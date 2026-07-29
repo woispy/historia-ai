@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Layout from "../components/Layout";
+import Layout from "../layouts/Layout/Layout";
 import CharacterService from "../services/CharacterService";
 import CharacterReport from "../components/CharacterReport";
 
