@@ -1,13 +1,13 @@
-import { advanceGameTime } from "../state";
+import { processTurn } from "../systems/Turn";
 
 export function advanceWeek(gameState) {
-  return advanceGameTime(gameState, "week");
+  return processTurn(gameState, "week");
 }
 
 export function advanceMonth(gameState) {
-  return advanceGameTime(gameState, "month");
+  return processTurn(gameState, "month");
 }
 
 export function advanceYear(gameState) {
-  return advanceGameTime(gameState, "year");
+  return processTurn(gameState, "year");
 }
