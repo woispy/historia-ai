@@ -1,69 +1,16 @@
-# Historia AI
+# React + Vite
 
-## Yaşayan Tarih Simülasyonu
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Historia AI, oyuncunun yaşayan bir dünyanın içinde kendi hikayesini oluşturduğu yapay zeka destekli tarih simülasyon oyunudur.
+Currently, two official plugins are available:
 
-Oyuncu sadece bir devlet yönetmez; isterse bir insan olarak tarihin içinde kendi yolunu oluşturabilir.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
----
+## React Compiler
 
-# İlk Senaryo
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## Osmanlı Kuruluş Dönemi
+## Expanding the ESLint configuration
 
-Başlangıç:
-
-1299
-
-Oyuncu:
-
-- Osmanlı Beyliği yöneticisi
-- Asker
-- Paşa
-- Tüccar
-- Köylü
-- İsyancı lider
-- Kendi oluşturduğu karakter
-
-olarak başlayabilir.
-
----
-
-# Temel Sistemler
-
-## Dünya Simülasyonu
-
-- Yapay zeka kontrollü devletler
-- Dinamik ekonomi
-- Diplomasi
-- Savaşlar
-- Şehir gelişimi
-- Kültür ve din sistemleri
-
-## Karakter Sistemi
-
-- Yaşam süreci
-- Yaşlanma
-- Aile
-- Hanedan
-- İtibar
-- Yetenekler
-
-## Bilgi Sistemi
-
-Oyuncu dünyayı seçtiği karakterin bildiği kadar görür.
-
-Bir hükümdar ile bir köylünün gördüğü dünya aynı değildir.
-
----
-
-# Geliştirme Durumu
-
-Versiyon:
-
-v0.0.1
-
-Durum:
-
-Proje başlangıcı
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
