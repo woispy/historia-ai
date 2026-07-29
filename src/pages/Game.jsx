@@ -3,7 +3,7 @@ import { useState } from "react";
 import Layout from "../components/Layout";
 import TopBar from "../components/TopBar/TopBar";
 import MapView from "../components/MapView/MapView";
-import LeftOverlay from "../components/LeftOverlay";
+import LeftOverlay from "../components/LeftOverlay/LeftOverlay";
 import RightOverlay from "../components/RightOverlay";
 
 function Game() {
