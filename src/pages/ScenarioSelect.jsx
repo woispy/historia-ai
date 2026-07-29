@@ -11,7 +11,7 @@ function ScenarioSelect() {
 
             <div className="menu">
 
-                <button>
+                <button onClick={() => navigate("/country")}>
 
                     🛡 1300 - Osmanlı Kuruluş Dönemi
 

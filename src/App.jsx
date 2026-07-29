@@ -5,6 +5,8 @@ import NewGame from "./pages/NewGame";
 import ScenarioSelect from "./pages/ScenarioSelect";
 import Settings from "./pages/Settings";
 import Game from "./pages/Game";
+import CountrySelect from "./pages/CountrySelect";
+import CharacterCreate from "./pages/CharacterCreate";
 
 function App() {
   return (
@@ -19,6 +21,10 @@ function App() {
         <Route path="/settings" element={<Settings />} />
 
         <Route path="/game" element={<Game />} />
+
+        <Route path="/country" element={<CountrySelect />} />
+
+        <Route path="/character" element={<CharacterCreate />} />
       </Routes>
     </BrowserRouter>
   );
