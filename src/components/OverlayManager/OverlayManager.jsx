@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import LeftOverlay from "../LeftOverlay/LeftOverlay";
 import RightOverlay from "../RightOverlay/RightOverlay";
+import OverlayButtons from "../OverlayButtons/OverlayButtons";
 
 function OverlayManager() {
   const [leftOpen, setLeftOpen] = useState(false);
@@ -18,6 +19,10 @@ function OverlayManager() {
     setLeftOpen(true);
   };
 
+  const openAdvisor = () => {
+    setRightOpen(true);
+  };
+
   return (
     <>
       <LeftOverlay
@@ -28,28 +33,13 @@ function OverlayManager() {
 
       <RightOverlay isOpen={rightOpen} />
 
-      <button
-        className={`left-toggle ${leftOpen ? "hidden-toggle" : ""}`}
-        onClick={openActions}
-      >
-        📜 Eylemler
-      </button>
-
-      <button
-        className={`left-toggle diplomacy-toggle ${
-          leftOpen ? "hidden-toggle" : ""
-        }`}
-        onClick={openDiplomacy}
-      >
-        🤝 Diplomasi
-      </button>
-
-      <button
-        className={`right-toggle ${rightOpen ? "hidden-toggle" : ""}`}
-        onClick={() => setRightOpen(true)}
-      >
-        🧙 Danışman
-      </button>
+      <OverlayButtons
+        leftOpen={leftOpen}
+        rightOpen={rightOpen}
+        onOpenActions={openActions}
+        onOpenDiplomacy={openDiplomacy}
+        onOpenAdvisor={openAdvisor}
+      />
 
       {leftOpen && (
         <button
