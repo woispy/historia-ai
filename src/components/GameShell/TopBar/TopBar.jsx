@@ -1,27 +1,20 @@
 import "./TopBar.css";
 
-function TopBar() {
+import { formatDate } from "../../../systems/Time";
+
+function TopBar({ currentDate }) {
   return (
     <header className="topbar">
-
       <div className="topbar-left">
-
         <div className="logo">
-
           <span className="logo-icon">👑</span>
-
           <span className="logo-text">HISTORIA AI</span>
-
         </div>
-
       </div>
 
       <div className="topbar-center">
-
         <button className="date-button">
-
-          📅 1 Ocak 1444 ▼
-
+          📅 {formatDate(currentDate)} ▼
         </button>
 
         <div className="resource">
@@ -79,17 +72,13 @@ function TopBar() {
             <small>Teknoloji</small>
           </div>
         </div>
-
       </div>
 
       <div className="topbar-right">
-
         <button className="menu-button">
           ⚙
         </button>
-
       </div>
-
     </header>
   );
 }

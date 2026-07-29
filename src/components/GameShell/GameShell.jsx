@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState } from "react";
 
 import Layout from "../../layouts/Layout/Layout";
 
@@ -6,33 +6,34 @@ import TopBar from "./TopBar/TopBar";
 import MapView from "./MapView/MapView";
 import OverlayManager from "./OverlayManager/OverlayManager";
 
-import {
-  createGameTime,
-  advanceWeeks,
-  advanceMonths,
-  advanceYears,
-  formatDate,
-} from "../../systems/Time";
+import { createInitialGameState } from "../../state";
+import { advanceWeek } from "../../actions";
 
 function GameShell() {
-  useEffect(() => {
-    const game = createGameTime();
+  const [gameState, setGameState] = useState(() => createInitialGameState());
 
-    console.log("Başlangıç:", formatDate(game.currentDate));
-
-    const afterWeek = advanceWeeks(game.currentDate, 1);
-    console.log("+1 Hafta:", formatDate(afterWeek));
-
-    const afterMonth = advanceMonths(afterWeek, 1);
-    console.log("+1 Ay:", formatDate(afterMonth));
-
-    const afterYear = advanceYears(afterMonth, 1);
-    console.log("+1 Yıl:", formatDate(afterYear));
-  }, []);
+  function handleAdvanceWeek() {
+    setGameState((previousState) => advanceWeek(previousState));
+  }
 
   return (
     <Layout title="">
-      <TopBar />
+      <TopBar currentDate={gameState.time.currentDate} />
+
+      {/* Geçici test butonu (ileride kaldırılacak) */}
+      <div
+        style={{
+          position: "fixed",
+          top: 80,
+          right: 20,
+          zIndex: 9999,
+        }}
+      >
+        <button onClick={handleAdvanceWeek}>
+          +1 Hafta
+        </button>
+      </div>
+
       <MapView />
       <OverlayManager />
     </Layout>
