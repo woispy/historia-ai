@@ -2,8 +2,7 @@ import { useState } from "react";
 
 import LeftOverlay from "../LeftOverlay/LeftOverlay";
 import RightOverlay from "../RightOverlay/RightOverlay";
-import OverlayButtons from "../GameShell/OverlayButtons/OverlayButtons";
-import OverlayHandles from "../GameShell/OverlayHandles/OverlayHandles";
+import OverlayButtons from "../OverlayButtons/OverlayButtons";
 
 function OverlayManager() {
   const [leftOpen, setLeftOpen] = useState(false);
@@ -42,12 +41,25 @@ function OverlayManager() {
         onOpenAdvisor={openAdvisor}
       />
 
-      <OverlayHandles
-        leftOpen={leftOpen}
-        rightOpen={rightOpen}
-        onCloseLeft={() => setLeftOpen(false)}
-        onCloseRight={() => setRightOpen(false)}
-      />
+      {leftOpen && (
+        <button
+          className="overlay-handle left"
+          onClick={() => setLeftOpen(false)}
+          aria-label="Sol paneli kapat"
+        >
+          ◀
+        </button>
+      )}
+
+      {rightOpen && (
+        <button
+          className="overlay-handle right"
+          onClick={() => setRightOpen(false)}
+          aria-label="Sağ paneli kapat"
+        >
+          ▶
+        </button>
+      )}
     </>
   );
 }
