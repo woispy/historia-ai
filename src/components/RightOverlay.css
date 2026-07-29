@@ -1,0 +1,50 @@
+.right-overlay {
+    position: fixed;
+
+    top: 74px;
+    right: 0;
+
+    width: 400px;
+    height: calc(100vh - 74px);
+
+    background: #26241f;
+
+    border-left: 1px solid #5d4f29;
+
+    transform: translateX(100%);
+
+    transition: transform .3s ease;
+
+    z-index: 2000;
+
+    display: flex;
+    flex-direction: column;
+
+    box-sizing: border-box;
+}
+
+.right-overlay.open {
+    transform: translateX(0);
+}
+
+.advisor-header {
+    padding: 20px;
+    border-bottom: 1px solid #5d4f29;
+}
+
+.advisor-chat {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.advisor-message {
+    background: #343027;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.advisor-input {
+    padding: 20px;
+    border-top: 1px solid #5d4f29;
+}

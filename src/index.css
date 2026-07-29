@@ -1,19 +1,82 @@
-* {
+/* ==========================================================
+   HISTORIA AI
+   Global Theme & Reset
+========================================================== */
+
+:root {
+
+  /* ========= Colors ========= */
+
+  --color-background: #1c1b17;
+  --color-surface: #26241f;
+  --color-surface-light: #343027;
+
+  --color-border: #5d4f29;
+
+  --color-primary: #c8a54d;
+  --color-primary-light: #e4c76a;
+
+  --color-text: #f4e8c1;
+  --color-text-muted: #c8b98a;
+
+  --color-success: #6ea65f;
+  --color-warning: #c98f3a;
+  --color-danger: #b24b4b;
+
+  /* ========= Layout ========= */
+
+  --topbar-height: 74px;
+
+  --left-panel-width: 400px;
+  --right-panel-width: 400px;
+
+  --content-padding: 20px;
+
+  --border-radius: 10px;
+
+  /* ========= Animation ========= */
+
+  --transition-fast: 0.20s ease;
+  --transition-normal: 0.30s ease;
+  --transition-slow: 0.50s ease;
+
+  /* ========= Layers ========= */
+
+  --z-map: 1;
+  --z-panel: 100;
+  --z-topbar: 200;
+  --z-popup: 500;
+  --z-modal: 1000;
+}
+
+/* ==========================================================
+   CSS RESET
+========================================================== */
+
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* ==========================================================
+   DOCUMENT
+========================================================== */
+
 html,
 body,
 #root {
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
+  overflow-x: hidden;
 }
 
 body {
-  background: #1c1b17;
-  color: #f4e8c1;
+  background: var(--color-background);
+  color: var(--color-text);
+
   font-family: Georgia, "Times New Roman", serif;
 }
 
@@ -21,6 +84,10 @@ body {
   display: flex;
   justify-content: center;
 }
+
+/* ==========================================================
+   GLOBAL ELEMENTS
+========================================================== */
 
 button {
   cursor: pointer;
