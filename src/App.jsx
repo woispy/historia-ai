@@ -1,26 +1,25 @@
-import "./App.css";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import MainMenu from "./pages/MainMenu";
+import NewGame from "./pages/NewGame";
+import Settings from "./pages/Settings";
+import Game from "./pages/Game";
 
 function App() {
   return (
-    <div className="app">
+    <BrowserRouter>
+      <Routes>
 
-      <h1>HISTORIA AI</h1>
+        <Route path="/" element={<MainMenu />} />
 
-      <h3>Every Decision Shapes History</h3>
+        <Route path="/new-game" element={<NewGame />} />
 
-      <div className="menu">
+        <Route path="/settings" element={<Settings />} />
 
-        <button>🗡 Yeni Oyun</button>
+        <Route path="/game" element={<Game />} />
 
-        <button>💾 Devam Et</button>
-
-        <button>⚙ Ayarlar</button>
-
-        <button>🚪 Çıkış</button>
-
-      </div>
-
-    </div>
+      </Routes>
+    </BrowserRouter>
   );
 }
 
