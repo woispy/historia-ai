@@ -4,7 +4,7 @@ import Layout from "../components/Layout";
 import TopBar from "../components/TopBar/TopBar";
 import MapView from "../components/MapView/MapView";
 import LeftOverlay from "../components/LeftOverlay/LeftOverlay";
-import RightOverlay from "../components/RightOverlay";
+import RightOverlay from "../components/RightOverlay/RightOverlay";
 
 function Game() {
   const [leftOpen, setLeftOpen] = useState(false);
