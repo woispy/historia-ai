@@ -1,38 +1,66 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
+import CharacterService from "../services/CharacterService";
+import CharacterReport from "../components/CharacterReport";
 
 function CharacterCreate() {
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
+  const [description, setDescription] = useState("");
 
-    return (
+  const [character, setCharacter] = useState(null);
 
-        <Layout title="Karakter Oluştur">
+  function generateCharacter() {
+    const result = CharacterService.create(description);
 
-            <p>
+    setCharacter(result);
+  }
 
-                Burada hükümdarın özelliklerini belirleyeceğiz.
+  return (
+    <Layout title="Karakter Oluştur">
+      <p>
+        Karakterinizi birkaç cümleyle anlatın.
+      </p>
 
-            </p>
+      <textarea
+        rows="8"
+        cols="60"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
 
-            <button onClick={() => navigate("/game")}>
+      <br />
+      <br />
 
-                Oyunu Başlat
+      <button onClick={generateCharacter}>
+        Karakteri Oluştur
+      </button>
 
-            </button>
+      <br />
+      <br />
 
-            <br /><br />
+      {character && (
+        <>
+          <h3>Karakter Analizi</h3>
 
-            <button onClick={() => navigate("/country")}>
+          <CharacterReport character={character} />
 
-                ← Ülke Seç
+          <h4>Kişilik</h4>
 
-            </button>
+          <ul>
+            {character.personality.map((trait) => (
+              <li key={trait}>{trait}</li>
+            ))}
+          </ul>
 
-        </Layout>
-
-    );
-
+          <button onClick={() => navigate("/game")}>
+            Karakteri Kabul Et
+          </button>
+        </>
+      )}
+    </Layout>
+  );
 }
 
 export default CharacterCreate;

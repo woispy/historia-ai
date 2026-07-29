@@ -1,0 +1,125 @@
+.topbar{
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+
+    height:74px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    background:#1f1d18;
+
+    border-bottom:1px solid #5d4f29;
+
+    padding:0 18px;
+
+    z-index:1000;
+}
+
+.topbar-left{
+    display:flex;
+    align-items:center;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.logo-icon{
+    font-size:34px;
+}
+
+.logo-text{
+    font-size:30px;
+    font-weight:bold;
+    color:#e4c76a;
+    letter-spacing:1px;
+}
+
+.topbar-center{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:18px;
+}
+
+.date-button{
+
+    background:#2d2921;
+
+    border:1px solid #6c5b2f;
+
+    padding:10px 16px;
+
+    font-size:15px;
+
+}
+
+.resource{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    min-width:90px;
+
+}
+
+.resource span{
+
+    font-size:20px;
+
+}
+
+.resource div{
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+.resource strong{
+
+    color:#f4e8c1;
+
+    font-size:15px;
+
+}
+
+.resource small{
+
+    color:#a89b70;
+
+    font-size:12px;
+
+}
+
+.topbar-right{
+
+    display:flex;
+
+    align-items:center;
+
+}
+
+.menu-button{
+
+    width:48px;
+
+    height:48px;
+
+    border-radius:8px;
+
+    font-size:20px;
+
+}

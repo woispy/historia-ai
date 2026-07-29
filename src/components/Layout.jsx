@@ -1,12 +1,20 @@
 function Layout({ title, children }) {
+  const isGamePage = title === "";
+
   return (
     <div className="app">
 
-      <h1>HISTORIA AI</h1>
+      {!isGamePage && (
+        <>
+          <h1>👑 HISTORIA AI</h1>
 
-      <h2>{title}</h2>
+          <h3>{title}</h3>
 
-      <hr />
+          <p className="game-description">
+            Yapay zekâ ile yaşayan dinamik bir büyük strateji deneyimi.
+          </p>
+        </>
+      )}
 
       {children}
 

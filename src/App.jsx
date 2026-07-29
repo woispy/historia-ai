@@ -1,3 +1,4 @@
+import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import MainMenu from "./pages/MainMenu";
@@ -13,17 +14,11 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<MainMenu />} />
-
         <Route path="/new-game" element={<NewGame />} />
-
         <Route path="/scenario" element={<ScenarioSelect />} />
-
         <Route path="/settings" element={<Settings />} />
-
         <Route path="/game" element={<Game />} />
-
         <Route path="/country" element={<CountrySelect />} />
-
         <Route path="/character" element={<CharacterCreate />} />
       </Routes>
     </BrowserRouter>

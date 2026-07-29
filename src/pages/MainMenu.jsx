@@ -12,27 +12,19 @@ function MainMenu() {
             <div className="menu">
 
                 <button onClick={() => navigate("/scenario")}>
-
                     🗡 Yeni Oyun
-
                 </button>
 
                 <button>
-
                     💾 Devam Et
-
                 </button>
 
                 <button onClick={() => navigate("/settings")}>
-
                     ⚙ Ayarlar
-
                 </button>
 
                 <button>
-
                     🚪 Çıkış
-
                 </button>
 
             </div>
