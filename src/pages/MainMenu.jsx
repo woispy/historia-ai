@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import Layout from "../components/Layout";
 
 function MainMenu() {
 
@@ -6,15 +7,11 @@ function MainMenu() {
 
     return (
 
-        <div className="app">
-
-            <h1>HISTORIA AI</h1>
-
-            <h3>A Living Grand Strategy</h3>
+        <Layout title="A Living Grand Strategy">
 
             <div className="menu">
 
-                <button onClick={() => navigate("/new-game")}>
+                <button onClick={() => navigate("/scenario")}>
 
                     🗡 Yeni Oyun
 
@@ -40,7 +37,7 @@ function MainMenu() {
 
             </div>
 
-        </div>
+        </Layout>
 
     );
 
