@@ -1,0 +1,20 @@
+{
+  "id": "1300",
+  "name": "Rise of the Ottomans",
+  "description": "",
+  "version": 1,
+  "startDate": "1300-01-01",
+  "world": "earth",
+  "data": {
+    "countries": "countries.json",
+    "provinces": "provinces.json",
+    "cities": "cities.json",
+    "armies": "armies.json",
+    "diplomacy": "diplomacy.json",
+    "population": "population.json",
+    "economy": "economy.json",
+    "religions": "religions.json",
+    "cultures": "cultures.json",
+    "laws": "laws.json"
+  }
+}

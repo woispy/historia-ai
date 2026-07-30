@@ -1,0 +1,11 @@
+{
+  "defaultScenario": "1300",
+  "availableScenarios": [
+    {
+      "id": "1300",
+      "name": "Rise of the Ottomans",
+      "folder": "1300",
+      "version": 1
+    }
+  ]
+}
