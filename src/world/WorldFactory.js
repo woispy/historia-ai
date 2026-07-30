@@ -1,20 +1,20 @@
 import { createMap } from "./map";
 
-import { createCities } from "./cities";
-import { createCountries } from "./countries";
-import { createArmies } from "./armies";
-import { createDiplomacy } from "./diplomacy";
+/**
+ * Creates the runtime world from a loaded scenario.
+ *
+ * The world is intentionally mutable.
+ * Runtime systems (economy, diplomacy, war...)
+ * will update this object during gameplay.
+ */
+export function createWorld(scenario) {
+  if (!scenario) {
+    throw new Error("Scenario is required.");
+  }
 
-export function createWorld() {
   return {
     map: createMap(),
 
-    cities: createCities(),
-
-    countries: createCountries(),
-
-    armies: createArmies(),
-
-    diplomacy: createDiplomacy(),
+    ...scenario.data,
   };
 }
