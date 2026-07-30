@@ -1,10 +1,9 @@
-import Province from "./Province";
-import ProvinceLabel from "./ProvinceLabel";
-
 import {
   useProvinceSelection,
   useWorldMap,
 } from "../hooks";
+
+import { ProvinceLayer } from "./layers";
 
 function WorldMap({ gameState }) {
   const { provinces } = useWorldMap(gameState);
@@ -16,20 +15,11 @@ function WorldMap({ gameState }) {
 
   return (
     <div className="world-map">
-      {provinces.map((province) => (
-        <Province
-          key={province.id}
-          id={province.id}
-          selected={
-            province.id === selectedProvince
-          }
-          onSelect={selectProvince}
-        >
-          <ProvinceLabel
-            name={province.name}
-          />
-        </Province>
-      ))}
+      <ProvinceLayer
+        provinces={provinces}
+        selectedProvince={selectedProvince}
+        onSelectProvince={selectProvince}
+      />
     </div>
   );
 }
