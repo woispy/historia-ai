@@ -1,0 +1,11 @@
+{
+  "id": "byzantium",
+  "name": "Byzantium",
+  "title": "Empire",
+  "government": "empire",
+  "capital": "konstantinopolis",
+  "culture": "greek",
+  "religion": "orthodox",
+  "color": "#6A1B9A",
+  "playable": true
+}

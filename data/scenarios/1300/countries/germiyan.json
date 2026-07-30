@@ -1,0 +1,11 @@
+{
+  "id": "germiyan",
+  "name": "Germiyan",
+  "title": "Beylik",
+  "government": "beylik",
+  "capital": "kutahya",
+  "culture": "oghuz-turk",
+  "religion": "sunni",
+  "color": "#F9A825",
+  "playable": true
+}

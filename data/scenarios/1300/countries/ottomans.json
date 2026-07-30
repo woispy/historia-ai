@@ -1,0 +1,11 @@
+{
+  "id": "ottomans",
+  "name": "Ottoman",
+  "title": "Beylik",
+  "government": "beylik",
+  "capital": "sogut",
+  "culture": "oghuz-turk",
+  "religion": "sunni",
+  "color": "#0F7A32",
+  "playable": true
+}

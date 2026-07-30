@@ -6,15 +6,15 @@
   "startDate": "1300-01-01",
   "world": "earth",
   "resources": [
-    "countries.json",
-    "provinces.json",
-    "cities.json",
-    "armies.json",
-    "diplomacy.json",
-    "population.json",
-    "economy.json",
-    "religions.json",
-    "cultures.json",
-    "laws.json"
+    "countries",
+    "provinces",
+    "cities",
+    "armies",
+    "diplomacy",
+    "population",
+    "economy",
+    "religions",
+    "cultures",
+    "laws"
   ]
 }

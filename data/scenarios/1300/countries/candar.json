@@ -1,0 +1,11 @@
+{
+  "id": "candar",
+  "name": "Candar",
+  "title": "Beylik",
+  "government": "beylik",
+  "capital": "kastamonu",
+  "culture": "oghuz-turk",
+  "religion": "sunni",
+  "color": "#8D6E63",
+  "playable": true
+}

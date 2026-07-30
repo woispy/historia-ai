@@ -1,0 +1,11 @@
+{
+  "id": "karasi",
+  "name": "Karasi",
+  "title": "Beylik",
+  "government": "beylik",
+  "capital": "balikesir",
+  "culture": "oghuz-turk",
+  "religion": "sunni",
+  "color": "#D84315",
+  "playable": true
+}
