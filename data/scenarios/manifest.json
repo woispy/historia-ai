@@ -1,11 +1,16 @@
 {
+  "version": 1,
   "defaultScenario": "1300",
-  "availableScenarios": [
+  "scenarios": [
     {
       "id": "1300",
       "name": "Rise of the Ottomans",
       "folder": "1300",
-      "version": 1
+      "startDate": "1300-01-01",
+      "world": "earth",
+      "engineVersion": "1.0",
+      "scenarioVersion": 1,
+      "enabled": true
     }
   ]
 }
