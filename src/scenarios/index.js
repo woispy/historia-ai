@@ -1,4 +1,10 @@
 export { createScenario } from "./ScenarioFactory";
-export { loadScenario } from "./ScenarioLoader";
+
+export {
+  loadScenario,
+  loadScenarioDefinition,
+} from "./ScenarioLoader";
+
 export { validateScenario } from "./ScenarioValidator";
+
 export { createScenarioDefinition } from "./ScenarioDefinition";
