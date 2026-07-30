@@ -5,6 +5,8 @@ import {
   advanceYears,
 } from "../systems/Time";
 
+import { createWorld } from "../world";
+
 export function createInitialGameState() {
   return {
     // Zaman sistemi
@@ -14,7 +16,14 @@ export function createInitialGameState() {
     player: {},
 
     // Dünya durumu
-    world: {},
+    world: createWorld(),
+
+    // Oyun zaman akışı
+    timeline: [],
+
+    // Bu tur içerisinde oyuncunun verdiği,
+    // henüz işlenmemiş emirler
+    pendingActions: [],
 
     // Oyun ayarları
     settings: {},

@@ -5,7 +5,17 @@ import RightOverlay from "./RightOverlay/RightOverlay";
 import OverlayButtons from "./OverlayButtons/OverlayButtons";
 import OverlayHandles from "./OverlayHandles/OverlayHandles";
 
-function OverlayManager() {
+function OverlayManager({
+  timeline = [],
+  pendingActions = [],
+  editingAction,
+  decisionText,
+  onDecisionTextChange,
+  onSubmitAction,
+  onUpdateAction,
+  onRemoveAction,
+  onCancelEditing,
+}) {
   const [leftOpen, setLeftOpen] = useState(false);
   const [rightOpen, setRightOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("actions");
@@ -30,6 +40,15 @@ function OverlayManager() {
         isOpen={leftOpen}
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        timeline={timeline}
+        pendingActions={pendingActions}
+        editingAction={editingAction}
+        decisionText={decisionText}
+        onDecisionTextChange={onDecisionTextChange}
+        onSubmitAction={onSubmitAction}
+        onUpdateAction={onUpdateAction}
+        onRemoveAction={onRemoveAction}
+        onCancelEditing={onCancelEditing}
       />
 
       <RightOverlay isOpen={rightOpen} />

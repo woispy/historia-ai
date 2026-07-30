@@ -1,0 +1,59 @@
+.pending-action-entry {
+    border-bottom: 1px solid rgba(200, 165, 77, 0.15);
+    padding: 12px 0;
+}
+
+.pending-action-entry:last-child {
+    border-bottom: none;
+}
+
+.pending-action-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pending-action-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.pending-action-icon {
+    flex-shrink: 0;
+    font-size: 1rem;
+    line-height: 1.4;
+}
+
+.pending-action-text {
+    flex: 1;
+    line-height: 1.5;
+    color: #f2efe6;
+}
+
+.pending-action-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.pending-action-button {
+    background: transparent;
+    border: none;
+
+    color: #c8a54d;
+
+    cursor: pointer;
+
+    font-size: 0.9rem;
+
+    transition: color 0.2s ease;
+}
+
+.pending-action-button:hover {
+    color: #e6c76d;
+}
+
+.pending-action-button.danger:hover {
+    color: #d46a6a;
+}

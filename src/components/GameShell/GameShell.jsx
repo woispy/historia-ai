@@ -7,10 +7,21 @@ import MapView from "./MapView/MapView";
 import OverlayManager from "./OverlayManager/OverlayManager";
 
 import { createInitialGameState } from "../../state";
-import { advanceWeek } from "../../actions";
+import { advanceWeek } from "../../systems/Action";
+import { useDecisionEditor } from "../../hooks/useDecisionEditor";
 
 function GameShell() {
   const [gameState, setGameState] = useState(() => createInitialGameState());
+
+  const {
+    editingAction,
+    decisionText,
+    setDecisionText,
+    submitAction,
+    startEditing,
+    cancelEditing,
+    deleteAction,
+  } = useDecisionEditor(setGameState);
 
   function handleAdvanceWeek() {
     setGameState((previousState) => advanceWeek(previousState));
@@ -29,13 +40,22 @@ function GameShell() {
           zIndex: 9999,
         }}
       >
-        <button onClick={handleAdvanceWeek}>
-          +1 Hafta
-        </button>
+        <button onClick={handleAdvanceWeek}>+1 Hafta</button>
       </div>
 
       <MapView />
-      <OverlayManager />
+
+      <OverlayManager
+        timeline={gameState.timeline}
+        pendingActions={gameState.pendingActions}
+        editingAction={editingAction}
+        decisionText={decisionText}
+        onDecisionTextChange={setDecisionText}
+        onSubmitAction={submitAction}
+        onUpdateAction={startEditing}
+        onRemoveAction={deleteAction}
+        onCancelEditing={cancelEditing}
+      />
     </Layout>
   );
 }

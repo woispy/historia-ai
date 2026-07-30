@@ -11,3 +11,20 @@ export function advanceMonth(gameState) {
 export function advanceYear(gameState) {
   return processTurn(gameState, "year");
 }
+
+export function submitAction(gameState, actionText) {
+  const action = {
+    id: crypto.randomUUID(),
+    type: "player",
+    text: actionText,
+    status: "pending",
+  };
+
+  return {
+    ...gameState,
+    pendingActions: [
+      ...gameState.pendingActions,
+      action,
+    ],
+  };
+}
