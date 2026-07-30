@@ -1,4 +1,5 @@
 import { createScenarioDefinition } from "./ScenarioDefinition";
+import { loadResourceFolder } from "./ResourceLoader";
 
 /**
  * Loads every scenario.json file at build time.
@@ -44,10 +45,23 @@ export function loadScenarioDefinition(scenarioId) {
 /**
  * Loads a complete scenario.
  *
- * Currently only the ScenarioDefinition is loaded.
- * Future versions will also load countries,
- * cities, provinces and every other resource.
+ * Returns the immutable ScenarioDefinition together with
+ * every resource declared by the scenario.
  */
 export function loadScenario(scenarioId) {
-  return loadScenarioDefinition(scenarioId);
+  const definition = loadScenarioDefinition(scenarioId);
+
+  const data = {};
+
+  for (const resourceName of definition.resources) {
+    data[resourceName] = loadResourceFolder(
+      scenarioId,
+      resourceName
+    );
+  }
+
+  return Object.freeze({
+    ...definition,
+    data: Object.freeze(data),
+  });
 }

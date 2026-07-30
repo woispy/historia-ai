@@ -5,6 +5,8 @@ export {
   loadScenarioDefinition,
 } from "./ScenarioLoader";
 
+export { loadResourceFolder } from "./ResourceLoader";
+
 export { validateScenario } from "./ScenarioValidator";
 
 export { createScenarioDefinition } from "./ScenarioDefinition";
