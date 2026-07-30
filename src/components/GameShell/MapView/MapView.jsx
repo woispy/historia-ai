@@ -1,36 +1,21 @@
 import "./MapView.css";
 
-function MapView() {
+import { WorldMap } from "../../../map";
+
+function MapView({ gameState }) {
   return (
     <main className="map-view">
-
-      {/* Dünya Haritası */}
       <div className="map-layer terrain">
-
-        <div className="map-placeholder">
-
-          <h2>🌍 Dünya Haritası</h2>
-
-          <p>
-            Gerçek dünya haritası burada görüntülenecek.
-          </p>
-
-        </div>
-
+        <WorldMap gameState={gameState} />
       </div>
 
-      {/* Ülke Katmanı */}
-      <div className="country-layer"></div>
+      <div className="country-layer" />
 
-      {/* Şehir Katmanı */}
-      <div className="city-layer"></div>
+      <div className="city-layer" />
 
-      {/* Ordu Katmanı */}
-      <div className="army-layer"></div>
+      <div className="army-layer" />
 
-      {/* Efekt Katmanı */}
-      <div className="effect-layer"></div>
-
+      <div className="effect-layer" />
     </main>
   );
 }

@@ -11,7 +11,9 @@ import { advanceWeek } from "../../systems/Action";
 import { useDecisionEditor } from "../../hooks/useDecisionEditor";
 
 function GameShell() {
-  const [gameState, setGameState] = useState(() => createInitialGameState());
+  const [gameState, setGameState] = useState(() =>
+    createInitialGameState()
+  );
 
   const {
     editingAction,
@@ -24,7 +26,9 @@ function GameShell() {
   } = useDecisionEditor(setGameState);
 
   function handleAdvanceWeek() {
-    setGameState((previousState) => advanceWeek(previousState));
+    setGameState((previousState) =>
+      advanceWeek(previousState)
+    );
   }
 
   return (
@@ -40,10 +44,12 @@ function GameShell() {
           zIndex: 9999,
         }}
       >
-        <button onClick={handleAdvanceWeek}>+1 Hafta</button>
+        <button onClick={handleAdvanceWeek}>
+          +1 Hafta
+        </button>
       </div>
 
-      <MapView />
+      <MapView gameState={gameState} />
 
       <OverlayManager
         timeline={gameState.timeline}

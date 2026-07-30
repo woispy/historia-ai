@@ -1,0 +1,86 @@
+[
+  {
+    "id": "plains",
+    "name": "Ova",
+    "movementCost": 1,
+    "combat": {
+      "attacker": 0,
+      "defender": 0
+    },
+    "supplyModifier": 1.0,
+    "developmentModifier": 1.2,
+    "canBuildRoad": true
+  },
+  {
+    "id": "forest",
+    "name": "Orman",
+    "movementCost": 2,
+    "combat": {
+      "attacker": -1,
+      "defender": 1
+    },
+    "supplyModifier": 0.9,
+    "developmentModifier": 0.8,
+    "canBuildRoad": true
+  },
+  {
+    "id": "hills",
+    "name": "Tepelik",
+    "movementCost": 2,
+    "combat": {
+      "attacker": -1,
+      "defender": 1
+    },
+    "supplyModifier": 0.9,
+    "developmentModifier": 0.9,
+    "canBuildRoad": true
+  },
+  {
+    "id": "mountains",
+    "name": "Dağ",
+    "movementCost": 3,
+    "combat": {
+      "attacker": -2,
+      "defender": 2
+    },
+    "supplyModifier": 0.7,
+    "developmentModifier": 0.4,
+    "canBuildRoad": false
+  },
+  {
+    "id": "marsh",
+    "name": "Bataklık",
+    "movementCost": 3,
+    "combat": {
+      "attacker": -2,
+      "defender": 1
+    },
+    "supplyModifier": 0.6,
+    "developmentModifier": 0.3,
+    "canBuildRoad": false
+  },
+  {
+    "id": "desert",
+    "name": "Çöl",
+    "movementCost": 3,
+    "combat": {
+      "attacker": -1,
+      "defender": 0
+    },
+    "supplyModifier": 0.4,
+    "developmentModifier": 0.2,
+    "canBuildRoad": true
+  },
+  {
+    "id": "steppe",
+    "name": "Bozkır",
+    "movementCost": 1,
+    "combat": {
+      "attacker": 1,
+      "defender": 0
+    },
+    "supplyModifier": 1.1,
+    "developmentModifier": 0.8,
+    "canBuildRoad": true
+  }
+]

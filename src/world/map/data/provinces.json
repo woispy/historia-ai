@@ -1,0 +1,102 @@
+[
+  {
+    "id": "sogut",
+    "name": "Söğüt",
+    "region": "marmara",
+    "terrain": "plains",
+
+    "city": "sogut",
+
+    "owner": "ottomans",
+    "controller": "ottomans",
+
+    "population": 12000,
+    "development": 18,
+
+    "sea": null,
+    "river": null,
+
+    "port": false,
+    "fortLevel": 1
+  },
+  {
+    "id": "bilecik",
+    "name": "Bilecik",
+    "region": "marmara",
+    "terrain": "hills",
+
+    "city": "bilecik",
+
+    "owner": "ottomans",
+    "controller": "ottomans",
+
+    "population": 18000,
+    "development": 26,
+
+    "sea": null,
+    "river": "sakarya",
+
+    "port": false,
+    "fortLevel": 2
+  },
+  {
+    "id": "iznik",
+    "name": "İznik",
+    "region": "marmara",
+    "terrain": "plains",
+
+    "city": "iznik",
+
+    "owner": "byzantium",
+    "controller": "byzantium",
+
+    "population": 35000,
+    "development": 48,
+
+    "sea": "marmara",
+    "river": null,
+
+    "port": true,
+    "fortLevel": 3
+  },
+  {
+    "id": "bursa",
+    "name": "Bursa",
+    "region": "marmara",
+    "terrain": "plains",
+
+    "city": "bursa",
+
+    "owner": "byzantium",
+    "controller": "byzantium",
+
+    "population": 65000,
+    "development": 62,
+
+    "sea": "marmara",
+    "river": null,
+
+    "port": true,
+    "fortLevel": 4
+  },
+  {
+    "id": "konstantinopolis",
+    "name": "Konstantinopolis",
+    "region": "thrace",
+    "terrain": "plains",
+
+    "city": "konstantinopolis",
+
+    "owner": "byzantium",
+    "controller": "byzantium",
+
+    "population": 250000,
+    "development": 100,
+
+    "sea": "marmara",
+    "river": "bosphorus",
+
+    "port": true,
+    "fortLevel": 5
+  }
+]

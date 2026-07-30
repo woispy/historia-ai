@@ -1,0 +1,28 @@
+{
+  "sogut": [
+    "bilecik"
+  ],
+
+  "bilecik": [
+    "sogut",
+    "iznik",
+    "bursa"
+  ],
+
+  "iznik": [
+    "bilecik",
+    "bursa",
+    "konstantinopolis"
+  ],
+
+  "bursa": [
+    "bilecik",
+    "iznik",
+    "konstantinopolis"
+  ],
+
+  "konstantinopolis": [
+    "iznik",
+    "bursa"
+  ]
+}

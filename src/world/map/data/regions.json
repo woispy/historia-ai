@@ -1,0 +1,38 @@
+[
+  {
+    "id": "marmara",
+    "name": "Marmara"
+  },
+  {
+    "id": "aegean",
+    "name": "Ege"
+  },
+  {
+    "id": "central_anatolia",
+    "name": "İç Anadolu"
+  },
+  {
+    "id": "black_sea",
+    "name": "Karadeniz"
+  },
+  {
+    "id": "mediterranean",
+    "name": "Akdeniz"
+  },
+  {
+    "id": "eastern_anatolia",
+    "name": "Doğu Anadolu"
+  },
+  {
+    "id": "southeastern_anatolia",
+    "name": "Güneydoğu Anadolu"
+  },
+  {
+    "id": "thrace",
+    "name": "Trakya"
+  },
+  {
+    "id": "balkans",
+    "name": "Balkanlar"
+  }
+]

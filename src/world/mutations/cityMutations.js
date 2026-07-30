@@ -1,5 +1,7 @@
+import { getCity } from "../queries";
+
 export function setCityUnderSiege(gameState, cityId, underSiege = true) {
-  const city = gameState.world.cities.byId[cityId];
+  const city = getCity(gameState, cityId);
 
   if (!city) {
     return gameState;

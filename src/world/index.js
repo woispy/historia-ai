@@ -1,3 +1,11 @@
-export { createWorld } from "./WorldFactory";
+export * from "./WorldFactory";
 
-export { setCityUnderSiege } from "./mutations";
+export * from "./cities";
+export * from "./countries";
+export * from "./armies";
+export * from "./diplomacy";
+export * from "./map";
+
+export * from "./queries";
+
+export * from "./mutations";
