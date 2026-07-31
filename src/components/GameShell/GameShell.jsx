@@ -6,7 +6,13 @@ import TopBar from "./TopBar/TopBar";
 import MapView from "./MapView/MapView";
 import OverlayManager from "./OverlayManager/OverlayManager";
 
-import { createInitialGameState } from "../../state";
+import {
+  createInitialGameState,
+  getCurrentDate,
+  getTimeline,
+  getPendingActions,
+} from "../../state";
+
 import { advanceWeek } from "../../systems/Action";
 import { useDecisionEditor } from "../../hooks/useDecisionEditor";
 
@@ -33,7 +39,7 @@ function GameShell() {
 
   return (
     <Layout title="">
-      <TopBar currentDate={gameState.time.currentDate} />
+      <TopBar currentDate={getCurrentDate(gameState)} />
 
       {/* Geçici test butonu (ileride kaldırılacak) */}
       <div
@@ -52,8 +58,8 @@ function GameShell() {
       <MapView gameState={gameState} />
 
       <OverlayManager
-        timeline={gameState.timeline}
-        pendingActions={gameState.pendingActions}
+        timeline={getTimeline(gameState)}
+        pendingActions={getPendingActions(gameState)}
         editingAction={editingAction}
         decisionText={decisionText}
         onDecisionTextChange={setDecisionText}
