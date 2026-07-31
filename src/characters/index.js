@@ -1,14 +1,3 @@
-export { createCharacter } from "./CharacterFactory";
-
-export { createCharacterModel } from "./CharacterModel";
-
-export {
-  createCharacterRepository,
-  addCharacter,
-  updateCharacter,
-  removeCharacter,
-} from "./CharacterRepository";
-
 export {
   getCharacter,
   getCharacters,
@@ -17,4 +6,5 @@ export {
   getCharactersByLocation,
   getCharactersByCulture,
   getCharactersByReligion,
+  getCharactersByFamily,
 } from "./CharacterQueries";

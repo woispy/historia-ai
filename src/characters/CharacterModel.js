@@ -7,15 +7,6 @@
  * Represents a single living person in the world.
  *
  * Every human in Historia AI uses this model.
- *
- * Examples
- * --------
- * - Osman Bey
- * - Orhan Bey
- * - A peasant
- * - A merchant
- * - A soldier
- * - The player character
  */
 
 export function createCharacterModel({
@@ -37,7 +28,9 @@ export function createCharacterModel({
 
   profession = null,
 
-  dynastyId = null,
+  familyId = null,
+
+  authorityId = "COMMONER",
 
   titles = [],
 
@@ -74,7 +67,9 @@ export function createCharacterModel({
 
     profession,
 
-    dynastyId,
+    familyId,
+
+    authorityId,
 
     titles,
 

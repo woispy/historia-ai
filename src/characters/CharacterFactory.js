@@ -4,8 +4,6 @@ import { createCharacterModel } from "./CharacterModel";
  * ============================================================================
  * Character Factory
  * ============================================================================
- *
- * Creates a valid Character instance.
  */
 
 export function createCharacter(data) {

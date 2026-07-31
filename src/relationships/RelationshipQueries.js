@@ -28,6 +28,20 @@ export function getRelationshipsByType(
     world,
     characterId
   ).filter(
-    (relationship) => relationship.type === type
+    (relationship) =>
+      relationship.type === type
   );
 }
+
+/**
+ * ============================================================================
+ * TODO
+ * ============================================================================
+ *
+ * getParents()
+ * getChildren()
+ * getSiblings()
+ * getSpouse()
+ *
+ * Family System will use these helpers.
+ */

@@ -5,34 +5,22 @@
  * ============================================================================
  */
 
-/**
- * Returns every character.
- */
 export function getCharacters(repository) {
   return repository.allIds.map(
     (id) => repository.byId[id]
   );
 }
 
-/**
- * Returns one character.
- */
 export function getCharacter(repository, characterId) {
   return repository.byId[characterId] ?? null;
 }
 
-/**
- * Returns every living character.
- */
 export function getLivingCharacters(repository) {
   return getCharacters(repository).filter(
     (character) => character.alive
   );
 }
 
-/**
- * Returns every character with the given authority.
- */
 export function getCharactersByAuthority(
   repository,
   authorityId
@@ -43,9 +31,6 @@ export function getCharactersByAuthority(
   );
 }
 
-/**
- * Returns every character in the given location.
- */
 export function getCharactersByLocation(
   repository,
   location
@@ -56,9 +41,6 @@ export function getCharactersByLocation(
   );
 }
 
-/**
- * Returns every character of a culture.
- */
 export function getCharactersByCulture(
   repository,
   culture
@@ -69,9 +51,6 @@ export function getCharactersByCulture(
   );
 }
 
-/**
- * Returns every character of a religion.
- */
 export function getCharactersByReligion(
   repository,
   religion
@@ -79,5 +58,15 @@ export function getCharactersByReligion(
   return getCharacters(repository).filter(
     (character) =>
       character.religion === religion
+  );
+}
+
+export function getCharactersByFamily(
+  repository,
+  familyId
+) {
+  return getCharacters(repository).filter(
+    (character) =>
+      character.familyId === familyId
   );
 }
