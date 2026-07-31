@@ -1,25 +1,40 @@
 import { processTurn } from "../Turn";
 import { interpretAction } from "../Interpreter";
+import {
+  getRuntimeState,
+} from "../../state/runtime";
 
-export function advanceWeek(gameState) {
-  return processTurn(gameState, "week");
+function rebuildRuntime(runtime, state) {
+  if (runtime.state) {
+    return {
+      ...runtime,
+      state,
+    };
+  }
+
+  return state;
 }
 
-export function advanceMonth(gameState) {
-  return processTurn(gameState, "month");
+export function advanceWeek(runtime) {
+  return processTurn(runtime, "week");
 }
 
-export function advanceYear(gameState) {
-  return processTurn(gameState, "year");
+export function advanceMonth(runtime) {
+  return processTurn(runtime, "month");
 }
 
-export function queueAction(gameState, actionText) {
+export function advanceYear(runtime) {
+  return processTurn(runtime, "year");
+}
+
+export function queueAction(runtime, actionText) {
+  const state = getRuntimeState(runtime);
+
   const interpretation = interpretAction(actionText);
 
   const action = {
     id: crypto.randomUUID(),
 
-    // Action'ın kaynağı
     type: "player",
 
     source: "player",
@@ -27,34 +42,35 @@ export function queueAction(gameState, actionText) {
     status: "pending",
 
     createdAt: {
-      ...gameState.time.currentDate,
+      ...state.time.currentDate,
     },
 
     priority: 0,
 
-    // Oyuncunun yazdığı orijinal metin
     text: actionText,
 
-    // Interpreter çıktısı
     interpretation,
 
-    // Handler'ların kullanacağı veriler
     payload: {},
   };
 
-  return {
-    ...gameState,
+  return rebuildRuntime(runtime, {
+    ...state,
+
     pendingActions: [
-      ...gameState.pendingActions,
+      ...state.pendingActions,
       action,
     ],
-  };
+  });
 }
 
-export function updateAction(gameState, actionId, changes) {
-  return {
-    ...gameState,
-    pendingActions: gameState.pendingActions.map((action) =>
+export function updateAction(runtime, actionId, changes) {
+  const state = getRuntimeState(runtime);
+
+  return rebuildRuntime(runtime, {
+    ...state,
+
+    pendingActions: state.pendingActions.map((action) =>
       action.id === actionId
         ? {
             ...action,
@@ -62,21 +78,27 @@ export function updateAction(gameState, actionId, changes) {
           }
         : action
     ),
-  };
+  });
 }
 
-export function removeAction(gameState, actionId) {
-  return {
-    ...gameState,
-    pendingActions: gameState.pendingActions.filter(
+export function removeAction(runtime, actionId) {
+  const state = getRuntimeState(runtime);
+
+  return rebuildRuntime(runtime, {
+    ...state,
+
+    pendingActions: state.pendingActions.filter(
       (action) => action.id !== actionId
     ),
-  };
+  });
 }
 
-export function clearPendingActions(gameState) {
-  return {
-    ...gameState,
+export function clearPendingActions(runtime) {
+  const state = getRuntimeState(runtime);
+
+  return rebuildRuntime(runtime, {
+    ...state,
+
     pendingActions: [],
-  };
+  });
 }

@@ -5,9 +5,14 @@ import Layout from "../../layouts/Layout/Layout";
 import TopBar from "./TopBar/TopBar";
 import MapView from "./MapView/MapView";
 import OverlayManager from "./OverlayManager/OverlayManager";
+import NotificationToast from "../NotificationToast/NotificationToast";
 
 import {
-  createInitialGameState,
+  getCurrentState,
+  updateCurrentState,
+} from "../../game/currentGame";
+
+import {
   getCurrentDate,
   getTimeline,
   getPendingActions,
@@ -18,7 +23,7 @@ import { useDecisionEditor } from "../../hooks/useDecisionEditor";
 
 function GameShell() {
   const [gameState, setGameState] = useState(() =>
-    createInitialGameState()
+    getCurrentState()
   );
 
   const {
@@ -32,14 +37,20 @@ function GameShell() {
   } = useDecisionEditor(setGameState);
 
   function handleAdvanceWeek() {
-    setGameState((previousState) =>
-      advanceWeek(previousState)
-    );
+    setGameState((previousState) => {
+      const nextState = advanceWeek(previousState);
+
+      updateCurrentState(nextState);
+
+      return nextState;
+    });
   }
 
   return (
     <Layout title="">
       <TopBar currentDate={getCurrentDate(gameState)} />
+
+      <NotificationToast />
 
       {/* Geçici test butonu (ileride kaldırılacak) */}
       <div

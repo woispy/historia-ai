@@ -9,17 +9,17 @@ import {
   processTimeline,
 } from "./processors";
 
-export function processTurn(gameState, unit = "week", amount = 1) {
-  let nextState = gameState;
+export function processTurn(runtime, unit = "week", amount = 1) {
+  let nextRuntime = runtime;
 
-  nextState = processTime(nextState, unit, amount);
-  nextState = processActions(nextState);
-  nextState = processEconomy(nextState);
-  nextState = processPopulation(nextState);
-  nextState = processDiplomacy(nextState);
-  nextState = processMilitary(nextState);
-  nextState = processEvents(nextState);
-  nextState = processTimeline(nextState);
+  nextRuntime = processTime(nextRuntime, unit, amount);
+  nextRuntime = processActions(nextRuntime);
+  nextRuntime = processEconomy(nextRuntime);
+  nextRuntime = processPopulation(nextRuntime);
+  nextRuntime = processDiplomacy(nextRuntime);
+  nextRuntime = processMilitary(nextRuntime);
+  nextRuntime = processEvents(nextRuntime);
+  nextRuntime = processTimeline(nextRuntime);
 
-  return nextState;
+  return nextRuntime;
 }

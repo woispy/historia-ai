@@ -1,8 +1,22 @@
-export function processNotifications(gameState) {
-  const timelineEntry = {
-    id: gameState.time.turn,
+import {
+  getRuntimeState,
+  updateRuntimeState,
+} from "../../../state/runtime";
 
-    date: { ...gameState.time.currentDate },
+/**
+ * Creates engine notifications after each processed turn.
+ *
+ * Supports both the legacy GameState and the new GameSession runtime.
+ */
+export function processNotifications(runtime) {
+  const state = getRuntimeState(runtime);
+
+  const timelineEntry = {
+    id: state.time.turn,
+
+    date: {
+      ...state.time.currentDate,
+    },
 
     category: "system",
 
@@ -15,12 +29,12 @@ export function processNotifications(gameState) {
     editable: false,
   };
 
-  return {
-    ...gameState,
+  return updateRuntimeState(runtime, {
+    ...state,
 
     timeline: [
-      ...gameState.timeline,
+      ...state.timeline,
       timelineEntry,
     ],
-  };
+  });
 }

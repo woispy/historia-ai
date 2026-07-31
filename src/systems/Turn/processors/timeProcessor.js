@@ -4,8 +4,25 @@ import {
   advanceYears,
 } from "../../Time";
 
-export function processTime(gameState, unit = "week", amount = 1) {
-  let nextDate = gameState.time.currentDate;
+import { getRuntimeState } from "../../../state/runtime";
+
+function rebuildRuntime(runtime, state) {
+  // Yeni mimari (GameSession)
+  if (runtime.state) {
+    return {
+      ...runtime,
+      state,
+    };
+  }
+
+  // Legacy GameState
+  return state;
+}
+
+export function processTime(runtime, unit = "week", amount = 1) {
+  const state = getRuntimeState(runtime);
+
+  let nextDate = state.time.currentDate;
 
   switch (unit) {
     case "week":
@@ -21,15 +38,16 @@ export function processTime(gameState, unit = "week", amount = 1) {
       break;
 
     default:
-      return gameState;
+      return runtime;
   }
 
-  return {
-    ...gameState,
+  return rebuildRuntime(runtime, {
+    ...state,
+
     time: {
-      ...gameState.time,
+      ...state.time,
       currentDate: nextDate,
-      turn: gameState.time.turn + 1,
+      turn: state.time.turn + 1,
     },
-  };
+  });
 }

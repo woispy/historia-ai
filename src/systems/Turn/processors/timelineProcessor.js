@@ -1,7 +1,10 @@
 import { addTimelineEvent } from "../../Timeline";
 
-export function processTimeline(gameState) {
-  return addTimelineEvent(gameState, {
+/**
+ * Adds timeline entries generated during the current turn.
+ */
+export function processTimeline(runtime) {
+  return addTimelineEvent(runtime, {
     category: "system",
     source: "engine",
     key: "week_passed",

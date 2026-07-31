@@ -2,6 +2,8 @@ import "./TopBar.css";
 
 import { formatDate } from "../../../systems/Time";
 
+import SettingsMenu from "../SettingsMenu/SettingsMenu";
+
 function TopBar({ currentDate }) {
   return (
     <header className="topbar">
@@ -75,9 +77,7 @@ function TopBar({ currentDate }) {
       </div>
 
       <div className="topbar-right">
-        <button className="menu-button">
-          ⚙
-        </button>
+        <SettingsMenu />
       </div>
     </header>
   );

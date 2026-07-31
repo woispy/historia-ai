@@ -1,8 +1,22 @@
-export function addTimelineEvent(gameState, event) {
+import {
+  getRuntimeState,
+  updateRuntimeState,
+} from "../../state/runtime";
+
+/**
+ * Adds a new event to the timeline.
+ *
+ * Supports both the legacy GameState and the new GameSession.
+ */
+export function addTimelineEvent(runtime, event) {
+  const state = getRuntimeState(runtime);
+
   const timelineEntry = {
     id: crypto.randomUUID(),
 
-    date: gameState.time.currentDate,
+    date: {
+      ...state.time.currentDate,
+    },
 
     category: event.category ?? "system",
 
@@ -15,12 +29,12 @@ export function addTimelineEvent(gameState, event) {
     editable: event.editable ?? false,
   };
 
-  return {
-    ...gameState,
+  return updateRuntimeState(runtime, {
+    ...state,
 
     timeline: [
       timelineEntry,
-      ...gameState.timeline,
+      ...state.timeline,
     ],
-  };
+  });
 }

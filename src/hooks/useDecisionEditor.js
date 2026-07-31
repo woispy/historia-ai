@@ -6,6 +6,8 @@ import {
   removeAction,
 } from "../systems/Action";
 
+import { updateCurrentState } from "../game/currentGame";
+
 export function useDecisionEditor(setGameState) {
   const [editingAction, setEditingAction] = useState(null);
   const [decisionText, setDecisionText] = useState("");
@@ -18,13 +20,19 @@ export function useDecisionEditor(setGameState) {
     }
 
     setGameState((previousState) => {
+      let nextState;
+
       if (editingAction) {
-        return updateAction(previousState, editingAction.id, {
+        nextState = updateAction(previousState, editingAction.id, {
           text,
         });
+      } else {
+        nextState = queueAction(previousState, text);
       }
 
-      return queueAction(previousState, text);
+      updateCurrentState(nextState);
+
+      return nextState;
     });
 
     setEditingAction(null);
@@ -42,9 +50,13 @@ export function useDecisionEditor(setGameState) {
   }
 
   function deleteAction(actionId) {
-    setGameState((previousState) =>
-      removeAction(previousState, actionId)
-    );
+    setGameState((previousState) => {
+      const nextState = removeAction(previousState, actionId);
+
+      updateCurrentState(nextState);
+
+      return nextState;
+    });
 
     if (editingAction?.id === actionId) {
       setEditingAction(null);

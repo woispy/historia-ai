@@ -1,48 +1,55 @@
 import { useNavigate } from "react-router-dom";
+
 import Layout from "../layouts/Layout/Layout";
 
+import {
+  resetNewGame,
+  updateNewGame,
+} from "../game/newGame";
+
 function ScenarioSelect() {
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
+  function selectScenario(scenarioId) {
+    console.log("=== SCENARIO SELECT ===");
+    console.log("Scenario selected:", scenarioId);
 
-    return (
+    // Yeni oyuna her zaman temiz başla.
+    resetNewGame();
 
-        <Layout title="Senaryo Seç">
+    updateNewGame({
+      scenarioId,
+    });
 
-            <div className="menu">
+    console.log("Scenario stored:", scenarioId);
+    console.log("=======================");
 
-                <button onClick={() => navigate("/country")}>
+    navigate("/country");
+  }
 
-                    🛡 1300 - Osmanlı Kuruluş Dönemi
+  return (
+    <Layout title="Senaryo Seç">
+      <div className="menu">
+        <button onClick={() => selectScenario("1300")}>
+          🛡 1300 - Osmanlı Kuruluş Dönemi
+        </button>
 
-                </button>
+        <button disabled>
+          🔒 1453 - Yakında
+        </button>
 
-                <button disabled>
+        <button disabled>
+          🔒 1789 - Yakında
+        </button>
+      </div>
 
-                    🔒 1453 - Yakında
+      <br />
 
-                </button>
-
-                <button disabled>
-
-                    🔒 1789 - Yakında
-
-                </button>
-
-            </div>
-
-            <br />
-
-            <button onClick={() => navigate("/")}>
-
-                ← Ana Menü
-
-            </button>
-
-        </Layout>
-
-    );
-
+      <button onClick={() => navigate("/")}>
+        ← Ana Menü
+      </button>
+    </Layout>
+  );
 }
 
 export default ScenarioSelect;

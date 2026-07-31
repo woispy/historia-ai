@@ -7,26 +7,31 @@ import {
 
 import { addTimelineEvent } from "../../Timeline";
 
-export function handleAction(gameState, action) {
+/**
+ * Dispatches a player action to the appropriate handler.
+ *
+ * Supports both the legacy GameState and the new GameSession runtime.
+ */
+export function handleAction(runtime, action) {
   const intent = action.interpretation?.intent ?? "";
 
   if (intent.startsWith("military.")) {
-    return handleMilitaryAction(gameState, action);
+    return handleMilitaryAction(runtime, action);
   }
 
   if (intent.startsWith("economy.")) {
-    return handleEconomyAction(gameState, action);
+    return handleEconomyAction(runtime, action);
   }
 
   if (intent.startsWith("diplomacy.")) {
-    return handleDiplomacyAction(gameState, action);
+    return handleDiplomacyAction(runtime, action);
   }
 
   if (intent.startsWith("construction.")) {
-    return handleConstructionAction(gameState, action);
+    return handleConstructionAction(runtime, action);
   }
 
-  return addTimelineEvent(gameState, {
+  return addTimelineEvent(runtime, {
     category: "player",
     source: "action-handler",
     key: "player_action_processed",

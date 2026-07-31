@@ -1,13 +1,11 @@
 export { createRuntimeState } from "./RuntimeState";
 
 export {
-  createInitialGameState,
-  advanceGameTime,
-} from "./GameState";
-
-export {
   getRuntimeState,
+  updateRuntimeState,
   getWorld,
+  getPlayer,
+  getSettings,
   getCurrentDate,
   getTimeline,
   getPendingActions,
