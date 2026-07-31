@@ -1,0 +1,86 @@
+.province-panel {
+    position: absolute;
+
+    top: 90px;
+    right: 20px;
+
+    width: 320px;
+
+    background: #25211b;
+
+    border: 1px solid #6c5b2f;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+
+    box-shadow: 0 8px 24px rgba(0,0,0,.45);
+
+    color: #e7d8a5;
+
+    z-index: 500;
+}
+
+.province-panel-header {
+    padding: 18px;
+
+    background: #1f1d18;
+
+    border-bottom: 1px solid #5d4f29;
+}
+
+.province-panel-header h2 {
+    margin: 0;
+
+    font-size: 20px;
+
+    color: #f2d77d;
+}
+
+.province-section {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 12px 18px;
+
+    border-bottom: 1px solid #3f3728;
+}
+
+.province-section:last-child {
+    border-bottom: none;
+}
+
+.province-section span {
+    color: #a89b70;
+
+    font-size: 14px;
+}
+
+.province-section strong {
+    color: #f4e8c1;
+
+    font-size: 15px;
+}
+
+.province-panel-empty {
+    padding: 28px;
+
+    text-align: center;
+}
+
+.province-panel-empty h3 {
+    margin-bottom: 12px;
+
+    color: #f2d77d;
+}
+
+.province-panel-empty p {
+    margin: 0;
+
+    color: #b8ab82;
+
+    line-height: 1.5;
+}

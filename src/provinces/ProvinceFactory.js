@@ -1,24 +1,25 @@
+import { createProvinceModel } from "./ProvinceModel";
+
 /**
  * ============================================================================
- * @deprecated
+ * Province Factory
  * ============================================================================
- *
- * Province creation has moved to:
- *
- *     src/provinces/ProvinceFactory.js
- *
- * This file exists temporarily for backward compatibility during the
- * World → Domain migration.
- *
- * Do NOT add new gameplay logic here.
- *
- * TODO
- * ----
- * Remove this file after MapFactory and WorldFactory are fully migrated.
  */
 
 export function createProvince(rawProvince) {
-  return {
+  if (!rawProvince) {
+    throw new Error("Province data is required.");
+  }
+
+  if (!rawProvince.id) {
+    throw new Error("Province id is required.");
+  }
+
+  if (!rawProvince.name) {
+    throw new Error("Province name is required.");
+  }
+
+  return createProvinceModel({
     id: rawProvince.id,
 
     name: rawProvince.name,
@@ -27,15 +28,31 @@ export function createProvince(rawProvince) {
 
     terrain: rawProvince.terrain,
 
-    city: rawProvince.city,
-
     owner: rawProvince.owner,
 
     controller: rawProvince.controller,
 
+    culture: rawProvince.culture ?? null,
+
+    religion: rawProvince.religion ?? null,
+
+    governor: null,
+
     population: rawProvince.population,
 
     development: rawProvince.development,
+
+    cities: rawProvince.city
+      ? [rawProvince.city]
+      : [],
+
+    roads: [],
+
+    buildings: [],
+
+    characters: [],
+
+    armies: [],
 
     sea: rawProvince.sea,
 
@@ -50,7 +67,5 @@ export function createProvince(rawProvince) {
       occupied: false,
       looted: false,
     },
-
-    armies: [],
-  };
+  });
 }

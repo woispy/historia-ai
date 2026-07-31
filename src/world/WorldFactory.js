@@ -1,18 +1,12 @@
-import { createMap } from "./map";
-
-import { createCharacterRepository } from "../characters";
-import { createFamilyRepository } from "../family";
-import { createKnowledgeRepository } from "../knowledge";
+import { bootstrapWorld } from "./WorldBootstrap";
 
 /**
  * ============================================================================
  * World Factory
  * ============================================================================
  *
- * Creates the runtime world.
- *
- * World owns repositories.
- * Systems read and modify repository data.
+ * Validates input and delegates world creation
+ * to the bootstrap layer.
  */
 
 export function createWorld(scenario) {
@@ -20,17 +14,5 @@ export function createWorld(scenario) {
     throw new Error("Scenario is required.");
   }
 
-  return {
-    map: createMap(),
-
-    repositories: {
-      characters: createCharacterRepository(),
-
-      families: createFamilyRepository(),
-
-      knowledge: createKnowledgeRepository(),
-    },
-
-    ...scenario.data,
-  };
+  return bootstrapWorld(scenario);
 }
