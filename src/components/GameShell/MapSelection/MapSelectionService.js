@@ -2,6 +2,7 @@ import {
   createSelection,
   SelectionTypes,
   setSelection,
+  clearSelection,
 } from "../../../selection";
 
 /**
@@ -10,34 +11,29 @@ import {
  * Map Selection Service
  * ============================================================================
  *
- * Updates the current selection after the player
- * clicks an object on the world map.
+ * Updates the current map selection.
  */
 
 export function selectProvince(
   world,
   provinceId
 ) {
-  if (!world) {
-    return world;
-  }
-
-  if (!provinceId) {
-    return world;
+  if (!world || !provinceId) {
+    return;
   }
 
   const repositories =
     world.repositories;
 
   if (!repositories) {
-    return world;
+    return;
   }
 
   const selectionRepository =
     repositories.selection;
 
   if (!selectionRepository) {
-    return world;
+    return;
   }
 
   const selection =
@@ -47,43 +43,27 @@ export function selectProvince(
       id: provinceId,
     });
 
-  return {
-    ...world,
-
-    repositories: {
-      ...repositories,
-
-      selection: setSelection(
-        selectionRepository,
-        selection
-      ),
-    },
-  };
+  setSelection(
+    selectionRepository,
+    selection
+  );
 }
 
 export function clearMapSelection(
   world
 ) {
   if (!world) {
-    return world;
+    return;
   }
 
   const repositories =
     world.repositories;
 
   if (!repositories) {
-    return world;
+    return;
   }
 
-  return {
-    ...world,
-
-    repositories: {
-      ...repositories,
-
-      selection: {
-        currentSelection: null,
-      },
-    },
-  };
+  clearSelection(
+    repositories.selection
+  );
 }

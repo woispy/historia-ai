@@ -17,17 +17,14 @@ export function handleProvinceClick({
 
   provinceId,
 
-  setWorld,
+  refresh,
 }) {
-  if (!setWorld) {
-    return;
+  selectProvince(
+    world,
+    provinceId
+  );
+
+  if (refresh) {
+    refresh();
   }
-
-  const updatedWorld =
-    selectProvince(
-      world,
-      provinceId
-    );
-
-  setWorld(updatedWorld);
 }

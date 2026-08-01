@@ -1,9 +1,12 @@
 /**
  * ============================================================================
+ * Historia AI
  * Selection Repository
  * ============================================================================
  *
  * Stores the current active selection.
+ *
+ * Repository is mutable.
  */
 
 export function createSelectionRepository() {
@@ -16,19 +19,11 @@ export function setSelection(
   repository,
   selection
 ) {
-  return {
-    ...repository,
-
-    currentSelection: selection,
-  };
+  repository.currentSelection = selection;
 }
 
 export function clearSelection(
   repository
 ) {
-  return {
-    ...repository,
-
-    currentSelection: null,
-  };
+  repository.currentSelection = null;
 }
