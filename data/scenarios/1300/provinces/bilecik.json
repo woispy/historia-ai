@@ -1,0 +1,27 @@
+{
+  "id": "bilecik",
+
+  "name": "Bilecik",
+
+  "region": "bithynia",
+
+  "terrain": "forest",
+
+  "city": "bilecik",
+
+  "owner": "ottomans",
+
+  "controller": "ottomans",
+
+  "population": 5000,
+
+  "development": 18,
+
+  "sea": false,
+
+  "river": true,
+
+  "port": false,
+
+  "fortLevel": 1
+}

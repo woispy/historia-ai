@@ -1,11 +1,10 @@
 /**
  * ============================================================================
  * Historia AI
- * Pathfinding
+ * Scenario Types
  * ============================================================================
- *
- * Public API for world pathfinding.
  */
 
-export { findPath } from "./PathFinder";
-export { getMovementCost } from "./MovementCost";
+export const ScenarioTypes = Object.freeze({
+  SCENARIO_1300: "1300",
+});

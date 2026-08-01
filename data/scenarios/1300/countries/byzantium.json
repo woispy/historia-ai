@@ -3,9 +3,27 @@
   "name": "Byzantium",
   "title": "Empire",
   "government": "empire",
+
   "capital": "konstantinopolis",
+
   "culture": "greek",
   "religion": "orthodox",
+
   "color": "#6A1B9A",
-  "playable": true
+
+  "playable": true,
+
+  "rulerId": "andronikos_ii",
+
+  "treasury": 120000,
+
+  "manpower": 18000,
+
+  "stability": 68,
+
+  "startingCities": [
+    "konstantinopolis",
+    "iznik",
+    "bursa"
+  ]
 }

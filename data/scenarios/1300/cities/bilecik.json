@@ -1,0 +1,24 @@
+{
+  "id": "bilecik",
+  "name": "Bilecik",
+
+  "owner": "ottomans",
+
+  "province": "bilecik",
+
+  "population": 5000,
+
+  "prosperity": 50,
+
+  "food": 75,
+
+  "loyalty": 85,
+
+  "buildings": [],
+
+  "garrison": [],
+
+  "status": {
+    "underSiege": false
+  }
+}

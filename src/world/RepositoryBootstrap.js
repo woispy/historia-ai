@@ -8,19 +8,28 @@ import { createSelectionRepository } from "../selection";
  * Repository Bootstrap
  * ============================================================================
  *
- * Creates every runtime repository used by the world.
+ * Creates every runtime repository.
+ *
+ * Scenario repositories are injected
+ * by ScenarioBootstrap.
  */
 
-export function createRepositories(map) {
+export function createRepositories({
+  scenarioRepositories,
+}) {
   return {
-    provinces: map.provinces,
+    ...scenarioRepositories,
 
-    characters: createCharacterRepository(),
+    characters:
+      createCharacterRepository(),
 
-    families: createFamilyRepository(),
+    families:
+      createFamilyRepository(),
 
-    knowledge: createKnowledgeRepository(),
+    knowledge:
+      createKnowledgeRepository(),
 
-    selection: createSelectionRepository(),
+    selection:
+      createSelectionRepository(),
   };
 }

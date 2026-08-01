@@ -1,11 +1,12 @@
 /**
  * ============================================================================
  * Historia AI
- * Pathfinding
+ * City Model
  * ============================================================================
- *
- * Public API for world pathfinding.
  */
 
-export { findPath } from "./PathFinder";
-export { getMovementCost } from "./MovementCost";
+export function createCityModel(data) {
+  return Object.freeze({
+    ...data,
+  });
+}

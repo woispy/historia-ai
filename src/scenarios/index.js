@@ -1,12 +1,24 @@
-export { createScenario } from "./ScenarioFactory";
+export {
+  createScenario,
+} from "./ScenarioFactory";
 
 export {
   loadScenario,
   loadScenarioDefinition,
 } from "./ScenarioLoader";
 
-export { loadResourceFolder } from "./ResourceLoader";
+export {
+  loadResourceFolder,
+} from "./ResourceLoader";
 
-export { validateScenario } from "./ScenarioValidator";
+export {
+  validateScenario,
+} from "./ScenarioValidator";
 
-export { createScenarioDefinition } from "./ScenarioDefinition";
+export {
+  createScenarioDefinition,
+} from "./ScenarioDefinition";
+
+export {
+  ScenarioTypes,
+} from "./ScenarioTypes";

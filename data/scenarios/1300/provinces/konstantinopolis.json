@@ -1,0 +1,27 @@
+{
+  "id": "konstantinopolis",
+
+  "name": "Konstantinopolis",
+
+  "region": "thrace",
+
+  "terrain": "urban",
+
+  "city": "konstantinopolis",
+
+  "owner": "byzantium",
+
+  "controller": "byzantium",
+
+  "population": 80000,
+
+  "development": 100,
+
+  "sea": true,
+
+  "river": false,
+
+  "port": true,
+
+  "fortLevel": 5
+}

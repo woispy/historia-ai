@@ -1,0 +1,27 @@
+{
+  "id": "iznik",
+
+  "name": "İznik",
+
+  "region": "bithynia",
+
+  "terrain": "plains",
+
+  "city": "iznik",
+
+  "owner": "byzantium",
+
+  "controller": "byzantium",
+
+  "population": 10000,
+
+  "development": 42,
+
+  "sea": true,
+
+  "river": false,
+
+  "port": true,
+
+  "fortLevel": 3
+}

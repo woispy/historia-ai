@@ -1,0 +1,27 @@
+{
+  "id": "sogut",
+
+  "name": "Söğüt",
+
+  "region": "bithynia",
+
+  "terrain": "plains",
+
+  "city": "sogut",
+
+  "owner": "ottomans",
+
+  "controller": "ottomans",
+
+  "population": 3500,
+
+  "development": 12,
+
+  "sea": false,
+
+  "river": false,
+
+  "port": false,
+
+  "fortLevel": 1
+}

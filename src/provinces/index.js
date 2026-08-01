@@ -1,6 +1,22 @@
-export { createProvince } from "./ProvinceFactory";
+/* ============================================================================
+ * Factory
+ * ========================================================================== */
 
-export { createProvinceModel } from "./ProvinceModel";
+export {
+  createProvince,
+} from "./ProvinceFactory";
+
+/* ============================================================================
+ * Model
+ * ========================================================================== */
+
+export {
+  createProvinceModel,
+} from "./ProvinceModel";
+
+/* ============================================================================
+ * Repository
+ * ========================================================================== */
 
 export {
   createProvinceRepository,
@@ -8,6 +24,10 @@ export {
   updateProvince,
   removeProvince,
 } from "./ProvinceRepository";
+
+/* ============================================================================
+ * Queries
+ * ========================================================================== */
 
 export {
   getProvince,
@@ -18,15 +38,25 @@ export {
   getProvincesByController,
 } from "./ProvinceQueries";
 
+/* ============================================================================
+ * Bootstrap
+ * ========================================================================== */
+
+export {
+  createProvinceRepositoryFromArray,
+} from "./ProvinceBootstrap";
+
+/* ============================================================================
+ * Presentation
+ * ========================================================================== */
+
 export {
   getProvinceDisplayName,
   getProvincePopulationText,
   getProvinceDevelopmentText,
 } from "./ProvincePresentation";
 
-export {
-  createProvinceRepositoryFromArray,
-} from "./ProvinceBootstrap";
+export * from "./presentation";
 
 /* ============================================================================
  * View Models
@@ -39,19 +69,3 @@ export {
 export {
   createProvinceViewModelFromProvince,
 } from "./ProvinceViewModelFactory";
-
-export {
-  createProvincePanelViewModel,
-} from "./ProvincePanelViewModel";
-
-export {
-  createProvinceTooltipViewModel,
-} from "./ProvinceTooltipViewModel";
-
-export {
-  createProvinceReportViewModel,
-} from "./ProvinceReportViewModel";
-
-export {
-  createProvinceAdvisorViewModel,
-} from "./ProvinceAdvisorViewModel";

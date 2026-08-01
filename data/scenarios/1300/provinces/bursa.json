@@ -1,0 +1,27 @@
+{
+  "id": "bursa",
+
+  "name": "Bursa",
+
+  "region": "bithynia",
+
+  "terrain": "forest",
+
+  "city": "bursa",
+
+  "owner": "byzantium",
+
+  "controller": "byzantium",
+
+  "population": 12000,
+
+  "development": 48,
+
+  "sea": false,
+
+  "river": true,
+
+  "port": false,
+
+  "fortLevel": 2
+}

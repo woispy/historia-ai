@@ -3,9 +3,23 @@
   "name": "Karasi",
   "title": "Beylik",
   "government": "beylik",
+
   "capital": "balikesir",
+
   "culture": "oghuz-turk",
   "religion": "sunni",
+
   "color": "#D84315",
-  "playable": true
+
+  "playable": true,
+
+  "rulerId": "karasi_bey",
+
+  "treasury": 18000,
+
+  "manpower": 3500,
+
+  "stability": 76,
+
+  "startingCities": []
 }

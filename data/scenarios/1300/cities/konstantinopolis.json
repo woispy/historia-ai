@@ -1,0 +1,24 @@
+{
+  "id": "konstantinopolis",
+  "name": "Konstantinopolis",
+
+  "owner": "byzantium",
+
+  "province": "konstantinopolis",
+
+  "population": 80000,
+
+  "prosperity": 100,
+
+  "food": 90,
+
+  "loyalty": 95,
+
+  "buildings": [],
+
+  "garrison": [],
+
+  "status": {
+    "underSiege": false
+  }
+}

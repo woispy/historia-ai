@@ -1,11 +1,14 @@
 /**
  * ============================================================================
  * Historia AI
- * Pathfinding
+ * Country Model
  * ============================================================================
  *
- * Public API for world pathfinding.
+ * Immutable runtime country model.
  */
 
-export { findPath } from "./PathFinder";
-export { getMovementCost } from "./MovementCost";
+export function createCountryModel(data) {
+  return Object.freeze({
+    ...data,
+  });
+}

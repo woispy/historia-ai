@@ -1,6 +1,12 @@
 import { createMap } from "./map";
 
-import { createRepositories } from "./RepositoryBootstrap";
+import {
+  bootstrapScenario,
+} from "../scenarios/bootstrap";
+
+import {
+  createRepositories,
+} from "./RepositoryBootstrap";
 
 /**
  * ============================================================================
@@ -10,16 +16,33 @@ import { createRepositories } from "./RepositoryBootstrap";
  * Creates the runtime world.
  */
 
-export function bootstrapWorld(scenario) {
+export function bootstrapWorld(
+  scenario
+) {
+  if (!scenario) {
+    throw new Error(
+      "Scenario is required."
+    );
+  }
+
   const map = createMap();
 
-  const repositories = createRepositories(map);
+  const {
+    repositories:
+      scenarioRepositories,
+  } = bootstrapScenario({
+    scenario,
+    map,
+  });
+
+  const repositories =
+    createRepositories({
+      scenarioRepositories,
+    });
 
   return {
     map,
 
     repositories,
-
-    ...scenario.data,
   };
 }

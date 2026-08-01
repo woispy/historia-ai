@@ -1,24 +1,40 @@
-import Province from "../Province";
-import ProvinceLabel from "../ProvinceLabel";
+import MapProvince from "../MapProvince";
+import MapProvinceLabel from "../MapProvinceLabel";
+
+/**
+ * ============================================================================
+ * Historia AI
+ * Province Layer
+ * ============================================================================
+ *
+ * Renders every province on the world map.
+ *
+ * Presentation only.
+ */
 
 function ProvinceLayer({
   provinces,
-  selectedProvince,
-  onSelectProvince,
+
+  selectedProvinceId,
+
+  onProvinceClick,
 }) {
   return (
     <>
       {provinces.map((province) => (
-        <Province
+        <MapProvince
           key={province.id}
           id={province.id}
-          selected={province.id === selectedProvince}
-          onSelect={onSelectProvince}
+          selected={
+            province.id ===
+            selectedProvinceId
+          }
+          onClick={onProvinceClick}
         >
-          <ProvinceLabel
+          <MapProvinceLabel
             name={province.name}
           />
-        </Province>
+        </MapProvince>
       ))}
     </>
   );
