@@ -6,71 +6,123 @@ import {
   removeAction,
 } from "../systems/Action";
 
-import { updateCurrentState } from "../game/currentGame";
+import {
+  updateCurrentGame,
+} from "../game/currentGame";
 
-export function useDecisionEditor(setGameState) {
-  const [editingAction, setEditingAction] = useState(null);
-  const [decisionText, setDecisionText] = useState("");
+export function useDecisionEditor(
+  setGameSession
+) {
+  const [
+    editingAction,
+    setEditingAction,
+  ] = useState(null);
+
+  const [
+    decisionText,
+    setDecisionText,
+  ] = useState("");
 
   function submitAction() {
-    const text = decisionText.trim();
+    const text =
+      decisionText.trim();
 
     if (!text) {
       return;
     }
 
-    setGameState((previousState) => {
-      let nextState;
+    setGameSession(
+      (previousSession) => {
+        let nextSession;
 
-      if (editingAction) {
-        nextState = updateAction(previousState, editingAction.id, {
-          text,
-        });
-      } else {
-        nextState = queueAction(previousState, text);
+        if (editingAction) {
+          nextSession =
+            updateAction(
+              previousSession,
+              editingAction.id,
+              {
+                text,
+              }
+            );
+        } else {
+          nextSession =
+            queueAction(
+              previousSession,
+              text
+            );
+        }
+
+        updateCurrentGame(
+          nextSession
+        );
+
+        return nextSession;
       }
-
-      updateCurrentState(nextState);
-
-      return nextState;
-    });
+    );
 
     setEditingAction(null);
+
     setDecisionText("");
   }
 
-  function startEditing(action) {
+  function startEditing(
+    action
+  ) {
     setEditingAction(action);
-    setDecisionText(action.text);
+
+    setDecisionText(
+      action.text
+    );
   }
 
   function cancelEditing() {
     setEditingAction(null);
+
     setDecisionText("");
   }
 
-  function deleteAction(actionId) {
-    setGameState((previousState) => {
-      const nextState = removeAction(previousState, actionId);
+  function deleteAction(
+    actionId
+  ) {
+    setGameSession(
+      (previousSession) => {
+        const nextSession =
+          removeAction(
+            previousSession,
+            actionId
+          );
 
-      updateCurrentState(nextState);
+        updateCurrentGame(
+          nextSession
+        );
 
-      return nextState;
-    });
+        return nextSession;
+      }
+    );
 
-    if (editingAction?.id === actionId) {
+    if (
+      editingAction?.id ===
+      actionId
+    ) {
       setEditingAction(null);
+
       setDecisionText("");
     }
   }
 
   return {
     editingAction,
+
     decisionText,
+
     setDecisionText,
+
     submitAction,
+
     startEditing,
+
     cancelEditing,
+
     deleteAction,
   };
 }

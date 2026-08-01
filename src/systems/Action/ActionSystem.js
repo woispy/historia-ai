@@ -1,36 +1,62 @@
 import { processTurn } from "../Turn";
 import { interpretAction } from "../Interpreter";
-import {
-  getRuntimeState,
-} from "../../state/runtime";
 
-function rebuildRuntime(runtime, state) {
-  if (runtime.state) {
-    return {
-      ...runtime,
-      state,
-    };
-  }
+/**
+ * ============================================================================
+ * Historia AI
+ * Action System
+ * ============================================================================
+ *
+ * Operates directly on GameSession.
+ */
 
-  return state;
+function rebuildGameSession(
+  gameSession,
+  runtime
+) {
+  return {
+    ...gameSession,
+
+    runtime,
+  };
 }
 
-export function advanceWeek(runtime) {
-  return processTurn(runtime, "week");
+export function advanceWeek(
+  gameSession
+) {
+  return processTurn(
+    gameSession,
+    "week"
+  );
 }
 
-export function advanceMonth(runtime) {
-  return processTurn(runtime, "month");
+export function advanceMonth(
+  gameSession
+) {
+  return processTurn(
+    gameSession,
+    "month"
+  );
 }
 
-export function advanceYear(runtime) {
-  return processTurn(runtime, "year");
+export function advanceYear(
+  gameSession
+) {
+  return processTurn(
+    gameSession,
+    "year"
+  );
 }
 
-export function queueAction(runtime, actionText) {
-  const state = getRuntimeState(runtime);
+export function queueAction(
+  gameSession,
+  actionText
+) {
+  const runtime =
+    gameSession.runtime;
 
-  const interpretation = interpretAction(actionText);
+  const interpretation =
+    interpretAction(actionText);
 
   const action = {
     id: crypto.randomUUID(),
@@ -42,7 +68,7 @@ export function queueAction(runtime, actionText) {
     status: "pending",
 
     createdAt: {
-      ...state.time.currentDate,
+      ...runtime.time.currentDate,
     },
 
     priority: 0,
@@ -54,51 +80,76 @@ export function queueAction(runtime, actionText) {
     payload: {},
   };
 
-  return rebuildRuntime(runtime, {
-    ...state,
+  return rebuildGameSession(
+    gameSession,
+    {
+      ...runtime,
 
-    pendingActions: [
-      ...state.pendingActions,
-      action,
-    ],
-  });
+      pendingActions: [
+        ...runtime.pendingActions,
+        action,
+      ],
+    }
+  );
 }
 
-export function updateAction(runtime, actionId, changes) {
-  const state = getRuntimeState(runtime);
+export function updateAction(
+  gameSession,
+  actionId,
+  changes
+) {
+  const runtime =
+    gameSession.runtime;
 
-  return rebuildRuntime(runtime, {
-    ...state,
+  return rebuildGameSession(
+    gameSession,
+    {
+      ...runtime,
 
-    pendingActions: state.pendingActions.map((action) =>
-      action.id === actionId
-        ? {
-            ...action,
-            ...changes,
-          }
-        : action
-    ),
-  });
+      pendingActions:
+        runtime.pendingActions.map(
+          (action) =>
+            action.id === actionId
+              ? {
+                  ...action,
+                  ...changes,
+                }
+              : action
+        ),
+    }
+  );
 }
 
-export function removeAction(runtime, actionId) {
-  const state = getRuntimeState(runtime);
+export function removeAction(
+  gameSession,
+  actionId
+) {
+  const runtime =
+    gameSession.runtime;
 
-  return rebuildRuntime(runtime, {
-    ...state,
+  return rebuildGameSession(
+    gameSession,
+    {
+      ...runtime,
 
-    pendingActions: state.pendingActions.filter(
-      (action) => action.id !== actionId
-    ),
-  });
+      pendingActions:
+        runtime.pendingActions.filter(
+          (action) =>
+            action.id !== actionId
+        ),
+    }
+  );
 }
 
-export function clearPendingActions(runtime) {
-  const state = getRuntimeState(runtime);
+export function clearPendingActions(
+  gameSession
+) {
+  return rebuildGameSession(
+    gameSession,
+    {
+      ...gameSession.runtime,
 
-  return rebuildRuntime(runtime, {
-    ...state,
-
-    pendingActions: [],
-  });
+      pendingActions: [],
+    }
+  );
 }

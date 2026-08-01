@@ -1,1 +1,3 @@
-export { useWorldMap } from "./useWorldMap";
+export {
+  useWorldMap,
+} from "./useWorldMap";

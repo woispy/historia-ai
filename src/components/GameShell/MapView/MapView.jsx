@@ -2,11 +2,15 @@ import "./MapView.css";
 
 import { WorldMap } from "../../../map";
 
-function MapView({ gameState }) {
+function MapView({
+  gameSession,
+}) {
   return (
     <main className="map-view">
       <div className="map-layer terrain">
-        <WorldMap gameState={gameState} />
+        <WorldMap
+          runtime={gameSession}
+        />
       </div>
 
       <div className="country-layer" />

@@ -1,11 +1,10 @@
-export { createRuntimeState } from "./RuntimeState";
+export {
+  createRuntimeState,
+} from "./RuntimeState";
 
 export {
-  getRuntimeState,
-  updateRuntimeState,
-  getWorld,
-  getPlayer,
-  getSettings,
+  getRuntime,
+  updateRuntime,
   getCurrentDate,
   getTimeline,
   getPendingActions,

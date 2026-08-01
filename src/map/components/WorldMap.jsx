@@ -1,24 +1,43 @@
 import {
-  useProvinceSelection,
   useWorldMap,
 } from "../hooks";
 
-import { ProvinceLayer } from "./layers";
+import {
+  ProvinceLayer,
+} from "./layers";
 
-function WorldMap({ gameState }) {
-  const { provinces } = useWorldMap(gameState);
+/**
+ * ============================================================================
+ * Historia AI
+ * World Map
+ * ============================================================================
+ *
+ * Renders the current world map.
+ *
+ * Selection is managed by GameShell.
+ */
 
+function WorldMap({
+  runtime,
+
+  selectedProvinceId,
+
+  onProvinceClick,
+}) {
   const {
-    selectedProvince,
-    selectProvince,
-  } = useProvinceSelection();
+    provinces,
+  } = useWorldMap(runtime);
 
   return (
     <div className="world-map">
       <ProvinceLayer
         provinces={provinces}
-        selectedProvince={selectedProvince}
-        onSelectProvince={selectProvince}
+        selectedProvinceId={
+          selectedProvinceId
+        }
+        onProvinceClick={
+          onProvinceClick
+        }
       />
     </div>
   );

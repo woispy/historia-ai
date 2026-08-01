@@ -1,7 +1,30 @@
-import { createCharacterRepository } from "../characters";
-import { createFamilyRepository } from "../family";
-import { createKnowledgeRepository } from "../knowledge";
-import { createSelectionRepository } from "../selection";
+import {
+  createCountryRepositoryFromArray,
+} from "../countries";
+
+import {
+  createCityRepositoryFromArray,
+} from "../cities";
+
+import {
+  createProvinceRepositoryFromArray,
+} from "../provinces";
+
+import {
+  createCharacterRepository,
+} from "../characters";
+
+import {
+  createFamilyRepository,
+} from "../family";
+
+import {
+  createKnowledgeRepository,
+} from "../knowledge";
+
+import {
+  createSelectionRepository,
+} from "../selection";
 
 /**
  * ============================================================================
@@ -9,16 +32,38 @@ import { createSelectionRepository } from "../selection";
  * ============================================================================
  *
  * Creates every runtime repository.
- *
- * Scenario repositories are injected
- * by ScenarioBootstrap.
  */
 
-export function createRepositories({
-  scenarioRepositories,
-}) {
+export function createRepositories(
+  scenario
+) {
+  if (!scenario) {
+    throw new Error(
+      "Scenario is required."
+    );
+  }
+
   return {
-    ...scenarioRepositories,
+    countries:
+      createCountryRepositoryFromArray(
+        Object.values(
+          scenario.data.countries ?? {}
+        )
+      ),
+
+    cities:
+      createCityRepositoryFromArray(
+        Object.values(
+          scenario.data.cities ?? {}
+        )
+      ),
+
+    provinces:
+      createProvinceRepositoryFromArray(
+        Object.values(
+          scenario.data.provinces ?? {}
+        )
+      ),
 
     characters:
       createCharacterRepository(),

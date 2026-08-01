@@ -1,85 +1,79 @@
 let currentGame = null;
 
 /**
- * Stores the current active game session.
+ * ============================================================================
+ * Historia AI
+ * Current Game
+ * ============================================================================
  *
- * @param {object} gameSession
+ * Stores the currently active GameSession.
  */
-export function setCurrentGame(gameSession) {
+
+export function setCurrentGame(
+  gameSession
+) {
   if (!gameSession) {
-    throw new Error("Game session is required.");
+    throw new Error(
+      "Game session is required."
+    );
   }
 
   currentGame = gameSession;
 }
 
-/**
- * Returns the current active game session.
- *
- * @returns {object}
- */
 export function getCurrentGame() {
   if (!currentGame) {
-    throw new Error("No active game session.");
+    throw new Error(
+      "No active game session."
+    );
   }
 
   return currentGame;
 }
 
-/**
- * Replaces the current game session.
- *
- * @param {object} gameSession
- */
-export function updateCurrentGame(gameSession) {
+export function updateCurrentGame(
+  gameSession
+) {
   if (!gameSession) {
-    throw new Error("Game session is required.");
+    throw new Error(
+      "Game session is required."
+    );
   }
 
   currentGame = gameSession;
 }
 
-/**
- * Clears the active game session.
- */
 export function clearCurrentGame() {
   currentGame = null;
 }
 
-/**
- * Returns whether a game session currently exists.
- *
- * @returns {boolean}
- */
 export function hasCurrentGame() {
   return currentGame !== null;
 }
 
 /**
- * Returns the runtime state of the current game session.
- *
- * @returns {object}
+ * ============================================================================
+ * Runtime Access
+ * ============================================================================
  */
-export function getCurrentState() {
-  return getCurrentGame().state;
+
+export function getCurrentRuntime() {
+  return getCurrentGame().runtime;
 }
 
-/**
- * Updates only the runtime state of the current game session.
- *
- * @param {object} state
- * @returns {object}
- */
-export function updateCurrentState(state) {
-  if (!state) {
-    throw new Error("Game state is required.");
+export function updateCurrentRuntime(
+  runtime
+) {
+  if (!runtime) {
+    throw new Error(
+      "Runtime is required."
+    );
   }
 
-  const session = getCurrentGame();
-
   currentGame = {
-    ...session,
-    state,
+    ...currentGame,
+
+    runtime,
   };
 
   return currentGame;

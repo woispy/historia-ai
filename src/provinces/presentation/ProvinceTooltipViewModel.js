@@ -1,7 +1,7 @@
 import {
   getProvinceDisplayName,
   getProvincePopulationText,
-} from "./ProvincePresentation";
+} from "../ProvincePresentation";
 
 /**
  * ============================================================================

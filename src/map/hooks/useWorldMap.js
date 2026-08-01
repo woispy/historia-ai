@@ -1,11 +1,23 @@
 import { useMemo } from "react";
 
-import { getProvinces } from "../../world";
+import {
+  getProvinces,
+} from "../../provinces";
 
-export function useWorldMap(gameState) {
+export function useWorldMap(runtime) {
   return useMemo(() => {
+    if (!runtime) {
+      return {
+        provinces: [],
+      };
+    }
+
+    const repository =
+      runtime.world.repositories.provinces;
+
     return {
-      provinces: getProvinces(gameState),
+      provinces:
+        getProvinces(repository),
     };
-  }, [gameState]);
+  }, [runtime]);
 }

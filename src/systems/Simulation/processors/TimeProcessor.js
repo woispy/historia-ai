@@ -9,6 +9,16 @@ import {
   updateRuntime,
 } from "../../../state";
 
+/**
+ * ============================================================================
+ * Time Processor
+ * ============================================================================
+ *
+ * Advances the simulation clock.
+ *
+ * Works only with the GameSession runtime model.
+ */
+
 export function processTime(
   gameSession,
   unit = "week",

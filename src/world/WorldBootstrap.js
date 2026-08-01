@@ -12,8 +12,6 @@ import {
  * ============================================================================
  * World Bootstrap
  * ============================================================================
- *
- * Creates the runtime world.
  */
 
 export function bootstrapWorld(
@@ -25,20 +23,17 @@ export function bootstrapWorld(
     );
   }
 
+  const runtimeScenario =
+    bootstrapScenario(
+      scenario
+    );
+
   const map = createMap();
 
-  const {
-    repositories:
-      scenarioRepositories,
-  } = bootstrapScenario({
-    scenario,
-    map,
-  });
-
   const repositories =
-    createRepositories({
-      scenarioRepositories,
-    });
+    createRepositories(
+      runtimeScenario
+    );
 
   return {
     map,

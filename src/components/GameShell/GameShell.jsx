@@ -8,8 +8,8 @@ import OverlayManager from "./OverlayManager/OverlayManager";
 import NotificationToast from "../NotificationToast/NotificationToast";
 
 import {
-  getCurrentState,
-  updateCurrentState,
+  getCurrentGame,
+  updateCurrentGame,
 } from "../../game/currentGame";
 
 import {
@@ -19,12 +19,14 @@ import {
 } from "../../state";
 
 import { advanceWeek } from "../../systems/Action";
-import { useDecisionEditor } from "../../hooks/useDecisionEditor";
+
+import {
+  useDecisionEditor,
+} from "../../hooks/useDecisionEditor";
 
 function GameShell() {
-  const [gameState, setGameState] = useState(() =>
-    getCurrentState()
-  );
+  const [gameSession, setGameSession] =
+    useState(() => getCurrentGame());
 
   const {
     editingAction,
@@ -34,25 +36,29 @@ function GameShell() {
     startEditing,
     cancelEditing,
     deleteAction,
-  } = useDecisionEditor(setGameState);
+  } = useDecisionEditor(setGameSession);
 
   function handleAdvanceWeek() {
-    setGameState((previousState) => {
-      const nextState = advanceWeek(previousState);
+    setGameSession((previousSession) => {
+      const nextSession =
+        advanceWeek(previousSession);
 
-      updateCurrentState(nextState);
+      updateCurrentGame(nextSession);
 
-      return nextState;
+      return nextSession;
     });
   }
 
   return (
     <Layout title="">
-      <TopBar currentDate={getCurrentDate(gameState)} />
+      <TopBar
+        currentDate={getCurrentDate(
+          gameSession.runtime
+        )}
+      />
 
       <NotificationToast />
 
-      {/* Geçici test butonu (ileride kaldırılacak) */}
       <div
         style={{
           position: "fixed",
@@ -66,14 +72,24 @@ function GameShell() {
         </button>
       </div>
 
-      <MapView gameState={gameState} />
+      <MapView
+        gameSession={gameSession}
+      />
 
       <OverlayManager
-        timeline={getTimeline(gameState)}
-        pendingActions={getPendingActions(gameState)}
+        timeline={getTimeline(
+          gameSession.runtime
+        )}
+        pendingActions={
+          getPendingActions(
+            gameSession.runtime
+          )
+        }
         editingAction={editingAction}
         decisionText={decisionText}
-        onDecisionTextChange={setDecisionText}
+        onDecisionTextChange={
+          setDecisionText
+        }
         onSubmitAction={submitAction}
         onUpdateAction={startEditing}
         onRemoveAction={deleteAction}

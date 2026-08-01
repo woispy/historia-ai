@@ -29,3 +29,7 @@ export {
 export {
   bootstrapDecisions,
 } from "./DecisionBootstrap";
+
+export {
+  executeDecisions,
+} from "./DecisionExecutor";
