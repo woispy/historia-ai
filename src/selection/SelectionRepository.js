@@ -6,12 +6,14 @@
  *
  * Stores the current active selection.
  *
- * Repository is mutable.
+ * Repository is immutable.
  */
 
-export function createSelectionRepository() {
+export function createSelectionRepository(
+  initialSelection = null
+) {
   return {
-    currentSelection: null,
+    currentSelection: initialSelection,
   };
 }
 
@@ -19,11 +21,19 @@ export function setSelection(
   repository,
   selection
 ) {
-  repository.currentSelection = selection;
+  return {
+    ...repository,
+
+    currentSelection: selection,
+  };
 }
 
 export function clearSelection(
   repository
 ) {
-  repository.currentSelection = null;
+  return {
+    ...repository,
+
+    currentSelection: null,
+  };
 }
