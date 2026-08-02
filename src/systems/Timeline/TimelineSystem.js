@@ -1,68 +1,55 @@
 import {
-  advanceWeeks,
-  advanceMonths,
-  advanceYears,
-} from "../../Time";
-
-import {
   getRuntime,
   updateRuntime,
-} from "../../../state";
+} from "../../state";
 
-export function processTime(
+/**
+ * ============================================================================
+ * Historia AI
+ * Timeline System
+ * ============================================================================
+ *
+ * Adds timeline entries to the current GameSession runtime.
+ */
+
+export function addTimelineEvent(
   gameSession,
-  unit = "week",
-  amount = 1
+  event
 ) {
   const runtime =
     getRuntime(gameSession);
 
-  let nextDate =
-    runtime.time.currentDate;
+  const timelineEntry = {
+    id: crypto.randomUUID(),
 
-  switch (unit) {
-    case "week":
-      nextDate =
-        advanceWeeks(
-          nextDate,
-          amount
-        );
-      break;
+    date: {
+      ...runtime.time.currentDate,
+    },
 
-    case "month":
-      nextDate =
-        advanceMonths(
-          nextDate,
-          amount
-        );
-      break;
+    category:
+      event.category ?? "system",
 
-    case "year":
-      nextDate =
-        advanceYears(
-          nextDate,
-          amount
-        );
-      break;
+    source:
+      event.source ?? "system",
 
-    default:
-      return gameSession;
-  }
+    key: event.key,
+
+    data:
+      event.data ?? {},
+
+    editable:
+      event.editable ?? false,
+  };
 
   return updateRuntime(
     gameSession,
     {
       ...runtime,
 
-      time: {
-        ...runtime.time,
-
-        currentDate:
-          nextDate,
-
-        turn:
-          runtime.time.turn + 1,
-      },
+      timeline: [
+        timelineEntry,
+        ...runtime.timeline,
+      ],
     }
   );
 }

@@ -22,3 +22,7 @@ export {
   getCities,
   getCitiesByOwner,
 } from "./CityQueries";
+
+export {
+  setCityUnderSiege,
+} from "./CityMutations";

@@ -53,7 +53,7 @@ function GameShell() {
     <Layout title="">
       <TopBar
         currentDate={getCurrentDate(
-          gameSession.runtime
+          gameSession
         )}
       />
 
@@ -78,11 +78,11 @@ function GameShell() {
 
       <OverlayManager
         timeline={getTimeline(
-          gameSession.runtime
+          gameSession
         )}
         pendingActions={
           getPendingActions(
-            gameSession.runtime
+            gameSession
           )
         }
         editingAction={editingAction}
