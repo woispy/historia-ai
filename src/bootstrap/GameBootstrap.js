@@ -1,4 +1,5 @@
 import { createGameSession } from "../engine";
+
 import {
   loadScenario,
   validateScenario,
@@ -9,7 +10,7 @@ import {
 } from "../state";
 
 import {
-  createWorld,
+  bootstrapWorld,
 } from "../world";
 
 /**
@@ -26,7 +27,7 @@ import {
  *      ↓
  * ScenarioValidator
  *      ↓
- * WorldFactory
+ * WorldBootstrap
  *      ↓
  * RuntimeState
  *      ↓
@@ -65,7 +66,7 @@ export function createGame({
   }
 
   const world =
-    createWorld(scenario);
+    bootstrapWorld(scenario);
 
   const runtime =
     createRuntimeState();

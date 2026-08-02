@@ -50,31 +50,3 @@ export function clearCurrentGame() {
 export function hasCurrentGame() {
   return currentGame !== null;
 }
-
-/**
- * ============================================================================
- * Runtime Access
- * ============================================================================
- */
-
-export function getCurrentRuntime() {
-  return getCurrentGame().runtime;
-}
-
-export function updateCurrentRuntime(
-  runtime
-) {
-  if (!runtime) {
-    throw new Error(
-      "Runtime is required."
-    );
-  }
-
-  currentGame = {
-    ...currentGame,
-
-    runtime,
-  };
-
-  return currentGame;
-}
