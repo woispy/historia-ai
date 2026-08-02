@@ -12,3 +12,9 @@ export {
 export {
   bootstrapGeometry,
 } from "./GeometryBootstrap";
+
+export {
+  getGeometry,
+  getGeometries,
+  getGeometryByProvince,
+} from "./GeometryQueries";

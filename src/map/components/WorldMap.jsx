@@ -6,40 +6,56 @@ import {
   ProvinceLayer,
 } from "./layers";
 
+import {
+  CameraController,
+  CameraProvider,
+  CameraViewport,
+  useCamera,
+} from "../camera";
+
 /**
  * ============================================================================
  * Historia AI
  * World Map
  * ============================================================================
- *
- * Renders the current world map.
- *
- * Selection is managed by GameShell.
  */
 
 function WorldMap({
   runtime,
-
   selectedProvinceId,
-
   onProvinceClick,
 }) {
   const {
     provinces,
   } = useWorldMap(runtime);
 
+  const {
+    camera,
+    zoom,
+    move,
+  } = useCamera();
+
   return (
-    <div className="world-map">
-      <ProvinceLayer
-        provinces={provinces}
-        selectedProvinceId={
-          selectedProvinceId
-        }
-        onProvinceClick={
-          onProvinceClick
-        }
+    <CameraProvider>
+      <CameraController
+        zoom={zoom}
+        move={move}
       />
-    </div>
+
+      <CameraViewport
+        camera={camera}
+      >
+        <ProvinceLayer
+          provinces={provinces}
+          selectedProvinceId={
+            selectedProvinceId
+          }
+          onProvinceClick={
+            onProvinceClick
+          }
+        />
+      </CameraViewport>
+    </CameraProvider>
   );
 }
 

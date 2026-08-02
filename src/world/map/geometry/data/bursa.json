@@ -3,6 +3,16 @@
 
   "provinceId": "bursa",
 
+  "position": {
+    "x": 12640,
+    "y": 18380
+  },
+
+  "bounds": {
+    "width": 180,
+    "height": 160
+  },
+
   "polygon": [
     [0, 0],
     [140, 0],

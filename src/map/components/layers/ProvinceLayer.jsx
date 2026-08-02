@@ -1,41 +1,43 @@
-import MapProvince from "../MapProvince";
+import ProvinceSvg from "../ProvinceSvg";
 
-import MapProvinceLabel from "../MapProvinceLabel";
+import ProvincePolygon from "../ProvincePolygon";
 
 /**
  * ============================================================================
  * Historia AI
  * Province Layer
  * ============================================================================
+ *
+ * Renders every province polygon.
  */
 
 function ProvinceLayer({
   provinces,
-
   selectedProvinceId,
-
   onProvinceClick,
 }) {
   return (
-    <>
-      {provinces.map((province) => (
-        <MapProvince
-          key={province.id}
-          id={province.id}
-          selected={
-            province.id ===
-            selectedProvinceId
-          }
-          onClick={
-            onProvinceClick
-          }
-        >
-          <MapProvinceLabel
-            name={province.name}
+    <ProvinceSvg>
+      {provinces.map(
+        ({
+          province,
+          geometry,
+        }) => (
+          <ProvincePolygon
+            key={province.id}
+            province={province}
+            geometry={geometry}
+            selected={
+              province.id ===
+              selectedProvinceId
+            }
+            onClick={
+              onProvinceClick
+            }
           />
-        </MapProvince>
-      ))}
-    </>
+        )
+      )}
+    </ProvinceSvg>
   );
 }
 

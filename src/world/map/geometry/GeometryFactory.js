@@ -21,6 +21,24 @@ export function createGeometry(data) {
   }
 
   return Object.freeze({
-    ...data,
+    id: data.id,
+
+    provinceId:
+      data.provinceId,
+
+    position:
+      data.position ?? {
+        x: 0,
+        y: 0,
+      },
+
+    bounds:
+      data.bounds ?? {
+        width: 0,
+        height: 0,
+      },
+
+    polygon:
+      data.polygon ?? [],
   });
 }

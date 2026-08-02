@@ -4,20 +4,50 @@ import {
   getProvinces,
 } from "../../provinces";
 
-export function useWorldMap(runtime) {
+import {
+  getGeometryByProvince,
+} from "../../world/map/geometry";
+
+/**
+ * ============================================================================
+ * Historia AI
+ * useWorldMap
+ * ============================================================================
+ *
+ * Creates render-ready map data.
+ */
+
+export function useWorldMap(
+  gameSession
+) {
   return useMemo(() => {
-    if (!runtime) {
+    if (!gameSession) {
       return {
         provinces: [],
       };
     }
 
-    const repository =
-      runtime.world.repositories.provinces;
+    const provinceRepository =
+      gameSession.world.repositories.provinces;
+
+    const geometryRepository =
+      gameSession.world.map.geometry;
+
+    const provinces =
+      getProvinces(
+        provinceRepository
+      ).map((province) => ({
+        province,
+
+        geometry:
+          getGeometryByProvince(
+            geometryRepository,
+            province.id
+          ),
+      }));
 
     return {
-      provinces:
-        getProvinces(repository),
+      provinces,
     };
-  }, [runtime]);
+  }, [gameSession]);
 }
