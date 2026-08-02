@@ -29,15 +29,27 @@ export function handleMilitaryAction(
     intent === "military.siege" &&
     cityId
   ) {
-    const world =
-      nextSession.world;
-
-    world.repositories.cities =
+    const nextCitiesRepository =
       setCityUnderSiege(
-        world.repositories.cities,
+        nextSession.world.repositories.cities,
         cityId,
         true
       );
+
+    nextSession = {
+      ...nextSession,
+
+      world: {
+        ...nextSession.world,
+
+        repositories: {
+          ...nextSession.world.repositories,
+
+          cities:
+            nextCitiesRepository,
+        },
+      },
+    };
 
     nextSession =
       addTimelineEvent(nextSession, {

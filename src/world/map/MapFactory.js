@@ -7,18 +7,33 @@ import {
   createProvinceRepositoryFromArray,
 } from "../../provinces";
 
-import { createRegion } from "./RegionFactory";
-import { createTerrain } from "./TerrainFactory";
-import { createTopology } from "./topology";
+import {
+  createRegion,
+} from "./RegionFactory";
 
-import { createDictionary } from "../../utils/createDictionary";
+import {
+  createTerrain,
+} from "./TerrainFactory";
+
+import {
+  createTopology,
+} from "./topology";
+
+import {
+  bootstrapGeometry,
+} from "./geometry";
+
+import {
+  createDictionary,
+} from "../../utils/createDictionary";
 
 /**
  * ============================================================================
+ * Historia AI
  * Map Factory
  * ============================================================================
  *
- * Geometry + Runtime repositories.
+ * Creates the complete World Map.
  */
 
 export function createMap() {
@@ -26,19 +41,25 @@ export function createMap() {
     provincesData.map(createProvince);
 
   return {
+    geometry:
+      bootstrapGeometry(),
+
     provinces:
       createProvinceRepositoryFromArray(
         provinceModels
       ),
 
-    regions: createDictionary(
-      regionsData.map(createRegion)
-    ),
+    regions:
+      createDictionary(
+        regionsData.map(createRegion)
+      ),
 
-    terrain: createDictionary(
-      terrainData.map(createTerrain)
-    ),
+    terrain:
+      createDictionary(
+        terrainData.map(createTerrain)
+      ),
 
-    topology: createTopology(),
+    topology:
+      createTopology(),
   };
 }
