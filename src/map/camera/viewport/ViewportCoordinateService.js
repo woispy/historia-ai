@@ -34,11 +34,13 @@ export function getViewportCenter(
 }
 
 /**
- * Converts world coordinates into screen coordinates.
+ * Calculates the translation required to place
+ * the current camera position at the viewport center.
+ *
+ * This translation is shared by the rendering pipeline
+ * and future camera systems.
  */
-export function worldToScreen(
-  worldX,
-  worldY,
+export function getViewportTranslation(
   camera,
   viewport
 ) {
@@ -49,14 +51,42 @@ export function worldToScreen(
 
   return {
     x:
-      (worldX - camera.x) *
-        camera.zoom +
-      center.x,
+      center.x -
+      camera.x *
+        camera.zoom,
 
     y:
-      (worldY - camera.y) *
+      center.y -
+      camera.y *
+        camera.zoom,
+  };
+}
+
+/**
+ * Converts world coordinates into screen coordinates.
+ */
+export function worldToScreen(
+  worldX,
+  worldY,
+  camera,
+  viewport
+) {
+  const translation =
+    getViewportTranslation(
+      camera,
+      viewport
+    );
+
+  return {
+    x:
+      worldX *
         camera.zoom +
-      center.y,
+      translation.x,
+
+    y:
+      worldY *
+        camera.zoom +
+      translation.y,
   };
 }
 
@@ -69,20 +99,21 @@ export function screenToWorld(
   camera,
   viewport
 ) {
-  const center =
-    getViewportCenter(
+  const translation =
+    getViewportTranslation(
+      camera,
       viewport
     );
 
   return {
     x:
-      camera.x +
-      (screenX - center.x) /
-        camera.zoom,
+      (screenX -
+        translation.x) /
+      camera.zoom,
 
     y:
-      camera.y +
-      (screenY - center.y) /
-        camera.zoom,
+      (screenY -
+        translation.y) /
+      camera.zoom,
   };
 }
