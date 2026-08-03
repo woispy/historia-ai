@@ -28,7 +28,8 @@ export function bootstrapWorld(
       scenario
     );
 
-  const map = createMap();
+  const map =
+    createMap();
 
   const repositories =
     createRepositories(
@@ -36,6 +37,9 @@ export function bootstrapWorld(
     );
 
   return {
+    scenario:
+      runtimeScenario,
+
     map,
 
     repositories,
