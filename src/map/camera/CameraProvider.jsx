@@ -3,10 +3,6 @@ import {
   useContext,
 } from "react";
 
-import {
-  useCamera,
-} from "./useCamera";
-
 /**
  * ============================================================================
  * Historia AI
@@ -18,14 +14,12 @@ const CameraContext =
   createContext(null);
 
 function CameraProvider({
+  value,
   children,
 }) {
-  const camera =
-    useCamera();
-
   return (
     <CameraContext.Provider
-      value={camera}
+      value={value}
     >
       {children}
     </CameraContext.Provider>

@@ -3,20 +3,18 @@
  * Historia AI
  * Province SVG
  * ============================================================================
+ *
+ * ProvinceSvg no longer creates its own SVG.
+ * Rendering Engine owns the single SVG root.
  */
 
 function ProvinceSvg({
   children,
 }) {
   return (
-    <svg
-      width="100%"
-      height="100%"
-      viewBox="-50 -50 300 300"
-      preserveAspectRatio="xMidYMid meet"
-    >
+    <g>
       {children}
-    </svg>
+    </g>
   );
 }
 

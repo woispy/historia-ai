@@ -13,6 +13,12 @@ import {
   useCamera,
 } from "../camera";
 
+import {
+  RenderRoot,
+  RenderLayer,
+  SvgRenderer,
+} from "../rendering";
+
 /**
  * ============================================================================
  * Historia AI
@@ -29,31 +35,36 @@ function WorldMap({
     provinces,
   } = useWorldMap(runtime);
 
-  const {
-    camera,
-    zoom,
-    move,
-  } = useCamera();
+  const camera =
+    useCamera();
 
   return (
-    <CameraProvider>
+    <CameraProvider
+      value={camera}
+    >
       <CameraController
-        zoom={zoom}
-        move={move}
+        zoom={camera.zoom}
+        move={camera.move}
       />
 
       <CameraViewport
-        camera={camera}
+        camera={camera.camera}
       >
-        <ProvinceLayer
-          provinces={provinces}
-          selectedProvinceId={
-            selectedProvinceId
-          }
-          onProvinceClick={
-            onProvinceClick
-          }
-        />
+        <RenderRoot>
+          <SvgRenderer>
+            <RenderLayer>
+              <ProvinceLayer
+                provinces={provinces}
+                selectedProvinceId={
+                  selectedProvinceId
+                }
+                onProvinceClick={
+                  onProvinceClick
+                }
+              />
+            </RenderLayer>
+          </SvgRenderer>
+        </RenderRoot>
       </CameraViewport>
     </CameraProvider>
   );

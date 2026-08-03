@@ -1,6 +1,6 @@
 import {
   getGeometryByProvince,
-} from "../../world/map/geometry/GeometryQueries";
+} from "../../../world/map/geometry/GeometryQueries";
 
 /**
  * ============================================================================
