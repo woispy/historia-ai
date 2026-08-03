@@ -4,15 +4,16 @@
  * Viewport Transform Service
  * ============================================================================
  *
- * Creates the viewport transform from the current
- * camera state and viewport state.
+ * Produces render transform data from the current
+ * camera and viewport state.
  *
- * This service is responsible only for producing
- * render transform data.
+ * This service does not perform coordinate conversion.
+ * Coordinate conversion belongs to
+ * ViewportCoordinateService.
  */
 
 /**
- * Creates the current view matrix.
+ * Creates the current View Matrix.
  */
 export function createViewMatrix(
   camera,
@@ -21,16 +22,19 @@ export function createViewMatrix(
   void viewport;
 
   return {
-    x: camera.x,
+    translation: {
+      x: camera.x,
 
-    y: camera.y,
+      y: camera.y,
+    },
 
-    zoom: camera.zoom,
+    scale: camera.zoom,
   };
 }
 
 /**
- * Converts a view matrix into a CSS transform.
+ * Converts the current View Matrix
+ * into a CSS transform.
  */
 export function createViewportTransform(
   camera,
@@ -43,7 +47,10 @@ export function createViewportTransform(
     );
 
   return `
-    translate(${viewMatrix.x}px, ${viewMatrix.y}px)
-    scale(${viewMatrix.zoom})
+    translate(
+      ${viewMatrix.translation.x}px,
+      ${viewMatrix.translation.y}px
+    )
+    scale(${viewMatrix.scale})
   `;
 }
