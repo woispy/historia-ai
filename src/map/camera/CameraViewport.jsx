@@ -1,3 +1,8 @@
+import {
+  useViewport,
+  createViewportTransform,
+} from "./viewport";
+
 /**
  * ============================================================================
  * Historia AI
@@ -9,20 +14,30 @@ function CameraViewport({
   camera,
   children,
 }) {
+  const viewport =
+    useViewport();
+
+  const transform =
+    createViewportTransform(
+      camera,
+      viewport
+    );
+
   return (
     <div
       style={{
         width: "100%",
         height: "100%",
 
-        transform: `
-          translate(${camera.x}px, ${camera.y}px)
-          scale(${camera.zoom})
-        `,
+        overflow: "hidden",
 
-        transformOrigin: "center center",
+        transform,
 
-        willChange: "transform",
+        transformOrigin:
+          "center center",
+
+        willChange:
+          "transform",
       }}
     >
       {children}

@@ -5,21 +5,33 @@
  * ============================================================================
  */
 
-export function getCamera(camera) {
+export function getCamera(
+  camera
+) {
   return camera;
 }
 
-export function getCameraPosition(camera) {
+/**
+ * Returns the current world position.
+ */
+export function getCameraPosition(
+  camera
+) {
   return {
     x: camera.x,
+
     y: camera.y,
   };
 }
 
-export function getCameraZoom(camera) {
+export function getCameraZoom(
+  camera
+) {
   return camera.zoom;
 }
 
-export function getCameraTarget(camera) {
+export function getCameraTarget(
+  camera
+) {
   return camera.target ?? null;
 }

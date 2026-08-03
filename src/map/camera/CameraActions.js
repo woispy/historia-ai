@@ -9,6 +9,25 @@ import {
   createCameraModel,
 } from "./CameraModel";
 
+/**
+ * Clamps a zoom value within camera limits.
+ */
+function clampZoom(
+  camera,
+  zoom
+) {
+  return Math.max(
+    camera.minZoom,
+    Math.min(
+      camera.maxZoom,
+      zoom
+    )
+  );
+}
+
+/**
+ * Moves the camera within world space.
+ */
 export function moveCamera(
   camera,
   dx,
@@ -23,6 +42,9 @@ export function moveCamera(
   };
 }
 
+/**
+ * Changes camera zoom.
+ */
 export function zoomCamera(
   camera,
   delta
@@ -30,18 +52,16 @@ export function zoomCamera(
   return {
     ...camera,
 
-    zoom: Math.max(
-      camera.minZoom,
-
-      Math.min(
-        camera.maxZoom,
-
-        camera.zoom + delta
-      )
+    zoom: clampZoom(
+      camera,
+      camera.zoom + delta
     ),
   };
 }
 
+/**
+ * Sets an absolute zoom level.
+ */
 export function setCameraZoom(
   camera,
   zoom
@@ -49,17 +69,16 @@ export function setCameraZoom(
   return {
     ...camera,
 
-    zoom: Math.max(
-      camera.minZoom,
-
-      Math.min(
-        camera.maxZoom,
-        zoom
-      )
+    zoom: clampZoom(
+      camera,
+      zoom
     ),
   };
 }
 
+/**
+ * Sets the current world position.
+ */
 export function setCameraPosition(
   camera,
   x,
@@ -74,6 +93,9 @@ export function setCameraPosition(
   };
 }
 
+/**
+ * Focuses the camera on a world position.
+ */
 export function focusCamera(
   camera,
   x,

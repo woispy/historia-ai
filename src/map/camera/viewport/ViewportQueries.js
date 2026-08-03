@@ -16,7 +16,6 @@ export function getViewportSize(
 ) {
   return {
     width: viewport.width,
-
     height: viewport.height,
   };
 }
@@ -25,8 +24,7 @@ export function getViewportCenter(
   viewport
 ) {
   return {
-    x: viewport.centerX,
-
-    y: viewport.centerY,
+    x: viewport.width / 2,
+    y: viewport.height / 2,
   };
 }

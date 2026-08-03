@@ -20,5 +20,14 @@ export {
 } from "./ViewportQueries";
 
 export {
+  createViewportTransform,
+} from "./ViewportTransformService";
+
+export {
+  worldToScreen,
+  screenToWorld,
+} from "./ViewportCoordinateService";
+
+export {
   useViewport,
 } from "./useViewport";

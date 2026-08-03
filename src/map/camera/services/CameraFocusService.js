@@ -2,6 +2,10 @@ import {
   getGeometryByProvince,
 } from "../../../world/map/geometry/GeometryQueries";
 
+import {
+  getCountryCapital,
+} from "../../../countries";
+
 /**
  * ============================================================================
  * Historia AI
@@ -9,6 +13,9 @@ import {
  * ============================================================================
  */
 
+/**
+ * Returns the focus point of a province.
+ */
 export function getProvinceFocus(
   geometryRepository,
   provinceId
@@ -30,4 +37,28 @@ export function getProvinceFocus(
 
     provinceId,
   };
+}
+
+/**
+ * Returns the focus point of a country's capital.
+ */
+export function getCountryFocus(
+  countryRepository,
+  geometryRepository,
+  countryId
+) {
+  const capitalProvince =
+    getCountryCapital(
+      countryRepository,
+      countryId
+    );
+
+  if (!capitalProvince) {
+    return null;
+  }
+
+  return getProvinceFocus(
+    geometryRepository,
+    capitalProvince
+  );
 }

@@ -7,6 +7,8 @@ import {
 import {
   moveCamera,
   zoomCamera,
+  setCameraZoom,
+  setCameraPosition,
   resetCamera,
   focusCamera,
 } from "../CameraActions";
@@ -24,7 +26,10 @@ export function useCamera() {
       bootstrapCamera()
     );
 
-  function move(dx, dy) {
+  function move(
+    dx,
+    dy
+  ) {
     setCamera((previous) =>
       moveCamera(
         previous,
@@ -34,7 +39,9 @@ export function useCamera() {
     );
   }
 
-  function zoom(delta) {
+  function zoom(
+    delta
+  ) {
     setCamera((previous) =>
       zoomCamera(
         previous,
@@ -43,38 +50,41 @@ export function useCamera() {
     );
   }
 
-  function setPosition(x, y) {
+  function setPosition(
+    x,
+    y
+  ) {
     setCamera((previous) =>
-      focusCamera(
+      setCameraPosition(
         previous,
         x,
-        y,
-        previous.target
+        y
       )
     );
   }
 
-  function setZoom(value) {
-    setCamera((previous) => ({
-      ...previous,
-
-      zoom: Math.max(
-        previous.minZoom,
-        Math.min(
-          previous.maxZoom,
-          value
-        ),
-      ),
-    }));
+  function setZoom(
+    zoom
+  ) {
+    setCamera((previous) =>
+      setCameraZoom(
+        previous,
+        zoom
+      )
+    );
   }
 
   function reset() {
     setCamera(
-      bootstrapCamera()
+      resetCamera()
     );
   }
 
-  function focus(x, y, target) {
+  function focus(
+    x,
+    y,
+    target
+  ) {
     setCamera((previous) =>
       focusCamera(
         previous,
