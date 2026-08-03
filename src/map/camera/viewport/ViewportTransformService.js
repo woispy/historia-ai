@@ -7,30 +7,43 @@
  * Creates the viewport transform from the current
  * camera state and viewport state.
  *
- * This service contains every transformation between
- * world coordinates and screen coordinates.
- *
- * Camera
- * ------
- * Stores only camera state.
- *
- * Viewport
- * --------
- * Stores screen information.
- *
- * Transform
- * ---------
- * Produced here.
+ * This service is responsible only for producing
+ * render transform data.
  */
 
-export function createViewportTransform(
+/**
+ * Creates the current view matrix.
+ */
+export function createViewMatrix(
   camera,
   viewport
 ) {
   void viewport;
 
+  return {
+    x: camera.x,
+
+    y: camera.y,
+
+    zoom: camera.zoom,
+  };
+}
+
+/**
+ * Converts a view matrix into a CSS transform.
+ */
+export function createViewportTransform(
+  camera,
+  viewport
+) {
+  const viewMatrix =
+    createViewMatrix(
+      camera,
+      viewport
+    );
+
   return `
-    translate(${camera.x}px, ${camera.y}px)
-    scale(${camera.zoom})
+    translate(${viewMatrix.x}px, ${viewMatrix.y}px)
+    scale(${viewMatrix.zoom})
   `;
 }

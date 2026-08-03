@@ -20,6 +20,7 @@ export {
 } from "./ViewportQueries";
 
 export {
+  createViewMatrix,
   createViewportTransform,
 } from "./ViewportTransformService";
 
