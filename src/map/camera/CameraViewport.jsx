@@ -11,10 +11,8 @@ function CameraViewport({ children, cameraInput = null }) {
 
     if (!viewport || !wheelHandler) return undefined;
 
-    // Wheel is intentionally non-passive because the map owns the wheel and
-    // must suppress page scrolling while zooming. The handler itself does not
-    // call preventDefault(); the native listener is the only place where the
-    // browser cancellation contract is controlled.
+    // The map owns wheel input. Register it explicitly as non-passive so the
+    // handler may cancel the browser's default page scroll safely.
     viewport.addEventListener(
       "wheel",
       wheelHandler,
@@ -39,11 +37,6 @@ function CameraViewport({ children, cameraInput = null }) {
     <div
       ref={viewportRef}
       className="camera-viewport"
-      onWheel={(event) => {
-        // Keep React from installing a competing wheel handler. Zoom is handled
-        // by the native listener above, which is explicitly non-passive.
-        if (event.cancelable) event.preventDefault();
-      }}
       onPointerDown={cameraInput?.onPointerDown}
       onPointerMove={cameraInput?.onPointerMove}
       onPointerUp={cameraInput?.onPointerUp}
