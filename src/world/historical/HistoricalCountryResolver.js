@@ -56,15 +56,13 @@ const COUNTRY_ALIASES = Object.freeze({
 });
 
 const SPECIAL_LETTER_REPLACEMENTS = Object.freeze([
-  [/đ/g, "d"], [/ð/g, "d"], [/þ/g, "th"], [/ł/g, "l"],
-  [/ø/g, "o"], [/æ/g, "ae"], [/œ/g, "oe"],
+  [/đ/gi, "d"], [/ð/gi, "d"], [/þ/gi, "th"], [/ł/gi, "l"],
+  [/ø/gi, "o"], [/æ/gi, "ae"], [/œ/gi, "oe"],
 ]);
 
 export function normalizeHistoricalCountryName(value) {
   let normalized = String(value ?? "").normalize("NFKD");
-  for (const [pattern, replacement] of SPECIAL_LETTER_REPLACEMENTS) {
-    normalized = normalized.replace(pattern, replacement);
-  }
+  for (const [pattern, replacement] of SPECIAL_LETTER_REPLACEMENTS) normalized = normalized.replace(pattern, replacement);
   return normalized.replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
