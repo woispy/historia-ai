@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 
+const NON_PASSIVE_WHEEL_OPTIONS = Object.freeze({ passive: false });
+
 function CameraViewport({ children, cameraInput = null }) {
   const viewportRef = useRef(null);
 
@@ -9,13 +11,22 @@ function CameraViewport({ children, cameraInput = null }) {
 
     if (!viewport || !wheelHandler) return undefined;
 
-    // React's wheel delegation may be treated as passive by the browser.
-    // Register explicitly as non-passive so preventDefault() is guaranteed to
-    // work and page scrolling cannot compete with map zooming.
-    viewport.addEventListener("wheel", wheelHandler, { passive: false });
+    // Wheel is intentionally non-passive because the map owns the wheel and
+    // must suppress page scrolling while zooming. The handler itself does not
+    // call preventDefault(); the native listener is the only place where the
+    // browser cancellation contract is controlled.
+    viewport.addEventListener(
+      "wheel",
+      wheelHandler,
+      NON_PASSIVE_WHEEL_OPTIONS,
+    );
 
     return () => {
-      viewport.removeEventListener("wheel", wheelHandler);
+      viewport.removeEventListener(
+        "wheel",
+        wheelHandler,
+        NON_PASSIVE_WHEEL_OPTIONS,
+      );
     };
   }, [cameraInput?.onWheel]);
 
@@ -28,6 +39,11 @@ function CameraViewport({ children, cameraInput = null }) {
     <div
       ref={viewportRef}
       className="camera-viewport"
+      onWheel={(event) => {
+        // Keep React from installing a competing wheel handler. Zoom is handled
+        // by the native listener above, which is explicitly non-passive.
+        if (event.cancelable) event.preventDefault();
+      }}
       onPointerDown={cameraInput?.onPointerDown}
       onPointerMove={cameraInput?.onPointerMove}
       onPointerUp={cameraInput?.onPointerUp}
