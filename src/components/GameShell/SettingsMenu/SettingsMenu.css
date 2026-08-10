@@ -1,86 +1,30 @@
 .settings-menu-container {
-    position: relative;
-
-    display: flex;
-    align-items: center;
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .menu-button {
-    width: 48px;
-    height: 48px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: #2d2921;
-
-    border: 1px solid #6c5b2f;
-    border-radius: 8px;
-
-    color: #f4e8c1;
-
-    font-size: 22px;
-
-    cursor: pointer;
-
-    transition:
-        background .2s,
-        border-color .2s;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #2d2921;
+  border: 1px solid #6c5b2f;
+  border-radius: 8px;
+  color: #f4e8c1;
+  font: 400 22px/1 "Segoe UI Symbol", "Segoe UI", Arial, sans-serif;
+  cursor: pointer;
+  transition: background .2s, border-color .2s, transform .2s;
 }
 
-.menu-button:hover {
-    background: #3a3429;
-    border-color: #b99842;
+.menu-button:hover,
+.menu-button.active {
+  background: #3a3429;
+  border-color: #c9a94f;
 }
 
-.settings-menu {
-    position: absolute;
-
-    top: 58px;
-    right: 0;
-
-    width: 240px;
-
-    display: flex;
-    flex-direction: column;
-
-    background: #25211b;
-
-    border: 1px solid #6c5b2f;
-    border-radius: 10px;
-
-    overflow: hidden;
-
-    box-shadow: 0 8px 22px rgba(0, 0, 0, .45);
-
-    z-index: 2000;
-}
-
-.settings-menu button {
-    background: transparent;
-    border: none;
-
-    color: #e7d8a5;
-
-    padding: 12px 16px;
-
-    text-align: left;
-
-    font-size: 15px;
-
-    cursor: pointer;
-
-    transition: background .15s;
-}
-
-.settings-menu button:hover {
-    background: #3a3429;
-}
-
-.settings-menu hr {
-    margin: 0;
-
-    border: none;
-    border-top: 1px solid #5d4f29;
+.menu-button.active {
+  transform: rotate(8deg);
 }
