@@ -1,114 +1,75 @@
-/**
- * ============================================================================
- * Historia AI
- * Camera Actions
- * ============================================================================
- */
+import { createCameraModel } from "./CameraModel";
 
-import {
-  createCameraModel,
-} from "./CameraModel";
+const WORLD_WIDTH = 360;
+const WORLD_HEIGHT = 180;
 
-/**
- * Clamps a zoom value within camera limits.
- */
-function clampZoom(
-  camera,
-  zoom
-) {
-  return Math.max(
-    camera.minZoom,
-    Math.min(
-      camera.maxZoom,
-      zoom
-    )
-  );
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
 }
 
-/**
- * Moves the camera within world space.
- */
-export function moveCamera(
-  camera,
-  dx,
-  dy
-) {
+function normalizeWrap(value, period) {
+  if (!Number.isFinite(period) || period <= 0) return value;
+  return (((value + period / 2) % period + period) % period) - period / 2;
+}
+
+function getWorldScreenSize(viewport, zoom) {
+  const width = Math.max(1, Number(viewport?.width ?? 1));
+  const height = Math.max(1, Number(viewport?.height ?? 1));
+  const fitScale = Math.min(width / WORLD_WIDTH, height / WORLD_HEIGHT);
   return {
-    ...camera,
-
-    x: camera.x + dx,
-
-    y: camera.y + dy,
+    width: WORLD_WIDTH * fitScale * zoom,
+    height: WORLD_HEIGHT * fitScale * zoom,
   };
 }
 
-/**
- * Changes camera zoom.
- */
-export function zoomCamera(
-  camera,
-  delta
-) {
+function constrainPosition(camera, x, y, viewport) {
+  if (!viewport?.width || !viewport?.height) return { x, y };
+  const world = getWorldScreenSize(viewport, camera.zoom);
+  const verticalRange = Math.max(0, (world.height - viewport.height) / 2);
   return {
-    ...camera,
-
-    zoom: clampZoom(
-      camera,
-      camera.zoom + delta
-    ),
+    x: normalizeWrap(x, world.width),
+    y: clamp(y, -verticalRange, verticalRange),
   };
 }
 
-/**
- * Sets an absolute zoom level.
- */
-export function setCameraZoom(
-  camera,
-  zoom
-) {
+export function moveCamera(camera, dx, dy, viewport) {
   return {
     ...camera,
-
-    zoom: clampZoom(
-      camera,
-      zoom
-    ),
+    ...constrainPosition(camera, camera.x + dx, camera.y + dy, viewport),
   };
 }
 
-/**
- * Sets the current world position.
- */
-export function setCameraPosition(
-  camera,
-  x,
-  y
-) {
+export function zoomCamera(camera, delta, viewport) {
+  const zoom = clamp(camera.zoom + delta, camera.minZoom, camera.maxZoom);
+  const nextCamera = { ...camera, zoom };
   return {
-    ...camera,
-
-    x,
-
-    y,
+    ...nextCamera,
+    ...constrainPosition(nextCamera, nextCamera.x, nextCamera.y, viewport),
   };
 }
 
-/**
- * Focuses the camera on a world position.
- */
-export function focusCamera(
-  camera,
-  x,
-  y,
-  target = null
-) {
+export function setCameraZoom(camera, zoom, viewport) {
+  const nextCamera = {
+    ...camera,
+    zoom: clamp(zoom, camera.minZoom, camera.maxZoom),
+  };
+  return {
+    ...nextCamera,
+    ...constrainPosition(nextCamera, nextCamera.x, nextCamera.y, viewport),
+  };
+}
+
+export function setCameraPosition(camera, x, y, viewport) {
   return {
     ...camera,
+    ...constrainPosition(camera, x, y, viewport),
+  };
+}
 
-    x,
-
-    y,
-
+export function focusCamera(camera, x, y, target = null, viewport) {
+  return {
+    ...camera,
+    ...constrainPosition(camera, x, y, viewport),
     target,
   };
 }
