@@ -106,14 +106,18 @@ function GameShell() {
   }
 
   function handleLoadGame() {
-    const loaded = loadGame();
-    if (!loaded) return false;
+    try {
+      const loaded = loadGame();
+      if (!loaded) return false;
 
-    setGameSession(loaded);
-    setCurrentGame(loaded);
-    setAdvisorOpen(false);
-    setTimeMenuOpen(false);
-    return true;
+      setGameSession(loaded);
+      setCurrentGame(loaded);
+      setAdvisorOpen(false);
+      setTimeMenuOpen(false);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   function handleDeleteSave() {
