@@ -1,14 +1,27 @@
 import { addTimelineEvent } from "../../Timeline";
+import { getRuntime, updateRuntime } from "../../../state";
 
-export function handleEconomyAction(gameState, action) {
-  return addTimelineEvent(gameState, {
+export function handleEconomyAction(gameSession, action) {
+  const runtime = getRuntime(gameSession);
+  const simulation = runtime.simulation ?? {};
+  const nextSession = updateRuntime(gameSession, {
+    ...runtime,
+    simulation: {
+      ...simulation,
+      treasury: Math.max(0, (simulation.treasury ?? 0) + 120),
+      stability: Math.max(0, (simulation.stability ?? 70) - 2),
+      lastTurnSummary: "Vergi toplandı; hazine güçlendi fakat halk üzerindeki baskı arttı.",
+    },
+  });
+
+  return addTimelineEvent(nextSession, {
     category: "economy",
     source: "economy-handler",
-    key: "player_action_processed",
+    key: "tax_collected",
     data: {
       id: action.id,
+      amount: 120,
       intent: action.interpretation?.intent,
-      entities: action.interpretation?.entities ?? {},
       text: action.text,
     },
     editable: false,
