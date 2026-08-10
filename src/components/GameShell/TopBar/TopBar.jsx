@@ -14,6 +14,8 @@ function TopBar({
   timeControls,
   settingsOpen = false,
   onToggleSettings,
+  settings,
+  onSettingsChange,
 }) {
   return (
     <header className="topbar">
@@ -49,7 +51,12 @@ function TopBar({
       </div>
 
       <div className="topbar-right">
-        <SettingsMenu open={settingsOpen} onOpenChange={onToggleSettings} />
+        <SettingsMenu
+          open={settingsOpen}
+          settings={settings}
+          onOpenChange={onToggleSettings}
+          onSettingsChange={onSettingsChange}
+        />
       </div>
     </header>
   );
