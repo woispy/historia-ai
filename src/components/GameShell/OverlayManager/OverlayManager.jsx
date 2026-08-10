@@ -18,7 +18,6 @@ function OverlayManager({
   advisorOpen = false,
   onAdvisorOpenChange,
   settingsOpen = false,
-  settings = {},
 }) {
   const [leftOpen, setLeftOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("actions");
