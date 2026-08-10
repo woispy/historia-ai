@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "./SettingsMenu.css";
 import SettingsPanel from "./SettingsPanel";
 import SaveRecordsPanel from "./SaveRecordsPanel";
@@ -17,19 +17,23 @@ function SettingsMenu({
 }) {
   const [view, setView] = useState("menu");
 
-  useEffect(() => {
-    if (!open) setView("menu");
-  }, [open]);
-
   function handleChange(key, value) {
     onSettingsChange?.((current) => ({ ...current, [key]: value }));
   }
 
   function toggleMenu() {
-    onOpenChange?.(!open);
+    if (open) {
+      setView("menu");
+      onOpenChange?.(false);
+      return;
+    }
+
+    setView("menu");
+    onOpenChange?.(true);
   }
 
   function closeMenu() {
+    setView("menu");
     onOpenChange?.(false);
   }
 
