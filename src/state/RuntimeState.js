@@ -5,11 +5,7 @@ function parseStartDate(startDate) {
   if (typeof startDate === "object") return startDate;
 
   const [year, month, day] = String(startDate).split("-").map(Number);
-  if (
-    Number.isInteger(year) &&
-    Number.isInteger(month) &&
-    Number.isInteger(day)
-  ) {
+  if (Number.isInteger(year) && Number.isInteger(month) && Number.isInteger(day)) {
     return { year, month, day };
   }
 
@@ -20,18 +16,20 @@ function getPlayerCountry(scenario, player) {
   return scenario?.data?.countries?.[player?.countryId] ?? null;
 }
 
-export function createRuntimeState({
-  startDate,
-  scenario = null,
-  player = {},
-} = {}) {
+function getStartingPopulation(scenario, player) {
   const country = getPlayerCountry(scenario, player);
-  const initialPopulation = Number(
-    country?.population?.total ?? country?.population ?? 0
-  ) || 0;
-  const treasury = Number(
-    country?.economy?.treasury ?? country?.treasury ?? 2500
-  ) || 2500;
+  const direct = Number(country?.population?.total ?? country?.population);
+  if (direct > 0) return direct;
+
+  return Object.values(scenario?.data?.cities ?? {}).reduce((sum, city) => {
+    if (city.owner !== player?.countryId) return sum;
+    return sum + (Number(city.population) || 0);
+  }, 0);
+}
+
+export function createRuntimeState({ startDate, scenario = null, player = {} } = {}) {
+  const country = getPlayerCountry(scenario, player);
+  const treasury = Number(country?.economy?.treasury ?? country?.treasury ?? 2500) || 2500;
   const militaryPower = Number(
     country?.military?.power ?? country?.military?.strength ?? country?.manpower ?? 100
   ) || 100;
@@ -45,7 +43,7 @@ export function createRuntimeState({
       prestige: Number(country?.prestige ?? 40) || 40,
       stability: Number(country?.stability ?? 70) || 70,
       legitimacy: Number(country?.legitimacy ?? 65) || 65,
-      population: initialPopulation,
+      population: getStartingPopulation(scenario, player),
       food: Number(country?.economy?.food ?? 70) || 70,
       militaryPower,
       technology: Number(country?.technology ?? 10) || 10,
