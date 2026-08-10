@@ -7,35 +7,38 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
-function normalizeWrap(value, period) {
-  if (!Number.isFinite(period) || period <= 0) return value;
-  return (((value + period / 2) % period + period) % period) - period / 2;
-}
-
-function getWorldScreenSize(viewport, zoom) {
+function getWorldDegreesPerPixel(viewport, zoom) {
   const width = Math.max(1, Number(viewport?.width ?? 1));
   const height = Math.max(1, Number(viewport?.height ?? 1));
-  const fitScale = Math.min(width / WORLD_WIDTH, height / WORLD_HEIGHT);
   return {
-    width: WORLD_WIDTH * fitScale * zoom,
-    height: WORLD_HEIGHT * fitScale * zoom,
+    x: WORLD_WIDTH / (width * Math.max(zoom, 0.001)),
+    y: WORLD_HEIGHT / (height * Math.max(zoom, 0.001)),
   };
 }
 
 function constrainPosition(camera, x, y, viewport) {
   if (!viewport?.width || !viewport?.height) return { x, y };
-  const world = getWorldScreenSize(viewport, camera.zoom);
-  const verticalRange = Math.max(0, (world.height - viewport.height) / 2);
+
+  const degrees = getWorldDegreesPerPixel(viewport, camera.zoom);
+  const visibleHeight = viewport.height * degrees.y;
+  const verticalRange = Math.max(0, (WORLD_HEIGHT - visibleHeight) / 2);
+
   return {
-    x: normalizeWrap(x, world.width),
+    x,
     y: clamp(y, -verticalRange, verticalRange),
   };
 }
 
 export function moveCamera(camera, dx, dy, viewport) {
+  const degrees = getWorldDegreesPerPixel(viewport, camera.zoom);
   return {
     ...camera,
-    ...constrainPosition(camera, camera.x + dx, camera.y + dy, viewport),
+    ...constrainPosition(
+      camera,
+      camera.x + dx * degrees.x,
+      camera.y - dy * degrees.y,
+      viewport,
+    ),
   };
 }
 
