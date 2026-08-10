@@ -1,69 +1,29 @@
 /**
- * ============================================================================
- * Historia AI
- * Province Polygon
- * ============================================================================
+ * Historia AI — Province Polygon
  */
+function ProvincePolygon({ province, country, geometry, selected, onClick }) {
+  if (!geometry || !geometry.polygons) return null;
 
-function ProvincePolygon({
-  province,
-  geometry,
-  selected,
-  onClick,
-}) {
-  if (
-    !geometry ||
-    !geometry.polygons
-  ) {
+  // Natural Earth admin-0 Antarctica otherwise dominates the full-world view.
+  if (province.geometryId === "geometry_country_ata" || province.geometryId === "geometry_country_atf") {
     return null;
   }
 
-  const d =
-    geometry.polygons
-      .map((polygon) => {
-        if (
-          polygon.length === 0
-        ) {
-          return "";
-        }
-
-        const [
-          first,
-          ...rest
-        ] = polygon;
-
-        return [
-          `M ${first[0]} ${first[1]}`,
-
-          ...rest.map(
-            ([x, y]) =>
-              `L ${x} ${y}`
-          ),
-
-          "Z",
-        ].join(" ");
-      })
-      .join(" ");
+  const d = geometry.polygons.map((polygon) => {
+    if (polygon.length === 0) return "";
+    const [first, ...rest] = polygon;
+    return [`M ${first[0]} ${first[1]}`, ...rest.map(([x, y]) => `L ${x} ${y}`), "Z"].join(" ");
+  }).join(" ");
 
   return (
     <path
       d={d}
-      fill={
-        selected
-          ? "#d6b04d"
-          : "#5d7c4f"
-      }
+      fill={selected ? "#d6b04d" : country?.color ?? "#6f765f"}
       stroke="#20251f"
       strokeWidth="0.15"
       vectorEffect="non-scaling-stroke"
-      onClick={() =>
-        onClick?.(
-          province.id
-        )
-      }
-      style={{
-        cursor: "pointer",
-      }}
+      onClick={() => onClick?.(province.id)}
+      style={{ cursor: "pointer" }}
     />
   );
 }
