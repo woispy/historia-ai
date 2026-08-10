@@ -51,7 +51,6 @@ function SettingsMenu({ open = false, settings = DEFAULT_SETTINGS, onOpenChange,
         <SettingsPanel
           settings={settings}
           onChange={handleChange}
-          onClose={() => onOpenChange?.(false)}
         />
       )}
     </div>
