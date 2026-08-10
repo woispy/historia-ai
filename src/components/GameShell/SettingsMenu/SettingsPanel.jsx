@@ -32,12 +32,11 @@ function ToggleRow({ label, value, onChange }) {
   );
 }
 
-function SettingsPanel({ settings, onChange, onClose }) {
+function SettingsPanel({ settings, onChange }) {
   return (
     <aside className="settings-panel" aria-label="Ayarlar">
       <div className="settings-panel-header">
         <h2>⚙ Ayarlar</h2>
-        <button type="button" className="settings-close" onClick={onClose} aria-label="Ayarları kapat">×</button>
       </div>
 
       <div className="settings-panel-body">
