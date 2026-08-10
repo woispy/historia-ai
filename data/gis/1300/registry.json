@@ -10,25 +10,31 @@
     "status": "source-contract"
   },
   "provinceSource": {
-    "status": "not-yet-imported",
-    "note": "The historical-basemaps 1300 layer is a world political basemap, not a complete administrative-province dataset. Historia AI must not present the fallback country geometry as historically exact provinces."
+    "status": "source-derived-political-regions",
+    "note": "The 1300 source contains 237 historical political/cultural GIS features. Historia AI imports them as provisional Province simulation units; they must not be described as a complete historically exact administrative-province dataset."
   },
   "fallbackGeometry": {
     "provider": "natural-earth",
     "dataset": "admin-0-countries",
     "status": "provisional-modern-basemap"
   },
+  "import": {
+    "sourceFeatureCount": 237,
+    "lastVerifiedByImporter": true,
+    "sourceCachedLocally": "data/gis/1300/source/world_1300.geojson",
+    "generatedAssets": "src/world/map/assets/historical/1300"
+  },
   "pipeline": [
     "historical GIS source",
     "Historical Geometry Importer",
-    "Province Asset Builder",
+    "Historical Province Asset Builder",
     "Historical Province Repository",
     "1300 ownership",
     "SVG Renderer"
   ],
   "notes": [
     "Historical borders are approximate and source-dependent.",
-    "A source must be imported locally before its geometry can replace the fallback geometry.",
-    "Restricted or incompatible historical GIS datasets must not be redistributed in the repository."
+    "Province is Historia AI's runtime simulation unit; it is not a claim that every imported feature was an administrative province in 1300.",
+    "The generated source GeoJSON remains a local build artifact unless redistribution is explicitly permitted by the source license."
   ]
 }
