@@ -5,7 +5,6 @@ const TOGGLE_SETTINGS = [
   ["smoothCamera", "Yumuşak Kamera"],
   ["mapShadows", "Harita Gölgelendirme"],
   ["notifications", "Bildirimler"],
-  ["advisorAutoOpen", "Danışman Panelini Açılışta Göster"],
   ["tips", "Hızlı İpuçlarını Göster"],
 ];
 
