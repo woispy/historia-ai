@@ -4,7 +4,7 @@ import { useCallback, useMemo, useRef } from "react";
  * Map-local pointer input. The controller never installs global listeners, so
  * menus and overlays cannot accidentally participate in camera dragging.
  */
-export function useCameraController({ zoom, move }) {
+export function useCameraController({ zoom, move, smooth = true }) {
   const dragging = useRef(false);
   const dragged = useRef(false);
   const pointerId = useRef(null);
@@ -20,17 +20,27 @@ export function useCameraController({ zoom, move }) {
   }, [move]);
 
   const queueMove = useCallback((dx, dy) => {
+    if (!smooth) {
+      move(dx, dy);
+      return;
+    }
+
     pending.current.x += dx;
     pending.current.y += dy;
 
     if (!frame.current) {
       frame.current = requestAnimationFrame(flushMove);
     }
-  }, [flushMove]);
+  }, [flushMove, move, smooth]);
 
   const handleWheel = useCallback((event) => {
     event.preventDefault();
-    zoom(event.deltaY < 0 ? 0.2 : -0.2);
+
+    const direction = event.deltaY < 0 ? 1 : -1;
+    const currentZoom = Math.max(1, Number(zoom) || 1);
+    const step = Math.max(0.6, currentZoom * 0.22);
+
+    zoom(direction * step);
   }, [zoom]);
 
   const handlePointerDown = useCallback((event) => {
