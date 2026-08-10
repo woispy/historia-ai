@@ -6,12 +6,20 @@ function formatNumber(value) {
   return new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 0 }).format(Number(value ?? 0));
 }
 
-function TopBar({ currentDate, simulation = {}, timeMenuOpen = false, onToggleTimeMenu, timeControls }) {
+function TopBar({
+  currentDate,
+  simulation = {},
+  timeMenuOpen = false,
+  onToggleTimeMenu,
+  timeControls,
+  settingsOpen = false,
+  onToggleSettings,
+}) {
   return (
     <header className="topbar">
       <div className="topbar-left">
         <div className="logo">
-          <span className="logo-icon">👑</span>
+          <span className="logo-icon" aria-hidden="true">👑</span>
           <span className="logo-text">HISTORIA AI</span>
         </div>
       </div>
@@ -24,7 +32,9 @@ function TopBar({ currentDate, simulation = {}, timeMenuOpen = false, onToggleTi
             aria-expanded={timeMenuOpen}
             onClick={onToggleTimeMenu}
           >
-            📅 {formatDate(currentDate)} ▼
+            <span className="date-icon" aria-hidden="true">📅</span>
+            <span>{formatDate(currentDate)}</span>
+            <span className="date-arrow" aria-hidden="true">▼</span>
           </button>
           {timeMenuOpen && timeControls}
         </div>
@@ -39,7 +49,7 @@ function TopBar({ currentDate, simulation = {}, timeMenuOpen = false, onToggleTi
       </div>
 
       <div className="topbar-right">
-        <SettingsMenu />
+        <SettingsMenu open={settingsOpen} onOpenChange={onToggleSettings} />
       </div>
     </header>
   );
