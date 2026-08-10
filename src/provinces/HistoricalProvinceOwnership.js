@@ -1,7 +1,10 @@
 import {
   getProvinces,
+} from "./ProvinceQueries.js";
+
+import {
   updateProvince,
-} from "./index.js";
+} from "./ProvinceRepository.js";
 
 function getIsoFromGeometryId(geometryId) {
   if (!geometryId?.startsWith("geometry_country_")) {
