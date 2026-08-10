@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import LeftOverlay from "./LeftOverlay/LeftOverlay";
 import RightOverlay from "./RightOverlay/RightOverlay";
@@ -15,22 +15,31 @@ function OverlayManager({
   onUpdateAction,
   onRemoveAction,
   onCancelEditing,
+  closeAdvisorKey = 0,
+  settingsOpen = false,
 }) {
   const [leftOpen, setLeftOpen] = useState(false);
   const [rightOpen, setRightOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("actions");
 
+  useEffect(() => {
+    if (closeAdvisorKey > 0) setRightOpen(false);
+  }, [closeAdvisorKey]);
+
   const openActions = () => {
+    if (settingsOpen) return;
     setActiveTab("actions");
     setLeftOpen(true);
   };
 
   const openDiplomacy = () => {
+    if (settingsOpen) return;
     setActiveTab("diplomacy");
     setLeftOpen(true);
   };
 
   const openAdvisor = () => {
+    if (settingsOpen) return;
     setRightOpen(true);
   };
 
