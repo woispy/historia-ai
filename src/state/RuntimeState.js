@@ -1,18 +1,10 @@
 import { createGameTime } from "../systems/Time";
 
 function parseStartDate(startDate) {
-  if (!startDate) {
-    return undefined;
-  }
+  if (!startDate) return undefined;
+  if (typeof startDate === "object") return startDate;
 
-  if (typeof startDate === "object") {
-    return startDate;
-  }
-
-  const [year, month, day] = String(startDate)
-    .split("-")
-    .map(Number);
-
+  const [year, month, day] = String(startDate).split("-").map(Number);
   if (
     Number.isInteger(year) &&
     Number.isInteger(month) &&
@@ -34,41 +26,33 @@ export function createRuntimeState({
   player = {},
 } = {}) {
   const country = getPlayerCountry(scenario, player);
-  const countryEconomy = country?.economy ?? {};
-  const countryPopulation = country?.population ?? {};
-  const countryMilitary = country?.military ?? {};
-
-  const initialPopulation =
-    Number(countryPopulation.total ?? country.population ?? 0) || 0;
+  const initialPopulation = Number(
+    country?.population?.total ?? country?.population ?? 0
+  ) || 0;
+  const treasury = Number(
+    country?.economy?.treasury ?? country?.treasury ?? 2500
+  ) || 2500;
+  const militaryPower = Number(
+    country?.military?.power ?? country?.military?.strength ?? country?.manpower ?? 100
+  ) || 100;
 
   return {
-    time: createGameTime(
-      parseStartDate(startDate)
-    ),
-
+    time: createGameTime(parseStartDate(startDate)),
     timeline: [],
-
     pendingActions: [],
-
     simulation: {
-      treasury:
-        Number(countryEconomy.treasury ?? countryEconomy.gold ?? 2500) || 2500,
-      prestige:
-        Number(country.prestige ?? 40) || 40,
-      stability:
-        Number(country.stability ?? 70) || 70,
-      legitimacy:
-        Number(country.legitimacy ?? 65) || 65,
+      treasury,
+      prestige: Number(country?.prestige ?? 40) || 40,
+      stability: Number(country?.stability ?? 70) || 70,
+      legitimacy: Number(country?.legitimacy ?? 65) || 65,
       population: initialPopulation,
-      food: Number(countryEconomy.food ?? 70) || 70,
-      militaryPower:
-        Number(countryMilitary.power ?? countryMilitary.strength ?? 100) || 100,
-      technology:
-        Number(country.technology ?? 10) || 10,
+      food: Number(country?.economy?.food ?? 70) || 70,
+      militaryPower,
+      technology: Number(country?.technology ?? 10) || 10,
       income: 0,
       expenses: 0,
       monthlyGrowth: 0,
-      lastTurnSummary: "Devlet henüz yeni bir dönem simülasyonu yaşamadı.",
+      lastTurnSummary: "Yeni hükümdarlık dönemi başladı.",
       recentEvents: [],
       relationships: {},
       activeWars: [],
