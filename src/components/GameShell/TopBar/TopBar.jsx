@@ -9,7 +9,13 @@ function formatNumber(value) {
   }).format(Number(value ?? 0));
 }
 
-function TopBar({ currentDate, simulation = {} }) {
+function TopBar({
+  currentDate,
+  simulation = {},
+  timeMenuOpen = false,
+  onToggleTimeMenu,
+  timeControls,
+}) {
   return (
     <header className="topbar">
       <div className="topbar-left">
@@ -20,9 +26,18 @@ function TopBar({ currentDate, simulation = {} }) {
       </div>
 
       <div className="topbar-center">
-        <button className="date-button">
-          📅 {formatDate(currentDate)} ▼
-        </button>
+        <div className="date-control">
+          <button
+            type="button"
+            className={`date-button${timeMenuOpen ? " active" : ""}`}
+            aria-expanded={timeMenuOpen}
+            onClick={onToggleTimeMenu}
+          >
+            📅 {formatDate(currentDate)} ▼
+          </button>
+
+          {timeMenuOpen && timeControls}
+        </div>
 
         <div className="resource"><span>💰</span><div><strong>{formatNumber(simulation.treasury)}</strong><small>Altın</small></div></div>
         <div className="resource"><span>⭐</span><div><strong>{formatNumber(simulation.prestige)}</strong><small>Prestij</small></div></div>
