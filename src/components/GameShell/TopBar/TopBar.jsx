@@ -1,10 +1,15 @@
 import "./TopBar.css";
 
 import { formatDate } from "../../../systems/Time";
-
 import SettingsMenu from "../SettingsMenu/SettingsMenu";
 
-function TopBar({ currentDate }) {
+function formatNumber(value) {
+  return new Intl.NumberFormat("tr-TR", {
+    maximumFractionDigits: 0,
+  }).format(Number(value ?? 0));
+}
+
+function TopBar({ currentDate, simulation = {} }) {
   return (
     <header className="topbar">
       <div className="topbar-left">
@@ -19,61 +24,13 @@ function TopBar({ currentDate }) {
           📅 {formatDate(currentDate)} ▼
         </button>
 
-        <div className="resource">
-          <span>💰</span>
-          <div>
-            <strong>2500</strong>
-            <small>Altın</small>
-          </div>
-        </div>
-
-        <div className="resource">
-          <span>⭐</span>
-          <div>
-            <strong>40</strong>
-            <small>Prestij</small>
-          </div>
-        </div>
-
-        <div className="resource">
-          <span>😊</span>
-          <div>
-            <strong>82</strong>
-            <small>İstikrar</small>
-          </div>
-        </div>
-
-        <div className="resource">
-          <span>👥</span>
-          <div>
-            <strong>11.2M</strong>
-            <small>Nüfus</small>
-          </div>
-        </div>
-
-        <div className="resource">
-          <span>⚔</span>
-          <div>
-            <strong>78.000</strong>
-            <small>Ordu</small>
-          </div>
-        </div>
-
-        <div className="resource">
-          <span>🏛</span>
-          <div>
-            <strong>3 / 6</strong>
-            <small>Yasalar</small>
-          </div>
-        </div>
-
-        <div className="resource">
-          <span>📚</span>
-          <div>
-            <strong>65</strong>
-            <small>Teknoloji</small>
-          </div>
-        </div>
+        <div className="resource"><span>💰</span><div><strong>{formatNumber(simulation.treasury)}</strong><small>Altın</small></div></div>
+        <div className="resource"><span>⭐</span><div><strong>{formatNumber(simulation.prestige)}</strong><small>Prestij</small></div></div>
+        <div className="resource"><span>😊</span><div><strong>{formatNumber(simulation.stability)}</strong><small>İstikrar</small></div></div>
+        <div className="resource"><span>👥</span><div><strong>{formatNumber(simulation.population)}</strong><small>Nüfus</small></div></div>
+        <div className="resource"><span>⚔</span><div><strong>{formatNumber(simulation.militaryPower)}</strong><small>Askerî Güç</small></div></div>
+        <div className="resource"><span>📈</span><div><strong>{formatNumber(simulation.income)}</strong><small>Dönem Geliri</small></div></div>
+        <div className="resource"><span>📚</span><div><strong>{formatNumber(simulation.technology)}</strong><small>Teknoloji</small></div></div>
       </div>
 
       <div className="topbar-right">
