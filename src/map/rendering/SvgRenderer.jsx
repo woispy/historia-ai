@@ -5,7 +5,7 @@
  * ============================================================================
  *
  * One SVG root owns the map. The world is repeated horizontally so the camera
- * can cross the antimeridian without changing the underlying geometry.
+ * can cross the antimeridian continuously without changing the geometry data.
  */
 
 function SvgRenderer({ children, camera = {} }) {
@@ -17,16 +17,11 @@ function SvgRenderer({ children, camera = {} }) {
   const viewX = centerX - viewWidth / 2;
   const viewY = -centerY - viewHeight / 2;
 
-  // Render only the copies that can intersect the viewport, with one safety
-  // copy on either side. This avoids the fixed three-copy assumption at wide
-  // zoom levels while keeping the DOM bounded at normal zoom.
-  const firstCopy = Math.floor((viewX - 360) / 360);
-  const lastCopy = Math.ceil((viewX + viewWidth + 360) / 360);
-  const copies = [];
-
-  for (let copy = firstCopy; copy <= lastCopy; copy += 1) {
-    copies.push(copy);
-  }
+  // minZoom is 1, so the viewport never shows more than one full world width.
+  // Three copies are therefore sufficient: previous, current and next world.
+  // Keeping the copy count fixed is important for map FPS at low zoom levels.
+  const copyCenter = Math.floor(centerX / 360);
+  const copies = [copyCenter - 1, copyCenter, copyCenter + 1];
 
   return (
     <svg
@@ -34,7 +29,7 @@ function SvgRenderer({ children, camera = {} }) {
       height="100%"
       viewBox={`${viewX} ${viewY} ${viewWidth} ${viewHeight}`}
       preserveAspectRatio="xMidYMid meet"
-      shapeRendering="geometricPrecision"
+      shapeRendering="auto"
       textRendering="geometricPrecision"
       style={{ display: "block" }}
     >
