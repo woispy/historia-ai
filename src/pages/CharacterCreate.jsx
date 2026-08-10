@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Layout from "../layouts/Layout/Layout";
@@ -6,6 +6,7 @@ import CharacterService from "../services/CharacterService";
 import CharacterReport from "../components/CharacterReport";
 
 import {
+  getNewGame,
   updateNewGame,
 } from "../game/newGame";
 
@@ -14,40 +15,60 @@ import {
 } from "../bootstrap";
 
 function CharacterCreate() {
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
 
-  const [
-    description,
-    setDescription,
-  ] = useState("");
+  const [description, setDescription] = useState("");
+  const [character, setCharacter] = useState(null);
+  const [error, setError] = useState("");
 
-  const [
-    character,
-    setCharacter,
-  ] = useState(null);
+  useEffect(() => {
+    const newGame = getNewGame();
+
+    if (!newGame.scenarioId) {
+      navigate("/scenario", { replace: true });
+      return;
+    }
+
+    if (!newGame.countryId) {
+      navigate("/country", { replace: true });
+    }
+  }, [navigate]);
 
   function generateCharacter() {
-    const result =
-      CharacterService.create(
-        description
-      );
+    setError("");
 
+    const result = CharacterService.create(description);
     setCharacter(result);
   }
 
   function acceptCharacter() {
-    if (!character) {
+    if (!character) return;
+
+    setError("");
+
+    const newGame = getNewGame();
+
+    if (!newGame.scenarioId) {
+      navigate("/scenario", { replace: true });
       return;
     }
 
-    updateNewGame({
-      character,
-    });
+    if (!newGame.countryId) {
+      navigate("/country", { replace: true });
+      return;
+    }
 
-    initializeGame();
-
-    navigate("/game");
+    try {
+      updateNewGame({ character });
+      initializeGame();
+      navigate("/game", { replace: true });
+    } catch (initializationError) {
+      setError(
+        initializationError instanceof Error
+          ? initializationError.message
+          : "Oyun başlatılamadı.",
+      );
+    }
   }
 
   return (
@@ -60,23 +81,21 @@ function CharacterCreate() {
         rows="8"
         cols="60"
         value={description}
-        onChange={(e) =>
-          setDescription(
-            e.target.value
-          )
-        }
+        onChange={(event) => setDescription(event.target.value)}
       />
 
       <br />
       <br />
 
-      <button
-        onClick={
-          generateCharacter
-        }
-      >
+      <button onClick={generateCharacter}>
         Karakteri Oluştur
       </button>
+
+      {error && (
+        <p role="alert" style={{ color: "#d66" }}>
+          {error}
+        </p>
+      )}
 
       <br />
       <br />
@@ -87,33 +106,21 @@ function CharacterCreate() {
             Karakter Analizi
           </h3>
 
-          <CharacterReport
-            character={
-              character
-            }
-          />
+          <CharacterReport character={character} />
 
           <h4>
             Kişilik
           </h4>
 
           <ul>
-            {character.personality.map(
-              (trait) => (
-                <li
-                  key={trait}
-                >
-                  {trait}
-                </li>
-              )
-            )}
+            {character.personality.map((trait) => (
+              <li key={trait}>
+                {trait}
+              </li>
+            ))}
           </ul>
 
-          <button
-            onClick={
-              acceptCharacter
-            }
-          >
+          <button onClick={acceptCharacter}>
             Karakteri Kabul Et
           </button>
         </>
