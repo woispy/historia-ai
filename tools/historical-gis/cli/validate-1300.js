@@ -17,8 +17,19 @@ const geometryDir = path.join(
 );
 
 async function readJsonFiles(directory) {
-  const names = await fs.readdir(directory);
-  const jsonNames = names.filter((name) => name.endsWith(".json"));
+  let names;
+
+  try {
+    names = await fs.readdir(directory);
+  } catch (error) {
+    throw new Error(`Historical GIS asset directory is missing: ${directory}`, {
+      cause: error,
+    });
+  }
+
+  const jsonNames = names
+    .filter((name) => name.endsWith(".json"))
+    .sort();
 
   return Promise.all(
     jsonNames.map(async (name) => ({
@@ -68,6 +79,9 @@ for (const { name, data } of provinces) {
 }
 
 for (const { name, data } of geometries) {
+  const identity = data.identity ?? {};
+  assert(identity.id, `Missing geometry identity in ${name}.`);
+
   const polygons = data.polygons;
   assert(
     Array.isArray(polygons) && polygons.length > 0,
@@ -85,11 +99,14 @@ for (const { name, data } of geometries) {
         Array.isArray(coordinate) && coordinate.length >= 2,
         `Geometry ${name} contains an invalid coordinate.`,
       );
+
       const [longitude, latitude] = coordinate;
+
       assert(
         Number.isFinite(longitude) && Number.isFinite(latitude),
         `Geometry ${name} contains a non-numeric coordinate.`,
       );
+
       assert(
         longitude >= -180 && longitude <= 180 &&
           latitude >= -90 && latitude <= 90,
