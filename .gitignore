@@ -26,5 +26,8 @@ dist-ssr
 
 # Local source-data caches / generated historical GIS input
 # The upstream historical source is downloaded locally by the import CLI.
-# Generated runtime assets are reviewed separately before committing.
 data/gis/1300/source/
+
+# Reproducible historical GIS runtime assets
+# These are regenerated from the licensed upstream source during dev/build.
+src/world/map/assets/historical/1300/
