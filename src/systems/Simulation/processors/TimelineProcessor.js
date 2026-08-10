@@ -1,22 +1,15 @@
-import {
-  addTimelineEvent,
-} from "../../Timeline";
+import { addTimelineEvent } from "../../Timeline";
 
-export function processTimeline(
-  gameSession
-) {
-  return addTimelineEvent(
-    gameSession,
-    {
-      category: "system",
-
-      source: "engine",
-
-      key: "week_passed",
-
-      data: {},
-
-      editable: false,
-    }
-  );
+export function processTimeline(gameSession) {
+  const unit = gameSession.runtime?.time?.lastUnit ?? "turn";
+  return addTimelineEvent(gameSession, {
+    category: "system",
+    source: "engine",
+    key: "time_advanced",
+    data: {
+      unit,
+      turn: gameSession.runtime?.time?.turn,
+    },
+    editable: false,
+  });
 }

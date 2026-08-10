@@ -1,101 +1,62 @@
-import {
-  addTimelineEvent,
-} from "../../Timeline";
+import { addTimelineEvent } from "../../Timeline";
+import { updateCity } from "../../../cities/CityRepository";
 
-import {
-  setCityUnderSiege,
-} from "../../../cities";
+export function handleMilitaryAction(gameSession, action) {
+  const intent = action.interpretation?.intent;
+  const cityId = action.interpretation?.entities?.city;
+  const cityRepository = gameSession.world.repositories.cities;
+  const city = cityId ? cityRepository.byId[cityId] : null;
 
-/**
- * ============================================================================
- * Historia AI
- * Military Handler
- * ============================================================================
- */
+  if (!city) {
+    return addTimelineEvent(gameSession, {
+      category: "military",
+      source: "military-handler",
+      key: "military_target_missing",
+      data: { text: action.text },
+      editable: false,
+    });
+  }
 
-export function handleMilitaryAction(
-  gameSession,
-  action
-) {
-  let nextSession = gameSession;
+  if (intent === "military.siege" || intent === "military.attack") {
+    const nextCity = {
+      ...city,
+      status: {
+        ...city.status,
+        underSiege: true,
+        siegeTurns: Number(city.status?.siegeTurns ?? 0),
+      },
+    };
 
-  const intent =
-    action.interpretation?.intent;
-
-  const cityId =
-    action.interpretation?.entities?.city;
-
-  if (
-    intent === "military.siege" &&
-    cityId
-  ) {
-    const nextCitiesRepository =
-      setCityUnderSiege(
-        nextSession.world.repositories.cities,
-        cityId,
-        true
-      );
-
-    nextSession = {
-      ...nextSession,
-
+    const nextSession = {
+      ...gameSession,
       world: {
-        ...nextSession.world,
-
+        ...gameSession.world,
         repositories: {
-          ...nextSession.world.repositories,
-
-          cities:
-            nextCitiesRepository,
+          ...gameSession.world.repositories,
+          cities: updateCity(cityRepository, nextCity),
         },
       },
     };
 
-    nextSession =
-      addTimelineEvent(nextSession, {
-        category: "military",
-
-        source:
-          "military-handler",
-
-        key: "city_under_siege",
-
-        data: {
-          city: cityId,
-
-          text: action.text,
-        },
-
-        editable: false,
-      });
-
-    return nextSession;
+    return addTimelineEvent(nextSession, {
+      category: "military",
+      source: "military-handler",
+      key: intent === "military.attack" ? "attack_started" : "city_under_siege",
+      data: { city: cityId, text: action.text },
+      editable: false,
+    });
   }
 
-  return addTimelineEvent(
-    nextSession,
-    {
-      category: "military",
-
-      source:
-        "military-handler",
-
-      key:
-        "player_action_processed",
-
-      data: {
-        id: action.id,
-
-        intent,
-
-        entities:
-          action.interpretation
-            ?.entities ?? {},
-
-        text: action.text,
-      },
-
-      editable: false,
-    }
-  );
+  return addTimelineEvent(gameSession, {
+    category: "military",
+    source: "military-handler",
+    key: "player_action_processed",
+    data: {
+      id: action.id,
+      intent,
+      entities: action.interpretation?.entities ?? {},
+      text: action.text,
+    },
+    editable: false,
+  });
 }

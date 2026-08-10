@@ -7,32 +7,20 @@
 export function createConversationRepository() {
   return {
     allIds: [],
-
     byId: {},
   };
 }
 
-export function addConversation(
-  repository,
-  conversation
-) {
+export function addConversation(repository, conversation) {
   return {
-    allIds: [
-      ...repository.allIds,
-      conversation.id,
-    ],
-
+    allIds: [...repository.allIds, conversation.id],
     byId: {
       ...repository.byId,
-
-      [conversation.id]:
-        conversation,
+      [conversation.id]: conversation,
     },
   };
 }
 
-export function clearConversation(
-  repository
-) {
+export function clearConversation() {
   return createConversationRepository();
 }

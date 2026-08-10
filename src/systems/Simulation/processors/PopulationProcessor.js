@@ -1,11 +1,59 @@
-import {
-  getRuntime,
-} from "../../../state";
+import { getRuntime, updateRuntime } from "../../../state";
+import { updateCity } from "../../../cities/CityRepository";
 
-export function processPopulation(
-  gameSession
-) {
-  getRuntime(gameSession);
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
 
-  return gameSession;
+export function processPopulation(gameSession) {
+  const runtime = getRuntime(gameSession);
+  const simulation = runtime.simulation ?? {};
+  const cityRepository = gameSession.world.repositories.cities;
+  let nextCities = cityRepository;
+  let totalPopulation = 0;
+
+  for (const city of Object.values(cityRepository.byId)) {
+    const food = Number(city.food ?? 50);
+    const prosperity = Number(city.prosperity ?? 50);
+    const loyalty = Number(city.loyalty ?? 50);
+    const pressure =
+      (food - 50) * 0.0004 +
+      (prosperity - 50) * 0.0002 +
+      (loyalty - 50) * 0.0001;
+    const growthRate = clamp(0.002 + pressure, -0.01, 0.012);
+    const population = Math.max(
+      100,
+      Math.round(Number(city.population ?? 0) * (1 + growthRate))
+    );
+    const nextFood = clamp(food - population / 250000, 0, 100);
+
+    nextCities = updateCity(nextCities, {
+      ...city,
+      population,
+      food: Number(nextFood.toFixed(2)),
+    });
+
+    totalPopulation += population;
+  }
+
+  const nextSession = {
+    ...gameSession,
+    world: {
+      ...gameSession.world,
+      repositories: {
+        ...gameSession.world.repositories,
+        cities: nextCities,
+      },
+    },
+  };
+
+  return updateRuntime(nextSession, {
+    ...runtime,
+    simulation: {
+      ...simulation,
+      population: totalPopulation,
+      monthlyGrowth:
+        totalPopulation - (simulation.population ?? totalPopulation),
+    },
+  });
 }

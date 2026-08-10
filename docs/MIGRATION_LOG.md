@@ -1,193 +1,102 @@
-# Historia AI - Migration Log
+# Historia AI — Migration Log
 
-This document records every architectural migration performed during the
-development of Historia AI.
+This document records structural migrations in Historia AI.
 
-Unlike the CHANGELOG, this document focuses on structural and architectural
-changes rather than gameplay features.
+## Migration 1 — GameSession Runtime
 
-Each migration should leave the project in a fully buildable state.
+Status: **Completed**
 
-Legacy code is removed progressively instead of being maintained through
-compatibility layers.
+The application now creates a `GameSession` through `createGame()` and stores it as the active runtime object.
 
----
+Pipeline:
 
-# Migration 1 — GameShell → GameSession
+```text
+NewGame
+  ↓
+Validation
+  ↓
+Scenario Loader
+  ↓
+World Bootstrap
+  ↓
+RuntimeState
+  ↓
+GameSession
+  ↓
+Current Game
+  ↓
+Save
+```
 
-Status: Planned
+## Migration 2 — Runtime Simulation
 
-## Objective
+Status: **Completed**
 
-Replace the legacy GameState initialization with the new GameSession runtime
-pipeline.
+Runtime information is owned by `GameSession.runtime` / `RuntimeState`.
 
-## Scope
+Implemented simulation processors:
 
-- GameShell
-- GameBootstrap
-- Runtime initialization
+- Time
+- Player actions
+- Economy
+- Population
+- Diplomacy
+- Military
+- Events
+- Timeline
 
-## Expected Result
+## Migration 3 — World Runtime
 
-- GameSession becomes the application's runtime object.
-- createGame() becomes the only initialization entry point.
-- createInitialGameState() is no longer used.
+Status: **Completed**
 
-## Legacy Removed
+World information is exposed through `GameSession.world`, including repositories for countries, cities, provinces, characters, families, knowledge and selection, plus map geometry.
 
-- Legacy GameState initialization pipeline
+## Migration 4 — Map Rendering
 
-## Commit
+Status: **Completed / Iterating**
 
-(Not yet)
+The map uses a single SVG rendering root with camera and layer composition. Generated Geometry Assets are loaded through the Geometry Runtime rather than the legacy importer.
 
----
+## Migration 5 — Legacy Cleanup
 
-# Migration 2 — Runtime Systems
+Status: **Completed for the current migration scope**
 
-Status: Planned
+Removed obsolete compatibility code:
 
-## Objective
+- `src/world/map/ProvinceFactory.js`
+- `src/world/map/importer/*`
+- obsolete `GeometryFactory`
+- legacy Province bootstrap helper
 
-Move every runtime system to RuntimeState.
+## Migration 6 — Living Scenario Foundation
 
-## Scope
+Status: **Completed / Foundation**
 
-- ActionSystem
-- TurnSystem
-- RuntimeState
+The 1300 scenario now has playable Ottoman and Byzantine country definitions and a working scenario selection flow. The runtime initializes treasury, stability, prestige, population and military power from scenario data.
 
-## Expected Result
+The turn engine now supports:
 
-Every gameplay system reads and writes through:
+- 1 week
+- 1 month
+- 6 months
+- 1 year
+- arbitrary day-based advancement through the Action API
 
-GameSession.state
+Player actions can currently affect:
 
-instead of
+- taxation
+- construction
+- diplomacy
+- attacks and sieges
 
-GameState
+The simulation also generates economic, population, diplomatic, military and event consequences over time.
 
-## Legacy Removed
+## Architectural Rules
 
-- GameState runtime ownership
-
-## Commit
-
-(Not yet)
-
----
-
-# Migration 3 — World Systems
-
-Status: Planned
-
-## Objective
-
-Move world rendering to the GameSession model.
-
-## Scope
-
-- MapView
-- WorldMap
-- World hooks
-
-## Expected Result
-
-All world information is accessed through:
-
-GameSession.world
-
-## Legacy Removed
-
-- gameState.world
-
-## Commit
-
-(Not yet)
-
----
-
-# Migration 4 — User Interface
-
-Status: Planned
-
-## Objective
-
-Remove legacy runtime props from UI components.
-
-## Scope
-
-- TopBar
-- OverlayManager
-- GameShell UI
-
-## Expected Result
-
-UI components receive:
-
-session
-
-instead of individual runtime values.
-
-## Legacy Removed
-
-- currentDate
-- timeline
-- pendingActions
-- gameState props
-
-## Commit
-
-(Not yet)
-
----
-
-# Migration 5 — Legacy Cleanup
-
-Status: Planned
-
-## Objective
-
-Remove every remaining legacy runtime component.
-
-## Scope
-
-- GameState
-- createInitialGameState
-- Legacy imports
-- Deprecated helpers
-
-## Expected Result
-
-GameSession becomes the only runtime model.
-
-## Legacy Removed
-
-Everything related to GameState.
-
-## Commit
-
-(Not yet)
-
----
-
-# Migration Principles
-
-Every migration must satisfy the following rules.
-
-1. The project must remain buildable.
-
-2. Legacy code is removed instead of preserved.
-
-3. No compatibility layer is introduced.
-
-4. Every subsystem has a single owner.
-
-5. GameSession is the only runtime model.
-
-6. Runtime information belongs only to RuntimeState.
-
-7. World information belongs only to World.
-
-8. New systems must never depend on GameState.
+1. `GameSession` is the root runtime object.
+2. Runtime state belongs only to `GameSession.runtime`.
+3. World state belongs only to `GameSession.world`.
+4. Scenario data remains immutable source data.
+5. Generated map assets are separated from gameplay entities.
+6. Simulation processors operate on sessions and return the next session.
+7. New gameplay systems must not reintroduce the legacy `GameState` model.

@@ -1,11 +1,56 @@
-import {
-  getRuntime,
-} from "../../../state";
+import { getRuntime, updateRuntime } from "../../../state";
+import { addTimelineEvent } from "../../Timeline";
 
-export function processEconomy(
-  gameSession
-) {
-  getRuntime(gameSession);
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
 
-  return gameSession;
+export function processEconomy(gameSession) {
+  const runtime = getRuntime(gameSession);
+  const simulation = runtime.simulation ?? {};
+  const playerCountryId = gameSession.player?.countryId;
+  const cities = Object.values(
+    gameSession.world.repositories.cities?.byId ?? {}
+  ).filter((city) => city.owner === playerCountryId);
+
+  const cityCount = Math.max(cities.length, 1);
+  const prosperity = cities.reduce(
+    (sum, city) => sum + (Number(city.prosperity) || 0),
+    0
+  ) / cityCount;
+  const food = cities.reduce(
+    (sum, city) => sum + (Number(city.food) || 0),
+    0
+  ) / cityCount;
+
+  const baseIncome = Math.max(5, Math.round(prosperity * cityCount * 0.45));
+  const expenses = Math.max(2, Math.round((simulation.militaryPower ?? 0) * 0.025));
+  const net = baseIncome - expenses;
+
+  const nextSimulation = {
+    ...simulation,
+    treasury: Math.max(0, (simulation.treasury ?? 0) + net),
+    income: baseIncome,
+    expenses,
+    food: clamp(food, 0, 100),
+    lastTurnSummary:
+      net >= 0
+        ? `Hazine ${net} altın arttı.`
+        : `Hazine ${Math.abs(net)} altın azaldı.`,
+  };
+
+  let nextSession = updateRuntime(gameSession, {
+    ...runtime,
+    simulation: nextSimulation,
+  });
+
+  nextSession = addTimelineEvent(nextSession, {
+    category: "economy",
+    source: "economy-engine",
+    key: net >= 0 ? "treasury_growth" : "treasury_decline",
+    data: { income: baseIncome, expenses, net, cities: cities.length },
+    editable: false,
+  });
+
+  return nextSession;
 }

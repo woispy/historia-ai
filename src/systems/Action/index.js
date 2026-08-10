@@ -1,7 +1,9 @@
 export {
   advanceWeek,
   advanceMonth,
+  advanceSixMonths,
   advanceYear,
+  advanceDays,
   queueAction,
   updateAction,
   removeAction,
