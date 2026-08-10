@@ -15,6 +15,8 @@ function GameShell() {
   const [gameSession, setGameSession] = useState(() => getCurrentGame());
   const [busy, setBusy] = useState(false);
   const [timeMenuOpen, setTimeMenuOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [closeAdvisorKey, setCloseAdvisorKey] = useState(0);
 
   const {
     editingAction,
@@ -45,6 +47,15 @@ function GameShell() {
     if (unit === "year" && amount === 1) return advance(advanceYear);
   }
 
+  function toggleSettings(nextOpen) {
+    const open = Boolean(nextOpen);
+    setSettingsOpen(open);
+    if (open) {
+      setCloseAdvisorKey((key) => key + 1);
+      setTimeMenuOpen(false);
+    }
+  }
+
   const simulation = gameSession.runtime?.simulation ?? {};
 
   return (
@@ -53,8 +64,12 @@ function GameShell() {
         currentDate={getCurrentDate(gameSession)}
         simulation={simulation}
         timeMenuOpen={timeMenuOpen}
-        onToggleTimeMenu={() => setTimeMenuOpen((open) => !open)}
+        onToggleTimeMenu={() => {
+          if (!settingsOpen) setTimeMenuOpen((open) => !open);
+        }}
         timeControls={<TimeControls busy={busy} onAdvance={advanceBy} />}
+        settingsOpen={settingsOpen}
+        onToggleSettings={toggleSettings}
       />
       <NotificationToast />
       <MapView gameSession={gameSession} />
@@ -68,6 +83,8 @@ function GameShell() {
         onUpdateAction={startEditing}
         onRemoveAction={deleteAction}
         onCancelEditing={cancelEditing}
+        closeAdvisorKey={closeAdvisorKey}
+        settingsOpen={settingsOpen}
       />
     </Layout>
   );
