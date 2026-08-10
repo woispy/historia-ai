@@ -11,6 +11,7 @@ on:
       - feat/living-game-foundation
       - feat/phase1-polish
       - feat/phase1-historical-gis-runtime
+      - fix/historical-gis-import-integrity
 
 jobs:
   validate:
@@ -31,8 +32,19 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Generate historical GIS runtime assets
+        run: npm run build:historical-gis:1300
+
+      - name: Validate historical GIS runtime assets
+        run: npm run validate:historical-gis:1300
+
       - name: Build
         run: npm run build
 
       - name: Verify historical GIS scripts
-        run: node --check tools/historical-gis/HistoricalGeometryImporter.js && node --check tools/historical-gis/HistoricalProvinceAssetBuilder.js && node --check tools/historical-gis/cli/import-1300.js && node --check tools/historical-gis/cli/validate-1300.js
+        run: >-
+          node --check tools/historical-gis/HistoricalAssetId.js &&
+          node --check tools/historical-gis/HistoricalGeometryImporter.js &&
+          node --check tools/historical-gis/HistoricalProvinceAssetBuilder.js &&
+          node --check tools/historical-gis/cli/import-1300.js &&
+          node --check tools/historical-gis/cli/validate-1300.js
