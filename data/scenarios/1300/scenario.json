@@ -2,7 +2,7 @@
   "id": "1300",
   "name": "Rise of the Ottomans",
   "description": "",
-  "version": 1,
+  "version": 2,
   "startDate": "1300-01-01",
   "world": "earth",
   "resources": [
@@ -15,6 +15,7 @@
     "economy",
     "religions",
     "cultures",
-    "laws"
+    "laws",
+    "historical"
   ]
 }
