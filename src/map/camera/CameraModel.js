@@ -4,9 +4,9 @@
  * Camera Model
  * ============================================================================
  *
- * Camera stores the current screen-space translation and zoom.
- * The minimum zoom is the full-world view: zooming out never shrinks the
- * world into a small floating map.
+ * Camera position is stored in world degrees rather than CSS pixels. This
+ * keeps panning continuous across the antimeridian and lets the SVG renderer
+ * use a real viewBox instead of scaling a rasterized DOM layer.
  */
 
 export function createCameraModel() {
