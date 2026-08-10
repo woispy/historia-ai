@@ -1,0 +1,34 @@
+{
+  "id": "historical_gis_1300",
+  "date": "1300-01-01",
+  "projection": "EPSG:4326",
+  "geometrySource": {
+    "provider": "historical-basemaps",
+    "dataset": "world_1300.geojson",
+    "url": "https://github.com/aourednik/historical-basemaps/blob/master/geojson/world_1300.geojson",
+    "license": "GPL-3.0",
+    "status": "source-contract"
+  },
+  "provinceSource": {
+    "status": "not-yet-imported",
+    "note": "The historical-basemaps 1300 layer is a world political basemap, not a complete administrative-province dataset. Historia AI must not present the fallback country geometry as historically exact provinces."
+  },
+  "fallbackGeometry": {
+    "provider": "natural-earth",
+    "dataset": "admin-0-countries",
+    "status": "provisional-modern-basemap"
+  },
+  "pipeline": [
+    "historical GIS source",
+    "Historical Geometry Importer",
+    "Province Asset Builder",
+    "Historical Province Repository",
+    "1300 ownership",
+    "SVG Renderer"
+  ],
+  "notes": [
+    "Historical borders are approximate and source-dependent.",
+    "A source must be imported locally before its geometry can replace the fallback geometry.",
+    "Restricted or incompatible historical GIS datasets must not be redistributed in the repository."
+  ]
+}
