@@ -5,18 +5,13 @@
  * screen at once, so visual separation is achieved with vector strokes rather
  * than per-path CSS filters.
  */
-function ProvincePolygon({
-  province,
-  country,
-  geometry,
-  selected,
-  onClick,
-  mapStyle = "detailed",
-  mapShadows = true,
-}) {
-  if (!geometry || !geometry.polygons) return null;
 
-  const d = geometry.polygons
+import { useMemo } from "react";
+
+function buildPathData(polygons) {
+  if (!Array.isArray(polygons)) return "";
+
+  return polygons
     .map((polygon) => {
       if (!Array.isArray(polygon) || polygon.length < 3) return "";
       const [first, ...rest] = polygon;
@@ -29,6 +24,21 @@ function ProvincePolygon({
     })
     .filter(Boolean)
     .join(" ");
+}
+
+function ProvincePolygon({
+  province,
+  country,
+  geometry,
+  selected,
+  onClick,
+  mapStyle = "detailed",
+  mapShadows = true,
+}) {
+  const d = useMemo(
+    () => buildPathData(geometry?.polygons),
+    [geometry?.polygons],
+  );
 
   if (!d) return null;
 
