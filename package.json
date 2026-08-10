@@ -9,6 +9,7 @@
     "build:assets": "node tools/asset-builder/cli/build-assets.js",
     "build:assets:debug": "node --trace-uncaught tools/asset-builder/cli/build-assets.js",
     "build:historical-gis:1300": "node tools/historical-gis/cli/import-1300.js",
+    "test:historical-gis": "node tools/historical-gis/cli/test-1300.js",
     "validate:historical-gis:1300": "node tools/historical-gis/cli/validate-1300.js",
     "lint": "eslint .",
     "preview": "vite preview"
