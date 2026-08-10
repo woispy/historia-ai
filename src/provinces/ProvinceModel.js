@@ -1,13 +1,3 @@
-/**
- * ============================================================================
- * Historia AI
- * Province Model
- * ============================================================================
- *
- * Represents one Province in the runtime world.
- * Province Models are immutable runtime objects created from Province Assets.
- */
-
 export function createProvinceModel({
   id,
   name,
@@ -21,6 +11,8 @@ export function createProvinceModel({
   religion = null,
   population = 0,
   development = 0,
+  wealth = 0,
+  supplyLimit = 0,
   historical = null,
   historicalDate = null,
   historicalSource = null,
@@ -52,6 +44,8 @@ export function createProvinceModel({
     religion,
     population,
     development,
+    wealth,
+    supplyLimit,
     historical,
     historicalDate,
     historicalSource,
