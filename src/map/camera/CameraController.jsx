@@ -1,11 +1,12 @@
 import { useCallback, useMemo, useRef } from "react";
+import { getWheelZoomDelta } from "./CameraZoom";
 
 /**
  * Map-local pointer input.
  *
- * Wheel input is consumed by a native non-passive listener in CameraViewport.
- * React/browser passive-event handling can otherwise reject preventDefault()
- * and produce the Chromium passive-listener warning.
+ * Wheel cancellation is owned by CameraViewport's native non-passive listener.
+ * Keeping preventDefault() out of this callback avoids Chromium's passive
+ * listener warning while preserving normal page-scroll suppression.
  */
 export function useCameraController({ zoom, move, smooth = true }) {
   const dragging = useRef(false);
@@ -37,16 +38,8 @@ export function useCameraController({ zoom, move, smooth = true }) {
   }, [flushMove, move, smooth]);
 
   const handleWheel = useCallback((event) => {
-    event.preventDefault();
-
-    // Keep the zoom increment in zoom-space rather than multiplying it by
-    // the current zoom. The previous proportional step caused large jumps
-    // while zoomed out and very slow movement while zoomed in.
-    const magnitude = Math.min(1, Math.abs(event.deltaY) / 100);
-    const normalizedMagnitude = Math.max(0.75, magnitude);
-    const direction = event.deltaY < 0 ? 1 : -1;
-
-    zoom(direction * normalizedMagnitude * 1.5);
+    const delta = getWheelZoomDelta(event, zoom);
+    if (delta) zoom(delta);
   }, [zoom]);
 
   const handlePointerDown = useCallback((event) => {
