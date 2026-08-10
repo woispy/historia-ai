@@ -7,7 +7,7 @@ import {
 } from "../cities";
 
 import {
-  createProvinceRepositoryFromArray,
+  bootstrapProvinces,
 } from "../provinces";
 
 import {
@@ -28,6 +28,7 @@ import {
 
 /**
  * ============================================================================
+ * Historia AI
  * Repository Bootstrap
  * ============================================================================
  *
@@ -59,11 +60,7 @@ export function createRepositories(
       ),
 
     provinces:
-      createProvinceRepositoryFromArray(
-        Object.values(
-          scenario.data.provinces ?? {}
-        )
-      ),
+      bootstrapProvinces(),
 
     characters:
       createCharacterRepository(),

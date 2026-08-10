@@ -11,46 +11,60 @@ function ProvincePolygon({
   selected,
   onClick,
 }) {
-  if (!geometry) {
+  if (
+    !geometry ||
+    !geometry.polygons
+  ) {
     return null;
   }
 
-  const points =
-    geometry.polygon
-      .map(
-        ([x, y]) =>
-          `${x},${y}`
-      )
+  const d =
+    geometry.polygons
+      .map((polygon) => {
+        if (
+          polygon.length === 0
+        ) {
+          return "";
+        }
+
+        const [
+          first,
+          ...rest
+        ] = polygon;
+
+        return [
+          `M ${first[0]} ${first[1]}`,
+
+          ...rest.map(
+            ([x, y]) =>
+              `L ${x} ${y}`
+          ),
+
+          "Z",
+        ].join(" ");
+      })
       .join(" ");
 
   return (
-    <g
-      transform={`
-        translate(
-          ${geometry.position.x},
-          ${geometry.position.y}
+    <path
+      d={d}
+      fill={
+        selected
+          ? "#d6b04d"
+          : "#5d7c4f"
+      }
+      stroke="#20251f"
+      strokeWidth="0.15"
+      vectorEffect="non-scaling-stroke"
+      onClick={() =>
+        onClick?.(
+          province.id
         )
-      `}
-    >
-      <polygon
-        points={points}
-        fill={
-          selected
-            ? "#d6b04d"
-            : "#5d7c4f"
-        }
-        stroke="#20251f"
-        strokeWidth="2"
-        onClick={() =>
-          onClick?.(
-            province.id
-          )
-        }
-        style={{
-          cursor: "pointer",
-        }}
-      />
-    </g>
+      }
+      style={{
+        cursor: "pointer",
+      }}
+    />
   );
 }
 

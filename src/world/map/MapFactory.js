@@ -1,31 +1,29 @@
-import provincesData from "./data/provinces.json";
 import regionsData from "./data/regions.json";
 import terrainData from "./data/terrain.json";
 
 import {
-  createProvince,
-  createProvinceRepositoryFromArray,
-} from "../../provinces";
-
-import {
   createRegion,
-} from "./RegionFactory";
+} from "./RegionFactory.js";
 
 import {
   createTerrain,
-} from "./TerrainFactory";
+} from "./TerrainFactory.js";
 
 import {
   createTopology,
-} from "./topology";
+} from "./topology/index.js";
 
 import {
   bootstrapGeometry,
-} from "./geometry";
+} from "./geometry/index.js";
+
+import {
+  bootstrapProvinces,
+} from "../../provinces/index.js";
 
 import {
   createDictionary,
-} from "../../utils/createDictionary";
+} from "../../utils/createDictionary.js";
 
 /**
  * ============================================================================
@@ -37,26 +35,25 @@ import {
  */
 
 export function createMap() {
-  const provinceModels =
-    provincesData.map(createProvince);
-
   return {
     geometry:
       bootstrapGeometry(),
 
     provinces:
-      createProvinceRepositoryFromArray(
-        provinceModels
-      ),
+      bootstrapProvinces(),
 
     regions:
       createDictionary(
-        regionsData.map(createRegion)
+        regionsData.map(
+          createRegion
+        )
       ),
 
     terrain:
       createDictionary(
-        terrainData.map(createTerrain)
+        terrainData.map(
+          createTerrain
+        )
       ),
 
     topology:

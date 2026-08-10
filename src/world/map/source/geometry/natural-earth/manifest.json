@@ -1,0 +1,18 @@
+{
+  "provider": "natural-earth",
+  "version": "5.1.1",
+  "projection": "EPSG:4326",
+  "license": "Natural Earth",
+  "homepage": "https://www.naturalearthdata.com",
+  "datasets": [
+    {
+      "id": "admin-0-countries",
+      "name": "Admin 0 Countries",
+      "description": "World country boundaries",
+      "file": "admin-0-countries.geojson",
+      "geometryType": "MultiPolygon",
+      "featureType": "country",
+      "enabled": true
+    }
+  ]
+}

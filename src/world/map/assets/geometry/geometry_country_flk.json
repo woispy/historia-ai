@@ -1,0 +1,71 @@
+{
+  "header": {
+    "assetType": "geometry",
+    "assetVersion": 1,
+    "generator": "Historia Asset Builder",
+    "provider": "natural-earth",
+    "dataset": "admin-0-countries",
+    "generatedAt": "2026-08-06T02:26:00.615Z"
+  },
+  "id": "geometry_country_flk",
+  "name": "Falkland Is.",
+  "provider": "natural-earth",
+  "dataset": "admin-0-countries",
+  "geometryType": "Polygon",
+  "center": {
+    "x": -59.475,
+    "y": -51.7
+  },
+  "bounds": {
+    "minX": -61.2,
+    "minY": -52.3,
+    "maxX": -57.75,
+    "maxY": -51.1,
+    "width": 3.450000000000003,
+    "height": 1.1999999999999957
+  },
+  "polygons": [
+    [
+      [
+        -61.2,
+        -51.85
+      ],
+      [
+        -60,
+        -51.25
+      ],
+      [
+        -59.15,
+        -51.5
+      ],
+      [
+        -58.55,
+        -51.1
+      ],
+      [
+        -57.75,
+        -51.55
+      ],
+      [
+        -58.05,
+        -51.9
+      ],
+      [
+        -59.4,
+        -52.2
+      ],
+      [
+        -59.85,
+        -51.85
+      ],
+      [
+        -60.7,
+        -52.3
+      ],
+      [
+        -61.2,
+        -51.85
+      ]
+    ]
+  ]
+}

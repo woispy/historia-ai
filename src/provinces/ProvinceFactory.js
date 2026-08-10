@@ -1,50 +1,138 @@
-import { createProvinceModel } from "./ProvinceModel";
+import {
+  createProvinceModel,
+} from "./ProvinceModel.js";
 
 /**
  * ============================================================================
+ * Historia AI
  * Province Factory
  * ============================================================================
+ *
+ * Converts immutable Province Assets into
+ * runtime Province Models.
  */
 
-export function createProvince(rawProvince) {
-  if (!rawProvince) {
-    throw new Error("Province data is required.");
+export function createProvince(
+  asset
+) {
+  if (!asset) {
+    throw new Error(
+      "Province Asset is required."
+    );
   }
 
-  if (!rawProvince.id) {
-    throw new Error("Province id is required.");
+  if (!asset.identity) {
+    throw new Error(
+      "Province Asset identity is required."
+    );
   }
 
-  if (!rawProvince.name) {
-    throw new Error("Province name is required.");
+  if (!asset.references) {
+    throw new Error(
+      "Province Asset references are required."
+    );
+  }
+
+  const {
+    identity,
+    references,
+    ownership = {},
+    administration = {},
+    culture = {},
+    religion = {},
+    population = {},
+    economy = {},
+  } = asset;
+
+  if (!identity.id) {
+    throw new Error(
+      "Province Asset ID is required."
+    );
+  }
+
+  if (!identity.name) {
+    throw new Error(
+      "Province Asset name is required."
+    );
   }
 
   return createProvinceModel({
-    id: rawProvince.id,
+    /**
+     * Identity
+     */
 
-    name: rawProvince.name,
+    id:
+      identity.id,
 
-    region: rawProvince.region,
+    name:
+      identity.name,
 
-    terrain: rawProvince.terrain,
+    /**
+     * Geometry
+     */
 
-    owner: rawProvince.owner,
+    geometryId:
+      references.geometryId,
 
-    controller: rawProvince.controller,
+    /**
+     * World
+     */
 
-    culture: rawProvince.culture ?? null,
+    region:
+      null,
 
-    religion: rawProvince.religion ?? null,
+    terrain:
+      null,
 
-    governor: null,
+    /**
+     * Politics
+     */
 
-    population: rawProvince.population,
+    owner:
+      ownership.countryId ??
+      null,
 
-    development: rawProvince.development,
+    controller:
+      ownership.ownerId ??
+      null,
 
-    cities: rawProvince.city
-      ? [rawProvince.city]
-      : [],
+    governor:
+      administration.governorId ??
+      null,
+
+    /**
+     * Culture
+     */
+
+    culture:
+      culture.primaryCulture ??
+      null,
+
+    religion:
+      religion.primaryReligion ??
+      null,
+
+    /**
+     * Population
+     */
+
+    population:
+      population.total ??
+      0,
+
+    /**
+     * Economy
+     */
+
+    development:
+      economy.development ??
+      0,
+
+    /**
+     * Runtime Collections
+     */
+
+    cities: [],
 
     roads: [],
 
@@ -54,13 +142,21 @@ export function createProvince(rawProvince) {
 
     armies: [],
 
-    sea: rawProvince.sea,
+    /**
+     * Geography
+     */
 
-    river: rawProvince.river,
+    sea: false,
 
-    port: rawProvince.port,
+    river: false,
 
-    fortLevel: rawProvince.fortLevel,
+    port: false,
+
+    fortLevel: 0,
+
+    /**
+     * Runtime Status
+     */
 
     status: {
       underSiege: false,

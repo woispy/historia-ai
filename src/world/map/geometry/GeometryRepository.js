@@ -3,6 +3,14 @@
  * Historia AI
  * Geometry Repository
  * ============================================================================
+ *
+ * Stores Geometry Assets used by the runtime.
+ *
+ * Responsibilities
+ * ----------------
+ * - Store Geometry Assets
+ * - Provide lookup operations
+ * - Provide immutable CRUD operations
  */
 
 export function createGeometryRepository() {
@@ -12,6 +20,12 @@ export function createGeometryRepository() {
     allIds: [],
   };
 }
+
+/**
+ * ============================================================================
+ * CRUD
+ * ============================================================================
+ */
 
 export function addGeometry(
   repository,
@@ -59,7 +73,9 @@ export function removeGeometry(
     ...repository.byId,
   };
 
-  delete byId[geometryId];
+  delete byId[
+    geometryId
+  ];
 
   return {
     byId,
@@ -67,7 +83,59 @@ export function removeGeometry(
     allIds:
       repository.allIds.filter(
         (id) =>
-          id !== geometryId
+          id !==
+          geometryId
       ),
   };
+}
+
+/**
+ * ============================================================================
+ * Queries
+ * ============================================================================
+ */
+
+export function findGeometryById(
+  repository,
+  geometryId
+) {
+  return (
+    repository.byId[
+      geometryId
+    ] ?? null
+  );
+}
+
+export function findAllGeometries(
+  repository
+) {
+  return repository.allIds.map(
+    (id) =>
+      repository.byId[id]
+  );
+}
+
+export function hasGeometry(
+  repository,
+  geometryId
+) {
+  return Object.prototype.hasOwnProperty.call(
+    repository.byId,
+    geometryId
+  );
+}
+
+export function countGeometries(
+  repository
+) {
+  return repository.allIds.length;
+}
+
+export function isGeometryRepositoryEmpty(
+  repository
+) {
+  return (
+    repository.allIds.length ===
+    0
+  );
 }

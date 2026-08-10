@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:assets": "node tools/asset-builder/cli/build-assets.js",
+    "build:assets:debug": "node --trace-uncaught tools/asset-builder/cli/build-assets.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },

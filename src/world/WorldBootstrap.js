@@ -1,15 +1,18 @@
-import { createMap } from "./map";
+import {
+  createMap,
+} from "./map/index.js";
 
 import {
   bootstrapScenario,
-} from "../scenarios/bootstrap";
+} from "../scenarios/bootstrap/index.js";
 
 import {
   createRepositories,
-} from "./RepositoryBootstrap";
+} from "./RepositoryBootstrap.js";
 
 /**
  * ============================================================================
+ * Historia AI
  * World Bootstrap
  * ============================================================================
  */

@@ -1,0 +1,63 @@
+{
+  "header": {
+    "assetType": "geometry",
+    "assetVersion": 1,
+    "generator": "Historia Asset Builder",
+    "provider": "natural-earth",
+    "dataset": "admin-0-countries",
+    "generatedAt": "2026-08-06T02:26:00.617Z"
+  },
+  "id": "geometry_country_tto",
+  "name": "Trinidad and Tobago",
+  "provider": "natural-earth",
+  "dataset": "admin-0-countries",
+  "geometryType": "Polygon",
+  "center": {
+    "x": -61.4225,
+    "y": 10.445
+  },
+  "bounds": {
+    "minX": -61.95,
+    "minY": 10,
+    "maxX": -60.895,
+    "maxY": 10.89,
+    "width": 1.0549999999999997,
+    "height": 0.8900000000000006
+  },
+  "polygons": [
+    [
+      [
+        -61.68,
+        10.76
+      ],
+      [
+        -61.105,
+        10.89
+      ],
+      [
+        -60.895,
+        10.855
+      ],
+      [
+        -60.935,
+        10.11
+      ],
+      [
+        -61.77,
+        10
+      ],
+      [
+        -61.95,
+        10.09
+      ],
+      [
+        -61.66,
+        10.365
+      ],
+      [
+        -61.68,
+        10.76
+      ]
+    ]
+  ]
+}

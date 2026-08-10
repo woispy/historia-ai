@@ -4,33 +4,66 @@
  * Province Model
  * ============================================================================
  *
- * Represents one province in the game world.
+ * Represents one Province in the runtime world.
  *
- * Province models are immutable.
+ * Province Models are immutable runtime objects.
+ *
+ * Runtime Models are created from Province Assets
+ * by ProvinceFactory.
  */
 
 export function createProvinceModel({
+  /**
+   * Identity
+   */
+
   id,
 
   name,
 
-  region,
+  /**
+   * References
+   */
 
-  terrain,
+  geometryId = null,
 
-  owner,
+  /**
+   * World
+   */
 
-  controller,
+  region = null,
+
+  terrain = null,
+
+  /**
+   * Politics
+   */
+
+  owner = null,
+
+  controller = null,
+
+  governor = null,
+
+  /**
+   * Society
+   */
 
   culture = null,
 
   religion = null,
 
-  governor = null,
-
   population = 0,
 
+  /**
+   * Economy
+   */
+
   development = 0,
+
+  /**
+   * Runtime Collections
+   */
 
   cities = [],
 
@@ -42,6 +75,10 @@ export function createProvinceModel({
 
   armies = [],
 
+  /**
+   * Geography
+   */
+
   sea = false,
 
   river = false,
@@ -50,6 +87,10 @@ export function createProvinceModel({
 
   fortLevel = 0,
 
+  /**
+   * Runtime Status
+   */
+
   status = {
     underSiege: false,
     occupied: false,
@@ -57,27 +98,57 @@ export function createProvinceModel({
   },
 }) {
   return Object.freeze({
+    /**
+     * Identity
+     */
+
     id,
 
     name,
+
+    /**
+     * References
+     */
+
+    geometryId,
+
+    /**
+     * World
+     */
 
     region,
 
     terrain,
 
+    /**
+     * Politics
+     */
+
     owner,
 
     controller,
+
+    governor,
+
+    /**
+     * Society
+     */
 
     culture,
 
     religion,
 
-    governor,
-
     population,
 
+    /**
+     * Economy
+     */
+
     development,
+
+    /**
+     * Runtime Collections
+     */
 
     cities,
 
@@ -89,6 +160,10 @@ export function createProvinceModel({
 
     armies,
 
+    /**
+     * Geography
+     */
+
     sea,
 
     river,
@@ -96,6 +171,10 @@ export function createProvinceModel({
     port,
 
     fortLevel,
+
+    /**
+     * Runtime Status
+     */
 
     status,
   });

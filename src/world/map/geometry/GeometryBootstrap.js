@@ -1,33 +1,26 @@
-import geometries from "./data";
-
 import {
-  createGeometryRepository,
-  addGeometry,
-} from "./GeometryRepository";
-
-import {
-  createGeometry,
-} from "./GeometryFactory";
+  loadGeometryRepository,
+} from "./loader/index.js";
 
 /**
  * ============================================================================
+ * Historia AI
  * Geometry Bootstrap
  * ============================================================================
+ *
+ * Builds the runtime Geometry Repository
+ * from generated Geometry Assets.
+ *
+ * Pipeline
+ * --------
+ *
+ * Geometry Manifest
+ *        ↓
+ * Geometry Assets
+ *        ↓
+ * Geometry Repository
  */
 
 export function bootstrapGeometry() {
-  let repository =
-    createGeometryRepository();
-
-  for (const geometryData of geometries) {
-    repository =
-      addGeometry(
-        repository,
-        createGeometry(
-          geometryData
-        )
-      );
-  }
-
-  return repository;
+  return loadGeometryRepository();
 }

@@ -5,7 +5,7 @@ import {
 } from "../../provinces";
 
 import {
-  getGeometryByProvince,
+  getGeometry,
 } from "../../world/map/geometry";
 
 /**
@@ -40,10 +40,12 @@ export function useWorldMap(
         province,
 
         geometry:
-          getGeometryByProvince(
-            geometryRepository,
-            province.id
-          ),
+          province.geometryId
+            ? getGeometry(
+                geometryRepository,
+                province.geometryId
+              )
+            : null,
       }));
 
     return {

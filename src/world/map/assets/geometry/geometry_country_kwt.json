@@ -1,0 +1,67 @@
+{
+  "header": {
+    "assetType": "geometry",
+    "assetVersion": 1,
+    "generator": "Historia Asset Builder",
+    "provider": "natural-earth",
+    "dataset": "admin-0-countries",
+    "generatedAt": "2026-08-06T02:26:00.616Z"
+  },
+  "id": "geometry_country_kwt",
+  "name": "Kuwait",
+  "provider": "natural-earth",
+  "dataset": "admin-0-countries",
+  "geometryType": "Polygon",
+  "center": {
+    "x": 47.4924035,
+    "y": 29.2925665
+  },
+  "bounds": {
+    "minX": 46.568713,
+    "minY": 28.526063,
+    "maxX": 48.416094,
+    "maxY": 30.05907,
+    "width": 1.8473809999999986,
+    "height": 1.5330069999999978
+  },
+  "polygons": [
+    [
+      [
+        47.974519,
+        29.975819
+      ],
+      [
+        48.183189,
+        29.534477
+      ],
+      [
+        48.093943,
+        29.306299
+      ],
+      [
+        48.416094,
+        28.552004
+      ],
+      [
+        47.708851,
+        28.526063
+      ],
+      [
+        47.459822,
+        29.002519
+      ],
+      [
+        46.568713,
+        29.099025
+      ],
+      [
+        47.302622,
+        30.05907
+      ],
+      [
+        47.974519,
+        29.975819
+      ]
+    ]
+  ]
+}

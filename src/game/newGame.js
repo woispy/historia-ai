@@ -5,9 +5,6 @@ let newGame = {
   settings: {},
 };
 
-/**
- * Returns the current new game configuration.
- */
 export function getNewGame() {
   console.log("[newGame] get", newGame);
 
@@ -16,26 +13,28 @@ export function getNewGame() {
   };
 }
 
-/**
- * Updates one or more new game properties.
- */
 export function updateNewGame(values) {
-  console.log("[newGame] before", newGame);
-  console.log("[newGame] update", values);
+  console.group("[newGame] update");
+
+  console.log("Before:", newGame);
+  console.log("Patch :", values);
+
+  console.trace("Called from");
 
   newGame = {
     ...newGame,
     ...values,
   };
 
-  console.log("[newGame] after", newGame);
+  console.log("After :", newGame);
+
+  console.groupEnd();
 }
 
-/**
- * Clears the new game configuration.
- */
 export function resetNewGame() {
-  console.log("[newGame] reset");
+  console.group("[newGame] reset");
+
+  console.trace("Called from");
 
   newGame = {
     scenarioId: null,
@@ -43,4 +42,8 @@ export function resetNewGame() {
     character: null,
     settings: {},
   };
+
+  console.log("After reset:", newGame);
+
+  console.groupEnd();
 }

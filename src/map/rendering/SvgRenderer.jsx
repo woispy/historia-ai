@@ -3,6 +3,10 @@
  * Historia AI
  * SVG Renderer
  * ============================================================================
+ *
+ * Root SVG used by the Rendering Engine.
+ *
+ * Uses world coordinates (Natural Earth / EPSG:4326).
  */
 
 function SvgRenderer({
@@ -12,10 +16,12 @@ function SvgRenderer({
     <svg
       width="100%"
       height="100%"
-      viewBox="0 0 20000 20000"
+      viewBox="-180 -90 360 180"
       preserveAspectRatio="xMidYMid meet"
     >
-      {children}
+      <g transform="scale(1,-1)">
+        {children}
+      </g>
     </svg>
   );
 }

@@ -6,25 +6,32 @@ import CharacterService from "../services/CharacterService";
 import CharacterReport from "../components/CharacterReport";
 
 import {
-  getNewGame,
   updateNewGame,
 } from "../game/newGame";
 
-import { setCurrentGame } from "../game/currentGame";
-
-import { createGame } from "../bootstrap/GameBootstrap";
-
-import { saveGame } from "../save";
+import {
+  initializeGame,
+} from "../bootstrap";
 
 function CharacterCreate() {
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
-  const [description, setDescription] = useState("");
+  const [
+    description,
+    setDescription,
+  ] = useState("");
 
-  const [character, setCharacter] = useState(null);
+  const [
+    character,
+    setCharacter,
+  ] = useState(null);
 
   function generateCharacter() {
-    const result = CharacterService.create(description);
+    const result =
+      CharacterService.create(
+        description
+      );
 
     setCharacter(result);
   }
@@ -38,24 +45,7 @@ function CharacterCreate() {
       character,
     });
 
-    const config = getNewGame();
-
-    const session = createGame({
-      scenarioId: config.scenarioId,
-
-      player: {
-        countryId: config.countryId,
-        character: config.character,
-      },
-
-      settings: config.settings,
-    });
-
-    // Aktif oturumu belleğe al.
-    setCurrentGame(session);
-
-    // İlk kayıt dosyasını oluştur.
-    saveGame(session);
+    initializeGame();
 
     navigate("/game");
   }
@@ -71,14 +61,20 @@ function CharacterCreate() {
         cols="60"
         value={description}
         onChange={(e) =>
-          setDescription(e.target.value)
+          setDescription(
+            e.target.value
+          )
         }
       />
 
       <br />
       <br />
 
-      <button onClick={generateCharacter}>
+      <button
+        onClick={
+          generateCharacter
+        }
+      >
         Karakteri Oluştur
       </button>
 
@@ -87,19 +83,37 @@ function CharacterCreate() {
 
       {character && (
         <>
-          <h3>Karakter Analizi</h3>
+          <h3>
+            Karakter Analizi
+          </h3>
 
-          <CharacterReport character={character} />
+          <CharacterReport
+            character={
+              character
+            }
+          />
 
-          <h4>Kişilik</h4>
+          <h4>
+            Kişilik
+          </h4>
 
           <ul>
-            {character.personality.map((trait) => (
-              <li key={trait}>{trait}</li>
-            ))}
+            {character.personality.map(
+              (trait) => (
+                <li
+                  key={trait}
+                >
+                  {trait}
+                </li>
+              )
+            )}
           </ul>
 
-          <button onClick={acceptCharacter}>
+          <button
+            onClick={
+              acceptCharacter
+            }
+          >
             Karakteri Kabul Et
           </button>
         </>
