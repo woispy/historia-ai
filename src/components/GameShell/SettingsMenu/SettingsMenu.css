@@ -10,19 +10,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 0;
+  padding: 0;
   background: #2d2921;
   border: 1px solid #6c5b2f;
   border-radius: 8px;
   color: #f4e8c1;
   font: 400 22px/1 "Segoe UI Symbol", "Segoe UI", Arial, sans-serif;
   cursor: pointer;
-  transition: background .2s, border-color .2s, transform .2s;
+  transition: background .2s, border-color .2s, transform .2s, box-shadow .2s;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.24);
 }
 
 .menu-button:hover,
 .menu-button.active {
   background: #3a3429;
   border-color: #c9a94f;
+  color: #fff4c7;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.30);
 }
 
 .menu-button.active {
