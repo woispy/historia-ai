@@ -39,7 +39,7 @@ export function moveCamera(camera, dx, dy, viewport) {
     ...constrainPosition(
       camera,
       camera.x - dx * degrees.x,
-      camera.y + dy * degrees.y,
+      camera.y - dy * degrees.y,
       viewport,
     ),
   };
