@@ -49,6 +49,12 @@
   --z-modal: 1000;
 }
 
+html[data-effects="false"] {
+  --transition-fast: 0s;
+  --transition-normal: 0s;
+  --transition-slow: 0s;
+}
+
 /* ==========================================================
    CSS RESET
 ========================================================== */
