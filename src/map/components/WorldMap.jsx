@@ -1,20 +1,29 @@
 import { useWorldMap } from "../hooks";
 import { ProvinceLayer } from "./layers";
-import { CameraController, CameraProvider, CameraViewport, useCamera } from "../camera";
+import {
+  CameraProvider,
+  CameraViewport,
+  useCamera,
+  useCameraController,
+} from "../camera";
 import { RenderRoot, RenderLayer, SvgRenderer } from "../rendering";
 
-function WorldMap({ runtime, selectedProvinceId, onProvinceClick, settings = {} }) {
+function WorldMap({
+  runtime,
+  selectedProvinceId,
+  onProvinceClick,
+  settings = {},
+}) {
   const { provinces } = useWorldMap(runtime);
   const camera = useCamera();
+  const cameraInput = useCameraController({
+    zoom: camera.zoom,
+    move: camera.move,
+  });
 
   return (
     <CameraProvider value={camera}>
-      <CameraController
-        zoom={camera.zoom}
-        move={camera.move}
-        smooth={settings.smoothCamera !== false}
-      />
-      <CameraViewport>
+      <CameraViewport cameraInput={cameraInput}>
         <RenderRoot>
           <SvgRenderer camera={camera.camera}>
             <RenderLayer>
