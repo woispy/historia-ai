@@ -17,7 +17,7 @@ function GameShell() {
   const [busy, setBusy] = useState(false);
   const [timeMenuOpen, setTimeMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [advisorOpen, setAdvisorOpen] = useState(() => readSettings().advisorAutoOpen);
+  const [advisorOpen, setAdvisorOpen] = useState(false);
   const [settings, setSettings] = useState(readSettings);
 
   const {
