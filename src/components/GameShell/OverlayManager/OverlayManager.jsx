@@ -17,14 +17,19 @@ function OverlayManager({
   onCancelEditing,
   closeAdvisorKey = 0,
   settingsOpen = false,
+  settings = {},
 }) {
   const [leftOpen, setLeftOpen] = useState(false);
-  const [rightOpen, setRightOpen] = useState(false);
+  const [rightOpen, setRightOpen] = useState(Boolean(settings.advisorAutoOpen));
   const [activeTab, setActiveTab] = useState("actions");
 
   useEffect(() => {
     if (closeAdvisorKey > 0) setRightOpen(false);
   }, [closeAdvisorKey]);
+
+  useEffect(() => {
+    if (settings.advisorAutoOpen) setRightOpen(true);
+  }, [settings.advisorAutoOpen]);
 
   const openActions = () => {
     if (settingsOpen) return;
