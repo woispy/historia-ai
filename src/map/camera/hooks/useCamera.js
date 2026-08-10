@@ -13,6 +13,10 @@ import {
   focusCamera,
 } from "../CameraActions";
 
+import {
+  useViewport,
+} from "../viewport";
+
 /**
  * ============================================================================
  * Historia AI
@@ -21,6 +25,8 @@ import {
  */
 
 export function useCamera() {
+  const viewport = useViewport();
+
   const [camera, setCamera] =
     useState(() =>
       bootstrapCamera()
@@ -34,7 +40,8 @@ export function useCamera() {
       moveCamera(
         previous,
         dx,
-        dy
+        dy,
+        viewport
       )
     );
   }
@@ -45,7 +52,8 @@ export function useCamera() {
     setCamera((previous) =>
       zoomCamera(
         previous,
-        delta
+        delta,
+        viewport
       )
     );
   }
@@ -58,18 +66,20 @@ export function useCamera() {
       setCameraPosition(
         previous,
         x,
-        y
+        y,
+        viewport
       )
     );
   }
 
   function setZoom(
-    zoom
+    zoomValue
   ) {
     setCamera((previous) =>
       setCameraZoom(
         previous,
-        zoom
+        zoomValue,
+        viewport
       )
     );
   }
@@ -90,24 +100,19 @@ export function useCamera() {
         previous,
         x,
         y,
-        target
+        target,
+        viewport
       )
     );
   }
 
   return {
     camera,
-
     move,
-
     zoom,
-
     focus,
-
     setZoom,
-
     setPosition,
-
     reset,
   };
 }
