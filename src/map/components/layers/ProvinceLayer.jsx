@@ -10,7 +10,6 @@ import ProvincePolygon from "../ProvincePolygon";
  *
  * Renders every province polygon.
  */
-
 function ProvinceLayer({
   provinces,
   selectedProvinceId,
@@ -21,11 +20,13 @@ function ProvinceLayer({
       {provinces.map(
         ({
           province,
+          country,
           geometry,
         }) => (
           <ProvincePolygon
             key={province.id}
             province={province}
+            country={country}
             geometry={geometry}
             selected={
               province.id ===
