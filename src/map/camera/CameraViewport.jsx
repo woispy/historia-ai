@@ -1,6 +1,24 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 function CameraViewport({ children, cameraInput = null }) {
+  const viewportRef = useRef(null);
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    const wheelHandler = cameraInput?.onWheel;
+
+    if (!viewport || !wheelHandler) return undefined;
+
+    // React's wheel delegation may be treated as passive by the browser.
+    // Register explicitly as non-passive so preventDefault() is guaranteed to
+    // work and page scrolling cannot compete with map zooming.
+    viewport.addEventListener("wheel", wheelHandler, { passive: false });
+
+    return () => {
+      viewport.removeEventListener("wheel", wheelHandler);
+    };
+  }, [cameraInput?.onWheel]);
+
   useEffect(
     () => () => cameraInput?.dispose?.(),
     [cameraInput],
@@ -8,8 +26,8 @@ function CameraViewport({ children, cameraInput = null }) {
 
   return (
     <div
+      ref={viewportRef}
       className="camera-viewport"
-      onWheel={cameraInput?.onWheel}
       onPointerDown={cameraInput?.onPointerDown}
       onPointerMove={cameraInput?.onPointerMove}
       onPointerUp={cameraInput?.onPointerUp}
@@ -21,6 +39,7 @@ function CameraViewport({ children, cameraInput = null }) {
         overflow: "hidden",
         position: "relative",
         touchAction: "none",
+        overscrollBehavior: "none",
         cursor: "grab",
       }}
     >
