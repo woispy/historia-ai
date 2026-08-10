@@ -7,19 +7,15 @@
   width: 100%;
   max-width: 1200px;
   min-height: 100vh;
-
   margin: 0 auto;
   padding: 60px 40px;
-
   text-align: center;
 }
 
 .game-app {
   position: relative;
-
   width: 100vw;
   height: 100vh;
-
   overflow: hidden;
 }
 
@@ -35,17 +31,9 @@ h4 {
   margin-bottom: 15px;
 }
 
-h1 {
-  font-size: 56px;
-}
-
-h2 {
-  font-size: 32px;
-}
-
-h3 {
-  font-size: 24px;
-}
+h1 { font-size: 56px; }
+h2 { font-size: 32px; }
+h3 { font-size: 24px; }
 
 p,
 li {
@@ -60,15 +48,11 @@ li {
 button {
   background: var(--color-primary);
   color: #ffffff;
-
   border: none;
   border-radius: 6px;
-
   padding: 12px 24px;
   margin: 8px;
-
   font-size: 16px;
-
   transition: var(--transition-fast);
 }
 
@@ -84,13 +68,10 @@ button:hover {
 textarea,
 input {
   width: 100%;
-
   margin-top: 10px;
   padding: 12px;
-
   background: var(--color-surface-light);
   color: var(--color-text);
-
   border: 1px solid var(--color-border);
   border-radius: 6px;
 }
@@ -103,17 +84,13 @@ input {
   display: flex;
   flex-direction: column;
   align-items: center;
-
   gap: 18px;
-
   margin-top: 40px;
 }
 
 .menu button {
   width: 280px;
-
   padding: 16px;
-
   font-size: 20px;
 }
 
@@ -123,9 +100,7 @@ input {
 
 .game-description {
   margin-bottom: 30px;
-
   color: var(--color-text-muted);
-
   font-style: italic;
   font-size: 18px;
 }
@@ -137,38 +112,25 @@ input {
 .character-report {
   margin-top: 30px;
   padding: 25px;
-
   background: var(--color-surface);
-
   border: 2px solid var(--color-primary);
   border-radius: 12px;
-
   box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
 }
 
 .profile-row {
   display: flex;
-
   justify-content: space-between;
   align-items: center;
-
   gap: 20px;
-
   margin-bottom: 10px;
 }
 
-.profile-row strong {
-  color: var(--color-primary-light);
-}
-
-.profile-row span {
-  color: var(--color-text);
-  text-align: right;
-}
+.profile-row strong { color: var(--color-primary-light); }
+.profile-row span { color: var(--color-text); text-align: right; }
 
 hr {
   margin: 25px 0;
-
   border: none;
   border-top: 1px solid var(--color-border);
 }
@@ -179,23 +141,17 @@ hr {
 
 .stat-bar {
   margin-top: 6px;
-
   overflow: hidden;
-
   background: var(--color-surface-light);
-
   border-radius: 8px;
 }
 
 .stat-fill {
   padding: 6px 10px;
-
   background: var(--color-primary);
   color: var(--color-background);
-
   text-align: right;
   font-weight: bold;
-
   transition: width var(--transition-slow);
 }
 
@@ -205,69 +161,64 @@ hr {
 
 .game-world {
   position: relative;
-
   width: 100%;
   height: calc(100vh - var(--topbar-height));
-
   margin-top: var(--topbar-height);
-
   overflow: hidden;
 }
 
 .map-placeholder {
   width: 100%;
   height: 100%;
-
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-
-  background:
-    radial-gradient(circle at center, #3b4d35 0%, #243123 100%);
+  background: radial-gradient(circle at center, #3b4d35 0%, #243123 100%);
 }
 
-.map-placeholder h2 {
-  font-size: 48px;
-}
-
-.map-placeholder p {
-  margin-top: 20px;
-}
+.map-placeholder h2 { font-size: 48px; }
+.map-placeholder p { margin-top: 20px; }
 
 /* ==========================================================
    OVERLAY BUTTONS
+   Consistent with the dark/gold game theme.
 ========================================================== */
 
 .left-toggle,
 .right-toggle {
   position: fixed;
-
   bottom: 20px;
-
-  transition: var(--transition-fast);
-
+  min-height: 42px;
+  margin: 0;
+  padding: 0 16px;
+  border: 1px solid #6c5b2f;
+  border-radius: 7px;
+  background: rgba(25, 23, 19, 0.94);
+  color: #f4e8c1;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font: 600 14px/1 "Segoe UI", Arial, sans-serif;
   z-index: var(--z-popup);
 }
 
-.left-toggle {
-  left: 20px;
+.left-toggle:hover,
+.right-toggle:hover {
+  background: #3a3429;
+  border-color: #c9a94f;
+  color: #fff4c7;
+  transform: translateY(-2px);
 }
 
-.diplomacy-toggle {
-  left: 180px;
-}
-
-.right-toggle {
-  right: 20px;
-}
+.left-toggle { left: 20px; }
+.diplomacy-toggle { left: 164px; }
+.right-toggle { right: 20px; }
 
 .hidden-toggle {
   opacity: 0;
-
   pointer-events: none;
-
-  transform: scale(.9);
+  transform: scale(.94);
 }
 
 /* ==========================================================
@@ -276,28 +227,24 @@ hr {
 
 .overlay-handle {
   position: fixed;
-
   top: 50%;
-
   width: 34px;
   height: 80px;
-
   margin: 0;
   padding: 0;
-
-  border-radius: 0;
-
+  border: 1px solid #6c5b2f;
+  border-radius: 7px;
+  background: rgba(25, 23, 19, 0.94);
+  color: #f4e8c1;
   transform: translateY(-50%);
-
   font-size: 22px;
-
   z-index: var(--z-popup);
 }
 
-.overlay-handle.left {
-  left: var(--left-panel-width);
+.overlay-handle:hover {
+  background: #3a3429;
+  border-color: #c9a94f;
 }
 
-.overlay-handle.right {
-  right: var(--right-panel-width);
-}
+.overlay-handle.left { left: var(--left-panel-width); }
+.overlay-handle.right { right: var(--right-panel-width); }

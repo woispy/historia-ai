@@ -53,6 +53,7 @@
   align-items: center;
   gap: 7px;
   box-sizing: border-box;
+  margin: 0;
   padding: 0 13px;
   border: 1px solid #6c5b2f;
   border-radius: 7px;
@@ -62,12 +63,15 @@
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
 }
 
 .date-button.active,
 .date-button:hover {
   background: #3a3325;
   border-color: #c9a94f;
+  color: #fff4c7;
+  transform: none;
 }
 
 .date-icon,

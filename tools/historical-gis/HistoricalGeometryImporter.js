@@ -43,13 +43,34 @@ function extractPolygons(geometry) {
   return [];
 }
 
+function compressAntarctica(polygons, sourceName) {
+  if (!/antarctica/i.test(String(sourceName ?? ""))) return polygons;
+
+  // The source uses geographic coordinates, where Antarctica occupies the
+  // extreme southern edge of the world. Compress only that region so the
+  // playable world keeps a practical political-map aspect ratio without
+  // changing the longitude of any territory.
+  const pivotLatitude = -90;
+  const verticalScale = 0.42;
+
+  return polygons.map((ring) =>
+    ring.map(([longitude, latitude]) => [
+      longitude,
+      pivotLatitude + (latitude - pivotLatitude) * verticalScale,
+    ]),
+  );
+}
+
 export function normalizeHistoricalFeature(feature, index, year = 1300) {
   const properties = feature?.properties ?? {};
-  const polygons = extractPolygons(feature?.geometry);
   const sourceName =
     properties.NAME ??
     properties.name ??
     `Historical Region ${index + 1}`;
+  const polygons = compressAntarctica(
+    extractPolygons(feature?.geometry),
+    sourceName,
+  );
   const sourceFeatureId = String(
     feature?.id ??
     properties.ID ??
