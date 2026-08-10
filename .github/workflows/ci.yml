@@ -6,12 +6,14 @@ on:
       - master
       - feat/phase1-polish
       - feat/phase1-historical-gis-runtime
+      - feat/phase1-map-camera-ui-polish
   push:
     branches:
       - master
       - feat/living-game-foundation
       - feat/phase1-polish
       - feat/phase1-historical-gis-runtime
+      - feat/phase1-map-camera-ui-polish
       - fix/historical-gis-import-integrity
 
 jobs:
@@ -48,4 +50,6 @@ jobs:
           node --check src/world/historical/HistoricalCountryResolver.js &&
           node --check src/provinces/HistoricalProvinceRepository.js &&
           node --check src/provinces/ProvinceFactory.js &&
-          node --check src/provinces/ProvinceModel.js
+          node --check src/provinces/ProvinceModel.js &&
+          node --check src/map/camera/CameraModel.js &&
+          node --check src/map/camera/CameraActions.js
