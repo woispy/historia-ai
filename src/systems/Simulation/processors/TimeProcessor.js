@@ -4,7 +4,6 @@ import {
   advanceMonths,
   advanceYears,
 } from "../../Time";
-
 import { getRuntime, updateRuntime } from "../../../state";
 
 export function processTime(gameSession, unit = "week", amount = 1) {
@@ -34,6 +33,8 @@ export function processTime(gameSession, unit = "week", amount = 1) {
       ...runtime.time,
       currentDate: nextDate,
       turn: runtime.time.turn + 1,
+      lastUnit: unit,
+      lastAmount: amount,
     },
   });
 }
