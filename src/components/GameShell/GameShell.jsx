@@ -10,7 +10,7 @@ import { getCurrentDate, getTimeline, getPendingActions } from "../../state";
 import { advanceWeek, advanceMonth, advanceSixMonths, advanceYear } from "../../systems/Action";
 import { saveGame } from "../../save";
 import { useDecisionEditor } from "../../hooks/useDecisionEditor";
-import { DEFAULT_SETTINGS, STORAGE_KEY, readSettings } from "./SettingsMenu/SettingsMenu";
+import { STORAGE_KEY, readSettings } from "./SettingsMenu/SettingsMenu";
 
 function GameShell() {
   const [gameSession, setGameSession] = useState(() => getCurrentGame());
@@ -37,6 +37,10 @@ function GameShell() {
     document.documentElement.dataset.mapShadows = String(settings.mapShadows);
     document.documentElement.dataset.effects = String(settings.effects);
     document.body.style.zoom = `${Number(settings.uiScale) / 100}`;
+
+    return () => {
+      document.body.style.zoom = "1";
+    };
   }, [settings]);
 
   function advance(simulator) {
@@ -105,5 +109,3 @@ function GameShell() {
 }
 
 export default GameShell;
-
-void DEFAULT_SETTINGS;
