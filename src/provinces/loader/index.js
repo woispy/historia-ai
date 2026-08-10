@@ -9,3 +9,7 @@ export {
 export {
   loadProvinceRepository,
 } from "./ProvinceRepositoryLoader.js";
+
+export {
+  loadHistoricalProvinceRepository,
+} from "./HistoricalProvinceRepositoryLoader.js";
