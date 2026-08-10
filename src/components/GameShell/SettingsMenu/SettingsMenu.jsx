@@ -1,9 +1,7 @@
-import { useEffect, useState } from "react";
-
 import "./SettingsMenu.css";
 import SettingsPanel from "./SettingsPanel";
 
-const STORAGE_KEY = "historia-ai.settings";
+export const STORAGE_KEY = "historia-ai.settings";
 
 export const DEFAULT_SETTINGS = Object.freeze({
   theme: "dark",
@@ -19,7 +17,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   language: "tr",
 });
 
-function readSettings() {
+export function readSettings() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null");
     return { ...DEFAULT_SETTINGS, ...(saved && typeof saved === "object" ? saved : {}) };
@@ -28,17 +26,9 @@ function readSettings() {
   }
 }
 
-function SettingsMenu({ open = false, onOpenChange }) {
-  const [settings, setSettings] = useState(readSettings);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-    document.documentElement.dataset.theme = settings.theme;
-    document.documentElement.style.setProperty("--ui-scale", `${Number(settings.uiScale) / 100}`);
-  }, [settings]);
-
+function SettingsMenu({ open = false, settings = DEFAULT_SETTINGS, onOpenChange, onSettingsChange }) {
   function handleChange(key, value) {
-    setSettings((current) => ({ ...current, [key]: value }));
+    onSettingsChange?.((current) => ({ ...current, [key]: value }));
   }
 
   function toggleMenu() {
