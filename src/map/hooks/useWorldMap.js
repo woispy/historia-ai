@@ -1,55 +1,24 @@
 import { useMemo } from "react";
+import { getProvinces } from "../../provinces";
+import { getGeometry } from "../../world/map/geometry";
+import { getCountry } from "../../countries";
 
-import {
-  getProvinces,
-} from "../../provinces";
-
-import {
-  getGeometry,
-} from "../../world/map/geometry";
-
-/**
- * ============================================================================
- * Historia AI
- * useWorldMap
- * ============================================================================
- *
- * Creates render-ready map data.
- */
-
-export function useWorldMap(
-  gameSession
-) {
+export function useWorldMap(gameSession) {
   return useMemo(() => {
-    if (!gameSession) {
-      return {
-        provinces: [],
-      };
-    }
+    if (!gameSession) return { provinces: [] };
 
-    const provinceRepository =
-      gameSession.world.repositories.provinces;
+    const provinceRepository = gameSession.world.repositories.provinces;
+    const countryRepository = gameSession.world.repositories.countries;
+    const geometryRepository = gameSession.world.map.geometry;
 
-    const geometryRepository =
-      gameSession.world.map.geometry;
+    const provinces = getProvinces(provinceRepository).map((province) => ({
+      province,
+      country: province.owner ? getCountry(countryRepository, province.owner) : null,
+      geometry: province.geometryId
+        ? getGeometry(geometryRepository, province.geometryId)
+        : null,
+    }));
 
-    const provinces =
-      getProvinces(
-        provinceRepository
-      ).map((province) => ({
-        province,
-
-        geometry:
-          province.geometryId
-            ? getGeometry(
-                geometryRepository,
-                province.geometryId
-              )
-            : null,
-      }));
-
-    return {
-      provinces,
-    };
+    return { provinces };
   }, [gameSession]);
 }
