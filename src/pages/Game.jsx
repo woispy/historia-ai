@@ -1,37 +1,27 @@
-import { useEffect, useState } from "react";
-
 import GameShell from "../components/GameShell/GameShell";
+import { hasCurrentGame, setCurrentGame, getCurrentGame } from "../game/currentGame";
+import { hasGameSave, loadGame } from "../save";
 
-import {
-  hasCurrentGame,
-  setCurrentGame,
-} from "../game/currentGame";
+function ensureCurrentGame() {
+  if (hasCurrentGame()) {
+    return getCurrentGame();
+  }
 
-import {
-  hasGameSave,
-  loadGame,
-} from "../save";
+  if (hasGameSave()) {
+    const session = loadGame();
+    if (session) {
+      setCurrentGame(session);
+      return session;
+    }
+  }
+
+  return null;
+}
 
 function Game() {
-  const [ready, setReady] = useState(false);
+  const session = ensureCurrentGame();
 
-  useEffect(() => {
-    // Eğer RAM'de aktif oyun yoksa,
-    // kayıtlı oyunu yüklemeyi dene.
-    if (!hasCurrentGame()) {
-      if (hasGameSave()) {
-        const session = loadGame();
-
-        if (session) {
-          setCurrentGame(session);
-        }
-      }
-    }
-
-    setReady(true);
-  }, []);
-
-  if (!ready) {
+  if (!session) {
     return null;
   }
 
