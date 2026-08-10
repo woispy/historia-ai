@@ -1,28 +1,13 @@
-import {
-  loadProvinceAssets,
-} from "./ProvinceAssetLoader.js";
-import {
-  createProvince,
-} from "../ProvinceFactory.js";
+import { loadProvinceAssets } from "./ProvinceAssetLoader.js";
+import { loadHistoricalProvinceManifest } from "./HistoricalProvinceManifestLoader.js";
+import { createProvince } from "../ProvinceFactory.js";
 import {
   createProvinceRepository,
   addProvince,
 } from "../ProvinceRepository.js";
-import {
-  createHistoricalProvinceRepository,
-} from "../HistoricalProvinceRepository.js";
+import { createHistoricalProvinceRepository } from "../HistoricalProvinceRepository.js";
 
-/**
- * Builds the province runtime from the generated province assets and then
- * applies the historical ownership registry for the active scenario date.
- *
- * Geometry remains an asset concern; ownership remains a historical-state
- * concern. Keeping those layers separate lets a later GIS import replace the
- * geometry without rewriting the simulation state model.
- */
-export function loadHistoricalProvinceRepository(historicalRegistry) {
-  const assets = loadProvinceAssets();
-
+function buildRepository(assets) {
   if (!Array.isArray(assets)) {
     throw new Error("Province Assets must be an array.");
   }
@@ -37,5 +22,21 @@ export function loadHistoricalProvinceRepository(historicalRegistry) {
     repository = addProvince(repository, createProvince(asset));
   }
 
-  return createHistoricalProvinceRepository(repository, historicalRegistry);
+  return repository;
+}
+
+/**
+ * Prefer imported historical province assets for the requested date. If none
+ * exist yet, fall back to the generated baseline assets and apply the
+ * historical ownership registry as a provisional runtime layer.
+ */
+export function loadHistoricalProvinceRepository(historicalRegistry) {
+  const date = historicalRegistry?.date ?? null;
+  const historicalAssets = loadHistoricalProvinceManifest(date);
+  const assets = historicalAssets ?? loadProvinceAssets();
+
+  return createHistoricalProvinceRepository(
+    buildRepository(assets),
+    historicalRegistry,
+  );
 }
