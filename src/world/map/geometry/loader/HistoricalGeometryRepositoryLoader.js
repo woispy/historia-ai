@@ -2,21 +2,22 @@ import {
   createGeometryRepository,
   addGeometry,
 } from "../GeometryRepository.js";
-import { loadHistoricalGeometryManifest } from "./HistoricalGeometryManifestLoader.js";
+import { loadHistoricalRuntimeAsset } from "../../loader/HistoricalRuntimeManifestLoader.js";
 
 export function loadHistoricalGeometryRepository(date) {
-  const assets = loadHistoricalGeometryManifest(date);
+  const runtimeAsset = loadHistoricalRuntimeAsset(date);
+  const assets = runtimeAsset?.geometries ?? null;
   if (!assets) return null;
 
   let repository = createGeometryRepository();
-
   for (const asset of assets) {
-    if (!asset?.id || !Array.isArray(asset.polygons)) {
+    if (!asset?.identity?.id || !Array.isArray(asset.polygons)) {
       throw new Error("Invalid historical geometry asset.");
     }
-
-    repository = addGeometry(repository, asset);
+    repository = addGeometry(repository, {
+      ...asset,
+      id: asset.identity.id,
+    });
   }
-
   return repository;
 }
