@@ -1,30 +1,10 @@
 /* ============================================================================
  * Historia AI
  * Provinces Module
- * ============================================================================
- *
- * Public API for the Province Runtime.
- */
-
-/* ============================================================================
- * Factory
  * ========================================================================== */
 
-export {
-  createProvince,
-} from "./ProvinceFactory.js";
-
-/* ============================================================================
- * Model
- * ========================================================================== */
-
-export {
-  createProvinceModel,
-} from "./ProvinceModel.js";
-
-/* ============================================================================
- * Repository
- * ========================================================================== */
+export { createProvince } from "./ProvinceFactory.js";
+export { createProvinceModel } from "./ProvinceModel.js";
 
 export {
   createProvinceRepository,
@@ -32,10 +12,6 @@ export {
   updateProvince,
   removeProvince,
 } from "./ProvinceRepository.js";
-
-/* ============================================================================
- * Queries
- * ========================================================================== */
 
 export {
   getProvince,
@@ -46,28 +22,13 @@ export {
   getProvincesByController,
 } from "./ProvinceQueries.js";
 
-/* ============================================================================
- * Bootstrap
- * ========================================================================== */
-
-export {
-  bootstrapProvinces,
-  createProvinceRepositoryFromArray,
-} from "./ProvinceBootstrap.js";
-
-/* ============================================================================
- * Loader
- * ========================================================================== */
+export { bootstrapProvinces } from "./ProvinceBootstrap.js";
 
 export {
   loadProvinceManifest,
   loadProvinceAssets,
   loadProvinceRepository,
 } from "./loader/index.js";
-
-/* ============================================================================
- * Presentation
- * ========================================================================== */
 
 export {
   getProvinceDisplayName,
@@ -77,14 +38,5 @@ export {
 
 export * from "./presentation/index.js";
 
-/* ============================================================================
- * View Models
- * ========================================================================== */
-
-export {
-  createProvinceViewModel,
-} from "./ProvinceViewModel.js";
-
-export {
-  createProvinceViewModelFromProvince,
-} from "./ProvinceViewModelFactory.js";
+export { createProvinceViewModel } from "./ProvinceViewModel.js";
+export { createProvinceViewModelFromProvince } from "./ProvinceViewModelFactory.js";
