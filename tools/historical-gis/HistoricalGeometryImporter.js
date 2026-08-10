@@ -46,12 +46,12 @@ function extractPolygons(geometry) {
 function compressAntarctica(polygons, sourceName) {
   if (!/antarctica/i.test(String(sourceName ?? ""))) return polygons;
 
-  // The source uses geographic coordinates, where Antarctica occupies the
-  // extreme southern edge of the world. Compress only that region so the
-  // playable world keeps a practical political-map aspect ratio without
-  // changing the longitude of any territory.
+  // Keep Antarctica as a small visual footer rather than allowing the raw
+  // geographic extent (-90 to roughly -60) to dominate the playable map.
+  // The source's southern edge remains anchored at -90 while the full
+  // continent is compressed to roughly 5.4 degrees of latitude.
   const pivotLatitude = -90;
-  const verticalScale = 0.42;
+  const verticalScale = 0.18;
 
   return polygons.map((ring) =>
     ring.map(([longitude, latitude]) => [

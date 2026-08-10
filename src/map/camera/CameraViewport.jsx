@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 
+const NON_PASSIVE_WHEEL_OPTIONS = Object.freeze({ passive: false });
+
 function CameraViewport({ children, cameraInput = null }) {
   const viewportRef = useRef(null);
 
@@ -9,13 +11,20 @@ function CameraViewport({ children, cameraInput = null }) {
 
     if (!viewport || !wheelHandler) return undefined;
 
-    // React's wheel delegation may be treated as passive by the browser.
-    // Register explicitly as non-passive so preventDefault() is guaranteed to
-    // work and page scrolling cannot compete with map zooming.
-    viewport.addEventListener("wheel", wheelHandler, { passive: false });
+    // The map owns wheel input. Register it explicitly as non-passive so the
+    // handler may cancel the browser's default page scroll safely.
+    viewport.addEventListener(
+      "wheel",
+      wheelHandler,
+      NON_PASSIVE_WHEEL_OPTIONS,
+    );
 
     return () => {
-      viewport.removeEventListener("wheel", wheelHandler);
+      viewport.removeEventListener(
+        "wheel",
+        wheelHandler,
+        NON_PASSIVE_WHEEL_OPTIONS,
+      );
     };
   }, [cameraInput?.onWheel]);
 

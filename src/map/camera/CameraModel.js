@@ -16,9 +16,6 @@ export function createCameraModel() {
     zoom: 1,
     target: null,
     minZoom: 1,
-    // High enough to inspect individual historical regions without making
-    // the world layer effectively unusable. The zoom step itself is constant,
-    // so reaching this range no longer becomes progressively slower.
-    maxZoom: 96,
+    maxZoom: 120,
   });
 }
