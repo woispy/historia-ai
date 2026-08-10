@@ -19,6 +19,16 @@ function ProvincePolygon({
     return null;
   }
 
+  // The current Phase 1 source is Natural Earth admin-0. Antarctica and the
+  // French Southern Lands are not useful political provinces for the 1300
+  // gameplay layer and otherwise dominate the far-zoom composition.
+  if (
+    province.geometryId === "geometry_country_ata" ||
+    province.geometryId === "geometry_country_atf"
+  ) {
+    return null;
+  }
+
   const d =
     geometry.polygons
       .map((polygon) => {
