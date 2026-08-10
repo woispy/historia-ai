@@ -4,9 +4,9 @@ import { getWheelZoomDelta } from "./CameraZoom";
 /**
  * Map-local pointer input.
  *
- * Wheel cancellation is owned by CameraViewport's native non-passive listener.
- * Keeping preventDefault() out of this callback avoids Chromium's passive
- * listener warning while preserving normal page-scroll suppression.
+ * Wheel input is attached by CameraViewport as a native non-passive listener.
+ * That keeps preventDefault() legal and avoids Chromium's passive-listener
+ * warning while preventing the page from scrolling during map zoom.
  */
 export function useCameraController({ zoom, move, smooth = true }) {
   const dragging = useRef(false);
@@ -38,6 +38,8 @@ export function useCameraController({ zoom, move, smooth = true }) {
   }, [flushMove, move, smooth]);
 
   const handleWheel = useCallback((event) => {
+    if (event.cancelable) event.preventDefault();
+
     const delta = getWheelZoomDelta(event, zoom);
     if (delta) zoom(delta);
   }, [zoom]);
