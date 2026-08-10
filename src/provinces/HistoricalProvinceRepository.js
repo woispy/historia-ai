@@ -11,9 +11,11 @@ function resolveHistoricalOwner(province, registry) {
   const provinceOwnership = registry?.provinceOwnership ?? {};
   const geometryOwnership = registry?.geometryOwnership ?? {};
   const geometryIso = getIsoFromGeometryId(province.geometryId);
+  const sourceFeatureId = province.historical?.sourceFeatureId ?? null;
 
   return (
     provinceOwnership[province.id] ??
+    (sourceFeatureId ? provinceOwnership[sourceFeatureId] : null) ??
     geometryOwnership[geometryIso] ??
     province.owner ??
     registry?.defaultCountryId ??
@@ -34,7 +36,8 @@ export function createHistoricalProvinceRepository(repository, historicalRegistr
     if (
       province.owner === countryId &&
       province.controller === countryId &&
-      province.historicalDate === historicalDate
+      province.historicalDate === historicalDate &&
+      province.historicalSource === historicalSource
     ) {
       continue;
     }
