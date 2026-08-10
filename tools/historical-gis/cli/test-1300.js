@@ -11,7 +11,7 @@ import {
   resolveHistoricalCountryId,
 } from "../../../src/world/historical/HistoricalCountryResolver.js";
 import { createCameraModel } from "../../../src/map/camera/CameraModel.js";
-import { moveCamera, setCameraZoom } from "../../../src/map/camera/CameraActions.js";
+import { moveCamera, setCameraZoom, zoomCamera } from "../../../src/map/camera/CameraActions.js";
 import { DEFAULT_SETTINGS } from "../../../src/components/GameShell/SettingsMenu/SettingsConfig.js";
 
 const duplicateNameFeatures = [
@@ -48,7 +48,7 @@ assert.equal(province.references.geometryId, geometry.identity.id);
 assert.equal(province.historical.sourceFeatureIndex, 0);
 assert.equal(geometry.metadata.sourceFeatureIndex, 0);
 
-assert.equal(normalizeHistoricalCountryName("Đại Việt"), "dai viet");
+assert.equal(normalizeHistoricalCountryName("Đại Viet"), "dai viet");
 assert.equal(resolveCanonicalHistoricalCountryId("Byzantine Empire"), "byzantium");
 assert.equal(resolveCanonicalHistoricalCountryId("Mamluke Sultanate"), "mamluks");
 assert.equal(resolveCanonicalHistoricalCountryId("Great Khanate"), "yuan");
@@ -81,7 +81,7 @@ const antarctica = normalizeHistoricalFeature(
     properties: { NAME: "Antarctica" },
     geometry: {
       type: "Polygon",
-      coordinates: [[[-30, -90], [30, -90], [30, -60], [-30, -60], [-30, -90]]],
+      coordinates: [[[-30, -90], [30, -90], [30, -60], [-30, -90]]],
     },
   },
   11,
@@ -97,8 +97,16 @@ const draggedDown = moveCamera(camera, 0, 100, viewport);
 const draggedUp = moveCamera(camera, 0, -100, viewport);
 assert.ok(draggedDown.y > camera.y, "Dragging down must move the map south/down.");
 assert.ok(draggedUp.y < camera.y, "Dragging up must move the map north/up.");
-assert.equal(setCameraZoom(camera, 99, viewport).zoom, 72);
+assert.equal(setCameraZoom(camera, 99, viewport).zoom, 96);
 assert.equal(setCameraZoom(camera, 0, viewport).zoom, 1);
+
+// A wheel-sized 1.5 zoom increment must have the same strength at every
+// starting zoom level. This guards against the old zoom-proportional jump.
+const lowZoom = setCameraZoom(camera, 4, viewport);
+const highZoom = setCameraZoom(camera, 60, viewport);
+assert.equal(zoomCamera(lowZoom, 1.5, viewport).zoom - lowZoom.zoom, 1.5);
+assert.equal(zoomCamera(highZoom, 1.5, viewport).zoom - highZoom.zoom, 1.5);
+assert.equal(zoomCamera(highZoom, -1.5, viewport).zoom - highZoom.zoom, -1.5);
 
 assert.equal(DEFAULT_SETTINGS.advisorAutoOpen, undefined);
 assert.equal(DEFAULT_SETTINGS.tips, true);
