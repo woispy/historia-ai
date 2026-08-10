@@ -39,12 +39,14 @@ function NotificationToast() {
   }, [notifications]);
 
   useEffect(() => {
+    const activeTimers = timers.current;
+
     return () => {
-      for (const timer of timers.current.values()) {
+      for (const timer of activeTimers.values()) {
         clearTimeout(timer);
       }
 
-      timers.current.clear();
+      activeTimers.clear();
     };
   }, []);
 
