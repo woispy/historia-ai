@@ -6,7 +6,7 @@
 }
 
 .date-button.active {
-  background: #3a3325;
+  background: rgba(58, 51, 37, 0.92);
   border-color: #c9a94f;
 }
 
@@ -14,8 +14,8 @@
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
-  width: max-content;
-  min-width: 158px;
+  width: 100%;
+  min-width: 0;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -23,10 +23,10 @@
   padding: 8px;
   border: 1px solid #6c5b2f;
   border-radius: 8px;
-  background: rgba(25, 23, 19, 0.96);
+  background: rgba(25, 23, 19, 0.78);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.38);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.34);
 }
 
 .time-controls button {
@@ -34,10 +34,10 @@
   min-height: 38px;
   box-sizing: border-box;
   margin: 0;
-  padding: 8px 14px;
-  border: 1px solid #6c5b2f;
+  padding: 8px 10px;
+  border: 1px solid rgba(108, 91, 47, 0.88);
   border-radius: 6px;
-  background: #2d2921;
+  background: rgba(45, 41, 33, 0.72);
   color: #f4e8c1;
   font: 600 13px/1 "Segoe UI", Arial, sans-serif;
   font-variant-numeric: tabular-nums;
@@ -47,7 +47,7 @@
 }
 
 .time-controls button:hover:not(:disabled) {
-  background: #3a3429;
+  background: rgba(58, 52, 41, 0.90);
   border-color: #c9a94f;
   color: #fff4c7;
   transform: none;

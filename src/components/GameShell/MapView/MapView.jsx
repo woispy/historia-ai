@@ -4,7 +4,11 @@ import { WorldMap } from "../../../map";
 
 function MapView({ gameSession, settings }) {
   return (
-    <main className="map-view">
+    <main
+      className="map-view"
+      title={settings.tips ? "Haritayı sürükleyerek gezinebilir, tekerlek ile yakınlaşıp uzaklaşabilirsiniz." : undefined}
+      aria-label="Dünya haritası"
+    >
       <div className="map-layer terrain">
         <WorldMap
           runtime={gameSession}

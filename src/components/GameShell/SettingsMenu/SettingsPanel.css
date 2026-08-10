@@ -6,9 +6,11 @@
   height: calc(100vh - 74px);
   box-sizing: border-box;
   overflow: hidden;
-  background: rgba(25, 23, 19, 0.98);
+  background: rgba(25, 23, 19, 0.96);
   border-left: 1px solid #6c5b2f;
   box-shadow: -14px 0 36px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   z-index: 2400;
   color: #eadcae;
 }
@@ -17,16 +19,37 @@
   height: 72px;
   display: flex;
   align-items: center;
+  gap: 12px;
   padding: 0 22px;
   box-sizing: border-box;
   border-bottom: 1px solid #5d4f29;
-  background: rgba(31, 29, 24, 0.94);
+  background: rgba(31, 29, 24, 0.90);
 }
 
 .settings-panel-header h2 {
   margin: 0;
   color: #e4c76a;
   font: 700 25px/1.1 Georgia, "Times New Roman", serif;
+}
+
+.settings-panel-back {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #6c5b2f;
+  border-radius: 6px;
+  background: rgba(45, 41, 33, 0.82);
+  color: #f4e8c1;
+  font: 600 18px/1 "Segoe UI", Arial, sans-serif;
+  cursor: pointer;
+}
+
+.settings-panel-back:hover {
+  background: rgba(58, 52, 41, 0.92);
+  border-color: #c9a94f;
+  transform: none;
 }
 
 .settings-panel-body {

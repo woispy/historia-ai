@@ -97,10 +97,14 @@ const draggedDown = moveCamera(camera, 0, 100, viewport);
 const draggedUp = moveCamera(camera, 0, -100, viewport);
 assert.ok(draggedDown.y > camera.y, "Dragging down must move the map south/down.");
 assert.ok(draggedUp.y < camera.y, "Dragging up must move the map north/up.");
-assert.equal(setCameraZoom(camera, 99, viewport).zoom, 18);
+assert.equal(setCameraZoom(camera, 99, viewport).zoom, 72);
 assert.equal(setCameraZoom(camera, 0, viewport).zoom, 1);
 
 assert.equal(DEFAULT_SETTINGS.advisorAutoOpen, undefined);
 assert.equal(DEFAULT_SETTINGS.tips, true);
+assert.equal(DEFAULT_SETTINGS.smoothCamera, true);
+assert.equal(DEFAULT_SETTINGS.mapShadows, true);
+assert.equal(DEFAULT_SETTINGS.notifications, true);
+assert.equal(DEFAULT_SETTINGS.autosave, "6m");
 
 console.log("Historical GIS 1300 identity, country resolver, camera, projection and settings tests passed.");

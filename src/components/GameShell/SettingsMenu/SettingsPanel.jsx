@@ -31,11 +31,14 @@ function ToggleRow({ label, value, onChange }) {
   );
 }
 
-function SettingsPanel({ settings, onChange }) {
+function SettingsPanel({ settings, onChange, onBack }) {
   return (
     <aside className="settings-panel" aria-label="Ayarlar">
       <div className="settings-panel-header">
-        <h2>⚙ Ayarlar</h2>
+        <button type="button" className="settings-panel-back" onClick={onBack} aria-label="Oyun menüsüne dön">
+          ←
+        </button>
+        <h2>Ayarlar</h2>
       </div>
 
       <div className="settings-panel-body">

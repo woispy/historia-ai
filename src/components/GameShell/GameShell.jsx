@@ -1,18 +1,41 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "../../layouts/Layout/Layout";
 import TopBar from "./TopBar/TopBar";
 import TimeControls from "./TopBar/TimeControls";
 import MapView from "./MapView/MapView";
 import OverlayManager from "./OverlayManager/OverlayManager";
 import NotificationToast from "../NotificationToast/NotificationToast";
-import { getCurrentGame, updateCurrentGame } from "../../game/currentGame";
+import { getCurrentGame, updateCurrentGame, setCurrentGame, clearCurrentGame } from "../../game/currentGame";
 import { getCurrentDate, getTimeline, getPendingActions } from "../../state";
 import { advanceWeek, advanceMonth, advanceSixMonths, advanceYear } from "../../systems/Action";
-import { saveGame } from "../../save";
+import {
+  saveGame,
+  loadGame,
+  deleteGame,
+} from "../../save";
 import { useDecisionEditor } from "../../hooks/useDecisionEditor";
 import { readSettings, STORAGE_KEY } from "./SettingsMenu/SettingsConfig";
 
+function monthIndex(date) {
+  return Number(date?.year ?? 0) * 12 + Number(date?.month ?? 0);
+}
+
+function shouldAutoSave(previousSession, nextSession, autosave) {
+  if (autosave === "off") return false;
+
+  const previousDate = getCurrentDate(previousSession);
+  const nextDate = getCurrentDate(nextSession);
+  const elapsedMonths = monthIndex(nextDate) - monthIndex(previousDate);
+
+  if (autosave === "6m") return elapsedMonths >= 6;
+  if (autosave === "1y") return Number(nextDate?.year) > Number(previousDate?.year);
+
+  return false;
+}
+
 function GameShell() {
+  const navigate = useNavigate();
   const [gameSession, setGameSession] = useState(() => getCurrentGame());
   const [busy, setBusy] = useState(false);
   const [timeMenuOpen, setTimeMenuOpen] = useState(false);
@@ -36,6 +59,7 @@ function GameShell() {
     document.documentElement.dataset.mapStyle = settings.mapStyle;
     document.documentElement.dataset.mapShadows = String(settings.mapShadows);
     document.documentElement.dataset.effects = String(settings.effects);
+    document.documentElement.dataset.tips = String(settings.tips);
     document.body.style.zoom = `${Number(settings.uiScale) / 100}`;
 
     return () => {
@@ -46,12 +70,18 @@ function GameShell() {
   function advance(simulator) {
     if (busy) return;
     setBusy(true);
+
     setGameSession((previousSession) => {
       const nextSession = simulator(previousSession);
       updateCurrentGame(nextSession);
-      saveGame(nextSession);
+
+      if (shouldAutoSave(previousSession, nextSession, settings.autosave)) {
+        saveGame(nextSession);
+      }
+
       return nextSession;
     });
+
     setBusy(false);
   }
 
@@ -71,6 +101,35 @@ function GameShell() {
     }
   }
 
+  function handleManualSave() {
+    saveGame(gameSession);
+  }
+
+  function handleLoadGame() {
+    try {
+      const loaded = loadGame();
+      if (!loaded) return false;
+
+      setGameSession(loaded);
+      setCurrentGame(loaded);
+      setAdvisorOpen(false);
+      setTimeMenuOpen(false);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function handleDeleteSave() {
+    deleteGame();
+  }
+
+  function leaveToMainMenu() {
+    clearCurrentGame();
+    setSettingsOpen(false);
+    navigate("/");
+  }
+
   const simulation = gameSession.runtime?.simulation ?? {};
 
   return (
@@ -87,6 +146,11 @@ function GameShell() {
         onToggleSettings={toggleSettings}
         settings={settings}
         onSettingsChange={setSettings}
+        onSaveGame={handleManualSave}
+        onLoadGame={handleLoadGame}
+        onDeleteSave={handleDeleteSave}
+        onMainMenu={leaveToMainMenu}
+        onExitGame={leaveToMainMenu}
       />
       {settings.notifications && <NotificationToast />}
       <MapView gameSession={gameSession} settings={settings} />

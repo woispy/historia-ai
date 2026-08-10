@@ -16,6 +16,6 @@ export function createCameraModel() {
     zoom: 1,
     target: null,
     minZoom: 1,
-    maxZoom: 18,
+    maxZoom: 72,
   });
 }

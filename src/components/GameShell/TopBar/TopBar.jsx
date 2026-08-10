@@ -16,6 +16,11 @@ function TopBar({
   onToggleSettings,
   settings,
   onSettingsChange,
+  onSaveGame,
+  onLoadGame,
+  onDeleteSave,
+  onMainMenu,
+  onExitGame,
 }) {
   return (
     <header className="topbar">
@@ -34,7 +39,6 @@ function TopBar({
             aria-expanded={timeMenuOpen}
             onClick={onToggleTimeMenu}
           >
-            <span className="date-icon" aria-hidden="true">📅</span>
             <span>{formatDate(currentDate)}</span>
             <span className="date-arrow" aria-hidden="true">▼</span>
           </button>
@@ -56,6 +60,11 @@ function TopBar({
           settings={settings}
           onOpenChange={onToggleSettings}
           onSettingsChange={onSettingsChange}
+          onSaveGame={onSaveGame}
+          onLoadGame={onLoadGame}
+          onDeleteSave={onDeleteSave}
+          onMainMenu={onMainMenu}
+          onExitGame={onExitGame}
         />
       </div>
     </header>
