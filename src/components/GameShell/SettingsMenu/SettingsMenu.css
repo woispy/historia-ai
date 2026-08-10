@@ -12,7 +12,7 @@
   justify-content: center;
   margin: 0;
   padding: 0;
-  background: #2d2921;
+  background: rgba(45, 41, 33, 0.88);
   border: 1px solid #6c5b2f;
   border-radius: 8px;
   color: #f4e8c1;
@@ -24,7 +24,7 @@
 
 .menu-button:hover,
 .menu-button.active {
-  background: #3a3429;
+  background: rgba(58, 52, 41, 0.92);
   border-color: #c9a94f;
   color: #fff4c7;
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.30);
@@ -32,4 +32,149 @@
 
 .menu-button.active {
   transform: rotate(8deg);
+}
+
+.game-menu-panel,
+.save-records-panel {
+  position: fixed;
+  top: 74px;
+  right: 10px;
+  width: 236px;
+  box-sizing: border-box;
+  border: 1px solid #6c5b2f;
+  border-radius: 0 0 9px 9px;
+  background: rgba(31, 29, 24, 0.90);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.42);
+  overflow: hidden;
+  z-index: 2500;
+}
+
+.game-menu-panel {
+  padding: 8px 0;
+}
+
+.game-menu-panel button {
+  width: 100%;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0 20px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #eadcae;
+  font: 500 14px/1 "Segoe UI", Arial, sans-serif;
+  text-align: left;
+  cursor: pointer;
+}
+
+.game-menu-panel button:hover:not(:disabled) {
+  background: rgba(201, 169, 79, 0.12);
+  color: #fff4c7;
+  transform: none;
+}
+
+.game-menu-panel button:disabled {
+  color: #746d59;
+  cursor: default;
+}
+
+.game-menu-separator {
+  height: 1px;
+  margin: 6px 0;
+  background: rgba(108, 91, 47, 0.65);
+}
+
+.save-records-panel {
+  min-height: 210px;
+}
+
+.settings-subheader {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  border-bottom: 1px solid rgba(108, 91, 47, 0.65);
+}
+
+.settings-subheader h2 {
+  margin: 0;
+  color: #e4c76a;
+  font: 700 18px/1.1 Georgia, "Times New Roman", serif;
+}
+
+.settings-back-button {
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #6c5b2f;
+  border-radius: 6px;
+  background: rgba(45, 41, 33, 0.82);
+  color: #f4e8c1;
+  cursor: pointer;
+}
+
+.settings-back-button:hover {
+  background: rgba(58, 52, 41, 0.92);
+  border-color: #c9a94f;
+  transform: none;
+}
+
+.save-records-body {
+  padding: 14px;
+}
+
+.save-record-card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 12px;
+  border: 1px solid rgba(108, 91, 47, 0.72);
+  border-radius: 7px;
+  background: rgba(25, 23, 19, 0.62);
+  color: #b2a681;
+  font: 400 12px/1.35 "Segoe UI", Arial, sans-serif;
+}
+
+.save-record-card strong {
+  color: #eadcae;
+  font-size: 14px;
+}
+
+.save-record-card.has-save span {
+  color: #d8ba62;
+}
+
+.save-record-card small {
+  color: #81785f;
+}
+
+.save-record-delete {
+  width: 100%;
+  min-height: 36px;
+  margin: 10px 0 0;
+  border: 1px solid #6c5b2f;
+  border-radius: 6px;
+  background: rgba(45, 41, 33, 0.82);
+  color: #eadcae;
+  font: 500 12px/1 "Segoe UI", Arial, sans-serif;
+  cursor: pointer;
+}
+
+.save-record-delete:hover:not(:disabled) {
+  background: rgba(120, 73, 49, 0.42);
+  border-color: #b78954;
+  transform: none;
+}
+
+.save-record-delete:disabled {
+  opacity: .45;
+  cursor: default;
 }
