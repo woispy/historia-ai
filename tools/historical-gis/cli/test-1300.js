@@ -88,7 +88,8 @@ const antarctica = normalizeHistoricalFeature(
   1300,
 );
 const antarcticaLatitudes = antarctica.polygons[0].map(([, latitude]) => latitude);
-assert.equal(Math.max(...antarcticaLatitudes) - Math.min(...antarcticaLatitudes), 12.6);
+const antarcticaLatitudeSpan = Math.max(...antarcticaLatitudes) - Math.min(...antarcticaLatitudes);
+assert.ok(Math.abs(antarcticaLatitudeSpan - 12.6) < 1e-9);
 
 const viewport = { width: 1200, height: 700 };
 const camera = createCameraModel();
