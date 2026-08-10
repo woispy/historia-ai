@@ -11,6 +11,10 @@ import {
 } from "../provinces";
 
 import {
+  applyHistoricalProvinceOwnership,
+} from "../provinces/HistoricalProvinceOwnership.js";
+
+import {
   createCharacterRepository,
 } from "../characters";
 
@@ -34,7 +38,6 @@ import {
  *
  * Creates every runtime repository.
  */
-
 export function createRepositories(
   scenario
 ) {
@@ -44,12 +47,44 @@ export function createRepositories(
     );
   }
 
+  const historicalRegistry =
+    Object.values(
+      scenario.data.historical ?? {}
+    )[0] ?? null;
+
+  const scenarioCountries =
+    Object.values(
+      scenario.data.countries ?? {}
+    );
+
+  const historicalCountries =
+    Object.values(
+      historicalRegistry?.countries ?? {}
+    );
+
+  const countriesById = {};
+
+  for (const country of historicalCountries) {
+    countriesById[country.id] = country;
+  }
+
+  for (const country of scenarioCountries) {
+    countriesById[country.id] = {
+      ...(countriesById[country.id] ?? {}),
+      ...country,
+    };
+  }
+
+  const provinceRepository =
+    applyHistoricalProvinceOwnership(
+      bootstrapProvinces(),
+      historicalRegistry
+    );
+
   return {
     countries:
       createCountryRepositoryFromArray(
-        Object.values(
-          scenario.data.countries ?? {}
-        )
+        Object.values(countriesById)
       ),
 
     cities:
@@ -60,7 +95,7 @@ export function createRepositories(
       ),
 
     provinces:
-      bootstrapProvinces(),
+      provinceRepository,
 
     characters:
       createCharacterRepository(),
