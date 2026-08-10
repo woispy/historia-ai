@@ -8,30 +8,23 @@ function clamp(value, min, max) {
 export function processEconomy(gameSession) {
   const runtime = getRuntime(gameSession);
   const simulation = runtime.simulation ?? {};
+  const playerCountryId = gameSession.player?.countryId;
   const cities = Object.values(
     gameSession.world.repositories.cities?.byId ?? {}
-  );
+  ).filter((city) => city.owner === playerCountryId);
 
-  const cityProsperity = cities.reduce(
+  const cityCount = Math.max(cities.length, 1);
+  const prosperity = cities.reduce(
     (sum, city) => sum + (Number(city.prosperity) || 0),
     0
-  );
-  const cityFood = cities.reduce(
+  ) / cityCount;
+  const food = cities.reduce(
     (sum, city) => sum + (Number(city.food) || 0),
     0
-  );
-  const cityCount = Math.max(cities.length, 1);
+  ) / cityCount;
 
-  const prosperity = cityProsperity / cityCount;
-  const food = cityFood / cityCount;
-  const baseIncome = Math.max(
-    5,
-    Math.round(prosperity * cityCount * 0.45)
-  );
-  const expenses = Math.max(
-    2,
-    Math.round((simulation.militaryPower ?? 0) * 0.025)
-  );
+  const baseIncome = Math.max(5, Math.round(prosperity * cityCount * 0.45));
+  const expenses = Math.max(2, Math.round((simulation.militaryPower ?? 0) * 0.025));
   const net = baseIncome - expenses;
 
   const nextSimulation = {
@@ -51,15 +44,13 @@ export function processEconomy(gameSession) {
     simulation: nextSimulation,
   });
 
-  if (net !== 0) {
-    nextSession = addTimelineEvent(nextSession, {
-      category: "economy",
-      source: "economy-engine",
-      key: net > 0 ? "treasury_growth" : "treasury_decline",
-      data: { income: baseIncome, expenses, net },
-      editable: false,
-    });
-  }
+  nextSession = addTimelineEvent(nextSession, {
+    category: "economy",
+    source: "economy-engine",
+    key: net >= 0 ? "treasury_growth" : "treasury_decline",
+    data: { income: baseIncome, expenses, net, cities: cities.length },
+    editable: false,
+  });
 
   return nextSession;
 }
