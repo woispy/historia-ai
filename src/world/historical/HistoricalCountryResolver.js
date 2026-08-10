@@ -55,13 +55,17 @@ const COUNTRY_ALIASES = Object.freeze({
   goryeo: ["goryeo", "koryo", "goryeo kingdom"],
 });
 
+const SPECIAL_LETTER_REPLACEMENTS = Object.freeze([
+  [/đ/g, "d"], [/ð/g, "d"], [/þ/g, "th"], [/ł/g, "l"],
+  [/ø/g, "o"], [/æ/g, "ae"], [/œ/g, "oe"],
+]);
+
 export function normalizeHistoricalCountryName(value) {
-  return String(value ?? "")
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
+  let normalized = String(value ?? "").normalize("NFKD");
+  for (const [pattern, replacement] of SPECIAL_LETTER_REPLACEMENTS) {
+    normalized = normalized.replace(pattern, replacement);
+  }
+  return normalized.replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
 const aliasIndex = new Map();
@@ -73,8 +77,7 @@ for (const [countryId, aliases] of Object.entries(COUNTRY_ALIASES)) {
 }
 
 export function resolveCanonicalHistoricalCountryId(value) {
-  const normalized = normalizeHistoricalCountryName(value);
-  return aliasIndex.get(normalized) ?? null;
+  return aliasIndex.get(normalizeHistoricalCountryName(value)) ?? null;
 }
 
 export function buildHistoricalCountryAliasIndex(countries = {}) {
