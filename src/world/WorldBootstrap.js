@@ -15,7 +15,7 @@ export function bootstrapWorld(scenario) {
 
   const runtimeScenario = bootstrapScenario(scenario);
   const repositories = createRepositories(runtimeScenario);
-  const map = createMap(repositories.provinces);
+  const map = createMap(repositories.provinces, runtimeScenario.startDate);
 
   return {
     scenario: runtimeScenario,
