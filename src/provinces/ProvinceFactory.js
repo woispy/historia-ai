@@ -1,8 +1,5 @@
 import { createProvinceModel } from "./ProvinceModel.js";
 
-/**
- * Converts immutable Province Assets into runtime Province Models.
- */
 export function createProvince(asset) {
   if (!asset) throw new Error("Province Asset is required.");
   if (!asset.identity) throw new Error("Province Asset identity is required.");
@@ -17,6 +14,7 @@ export function createProvince(asset) {
     religion = {},
     population = {},
     economy = {},
+    military = {},
     historical = {},
   } = asset;
 
@@ -27,8 +25,6 @@ export function createProvince(asset) {
     id: identity.id,
     name: identity.name,
     geometryId: references.geometryId,
-    region: null,
-    terrain: null,
     owner: ownership.countryId ?? null,
     controller: ownership.ownerId ?? null,
     governor: administration.governorId ?? null,
@@ -36,6 +32,8 @@ export function createProvince(asset) {
     religion: religion.primaryReligion ?? null,
     population: population.total ?? 0,
     development: economy.development ?? 0,
+    wealth: economy.wealth ?? 0,
+    supplyLimit: military.supplyLimit ?? 0,
     historical: Object.freeze({ ...historical }),
     historicalDate: asset.header?.historicalDate ?? null,
     historicalSource: asset.header?.provider ?? null,
