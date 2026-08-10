@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Layout from "../../layouts/Layout/Layout";
 import TopBar from "./TopBar/TopBar";
 import TimeControls from "./TopBar/TimeControls";
@@ -10,6 +10,7 @@ import { getCurrentDate, getTimeline, getPendingActions } from "../../state";
 import { advanceWeek, advanceMonth, advanceSixMonths, advanceYear } from "../../systems/Action";
 import { saveGame } from "../../save";
 import { useDecisionEditor } from "../../hooks/useDecisionEditor";
+import { DEFAULT_SETTINGS, STORAGE_KEY, readSettings } from "./SettingsMenu/SettingsMenu";
 
 function GameShell() {
   const [gameSession, setGameSession] = useState(() => getCurrentGame());
@@ -17,6 +18,7 @@ function GameShell() {
   const [timeMenuOpen, setTimeMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [closeAdvisorKey, setCloseAdvisorKey] = useState(0);
+  const [settings, setSettings] = useState(readSettings);
 
   const {
     editingAction,
@@ -27,6 +29,15 @@ function GameShell() {
     cancelEditing,
     deleteAction,
   } = useDecisionEditor(setGameSession);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    document.documentElement.dataset.theme = settings.theme;
+    document.documentElement.dataset.mapStyle = settings.mapStyle;
+    document.documentElement.dataset.mapShadows = String(settings.mapShadows);
+    document.documentElement.dataset.effects = String(settings.effects);
+    document.body.style.zoom = `${Number(settings.uiScale) / 100}`;
+  }, [settings]);
 
   function advance(simulator) {
     if (busy) return;
@@ -70,9 +81,11 @@ function GameShell() {
         timeControls={<TimeControls busy={busy} onAdvance={advanceBy} />}
         settingsOpen={settingsOpen}
         onToggleSettings={toggleSettings}
+        settings={settings}
+        onSettingsChange={setSettings}
       />
-      <NotificationToast />
-      <MapView gameSession={gameSession} />
+      {settings.notifications && <NotificationToast />}
+      <MapView gameSession={gameSession} settings={settings} />
       <OverlayManager
         timeline={getTimeline(gameSession)}
         pendingActions={getPendingActions(gameSession)}
@@ -85,9 +98,12 @@ function GameShell() {
         onCancelEditing={cancelEditing}
         closeAdvisorKey={closeAdvisorKey}
         settingsOpen={settingsOpen}
+        settings={settings}
       />
     </Layout>
   );
 }
 
 export default GameShell;
+
+void DEFAULT_SETTINGS;
