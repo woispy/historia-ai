@@ -7,6 +7,7 @@
 
 function ProvincePolygon({
   province,
+  country,
   geometry,
   selected,
   onClick,
@@ -45,13 +46,17 @@ function ProvincePolygon({
       })
       .join(" ");
 
+  const countryColor =
+    country?.color ??
+    "#6f765f";
+
   return (
     <path
       d={d}
       fill={
         selected
           ? "#d6b04d"
-          : "#5d7c4f"
+          : countryColor
       }
       stroke="#20251f"
       strokeWidth="0.15"
