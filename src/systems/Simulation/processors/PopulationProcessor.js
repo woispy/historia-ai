@@ -1,6 +1,5 @@
 import { getRuntime, updateRuntime } from "../../../state";
 import { updateCity } from "../../../cities/CityRepository";
-import { addTimelineEvent } from "../../Timeline";
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -17,9 +16,15 @@ export function processPopulation(gameSession) {
     const food = Number(city.food ?? 50);
     const prosperity = Number(city.prosperity ?? 50);
     const loyalty = Number(city.loyalty ?? 50);
-    const pressure = (food - 50) * 0.0004 + (prosperity - 50) * 0.0002 + (loyalty - 50) * 0.0001;
+    const pressure =
+      (food - 50) * 0.0004 +
+      (prosperity - 50) * 0.0002 +
+      (loyalty - 50) * 0.0001;
     const growthRate = clamp(0.002 + pressure, -0.01, 0.012);
-    const population = Math.max(100, Math.round(Number(city.population ?? 0) * (1 + growthRate)));
+    const population = Math.max(
+      100,
+      Math.round(Number(city.population ?? 0) * (1 + growthRate))
+    );
     const nextFood = clamp(food - population / 250000, 0, 100);
 
     nextCities = updateCity(nextCities, {
@@ -47,7 +52,8 @@ export function processPopulation(gameSession) {
     simulation: {
       ...simulation,
       population: totalPopulation,
-      monthlyGrowth: totalPopulation - (simulation.population ?? totalPopulation),
+      monthlyGrowth:
+        totalPopulation - (simulation.population ?? totalPopulation),
     },
   });
 }
