@@ -23,11 +23,13 @@ export {
 } from "./ProvinceQueries.js";
 
 export { bootstrapProvinces } from "./ProvinceBootstrap.js";
+export { createHistoricalProvinceRepository } from "./HistoricalProvinceRepository.js";
 
 export {
   loadProvinceManifest,
   loadProvinceAssets,
   loadProvinceRepository,
+  loadHistoricalProvinceRepository,
 } from "./loader/index.js";
 
 export {
