@@ -63,20 +63,22 @@ function WorldMap({
         <RenderRoot>
           <SvgRenderer>
             {worldCopies.map((offset) => (
-              <RenderLayer
+              <g
                 key={offset}
                 transform={`translate(${offset} 0)`}
               >
-                <ProvinceLayer
-                  provinces={provinces}
-                  selectedProvinceId={
-                    selectedProvinceId
-                  }
-                  onProvinceClick={
-                    onProvinceClick
-                  }
-                />
-              </RenderLayer>
+                <RenderLayer>
+                  <ProvinceLayer
+                    provinces={provinces}
+                    selectedProvinceId={
+                      selectedProvinceId
+                    }
+                    onProvinceClick={
+                      onProvinceClick
+                    }
+                  />
+                </RenderLayer>
+              </g>
             ))}
           </SvgRenderer>
         </RenderRoot>
