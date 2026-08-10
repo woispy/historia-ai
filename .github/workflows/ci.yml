@@ -20,31 +20,23 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
       - name: Install dependencies
-        run: npm install
-
+        run: npm ci
       - name: Lint
         run: npm run lint
-
       - name: Run historical GIS identity tests
         run: npm run test:historical-gis
-
       - name: Generate historical GIS runtime assets
         run: npm run build:historical-gis:1300
-
       - name: Validate historical GIS runtime assets
         run: npm run validate:historical-gis:1300
-
       - name: Build
         run: npm run build
-
       - name: Verify historical GIS scripts
         run: >-
           node --check tools/historical-gis/HistoricalAssetId.js &&
@@ -52,4 +44,8 @@ jobs:
           node --check tools/historical-gis/HistoricalProvinceAssetBuilder.js &&
           node --check tools/historical-gis/cli/import-1300.js &&
           node --check tools/historical-gis/cli/test-1300.js &&
-          node --check tools/historical-gis/cli/validate-1300.js
+          node --check tools/historical-gis/cli/validate-1300.js &&
+          node --check src/world/historical/HistoricalCountryResolver.js &&
+          node --check src/provinces/HistoricalProvinceRepository.js &&
+          node --check src/provinces/ProvinceFactory.js &&
+          node --check src/provinces/ProvinceModel.js
