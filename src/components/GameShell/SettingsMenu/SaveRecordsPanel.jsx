@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { getGameSaveInfo, hasGameSave } from "../../../save";
 
@@ -15,17 +15,13 @@ function formatTimestamp(value) {
 }
 
 function SaveRecordsPanel({ onBack, onDelete }) {
-  const [hasSave, setHasSave] = useState(false);
-  const [info, setInfo] = useState(null);
+  const [hasSave, setHasSave] = useState(() => hasGameSave());
+  const [info, setInfo] = useState(() => getGameSaveInfo());
 
   function refresh() {
     setHasSave(hasGameSave());
     setInfo(getGameSaveInfo());
   }
-
-  useEffect(() => {
-    refresh();
-  }, []);
 
   function handleDelete() {
     if (!hasSave) return;
