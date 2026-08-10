@@ -48,7 +48,7 @@ assert.equal(province.references.geometryId, geometry.identity.id);
 assert.equal(province.historical.sourceFeatureIndex, 0);
 assert.equal(geometry.metadata.sourceFeatureIndex, 0);
 
-assert.equal(normalizeHistoricalCountryName("Đại Viet"), "dai viet");
+assert.equal(normalizeHistoricalCountryName("Đại Việt"), "dai viet");
 assert.equal(resolveCanonicalHistoricalCountryId("Byzantine Empire"), "byzantium");
 assert.equal(resolveCanonicalHistoricalCountryId("Mamluke Sultanate"), "mamluks");
 assert.equal(resolveCanonicalHistoricalCountryId("Great Khanate"), "yuan");
