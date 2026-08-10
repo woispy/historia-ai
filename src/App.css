@@ -182,7 +182,7 @@ hr {
 
 /* ==========================================================
    OVERLAY BUTTONS
-   Consistent with the dark/gold game theme.
+   Translucent, compact and consistent with the reference UI.
 ========================================================== */
 
 .left-toggle,
@@ -194,9 +194,9 @@ hr {
   padding: 0 16px;
   border: 1px solid #6c5b2f;
   border-radius: 7px;
-  background: rgba(25, 23, 19, 0.94);
+  background: rgba(25, 23, 19, 0.78);
   color: #f4e8c1;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.32);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   font: 600 14px/1 "Segoe UI", Arial, sans-serif;
@@ -205,14 +205,14 @@ hr {
 
 .left-toggle:hover,
 .right-toggle:hover {
-  background: #3a3429;
+  background: rgba(58, 52, 41, 0.88);
   border-color: #c9a94f;
   color: #fff4c7;
   transform: translateY(-2px);
 }
 
 .left-toggle { left: 20px; }
-.diplomacy-toggle { left: 164px; }
+.diplomacy-toggle { left: 145px; }
 .right-toggle { right: 20px; }
 
 .hidden-toggle {
@@ -234,15 +234,17 @@ hr {
   padding: 0;
   border: 1px solid #6c5b2f;
   border-radius: 7px;
-  background: rgba(25, 23, 19, 0.94);
+  background: rgba(25, 23, 19, 0.82);
   color: #f4e8c1;
   transform: translateY(-50%);
   font-size: 22px;
   z-index: var(--z-popup);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .overlay-handle:hover {
-  background: #3a3429;
+  background: rgba(58, 52, 41, 0.90);
   border-color: #c9a94f;
 }
 
