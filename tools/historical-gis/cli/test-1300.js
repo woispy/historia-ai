@@ -1,14 +1,41 @@
 import assert from "node:assert/strict";
+
 import { normalizeHistoricalFeature } from "../HistoricalGeometryImporter.js";
-import { buildHistoricalGeometryAsset, buildHistoricalProvinceAsset } from "../HistoricalProvinceAssetBuilder.js";
-import { normalizeHistoricalCountryName, resolveCanonicalHistoricalCountryId, resolveHistoricalCountryId } from "../../../src/world/historical/HistoricalCountryResolver.js";
+import {
+  buildHistoricalGeometryAsset,
+  buildHistoricalProvinceAsset,
+} from "../HistoricalProvinceAssetBuilder.js";
+import {
+  normalizeHistoricalCountryName,
+  resolveCanonicalHistoricalCountryId,
+  resolveHistoricalCountryId,
+} from "../../../src/world/historical/HistoricalCountryResolver.js";
+import { createCameraModel } from "../../../src/map/camera/CameraModel.js";
+import { moveCamera, setCameraZoom } from "../../../src/map/camera/CameraActions.js";
+import { DEFAULT_SETTINGS } from "../../../src/components/GameShell/SettingsMenu/SettingsConfig.js";
 
 const duplicateNameFeatures = [
-  { type: "Feature", properties: { NAME: "Thule", SUBJECTO: "Thule", PARTOF: "Thule" }, geometry: { type: "Polygon", coordinates: [[[-80, 60], [-79, 60], [-79, 61], [-80, 60]]] } },
-  { type: "Feature", properties: { NAME: "Thule", SUBJECTO: "Thule", PARTOF: "Thule" }, geometry: { type: "Polygon", coordinates: [[[-70, 60], [-69, 60], [-69, 61], [-70, 60]]] } },
+  {
+    type: "Feature",
+    properties: { NAME: "Thule", SUBJECTO: "Thule", PARTOF: "Thule" },
+    geometry: {
+      type: "Polygon",
+      coordinates: [[[-80, 60], [-79, 60], [-79, 61], [-80, 60]]],
+    },
+  },
+  {
+    type: "Feature",
+    properties: { NAME: "Thule", SUBJECTO: "Thule", PARTOF: "Thule" },
+    geometry: {
+      type: "Polygon",
+      coordinates: [[[-70, 60], [-69, 60], [-69, 61], [-70, 60]]],
+    },
+  },
 ];
 
-const regions = duplicateNameFeatures.map((feature, index) => normalizeHistoricalFeature(feature, index, 1300));
+const regions = duplicateNameFeatures.map((feature, index) =>
+  normalizeHistoricalFeature(feature, index, 1300),
+);
 assert.equal(regions.length, 2);
 assert.notEqual(regions[0].assetId, regions[1].assetId);
 assert.equal(regions[0].sourceFeatureIndex, 0);
@@ -26,8 +53,53 @@ assert.equal(resolveCanonicalHistoricalCountryId("Byzantine Empire"), "byzantium
 assert.equal(resolveCanonicalHistoricalCountryId("Mamluke Sultanate"), "mamluks");
 assert.equal(resolveCanonicalHistoricalCountryId("Great Khanate"), "yuan");
 assert.equal(resolveCanonicalHistoricalCountryId("Unknown polity"), null);
-assert.equal(resolveHistoricalCountryId("Test Realm", { test_kingdom: { id: "test_kingdom", name: "Test Kingdom", aliases: ["Test Realm"] } }), "test_kingdom");
+assert.equal(
+  resolveHistoricalCountryId("Test Realm", {
+    test_kingdom: {
+      id: "test_kingdom",
+      name: "Test Kingdom",
+      aliases: ["Test Realm"],
+    },
+  }),
+  "test_kingdom",
+);
 
-const unsupported = normalizeHistoricalFeature({ type: "Feature", properties: { NAME: "Invalid" }, geometry: { type: "Point", coordinates: [0, 0] } }, 10, 1300);
+const unsupported = normalizeHistoricalFeature(
+  {
+    type: "Feature",
+    properties: { NAME: "Invalid" },
+    geometry: { type: "Point", coordinates: [0, 0] },
+  },
+  10,
+  1300,
+);
 assert.equal(unsupported, null);
-console.log("Historical GIS 1300 identity and country resolver tests passed.");
+
+const antarctica = normalizeHistoricalFeature(
+  {
+    type: "Feature",
+    properties: { NAME: "Antarctica" },
+    geometry: {
+      type: "Polygon",
+      coordinates: [[[-30, -90], [30, -90], [30, -60], [-30, -60], [-30, -90]]],
+    },
+  },
+  11,
+  1300,
+);
+const antarcticaLatitudes = antarctica.polygons[0].map(([, latitude]) => latitude);
+assert.equal(Math.max(...antarcticaLatitudes) - Math.min(...antarcticaLatitudes), 12.6);
+
+const viewport = { width: 1200, height: 700 };
+const camera = createCameraModel();
+const draggedDown = moveCamera(camera, 0, 100, viewport);
+const draggedUp = moveCamera(camera, 0, -100, viewport);
+assert.ok(draggedDown.y > camera.y, "Dragging down must move the map south/down.");
+assert.ok(draggedUp.y < camera.y, "Dragging up must move the map north/up.");
+assert.equal(setCameraZoom(camera, 99, viewport).zoom, 18);
+assert.equal(setCameraZoom(camera, 0, viewport).zoom, 1);
+
+assert.equal(DEFAULT_SETTINGS.advisorAutoOpen, undefined);
+assert.equal(DEFAULT_SETTINGS.tips, true);
+
+console.log("Historical GIS 1300 identity, country resolver, camera, projection and settings tests passed.");
