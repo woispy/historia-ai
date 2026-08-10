@@ -32,7 +32,7 @@ if (inputArgument === "--download") {
   );
 }
 
-const regions = await importHistoricalGeoJson(inputPath);
+const regions = await importHistoricalGeoJson(inputPath, 1300);
 
 if (!regions.length) {
   throw new Error("The 1300 historical GIS source contains no usable polygons.");
@@ -54,11 +54,18 @@ await fs.mkdir(geometryDir, { recursive: true });
 
 const provinceImports = [];
 const geometryImports = [];
+const assetIds = new Set();
 
 for (const region of regions) {
   const provinceAsset = buildHistoricalProvinceAsset(region);
   const geometryAsset = buildHistoricalGeometryAsset(region);
   const stem = provinceAsset.identity.id;
+
+  if (assetIds.has(stem)) {
+    throw new Error(`Duplicate generated historical GIS asset id: ${stem}`);
+  }
+
+  assetIds.add(stem);
 
   await fs.writeFile(
     path.join(provinceDir, `${stem}.json`),
@@ -74,7 +81,7 @@ for (const region of regions) {
 
   provinceImports.push({
     variable: `province_${provinceImports.length}`,
-    path: `./provinces/${stem}.json`,
+    path: `./${stem}.json`,
   });
 
   geometryImports.push({
@@ -116,5 +123,9 @@ await fs.writeFile(
 );
 
 console.log(`Imported ${regions.length} historical GIS features for 1300.`);
-console.log("Generated province and geometry manifests under src/world/map/assets/historical/1300.");
-console.log("Review generated assets and commit them only when the source license permits redistribution.");
+console.log(
+  "Generated province and geometry manifests under src/world/map/assets/historical/1300.",
+);
+console.log(
+  "Generated GIS source/assets are reproducible build artifacts and should not be committed unless redistribution is explicitly approved by the source license.",
+);

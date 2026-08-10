@@ -1,5 +1,7 @@
 import fs from "node:fs/promises";
 
+import { createHistoricalAssetId, slug } from "./HistoricalAssetId.js";
+
 const HISTORICAL_1300_URL =
   "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1300.geojson";
 
@@ -41,17 +43,7 @@ function extractPolygons(geometry) {
   return [];
 }
 
-function slug(value) {
-  return String(value ?? "")
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
-}
-
-export function normalizeHistoricalFeature(feature, index) {
+export function normalizeHistoricalFeature(feature, index, year = 1300) {
   const properties = feature?.properties ?? {};
   const polygons = extractPolygons(feature?.geometry);
   const sourceName =
@@ -68,7 +60,13 @@ export function normalizeHistoricalFeature(feature, index) {
   if (!polygons.length) return null;
 
   return {
-    id: `historical_1300_${slug(sourceFeatureId) || index}`,
+    id: `historical_${year}_${slug(sourceFeatureId) || index}`,
+    assetId: createHistoricalAssetId({
+      year,
+      sourceFeatureId,
+      sourceFeatureIndex: index,
+    }),
+    sourceFeatureIndex: index,
     sourceFeatureId,
     sourceName,
     name: sourceName,
@@ -81,13 +79,13 @@ export function normalizeHistoricalFeature(feature, index) {
   };
 }
 
-export async function importHistoricalGeoJson(inputPath) {
+export async function importHistoricalGeoJson(inputPath, year = 1300) {
   const raw = await fs.readFile(inputPath, "utf8");
   const geojson = JSON.parse(raw);
   assertGeoJson(geojson);
 
   return geojson.features
-    .map(normalizeHistoricalFeature)
+    .map((feature, index) => normalizeHistoricalFeature(feature, index, year))
     .filter(Boolean);
 }
 

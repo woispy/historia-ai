@@ -10,7 +10,7 @@ import {
 
 function NotificationToast() {
   const [notifications, setNotifications] = useState(
-    getNotifications()
+    getNotifications(),
   );
 
   const timers = useRef(new Map());
@@ -39,12 +39,14 @@ function NotificationToast() {
   }, [notifications]);
 
   useEffect(() => {
+    const activeTimers = timers.current;
+
     return () => {
-      for (const timer of timers.current.values()) {
+      for (const timer of activeTimers.values()) {
         clearTimeout(timer);
       }
 
-      timers.current.clear();
+      activeTimers.clear();
     };
   }, []);
 
@@ -55,9 +57,7 @@ function NotificationToast() {
           key={notification.id}
           className={`notification notification-${notification.type}`}
         >
-          {notification.title && (
-            <strong>{notification.title}</strong>
-          )}
+          {notification.title && <strong>{notification.title}</strong>}
 
           <span>{notification.message}</span>
         </div>
