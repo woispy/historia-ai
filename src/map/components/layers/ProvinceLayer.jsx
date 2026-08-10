@@ -1,7 +1,7 @@
 import ProvinceSvg from "../ProvinceSvg";
 import ProvincePolygon from "../ProvincePolygon";
 
-function ProvinceLayer({ provinces, selectedProvinceId, onProvinceClick }) {
+function ProvinceLayer({ provinces, selectedProvinceId, onProvinceClick, mapStyle, mapShadows }) {
   return (
     <ProvinceSvg>
       {provinces.map(({ province, country, geometry }) => (
@@ -12,6 +12,8 @@ function ProvinceLayer({ provinces, selectedProvinceId, onProvinceClick }) {
           geometry={geometry}
           selected={province.id === selectedProvinceId}
           onClick={onProvinceClick}
+          mapStyle={mapStyle}
+          mapShadows={mapShadows}
         />
       ))}
     </ProvinceSvg>
