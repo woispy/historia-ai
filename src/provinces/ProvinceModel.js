@@ -5,92 +5,34 @@
  * ============================================================================
  *
  * Represents one Province in the runtime world.
- *
- * Province Models are immutable runtime objects.
- *
- * Runtime Models are created from Province Assets
- * by ProvinceFactory.
+ * Province Models are immutable runtime objects created from Province Assets.
  */
 
 export function createProvinceModel({
-  /**
-   * Identity
-   */
-
   id,
-
   name,
-
-  /**
-   * References
-   */
-
   geometryId = null,
-
-  /**
-   * World
-   */
-
   region = null,
-
   terrain = null,
-
-  /**
-   * Politics
-   */
-
   owner = null,
-
   controller = null,
-
   governor = null,
-
-  /**
-   * Society
-   */
-
   culture = null,
-
   religion = null,
-
   population = 0,
-
-  /**
-   * Economy
-   */
-
   development = 0,
-
-  /**
-   * Runtime Collections
-   */
-
+  historical = null,
+  historicalDate = null,
+  historicalSource = null,
   cities = [],
-
   roads = [],
-
   buildings = [],
-
   characters = [],
-
   armies = [],
-
-  /**
-   * Geography
-   */
-
   sea = false,
-
   river = false,
-
   port = false,
-
   fortLevel = 0,
-
-  /**
-   * Runtime Status
-   */
-
   status = {
     underSiege: false,
     occupied: false,
@@ -98,84 +40,30 @@ export function createProvinceModel({
   },
 }) {
   return Object.freeze({
-    /**
-     * Identity
-     */
-
     id,
-
     name,
-
-    /**
-     * References
-     */
-
     geometryId,
-
-    /**
-     * World
-     */
-
     region,
-
     terrain,
-
-    /**
-     * Politics
-     */
-
     owner,
-
     controller,
-
     governor,
-
-    /**
-     * Society
-     */
-
     culture,
-
     religion,
-
     population,
-
-    /**
-     * Economy
-     */
-
     development,
-
-    /**
-     * Runtime Collections
-     */
-
+    historical,
+    historicalDate,
+    historicalSource,
     cities,
-
     roads,
-
     buildings,
-
     characters,
-
     armies,
-
-    /**
-     * Geography
-     */
-
     sea,
-
     river,
-
     port,
-
     fortLevel,
-
-    /**
-     * Runtime Status
-     */
-
     status,
   });
 }
