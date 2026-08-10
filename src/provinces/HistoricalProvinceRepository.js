@@ -1,14 +1,6 @@
 import { getProvinces } from "./ProvinceQueries.js";
 import { updateProvince } from "./ProvinceRepository.js";
-
-function normalizeName(value) {
-  return String(value ?? "")
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
-}
+import { resolveHistoricalCountryId } from "../world/historical/HistoricalCountryResolver.js";
 
 function getIsoFromGeometryId(geometryId) {
   const prefix = "geometry_country_";
@@ -18,29 +10,15 @@ function getIsoFromGeometryId(geometryId) {
 
 function findCountryByHistoricalName(province, registry) {
   const countries = registry?.countries ?? {};
-  const aliases = registry?.countryAliases ?? {};
   const candidates = [
     province.historical?.subject,
     province.historical?.sourceName,
     province.name,
-  ]
-    .map(normalizeName)
-    .filter(Boolean);
+  ];
 
-  if (!candidates.length) return null;
-
-  for (const [countryId, country] of Object.entries(countries)) {
-    const names = [
-      countryId,
-      country?.id,
-      country?.name,
-      country?.title,
-      ...(aliases[countryId] ?? []),
-    ].map(normalizeName).filter(Boolean);
-
-    if (candidates.some((candidate) => names.includes(candidate))) {
-      return countryId;
-    }
+  for (const candidate of candidates) {
+    const resolved = resolveHistoricalCountryId(candidate, countries);
+    if (resolved && countries[resolved]) return resolved;
   }
 
   return null;
@@ -53,22 +31,28 @@ function resolveHistoricalOwner(province, registry) {
   const geometryIso = getIsoFromGeometryId(province.geometryId);
   const sourceFeatureId = province.historical?.sourceFeatureId ?? null;
 
-  return (
-    provinceOwnership[province.id] ??
-    (sourceFeatureId ? sourceFeatureOwnership[sourceFeatureId] : null) ??
-    findCountryByHistoricalName(province, registry) ??
-    geometryOwnership[geometryIso] ??
-    province.owner ??
-    registry?.defaultCountryId ??
-    "local_polities"
-  );
+  const explicitProvinceOwner = provinceOwnership[province.id];
+  if (explicitProvinceOwner && registry?.countries?.[explicitProvinceOwner]) return explicitProvinceOwner;
+
+  const explicitSourceOwner = sourceFeatureId ? sourceFeatureOwnership[sourceFeatureId] : null;
+  if (explicitSourceOwner && registry?.countries?.[explicitSourceOwner]) return explicitSourceOwner;
+
+  const historicalNameOwner = findCountryByHistoricalName(province, registry);
+  if (historicalNameOwner) return historicalNameOwner;
+
+  const geometryOwner = geometryOwnership[geometryIso];
+  if (geometryOwner && registry?.countries?.[geometryOwner]) return geometryOwner;
+
+  if (province.owner && registry?.countries?.[province.owner]) return province.owner;
+  if (registry?.defaultCountryId && registry.countries?.[registry.defaultCountryId]) return registry.defaultCountryId;
+
+  return "local_polities";
 }
 
 export function createHistoricalProvinceRepository(repository, historicalRegistry) {
   if (!repository || !historicalRegistry) return repository;
 
   let nextRepository = repository;
-
   for (const province of getProvinces(repository)) {
     const countryId = resolveHistoricalOwner(province, historicalRegistry);
     const historicalDate = historicalRegistry.date ?? null;
@@ -79,9 +63,7 @@ export function createHistoricalProvinceRepository(repository, historicalRegistr
       province.controller === countryId &&
       province.historicalDate === historicalDate &&
       province.historicalSource === historicalSource
-    ) {
-      continue;
-    }
+    ) continue;
 
     nextRepository = updateProvince(
       nextRepository,
