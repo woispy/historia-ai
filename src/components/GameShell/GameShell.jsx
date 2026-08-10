@@ -103,7 +103,6 @@ function GameShell() {
         advisorOpen={advisorOpen}
         onAdvisorOpenChange={setAdvisorOpen}
         settingsOpen={settingsOpen}
-        settings={settings}
       />
     </Layout>
   );
