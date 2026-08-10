@@ -1,78 +1,93 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useRef } from "react";
 
 /**
- * ============================================================================
- * Historia AI
- * Camera Controller
- * ============================================================================
+ * Map-local pointer input. The controller never installs global listeners, so
+ * menus and overlays cannot accidentally participate in camera dragging.
  */
-
-function CameraController({ zoom, move, smooth = true }) {
+export function useCameraController({ zoom, move }) {
   const dragging = useRef(false);
+  const dragged = useRef(false);
+  const pointerId = useRef(null);
   const last = useRef({ x: 0, y: 0 });
   const pending = useRef({ x: 0, y: 0 });
   const frame = useRef(0);
 
-  useEffect(() => {
-    function flushMove() {
-      frame.current = 0;
-      const { x, y } = pending.current;
-      pending.current = { x: 0, y: 0 };
-      if (x || y) move(x, y);
+  const flushMove = useCallback(() => {
+    frame.current = 0;
+    const { x, y } = pending.current;
+    pending.current = { x: 0, y: 0 };
+    if (x || y) move(x, y);
+  }, [move]);
+
+  const queueMove = useCallback((dx, dy) => {
+    pending.current.x += dx;
+    pending.current.y += dy;
+
+    if (!frame.current) {
+      frame.current = requestAnimationFrame(flushMove);
+    }
+  }, [flushMove]);
+
+  const handleWheel = useCallback((event) => {
+    event.preventDefault();
+    zoom(event.deltaY < 0 ? 0.2 : -0.2);
+  }, [zoom]);
+
+  const handlePointerDown = useCallback((event) => {
+    if (event.button !== 0) return;
+
+    dragging.current = true;
+    dragged.current = false;
+    pointerId.current = event.pointerId;
+    last.current = { x: event.clientX, y: event.clientY };
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  }, []);
+
+  const handlePointerMove = useCallback((event) => {
+    if (!dragging.current || event.pointerId !== pointerId.current) return;
+
+    const dx = event.clientX - last.current.x;
+    const dy = event.clientY - last.current.y;
+
+    if (Math.abs(dx) + Math.abs(dy) > 2) dragged.current = true;
+
+    queueMove(dx, dy);
+    last.current = { x: event.clientX, y: event.clientY };
+  }, [queueMove]);
+
+  const stopDragging = useCallback((event) => {
+    if (pointerId.current !== null) {
+      event.currentTarget.releasePointerCapture?.(pointerId.current);
     }
 
-    function queueMove(dx, dy) {
-      if (!smooth) {
-        move(dx, dy);
-        return;
-      }
+    dragging.current = false;
+    pointerId.current = null;
+  }, []);
 
-      pending.current.x += dx;
-      pending.current.y += dy;
-      if (!frame.current) frame.current = requestAnimationFrame(flushMove);
-    }
+  const handlePointerCancel = useCallback((event) => {
+    pending.current = { x: 0, y: 0 };
+    stopDragging(event);
+  }, [stopDragging]);
 
-    function handleWheel(event) {
-      if (event.target.closest?.("button, input, select, textarea")) return;
-      event.preventDefault();
-      zoom(event.deltaY < 0 ? 0.2 : -0.2);
-    }
+  const handleClickCapture = useCallback((event) => {
+    if (!dragged.current) return;
+    event.preventDefault();
+    event.stopPropagation();
+    dragged.current = false;
+  }, []);
 
-    function handleMouseDown(event) {
-      if (event.button !== 0) return;
-      if (event.target.closest?.("button, input, select, textarea")) return;
-      dragging.current = true;
-      last.current = { x: event.clientX, y: event.clientY };
-    }
+  const dispose = useCallback(() => {
+    if (frame.current) cancelAnimationFrame(frame.current);
+    pending.current = { x: 0, y: 0 };
+  }, []);
 
-    function handleMouseMove(event) {
-      if (!dragging.current) return;
-      const dx = event.clientX - last.current.x;
-      const dy = event.clientY - last.current.y;
-      queueMove(dx, dy);
-      last.current = { x: event.clientX, y: event.clientY };
-    }
-
-    function handleMouseUp() {
-      dragging.current = false;
-    }
-
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    window.addEventListener("mousedown", handleMouseDown);
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-
-    return () => {
-      if (frame.current) cancelAnimationFrame(frame.current);
-      pending.current = { x: 0, y: 0 };
-      window.removeEventListener("wheel", handleWheel);
-      window.removeEventListener("mousedown", handleMouseDown);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [zoom, move, smooth]);
-
-  return null;
+  return {
+    onWheel: handleWheel,
+    onPointerDown: handlePointerDown,
+    onPointerMove: handlePointerMove,
+    onPointerUp: stopDragging,
+    onPointerCancel: handlePointerCancel,
+    onClickCapture: handleClickCapture,
+    dispose,
+  };
 }
-
-export default CameraController;
