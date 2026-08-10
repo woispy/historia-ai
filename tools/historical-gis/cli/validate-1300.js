@@ -1,194 +1,83 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-
 import { importHistoricalGeoJson } from "../HistoricalGeometryImporter.js";
 
-const root = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "../../..",
-);
-
-const sourcePath = path.join(
-  root,
-  "data/gis/1300/source/world_1300.geojson",
-);
-const provinceDir = path.join(
-  root,
-  "src/world/map/assets/historical/1300/provinces",
-);
-const geometryDir = path.join(
-  root,
-  "src/world/map/assets/historical/1300/geometry",
-);
-
-async function readJsonFiles(directory) {
-  let names;
-
-  try {
-    names = await fs.readdir(directory);
-  } catch (error) {
-    throw new Error(`Historical GIS asset directory is missing: ${directory}`, {
-      cause: error,
-    });
-  }
-
-  const jsonNames = names
-    .filter((name) => name.endsWith(".json"))
-    .sort();
-
-  return Promise.all(
-    jsonNames.map(async (name) => ({
-      name,
-      data: JSON.parse(
-        await fs.readFile(path.join(directory, name), "utf8"),
-      ),
-    })),
-  );
-}
-
-async function readManifest(directory) {
-  const manifestPath = path.join(directory, "manifest.js");
-  const content = await fs.readFile(manifestPath, "utf8");
-  const imports = [...content.matchAll(/import\s+\w+\s+from\s+["'](.+?)["'];/g)]
-    .map((match) => match[1]);
-
-  for (const importPath of imports) {
-    const resolvedPath = path.resolve(directory, importPath);
-    try {
-      await fs.access(resolvedPath);
-    } catch (error) {
-      throw new Error(
-        `Manifest references a missing asset: ${manifestPath} -> ${importPath}`,
-        { cause: error },
-      );
-    }
-  }
-
-  return imports;
-}
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
+const sourcePath = path.join(root, "data/gis/1300/source/world_1300.geojson");
+const runtimePath = path.join(root, "src/world/map/assets/historical/1300/runtime.json");
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-const sourceRaw = JSON.parse(await fs.readFile(sourcePath, "utf8"));
-const normalizedRegions = await importHistoricalGeoJson(sourcePath, 1300);
-const provinces = await readJsonFiles(provinceDir);
-const geometries = await readJsonFiles(geometryDir);
-const provinceManifest = await readManifest(provinceDir);
-const geometryManifest = await readManifest(geometryDir);
-const geometryById = new Map(
-  geometries.map(({ data }) => [data.identity?.id, data]),
-);
-const provinceIds = new Set();
-const sourceFeatureIndices = new Set();
-
-assert(
-  Array.isArray(sourceRaw.features),
-  "Historical GIS source must contain a features array.",
-);
-assert(
-  sourceRaw.features.length === normalizedRegions.length,
-  `Source/normalized feature count mismatch: ${sourceRaw.features.length} vs ${normalizedRegions.length}.`,
-);
-assert(
-  normalizedRegions.length > 0,
-  "No historical province assets can be generated from the source.",
-);
-assert(
-  provinces.length === normalizedRegions.length,
-  `Province/source asset count mismatch: ${provinces.length} vs ${normalizedRegions.length}.`,
-);
-assert(
-  geometries.length === normalizedRegions.length,
-  `Geometry/source asset count mismatch: ${geometries.length} vs ${normalizedRegions.length}.`,
-);
-assert(
-  provinceManifest.length === provinces.length,
-  `Province manifest/file count mismatch: ${provinceManifest.length} vs ${provinces.length}.`,
-);
-assert(
-  geometryManifest.length === geometries.length,
-  `Geometry manifest/file count mismatch: ${geometryManifest.length} vs ${geometries.length}.`,
-);
-
-for (const { name, data } of provinces) {
-  const id = data.identity?.id;
-  assert(id, `Missing province identity in ${name}.`);
-  assert(!provinceIds.has(id), `Duplicate province id: ${id}.`);
-  provinceIds.add(id);
-
-  const geometryId = data.references?.geometryId;
-  assert(geometryId, `Missing geometry reference in ${name}.`);
-  assert(
-    geometryById.has(geometryId),
-    `Missing geometry asset for province ${id}: ${geometryId}.`,
-  );
-
-  const historical = data.historical ?? {};
-  assert(
-    historical.sourceFeatureId,
-    `Missing sourceFeatureId in historical province ${id}.`,
-  );
-  assert(
-    Number.isInteger(historical.sourceFeatureIndex),
-    `Missing sourceFeatureIndex in historical province ${id}.`,
-  );
-  assert(
-    !sourceFeatureIndices.has(historical.sourceFeatureIndex),
-    `Duplicate sourceFeatureIndex: ${historical.sourceFeatureIndex}.`,
-  );
-  sourceFeatureIndices.add(historical.sourceFeatureIndex);
-}
-
-for (const { name, data } of geometries) {
-  const identity = data.identity ?? {};
-  assert(identity.id, `Missing geometry identity in ${name}.`);
-  assert(
-    provinceIds.has(identity.provinceId),
-    `Geometry ${identity.id} references a missing province: ${identity.provinceId}.`,
-  );
-
-  const polygons = data.polygons;
-  assert(
-    Array.isArray(polygons) && polygons.length > 0,
-    `Geometry ${name} has no polygons.`,
-  );
-
-  for (const polygon of polygons) {
-    assert(
-      Array.isArray(polygon) && polygon.length >= 3,
-      `Geometry ${name} contains an invalid polygon ring.`,
-    );
-
-    for (const coordinate of polygon) {
-      assert(
-        Array.isArray(coordinate) && coordinate.length >= 2,
-        `Geometry ${name} contains an invalid coordinate.`,
-      );
-
-      const [longitude, latitude] = coordinate;
-
-      assert(
-        Number.isFinite(longitude) && Number.isFinite(latitude),
-        `Geometry ${name} contains a non-numeric coordinate.`,
-      );
-
-      assert(
-        longitude >= -180 && longitude <= 180 &&
-          latitude >= -90 && latitude <= 90,
-        `Geometry ${name} contains an out-of-range coordinate.`,
-      );
-    }
+function validatePolygonRing(polygon, label) {
+  assert(Array.isArray(polygon) && polygon.length >= 3, `${label} has an invalid polygon ring.`);
+  for (const coordinate of polygon) {
+    assert(Array.isArray(coordinate) && coordinate.length >= 2, `${label} contains an invalid coordinate.`);
+    const [longitude, latitude] = coordinate;
+    assert(Number.isFinite(longitude) && Number.isFinite(latitude), `${label} contains a non-numeric coordinate.`);
+    assert(longitude >= -180 && longitude <= 180 && latitude >= -90 && latitude <= 90, `${label} contains an out-of-range coordinate.`);
   }
 }
 
-assert(
-  sourceFeatureIndices.size === normalizedRegions.length,
-  `Source feature index coverage mismatch: ${sourceFeatureIndices.size} vs ${normalizedRegions.length}.`,
-);
+const sourceRaw = JSON.parse(await fs.readFile(sourcePath, "utf8"));
+const normalizedRegions = await importHistoricalGeoJson(sourcePath, 1300);
+const runtime = JSON.parse(await fs.readFile(runtimePath, "utf8"));
 
-console.log(
-  `Validated ${normalizedRegions.length} source features, ${provinces.length} historical province assets, ${geometries.length} geometry assets, and ${provinceManifest.length}/${geometryManifest.length} manifest entries for 1300.`,
-);
+assert(Array.isArray(sourceRaw.features), "Historical GIS source must contain a features array.");
+assert(sourceRaw.features.length === normalizedRegions.length, `Source/normalized feature count mismatch: ${sourceRaw.features.length} vs ${normalizedRegions.length}.`);
+assert(runtime.schemaVersion === 1, "Unsupported historical runtime asset schema.");
+assert(runtime.assetType === "historical-runtime", "Invalid historical runtime asset type.");
+assert(runtime.historicalDate === "1300-01-01", "Historical runtime date mismatch.");
+assert(Array.isArray(runtime.provinces), "Runtime province array is missing.");
+assert(Array.isArray(runtime.geometries), "Runtime geometry array is missing.");
+assert(runtime.provinces.length === normalizedRegions.length, "Runtime province count mismatch.");
+assert(runtime.geometries.length === normalizedRegions.length, "Runtime geometry count mismatch.");
+assert(runtime.source?.sourceFeatureCount === normalizedRegions.length, "Runtime source feature count mismatch.");
+
+const provinceIds = new Set();
+const geometryIds = new Set();
+const sourceFeatureIndices = new Set();
+let polygonCount = 0;
+
+for (const province of runtime.provinces) {
+  const id = province?.identity?.id;
+  assert(id, "Historical runtime contains a province without an identity.");
+  assert(!provinceIds.has(id), `Duplicate runtime province id: ${id}.`);
+  provinceIds.add(id);
+  assert(province.references?.geometryId, `Province ${id} is missing its geometry reference.`);
+
+  const historical = province.historical ?? {};
+  assert(historical.sourceFeatureId, `Province ${id} is missing sourceFeatureId.`);
+  assert(Number.isInteger(historical.sourceFeatureIndex), `Province ${id} is missing sourceFeatureIndex.`);
+  assert(historical.sourceFeatureIndex >= 0 && historical.sourceFeatureIndex < normalizedRegions.length, `Province ${id} has an invalid sourceFeatureIndex.`);
+  assert(!sourceFeatureIndices.has(historical.sourceFeatureIndex), `Duplicate sourceFeatureIndex: ${historical.sourceFeatureIndex}.`);
+  sourceFeatureIndices.add(historical.sourceFeatureIndex);
+}
+
+for (const geometry of runtime.geometries) {
+  const identity = geometry?.identity ?? {};
+  const id = identity.id;
+  assert(id, "Historical runtime contains geometry without an identity.");
+  assert(!geometryIds.has(id), `Duplicate runtime geometry id: ${id}.`);
+  geometryIds.add(id);
+  assert(identity.provinceId === id, `Geometry/province identity mismatch: ${id}.`);
+  assert(provinceIds.has(id), `Geometry references missing province: ${id}.`);
+  assert(Array.isArray(geometry.polygons) && geometry.polygons.length > 0, `Geometry ${id} has no polygons.`);
+  for (const polygon of geometry.polygons) {
+    validatePolygonRing(polygon, `Geometry ${id}`);
+    polygonCount += 1;
+  }
+}
+
+for (const province of runtime.provinces) {
+  assert(geometryIds.has(province.references.geometryId), `Province ${province.identity.id} references missing geometry ${province.references.geometryId}.`);
+}
+
+assert(sourceFeatureIndices.size === normalizedRegions.length, "Source feature coverage mismatch.");
+assert(runtime.counts?.provinces === runtime.provinces.length, "Runtime province metadata count mismatch.");
+assert(runtime.counts?.geometries === runtime.geometries.length, "Runtime geometry metadata count mismatch.");
+assert(runtime.counts?.polygons === polygonCount, "Runtime polygon metadata count mismatch.");
+
+console.log(`Validated ${normalizedRegions.length} source features, ${runtime.provinces.length} provinces, ${runtime.geometries.length} geometries, and ${polygonCount} polygon rings for 1300.`);
