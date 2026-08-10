@@ -10,9 +10,11 @@ function clamp(value, min, max) {
 function getWorldDegreesPerPixel(viewport, zoom) {
   const width = Math.max(1, Number(viewport?.width ?? 1));
   const height = Math.max(1, Number(viewport?.height ?? 1));
+  const safeZoom = Math.max(Number(zoom) || 1, 0.001);
+
   return {
-    x: WORLD_WIDTH / (width * Math.max(zoom, 0.001)),
-    y: WORLD_HEIGHT / (height * Math.max(zoom, 0.001)),
+    x: WORLD_WIDTH / (width * safeZoom),
+    y: WORLD_HEIGHT / (height * safeZoom),
   };
 }
 
@@ -31,12 +33,13 @@ function constrainPosition(camera, x, y, viewport) {
 
 export function moveCamera(camera, dx, dy, viewport) {
   const degrees = getWorldDegreesPerPixel(viewport, camera.zoom);
+
   return {
     ...camera,
     ...constrainPosition(
       camera,
-      camera.x + dx * degrees.x,
-      camera.y - dy * degrees.y,
+      camera.x - dx * degrees.x,
+      camera.y + dy * degrees.y,
       viewport,
     ),
   };
@@ -45,6 +48,7 @@ export function moveCamera(camera, dx, dy, viewport) {
 export function zoomCamera(camera, delta, viewport) {
   const zoom = clamp(camera.zoom + delta, camera.minZoom, camera.maxZoom);
   const nextCamera = { ...camera, zoom };
+
   return {
     ...nextCamera,
     ...constrainPosition(nextCamera, nextCamera.x, nextCamera.y, viewport),
@@ -56,6 +60,7 @@ export function setCameraZoom(camera, zoom, viewport) {
     ...camera,
     zoom: clamp(zoom, camera.minZoom, camera.maxZoom),
   };
+
   return {
     ...nextCamera,
     ...constrainPosition(nextCamera, nextCamera.x, nextCamera.y, viewport),
