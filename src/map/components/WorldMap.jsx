@@ -19,6 +19,7 @@ function WorldMap({
   const cameraInput = useCameraController({
     zoom: camera.zoom,
     move: camera.move,
+    smooth: settings.smoothCamera !== false,
   });
 
   return (
