@@ -1,28 +1,32 @@
-function slug(value) {
-  return String(value ?? "")
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
-}
+import { createHistoricalAssetId } from "./HistoricalAssetId.js";
 
 function createHeader(assetType, region) {
   return {
     assetType,
-    assetVersion: 3,
+    assetVersion: 4,
     generator: "Historia Historical GIS Importer",
     provider: "historical-basemaps",
     dataset: "world_1300.geojson",
     historicalDate: "1300-01-01",
     borderPrecision: region.borderPrecision,
     sourceFeatureId: region.sourceFeatureId,
+    sourceFeatureIndex: region.sourceFeatureIndex,
   };
 }
 
+function getAssetId(region) {
+  return (
+    region.assetId ??
+    createHistoricalAssetId({
+      year: 1300,
+      sourceFeatureId: region.sourceFeatureId,
+      sourceFeatureIndex: region.sourceFeatureIndex,
+    })
+  );
+}
+
 export function buildHistoricalProvinceAsset(region) {
-  const id = `province_1300_${slug(region.id)}`;
+  const id = getAssetId(region);
 
   return {
     header: createHeader("province", region),
@@ -41,6 +45,7 @@ export function buildHistoricalProvinceAsset(region) {
     },
     historical: {
       sourceFeatureId: region.sourceFeatureId,
+      sourceFeatureIndex: region.sourceFeatureIndex,
       sourceName: region.sourceName ?? region.name,
       subject: region.subject,
       partOf: region.partOf,
@@ -69,7 +74,7 @@ export function buildHistoricalProvinceAsset(region) {
 }
 
 export function buildHistoricalGeometryAsset(region) {
-  const id = `province_1300_${slug(region.id)}`;
+  const id = getAssetId(region);
 
   return {
     header: createHeader("geometry", region),
@@ -79,6 +84,7 @@ export function buildHistoricalGeometryAsset(region) {
     },
     metadata: {
       sourceFeatureId: region.sourceFeatureId,
+      sourceFeatureIndex: region.sourceFeatureIndex,
       name: region.name,
       subject: region.subject,
       partOf: region.partOf,
