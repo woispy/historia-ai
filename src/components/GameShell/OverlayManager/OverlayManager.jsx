@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import LeftOverlay from "./LeftOverlay/LeftOverlay";
 import RightOverlay from "./RightOverlay/RightOverlay";
@@ -15,21 +15,13 @@ function OverlayManager({
   onUpdateAction,
   onRemoveAction,
   onCancelEditing,
-  closeAdvisorKey = 0,
+  advisorOpen = false,
+  onAdvisorOpenChange,
   settingsOpen = false,
   settings = {},
 }) {
   const [leftOpen, setLeftOpen] = useState(false);
-  const [rightOpen, setRightOpen] = useState(Boolean(settings.advisorAutoOpen));
   const [activeTab, setActiveTab] = useState("actions");
-
-  useEffect(() => {
-    if (closeAdvisorKey > 0) setRightOpen(false);
-  }, [closeAdvisorKey]);
-
-  useEffect(() => {
-    if (settings.advisorAutoOpen) setRightOpen(true);
-  }, [settings.advisorAutoOpen]);
 
   const openActions = () => {
     if (settingsOpen) return;
@@ -45,7 +37,7 @@ function OverlayManager({
 
   const openAdvisor = () => {
     if (settingsOpen) return;
-    setRightOpen(true);
+    onAdvisorOpenChange?.(true);
   };
 
   return (
@@ -65,11 +57,11 @@ function OverlayManager({
         onCancelEditing={onCancelEditing}
       />
 
-      <RightOverlay isOpen={rightOpen} />
+      <RightOverlay isOpen={advisorOpen} />
 
       <OverlayButtons
         leftOpen={leftOpen}
-        rightOpen={rightOpen}
+        rightOpen={advisorOpen}
         onOpenActions={openActions}
         onOpenDiplomacy={openDiplomacy}
         onOpenAdvisor={openAdvisor}
@@ -77,9 +69,9 @@ function OverlayManager({
 
       <OverlayHandles
         leftOpen={leftOpen}
-        rightOpen={rightOpen}
+        rightOpen={advisorOpen}
         onCloseLeft={() => setLeftOpen(false)}
-        onCloseRight={() => setRightOpen(false)}
+        onCloseRight={() => onAdvisorOpenChange?.(false)}
       />
     </>
   );
