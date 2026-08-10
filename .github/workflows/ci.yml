@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - feat/phase1-polish
+      - feat/phase1-historical-gis-runtime
   push:
     branches:
       - master
