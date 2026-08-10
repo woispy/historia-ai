@@ -1,113 +1,35 @@
 import { useState } from "react";
-
-import {
-  bootstrapCamera,
-} from "../CameraBootstrap";
-
-import {
-  moveCamera,
-  zoomCamera,
-  setCameraZoom,
-  setCameraPosition,
-  resetCamera,
-  focusCamera,
-} from "../CameraActions";
-
-/**
- * ============================================================================
- * Historia AI
- * Camera Hook
- * ============================================================================
- */
+import { bootstrapCamera } from "../CameraBootstrap";
+import { moveCamera, zoomCamera, setCameraZoom, setCameraPosition, resetCamera, focusCamera } from "../CameraActions";
+import { useViewport } from "../viewport";
 
 export function useCamera() {
-  const [camera, setCamera] =
-    useState(() =>
-      bootstrapCamera()
-    );
+  const viewport = useViewport();
+  const [camera, setCamera] = useState(() => bootstrapCamera());
 
-  function move(
-    dx,
-    dy
-  ) {
-    setCamera((previous) =>
-      moveCamera(
-        previous,
-        dx,
-        dy
-      )
-    );
+  function move(dx, dy) {
+    setCamera((previous) => moveCamera(previous, dx, dy, viewport));
   }
 
-  function zoom(
-    delta
-  ) {
-    setCamera((previous) =>
-      zoomCamera(
-        previous,
-        delta
-      )
-    );
+  function zoom(delta) {
+    setCamera((previous) => zoomCamera(previous, delta, viewport));
   }
 
-  function setPosition(
-    x,
-    y
-  ) {
-    setCamera((previous) =>
-      setCameraPosition(
-        previous,
-        x,
-        y
-      )
-    );
+  function setPosition(x, y) {
+    setCamera((previous) => setCameraPosition(previous, x, y, viewport));
   }
 
-  function setZoom(
-    zoom
-  ) {
-    setCamera((previous) =>
-      setCameraZoom(
-        previous,
-        zoom
-      )
-    );
+  function setZoom(zoomValue) {
+    setCamera((previous) => setCameraZoom(previous, zoomValue, viewport));
   }
 
   function reset() {
-    setCamera(
-      resetCamera()
-    );
+    setCamera(resetCamera());
   }
 
-  function focus(
-    x,
-    y,
-    target
-  ) {
-    setCamera((previous) =>
-      focusCamera(
-        previous,
-        x,
-        y,
-        target
-      )
-    );
+  function focus(x, y, target) {
+    setCamera((previous) => focusCamera(previous, x, y, target, viewport));
   }
 
-  return {
-    camera,
-
-    move,
-
-    zoom,
-
-    focus,
-
-    setZoom,
-
-    setPosition,
-
-    reset,
-  };
+  return { camera, move, zoom, focus, setZoom, setPosition, reset };
 }
