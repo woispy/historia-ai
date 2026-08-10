@@ -39,7 +39,9 @@ export function moveCamera(camera, dx, dy, viewport) {
     ...constrainPosition(
       camera,
       camera.x - dx * degrees.x,
-      camera.y - dy * degrees.y,
+      // Pointer movement is expressed in screen coordinates. Positive dy
+      // means dragging downward, so the geographic center must move south.
+      camera.y + dy * degrees.y,
       viewport,
     ),
   };
