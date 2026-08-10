@@ -1,4 +1,4 @@
-import { createCameraModel } from "./CameraModel";
+import { createCameraModel } from "./CameraModel.js";
 
 const WORLD_WIDTH = 360;
 const WORLD_HEIGHT = 180;
