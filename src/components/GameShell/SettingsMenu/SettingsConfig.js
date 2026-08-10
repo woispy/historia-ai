@@ -8,7 +8,6 @@ export const DEFAULT_SETTINGS = Object.freeze({
   smoothCamera: true,
   mapShadows: true,
   notifications: true,
-  advisorAutoOpen: false,
   tips: true,
   autosave: "6m",
   language: "tr",
@@ -17,7 +16,16 @@ export const DEFAULT_SETTINGS = Object.freeze({
 export function readSettings() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null");
-    return { ...DEFAULT_SETTINGS, ...(saved && typeof saved === "object" ? saved : {}) };
+
+    if (!saved || typeof saved !== "object") {
+      return { ...DEFAULT_SETTINGS };
+    }
+
+    const settings = { ...DEFAULT_SETTINGS, ...saved };
+    // Remove the retired advisorAutoOpen option from older local saves so the
+    // setting cannot silently return after a UI upgrade.
+    delete settings.advisorAutoOpen;
+    return settings;
   } catch {
     return { ...DEFAULT_SETTINGS };
   }
