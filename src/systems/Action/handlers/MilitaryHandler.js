@@ -1,5 +1,4 @@
 import { addTimelineEvent } from "../../Timeline";
-import { getRuntime, updateRuntime } from "../../../state";
 import { updateCity } from "../../../cities/CityRepository";
 
 export function handleMilitaryAction(gameSession, action) {
