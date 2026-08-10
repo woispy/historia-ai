@@ -1,0 +1,52 @@
+.date-control {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+}
+
+.date-button.active {
+    background: #3a3325;
+    border-color: #c9a94f;
+}
+
+.time-controls {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 1100;
+
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    min-width: 100%;
+    padding: 8px;
+
+    border: 1px solid #5d4f29;
+    border-radius: 8px;
+    background: rgba(20, 19, 16, 0.97);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+.time-controls button {
+    width: 100%;
+    min-height: 34px;
+    padding: 7px 12px;
+
+    border: 1px solid #6c5b2f;
+    border-radius: 6px;
+    background: #c9a94f;
+    color: #17150f;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.time-controls button:hover:not(:disabled) {
+    background: #dfc267;
+}
+
+.time-controls button:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
