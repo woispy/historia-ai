@@ -14,9 +14,9 @@ import { createDictionary } from "../../utils/createDictionary.js";
  * The province repository can be supplied by WorldBootstrap so the map and
  * simulation always render the same historical province state.
  */
-export function createMap(provinceRepository = null) {
+export function createMap(provinceRepository = null, historicalDate = null) {
   return {
-    geometry: bootstrapGeometry(),
+    geometry: bootstrapGeometry(historicalDate),
     provinces: provinceRepository ?? bootstrapProvinces(),
     regions: createDictionary(regionsData.map(createRegion)),
     terrain: createDictionary(terrainData.map(createTerrain)),
