@@ -25,7 +25,7 @@ import {
  * World Map
  * ============================================================================
  *
- * The world is rendered three times across the antimeridian. The camera wraps
+ * The world is rendered in neighbouring horizontal copies. The camera wraps
  * horizontally, so dragging past the eastern or western edge continues onto
  * the other side without exposing an empty seam.
  */
@@ -43,9 +43,11 @@ function WorldMap({
     useCamera();
 
   const worldCopies = [
+    -720,
     -360,
     0,
     360,
+    720,
   ];
 
   return (
