@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 
 /**
  * Map-local pointer input. The controller never installs global listeners, so
@@ -78,10 +78,13 @@ export function useCameraController({ zoom, move }) {
 
   const dispose = useCallback(() => {
     if (frame.current) cancelAnimationFrame(frame.current);
+    frame.current = 0;
     pending.current = { x: 0, y: 0 };
+    dragging.current = false;
+    pointerId.current = null;
   }, []);
 
-  return {
+  return useMemo(() => ({
     onWheel: handleWheel,
     onPointerDown: handlePointerDown,
     onPointerMove: handlePointerMove,
@@ -89,5 +92,13 @@ export function useCameraController({ zoom, move }) {
     onPointerCancel: handlePointerCancel,
     onClickCapture: handleClickCapture,
     dispose,
-  };
+  }), [
+    handleWheel,
+    handlePointerDown,
+    handlePointerMove,
+    stopDragging,
+    handlePointerCancel,
+    handleClickCapture,
+    dispose,
+  ]);
 }
