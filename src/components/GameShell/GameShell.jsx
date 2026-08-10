@@ -10,14 +10,14 @@ import { getCurrentDate, getTimeline, getPendingActions } from "../../state";
 import { advanceWeek, advanceMonth, advanceSixMonths, advanceYear } from "../../systems/Action";
 import { saveGame } from "../../save";
 import { useDecisionEditor } from "../../hooks/useDecisionEditor";
-import { STORAGE_KEY, readSettings } from "./SettingsMenu/SettingsMenu";
+import { readSettings, STORAGE_KEY } from "./SettingsMenu/SettingsConfig";
 
 function GameShell() {
   const [gameSession, setGameSession] = useState(() => getCurrentGame());
   const [busy, setBusy] = useState(false);
   const [timeMenuOpen, setTimeMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [closeAdvisorKey, setCloseAdvisorKey] = useState(0);
+  const [advisorOpen, setAdvisorOpen] = useState(() => readSettings().advisorAutoOpen);
   const [settings, setSettings] = useState(readSettings);
 
   const {
@@ -66,7 +66,7 @@ function GameShell() {
     const open = Boolean(nextOpen);
     setSettingsOpen(open);
     if (open) {
-      setCloseAdvisorKey((key) => key + 1);
+      setAdvisorOpen(false);
       setTimeMenuOpen(false);
     }
   }
@@ -100,7 +100,8 @@ function GameShell() {
         onUpdateAction={startEditing}
         onRemoveAction={deleteAction}
         onCancelEditing={cancelEditing}
-        closeAdvisorKey={closeAdvisorKey}
+        advisorOpen={advisorOpen}
+        onAdvisorOpenChange={setAdvisorOpen}
         settingsOpen={settingsOpen}
         settings={settings}
       />
