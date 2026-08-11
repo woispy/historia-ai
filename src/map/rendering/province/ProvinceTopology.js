@@ -8,6 +8,7 @@
 
 const EDGE_PRECISION = 5;
 const EPSILON = 10 ** -EDGE_PRECISION;
+const GAP_TOLERANCE = 0.02;
 
 function round(value) {
   return Math.round(Number(value) * 10 ** EDGE_PRECISION) / 10 ** EDGE_PRECISION;
@@ -37,13 +38,21 @@ function polygonBounds(polygon) {
   };
 }
 
-function boundsOverlap(a, b, tolerance = EPSILON) {
-  return !(
-    a.maxX + tolerance < b.minX ||
-    a.minX - tolerance > b.maxX ||
-    a.maxY + tolerance < b.minY ||
-    a.minY - tolerance > b.maxY
-  );
+function boundsCouldShareBorder(a, b, gapTolerance = GAP_TOLERANCE) {
+  if (!a || !b) return false;
+
+  const xOverlap = Math.min(a.maxX, b.maxX) - Math.max(a.minX, b.minX);
+  const yOverlap = Math.min(a.maxY, b.maxY) - Math.max(a.minY, b.minY);
+  const xGap = Math.max(a.minX - b.maxX, b.minX - a.maxX, 0);
+  const yGap = Math.max(a.minY - b.maxY, b.minY - a.maxY, 0);
+
+  // A point-touch (zero overlap in both dimensions) is not a province
+  // adjacency. A tiny gap is accepted only when the other axis overlaps.
+  const horizontalBoundary = xGap <= gapTolerance && yOverlap > gapTolerance;
+  const verticalBoundary = yGap <= gapTolerance && xOverlap > gapTolerance;
+  const overlappingBounds = xOverlap > gapTolerance && yOverlap > gapTolerance;
+
+  return horizontalBoundary || verticalBoundary || overlappingBounds;
 }
 
 function getPolygonEdges(polygon) {
@@ -86,7 +95,6 @@ export function buildProvinceTopology(provinces = []) {
       ownerId: item.province.owner ?? null,
       bounds,
       neighbors: new Set(),
-      sharedEdges: new Map(),
     });
 
     for (const polygon of polygons) {
@@ -119,15 +127,14 @@ export function buildProvinceTopology(provinces = []) {
           ? "country"
           : "province";
 
-        const border = {
+        borderSegments.push({
           key: `${left.provinceId}:${right.provinceId}:${edgeKey(left.edge.start, left.edge.end)}`,
           leftProvinceId: left.provinceId,
           rightProvinceId: right.provinceId,
           kind,
           start: left.edge.start,
           end: left.edge.end,
-        };
-        borderSegments.push(border);
+        });
       }
     }
   }
@@ -140,10 +147,8 @@ export function buildProvinceTopology(provinces = []) {
       const left = nodeList[leftIndex];
       const right = nodeList[rightIndex];
       if (!left.bounds || !right.bounds || left.neighbors.has(right.id)) continue;
-      if (!boundsOverlap(left.bounds, right.bounds, 0.02)) continue;
+      if (!boundsCouldShareBorder(left.bounds, right.bounds)) continue;
 
-      // Only mark a fallback relationship. Rendering still relies on exact
-      // shared edges, preventing false lines across overlapping historical zones.
       left.neighbors.add(right.id);
       right.neighbors.add(left.id);
     }
@@ -200,4 +205,4 @@ export function validateProvinceTopology(topology) {
   return { valid: errors.length === 0, errors };
 }
 
-export { edgeKey, getPolygonEdges, polygonBounds };
+export { edgeKey, getPolygonEdges, polygonBounds, boundsCouldShareBorder };
