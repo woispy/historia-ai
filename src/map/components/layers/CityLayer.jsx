@@ -1,33 +1,31 @@
 import { getAnatoliaCityMapMetadata } from "../../data/AnatoliaCityAtlas";
+import { getCityLabelPolicy, getMapLod } from "../../rendering/CartographyModel";
 
 const TIER_WEIGHT = Object.freeze({ capital: 4, major: 3, town: 2, village: 1 });
 const LABEL_CONFIG = Object.freeze({
-  capital: { minZoom: 1.25, size: 0.30, widthFactor: 0.48 },
-  major: { minZoom: 1.75, size: 0.22, widthFactor: 0.46 },
-  town: { minZoom: 2.45, size: 0.17, widthFactor: 0.44 },
-  village: { minZoom: 3.2, size: 0.13, widthFactor: 0.42 },
+  capital: { minZoom: 1.15, size: 0.30, widthFactor: 0.48 },
+  major: { minZoom: 1.55, size: 0.22, widthFactor: 0.46 },
+  town: { minZoom: 2.15, size: 0.17, widthFactor: 0.44 },
+  village: { minZoom: 3.35, size: 0.13, widthFactor: 0.42 },
 });
 
 function mergeCityMetadata(city) {
   const atlas = getAnatoliaCityMapMetadata(city.id);
   if (!atlas) return null;
-
-  return {
-    ...city,
-    map: atlas,
-  };
+  return { ...city, map: atlas };
 }
 
 function getVisibleCities(cities, zoom) {
+  const lod = getMapLod(zoom);
   return cities
     .map(mergeCityMetadata)
     .filter(Boolean)
     .filter((city) => {
       const tier = city.map.tier ?? "town";
-      if (zoom >= 3.1) return true;
-      if (zoom >= 2.15) return tier !== "village";
-      if (zoom >= 1.45) return tier === "capital" || tier === "major";
-      return tier === "capital" || (tier === "major" && city.map.port);
+      if (lod === "world") return tier === "capital" || (tier === "major" && city.map.port);
+      if (lod === "regional") return tier === "capital" || tier === "major";
+      if (lod === "province") return tier !== "village";
+      return true;
     })
     .sort((a, b) => (TIER_WEIGHT[b.map.tier] ?? 0) - (TIER_WEIGHT[a.map.tier] ?? 0));
 }
@@ -53,7 +51,6 @@ function estimateLabelBox(city, candidate, config) {
   const right = candidate.anchor === "end" ? candidate.x : candidate.x + halfWidth;
   const top = candidate.y - config.size * 0.72;
   const bottom = candidate.y + config.size * 0.22;
-
   return { left, right, top, bottom };
 }
 
@@ -67,25 +64,24 @@ function boxesOverlap(a, b, padding = 0.055) {
 }
 
 function placeLabels(cities, zoom) {
+  const policy = getCityLabelPolicy(zoom);
   const placed = [];
   const labels = [];
 
   for (const city of cities) {
+    if (labels.length >= policy.maxLabels) break;
     const config = LABEL_CONFIG[city.map.tier] ?? LABEL_CONFIG.town;
     if (zoom < config.minZoom) continue;
+    if (city.map.tier === "town" && !policy.showTowns) continue;
+    if (city.map.tier === "village" && !policy.showVillages) continue;
 
-    let selected = null;
     for (const candidate of getLabelCandidates(city)) {
       const box = estimateLabelBox(city, candidate, config);
-      if (!placed.some((item) => boxesOverlap(box, item.box))) {
-        selected = { ...candidate, box };
-        break;
-      }
+      if (placed.some((item) => boxesOverlap(box, item.box))) continue;
+      placed.push({ box });
+      labels.push({ city, config, ...candidate });
+      break;
     }
-
-    if (!selected) continue;
-    placed.push(selected);
-    labels.push({ city, config, ...selected });
   }
 
   return labels;
@@ -93,8 +89,9 @@ function placeLabels(cities, zoom) {
 
 function CityMarker({ city, zoom, onClick }) {
   const { x, y, tier, port, fortified } = city.map;
-  const radius = tier === "capital" ? 0.14 : tier === "major" ? 0.095 : 0.065;
+  const radius = tier === "capital" ? 0.14 : tier === "major" ? 0.095 : tier === "town" ? 0.065 : 0.045;
   const isCapital = tier === "capital";
+  const detailed = zoom >= 2.55;
 
   return (
     <g
@@ -103,16 +100,7 @@ function CityMarker({ city, zoom, onClick }) {
       style={{ cursor: onClick ? "pointer" : "default" }}
     >
       {isCapital && (
-        <circle
-          cx={x}
-          cy={y}
-          r={radius + 0.055}
-          fill="none"
-          stroke="#d9bf68"
-          strokeOpacity="0.75"
-          strokeWidth="0.045"
-          vectorEffect="non-scaling-stroke"
-        />
+        <circle cx={x} cy={y} r={radius + 0.055} fill="none" stroke="#d9bf68" strokeOpacity="0.75" strokeWidth="0.045" vectorEffect="non-scaling-stroke" />
       )}
       <circle
         cx={x}
@@ -123,26 +111,11 @@ function CityMarker({ city, zoom, onClick }) {
         strokeWidth="0.045"
         vectorEffect="non-scaling-stroke"
       />
-      {fortified && zoom >= 2.5 && (
-        <circle
-          cx={x}
-          cy={y}
-          r={radius + 0.075}
-          fill="none"
-          stroke="#cbb76f"
-          strokeOpacity="0.72"
-          strokeWidth="0.035"
-          strokeDasharray="0.12 0.10"
-          vectorEffect="non-scaling-stroke"
-        />
+      {fortified && detailed && (
+        <circle cx={x} cy={y} r={radius + 0.075} fill="none" stroke="#cbb76f" strokeOpacity="0.72" strokeWidth="0.035" strokeDasharray="0.12 0.10" vectorEffect="non-scaling-stroke" />
       )}
       {port && zoom >= 2.0 && (
-        <path
-          d={`M ${x - 0.15} ${y - 0.15} L ${x + 0.15} ${y - 0.15}`}
-          stroke="#6f9fa9"
-          strokeWidth="0.045"
-          vectorEffect="non-scaling-stroke"
-        />
+        <path d={`M ${x - 0.15} ${y - 0.15} L ${x + 0.15} ${y - 0.15}`} stroke="#6f9fa9" strokeWidth="0.045" vectorEffect="non-scaling-stroke" />
       )}
     </g>
   );
@@ -176,12 +149,8 @@ function CityLayer({ cities = [], zoom = 1, onCityClick }) {
 
   return (
     <g aria-label="Historical cities">
-      {visibleCities.map((city) => (
-        <CityMarker key={city.id} city={city} zoom={zoom} onClick={onCityClick} />
-      ))}
-      {labels.map(({ city, config, x, y, anchor }) => (
-        <CityLabel key={`${city.id}-label`} city={city} config={config} x={x} y={y} anchor={anchor} />
-      ))}
+      {visibleCities.map((city) => <CityMarker key={city.id} city={city} zoom={zoom} onClick={onCityClick} />)}
+      {labels.map(({ city, config, x, y, anchor }) => <CityLabel key={`${city.id}-label`} city={city} config={config} x={x} y={y} anchor={anchor} />)}
     </g>
   );
 }

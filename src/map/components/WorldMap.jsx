@@ -6,6 +6,7 @@ import {
   CityLayer,
   PhysicalGeographyLayer,
   WorldPhysicalLayer,
+  CartographyLayer,
 } from "./layers";
 import {
   CameraProvider,
@@ -46,12 +47,8 @@ function WorldMap({
   }, [camera, onCityClick]);
 
   const worldPhysicalLayer = useMemo(() => <WorldPhysicalLayer />, []);
-
-  const physicalBaseLayer = useMemo(
-    () => <PhysicalGeographyLayer phase="base" zoom={camera.zoom} />,
-    [camera.zoom],
-  );
-
+  const cartographyLayer = useMemo(() => <CartographyLayer zoom={camera.zoom} />, [camera.zoom]);
+  const physicalBaseLayer = useMemo(() => <PhysicalGeographyLayer phase="base" zoom={camera.zoom} />, [camera.zoom]);
   const provinceLayer = useMemo(() => (
     <g clipPath="url(#world-landmask)">
       <ProvinceLayer
@@ -63,50 +60,22 @@ function WorldMap({
         zoom={camera.zoom}
       />
     </g>
-  ), [
-    provinces,
-    selectedProvinceId,
-    onProvinceClick,
-    settings.mapStyle,
-    settings.mapShadows,
-    camera.zoom,
-  ]);
-
-  const physicalWaterLayer = useMemo(
-    () => <PhysicalGeographyLayer phase="water" zoom={camera.zoom} />,
-    [camera.zoom],
-  );
-
-  const physicalDetailLayer = useMemo(
-    () => <PhysicalGeographyLayer phase="detail" zoom={camera.zoom} />,
-    [camera.zoom],
-  );
-
-  const cityLayer = useMemo(() => (
-    <CityLayer
-      cities={cities}
-      zoom={camera.zoom}
-      onCityClick={handleCityClick}
-    />
-  ), [cities, camera.zoom, handleCityClick]);
+  ), [provinces, selectedProvinceId, onProvinceClick, settings.mapStyle, settings.mapShadows, camera.zoom]);
+  const physicalWaterLayer = useMemo(() => <PhysicalGeographyLayer phase="water" zoom={camera.zoom} />, [camera.zoom]);
+  const physicalDetailLayer = useMemo(() => <PhysicalGeographyLayer phase="detail" zoom={camera.zoom} />, [camera.zoom]);
+  const cityLayer = useMemo(() => <CityLayer cities={cities} zoom={camera.zoom} onCityClick={handleCityClick} />, [cities, camera.zoom, handleCityClick]);
 
   const renderLayer = useMemo(() => (
     <RenderLayer>
       {worldPhysicalLayer}
+      {cartographyLayer}
       {physicalBaseLayer}
       {provinceLayer}
       {physicalWaterLayer}
       {physicalDetailLayer}
       {cityLayer}
     </RenderLayer>
-  ), [
-    worldPhysicalLayer,
-    physicalBaseLayer,
-    provinceLayer,
-    physicalWaterLayer,
-    physicalDetailLayer,
-    cityLayer,
-  ]);
+  ), [worldPhysicalLayer, cartographyLayer, physicalBaseLayer, provinceLayer, physicalWaterLayer, physicalDetailLayer, cityLayer]);
 
   return (
     <CameraProvider value={camera}>

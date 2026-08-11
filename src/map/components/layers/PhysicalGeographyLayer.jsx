@@ -1,4 +1,5 @@
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../data/AnatoliaPhysicalAtlas";
+import { getPhysicalDetailProfile } from "../../rendering/CartographyModel";
 import { layoutPhysicalLabels } from "../../rendering/physical/PhysicalLabelLayout";
 
 function pathFromCoordinates(coordinates, close = false) {
@@ -13,21 +14,12 @@ function pathFromCoordinates(coordinates, close = false) {
 function PhysicalPolygon({ feature, className = "", opacity = 1 }) {
   const d = pathFromCoordinates(feature.coordinates, true);
   if (!d) return null;
-
-  return (
-    <path
-      d={d}
-      className={className}
-      opacity={opacity}
-      pointerEvents="none"
-    />
-  );
+  return <path d={d} className={className} opacity={opacity} pointerEvents="none" />;
 }
 
 function PhysicalLine({ feature, className = "", width = 0.12, opacity = 1 }) {
   const d = pathFromCoordinates(feature.coordinates);
   if (!d) return null;
-
   return (
     <path
       d={d}
@@ -46,7 +38,6 @@ function PhysicalLine({ feature, className = "", width = 0.12, opacity = 1 }) {
 function PhysicalLabel({ label }) {
   const rotation = Number(label.rotation ?? 0);
   const transform = `translate(${label.x} ${label.y}) rotate(${rotation}) scale(1,-1)`;
-
   return (
     <g transform={transform} pointerEvents="none">
       <text
@@ -70,68 +61,41 @@ function PhysicalLabel({ label }) {
 
 function PhysicalGeographyLayer({ phase = "detail", zoom = 1 }) {
   const atlas = ANATOLIA_PHYSICAL_ATLAS;
+  const profile = getPhysicalDetailProfile(zoom);
 
   if (phase === "base") {
     return (
       <g aria-label="Anatolia terrain context">
         {atlas.terrainRegions.map((region) => (
-          <PhysicalPolygon
-            key={region.name}
-            feature={region}
-            className={`map-terrain-${region.type}`}
-            opacity={0.10}
-          />
+          <PhysicalPolygon key={region.name} feature={region} className={`map-terrain-${region.type}`} opacity={zoom >= 1.15 ? 0.10 : 0.055} />
         ))}
       </g>
     );
   }
 
-  // The global WorldPhysicalLayer owns the actual sea fill and coastline.
-  // Anatolia no longer paints broad water rectangles here. This layer only
-  // supplies local physical features that need to sit above political land.
   if (phase === "water") {
+    if (!profile.waterChannels) return null;
     return (
       <g aria-label="Anatolia physical water details">
-        {atlas.channels.map((channel) => (
-          <PhysicalPolygon
-            key={channel.name}
-            feature={channel}
-            className="map-sea-channel"
-            opacity={0.90}
-          />
-        ))}
+        {atlas.channels.map((channel) => <PhysicalPolygon key={channel.name} feature={channel} className="map-sea-channel" opacity={0.90} />)}
       </g>
     );
   }
 
-  const labels = layoutPhysicalLabels(atlas.labels, zoom);
+  const labels = profile.physicalLabels ? layoutPhysicalLabels(atlas.labels, zoom) : [];
+  const visibleMountains = profile.mountains ? atlas.mountainRanges.filter((range) => profile.minorRivers || range.rank === 1) : [];
+  const visibleRivers = profile.rivers ? atlas.rivers.filter((river) => profile.minorRivers || river.rank === 1) : [];
 
   return (
     <g aria-label="Anatolia physical geography detail">
-      {atlas.lakes.map((lake) => (
-        <PhysicalPolygon key={lake.name} feature={lake} className="map-lake" opacity={0.84} />
+      {profile.lakes && atlas.lakes.map((lake) => <PhysicalPolygon key={lake.name} feature={lake} className="map-lake" opacity={0.84} />)}
+      {visibleMountains.map((range) => (
+        <PhysicalLine key={range.name} feature={range} className="map-mountain" width={range.rank === 1 ? 0.11 : 0.075} opacity={range.rank === 1 ? 0.20 : 0.13} />
       ))}
-      {atlas.mountainRanges.map((range) => (
-        <PhysicalLine
-          key={range.name}
-          feature={range}
-          className="map-mountain"
-          width={range.rank === 1 ? 0.11 : 0.075}
-          opacity={range.rank === 1 ? 0.20 : 0.13}
-        />
+      {visibleRivers.map((river) => (
+        <PhysicalLine key={river.name} feature={river} className="map-river" width={river.rank === 1 ? 0.11 : 0.075} opacity={river.rank === 1 ? 0.72 : 0.48} />
       ))}
-      {atlas.rivers.map((river) => (
-        <PhysicalLine
-          key={river.name}
-          feature={river}
-          className="map-river"
-          width={river.rank === 1 ? 0.11 : 0.075}
-          opacity={river.rank === 1 ? 0.72 : 0.48}
-        />
-      ))}
-      {labels.map((label) => (
-        <PhysicalLabel key={label.id} label={label} />
-      ))}
+      {profile.mountainLabels && labels.map((label) => <PhysicalLabel key={label.id} label={label} />)}
     </g>
   );
 }

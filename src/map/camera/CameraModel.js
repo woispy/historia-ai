@@ -1,8 +1,9 @@
 /**
  * Historia AI — Camera Model
  *
- * World-space camera tuned for grand-strategy map navigation. Zoom is kept
- * within a readable range so city/province LOD transitions remain predictable.
+ * Phase 2G keeps a broad world view while preserving enough zoom range for
+ * province and city LODs. The map renderer owns visual LOD; the camera only
+ * owns navigation bounds.
  */
 
 export function createCameraModel() {
@@ -11,7 +12,7 @@ export function createCameraModel() {
     y: 0,
     zoom: 1,
     target: null,
-    minZoom: 0.85,
-    maxZoom: 40,
+    minZoom: 0.75,
+    maxZoom: 48,
   });
 }
