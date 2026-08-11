@@ -313,6 +313,23 @@ function clipCellToLand(cell) {
   return unique;
 }
 
+function createAnchorFallbackPolygon(centroid) {
+  const radii = [0.03, 0.015, 0.008];
+  for (const radius of radii) {
+    const polygon = [];
+    for (let index = 0; index < 6; index += 1) {
+      const angle = (index / 6) * Math.PI * 2;
+      polygon.push([
+        centroid[0] + Math.cos(angle) * radius,
+        centroid[1] + Math.sin(angle) * radius,
+      ]);
+    }
+    const clipped = clipCellToLand(polygon);
+    if (clipped.length >= 3 && isPhysicalLandPoint(polygonCentroid(clipped))) return clipped;
+  }
+  return [];
+}
+
 function roundPolygon(polygon) {
   return polygon.map(([x, y]) => [Number(x.toFixed(5)), Number(y.toFixed(5))]);
 }
@@ -429,11 +446,17 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     polygonsByProvince[sites[siteIndex].provinceId].push(roundPolygon(clipped));
   }
 
+  let fallbackCount = 0;
   const provinces = [];
   const geometries = [];
   for (const metadata of ANATOLIA_PROVINCE_METADATA) {
-    const polygons = polygonsByProvince[metadata.id];
-    if (!polygons.length) throw new Error(`Phase 2D produced no geometry for ${metadata.id}`);
+    let polygons = polygonsByProvince[metadata.id];
+    if (!polygons.length) {
+      const fallback = createAnchorFallbackPolygon(metadata.centroid);
+      if (fallback.length < 3) throw new Error(`Phase 2D produced no geometry for ${metadata.id}`);
+      polygons = [roundPolygon(fallback)];
+      fallbackCount += 1;
+    }
     provinces.push(createProvinceAsset(metadata, polygons));
     geometries.push(createGeometryAsset(metadata, polygons));
   }
@@ -449,6 +472,7 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     siteCount: sites.length,
     politicalSiteCount: sites.filter((site) => Boolean(site.provinceId)).length,
     barrierSiteCount: sites.filter((site) => !site.provinceId).length,
+    fallbackProvinceCount: fallbackCount,
     provinceCount: provinces.length,
     polygonCount: geometries.reduce((sum, geometry) => sum + geometry.polygons.length, 0),
     provinces,
