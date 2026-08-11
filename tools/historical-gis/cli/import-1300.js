@@ -3,8 +3,6 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { downloadHistorical1300GeoJson, importHistoricalGeoJson } from "../HistoricalGeometryImporter.js";
 import { buildHistoricalGeometryAsset, buildHistoricalProvinceAsset } from "../HistoricalProvinceAssetBuilder.js";
-import regionalLayer from "../../../data/gis/1300/regional/anatolia-byzantium.json" with { type: "json" };
-import { buildCuratedRegionalAssets } from "../HistoricalProvinceAssetBuilder.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const inputArgument = process.argv[2] ?? "--download";
@@ -44,17 +42,9 @@ for (const region of regions) {
   geometries.push(geometryAsset);
 }
 
-for (const { provinceAsset, geometryAsset } of buildCuratedRegionalAssets(regionalLayer).map(({ province, geometry }) => ({ provinceAsset: province, geometryAsset: geometry }))) {
-  const provinceId = provinceAsset.identity.id;
-  if (assetIds.has(provinceId)) throw new Error(`Duplicate curated regional GIS asset id: ${provinceId}`);
-  assetIds.add(provinceId);
-  provinces.push(provinceAsset);
-  geometries.push(geometryAsset);
-}
-
 const polygonCount = geometries.reduce((total, geometry) => total + geometry.polygons.length, 0);
 await fs.writeFile(runtimePath, `${JSON.stringify({
-  schemaVersion: 1,
+  schemaVersion: 2,
   assetType: "historical-runtime",
   historicalDate: "1300-01-01",
   source: {
@@ -63,9 +53,9 @@ await fs.writeFile(runtimePath, `${JSON.stringify({
     projection: "EPSG:4326",
     sourceFeatureCount: regions.length,
     regionalOverlay: {
-      id: regionalLayer.id,
-      regionCount: regionalLayer.regions.length,
-      precision: regionalLayer.precision,
+      status: "research-only",
+      id: "anatolia-byzantium-1300",
+      note: "The former broad political overlay is retained as research metadata but is no longer imported as runtime province geometry. Phase 2C refinement metadata is resolved separately by stable Phase 2B province ids.",
     },
   },
   counts: {
@@ -79,4 +69,5 @@ await fs.writeFile(runtimePath, `${JSON.stringify({
 
 console.log(`Imported ${regions.length} historical GIS features for 1300.`);
 console.log(`Generated one consolidated runtime asset containing ${provinces.length} provinces and ${geometries.length} geometries.`);
+console.log("Phase 2C: broad curated political overlay is research-only; runtime geometry remains source-derived.");
 console.log("Generated GIS source/assets are reproducible build artifacts and should not be committed unless redistribution is explicitly approved by the source license.");
