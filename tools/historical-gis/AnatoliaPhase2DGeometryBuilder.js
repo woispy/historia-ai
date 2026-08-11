@@ -298,7 +298,7 @@ function createAnchorFallbackPolygon(centroid) {
         centroid[1] + Math.sin(angle) * radius,
       ]);
     }
-    if (polygon.every((point) => isPhysicalLandPoint(point))) return polygon;
+    if (isPhysicalLandPoint(centroid)) return polygon;
   }
   return [];
 }
