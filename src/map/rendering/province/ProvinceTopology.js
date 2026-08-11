@@ -7,7 +7,6 @@
  */
 
 const EDGE_PRECISION = 5;
-const EPSILON = 10 ** -EDGE_PRECISION;
 const GAP_TOLERANCE = 0.02;
 
 function round(value) {
@@ -46,8 +45,6 @@ function boundsCouldShareBorder(a, b, gapTolerance = GAP_TOLERANCE) {
   const xGap = Math.max(a.minX - b.maxX, b.minX - a.maxX, 0);
   const yGap = Math.max(a.minY - b.maxY, b.minY - a.maxY, 0);
 
-  // A point-touch (zero overlap in both dimensions) is not a province
-  // adjacency. A tiny gap is accepted only when the other axis overlaps.
   const horizontalBoundary = xGap <= gapTolerance && yOverlap > gapTolerance;
   const verticalBoundary = yGap <= gapTolerance && xOverlap > gapTolerance;
   const overlappingBounds = xOverlap > gapTolerance && yOverlap > gapTolerance;
@@ -139,8 +136,6 @@ export function buildProvinceTopology(provinces = []) {
     }
   }
 
-  // Some historical GIS features have tiny coordinate gaps. Add a conservative
-  // bbox adjacency fallback, but never infer a border from distant provinces.
   const nodeList = [...nodes.values()];
   for (let leftIndex = 0; leftIndex < nodeList.length; leftIndex += 1) {
     for (let rightIndex = leftIndex + 1; rightIndex < nodeList.length; rightIndex += 1) {
