@@ -16,6 +16,7 @@
     "test:province-topology": "node tools/tests/province-topology.test.js",
     "test:anatolia-phase2b": "node tools/tests/anatolia-phase2b.test.js",
     "test:anatolia-phase2c": "node tools/tests/anatolia-phase2c.test.js",
+    "test:anatolia-phase2d": "node tools/tests/anatolia-phase2d.test.js",
     "test:new-game": "node tools/tests/new-game-state.test.js",
     "validate:historical-gis:1300": "node tools/historical-gis/cli/validate-1300.js",
     "lint": "eslint .",

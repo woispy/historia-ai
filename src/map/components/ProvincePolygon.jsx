@@ -1,10 +1,10 @@
 /**
  * Historia AI — Province Polygon
  *
- * Phase 2 presentation rules follow a grand-strategy hierarchy:
- * country color first, province borders second, physical geography above it.
- * Political geometry is still clipped by the global physical land mask in
- * WorldMap, so no historical province can paint the sea.
+ * Province fills are deliberately rendered without their own border stroke.
+ * Phase 2D can represent one province with many cartographic sub-polygons;
+ * the dedicated ProvinceBoundaryLayer owns the shared border topology so
+ * internal geometry fragments never create fake province borders.
  */
 
 import { useMemo } from "react";
@@ -34,7 +34,6 @@ function ProvincePolygon({
   selected,
   onClick,
   mapStyle = "detailed",
-  mapShadows = true,
   zoom = 1,
 }) {
   const d = useMemo(
@@ -44,12 +43,7 @@ function ProvincePolygon({
 
   if (!d) return null;
 
-  const isPolitical = mapStyle === "political";
   const isTerrain = mapStyle === "terrain";
-  const borderPrecision = Number(province.historical?.borderPrecision ?? 2);
-  const approximateBorder = borderPrecision <= 1;
-  const sourceDerived = province.historical?.classification !== "curated-regional-gameplay-overlay";
-
   const fill = selected
     ? "#d6b04d"
     : isTerrain
@@ -62,29 +56,13 @@ function ProvincePolygon({
       ? 0.94
       : 1;
 
-  const stroke = selected
-    ? "#f3d77c"
-    : isPolitical
-      ? "#1b1e1a"
-      : "#30342e";
-
-  const strokeWidth = selected
-    ? 0.28
-    : zoom >= 2.2
-      ? 0.08
-      : zoom >= 1.45
-        ? 0.06
-        : 0.04;
-
   return (
     <path
       d={d}
       fill={fill}
       fillOpacity={fillOpacity}
-      stroke={stroke}
-      strokeWidth={strokeWidth}
-      strokeDasharray={approximateBorder ? "0.42 0.28" : undefined}
-      strokeOpacity={approximateBorder && mapShadows ? 0.58 : sourceDerived ? 0.84 : 1}
+      stroke={selected ? "#f3d77c" : "none"}
+      strokeWidth={selected ? 0.28 : 0}
       vectorEffect="non-scaling-stroke"
       style={{ cursor: "pointer" }}
       onClick={() => onClick?.(province.id)}

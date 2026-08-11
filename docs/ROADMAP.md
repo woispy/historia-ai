@@ -14,7 +14,7 @@
 
 ---
 
-# Phase 2 — Map & Historical GIS Foundation ✅
+# Phase 2 — Map & Historical GIS Foundation 🚧
 
 ## Phase 2A — GIS core ✅
 
@@ -43,22 +43,35 @@
 - [x] City-to-province cartographic identity
 - [x] Dedicated Phase 2B validation suite
 
-## Phase 2C — Province geometry & geography refinement ✅
+## Phase 2C — Province geography refinement metadata ✅
 
-- [x] Reconcile runtime policy so broad approximate regional overlays no longer compete with source-derived province geometry
-- [x] Add stable WGS84 anchors for every Phase 2B province
-- [x] Add deterministic broad terrain modifiers
-- [x] Add relative historical settlement-density tiers
-- [x] Add symmetric historical adjacency hints
-- [x] Add strategic passes and major movement corridors as map metadata
-- [x] Add selected river-crossing anchors
-- [x] Preserve coastline and physical geography as authoritative
-- [x] Add dedicated Phase 2C validation suite
-- [x] Document the boundary between defensible cartography and future source-backed polygon overrides
+- [x] Stable WGS84 anchors for every Phase 2B province
+- [x] Terrain, movement, defence, winter, agriculture and settlement modifiers
+- [x] Symmetric historical adjacency hints
+- [x] Strategic passes and movement corridors
+- [x] River-crossing anchors
+- [x] Physical geography remains authoritative
+- [x] Dedicated Phase 2C validation suite
 
-### Deferred cartography rule
+## Phase 2D — Historical province geometry 🚧
 
-Individual medieval province polygons will only replace source-derived geometry when a defensible historical geometry source is available. Phase 2C deliberately does not manufacture cadastral-looking borders from uncertain evidence.
+- [x] Replace coarse Anatolia source polygons at runtime
+- [x] Deterministic 38-province cartographic geometry layer
+- [x] Dense land control field
+- [x] Coastline control points
+- [x] Historical GIS shape anchors
+- [x] Province fill separated from shared topology borders
+- [x] Dedicated Phase 2D validation suite
+- [x] CI/build integration
+- [ ] Hand-reviewed historical boundary anchors for the most important provinces
+- [ ] Province-specific river and mountain boundary constraints
+- [ ] Higher-resolution Aegean/Marmara coastal reconstruction
+- [ ] Historical city hinterland polygons
+- [ ] Final cartographic audit against primary/secondary sources
+
+### Phase 2D rule
+
+The generated geometry is a deterministic cartographic reconstruction, not a claim of medieval cadastral precision. Exact political control remains in the historical metadata layer. Future hand-reviewed boundary constraints must modify the builder inputs rather than introduce screen-coordinate hacks or a second rendering system.
 
 ---
 

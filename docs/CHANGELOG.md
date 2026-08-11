@@ -4,6 +4,40 @@ All notable changes to Historia AI will be documented here.
 
 ---
 
+# Unreleased — Phase 2D Historical Province Geometry
+
+## Added
+
+### Anatolia runtime geometry
+
+- Added a deterministic 38-province Phase 2D geometry builder.
+- Replaced the coarse Anatolia source-province presentation at runtime while preserving the 1300 historical GIS source for research and the rest of the world.
+- Added dense land control sites, coastline control sites and historical GIS shape anchors.
+- Added a stable WGS84 cartographic envelope that keeps Constantinople and Adrianopolis outside the Anatolia override while retaining Sinop, Trebizond and the eastern Black Sea coast.
+- Added multi-polygon province assets so complex cartographic shapes can be represented without introducing duplicate province entities.
+
+### Rendering
+
+- Province fills no longer draw their own border stroke.
+- Shared province/country borders are now visually owned by the topology layer, preventing internal geometry fragments from creating false borders.
+- Existing physical land-mask and water-layer ordering remains authoritative.
+
+### Validation
+
+- Added `test:anatolia-phase2d`.
+- CI now runs Phase 2D geometry tests, geometry-builder syntax checks, GIS generation and runtime validation.
+
+### Documentation
+
+- Added `docs/architecture/anatolia-phase2d-geometry.md`.
+- Updated the roadmap to distinguish Phase 2C metadata from Phase 2D actual runtime geometry.
+
+## Cartographic policy
+
+Phase 2D is a deterministic cartographic reconstruction, not a claim of medieval cadastral precision. Historical ownership remains separate from geometry and continues to use the Phase 2B confidence model. Future source-backed boundary corrections should be added as builder constraints rather than hard-coded screen coordinates.
+
+---
+
 # Unreleased — Phase 2C Anatolia Geometry & Geography Refinement
 
 ## Added
@@ -20,30 +54,18 @@ All notable changes to Historia AI will be documented here.
 ### Runtime GIS policy
 
 - Broad hand-drawn Phase 2B political regional overlays are now research-only.
-- Runtime province geometry remains source-derived from the 1300 historical GIS layer.
-- This prevents approximate regional blobs from becoming false cadastral-looking province borders.
+- Runtime province geometry remains source-derived from the 1300 historical GIS layer until Phase 2D.
 
 ### Validation
 
 - Added `test:anatolia-phase2c`.
-- CI now checks Phase 2C metadata, adjacency symmetry, strategic geography, coordinate ranges and terrain profiles.
-
-## Historical basis
-
-Phase 2C continues the cautious historical policy of Phase 2B. The historical-basemaps source is treated as a useful world-scale historical base but not as unquestionable cadastral truth. Oxford's Clive Foss study is used for the Ottoman homeland / Bithynia / Sangarius context, while TDV İslâm Ansiklopedisi entries support the broad beylik anchors and chronological caution.
-
-## Documentation
-
-- Added `docs/architecture/anatolia-phase2c-refinement.md`.
-- Marked Phase 2 complete in the roadmap.
+- CI checks Phase 2C metadata, adjacency symmetry, strategic geography, coordinate ranges and terrain profiles.
 
 ---
 
 # Unreleased — Phase 2B Anatolia Reconstruction
 
 ## Added
-
-### Historical GIS
 
 - Ten-region 1300 Anatolia reconstruction profile.
 - Historical polity context with start/end dates and confidence levels.
@@ -65,15 +87,6 @@ Phase 2C continues the cautious historical policy of Phase 2B. The historical-ba
 - Anatolia city atlas now references stable Phase 2B province ids.
 - Constantinople and Adrianopolis are intentionally outside the Anatolian province vocabulary.
 
-### Validation
-
-- CI now runs `test:anatolia-phase2b` before GIS generation and production build.
-
-## Documentation
-
-- Added `docs/architecture/anatolia-phase2b-reconstruction.md`.
-- Updated roadmap with Phase 2A, Phase 2B and Phase 2C boundaries.
-
 ---
 
 # v0.1.0 — Foundation Complete
@@ -92,20 +105,9 @@ Phase 2C continues the cautious historical policy of Phase 2B. The historical-ba
 - ResourceLoader
 - Layered ScenarioValidator
 
-### World
-
-- Data-driven WorldFactory
-
 ### Architecture
 
 - Entity-per-file scenario structure
 - Immutable scenario definitions
 - Generic resource loading
 - Layered validation pipeline
-
-### Documentation
-
-- Architecture documentation
-- ADR documentation
-- Development roadmap
-- Changelog
