@@ -19,6 +19,17 @@
       "provinceMetadata": "src/map/data/AnatoliaProvinceMetadata.js",
       "regions": 10,
       "policy": "later political ownership is not projected backward onto 1300 without evidence"
+    },
+    "phase2c": {
+      "status": "cartographic-refinement-metadata",
+      "refinement": "src/map/data/AnatoliaProvinceRefinement.js",
+      "provinceCount": 38,
+      "strategicPassCount": 9,
+      "riverCrossingCount": 7,
+      "geometryPolicy": "source-derived-with-anchor-refinement",
+      "runtimeOverlayPolicy": "broad curated political overlay is research-only and is no longer imported as runtime province geometry",
+      "terrainPolicy": "broad terrain classes provide deterministic map modifiers without pretending to be a high-resolution elevation model",
+      "settlementPolicy": "relative low/medium/high density tiers only; not a population census"
     }
   },
   "topology": {
@@ -26,7 +37,8 @@
     "engine": "src/map/rendering/province/ProvinceTopology.js",
     "sharedEdgePrecision": 5,
     "fallbackAdjacency": "conservative-bounding-box",
-    "renderedFallbackEdges": false
+    "renderedFallbackEdges": false,
+    "phase2cHistoricalHints": "src/map/data/AnatoliaProvinceRefinement.js"
   },
   "physicalGeography": {
     "status": "curated-anatolia-physical-atlas",
@@ -58,6 +70,7 @@
     "Historical Province Repository",
     "Province Topology",
     "Phase 2B historical reconstruction metadata",
+    "Phase 2C cartographic refinement metadata",
     "physical geography renderer",
     "1300 ownership",
     "SVG Renderer"
@@ -66,6 +79,7 @@
     "Historical borders are approximate and source-dependent.",
     "Province is Historia AI's runtime simulation unit; it is not a claim that every imported feature was an administrative province in 1300.",
     "Physical geography is rendered independently from political ownership so coastlines, water and terrain cannot accidentally become political territory.",
-    "The generated source GeoJSON remains a local build artifact unless redistribution is explicitly approved by the source license."
+    "The generated source GeoJSON remains a local build artifact unless redistribution is explicitly approved by the source license.",
+    "The broad Phase 2B regional political overlay remains available for research comparison but is not imported into runtime province geometry after Phase 2C."
   ]
 }
