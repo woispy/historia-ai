@@ -58,9 +58,13 @@
 - [x] Replace coarse Anatolia source polygons at runtime
 - [x] Deterministic 38-province cartographic geometry layer
 - [x] Dense land control field
-- [x] Coastline control points
 - [x] Historical GIS shape anchors
 - [x] Province fill separated from shared topology borders
+- [x] Physical coastline barrier field
+- [x] Internal sea/lake barrier field
+- [x] Political control sites constrained to physical land
+- [x] Polygon-centroid physical-land validation
+- [x] Higher-density coastal control sampling
 - [x] Dedicated Phase 2D validation suite
 - [x] CI/build integration
 - [ ] Hand-reviewed historical boundary anchors for the most important provinces
@@ -71,7 +75,7 @@
 
 ### Phase 2D rule
 
-The generated geometry is a deterministic cartographic reconstruction, not a claim of medieval cadastral precision. Exact political control remains in the historical metadata layer. Future hand-reviewed boundary constraints must modify the builder inputs rather than introduce screen-coordinate hacks or a second rendering system.
+The generated geometry is a deterministic cartographic reconstruction, not a claim of medieval cadastral precision. Exact political control remains in the historical metadata layer. Future hand-reviewed boundary constraints must modify builder inputs rather than introduce screen-coordinate hacks or a second rendering system.
 
 ---
 
