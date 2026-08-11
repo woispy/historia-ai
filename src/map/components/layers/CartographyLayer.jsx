@@ -3,12 +3,12 @@ import {
   ANATOLIA_STRATEGIC_CORRIDORS,
   ANATOLIA_STRATEGIC_PASSES,
   ANATOLIA_STRATEGIC_CROSSINGS,
-} from "../../data/CartographyAtlas";
+} from "../../data/CartographyAtlas.js";
 import {
   shouldShowRegionLabels,
   shouldShowStrategicCorridors,
   shouldShowStrategicPasses,
-} from "../../rendering/CartographyModel";
+} from "../../rendering/CartographyModel.js";
 
 function pathFromPoints(points) {
   if (!Array.isArray(points) || points.length < 2) return "";
