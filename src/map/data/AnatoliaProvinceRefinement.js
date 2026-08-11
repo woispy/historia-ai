@@ -106,7 +106,7 @@ export const ANATOLIA_ADJACENCY_HINTS = Object.freeze({
   "phrygia-kutahya": ["phrygia-sogut", "phrygia-bilecik", "phrygia-eskisehir", "mysia-balikesir", "lydia-magnesia", "phrygia-afyon", "galatia-ankara"],
   "galatia-ankara": ["phrygia-eskisehir", "phrygia-kutahya", "cappadocia-sivas", "lycaonia-konya", "pontus-kastamon"],
   "cappadocia-kayseri": ["cappadocia-sivas", "lycaonia-konya", "eastern-anatolia-erzincan"],
-  "cappadocia-sivas": ["galatia-ankara", "cappadocia-kayseri", "lycaonia-konya", "pontus-amasya", "pontus-kastamon", "eastern-anatolia-erzincan"],
+  "cappadocia-sivas": ["galatia-ankara", "cappadocia-kayseri", "lycaonia-konya", "pontus-amasya", "pontus-kastamon", "eastern-anatolia-erzincan", "eastern-anatolia-erzurum"],
   "lycaonia-konya": ["galatia-ankara", "cappadocia-kayseri", "cappadocia-sivas", "pisidia-egirdir", "pisidia-beysehir", "lycaonia-larende"],
   "lycaonia-larende": ["lycaonia-konya", "pisidia-beysehir", "cilicia-sis", "cilicia-alaiye"],
   "pontus-sinop": ["pontus-amisos", "pontus-kastamon"],
