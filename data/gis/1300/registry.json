@@ -11,7 +11,15 @@
   },
   "provinceSource": {
     "status": "source-derived-political-regions",
-    "note": "The 1300 source contains 237 historical political/cultural GIS features. Historia AI imports them as provisional Province simulation units; they must not be described as a complete historically exact administrative-province dataset."
+    "note": "The 1300 source contains 237 historical political/cultural GIS features. Historia AI imports them as provisional Province simulation units; they are not presented as a complete historically exact administrative-province dataset.",
+    "phase2": "source-derived features are rendered as provinces; curated country-region overlays are retained as research metadata rather than province geometry"
+  },
+  "topology": {
+    "status": "runtime-derived",
+    "engine": "src/map/rendering/province/ProvinceTopology.js",
+    "sharedEdgePrecision": 5,
+    "fallbackAdjacency": "conservative-bounding-box",
+    "renderedFallbackEdges": false
   },
   "physicalGeography": {
     "status": "curated-anatolia-physical-atlas",
@@ -41,6 +49,7 @@
     "Historical Geometry Importer",
     "Historical Province Asset Builder",
     "Historical Province Repository",
+    "Province Topology",
     "physical geography renderer",
     "1300 ownership",
     "SVG Renderer"
@@ -49,6 +58,6 @@
     "Historical borders are approximate and source-dependent.",
     "Province is Historia AI's runtime simulation unit; it is not a claim that every imported feature was an administrative province in 1300.",
     "Physical geography is rendered independently from political ownership so coastlines, water and terrain cannot accidentally become political territory.",
-    "The generated source GeoJSON remains a local build artifact unless redistribution is explicitly permitted by the source license."
+    "The generated source GeoJSON remains a local build artifact unless redistribution is explicitly approved by the source license."
   ]
 }
