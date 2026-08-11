@@ -83,10 +83,10 @@ export const ANATOLIA_PROVINCE_REFINEMENTS = Object.freeze({
 export const ANATOLIA_ADJACENCY_HINTS = Object.freeze({
   "bithynia-nicomedia": ["bithynia-nicaea", "bithynia-prusa", "bithynia-sangarios"],
   "bithynia-nicaea": ["bithynia-nicomedia", "bithynia-prusa", "bithynia-sangarios"],
-  "bithynia-prusa": ["bithynia-nicomedia", "bithynia-nicaea", "phrygia-sogut", "phrygia-bilecik", "bithynia-sangarios"],
+  "bithynia-prusa": ["bithynia-nicomedia", "bithynia-nicaea", "bithynia-sangarios", "phrygia-sogut", "phrygia-bilecik"],
   "bithynia-sangarios": ["bithynia-nicomedia", "bithynia-nicaea", "bithynia-prusa", "phrygia-sogut", "phrygia-bilecik", "phrygia-eskisehir"],
   "phrygia-sogut": ["bithynia-sangarios", "bithynia-prusa", "phrygia-bilecik", "phrygia-kutahya"],
-  "phrygia-bilecik": ["bithynia-prusa", "phrygia-sogut", "phrygia-eskisehir", "phrygia-kutahya"],
+  "phrygia-bilecik": ["bithynia-sangarios", "bithynia-prusa", "phrygia-sogut", "phrygia-eskisehir", "phrygia-kutahya"],
   "phrygia-eskisehir": ["bithynia-sangarios", "phrygia-bilecik", "phrygia-kutahya", "galatia-ankara"],
   "mysia-balikesir": ["mysia-pergamon", "phrygia-kutahya", "lydia-magnesia"],
   "mysia-pergamon": ["mysia-balikesir", "lydia-magnesia"],
