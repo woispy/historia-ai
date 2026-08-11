@@ -2,7 +2,6 @@ import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtla
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 
 const BBOX = [25.45, 35.72, 44.85, 42.35];
-const GRID_STEP = 0.22;
 const SITE_EPSILON = 1e-6;
 
 function distanceSquared(a, b) {
@@ -58,9 +57,9 @@ function nearestProvinceId(point) {
   return winner.id;
 }
 
-function deterministicJitter(xIndex, yIndex) {
-  const seed = Math.sin((xIndex * 92821 + yIndex * 68917 + 1300) * 0.00017) * 43758.5453;
-  return (seed - Math.floor(seed)) - 0.5;
+function deterministicJitter(index, seed = 1300) {
+  const value = Math.sin((index * 92821 + seed * 68917) * 0.00017) * 43758.5453;
+  return (value - Math.floor(value)) - 0.5;
 }
 
 function addSite(sites, seen, point, provinceId, kind) {
@@ -76,19 +75,25 @@ function addAnchorSites(sites, seen) {
   }
 }
 
-function addGridSites(sites, seen) {
-  let yIndex = 0;
-  for (let y = BBOX[1]; y <= BBOX[3] + SITE_EPSILON; y += GRID_STEP) {
-    let xIndex = 0;
-    for (let x = BBOX[0]; x <= BBOX[2] + SITE_EPSILON; x += GRID_STEP) {
-      const point = [
-        x + deterministicJitter(xIndex, yIndex) * GRID_STEP * 0.22,
-        y + deterministicJitter(xIndex + 17, yIndex + 31) * GRID_STEP * 0.22,
-      ];
-      if (isUsableLandPoint(point)) addSite(sites, seen, point, nearestProvinceId(point), "land-grid");
-      xIndex += 1;
+function addProvinceShapeSites(sites, seen) {
+  const radii = [0.12, 0.24, 0.38];
+  const directions = 12;
+  let sequence = 0;
+
+  for (const province of ANATOLIA_PROVINCE_METADATA) {
+    for (let ring = 0; ring < radii.length; ring += 1) {
+      for (let direction = 0; direction < directions; direction += 1) {
+        const angle = (direction / directions) * Math.PI * 2
+          + deterministicJitter(sequence, province.centroid[0] * 100);
+        const radius = radii[ring] * (1 + deterministicJitter(sequence + 11, province.centroid[1] * 100) * 0.18);
+        const point = [
+          province.centroid[0] + Math.cos(angle) * radius,
+          province.centroid[1] + Math.sin(angle) * radius,
+        ];
+        if (isUsableLandPoint(point)) addSite(sites, seen, point, province.id, "province-shape-control");
+        sequence += 1;
+      }
     }
-    yIndex += 1;
   }
 }
 
@@ -265,7 +270,7 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
   const sites = [];
   const seen = new Set();
   addAnchorSites(sites, seen);
-  addGridSites(sites, seen);
+  addProvinceShapeSites(sites, seen);
   addCoastSites(sites, seen);
   addSourceShapeSites(sites, seen, sourceRegions);
 
