@@ -78,8 +78,9 @@ function CityLabel({ city, fontSize, x, y, anchor }) {
         x="0"
         y="0"
         textAnchor={anchor}
-        fontSize={fontSize}
         fontFamily="Georgia, serif"
+        fontSize={fontSize}
+        style={{ fontSize: `${fontSize}px` }}
         fontWeight={city.map.tier === "capital" ? "700" : "600"}
         fill="#eee7d1"
         stroke="#151916"
