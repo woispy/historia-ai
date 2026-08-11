@@ -44,6 +44,10 @@ function isUsableLandPoint(point) {
     && !pointInWaterEnvelope(point);
 }
 
+function isUsableCartographicPoint(point) {
+  return isWithinAnatoliaEnvelope(point) && !pointInWaterEnvelope(point);
+}
+
 function nearestProvinceId(point) {
   let winner = ANATOLIA_PROVINCE_METADATA[0];
   let best = Number.POSITIVE_INFINITY;
@@ -90,7 +94,7 @@ function addProvinceShapeSites(sites, seen) {
           province.centroid[0] + Math.cos(angle) * radius,
           province.centroid[1] + Math.sin(angle) * radius,
         ];
-        if (isUsableLandPoint(point)) addSite(sites, seen, point, province.id, "province-shape-control");
+        if (isUsableCartographicPoint(point)) addSite(sites, seen, point, province.id, "province-shape-control");
         sequence += 1;
       }
     }
@@ -110,7 +114,7 @@ function addCoastSites(sites, seen) {
           start[0] + (end[0] - start[0]) * t,
           start[1] + (end[1] - start[1]) * t,
         ];
-        if (isUsableLandPoint(point)) addSite(sites, seen, point, nearestProvinceId(point), "coastline");
+        if (isUsableCartographicPoint(point)) addSite(sites, seen, point, nearestProvinceId(point), "coastline");
       }
     }
   }
@@ -125,7 +129,7 @@ function addSourceShapeSites(sites, seen, sourceRegions) {
       [0, 0],
     );
     const point = [center[0] / polygon.length, center[1] / polygon.length];
-    if (isUsableLandPoint(point)) addSite(sites, seen, point, nearestProvinceId(point), "historical-source-anchor");
+    if (isUsableCartographicPoint(point)) addSite(sites, seen, point, nearestProvinceId(point), "historical-source-anchor");
   }
 }
 
