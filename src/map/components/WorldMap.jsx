@@ -44,6 +44,10 @@ function WorldMap({
     settings.mapShadows,
   ]);
 
+  const physicalWaterLayer = useMemo(() => (
+    <PhysicalGeographyLayer phase="water" zoom={camera.zoom} />
+  ), [camera.zoom]);
+
   const physicalDetailLayer = useMemo(() => (
     <PhysicalGeographyLayer phase="detail" zoom={camera.zoom} />
   ), [camera.zoom]);
@@ -60,10 +64,11 @@ function WorldMap({
     <RenderLayer>
       {physicalBaseLayer}
       {provinceLayer}
+      {physicalWaterLayer}
       {physicalDetailLayer}
       {cityLayer}
     </RenderLayer>
-  ), [physicalBaseLayer, provinceLayer, physicalDetailLayer, cityLayer]);
+  ), [physicalBaseLayer, provinceLayer, physicalWaterLayer, physicalDetailLayer, cityLayer]);
 
   return (
     <CameraProvider value={camera}>
