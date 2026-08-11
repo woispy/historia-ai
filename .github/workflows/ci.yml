@@ -28,6 +28,7 @@ on:
       - feat/world-1300-map-foundation
       - feat/anatolia-phase2-historical-gis
       - feat/phase2b-anatolia-reconstruction
+      - feat/phase2c-anatolia-geometry-refinement
 
 jobs:
   validate:
@@ -56,6 +57,8 @@ jobs:
         run: npm run test:province-topology
       - name: Run Phase 2B Anatolia reconstruction tests
         run: npm run test:anatolia-phase2b
+      - name: Run Phase 2C Anatolia refinement tests
+        run: npm run test:anatolia-phase2c
       - name: Generate historical GIS runtime assets
         run: npm run build:historical-gis:1300
       - name: Validate historical GIS runtime assets
@@ -75,6 +78,8 @@ jobs:
           node --check tools/tests/historical-world-1300.test.js &&
           node --check tools/tests/province-topology.test.js &&
           node --check tools/tests/anatolia-phase2b.test.js &&
+          node --check tools/tests/anatolia-phase2c.test.js &&
+          node --check src/map/data/AnatoliaProvinceRefinement.js &&
           node --check src/world/historical/HistoricalCountryResolver.js &&
           node --check src/world/historical/HistoricalWorld1300Registry.js &&
           node --check src/provinces/HistoricalProvinceRepository.js &&
