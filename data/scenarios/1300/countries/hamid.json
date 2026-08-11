@@ -1,0 +1,16 @@
+{
+  "id": "hamid",
+  "name": "Hamid",
+  "title": "Beylik",
+  "government": "beylik",
+  "capital": "egirdir",
+  "culture": "oghuz-turk",
+  "religion": "sunni",
+  "color": "#7E57C2",
+  "playable": true,
+  "rulerId": null,
+  "treasury": 15000,
+  "manpower": 3500,
+  "stability": 72,
+  "startingCities": []
+}

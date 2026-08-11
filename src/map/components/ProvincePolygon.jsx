@@ -1,9 +1,8 @@
 /**
  * Historia AI — Province Polygon
  *
- * Rendering is intentionally filter-free. Thousands of SVG paths can be on
- * screen at once, so visual separation is achieved with vector strokes rather
- * than per-path CSS filters.
+ * Curated Anatolia regions are clipped to a physical land mask so the political
+ * overlay cannot paint the Marmara, Aegean or Mediterranean as land.
  */
 
 import { useMemo } from "react";
@@ -46,6 +45,7 @@ function ProvincePolygon({
   const isTerrain = mapStyle === "terrain";
   const borderPrecision = Number(province.historical?.borderPrecision ?? 3);
   const approximateBorder = borderPrecision <= 1;
+  const isCuratedRegional = province.historical?.classification === "curated-regional-gameplay-overlay";
 
   const fill = selected
     ? "#d6b04d"
@@ -68,6 +68,7 @@ function ProvincePolygon({
       strokeDasharray={approximateBorder ? "0.55 0.35" : undefined}
       strokeOpacity={approximateBorder && mapShadows ? "0.78" : "1"}
       vectorEffect="non-scaling-stroke"
+      clipPath={isCuratedRegional ? "url(#anatolia-landmask)" : undefined}
       style={{ cursor: "pointer" }}
       onClick={() => onClick?.(province.id)}
     />

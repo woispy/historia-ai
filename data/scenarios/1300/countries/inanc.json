@@ -1,0 +1,16 @@
+{
+  "id": "inanc",
+  "name": "İnanç Beyliği",
+  "title": "Beylik",
+  "government": "beylik",
+  "capital": "denizli",
+  "culture": "oghuz-turk",
+  "religion": "sunni",
+  "color": "#26A69A",
+  "playable": true,
+  "rulerId": null,
+  "treasury": 12000,
+  "manpower": 2600,
+  "stability": 68,
+  "startingCities": []
+}

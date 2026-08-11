@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useWorldMap } from "../hooks";
-import { ProvinceLayer } from "./layers";
+import { ProvinceLayer, CityLayer } from "./layers";
 import {
   CameraProvider,
   CameraViewport,
@@ -13,9 +13,10 @@ function WorldMap({
   runtime,
   selectedProvinceId,
   onProvinceClick,
+  onCityClick,
   settings = {},
 }) {
-  const { provinces } = useWorldMap(runtime);
+  const { provinces, cities } = useWorldMap(runtime);
   const camera = useCamera();
   const cameraInput = useCameraController({
     zoom: camera.zoom,
@@ -23,9 +24,6 @@ function WorldMap({
     smooth: settings.smoothCamera !== false,
   });
 
-  // Camera movement should only update the SVG viewBox. Keep the expensive
-  // province element tree stable so React does not reconcile thousands of
-  // paths on every animation frame.
   const provinceLayer = useMemo(() => (
     <ProvinceLayer
       provinces={provinces}
@@ -42,9 +40,20 @@ function WorldMap({
     settings.mapShadows,
   ]);
 
+  const cityLayer = useMemo(() => (
+    <CityLayer
+      cities={cities}
+      zoom={camera.zoom}
+      onCityClick={onCityClick}
+    />
+  ), [cities, camera.zoom, onCityClick]);
+
   const renderLayer = useMemo(() => (
-    <RenderLayer>{provinceLayer}</RenderLayer>
-  ), [provinceLayer]);
+    <RenderLayer>
+      {provinceLayer}
+      {cityLayer}
+    </RenderLayer>
+  ), [provinceLayer, cityLayer]);
 
   return (
     <CameraProvider value={camera}>

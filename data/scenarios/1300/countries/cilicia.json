@@ -1,0 +1,16 @@
+{
+  "id": "cilicia",
+  "name": "Armenian Cilicia",
+  "title": "Kingdom",
+  "government": "kingdom",
+  "capital": "sis",
+  "culture": "armenian",
+  "religion": "armenian-apostolic",
+  "color": "#A85D4D",
+  "playable": true,
+  "rulerId": null,
+  "treasury": 18000,
+  "manpower": 3600,
+  "stability": 74,
+  "startingCities": []
+}

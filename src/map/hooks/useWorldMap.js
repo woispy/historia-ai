@@ -1,13 +1,15 @@
 import { useMemo } from "react";
 import { getProvinces } from "../../provinces";
+import { getCities } from "../../cities";
 import { getGeometry } from "../../world/map/geometry";
 import { getCountry } from "../../countries";
 
 export function useWorldMap(gameSession) {
   return useMemo(() => {
-    if (!gameSession) return { provinces: [] };
+    if (!gameSession) return { provinces: [], cities: [] };
 
     const provinceRepository = gameSession.world.repositories.provinces;
+    const cityRepository = gameSession.world.repositories.cities;
     const countryRepository = gameSession.world.repositories.countries;
     const geometryRepository = gameSession.world.map.geometry;
 
@@ -19,6 +21,8 @@ export function useWorldMap(gameSession) {
         : null,
     }));
 
-    return { provinces };
+    const cities = getCities(cityRepository);
+
+    return { provinces, cities };
   }, [gameSession]);
 }

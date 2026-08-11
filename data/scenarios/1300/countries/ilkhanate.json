@@ -1,0 +1,16 @@
+{
+  "id": "ilkhanate",
+  "name": "Ilkhanate",
+  "title": "Ilkhanate",
+  "government": "mongol_monarchy",
+  "capital": "tabriz",
+  "culture": "mongol-persian",
+  "religion": "sunni",
+  "color": "#6B6F4E",
+  "playable": true,
+  "rulerId": null,
+  "treasury": 50000,
+  "manpower": 12000,
+  "stability": 60,
+  "startingCities": []
+}

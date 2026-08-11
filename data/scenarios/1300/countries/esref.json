@@ -1,0 +1,16 @@
+{
+  "id": "esref",
+  "name": "Eşref Beyliği",
+  "title": "Beylik",
+  "government": "beylik",
+  "capital": "beysehir",
+  "culture": "oghuz-turk",
+  "religion": "sunni",
+  "color": "#5C6BC0",
+  "playable": true,
+  "rulerId": null,
+  "treasury": 11000,
+  "manpower": 2400,
+  "stability": 67,
+  "startingCities": []
+}
