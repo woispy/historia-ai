@@ -26,10 +26,7 @@ function ProvinceLayer({ provinces, selectedProvinceId, onProvinceClick, mapStyl
     <ProvinceSvg>
       <defs>
         <clipPath id="anatolia-landmask" clipPathUnits="userSpaceOnUse">
-          <path
-            d={`${landPath} ${waterHolesPath}`}
-            fillRule="evenodd"
-          />
+          <path d={`${landPath} ${waterHolesPath}`} fillRule="evenodd" />
         </clipPath>
       </defs>
       {provinces.map(({ province, country, geometry }) => (

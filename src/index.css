@@ -4,44 +4,25 @@
 ========================================================== */
 
 :root {
-
-  /* ========= Colors ========= */
-
   --color-background: #1c1b17;
   --color-surface: #26241f;
   --color-surface-light: #343027;
-
   --color-border: #5d4f29;
-
   --color-primary: #c8a54d;
   --color-primary-light: #e4c76a;
-
   --color-text: #f4e8c1;
   --color-text-muted: #c8b98a;
-
   --color-success: #6ea65f;
   --color-warning: #c98f3a;
   --color-danger: #b24b4b;
-
-  /* ========= Layout ========= */
-
   --topbar-height: 74px;
-
   --left-panel-width: 400px;
   --right-panel-width: 400px;
-
   --content-padding: 20px;
-
   --border-radius: 10px;
-
-  /* ========= Animation ========= */
-
   --transition-fast: 0.20s ease;
   --transition-normal: 0.30s ease;
   --transition-slow: 0.50s ease;
-
-  /* ========= Layers ========= */
-
   --z-map: 1;
   --z-panel: 100;
   --z-topbar: 200;
@@ -55,10 +36,6 @@ html[data-effects="false"] {
   --transition-slow: 0s;
 }
 
-/* ==========================================================
-   CSS RESET
-========================================================== */
-
 *,
 *::before,
 *::after {
@@ -66,10 +43,6 @@ html[data-effects="false"] {
   padding: 0;
   box-sizing: border-box;
 }
-
-/* ==========================================================
-   DOCUMENT
-========================================================== */
 
 html,
 body,
@@ -82,7 +55,6 @@ body,
 body {
   background: var(--color-background);
   color: var(--color-text);
-
   font-family: Georgia, "Times New Roman", serif;
 }
 
@@ -91,26 +63,30 @@ body {
   justify-content: center;
 }
 
-/* ==========================================================
-   GLOBAL ELEMENTS
-========================================================== */
-
-button {
-  cursor: pointer;
-}
-
-ul {
-  padding-left: 25px;
-}
+button { cursor: pointer; }
+ul { padding-left: 25px; }
 
 /* ==========================================================
-   MAP — PHYSICAL GEOGRAPHY
-   These are intentionally subdued so political ownership remains the
-   primary visual language while terrain and water stay readable.
+   MAP — PHYSICAL GEOGRAPHY 2.0
 ========================================================== */
+
+.map-land-base {
+  fill: #283229;
+  stroke: none;
+}
 
 .map-sea {
-  fill: #16272b;
+  fill: #132a2f;
+  stroke: none;
+}
+
+.map-gulf {
+  fill: #18363b;
+  stroke: none;
+}
+
+.map-sea-channel {
+  fill: #102a30;
   stroke: none;
 }
 
@@ -147,7 +123,7 @@ ul {
 }
 
 .map-coastline {
-  stroke: #b6aa7e;
+  stroke: #c1b58b;
   fill: none;
 }
 
