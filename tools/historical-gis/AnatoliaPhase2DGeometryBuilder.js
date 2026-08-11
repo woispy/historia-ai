@@ -288,19 +288,12 @@ function polygonCentroid(polygon) {
 }
 
 function createAnchorFallbackPolygon(centroid) {
-  const radii = [0.004, 0.002, 0.001];
-  for (const radius of radii) {
-    const polygon = [];
-    for (let index = 0; index < 6; index += 1) {
-      const angle = (index / 6) * Math.PI * 2;
-      polygon.push([
-        centroid[0] + Math.cos(angle) * radius,
-        centroid[1] + Math.sin(angle) * radius,
-      ]);
-    }
-    if (isPhysicalLandPoint(centroid)) return polygon;
-  }
-  return [];
+  if (!pointInAnatoliaLand(centroid) && distanceToLandBoundary(centroid) > COASTAL_TOLERANCE) return [];
+  const radius = 0.002;
+  return Array.from({ length: 6 }, (_, index) => {
+    const angle = (index / 6) * Math.PI * 2;
+    return [centroid[0] + Math.cos(angle) * radius, centroid[1] + Math.sin(angle) * radius];
+  });
 }
 
 function createProvinceAsset(metadata, polygons) {
@@ -432,7 +425,7 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
 }
 
 export function isAnatoliaGeometryPoint(point) {
-  return isUsableCartographicPoint(point);
+  return isWithinAnatoliaEnvelope(point) && isPhysicalLandPoint(point);
 }
 
 export { isPhysicalLandPoint };
