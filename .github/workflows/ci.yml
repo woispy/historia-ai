@@ -11,6 +11,7 @@ on:
       - feat/anatolia-historical-map-overhaul
       - feat/anatolia-physical-geography
       - feat/anatolia-map-label-water-overhaul
+      - feat/world-1300-map-foundation
   push:
     branches:
       - master
@@ -24,6 +25,7 @@ on:
       - feat/anatolia-historical-map-overhaul
       - feat/anatolia-physical-geography
       - feat/anatolia-map-label-water-overhaul
+      - feat/world-1300-map-foundation
 
 jobs:
   validate:
@@ -44,6 +46,10 @@ jobs:
         run: npm run test:historical-gis
       - name: Run physical geography tests
         run: npm run test:physical-geography
+      - name: Run world map land-mask tests
+        run: npm run test:world-map
+      - name: Run historical world anchor tests
+        run: npm run test:historical-world
       - name: Generate historical GIS runtime assets
         run: npm run build:historical-gis:1300
       - name: Validate historical GIS runtime assets
@@ -59,7 +65,10 @@ jobs:
           node --check tools/historical-gis/cli/test-1300.js &&
           node --check tools/historical-gis/cli/validate-1300.js &&
           node --check tools/tests/physical-geography-1300.test.js &&
+          node --check tools/tests/world-land-mask.test.js &&
+          node --check tools/tests/historical-world-1300.test.js &&
           node --check src/world/historical/HistoricalCountryResolver.js &&
+          node --check src/world/historical/HistoricalWorld1300Registry.js &&
           node --check src/provinces/HistoricalProvinceRepository.js &&
           node --check src/provinces/ProvinceFactory.js &&
           node --check src/provinces/ProvinceModel.js &&

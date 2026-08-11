@@ -1,6 +1,11 @@
 import { useMemo } from "react";
 import { useWorldMap } from "../hooks";
-import { ProvinceLayer, CityLayer, PhysicalGeographyLayer } from "./layers";
+import {
+  ProvinceLayer,
+  CityLayer,
+  PhysicalGeographyLayer,
+  WorldPhysicalLayer,
+} from "./layers";
 import {
   CameraProvider,
   CameraViewport,
@@ -24,18 +29,26 @@ function WorldMap({
     smooth: settings.smoothCamera !== false,
   });
 
-  const physicalBaseLayer = useMemo(() => (
-    <PhysicalGeographyLayer phase="base" zoom={camera.zoom} />
-  ), [camera.zoom]);
+  const worldPhysicalLayer = useMemo(
+    () => <WorldPhysicalLayer />,
+    [],
+  );
+
+  const physicalBaseLayer = useMemo(
+    () => <PhysicalGeographyLayer phase="base" zoom={camera.zoom} />,
+    [camera.zoom],
+  );
 
   const provinceLayer = useMemo(() => (
-    <ProvinceLayer
-      provinces={provinces}
-      selectedProvinceId={selectedProvinceId}
-      onProvinceClick={onProvinceClick}
-      mapStyle={settings.mapStyle ?? "detailed"}
-      mapShadows={settings.mapShadows !== false}
-    />
+    <g clipPath="url(#world-landmask)">
+      <ProvinceLayer
+        provinces={provinces}
+        selectedProvinceId={selectedProvinceId}
+        onProvinceClick={onProvinceClick}
+        mapStyle={settings.mapStyle ?? "detailed"}
+        mapShadows={settings.mapShadows !== false}
+      />
+    </g>
   ), [
     provinces,
     selectedProvinceId,
@@ -44,13 +57,15 @@ function WorldMap({
     settings.mapShadows,
   ]);
 
-  const physicalWaterLayer = useMemo(() => (
-    <PhysicalGeographyLayer phase="water" zoom={camera.zoom} />
-  ), [camera.zoom]);
+  const physicalWaterLayer = useMemo(
+    () => <PhysicalGeographyLayer phase="water" zoom={camera.zoom} />,
+    [camera.zoom],
+  );
 
-  const physicalDetailLayer = useMemo(() => (
-    <PhysicalGeographyLayer phase="detail" zoom={camera.zoom} />
-  ), [camera.zoom]);
+  const physicalDetailLayer = useMemo(
+    () => <PhysicalGeographyLayer phase="detail" zoom={camera.zoom} />,
+    [camera.zoom],
+  );
 
   const cityLayer = useMemo(() => (
     <CityLayer
@@ -62,13 +77,21 @@ function WorldMap({
 
   const renderLayer = useMemo(() => (
     <RenderLayer>
+      {worldPhysicalLayer}
       {physicalBaseLayer}
       {provinceLayer}
       {physicalWaterLayer}
       {physicalDetailLayer}
       {cityLayer}
     </RenderLayer>
-  ), [physicalBaseLayer, provinceLayer, physicalWaterLayer, physicalDetailLayer, cityLayer]);
+  ), [
+    worldPhysicalLayer,
+    physicalBaseLayer,
+    provinceLayer,
+    physicalWaterLayer,
+    physicalDetailLayer,
+    cityLayer,
+  ]);
 
   return (
     <CameraProvider value={camera}>
