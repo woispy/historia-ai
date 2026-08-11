@@ -1,8 +1,12 @@
 /**
- * Historia AI — Grand-strategy cartography model.
+ * Historia AI — grand-strategy cartography model.
  *
  * Phase 2E–2H centralises map presentation rules so physical geography,
  * strategic routes, city labels and camera LOD use one deterministic scale.
+ *
+ * The visual-refinement pass deliberately separates data visibility from
+ * presentation density: important features remain available to the engine,
+ * while the renderer progressively declutters the screen as needed.
  */
 
 export const MAP_LOD = Object.freeze({
@@ -59,7 +63,7 @@ export function getProvincePresentation(zoom = 1) {
   return Object.freeze({
     lod,
     showProvinceBoundaries: lod !== "world",
-    boundaryOpacity: lod === "world" ? 0.18 : lod === "regional" ? 0.42 : lod === "province" ? 0.62 : 0.78,
+    boundaryOpacity: lod === "world" ? 0.18 : lod === "regional" ? 0.38 : lod === "province" ? 0.56 : 0.70,
     fillOpacity: lod === "world" ? 0.86 : 1,
   });
 }
@@ -67,8 +71,18 @@ export function getProvincePresentation(zoom = 1) {
 export function getCityLabelPolicy(zoom = 1) {
   const lod = getMapLod(zoom);
   return Object.freeze({
-    maxLabels: lod === "world" ? 8 : lod === "regional" ? 28 : lod === "province" ? 64 : 120,
-    showTowns: lod !== "world" && lod !== "regional",
+    maxLabels: lod === "world" ? 6 : lod === "regional" ? 12 : lod === "province" ? 18 : lod === "city" ? 24 : 32,
+    showTowns: lod === "province" || lod === "city" || lod === "detailed",
     showVillages: lod === "detailed",
+  });
+}
+
+export function getPhysicalPresentation(zoom = 1) {
+  const lod = getMapLod(zoom);
+  return Object.freeze({
+    terrainOpacity: lod === "world" ? 0.025 : lod === "regional" ? 0.045 : lod === "province" ? 0.075 : 0.095,
+    riverOpacity: lod === "regional" ? 0.42 : lod === "province" ? 0.56 : 0.66,
+    mountainOpacity: lod === "regional" ? 0.07 : lod === "province" ? 0.11 : 0.15,
+    lakeOpacity: lod === "regional" ? 0.58 : lod === "province" ? 0.70 : 0.78,
   });
 }
