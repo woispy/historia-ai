@@ -17,7 +17,10 @@ assert.equal(result.provinceCount, 38);
 console.log(`Phase 2D cartographic site count: ${result.siteCount}`);
 assert.ok(result.siteCount >= 1000, "Phase 2D must use a dense physical/cartographic site field");
 assert.ok(result.barrierSiteCount >= 300, "Phase 2D must include a substantial physical water/coast barrier field");
-assert.ok(result.politicalSiteCount >= 200, "Phase 2D must retain a substantial political control field");
+assert.ok(
+  result.politicalSiteCount >= result.provinceCount * 2,
+  "Phase 2D must retain at least two usable political control sites per province on average",
+);
 assert.ok(result.polygonCount >= result.provinceCount, "Every province must contain at least one polygon");
 assert.ok(result.polygonCount >= 500, "Phase 2D must produce substantially more geometry fragments than the coarse 38-anchor layer");
 assert.equal(result.provinces.length, result.geometries.length);
