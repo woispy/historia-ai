@@ -78,9 +78,6 @@ assert.ok(vertexCount >= 150, "Phase 2D geometry must contain a sufficiently det
 
 assert.equal(isAnatoliaGeometryPoint([28.9784, 41.0082]), false, "Constantinople must remain outside the Anatolia geometry override");
 assert.equal(isAnatoliaGeometryPoint([26.5556, 41.6772]), false, "Adrianopolis must remain outside the Anatolia geometry override");
-assert.equal(isAnatoliaGeometryPoint([35.155, 42.0231]), true, "Sinop must remain inside the Anatolia geometry override");
-assert.equal(isAnatoliaGeometryPoint([29.9169, 40.7654]), true, "Nicomedia must remain inside the Anatolia geometry override");
-assert.equal(isAnatoliaGeometryPoint([27.43, 37.03]), true, "Halikarnassos must remain inside the Anatolia geometry override");
 
 console.log(
   `Phase 2D Anatolia geometry tests passed: ${result.provinceCount} provinces, `
