@@ -4,31 +4,21 @@
 
 Phase 2D converts the Phase 2B/2C Anatolia province vocabulary into an actual runtime cartographic layer. The target is an EU5-inspired grand-strategy presentation: country fills remain dominant, province borders are a separate topology layer, and physical water remains visually authoritative.
 
-## What changed
+## Geometry model
 
-The 1300 runtime no longer uses the broad source-derived political polygons as the visible province geometry for the Anatolia envelope. They are still used as the historical GIS source and research basis.
-
-Inside the Anatolia envelope, the importer creates 38 stable province assets from the Phase 2B identity registry and generates deterministic multi-site Voronoi geometry around:
-
-- province/city anchors;
-- a dense land control field;
-- coastline control points;
-- source-derived historical shape anchors.
-
-This produces a much finer province mesh without hard-coding hundreds of screen coordinates by hand.
-
-## Why multi-site geometry
-
-A province is allowed to contain multiple polygon fragments. The province fill renderer draws these fragments as one SVG path, while `ProvinceBoundaryLayer` owns the visible border topology. This prevents internal fragments of the same province from becoming fake political borders.
+The runtime layer uses 38 stable province identities. Geometry is generated deterministically from WGS84 cartographic sites rather than screen coordinates.
 
 ```text
 province metadata
       ↓
 cartographic sites
-      ├── city anchor
-      ├── land field
-      ├── coastline points
-      └── historical source anchors
+      ├── city/province anchors
+      ├── dense land control field
+      ├── historical source anchors
+      └── physical barrier field
+            ├── outer coastline
+            ├── seas
+            └── lakes
       ↓
 deterministic tessellation
       ↓
@@ -39,17 +29,38 @@ province topology
 SVG fill + shared borders
 ```
 
-## Physical geography authority
+## Physical coastline is a hard constraint
 
-Phase 2D does not replace `AnatoliaPhysicalAtlas`. The province layer is still rendered inside the world land mask, and water is rendered after the political layer. The Anatolia envelope deliberately excludes European Thrace around Constantinople and Adrianopolis while keeping the Black Sea Anatolian coast, including Sinop and Trebizond.
+The previous Phase 2D geometry used coastline points as ordinary province sites. That produced a visually obvious failure mode: a Voronoi cell could extend from the Anatolian coast into the sea or all the way to the builder bounding box.
 
-This keeps the following invariant:
+The refinement layer now treats physical coastlines and internal water boundaries as **barrier sites**. Barrier sites participate in the tessellation but never become political provinces. Dense coastline sampling means province cells terminate at the physical coast rather than at the rectangular builder envelope.
 
-> Political province geometry cannot visually become the sea.
+The same rule is applied to the mapped internal seas and lakes. This prevents Marmara, İzmit, İzmir, Gökova, Antalya and other mapped water bodies from becoming political fill.
+
+## Land authority
+
+`AnatoliaPhysicalAtlas.landPolygons` is now consulted when generating political control sites. A political site is not created merely because it falls inside the numeric Anatolia bounding box; it must also lie on physical land and outside mapped water.
+
+This makes the following invariant executable rather than purely visual:
+
+> A Phase 2D province control site must be on physical land.
+
+Polygon centroids are also validated against the same land/water authority.
+
+## Coast detail
+
+The outer coastline is sampled at a smaller interval than the original Phase 2D pass. A second inward coastal control field preserves province detail immediately behind the coast while the barrier field prevents cells from crossing into water.
+
+This is particularly important for the next visual refinement targets:
+
+- Aegean coast and gulfs
+- Marmara and the Bithynian coast
+- Black Sea coast around Sinop and Trebizond
+- Mediterranean / Cilician coast
 
 ## Historical caution
 
-Phase 2D is a cartographic reconstruction, not a claim that the medieval frontier was surveyed to modern cadastral precision. The geometry therefore follows the stable province vocabulary and records historical confidence in the metadata layer. The exact 1300 political control of uncertain frontier areas remains separate from geometry.
+Phase 2D is a cartographic reconstruction, not a claim that the medieval frontier was surveyed to modern cadastral precision. Political ownership and uncertainty remain in the Phase 2B historical metadata layer. Physical constraints are high-confidence geography; exact medieval political boundaries remain subject to source-backed refinement.
 
 ## Runtime scope
 
@@ -57,10 +68,24 @@ Phase 2D is a cartographic reconstruction, not a claim that the medieval frontie
 - Rest of the 1300 world: existing source-derived historical GIS geometry.
 - Physical geography: existing physical atlas and land/water authority.
 
+## Rendering
+
+Province fills do not own their visible border stroke. Shared topology owns the province/country border hierarchy. Physical water remains visually authoritative in the render stack.
+
 ## Performance
 
-The geometry is generated during the historical GIS build, not in the React render path. The runtime receives one consolidated JSON asset. Province fills remain one SVG path per province even when a province contains many sub-polygons. Shared borders are rendered by the existing topology layer.
+Geometry is generated during the historical GIS build, not in React. The runtime receives one consolidated JSON asset. Barrier sites are discarded after tessellation and do not become runtime provinces.
 
-## Next work
+The tessellation remains deterministic so regenerated assets are reproducible.
 
-Phase 2D is intentionally not the final historical cartographic research pass. The next map research layer can add hand-reviewed boundary anchors for individual provinces, river-crossing constraints, mountain passes and historically documented city hinterlands. Those refinements should modify the deterministic builder inputs rather than introduce a second renderer or a collection of screen-coordinate hacks.
+## Next refinement
+
+The next cartographic pass should add source-backed constraints rather than another generic polygon algorithm:
+
+1. hand-reviewed Aegean/Marmara coastal anchors;
+2. province-specific river boundary constraints where historically defensible;
+3. mountain-pass and watershed constraints;
+4. city hinterland shapes for major urban centers;
+5. final historical audit of the most strategically important provinces.
+
+Those refinements must modify builder inputs and metadata, not introduce screen-coordinate hacks or a second rendering system.

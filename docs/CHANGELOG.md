@@ -4,6 +4,39 @@ All notable changes to Historia AI will be documented here.
 
 ---
 
+# Unreleased — Phase 2D Physical Coast & Water Geometry Refinement
+
+## Added
+
+### Physical geometry constraints
+
+- Political control sites now require physical-land membership.
+- Added deterministic coastline barrier sites that participate in tessellation without becoming provinces.
+- Added internal sea and lake barrier sites so water bodies cannot be painted by province cells.
+- Increased coastline sampling density.
+- Added a small inward coastal control field to preserve detailed province geometry near the shore.
+- Added polygon-centroid validation against the physical land/water authority.
+
+### Runtime geometry
+
+- Phase 2D geometry version advanced to `2`.
+- Runtime asset metadata now reports political-site and barrier-site counts.
+- The geometry builder no longer treats the numeric Anatolia bounding box as sufficient evidence of usable land.
+
+### Validation
+
+- Strengthened `test:anatolia-phase2d` to validate physical land centroids and the presence of a substantial barrier field.
+
+### Documentation
+
+- Updated the Phase 2D architecture document and roadmap to distinguish physical constraints from future source-backed historical boundary constraints.
+
+## Cartographic policy
+
+The physical coastline is a hard cartographic constraint. This refinement does not claim cadastral precision for uncertain medieval political borders. Historical ownership remains separate in the Phase 2B metadata layer.
+
+---
+
 # Unreleased — Phase 2D Historical Province Geometry
 
 ## Added
@@ -26,11 +59,6 @@ All notable changes to Historia AI will be documented here.
 
 - Added `test:anatolia-phase2d`.
 - CI now runs Phase 2D geometry tests, geometry-builder syntax checks, GIS generation and runtime validation.
-
-### Documentation
-
-- Added `docs/architecture/anatolia-phase2d-geometry.md`.
-- Updated the roadmap to distinguish Phase 2C metadata from Phase 2D actual runtime geometry.
 
 ## Cartographic policy
 
@@ -68,7 +96,7 @@ Phase 2D is a deterministic cartographic reconstruction, not a claim of medieval
 ## Added
 
 - Ten-region 1300 Anatolia reconstruction profile.
-- Historical polity context with start/end dates and confidence levels.
+- Historical polity context with start/end years, confidence levels and temporal notes.
 - Province-level historical control metadata separated from mutable runtime ownership.
 - Phase 2B province-to-region and city-to-province identity layer.
 - Dedicated Phase 2B historical reconstruction tests.
