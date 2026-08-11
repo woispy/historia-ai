@@ -47,7 +47,6 @@ function WorldMap({
   }, [camera, onCityClick]);
 
   const worldPhysicalLayer = useMemo(() => <WorldPhysicalLayer />, []);
-  const cartographyLayer = useMemo(() => <CartographyLayer zoom={camera.zoom} />, [camera.zoom]);
   const physicalBaseLayer = useMemo(() => <PhysicalGeographyLayer phase="base" zoom={camera.zoom} />, [camera.zoom]);
   const provinceLayer = useMemo(() => (
     <g clipPath="url(#world-landmask)">
@@ -61,6 +60,7 @@ function WorldMap({
       />
     </g>
   ), [provinces, selectedProvinceId, onProvinceClick, settings.mapStyle, settings.mapShadows, camera.zoom]);
+  const cartographyLayer = useMemo(() => <CartographyLayer zoom={camera.zoom} />, [camera.zoom]);
   const physicalWaterLayer = useMemo(() => <PhysicalGeographyLayer phase="water" zoom={camera.zoom} />, [camera.zoom]);
   const physicalDetailLayer = useMemo(() => <PhysicalGeographyLayer phase="detail" zoom={camera.zoom} />, [camera.zoom]);
   const cityLayer = useMemo(() => <CityLayer cities={cities} zoom={camera.zoom} onCityClick={handleCityClick} />, [cities, camera.zoom, handleCityClick]);
@@ -68,14 +68,14 @@ function WorldMap({
   const renderLayer = useMemo(() => (
     <RenderLayer>
       {worldPhysicalLayer}
-      {cartographyLayer}
       {physicalBaseLayer}
       {provinceLayer}
+      {cartographyLayer}
       {physicalWaterLayer}
       {physicalDetailLayer}
       {cityLayer}
     </RenderLayer>
-  ), [worldPhysicalLayer, cartographyLayer, physicalBaseLayer, provinceLayer, physicalWaterLayer, physicalDetailLayer, cityLayer]);
+  ), [worldPhysicalLayer, physicalBaseLayer, provinceLayer, cartographyLayer, physicalWaterLayer, physicalDetailLayer, cityLayer]);
 
   return (
     <CameraProvider value={camera}>
