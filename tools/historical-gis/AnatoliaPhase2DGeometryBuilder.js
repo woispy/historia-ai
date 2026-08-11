@@ -77,6 +77,29 @@ function addAnchorSites(sites, seen) {
   }
 }
 
+function addProvinceMicroSites(sites, seen) {
+  // Short-radius sites keep every province locally well-defined after the
+  // physical land mask removes large-radius points near coasts and water.
+  const radii = [0.04, 0.08, 0.12];
+  const directions = 8;
+  let sequence = 0;
+
+  for (const province of ANATOLIA_PROVINCE_METADATA) {
+    for (const radius of radii) {
+      for (let direction = 0; direction < directions; direction += 1) {
+        const angle = (direction / directions) * Math.PI * 2
+          + deterministicJitter(sequence, province.centroid[0] * 100);
+        const point = [
+          province.centroid[0] + Math.cos(angle) * radius,
+          province.centroid[1] + Math.sin(angle) * radius,
+        ];
+        if (isUsableCartographicPoint(point)) addSite(sites, seen, point, province.id, "province-micro-control");
+        sequence += 1;
+      }
+    }
+  }
+}
+
 function addProvinceShapeSites(sites, seen) {
   const radii = [0.12, 0.24, 0.38];
   const directions = 12;
@@ -313,6 +336,7 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
   const sites = [];
   const seen = new Set();
   addAnchorSites(sites, seen);
+  addProvinceMicroSites(sites, seen);
   addProvinceShapeSites(sites, seen);
   addPhysicalBarrierSites(sites, seen);
   addCoastInteriorSites(sites, seen);
