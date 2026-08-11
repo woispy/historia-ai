@@ -12,7 +12,14 @@
   "provinceSource": {
     "status": "source-derived-political-regions",
     "note": "The 1300 source contains 237 historical political/cultural GIS features. Historia AI imports them as provisional Province simulation units; they are not presented as a complete historically exact administrative-province dataset.",
-    "phase2": "source-derived features are rendered as provinces; curated country-region overlays are retained as research metadata rather than province geometry"
+    "phase2": "source-derived features are rendered as provinces; curated country-region overlays are retained as research metadata rather than province geometry",
+    "phase2b": {
+      "status": "historical-reconstruction-metadata",
+      "profile": "src/map/data/Anatolia1300HistoricalProfile.js",
+      "provinceMetadata": "src/map/data/AnatoliaProvinceMetadata.js",
+      "regions": 10,
+      "policy": "later political ownership is not projected backward onto 1300 without evidence"
+    }
   },
   "topology": {
     "status": "runtime-derived",
@@ -50,6 +57,7 @@
     "Historical Province Asset Builder",
     "Historical Province Repository",
     "Province Topology",
+    "Phase 2B historical reconstruction metadata",
     "physical geography renderer",
     "1300 ownership",
     "SVG Renderer"

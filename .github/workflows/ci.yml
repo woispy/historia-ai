@@ -27,6 +27,7 @@ on:
       - feat/anatolia-map-label-water-overhaul
       - feat/world-1300-map-foundation
       - feat/anatolia-phase2-historical-gis
+      - feat/phase2b-anatolia-reconstruction
 
 jobs:
   validate:
@@ -53,6 +54,8 @@ jobs:
         run: npm run test:historical-world
       - name: Run Phase 2 province topology tests
         run: npm run test:province-topology
+      - name: Run Phase 2B Anatolia reconstruction tests
+        run: npm run test:anatolia-phase2b
       - name: Generate historical GIS runtime assets
         run: npm run build:historical-gis:1300
       - name: Validate historical GIS runtime assets
@@ -71,6 +74,7 @@ jobs:
           node --check tools/tests/world-land-mask.test.js &&
           node --check tools/tests/historical-world-1300.test.js &&
           node --check tools/tests/province-topology.test.js &&
+          node --check tools/tests/anatolia-phase2b.test.js &&
           node --check src/world/historical/HistoricalCountryResolver.js &&
           node --check src/world/historical/HistoricalWorld1300Registry.js &&
           node --check src/provinces/HistoricalProvinceRepository.js &&
