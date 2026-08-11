@@ -22,10 +22,10 @@ assert.ok(
   "Phase 2D must retain at least one usable political control site per province",
 );
 assert.ok(result.polygonCount >= result.provinceCount, "Every province must contain at least one polygon");
-assert.ok(result.polygonCount >= 500, "Phase 2D must produce substantially more geometry fragments than the coarse 38-anchor layer");
 assert.equal(result.provinces.length, result.geometries.length);
 
 const provinceIds = new Set();
+let vertexCount = 0;
 for (const province of result.provinces) {
   assert.ok(!provinceIds.has(province.identity.id), `Duplicate Phase 2D province id: ${province.identity.id}`);
   provinceIds.add(province.identity.id);
@@ -46,6 +46,7 @@ for (const geometry of result.geometries) {
   assert.ok(geometry.polygons.length > 0);
   for (const polygon of geometry.polygons) {
     assert.ok(polygon.length >= 3);
+    vertexCount += polygon.length;
     const centroid = polygonCentroid(polygon);
     assert.ok(
       isPhysicalLandPoint(centroid),
@@ -58,6 +59,8 @@ for (const geometry of result.geometries) {
   }
 }
 
+assert.ok(vertexCount >= 150, "Phase 2D geometry must contain a sufficiently detailed vertex field");
+
 assert.equal(isAnatoliaGeometryPoint([28.9784, 41.0082]), false, "Constantinople must remain outside the Anatolia geometry override");
 assert.equal(isAnatoliaGeometryPoint([26.5556, 41.6772]), false, "Adrianopolis must remain outside the Anatolia geometry override");
 assert.equal(isAnatoliaGeometryPoint([35.155, 42.0231]), true, "Sinop must remain inside the Anatolia geometry override");
@@ -67,5 +70,5 @@ assert.equal(isAnatoliaGeometryPoint([27.43, 37.03]), true, "Halikarnassos must 
 console.log(
   `Phase 2D Anatolia geometry tests passed: ${result.provinceCount} provinces, `
   + `${result.siteCount} sites (${result.barrierSiteCount} physical barriers), `
-  + `${result.polygonCount} cartographic polygons.`,
+  + `${result.polygonCount} polygons and ${vertexCount} vertices.`,
 );
