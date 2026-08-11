@@ -10,13 +10,6 @@ function pathFromCoordinates(coordinates, close = false) {
   return commands.join(" ");
 }
 
-function pathFromPolygons(polygons = []) {
-  return polygons
-    .map((polygon) => pathFromCoordinates(polygon, true))
-    .filter(Boolean)
-    .join(" ");
-}
-
 function PhysicalPolygon({ feature, className = "", opacity = 1 }) {
   const d = pathFromCoordinates(feature.coordinates, true);
   if (!d) return null;
@@ -31,8 +24,8 @@ function PhysicalPolygon({ feature, className = "", opacity = 1 }) {
   );
 }
 
-function PhysicalLine({ feature, className = "", width = 0.12, opacity = 1, close = false }) {
-  const d = pathFromCoordinates(feature.coordinates, close);
+function PhysicalLine({ feature, className = "", width = 0.12, opacity = 1 }) {
+  const d = pathFromCoordinates(feature.coordinates);
   if (!d) return null;
 
   return (
@@ -75,78 +68,36 @@ function PhysicalLabel({ label }) {
   );
 }
 
-function WaterMask({ id = "physical-water-mask" }) {
-  const { bbox, landPolygons } = ANATOLIA_PHYSICAL_ATLAS;
-  const [minLon, minLat, maxLon, maxLat] = bbox;
-  const outer = [
-    [minLon, minLat],
-    [maxLon, minLat],
-    [maxLon, maxLat],
-    [minLon, maxLat],
-  ];
-
-  return (
-    <clipPath id={id} clipPathUnits="userSpaceOnUse">
-      <path
-        d={`${pathFromCoordinates(outer, true)} ${pathFromPolygons(landPolygons)}`}
-        fillRule="evenodd"
-      />
-    </clipPath>
-  );
-}
-
 function PhysicalGeographyLayer({ phase = "detail", zoom = 1 }) {
   const atlas = ANATOLIA_PHYSICAL_ATLAS;
 
   if (phase === "base") {
     return (
-      <g aria-label="Physical geography base">
-        <g aria-label="Physical land mass">
-          {atlas.landPolygons.map((polygon, index) => (
-            <PhysicalPolygon
-              key={`land-${index}`}
-              feature={{ coordinates: polygon }}
-              className="map-land-base"
-              opacity={1}
-            />
-          ))}
-        </g>
+      <g aria-label="Anatolia terrain context">
         {atlas.terrainRegions.map((region) => (
           <PhysicalPolygon
             key={region.name}
             feature={region}
             className={`map-terrain-${region.type}`}
-            opacity={0.16}
+            opacity={0.10}
           />
         ))}
       </g>
     );
   }
 
+  // The global WorldPhysicalLayer owns the actual sea fill and coastline.
+  // Anatolia no longer paints broad water rectangles here. This layer only
+  // supplies local physical features that need to sit above political land.
   if (phase === "water") {
-    const waterClipId = "physical-water-mask";
-
     return (
-      <g aria-label="Physical geography water">
-        <defs>
-          <WaterMask id={waterClipId} />
-        </defs>
-        <g clipPath={`url(#${waterClipId})`}>
-          {atlas.seas.map((sea) => (
-            <PhysicalPolygon
-              key={sea.name}
-              feature={sea}
-              className={sea.kind === "gulf" ? "map-gulf" : "map-sea"}
-              opacity={sea.kind === "gulf" ? 0.96 : 0.98}
-            />
-          ))}
-        </g>
+      <g aria-label="Anatolia physical water details">
         {atlas.channels.map((channel) => (
           <PhysicalPolygon
             key={channel.name}
             feature={channel}
             className="map-sea-channel"
-            opacity={0.98}
+            opacity={0.90}
           />
         ))}
       </g>
@@ -156,7 +107,7 @@ function PhysicalGeographyLayer({ phase = "detail", zoom = 1 }) {
   const labels = layoutPhysicalLabels(atlas.labels, zoom);
 
   return (
-    <g aria-label="Physical geography detail">
+    <g aria-label="Anatolia physical geography detail">
       {atlas.lakes.map((lake) => (
         <PhysicalPolygon key={lake.name} feature={lake} className="map-lake" opacity={0.84} />
       ))}
@@ -177,19 +128,6 @@ function PhysicalGeographyLayer({ phase = "detail", zoom = 1 }) {
           width={river.rank === 1 ? 0.11 : 0.075}
           opacity={river.rank === 1 ? 0.72 : 0.48}
         />
-      ))}
-      {atlas.landPolygons.map((polygon, index) => (
-        <PhysicalLine
-          key={`coast-${index}`}
-          feature={{ coordinates: polygon }}
-          className="map-coastline"
-          width={0.13}
-          opacity={0.78}
-          close
-        />
-      ))}
-      {atlas.islands.map((island) => (
-        <PhysicalPolygon key={island.name} feature={island} className="map-island" opacity={0.92} />
       ))}
       {labels.map((label) => (
         <PhysicalLabel key={label.id} label={label} />
