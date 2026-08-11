@@ -288,7 +288,7 @@ function polygonCentroid(polygon) {
 }
 
 function createAnchorFallbackPolygon(centroid) {
-  if (!pointInAnatoliaLand(centroid) && distanceToLandBoundary(centroid) > COASTAL_TOLERANCE) return [];
+  if (!isWithinAnatoliaEnvelope(centroid)) return [];
   const radius = 0.002;
   return Array.from({ length: 6 }, (_, index) => {
     const angle = (index / 6) * Math.PI * 2;
