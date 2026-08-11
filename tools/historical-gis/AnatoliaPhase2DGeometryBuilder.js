@@ -2,7 +2,7 @@ import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtla
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 
 const BBOX = [25.45, 35.72, 44.85, 42.35];
-const GRID_STEP = 0.30;
+const GRID_STEP = 0.22;
 const SITE_EPSILON = 1e-6;
 
 function distanceSquared(a, b) {
@@ -14,7 +14,6 @@ function distanceSquared(a, b) {
 function pointInPolygon(point, polygon) {
   let inside = false;
   const [x, y] = point;
-
   for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i += 1) {
     const [xi, yi] = polygon[i];
     const [xj, yj] = polygon[j];
@@ -22,7 +21,6 @@ function pointInPolygon(point, polygon) {
       && x < ((xj - xi) * (y - yi)) / (yj - yi || Number.EPSILON) + xi;
     if (intersects) inside = !inside;
   }
-
   return inside;
 }
 
@@ -50,7 +48,6 @@ function isUsableLandPoint(point) {
 function nearestProvinceId(point) {
   let winner = ANATOLIA_PROVINCE_METADATA[0];
   let best = Number.POSITIVE_INFINITY;
-
   for (const province of ANATOLIA_PROVINCE_METADATA) {
     const distance = distanceSquared(point, province.centroid);
     if (distance < best) {
@@ -58,7 +55,6 @@ function nearestProvinceId(point) {
       winner = province;
     }
   }
-
   return winner.id;
 }
 
@@ -85,12 +81,11 @@ function addGridSites(sites, seen) {
   for (let y = BBOX[1]; y <= BBOX[3] + SITE_EPSILON; y += GRID_STEP) {
     let xIndex = 0;
     for (let x = BBOX[0]; x <= BBOX[2] + SITE_EPSILON; x += GRID_STEP) {
-      const jitterX = deterministicJitter(xIndex, yIndex) * GRID_STEP * 0.22;
-      const jitterY = deterministicJitter(xIndex + 17, yIndex + 31) * GRID_STEP * 0.22;
-      const point = [x + jitterX, y + jitterY];
-      if (isUsableLandPoint(point)) {
-        addSite(sites, seen, point, nearestProvinceId(point), "land-grid");
-      }
+      const point = [
+        x + deterministicJitter(xIndex, yIndex) * GRID_STEP * 0.22,
+        y + deterministicJitter(xIndex + 17, yIndex + 31) * GRID_STEP * 0.22,
+      ];
+      if (isUsableLandPoint(point)) addSite(sites, seen, point, nearestProvinceId(point), "land-grid");
       xIndex += 1;
     }
     yIndex += 1;
@@ -104,16 +99,13 @@ function addCoastSites(sites, seen) {
       const end = polygon[index + 1];
       const length = Math.sqrt(distanceSquared(start, end));
       const steps = Math.max(1, Math.ceil(length / 0.24));
-
       for (let step = 0; step <= steps; step += 1) {
         const t = step / steps;
         const point = [
           start[0] + (end[0] - start[0]) * t,
           start[1] + (end[1] - start[1]) * t,
         ];
-        if (isUsableLandPoint(point)) {
-          addSite(sites, seen, point, nearestProvinceId(point), "coastline");
-        }
+        if (isUsableLandPoint(point)) addSite(sites, seen, point, nearestProvinceId(point), "coastline");
       }
     }
   }
@@ -123,22 +115,17 @@ function addSourceShapeSites(sites, seen, sourceRegions) {
   for (const region of sourceRegions ?? []) {
     const polygon = region?.polygons?.find((candidate) => Array.isArray(candidate) && candidate.length >= 3);
     if (!polygon) continue;
-
     const center = polygon.reduce(
       (sum, [x, y]) => [sum[0] + x, sum[1] + y],
       [0, 0],
     );
     const point = [center[0] / polygon.length, center[1] / polygon.length];
-
-    if (isUsableLandPoint(point)) {
-      addSite(sites, seen, point, nearestProvinceId(point), "historical-source-anchor");
-    }
+    if (isUsableLandPoint(point)) addSite(sites, seen, point, nearestProvinceId(point), "historical-source-anchor");
   }
 }
 
 function clipHalfPlane(polygon, a, b, c) {
   if (!polygon.length) return [];
-
   const output = [];
   const inside = (point) => a * point[0] + b * point[1] <= c + SITE_EPSILON;
 
@@ -166,7 +153,6 @@ function clipHalfPlane(polygon, a, b, c) {
 
     if (!currentInside && nextInside) output.push(next);
   }
-
   return output;
 }
 
@@ -181,7 +167,6 @@ function buildVoronoiCell(siteIndex, sites) {
 
   for (let otherIndex = 0; otherIndex < sites.length; otherIndex += 1) {
     if (siteIndex === otherIndex) continue;
-
     const other = sites[otherIndex].point;
     const a = 2 * (other[0] - site[0]);
     const b = 2 * (other[1] - site[1]);
@@ -189,7 +174,6 @@ function buildVoronoiCell(siteIndex, sites) {
     polygon = clipHalfPlane(polygon, a, b, c);
     if (polygon.length < 3) return [];
   }
-
   return polygon;
 }
 
@@ -221,11 +205,7 @@ function createProvinceAsset(metadata, polygons) {
       sourceFeatureIndex: null,
     },
     identity: { id: metadata.id, name: metadata.name },
-    references: {
-      geometryId: metadata.id,
-      countryId: metadata.countryId,
-      capitalCityId: metadata.cityId,
-    },
+    references: { geometryId: metadata.id, countryId: metadata.countryId, capitalCityId: metadata.cityId },
     ownership: {
       countryId: metadata.countryId,
       ownerId: metadata.historicalControl.controllerAt1300 ?? metadata.countryId,
@@ -248,12 +228,7 @@ function createProvinceAsset(metadata, polygons) {
     military: { supplyLimit: 0 },
     culture: { primaryCulture: null },
     religion: { primaryReligion: null },
-    geometry: {
-      coastal: metadata.coastal,
-      port: metadata.port,
-      terrain: metadata.terrain,
-      strategic: metadata.strategic,
-    },
+    geometry: { coastal: metadata.coastal, port: metadata.port, terrain: metadata.terrain, strategic: metadata.strategic },
     polygons,
   };
 }
@@ -289,7 +264,6 @@ function createGeometryAsset(metadata, polygons) {
 export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
   const sites = [];
   const seen = new Set();
-
   addAnchorSites(sites, seen);
   addGridSites(sites, seen);
   addCoastSites(sites, seen);
@@ -307,11 +281,9 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
 
   const provinces = [];
   const geometries = [];
-
   for (const metadata of ANATOLIA_PROVINCE_METADATA) {
     const polygons = polygonsByProvince[metadata.id];
     if (!polygons.length) throw new Error(`Phase 2D produced no geometry for ${metadata.id}`);
-
     provinces.push(createProvinceAsset(metadata, polygons));
     geometries.push(createGeometryAsset(metadata, polygons));
   }
