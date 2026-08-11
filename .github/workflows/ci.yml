@@ -12,6 +12,9 @@ on:
       - feat/anatolia-physical-geography
       - feat/anatolia-map-label-water-overhaul
       - feat/world-1300-map-foundation
+      - feat/phase2b-anatolia-reconstruction
+      - feat/phase2c-anatolia-geometry-refinement
+      - feat/phase2d-anatolia-province-geometry
   push:
     branches:
       - master
