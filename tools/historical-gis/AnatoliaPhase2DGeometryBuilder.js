@@ -23,10 +23,6 @@ function pointInPolygon(point, polygon) {
   return inside;
 }
 
-function pointInLand(point) {
-  return ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon));
-}
-
 function pointInWaterEnvelope(point) {
   return ANATOLIA_PHYSICAL_ATLAS.seas.some((sea) => pointInPolygon(point, sea.coordinates));
 }
@@ -36,12 +32,6 @@ function isWithinAnatoliaEnvelope(point) {
   if (longitude < 28.5) return latitude <= 40.78;
   if (longitude < 29.2) return latitude <= 40.88;
   return latitude <= 42.20;
-}
-
-function isUsableLandPoint(point) {
-  return isWithinAnatoliaEnvelope(point)
-    && pointInLand(point)
-    && !pointInWaterEnvelope(point);
 }
 
 function isUsableCartographicPoint(point) {
@@ -314,5 +304,5 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
 }
 
 export function isAnatoliaGeometryPoint(point) {
-  return isUsableLandPoint(point);
+  return isUsableCartographicPoint(point);
 }
