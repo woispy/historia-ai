@@ -5,13 +5,51 @@ function createHeader(assetType, region) {
     assetType,
     assetVersion: 4,
     generator: "Historia Historical GIS Importer",
-    provider: "historical-basemaps",
-    dataset: "world_1300.geojson",
+    provider: region.provider ?? "historical-basemaps",
+    dataset: region.dataset ?? "world_1300.geojson",
     historicalDate: "1300-01-01",
     borderPrecision: region.borderPrecision,
     sourceFeatureId: region.sourceFeatureId,
     sourceFeatureIndex: region.sourceFeatureIndex,
   };
+}
+
+export function buildCuratedRegionalAssets(regionalLayer) {
+  if (!regionalLayer || !Array.isArray(regionalLayer.regions)) {
+    throw new Error("Regional historical layer must contain a regions array.");
+  }
+
+  return regionalLayer.regions.map((region, sourceFeatureIndex) => {
+    if (!region?.id || !region?.name || !region?.countryId || !Array.isArray(region.polygons)) {
+      throw new Error("Regional historical layer contains an invalid region.");
+    }
+
+    const normalized = {
+      assetId: region.id,
+      name: region.name,
+      sourceName: region.name,
+      subject: region.countryId,
+      partOf: "Anatolia and Byzantine regional layer",
+      sourceFeatureId: region.id,
+      sourceFeatureIndex,
+      borderPrecision: 1,
+      polygons: region.polygons,
+      provider: "historia-ai-curated",
+      dataset: regionalLayer.id,
+    };
+
+    const province = buildHistoricalProvinceAsset(normalized);
+    province.ownership.countryId = region.countryId;
+    province.ownership.ownerId = region.countryId;
+    province.historical = {
+      ...province.historical,
+      classification: "curated-regional-gameplay-overlay",
+      precision: regionalLayer.precision ?? "approximate",
+      anchor: region.anchor ?? null,
+      inferenceNotice: regionalLayer.notice ?? null,
+    };
+    return { province, geometry: buildHistoricalGeometryAsset(normalized) };
+  });
 }
 
 function getAssetId(region) {

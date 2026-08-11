@@ -5,6 +5,8 @@ import {
   buildHistoricalGeometryAsset,
   buildHistoricalProvinceAsset,
 } from "../HistoricalProvinceAssetBuilder.js";
+import { buildCuratedRegionalAssets } from "../HistoricalProvinceAssetBuilder.js";
+import regionalLayer from "../../../data/gis/1300/regional/anatolia-byzantium.json" with { type: "json" };
 import {
   normalizeHistoricalCountryName,
   resolveCanonicalHistoricalCountryId,
@@ -49,10 +51,18 @@ assert.equal(province.references.geometryId, geometry.identity.id);
 assert.equal(province.historical.sourceFeatureIndex, 0);
 assert.equal(geometry.metadata.sourceFeatureIndex, 0);
 
+const regionalAssets = buildCuratedRegionalAssets(regionalLayer);
+assert.equal(regionalAssets.length, regionalLayer.regions.length);
+assert.equal(regionalAssets.find(({ province: asset }) => asset.identity.id === "anatolia_ottomans").province.ownership.countryId, "ottomans");
+assert.equal(regionalAssets.find(({ province: asset }) => asset.identity.id === "anatolia_byzantium_bithynia").province.ownership.countryId, "byzantium");
+assert.ok(regionalAssets.every(({ province: asset }) => asset.historical.precision === "approximate"));
+
 assert.equal(normalizeHistoricalCountryName("Đại Viet"), "dai viet");
 assert.equal(resolveCanonicalHistoricalCountryId("Byzantine Empire"), "byzantium");
 assert.equal(resolveCanonicalHistoricalCountryId("Mamluke Sultanate"), "mamluks");
 assert.equal(resolveCanonicalHistoricalCountryId("Great Khanate"), "yuan");
+assert.equal(resolveCanonicalHistoricalCountryId("Aydinogullari"), "aydin");
+assert.equal(resolveCanonicalHistoricalCountryId("Saruhanogullari"), "saruhan");
 assert.equal(resolveCanonicalHistoricalCountryId("Unknown polity"), null);
 assert.equal(
   resolveHistoricalCountryId("Test Realm", {

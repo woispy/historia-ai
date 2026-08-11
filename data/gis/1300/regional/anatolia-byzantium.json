@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "anatolia-byzantium-1300",
+  "historicalDate": "1300-01-01",
+  "method": "curated-regional-overlay",
+  "precision": "approximate",
+  "notice": "These are gameplay regions, not asserted medieval cadastral or administrative boundaries. Coastlines and city anchors are geographic; inter-polity borders are documented historical inferences and deliberately rendered as approximate.",
+  "sources": [
+    {"title": "Encyclopaedia Iranica, C̱elebī, ʿĀref", "url": "https://www.iranicaonline.org/articles/celebi-calabi-aref-670-719-1272-1320-the-son-of-baha-al-din-soltan-walad-q/", "use": "Confirms the early-fourteenth-century Anatolian setting of the Menteşe beylik and its towns."},
+    {"title": "Historical Basemaps", "url": "https://github.com/aourednik/historical-basemaps", "use": "Provides the underlying global 1300 basemap; this overlay does not claim to replace it."}
+  ],
+  "regions": [
+    {"id":"anatolia_ottomans","name":"Ottoman Beylik (Söğüt)","countryId":"ottomans","anchor":"Söğüt","polygons":[[[29.1,39.5],[30.0,39.25],[30.85,39.65],[30.72,40.35],[29.75,40.55],[29.1,40.1],[29.1,39.5]]]},
+    {"id":"anatolia_byzantium_bithynia","name":"Byzantine Bithynia","countryId":"byzantium","anchor":"Nicaea","polygons":[[[28.25,39.7],[29.1,39.5],[29.1,40.1],[29.75,40.55],[30.72,40.35],[31.45,40.65],[31.5,41.15],[30.35,41.25],[29.15,41.0],[28.25,40.45],[28.25,39.7]]]},
+    {"id":"anatolia_byzantium_thrace","name":"Byzantine Thrace","countryId":"byzantium","anchor":"Constantinople","polygons":[[[25.8,40.45],[28.25,40.45],[29.15,41.0],[29.15,41.55],[27.9,41.9],[26.0,41.7],[25.8,40.45]]]},
+    {"id":"anatolia_karasi","name":"Karasi Beylik","countryId":"karasi","anchor":"Balıkesir","polygons":[[[26.0,38.55],[28.2,38.35],[29.1,39.5],[29.1,40.1],[28.25,40.45],[26.7,40.15],[26.0,39.35],[26.0,38.55]]]},
+    {"id":"anatolia_saruhan","name":"Saruhan Beylik","countryId":"saruhan","anchor":"Manisa","polygons":[[[26.6,37.65],[28.65,37.6],[29.1,39.5],[28.2,38.35],[26.0,38.55],[26.6,37.65]]]},
+    {"id":"anatolia_aydin","name":"Aydin Beylik","countryId":"aydin","anchor":"Birgi","polygons":[[[26.0,36.75],[28.05,36.8],[28.65,37.6],[26.6,37.65],[26.0,37.25],[26.0,36.75]]]},
+    {"id":"anatolia_mentese","name":"Menteşe Beylik","countryId":"mentese","anchor":"Milas","polygons":[[[26.25,36.25],[28.45,36.2],[28.05,36.8],[26.0,36.75],[26.25,36.25]]]},
+    {"id":"anatolia_germiyan","name":"Germiyan Beylik","countryId":"germiyan","anchor":"Kütahya","polygons":[[[28.65,37.6],[30.85,37.75],[31.15,39.2],[30.72,40.35],[29.1,39.5],[28.65,37.6]]]},
+    {"id":"anatolia_karaman","name":"Karaman Beylik","countryId":"karaman","anchor":"Karaman","polygons":[[[30.85,36.55],[34.55,36.6],[34.65,38.55],[31.15,39.2],[30.85,37.75],[30.85,36.55]]]},
+    {"id":"anatolia_candar","name":"Candar Beylik","countryId":"candar","anchor":"Sinop","polygons":[[[31.15,39.2],[34.65,38.55],[35.75,40.65],[35.15,41.9],[33.1,42.0],[31.5,41.15],[30.72,40.35],[31.15,39.2]]]},
+    {"id":"anatolia_trebizond","name":"Empire of Trebizond","countryId":"trebizond","anchor":"Trebizond","polygons":[[[35.15,41.9],[35.75,40.65],[40.75,40.55],[41.15,41.65],[39.8,42.0],[35.15,41.9]]]},
+    {"id":"anatolia_ilkhanate","name":"Ilkhanate Anatolian Marches","countryId":"ilkhanate","anchor":"Erzurum","polygons":[[[34.65,38.55],[40.75,40.55],[35.75,40.65],[34.65,41.85],[34.65,38.55]]]}
+  ]
+}

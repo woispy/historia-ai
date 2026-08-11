@@ -10,6 +10,8 @@
     "byzantium": {"id":"byzantium","name":"Eastern Roman Empire","title":"Empire","government":"empire","capital":"konstantinopolis","color":"#6A1B9A","playable":true,"rulerId":"andronikos_ii"},
     "germiyan": {"id":"germiyan","name":"Germiyanid Beylik","title":"Beylik","government":"beylik","capital":"kutahya","color":"#8C5A2B","playable":false},
     "karasi": {"id":"karasi","name":"Karasi Beylik","title":"Beylik","government":"beylik","capital":"balikesir","color":"#B87333","playable":false},
+    "aydin": {"id":"aydin","name":"Aydin Beylik","title":"Beylik","government":"beylik","capital":"birgi","color":"#2E7795","playable":false},
+    "saruhan": {"id":"saruhan","name":"Saruhan Beylik","title":"Beylik","government":"beylik","capital":"manisa","color":"#786A9D","playable":false},
     "mentese": {"id":"mentese","name":"Menteshe Beylik","title":"Beylik","government":"beylik","capital":"milas","color":"#3E7C59","playable":false},
     "karaman": {"id":"karaman","name":"Karamanid Beylik","title":"Beylik","government":"beylik","capital":"karaman","color":"#A33F3F","playable":false},
     "candar": {"id":"candar","name":"Candarid Beylik","title":"Beylik","government":"beylik","capital":"sinop","color":"#7A6A3A","playable":false},

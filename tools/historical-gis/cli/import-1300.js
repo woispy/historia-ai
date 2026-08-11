@@ -3,6 +3,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { downloadHistorical1300GeoJson, importHistoricalGeoJson } from "../HistoricalGeometryImporter.js";
 import { buildHistoricalGeometryAsset, buildHistoricalProvinceAsset } from "../HistoricalProvinceAssetBuilder.js";
+import regionalLayer from "../../../data/gis/1300/regional/anatolia-byzantium.json" with { type: "json" };
+import { buildCuratedRegionalAssets } from "../HistoricalProvinceAssetBuilder.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const inputArgument = process.argv[2] ?? "--download";
@@ -42,6 +44,14 @@ for (const region of regions) {
   geometries.push(geometryAsset);
 }
 
+for (const { provinceAsset, geometryAsset } of buildCuratedRegionalAssets(regionalLayer).map(({ province, geometry }) => ({ provinceAsset: province, geometryAsset: geometry }))) {
+  const provinceId = provinceAsset.identity.id;
+  if (assetIds.has(provinceId)) throw new Error(`Duplicate curated regional GIS asset id: ${provinceId}`);
+  assetIds.add(provinceId);
+  provinces.push(provinceAsset);
+  geometries.push(geometryAsset);
+}
+
 const polygonCount = geometries.reduce((total, geometry) => total + geometry.polygons.length, 0);
 await fs.writeFile(runtimePath, `${JSON.stringify({
   schemaVersion: 1,
@@ -52,6 +62,11 @@ await fs.writeFile(runtimePath, `${JSON.stringify({
     dataset: "world_1300.geojson",
     projection: "EPSG:4326",
     sourceFeatureCount: regions.length,
+    regionalOverlay: {
+      id: regionalLayer.id,
+      regionCount: regionalLayer.regions.length,
+      precision: regionalLayer.precision,
+    },
   },
   counts: {
     provinces: provinces.length,

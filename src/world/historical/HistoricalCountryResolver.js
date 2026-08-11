@@ -4,6 +4,8 @@ const COUNTRY_ALIASES = Object.freeze({
   byzantium: ["byzantine empire", "byzantine", "eastern roman empire", "roman empire", "empire of constantinople"],
   germiyan: ["germiyan", "germiyanid beylik", "germiyanids"],
   karasi: ["karasi", "karasi beylik", "karasid beylik"],
+  aydin: ["aydin", "aydin beylik", "aydinids", "aydinogullari"],
+  saruhan: ["saruhan", "saruhan beylik", "saruhanids", "saruhanogullari"],
   mentese: ["mentese", "menteshe", "menteshe beylik", "mentese beylik"],
   karaman: ["karaman", "karamanid beylik", "karamanids"],
   candar: ["candar", "candarid beylik", "candarids", "isfendiyarids"],
