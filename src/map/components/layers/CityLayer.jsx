@@ -17,7 +17,8 @@ function mergeCityMetadata(city) {
 
 function getVisibleCities(cities, zoom) {
   const lod = getMapLod(zoom);
-  return cities
+  const policy = getCityLabelPolicy(zoom);
+  const visible = cities
     .map(mergeCityMetadata)
     .filter(Boolean)
     .filter((city) => {
@@ -28,6 +29,8 @@ function getVisibleCities(cities, zoom) {
       return true;
     })
     .sort((a, b) => (TIER_WEIGHT[b.map.tier] ?? 0) - (TIER_WEIGHT[a.map.tier] ?? 0));
+
+  return visible.slice(0, policy.maxLabels);
 }
 
 function getLabelCandidates(city) {
@@ -94,29 +97,11 @@ function CityMarker({ city, zoom, onClick }) {
   const detailed = zoom >= 2.55;
 
   return (
-    <g
-      key={city.id}
-      onClick={() => onClick?.(city.id, city.map)}
-      style={{ cursor: onClick ? "pointer" : "default" }}
-    >
-      {isCapital && (
-        <circle cx={x} cy={y} r={radius + 0.055} fill="none" stroke="#d9bf68" strokeOpacity="0.75" strokeWidth="0.045" vectorEffect="non-scaling-stroke" />
-      )}
-      <circle
-        cx={x}
-        cy={y}
-        r={radius}
-        fill={isCapital ? "#f0d276" : "#e8e1c9"}
-        stroke="#151916"
-        strokeWidth="0.045"
-        vectorEffect="non-scaling-stroke"
-      />
-      {fortified && detailed && (
-        <circle cx={x} cy={y} r={radius + 0.075} fill="none" stroke="#cbb76f" strokeOpacity="0.72" strokeWidth="0.035" strokeDasharray="0.12 0.10" vectorEffect="non-scaling-stroke" />
-      )}
-      {port && zoom >= 2.0 && (
-        <path d={`M ${x - 0.15} ${y - 0.15} L ${x + 0.15} ${y - 0.15}`} stroke="#6f9fa9" strokeWidth="0.045" vectorEffect="non-scaling-stroke" />
-      )}
+    <g key={city.id} onClick={() => onClick?.(city.id, city.map)} style={{ cursor: onClick ? "pointer" : "default" }}>
+      {isCapital && <circle cx={x} cy={y} r={radius + 0.055} fill="none" stroke="#d9bf68" strokeOpacity="0.75" strokeWidth="0.045" vectorEffect="non-scaling-stroke" />}
+      <circle cx={x} cy={y} r={radius} fill={isCapital ? "#f0d276" : "#e8e1c9"} stroke="#151916" strokeWidth="0.045" vectorEffect="non-scaling-stroke" />
+      {fortified && detailed && <circle cx={x} cy={y} r={radius + 0.075} fill="none" stroke="#cbb76f" strokeOpacity="0.72" strokeWidth="0.035" strokeDasharray="0.12 0.10" vectorEffect="non-scaling-stroke" />}
+      {port && zoom >= 2.0 && <path d={`M ${x - 0.15} ${y - 0.15} L ${x + 0.15} ${y - 0.15}`} stroke="#6f9fa9" strokeWidth="0.045" vectorEffect="non-scaling-stroke" />}
     </g>
   );
 }
@@ -124,19 +109,7 @@ function CityMarker({ city, zoom, onClick }) {
 function CityLabel({ city, config, x, y, anchor }) {
   return (
     <g transform={`translate(${x} ${y}) scale(1,-1)`} pointerEvents="none">
-      <text
-        x="0"
-        y="0"
-        textAnchor={anchor}
-        fontSize={config.size}
-        fontFamily="Georgia, serif"
-        fontWeight={city.map.tier === "capital" ? "700" : "600"}
-        fill="#eee7d1"
-        stroke="#151916"
-        strokeWidth="0.055"
-        paintOrder="stroke"
-        vectorEffect="non-scaling-stroke"
-      >
+      <text x="0" y="0" textAnchor={anchor} fontSize={config.size} fontFamily="Georgia, serif" fontWeight={city.map.tier === "capital" ? "700" : "600"} fill="#eee7d1" stroke="#151916" strokeWidth="0.055" paintOrder="stroke" vectorEffect="non-scaling-stroke">
         {city.map.name}
       </text>
     </g>
