@@ -1,5 +1,5 @@
-import { getAnatoliaCityMapMetadata } from "../../data/AnatoliaCityAtlas";
-import { getCityLabelPolicy, getMapLod } from "../../rendering/CartographyModel";
+import { getAnatoliaCityMapMetadata } from "../../data/AnatoliaCityAtlas.js";
+import { getCityLabelPolicy, getMapLod } from "../../rendering/CartographyModel.js";
 
 const TIER_WEIGHT = Object.freeze({ capital: 4, major: 3, town: 2, village: 1 });
 const LABEL_CONFIG = Object.freeze({
