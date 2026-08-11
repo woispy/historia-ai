@@ -61,16 +61,16 @@ function compareCityPriority(a, b) {
 }
 
 function getScreenStableScale(zoom) {
-  // SVG viewBox zoom scales map units linearly. A power below 1 keeps labels
-  // readable while preventing the large growth seen in deep city zooms.
-  return Math.max(0.42, Math.min(1.0, zoom ** -0.82));
+  // SVG viewBox zoom scales map units linearly. A fractional power keeps
+  // typography readable while preventing the large growth seen in deep zooms.
+  return Math.max(0.035, Math.min(1.0, 0.95 * zoom ** -0.65));
 }
 
 export function getCityVisualStyle(city, zoom = 1) {
   const config = tierConfig(city);
   const scale = getScreenStableScale(zoom);
-  const radius = Math.max(0.028, Math.min(config.markerRadius, config.markerRadius * scale));
-  const fontSize = Math.max(0.11, Math.min(config.baseSize, config.baseSize * scale));
+  const radius = Math.max(0.018, Math.min(config.markerRadius, config.markerRadius * scale));
+  const fontSize = Math.max(0.045, Math.min(config.baseSize, config.baseSize * scale));
   return Object.freeze({ radius, fontSize, priority: config.priority, minZoom: config.minZoom });
 }
 
