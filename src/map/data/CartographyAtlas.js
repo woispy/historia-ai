@@ -81,11 +81,11 @@ export const ANATOLIA_STRATEGIC_CORRIDORS = Object.freeze([
 ]);
 
 export const ANATOLIA_STRATEGIC_PASSES = Object.freeze([
-  { id: "izmit-gate", name: "İzmit Geçidi", ...Object.fromEntries(["x", "y"].map((key) => [key, key === "x" ? 29.72 : 40.45])) },
-  { id: "bilecik-pass", name: "Bilecik Geçidi", ...Object.fromEntries(["x", "y"].map((key) => [key, key === "x" ? 30.15 : 40.10])) },
-  { id: "eskisehir-gate", name: "Eskişehir Geçidi", ...Object.fromEntries(["x", "y"].map((key) => [key, key === "x" ? 30.75 : 39.72])) },
-  { id: "cilician-gates", name: "Kilikya Kapıları", ...Object.fromEntries(["x", "y"].map((key) => [key, key === "x" ? 34.79 : 37.36])) },
-  { id: "erzincan-gate", name: "Erzincan Geçidi", ...Object.fromEntries(["x", "y"].map((key) => [key, key === "x" ? 39.0 : 39.72])) },
+  { id: "izmit-gate", name: "İzmit Geçidi", x: 29.72, y: 40.45 },
+  { id: "bilecik-pass", name: "Bilecik Geçidi", x: 30.15, y: 40.10 },
+  { id: "eskisehir-gate", name: "Eskişehir Geçidi", x: 30.75, y: 39.72 },
+  { id: "cilician-gates", name: "Kilikya Kapıları", x: 34.79, y: 37.36 },
+  { id: "erzincan-gate", name: "Erzincan Geçidi", x: 39.00, y: 39.72 },
 ]);
 
 export const ANATOLIA_STRATEGIC_CROSSINGS = Object.freeze([
