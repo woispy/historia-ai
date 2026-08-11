@@ -34,8 +34,17 @@ function pointInWaterEnvelope(point) {
   return ANATOLIA_PHYSICAL_ATLAS.seas.some((sea) => pointInPolygon(point, sea.coordinates));
 }
 
+function isWithinAnatoliaEnvelope(point) {
+  const [longitude, latitude] = point;
+  if (longitude < 28.5) return latitude <= 40.78;
+  if (longitude < 29.2) return latitude <= 40.88;
+  return latitude <= 42.20;
+}
+
 function isUsableLandPoint(point) {
-  return pointInLand(point) && !pointInWaterEnvelope(point);
+  return isWithinAnatoliaEnvelope(point)
+    && pointInLand(point)
+    && !pointInWaterEnvelope(point);
 }
 
 function nearestProvinceId(point) {
@@ -211,10 +220,7 @@ function createProvinceAsset(metadata, polygons) {
       sourceFeatureId: metadata.id,
       sourceFeatureIndex: null,
     },
-    identity: {
-      id: metadata.id,
-      name: metadata.name,
-    },
+    identity: { id: metadata.id, name: metadata.name },
     references: {
       geometryId: metadata.id,
       countryId: metadata.countryId,
@@ -265,10 +271,7 @@ function createGeometryAsset(metadata, polygons) {
       sourceFeatureId: metadata.id,
       sourceFeatureIndex: null,
     },
-    identity: {
-      id: metadata.id,
-      provinceId: metadata.id,
-    },
+    identity: { id: metadata.id, provinceId: metadata.id },
     metadata: {
       sourceFeatureId: metadata.id,
       sourceFeatureIndex: null,
@@ -320,7 +323,7 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     provider: "historia-ai-curated-cartography",
     dataset: "anatolia-province-geometry-1300",
     projection: "EPSG:4326",
-    method: "weighted-free Voronoi cartographic tessellation constrained by the Phase 2 physical land envelope",
+    method: "deterministic multi-site Voronoi cartography constrained by the Phase 2 physical land envelope",
     siteCount: sites.length,
     provinceCount: provinces.length,
     polygonCount: geometries.reduce((sum, geometry) => sum + geometry.polygons.length, 0),
