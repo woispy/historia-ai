@@ -13,6 +13,7 @@
     "test:physical-geography": "node tools/tests/physical-geography-1300.test.js",
     "test:world-map": "node tools/tests/world-land-mask.test.js",
     "test:historical-world": "node tools/tests/historical-world-1300.test.js",
+    "test:province-topology": "node tools/tests/province-topology.test.js",
     "test:new-game": "node tools/tests/new-game-state.test.js",
     "validate:historical-gis:1300": "node tools/historical-gis/cli/validate-1300.js",
     "lint": "eslint .",

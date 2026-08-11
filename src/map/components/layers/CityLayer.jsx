@@ -1,10 +1,11 @@
 import { getAnatoliaCityMapMetadata } from "../../data/AnatoliaCityAtlas";
 
-const TIER_WEIGHT = Object.freeze({ capital: 3, major: 2, town: 1 });
+const TIER_WEIGHT = Object.freeze({ capital: 4, major: 3, town: 2, village: 1 });
 const LABEL_CONFIG = Object.freeze({
-  capital: { minZoom: 1.45, size: 0.42, widthFactor: 0.56 },
-  major: { minZoom: 1.95, size: 0.31, widthFactor: 0.54 },
-  town: { minZoom: 2.75, size: 0.25, widthFactor: 0.52 },
+  capital: { minZoom: 1.25, size: 0.30, widthFactor: 0.48 },
+  major: { minZoom: 1.75, size: 0.22, widthFactor: 0.46 },
+  town: { minZoom: 2.45, size: 0.17, widthFactor: 0.44 },
+  village: { minZoom: 3.2, size: 0.13, widthFactor: 0.42 },
 });
 
 function mergeCityMetadata(city) {
@@ -22,30 +23,31 @@ function getVisibleCities(cities, zoom) {
     .map(mergeCityMetadata)
     .filter(Boolean)
     .filter((city) => {
+      const tier = city.map.tier ?? "town";
       if (zoom >= 3.1) return true;
-      if (zoom >= 2.15) return city.map.tier !== "town";
-      if (zoom >= 1.55) return city.map.tier === "capital" || city.map.tier === "major";
-      return city.map.tier === "capital" || (city.map.tier === "major" && city.map.port);
+      if (zoom >= 2.15) return tier !== "village";
+      if (zoom >= 1.45) return tier === "capital" || tier === "major";
+      return tier === "capital" || (tier === "major" && city.map.port);
     })
     .sort((a, b) => (TIER_WEIGHT[b.map.tier] ?? 0) - (TIER_WEIGHT[a.map.tier] ?? 0));
 }
 
 function getLabelCandidates(city) {
   const { x, y, tier } = city.map;
-  const gap = tier === "capital" ? 0.16 : 0.12;
+  const gap = tier === "capital" ? 0.12 : 0.09;
   const dx = city.map.labelDx ?? 0;
   const dy = city.map.labelDy ?? 0;
 
   return [
-    { x: x + dx + 0.18 + gap, y: y + dy + 0.07, anchor: "start" },
-    { x: x + dx, y: y + dy - 0.24 - gap, anchor: "middle" },
-    { x: x + dx - 0.18 - gap, y: y + dy + 0.07, anchor: "end" },
-    { x: x + dx, y: y + dy + 0.34 + gap, anchor: "middle" },
+    { x: x + dx + 0.14 + gap, y: y + dy + 0.05, anchor: "start" },
+    { x: x + dx, y: y + dy - 0.18 - gap, anchor: "middle" },
+    { x: x + dx - 0.14 - gap, y: y + dy + 0.05, anchor: "end" },
+    { x: x + dx, y: y + dy + 0.24 + gap, anchor: "middle" },
   ];
 }
 
 function estimateLabelBox(city, candidate, config) {
-  const textWidth = Math.max(0.55, city.map.name.length * config.size * config.widthFactor);
+  const textWidth = Math.max(0.42, city.map.name.length * config.size * config.widthFactor);
   const halfWidth = textWidth / 2;
   const left = candidate.anchor === "start" ? candidate.x : candidate.x - halfWidth;
   const right = candidate.anchor === "end" ? candidate.x : candidate.x + halfWidth;
@@ -55,7 +57,7 @@ function estimateLabelBox(city, candidate, config) {
   return { left, right, top, bottom };
 }
 
-function boxesOverlap(a, b, padding = 0.08) {
+function boxesOverlap(a, b, padding = 0.055) {
   return !(
     a.right + padding < b.left ||
     a.left - padding > b.right ||
@@ -72,13 +74,10 @@ function placeLabels(cities, zoom) {
     const config = LABEL_CONFIG[city.map.tier] ?? LABEL_CONFIG.town;
     if (zoom < config.minZoom) continue;
 
-    const candidates = getLabelCandidates(city);
     let selected = null;
-
-    for (const candidate of candidates) {
+    for (const candidate of getLabelCandidates(city)) {
       const box = estimateLabelBox(city, candidate, config);
-      const overlaps = placed.some((item) => boxesOverlap(box, item.box));
-      if (!overlaps) {
+      if (!placed.some((item) => boxesOverlap(box, item.box))) {
         selected = { ...candidate, box };
         break;
       }
@@ -94,40 +93,54 @@ function placeLabels(cities, zoom) {
 
 function CityMarker({ city, zoom, onClick }) {
   const { x, y, tier, port, fortified } = city.map;
-  const radius = tier === "capital" ? 0.22 : tier === "major" ? 0.14 : 0.09;
+  const radius = tier === "capital" ? 0.14 : tier === "major" ? 0.095 : 0.065;
+  const isCapital = tier === "capital";
 
   return (
     <g
       key={city.id}
-      onClick={() => onClick?.(city.id)}
+      onClick={() => onClick?.(city.id, city.map)}
       style={{ cursor: onClick ? "pointer" : "default" }}
     >
+      {isCapital && (
+        <circle
+          cx={x}
+          cy={y}
+          r={radius + 0.055}
+          fill="none"
+          stroke="#d9bf68"
+          strokeOpacity="0.75"
+          strokeWidth="0.045"
+          vectorEffect="non-scaling-stroke"
+        />
+      )}
       <circle
         cx={x}
         cy={y}
         r={radius}
-        fill={tier === "capital" ? "#f3d77c" : "#e9e2c8"}
-        stroke="#171b18"
-        strokeWidth="0.08"
+        fill={isCapital ? "#f0d276" : "#e8e1c9"}
+        stroke="#151916"
+        strokeWidth="0.045"
         vectorEffect="non-scaling-stroke"
       />
       {fortified && zoom >= 2.5 && (
         <circle
           cx={x}
           cy={y}
-          r={radius + 0.09}
+          r={radius + 0.075}
           fill="none"
-          stroke="#d5bd72"
-          strokeWidth="0.05"
-          strokeDasharray="0.14 0.12"
+          stroke="#cbb76f"
+          strokeOpacity="0.72"
+          strokeWidth="0.035"
+          strokeDasharray="0.12 0.10"
           vectorEffect="non-scaling-stroke"
         />
       )}
-      {port && zoom >= 2.3 && (
+      {port && zoom >= 2.0 && (
         <path
-          d={`M ${x - 0.22} ${y - 0.22} L ${x + 0.22} ${y - 0.22}`}
-          stroke="#79aeb9"
-          strokeWidth="0.07"
+          d={`M ${x - 0.15} ${y - 0.15} L ${x + 0.15} ${y - 0.15}`}
+          stroke="#6f9fa9"
+          strokeWidth="0.045"
           vectorEffect="non-scaling-stroke"
         />
       )}
@@ -145,9 +158,9 @@ function CityLabel({ city, config, x, y, anchor }) {
         fontSize={config.size}
         fontFamily="Georgia, serif"
         fontWeight={city.map.tier === "capital" ? "700" : "600"}
-        fill="#f3ecd8"
-        stroke="#121613"
-        strokeWidth="0.09"
+        fill="#eee7d1"
+        stroke="#151916"
+        strokeWidth="0.055"
         paintOrder="stroke"
         vectorEffect="non-scaling-stroke"
       >
@@ -167,14 +180,7 @@ function CityLayer({ cities = [], zoom = 1, onCityClick }) {
         <CityMarker key={city.id} city={city} zoom={zoom} onClick={onCityClick} />
       ))}
       {labels.map(({ city, config, x, y, anchor }) => (
-        <CityLabel
-          key={`${city.id}-label`}
-          city={city}
-          config={config}
-          x={x}
-          y={y}
-          anchor={anchor}
-        />
+        <CityLabel key={`${city.id}-label`} city={city} config={config} x={x} y={y} anchor={anchor} />
       ))}
     </g>
   );

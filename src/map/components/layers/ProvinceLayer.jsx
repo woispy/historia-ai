@@ -1,35 +1,29 @@
 import ProvinceSvg from "../ProvinceSvg";
 import ProvincePolygon from "../ProvincePolygon";
-import { ANATOLIA_PHYSICAL_ATLAS } from "../../data/AnatoliaPhysicalAtlas";
+import { ProvinceBoundaryLayer } from "./ProvinceBoundaryLayer";
 
-function buildPathData(polygons = []) {
-  return polygons
-    .filter((polygon) => Array.isArray(polygon) && polygon.length >= 3)
-    .map((polygon) => {
-      const [first, ...rest] = polygon;
-      return [
-        `M ${first[0]} ${first[1]}`,
-        ...rest.map(([x, y]) => `L ${x} ${y}`),
-        "Z",
-      ].join(" ");
-    })
-    .join(" ");
+function isCuratedCountryOverlay(province) {
+  return province?.historical?.classification === "curated-regional-gameplay-overlay";
 }
 
-function ProvinceLayer({ provinces, selectedProvinceId, onProvinceClick, mapStyle, mapShadows }) {
-  const landPath = buildPathData(ANATOLIA_PHYSICAL_ATLAS.landPolygons);
-  const waterHolesPath = buildPathData(
-    ANATOLIA_PHYSICAL_ATLAS.seas.map((sea) => sea.coordinates),
+function ProvinceLayer({
+  provinces,
+  selectedProvinceId,
+  onProvinceClick,
+  mapStyle,
+  mapShadows,
+  zoom = 1,
+}) {
+  // Phase 2 separates historical country-regional overlays from runtime
+  // province simulation units. The source-derived 1300 features are the
+  // province layer; the curated 16-region overlay remains metadata only.
+  const runtimeProvinces = provinces.filter(
+    ({ province }) => !isCuratedCountryOverlay(province),
   );
 
   return (
     <ProvinceSvg>
-      <defs>
-        <clipPath id="anatolia-landmask" clipPathUnits="userSpaceOnUse">
-          <path d={`${landPath} ${waterHolesPath}`} fillRule="evenodd" />
-        </clipPath>
-      </defs>
-      {provinces.map(({ province, country, geometry }) => (
+      {runtimeProvinces.map(({ province, country, geometry }) => (
         <ProvincePolygon
           key={province.id}
           province={province}
@@ -39,8 +33,10 @@ function ProvinceLayer({ provinces, selectedProvinceId, onProvinceClick, mapStyl
           onClick={onProvinceClick}
           mapStyle={mapStyle}
           mapShadows={mapShadows}
+          zoom={zoom}
         />
       ))}
+      <ProvinceBoundaryLayer provinces={runtimeProvinces} zoom={zoom} />
     </ProvinceSvg>
   );
 }
