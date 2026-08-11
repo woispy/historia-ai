@@ -1,4 +1,4 @@
-import { ANATOLIA_CITY_ATLAS } from "./AnatoliaCityAtlas";
+import { ANATOLIA_CITY_ATLAS } from "./AnatoliaCityAtlas.js";
 
 const point = (cityId) => {
   const city = ANATOLIA_CITY_ATLAS[cityId];
