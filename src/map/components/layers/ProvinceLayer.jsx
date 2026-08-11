@@ -1,6 +1,6 @@
 import ProvinceSvg from "../ProvinceSvg";
 import ProvincePolygon from "../ProvincePolygon";
-import { ANATOLIA_LAND_MASK } from "../../data/AnatoliaLandMask";
+import { ANATOLIA_PHYSICAL_ATLAS } from "../../data/AnatoliaPhysicalAtlas";
 
 function buildMaskPath(polygons) {
   return polygons
@@ -12,7 +12,7 @@ function buildMaskPath(polygons) {
 }
 
 function ProvinceLayer({ provinces, selectedProvinceId, onProvinceClick, mapStyle, mapShadows }) {
-  const landMaskPath = buildMaskPath(ANATOLIA_LAND_MASK);
+  const landMaskPath = buildMaskPath(ANATOLIA_PHYSICAL_ATLAS.landPolygons);
 
   return (
     <ProvinceSvg>

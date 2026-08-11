@@ -8,7 +8,7 @@ import {
 } from "../HistoricalProvinceAssetBuilder.js";
 import regionalLayer from "../../../data/gis/1300/regional/anatolia-byzantium.json" with { type: "json" };
 import { ANATOLIA_CITY_ATLAS } from "../../../src/map/data/AnatoliaCityAtlas.js";
-import { ANATOLIA_LAND_MASK } from "../../../src/map/data/AnatoliaLandMask.js";
+import { ANATOLIA_PHYSICAL_ATLAS } from "../../../src/map/data/AnatoliaPhysicalAtlas.js";
 import {
   normalizeHistoricalCountryName,
   resolveCanonicalHistoricalCountryId,
@@ -52,7 +52,8 @@ assert.equal(regionalAssets.find(({ province: asset }) => asset.identity.id === 
 assert.equal(regionalAssets.find(({ province: asset }) => asset.identity.id === "anatolia_byzantium_bithynia").province.ownership.countryId, "byzantium");
 assert.ok(regionalAssets.every(({ province: asset }) => asset.historical.precision === "approximate"));
 assert.ok(regionalAssets.every(({ province: asset }) => asset.historical.borderPrecision <= 2));
-assert.ok(ANATOLIA_LAND_MASK.length >= 2);
+assert.equal(ANATOLIA_PHYSICAL_ATLAS.landPolygons.length, 1);
+assert.ok(ANATOLIA_PHYSICAL_ATLAS.landPolygons[0].length >= 100);
 assert.ok(ANATOLIA_CITY_ATLAS.konstantinopolis);
 assert.ok(ANATOLIA_CITY_ATLAS.bursa);
 assert.ok(ANATOLIA_CITY_ATLAS.trabzon);
@@ -118,4 +119,4 @@ assert.equal(DEFAULT_SETTINGS.mapShadows, true);
 assert.equal(DEFAULT_SETTINGS.notifications, true);
 assert.equal(DEFAULT_SETTINGS.autosave, "6m");
 
-console.log("Historical GIS 1300 identity, Anatolia map, city atlas, camera, projection and settings tests passed.");
+console.log("Historical GIS 1300 identity, Anatolia map, city atlas, physical atlas, camera, projection and settings tests passed.");
