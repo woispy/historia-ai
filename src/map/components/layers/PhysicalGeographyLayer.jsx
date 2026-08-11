@@ -80,15 +80,15 @@ function PhysicalGeographyLayer({ phase = "detail", zoom = 1 }) {
         {atlas.terrainRegions.map((region) => (
           <PhysicalPolygon key={region.name} feature={region} className={`map-terrain-${region.type}`} opacity={0.13} />
         ))}
-        {atlas.lakes.map((lake) => (
-          <PhysicalPolygon key={lake.name} feature={lake} className="map-lake" opacity={0.82} />
-        ))}
       </g>
     );
   }
 
   return (
     <g aria-label="Physical geography detail">
+      {atlas.lakes.map((lake) => (
+        <PhysicalPolygon key={lake.name} feature={lake} className="map-lake" opacity={0.88} />
+      ))}
       {atlas.mountainRanges.map((range) => (
         <PhysicalLine key={range.name} feature={range} className="map-mountain" width={0.13} opacity={0.28} />
       ))}
