@@ -13,6 +13,17 @@
     "status": "source-derived-political-regions",
     "note": "The 1300 source contains 237 historical political/cultural GIS features. Historia AI imports them as provisional Province simulation units; they must not be described as a complete historically exact administrative-province dataset."
   },
+  "physicalGeography": {
+    "status": "curated-anatolia-physical-atlas",
+    "dataset": "src/map/data/AnatoliaPhysicalAtlas.js",
+    "projection": "EPSG:4326",
+    "layers": ["land-mask", "seas", "coastlines", "islands", "lakes", "rivers", "mountain-ranges", "terrain-regions", "labels"],
+    "sourceBasis": [
+      "Natural Earth 10m physical vectors — coastline, land, rivers/lake centerlines, lakes",
+      "Curated Anatolia-focused feature geometry for map readability and gameplay"
+    ],
+    "historicalNote": "Physical geography is largely time-stable at the game's scale; political ownership is intentionally excluded from this dataset."
+  },
   "fallbackGeometry": {
     "provider": "natural-earth",
     "dataset": "admin-0-countries",
@@ -26,15 +37,18 @@
   },
   "pipeline": [
     "historical GIS source",
+    "physical geography atlas",
     "Historical Geometry Importer",
     "Historical Province Asset Builder",
     "Historical Province Repository",
+    "physical geography renderer",
     "1300 ownership",
     "SVG Renderer"
   ],
   "notes": [
     "Historical borders are approximate and source-dependent.",
     "Province is Historia AI's runtime simulation unit; it is not a claim that every imported feature was an administrative province in 1300.",
+    "Physical geography is rendered independently from political ownership so coastlines, water and terrain cannot accidentally become political territory.",
     "The generated source GeoJSON remains a local build artifact unless redistribution is explicitly permitted by the source license."
   ]
 }
