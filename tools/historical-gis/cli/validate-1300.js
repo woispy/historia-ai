@@ -27,19 +27,27 @@ const runtime = JSON.parse(await fs.readFile(runtimePath, "utf8"));
 
 assert(Array.isArray(sourceRaw.features), "Historical GIS source must contain a features array.");
 assert(sourceRaw.features.length === normalizedRegions.length, `Source/normalized feature count mismatch: ${sourceRaw.features.length} vs ${normalizedRegions.length}.`);
-assert(runtime.schemaVersion === 2, "Unsupported historical runtime asset schema.");
+assert(runtime.schemaVersion === 3, "Unsupported historical runtime asset schema.");
 assert(runtime.assetType === "historical-runtime", "Invalid historical runtime asset type.");
 assert(runtime.historicalDate === "1300-01-01", "Historical runtime date mismatch.");
 assert(Array.isArray(runtime.provinces), "Runtime province array is missing.");
 assert(Array.isArray(runtime.geometries), "Runtime geometry array is missing.");
-assert(runtime.provinces.length === normalizedRegions.length, "Runtime province count mismatch.");
-assert(runtime.geometries.length === normalizedRegions.length, "Runtime geometry count mismatch.");
 assert(runtime.source?.sourceFeatureCount === normalizedRegions.length, "Runtime source feature count mismatch.");
 assert(runtime.source?.regionalOverlay?.status === "research-only", "Runtime regional overlay policy must be research-only.");
+assert(runtime.source?.phase2D?.status === "runtime", "Phase 2D runtime geometry is missing.");
+assert(runtime.source?.phase2D?.provinceCount === 38, "Phase 2D must provide exactly 38 Anatolia provinces.");
+
+const phase2DProvinceCount = runtime.source.phase2D.provinceCount;
+const replacedSourceFeatureCount = runtime.source.phase2D.sourceFeatureCountReplaced;
+const expectedSourceDerivedCount = normalizedRegions.length - replacedSourceFeatureCount;
+assert(runtime.provinces.length === expectedSourceDerivedCount + phase2DProvinceCount, "Runtime province count does not match Phase 2D replacement accounting.");
+assert(runtime.geometries.length === runtime.provinces.length, "Runtime province/geometry count mismatch.");
 
 const provinceIds = new Set();
 const geometryIds = new Set();
 const sourceFeatureIndices = new Set();
+let phase2DCount = 0;
+let sourceDerivedCount = 0;
 let polygonCount = 0;
 
 for (const province of runtime.provinces) {
@@ -50,12 +58,24 @@ for (const province of runtime.provinces) {
   assert(province.references?.geometryId, `Province ${id} is missing its geometry reference.`);
 
   const historical = province.historical ?? {};
-  assert(historical.sourceFeatureId, `Province ${id} is missing sourceFeatureId.`);
-  assert(Number.isInteger(historical.sourceFeatureIndex), `Province ${id} is missing sourceFeatureIndex.`);
-  assert(historical.sourceFeatureIndex >= 0 && historical.sourceFeatureIndex < normalizedRegions.length, `Province ${id} has an invalid sourceFeatureIndex.`);
-  assert(!sourceFeatureIndices.has(historical.sourceFeatureIndex), `Duplicate sourceFeatureIndex: ${historical.sourceFeatureIndex}.`);
-  sourceFeatureIndices.add(historical.sourceFeatureIndex);
+  if (historical.classification === "phase2d-anatolia-province-geometry") {
+    phase2DCount += 1;
+    assert(!Number.isInteger(historical.sourceFeatureIndex), `Phase 2D province ${id} must not pretend to be a source feature.`);
+    assert(historical.sourceFeatureId === id, `Phase 2D province ${id} must use its stable identity as sourceFeatureId.`);
+  } else {
+    sourceDerivedCount += 1;
+    assert(historical.sourceFeatureId, `Province ${id} is missing sourceFeatureId.`);
+    assert(Number.isInteger(historical.sourceFeatureIndex), `Province ${id} is missing sourceFeatureIndex.`);
+    assert(historical.sourceFeatureIndex >= 0 && historical.sourceFeatureIndex < normalizedRegions.length, `Province ${id} has an invalid sourceFeatureIndex.`);
+    assert(!sourceFeatureIndices.has(historical.sourceFeatureIndex), `Duplicate sourceFeatureIndex: ${historical.sourceFeatureIndex}.`);
+    sourceFeatureIndices.add(historical.sourceFeatureIndex);
+  }
 }
+
+assert(phase2DCount === phase2DProvinceCount, `Expected ${phase2DProvinceCount} Phase 2D provinces, found ${phase2DCount}.`);
+assert(sourceDerivedCount === expectedSourceDerivedCount, "Source-derived province coverage mismatch.");
+assert(sourceFeatureIndices.size === expectedSourceDerivedCount, "Source feature coverage mismatch after Phase 2D replacement.");
+assert(replacedSourceFeatureCount + sourceDerivedCount === normalizedRegions.length, "Phase 2D source replacement accounting is inconsistent.");
 
 for (const geometry of runtime.geometries) {
   const identity = geometry?.identity ?? {};
@@ -76,9 +96,10 @@ for (const province of runtime.provinces) {
   assert(geometryIds.has(province.references.geometryId), `Province ${province.identity.id} references missing geometry ${province.references.geometryId}.`);
 }
 
-assert(sourceFeatureIndices.size === normalizedRegions.length, "Source feature coverage mismatch.");
 assert(runtime.counts?.provinces === runtime.provinces.length, "Runtime province metadata count mismatch.");
 assert(runtime.counts?.geometries === runtime.geometries.length, "Runtime geometry metadata count mismatch.");
 assert(runtime.counts?.polygons === polygonCount, "Runtime polygon metadata count mismatch.");
+assert(runtime.source.phase2D.polygonCount > 500, "Phase 2D geometry layer is unexpectedly coarse.");
+assert(runtime.source.phase2D.siteCount > 500, "Phase 2D cartographic site field is unexpectedly sparse.");
 
-console.log(`Validated ${normalizedRegions.length} source-derived provinces, ${runtime.geometries.length} geometries, and ${polygonCount} polygon rings for 1300. Broad regional overlay is research-only.`);
+console.log(`Validated 1300 runtime: ${sourceDerivedCount} source-derived provinces + ${phase2DCount} Phase 2D Anatolia provinces, ${polygonCount} polygon rings.`);
