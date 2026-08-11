@@ -46,6 +46,10 @@ function isUsableCartographicPoint(point) {
     && !pointInWaterEnvelope(point);
 }
 
+function isPhysicalLandPoint(point) {
+  return pointInAnatoliaLand(point) && !pointInWaterEnvelope(point);
+}
+
 function nearestProvinceId(point) {
   let winner = ANATOLIA_PROVINCE_METADATA[0];
   let best = Number.POSITIVE_INFINITY;
@@ -78,8 +82,6 @@ function addAnchorSites(sites, seen) {
 }
 
 function addProvinceMicroSites(sites, seen) {
-  // Short-radius sites keep every province locally well-defined after the
-  // physical land mask removes large-radius points near coasts and water.
   const radii = [0.04, 0.08, 0.12];
   const directions = 8;
   let sequence = 0;
@@ -143,14 +145,10 @@ function addBarrierSitesAlongPolygon(sites, seen, polygon, kind) {
 }
 
 function addPhysicalBarrierSites(sites, seen) {
-  // The physical atlas is the authority for the outer coastline. Barrier
-  // sites participate in tessellation but never become political provinces.
   for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
     addBarrierSitesAlongPolygon(sites, seen, polygon, "coastline-barrier");
   }
 
-  // Internal water bodies become holes in the political mesh instead of
-  // being painted by a province Voronoi cell.
   for (const sea of ANATOLIA_PHYSICAL_ATLAS.seas) {
     addBarrierSitesAlongPolygon(sites, seen, sea.coordinates, "water-barrier");
   }
@@ -161,8 +159,6 @@ function addPhysicalBarrierSites(sites, seen) {
 }
 
 function addCoastInteriorSites(sites, seen) {
-  // A small inward companion field keeps the province mesh detailed right up
-  // to the coast while the physical barrier sites stop the cells crossing it.
   for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
     for (let index = 0; index < polygon.length - 1; index += 1) {
       const start = polygon[index];
@@ -246,6 +242,75 @@ function buildVoronoiCell(siteIndex, sites) {
     if (polygon.length < 3) return [];
   }
   return polygon;
+}
+
+function pointOnSegment(point, start, end) {
+  const cross = (point[1] - start[1]) * (end[0] - start[0])
+    - (point[0] - start[0]) * (end[1] - start[1]);
+  if (Math.abs(cross) > 1e-7) return false;
+  return point[0] >= Math.min(start[0], end[0]) - SITE_EPSILON
+    && point[0] <= Math.max(start[0], end[0]) + SITE_EPSILON
+    && point[1] >= Math.min(start[1], end[1]) - SITE_EPSILON
+    && point[1] <= Math.max(start[1], end[1]) + SITE_EPSILON;
+}
+
+function segmentIntersection(a, b, c, d) {
+  const denominator = (a[0] - b[0]) * (c[1] - d[1]) - (a[1] - b[1]) * (c[0] - d[0]);
+  if (Math.abs(denominator) < 1e-10) return null;
+  const t = ((a[0] - c[0]) * (c[1] - d[1]) - (a[1] - c[1]) * (c[0] - d[0])) / denominator;
+  const u = -((a[0] - b[0]) * (a[1] - c[1]) - (a[1] - b[1]) * (a[0] - c[0])) / denominator;
+  if (t < -SITE_EPSILON || t > 1 + SITE_EPSILON || u < -SITE_EPSILON || u > 1 + SITE_EPSILON) return null;
+  return [a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])];
+}
+
+function uniquePoints(points) {
+  const seen = new Set();
+  const result = [];
+  for (const point of points) {
+    const key = `${point[0].toFixed(6)}:${point[1].toFixed(6)}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(point);
+  }
+  return result;
+}
+
+function clipCellToLand(cell) {
+  const land = ANATOLIA_PHYSICAL_ATLAS.landPolygons[0];
+  if (!land || land.length < 3) return cell;
+
+  const points = [];
+  for (const point of cell) {
+    if (pointInPolygon(point, land) || land.some((_, index) => pointOnSegment(point, land[index], land[(index + 1) % land.length]))) {
+      points.push(point);
+    }
+  }
+
+  for (const point of land) {
+    if (pointInPolygon(point, cell)) points.push(point);
+  }
+
+  for (let cellIndex = 0; cellIndex < cell.length; cellIndex += 1) {
+    const a = cell[cellIndex];
+    const b = cell[(cellIndex + 1) % cell.length];
+    for (let landIndex = 0; landIndex < land.length; landIndex += 1) {
+      const c = land[landIndex];
+      const d = land[(landIndex + 1) % land.length];
+      const intersection = segmentIntersection(a, b, c, d);
+      if (intersection) points.push(intersection);
+    }
+  }
+
+  const unique = uniquePoints(points);
+  if (unique.length < 3) return [];
+  const center = unique.reduce(
+    (sum, [x, y]) => [sum[0] + x, sum[1] + y],
+    [0, 0],
+  );
+  center[0] /= unique.length;
+  center[1] /= unique.length;
+  unique.sort((a, b) => Math.atan2(a[1] - center[1], a[0] - center[0]) - Math.atan2(b[1] - center[1], b[0] - center[0]));
+  return unique;
 }
 
 function roundPolygon(polygon) {
@@ -358,12 +423,10 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     if (!sites[siteIndex].provinceId) continue;
     const cell = buildVoronoiCell(siteIndex, sites);
     if (cell.length < 3 || polygonArea(cell) < 0.00005) continue;
-    // Barrier sites stop cells at the water boundary, but a convex cell can
-    // still straddle a narrow coastline segment. Rejecting non-land centroids
-    // makes the physical land mask an executable invariant instead of relying
-    // on renderer ordering to hide a political leak.
-    if (!isPhysicalLandPoint(polygonCentroid(cell))) continue;
-    polygonsByProvince[sites[siteIndex].provinceId].push(roundPolygon(cell));
+    const clipped = clipCellToLand(cell);
+    if (clipped.length < 3 || polygonArea(clipped) < 0.00005) continue;
+    if (!isPhysicalLandPoint(polygonCentroid(clipped))) continue;
+    polygonsByProvince[sites[siteIndex].provinceId].push(roundPolygon(clipped));
   }
 
   const provinces = [];
@@ -397,6 +460,4 @@ export function isAnatoliaGeometryPoint(point) {
   return isUsableCartographicPoint(point);
 }
 
-export function isPhysicalLandPoint(point) {
-  return pointInAnatoliaLand(point) && !pointInWaterEnvelope(point);
-}
+export { isPhysicalLandPoint };
