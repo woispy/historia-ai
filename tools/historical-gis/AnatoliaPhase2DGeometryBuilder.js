@@ -212,7 +212,7 @@ function addSourceShapeSites(sites, seen, sourceRegions) {
       [0, 0],
     );
     const point = [center[0] / polygon.length, center[1] / polygon.length];
-    if (isPoliticalCartographicPoint(point)) addSite(sites, seen, point, nearestProvinceId(point), "historical-source-anchor");
+    if (isUsableCartographicPoint(point)) addSite(sites, seen, point, nearestProvinceId(point), "historical-source-anchor");
   }
 }
 
