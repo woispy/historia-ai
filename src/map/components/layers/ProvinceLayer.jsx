@@ -1,6 +1,6 @@
 import ProvinceSvg from "../ProvinceSvg";
 import ProvincePolygon from "../ProvincePolygon";
-import { ProvinceBoundaryLayer } from "./ProvinceBoundaryLayer";
+import ProvinceBoundaryLayer from "./ProvinceBoundaryLayer";
 
 function isCuratedCountryOverlay(province) {
   return province?.historical?.classification === "curated-regional-gameplay-overlay";
@@ -14,9 +14,6 @@ function ProvinceLayer({
   mapShadows,
   zoom = 1,
 }) {
-  // Phase 2 separates historical country-regional overlays from runtime
-  // province simulation units. The source-derived 1300 features are the
-  // province layer; the curated 16-region overlay remains metadata only.
   const runtimeProvinces = provinces.filter(
     ({ province }) => !isCuratedCountryOverlay(province),
   );
