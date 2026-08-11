@@ -30,7 +30,7 @@ function getVisibleCities(cities, zoom) {
     .sort((a, b) => (TIER_WEIGHT[b.map.tier] ?? 0) - (TIER_WEIGHT[a.map.tier] ?? 0));
 }
 
-function getLabelCandidates(city, config) {
+function getLabelCandidates(city) {
   const { x, y, tier } = city.map;
   const gap = tier === "capital" ? 0.16 : 0.12;
   const dx = city.map.labelDx ?? 0;
@@ -72,7 +72,7 @@ function placeLabels(cities, zoom) {
     const config = LABEL_CONFIG[city.map.tier] ?? LABEL_CONFIG.town;
     if (zoom < config.minZoom) continue;
 
-    const candidates = getLabelCandidates(city, config);
+    const candidates = getLabelCandidates(city);
     let selected = null;
 
     for (const candidate of candidates) {
