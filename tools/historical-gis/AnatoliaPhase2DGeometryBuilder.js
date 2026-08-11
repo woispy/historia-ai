@@ -288,7 +288,7 @@ function polygonCentroid(polygon) {
 }
 
 function createAnchorFallbackPolygon(centroid) {
-  const radii = [0.03, 0.015, 0.008];
+  const radii = [0.004, 0.002, 0.001];
   for (const radius of radii) {
     const polygon = [];
     for (let index = 0; index < 6; index += 1) {
