@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useWorldMap } from "../hooks";
-import { ProvinceLayer, CityLayer } from "./layers";
+import { ProvinceLayer, CityLayer, PhysicalGeographyLayer } from "./layers";
 import {
   CameraProvider,
   CameraViewport,
@@ -24,6 +24,10 @@ function WorldMap({
     smooth: settings.smoothCamera !== false,
   });
 
+  const physicalBaseLayer = useMemo(() => (
+    <PhysicalGeographyLayer phase="base" zoom={camera.zoom} />
+  ), [camera.zoom]);
+
   const provinceLayer = useMemo(() => (
     <ProvinceLayer
       provinces={provinces}
@@ -40,6 +44,10 @@ function WorldMap({
     settings.mapShadows,
   ]);
 
+  const physicalDetailLayer = useMemo(() => (
+    <PhysicalGeographyLayer phase="detail" zoom={camera.zoom} />
+  ), [camera.zoom]);
+
   const cityLayer = useMemo(() => (
     <CityLayer
       cities={cities}
@@ -50,10 +58,12 @@ function WorldMap({
 
   const renderLayer = useMemo(() => (
     <RenderLayer>
+      {physicalBaseLayer}
       {provinceLayer}
+      {physicalDetailLayer}
       {cityLayer}
     </RenderLayer>
-  ), [provinceLayer, cityLayer]);
+  ), [physicalBaseLayer, provinceLayer, physicalDetailLayer, cityLayer]);
 
   return (
     <CameraProvider value={camera}>
