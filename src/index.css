@@ -102,3 +102,57 @@ button {
 ul {
   padding-left: 25px;
 }
+
+/* ==========================================================
+   MAP — PHYSICAL GEOGRAPHY
+   These are intentionally subdued so political ownership remains the
+   primary visual language while terrain and water stay readable.
+========================================================== */
+
+.map-sea {
+  fill: #16272b;
+  stroke: none;
+}
+
+.map-terrain-lowland {
+  fill: #b9aa78;
+  stroke: none;
+}
+
+.map-terrain-plateau {
+  fill: #8e8a69;
+  stroke: none;
+}
+
+.map-terrain-highland {
+  fill: #777762;
+  stroke: none;
+}
+
+.map-lake {
+  fill: #2c5962;
+  stroke: #6d9295;
+  stroke-width: 0.08;
+}
+
+.map-river {
+  stroke: #76aab3;
+  fill: none;
+}
+
+.map-mountain {
+  stroke: #554f3d;
+  fill: none;
+  stroke-dasharray: 0.34 0.18;
+}
+
+.map-coastline {
+  stroke: #b6aa7e;
+  fill: none;
+}
+
+.map-island {
+  fill: #777963;
+  stroke: #b6aa7e;
+  stroke-width: 0.09;
+}
