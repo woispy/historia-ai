@@ -3,17 +3,14 @@ import { buildAnatoliaPhase2DAssets, isAnatoliaGeometryPoint } from "../historic
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 
 const result = buildAnatoliaPhase2DAssets([
-  {
-    polygons: [[[29.9, 40.7], [30.1, 40.7], [30.1, 40.9], [29.9, 40.7]]],
-  },
-  {
-    polygons: [[[27.4, 38.4], [27.7, 38.4], [27.7, 38.7], [27.4, 38.4]]],
-  },
+  { polygons: [[[29.9, 40.7], [30.1, 40.7], [30.1, 40.9], [29.9, 40.7]]] },
+  { polygons: [[[27.4, 38.4], [27.7, 38.4], [27.7, 38.7], [27.4, 38.4]]] },
 ]);
 
 assert.equal(result.historicalDate, "1300-01-01");
 assert.equal(result.provinceCount, ANATOLIA_PROVINCE_METADATA.length);
 assert.equal(result.provinceCount, 38);
+console.log(`Phase 2D cartographic site count: ${result.siteCount}`);
 assert.ok(result.siteCount >= 500, "Phase 2D must use a dense cartographic site field");
 assert.ok(result.polygonCount >= result.provinceCount, "Every province must contain at least one polygon");
 assert.ok(result.polygonCount >= 500, "Phase 2D must produce substantially more geometry fragments than the coarse 38-anchor layer");
