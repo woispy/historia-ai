@@ -4,6 +4,7 @@ import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceM
 const BBOX = [25.45, 35.72, 44.85, 42.35];
 const SITE_EPSILON = 1e-6;
 const COAST_SAMPLE_STEP = 0.12;
+const COASTAL_TOLERANCE = 0.06;
 
 function distanceSquared(a, b) {
   const dx = a[0] - b[0];
@@ -29,6 +30,25 @@ function pointInWaterEnvelope(point) {
     || ANATOLIA_PHYSICAL_ATLAS.lakes.some((lake) => pointInPolygon(point, lake.coordinates));
 }
 
+function pointToSegmentDistanceSquared(point, start, end) {
+  const dx = end[0] - start[0];
+  const dy = end[1] - start[1];
+  if (dx === 0 && dy === 0) return distanceSquared(point, start);
+  const t = Math.max(0, Math.min(1, ((point[0] - start[0]) * dx + (point[1] - start[1]) * dy) / (dx * dx + dy * dy)));
+  return distanceSquared(point, [start[0] + t * dx, start[1] + t * dy]);
+}
+
+function distanceToLandBoundary(point) {
+  let best = Number.POSITIVE_INFINITY;
+  for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
+    for (let index = 0; index < polygon.length; index += 1) {
+      const distance = pointToSegmentDistanceSquared(point, polygon[index], polygon[(index + 1) % polygon.length]);
+      if (distance < best) best = distance;
+    }
+  }
+  return Math.sqrt(best);
+}
+
 function pointInAnatoliaLand(point) {
   return ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon));
 }
@@ -47,7 +67,8 @@ function isUsableCartographicPoint(point) {
 }
 
 function isPhysicalLandPoint(point) {
-  return pointInAnatoliaLand(point) && !pointInWaterEnvelope(point);
+  return !pointInWaterEnvelope(point)
+    && (pointInAnatoliaLand(point) || distanceToLandBoundary(point) <= COASTAL_TOLERANCE);
 }
 
 function nearestProvinceId(point) {
@@ -244,92 +265,6 @@ function buildVoronoiCell(siteIndex, sites) {
   return polygon;
 }
 
-function pointOnSegment(point, start, end) {
-  const cross = (point[1] - start[1]) * (end[0] - start[0])
-    - (point[0] - start[0]) * (end[1] - start[1]);
-  if (Math.abs(cross) > 1e-7) return false;
-  return point[0] >= Math.min(start[0], end[0]) - SITE_EPSILON
-    && point[0] <= Math.max(start[0], end[0]) + SITE_EPSILON
-    && point[1] >= Math.min(start[1], end[1]) - SITE_EPSILON
-    && point[1] <= Math.max(start[1], end[1]) + SITE_EPSILON;
-}
-
-function segmentIntersection(a, b, c, d) {
-  const denominator = (a[0] - b[0]) * (c[1] - d[1]) - (a[1] - b[1]) * (c[0] - d[0]);
-  if (Math.abs(denominator) < 1e-10) return null;
-  const t = ((a[0] - c[0]) * (c[1] - d[1]) - (a[1] - c[1]) * (c[0] - d[0])) / denominator;
-  const u = -((a[0] - b[0]) * (a[1] - c[1]) - (a[1] - b[1]) * (a[0] - c[0])) / denominator;
-  if (t < -SITE_EPSILON || t > 1 + SITE_EPSILON || u < -SITE_EPSILON || u > 1 + SITE_EPSILON) return null;
-  return [a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])];
-}
-
-function uniquePoints(points) {
-  const seen = new Set();
-  const result = [];
-  for (const point of points) {
-    const key = `${point[0].toFixed(6)}:${point[1].toFixed(6)}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    result.push(point);
-  }
-  return result;
-}
-
-function clipCellToLand(cell) {
-  const land = ANATOLIA_PHYSICAL_ATLAS.landPolygons[0];
-  if (!land || land.length < 3) return cell;
-
-  const points = [];
-  for (const point of cell) {
-    if (pointInPolygon(point, land) || land.some((_, index) => pointOnSegment(point, land[index], land[(index + 1) % land.length]))) {
-      points.push(point);
-    }
-  }
-
-  for (const point of land) {
-    if (pointInPolygon(point, cell)) points.push(point);
-  }
-
-  for (let cellIndex = 0; cellIndex < cell.length; cellIndex += 1) {
-    const a = cell[cellIndex];
-    const b = cell[(cellIndex + 1) % cell.length];
-    for (let landIndex = 0; landIndex < land.length; landIndex += 1) {
-      const c = land[landIndex];
-      const d = land[(landIndex + 1) % land.length];
-      const intersection = segmentIntersection(a, b, c, d);
-      if (intersection) points.push(intersection);
-    }
-  }
-
-  const unique = uniquePoints(points);
-  if (unique.length < 3) return [];
-  const center = unique.reduce(
-    (sum, [x, y]) => [sum[0] + x, sum[1] + y],
-    [0, 0],
-  );
-  center[0] /= unique.length;
-  center[1] /= unique.length;
-  unique.sort((a, b) => Math.atan2(a[1] - center[1], a[0] - center[0]) - Math.atan2(b[1] - center[1], b[0] - center[0]));
-  return unique;
-}
-
-function createAnchorFallbackPolygon(centroid) {
-  const radii = [0.03, 0.015, 0.008];
-  for (const radius of radii) {
-    const polygon = [];
-    for (let index = 0; index < 6; index += 1) {
-      const angle = (index / 6) * Math.PI * 2;
-      polygon.push([
-        centroid[0] + Math.cos(angle) * radius,
-        centroid[1] + Math.sin(angle) * radius,
-      ]);
-    }
-    const clipped = clipCellToLand(polygon);
-    if (clipped.length >= 3 && isPhysicalLandPoint(polygonCentroid(clipped))) return clipped;
-  }
-  return [];
-}
-
 function roundPolygon(polygon) {
   return polygon.map(([x, y]) => [Number(x.toFixed(5)), Number(y.toFixed(5))]);
 }
@@ -350,6 +285,22 @@ function polygonCentroid(polygon) {
     [0, 0],
   );
   return [sum[0] / polygon.length, sum[1] / polygon.length];
+}
+
+function createAnchorFallbackPolygon(centroid) {
+  const radii = [0.03, 0.015, 0.008];
+  for (const radius of radii) {
+    const polygon = [];
+    for (let index = 0; index < 6; index += 1) {
+      const angle = (index / 6) * Math.PI * 2;
+      polygon.push([
+        centroid[0] + Math.cos(angle) * radius,
+        centroid[1] + Math.sin(angle) * radius,
+      ]);
+    }
+    if (polygon.every((point) => isPhysicalLandPoint(point))) return polygon;
+  }
+  return [];
 }
 
 function createProvinceAsset(metadata, polygons) {
@@ -440,10 +391,10 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     if (!sites[siteIndex].provinceId) continue;
     const cell = buildVoronoiCell(siteIndex, sites);
     if (cell.length < 3 || polygonArea(cell) < 0.00005) continue;
-    const clipped = clipCellToLand(cell);
-    if (clipped.length < 3 || polygonArea(clipped) < 0.00005) continue;
-    if (!isPhysicalLandPoint(polygonCentroid(clipped))) continue;
-    polygonsByProvince[sites[siteIndex].provinceId].push(roundPolygon(clipped));
+    const centroid = polygonCentroid(cell);
+    if (!isPhysicalLandPoint(centroid)) continue;
+    if (!cell.every((point) => isPhysicalLandPoint(point))) continue;
+    polygonsByProvince[sites[siteIndex].provinceId].push(roundPolygon(cell));
   }
 
   let fallbackCount = 0;
