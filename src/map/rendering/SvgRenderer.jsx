@@ -1,15 +1,12 @@
 /**
- * ============================================================================
- * Historia AI
- * SVG Renderer
- * ============================================================================
+ * Historia AI — SVG Renderer
  *
  * One SVG root owns the map. The world is repeated horizontally so the camera
- * can cross the antimeridian continuously without changing the geometry data.
+ * can cross the antimeridian continuously without changing geometry data.
  */
 
 function SvgRenderer({ children, camera = {} }) {
-  const zoom = Math.max(1, Number(camera.zoom ?? 1));
+  const zoom = Math.max(0.85, Number(camera.zoom ?? 1));
   const viewWidth = 360 / zoom;
   const viewHeight = 180 / zoom;
   const centerX = Number(camera.x ?? 0);
@@ -17,9 +14,8 @@ function SvgRenderer({ children, camera = {} }) {
   const viewX = centerX - viewWidth / 2;
   const viewY = -centerY - viewHeight / 2;
 
-  // minZoom is 1, so the viewport never shows more than one full world width.
-  // Three copies are therefore sufficient: previous, current and next world.
-  // Keeping the copy count fixed is important for map FPS at low zoom levels.
+  // Three copies remain sufficient for the supported camera range, including
+  // the slightly wider overview viewport at minZoom 0.85.
   const copyCenter = Math.floor(centerX / 360);
   const copies = [copyCenter - 1, copyCenter, copyCenter + 1];
 

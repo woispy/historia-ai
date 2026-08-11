@@ -1,12 +1,8 @@
 /**
- * ============================================================================
- * Historia AI
- * Camera Model
- * ============================================================================
+ * Historia AI — Camera Model
  *
- * Camera position is stored in world degrees rather than CSS pixels. This
- * keeps panning continuous across the antimeridian and lets the SVG renderer
- * use a real viewBox instead of scaling a rasterized DOM layer.
+ * World-space camera tuned for grand-strategy map navigation. Zoom is kept
+ * within a readable range so city/province LOD transitions remain predictable.
  */
 
 export function createCameraModel() {
@@ -15,7 +11,7 @@ export function createCameraModel() {
     y: 0,
     zoom: 1,
     target: null,
-    minZoom: 1,
-    maxZoom: 120,
+    minZoom: 0.85,
+    maxZoom: 40,
   });
 }

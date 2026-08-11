@@ -97,8 +97,8 @@ const draggedDown = moveCamera(camera, 0, 100, viewport);
 const draggedUp = moveCamera(camera, 0, -100, viewport);
 assert.ok(draggedDown.y > camera.y, "Dragging down must move the map south/down.");
 assert.ok(draggedUp.y < camera.y, "Dragging up must move the map north/up.");
-assert.equal(setCameraZoom(camera, 150, viewport).zoom, 120);
-assert.equal(setCameraZoom(camera, 0, viewport).zoom, 1);
+assert.equal(setCameraZoom(camera, 150, viewport).zoom, 40);
+assert.equal(setCameraZoom(camera, 0, viewport).zoom, 0.85);
 
 const lowWheelDelta = getWheelZoomDelta({ deltaY: -100, deltaMode: 0 }, 4);
 const highWheelDelta = getWheelZoomDelta({ deltaY: -100, deltaMode: 0 }, 60);
@@ -107,9 +107,9 @@ assert.ok(highWheelDelta > lowWheelDelta);
 assert.ok(Math.abs(highWheelDelta / lowWheelDelta - 15) < 1e-9);
 
 const lowZoom = setCameraZoom(camera, 4, viewport);
-const highZoom = setCameraZoom(camera, 60, viewport);
+const highZoom = setCameraZoom(camera, 40, viewport);
 assert.equal(zoomCamera(lowZoom, 1.5, viewport).zoom - lowZoom.zoom, 1.5);
-assert.equal(zoomCamera(highZoom, 1.5, viewport).zoom - highZoom.zoom, 1.5);
+assert.equal(zoomCamera(highZoom, 1.5, viewport).zoom - highZoom.zoom, 0);
 assert.equal(zoomCamera(highZoom, -1.5, viewport).zoom - highZoom.zoom, -1.5);
 
 assert.equal(DEFAULT_SETTINGS.advisorAutoOpen, undefined);

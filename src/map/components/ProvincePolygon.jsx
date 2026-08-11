@@ -1,8 +1,10 @@
 /**
  * Historia AI — Province Polygon
  *
- * Curated Anatolia regions are clipped to a physical land mask so the political
- * overlay cannot paint the Marmara, Aegean or Mediterranean as land.
+ * Phase 2 presentation rules follow a grand-strategy hierarchy:
+ * country color first, province borders second, physical geography above it.
+ * Political geometry is still clipped by the global physical land mask in
+ * WorldMap, so no historical province can paint the sea.
  */
 
 import { useMemo } from "react";
@@ -33,6 +35,7 @@ function ProvincePolygon({
   onClick,
   mapStyle = "detailed",
   mapShadows = true,
+  zoom = 1,
 }) {
   const d = useMemo(
     () => buildPathData(geometry?.polygons),
@@ -43,9 +46,9 @@ function ProvincePolygon({
 
   const isPolitical = mapStyle === "political";
   const isTerrain = mapStyle === "terrain";
-  const borderPrecision = Number(province.historical?.borderPrecision ?? 3);
+  const borderPrecision = Number(province.historical?.borderPrecision ?? 2);
   const approximateBorder = borderPrecision <= 1;
-  const isCuratedRegional = province.historical?.classification === "curated-regional-gameplay-overlay";
+  const sourceDerived = province.historical?.classification !== "curated-regional-gameplay-overlay";
 
   const fill = selected
     ? "#d6b04d"
@@ -53,22 +56,36 @@ function ProvincePolygon({
       ? country?.terrainColor ?? country?.color ?? "#6f765f"
       : country?.color ?? "#6f765f";
 
+  const fillOpacity = zoom < 1.35
+    ? 0.88
+    : zoom < 1.9
+      ? 0.94
+      : 1;
+
   const stroke = selected
     ? "#f3d77c"
     : isPolitical
-      ? "#191d19"
-      : "#30352e";
+      ? "#1b1e1a"
+      : "#30342e";
+
+  const strokeWidth = selected
+    ? 0.28
+    : zoom >= 2.2
+      ? 0.08
+      : zoom >= 1.45
+        ? 0.06
+        : 0.04;
 
   return (
     <path
       d={d}
       fill={fill}
+      fillOpacity={fillOpacity}
       stroke={stroke}
-      strokeWidth={selected ? "0.28" : isPolitical ? "0.11" : "0.15"}
-      strokeDasharray={approximateBorder ? "0.55 0.35" : undefined}
-      strokeOpacity={approximateBorder && mapShadows ? "0.78" : "1"}
+      strokeWidth={strokeWidth}
+      strokeDasharray={approximateBorder ? "0.42 0.28" : undefined}
+      strokeOpacity={approximateBorder && mapShadows ? 0.58 : sourceDerived ? 0.84 : 1}
       vectorEffect="non-scaling-stroke"
-      clipPath={isCuratedRegional ? "url(#anatolia-landmask)" : undefined}
       style={{ cursor: "pointer" }}
       onClick={() => onClick?.(province.id)}
     />
