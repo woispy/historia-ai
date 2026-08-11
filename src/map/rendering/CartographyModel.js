@@ -59,7 +59,7 @@ export function getProvincePresentation(zoom = 1) {
   return Object.freeze({
     lod,
     showProvinceBoundaries: lod !== "world",
-    boundaryOpacity: lod === "regional" ? 0.42 : lod === "province" ? 0.62 : 0.78,
+    boundaryOpacity: lod === "world" ? 0.18 : lod === "regional" ? 0.42 : lod === "province" ? 0.62 : 0.78,
     fillOpacity: lod === "world" ? 0.86 : 1,
   });
 }
