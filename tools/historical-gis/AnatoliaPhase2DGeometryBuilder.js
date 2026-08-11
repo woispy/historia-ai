@@ -66,6 +66,10 @@ function isUsableCartographicPoint(point) {
     && !pointInWaterEnvelope(point);
 }
 
+function isPoliticalCartographicPoint(point) {
+  return isWithinAnatoliaEnvelope(point) && !pointInWaterEnvelope(point);
+}
+
 function isPhysicalLandPoint(point) {
   return !pointInWaterEnvelope(point)
     && (pointInAnatoliaLand(point) || distanceToLandBoundary(point) <= COASTAL_TOLERANCE);
@@ -116,7 +120,7 @@ function addProvinceMicroSites(sites, seen) {
           province.centroid[0] + Math.cos(angle) * radius,
           province.centroid[1] + Math.sin(angle) * radius,
         ];
-        if (isUsableCartographicPoint(point)) addSite(sites, seen, point, province.id, "province-micro-control");
+        if (isPoliticalCartographicPoint(point)) addSite(sites, seen, point, province.id, "province-micro-control");
         sequence += 1;
       }
     }
@@ -138,7 +142,7 @@ function addProvinceShapeSites(sites, seen) {
           province.centroid[0] + Math.cos(angle) * radius,
           province.centroid[1] + Math.sin(angle) * radius,
         ];
-        if (isUsableCartographicPoint(point)) addSite(sites, seen, point, province.id, "province-shape-control");
+        if (isPoliticalCartographicPoint(point)) addSite(sites, seen, point, province.id, "province-shape-control");
         sequence += 1;
       }
     }
@@ -192,7 +196,7 @@ function addCoastInteriorSites(sites, seen) {
       const candidateA = [midpoint[0] + left[0] * 0.045, midpoint[1] + left[1] * 0.045];
       const candidateB = [midpoint[0] - left[0] * 0.045, midpoint[1] - left[1] * 0.045];
       const inward = pointInAnatoliaLand(candidateA) ? candidateA : candidateB;
-      if (isUsableCartographicPoint(inward)) {
+      if (isPoliticalCartographicPoint(inward)) {
         addSite(sites, seen, inward, nearestProvinceId(inward), "coastline-interior");
       }
     }
@@ -208,7 +212,7 @@ function addSourceShapeSites(sites, seen, sourceRegions) {
       [0, 0],
     );
     const point = [center[0] / polygon.length, center[1] / polygon.length];
-    if (isUsableCartographicPoint(point)) addSite(sites, seen, point, nearestProvinceId(point), "historical-source-anchor");
+    if (isPoliticalCartographicPoint(point)) addSite(sites, seen, point, nearestProvinceId(point), "historical-source-anchor");
   }
 }
 
@@ -425,7 +429,7 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
 }
 
 export function isAnatoliaGeometryPoint(point) {
-  return isWithinAnatoliaEnvelope(point) && isPhysicalLandPoint(point);
+  return isWithinAnatoliaEnvelope(point);
 }
 
 export { isPhysicalLandPoint };
