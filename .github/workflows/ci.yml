@@ -10,6 +10,7 @@ on:
       - agent/anatolia-byzantium-regional-layer
       - feat/anatolia-historical-map-overhaul
       - feat/anatolia-physical-geography
+      - feat/anatolia-map-label-water-overhaul
   push:
     branches:
       - master
@@ -22,6 +23,7 @@ on:
       - agent/anatolia-byzantium-regional-layer
       - feat/anatolia-historical-map-overhaul
       - feat/anatolia-physical-geography
+      - feat/anatolia-map-label-water-overhaul
 
 jobs:
   validate:
