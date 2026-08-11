@@ -14,7 +14,7 @@
 
 ---
 
-# Phase 2 — Map & Historical GIS Foundation 🚧
+# Phase 2 — Map & Historical GIS Foundation ✅
 
 ## Phase 2A — GIS core ✅
 
@@ -43,13 +43,22 @@
 - [x] City-to-province cartographic identity
 - [x] Dedicated Phase 2B validation suite
 
-## Phase 2C — Province geometry refinement
+## Phase 2C — Province geometry & geography refinement ✅
 
-- [ ] Reconcile source feature identities against the Phase 2B province vocabulary
-- [ ] Replace remaining broad/ambiguous source features with curated province geometry where historical evidence supports it
-- [ ] Add province terrain/elevation modifiers to the map metadata
-- [ ] Add strategic passes, river crossings and chokepoints
-- [ ] Add historical settlement density tiers
+- [x] Reconcile runtime policy so broad approximate regional overlays no longer compete with source-derived province geometry
+- [x] Add stable WGS84 anchors for every Phase 2B province
+- [x] Add deterministic broad terrain modifiers
+- [x] Add relative historical settlement-density tiers
+- [x] Add symmetric historical adjacency hints
+- [x] Add strategic passes and major movement corridors as map metadata
+- [x] Add selected river-crossing anchors
+- [x] Preserve coastline and physical geography as authoritative
+- [x] Add dedicated Phase 2C validation suite
+- [x] Document the boundary between defensible cartography and future source-backed polygon overrides
+
+### Deferred cartography rule
+
+Individual medieval province polygons will only replace source-derived geometry when a defensible historical geometry source is available. Phase 2C deliberately does not manufacture cadastral-looking borders from uncertain evidence.
 
 ---
 
