@@ -1,0 +1,16 @@
+{
+  "id": "trebizond",
+  "name": "Empire of Trebizond",
+  "title": "Empire",
+  "government": "empire",
+  "capital": "trabzon",
+  "culture": "greek",
+  "religion": "orthodox",
+  "color": "#4A7896",
+  "playable": true,
+  "rulerId": null,
+  "treasury": 24000,
+  "manpower": 4200,
+  "stability": 78,
+  "startingCities": []
+}

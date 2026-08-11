@@ -7,6 +7,8 @@ on:
       - feat/phase1-polish
       - feat/phase1-historical-gis-runtime
       - feat/phase1-map-camera-ui-polish
+      - agent/anatolia-byzantium-regional-layer
+      - feat/anatolia-historical-map-overhaul
   push:
     branches:
       - master
@@ -16,6 +18,8 @@ on:
       - feat/phase1-map-camera-ui-polish
       - feat/phase1-save-menu-camera-ux
       - fix/historical-gis-import-integrity
+      - agent/anatolia-byzantium-regional-layer
+      - feat/anatolia-historical-map-overhaul
 
 jobs:
   validate:

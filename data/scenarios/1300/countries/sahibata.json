@@ -1,0 +1,16 @@
+{
+  "id": "sahibata",
+  "name": "Sâhib Ata Beyliği",
+  "title": "Beylik",
+  "government": "beylik",
+  "capital": "afyon",
+  "culture": "oghuz-turk",
+  "religion": "sunni",
+  "color": "#8D6E63",
+  "playable": true,
+  "rulerId": null,
+  "treasury": 14000,
+  "manpower": 3000,
+  "stability": 70,
+  "startingCities": []
+}

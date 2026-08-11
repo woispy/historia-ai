@@ -4,9 +4,11 @@ import { normalizeHistoricalFeature } from "../HistoricalGeometryImporter.js";
 import {
   buildHistoricalGeometryAsset,
   buildHistoricalProvinceAsset,
+  buildCuratedRegionalAssets,
 } from "../HistoricalProvinceAssetBuilder.js";
-import { buildCuratedRegionalAssets } from "../HistoricalProvinceAssetBuilder.js";
 import regionalLayer from "../../../data/gis/1300/regional/anatolia-byzantium.json" with { type: "json" };
+import { ANATOLIA_CITY_ATLAS } from "../../../src/map/data/AnatoliaCityAtlas.js";
+import { ANATOLIA_LAND_MASK } from "../../../src/map/data/AnatoliaLandMask.js";
 import {
   normalizeHistoricalCountryName,
   resolveCanonicalHistoricalCountryId,
@@ -21,24 +23,16 @@ const duplicateNameFeatures = [
   {
     type: "Feature",
     properties: { NAME: "Thule", SUBJECTO: "Thule", PARTOF: "Thule" },
-    geometry: {
-      type: "Polygon",
-      coordinates: [[[-80, 60], [-79, 60], [-79, 61], [-80, 60]]],
-    },
+    geometry: { type: "Polygon", coordinates: [[[-80, 60], [-79, 60], [-79, 61], [-80, 60]]] },
   },
   {
     type: "Feature",
     properties: { NAME: "Thule", SUBJECTO: "Thule", PARTOF: "Thule" },
-    geometry: {
-      type: "Polygon",
-      coordinates: [[[-70, 60], [-69, 60], [-69, 61], [-70, 60]]],
-    },
+    geometry: { type: "Polygon", coordinates: [[[-70, 60], [-69, 60], [-69, 61], [-70, 60]]] },
   },
 ];
 
-const regions = duplicateNameFeatures.map((feature, index) =>
-  normalizeHistoricalFeature(feature, index, 1300),
-);
+const regions = duplicateNameFeatures.map((feature, index) => normalizeHistoricalFeature(feature, index, 1300));
 assert.equal(regions.length, 2);
 assert.notEqual(regions[0].assetId, regions[1].assetId);
 assert.equal(regions[0].sourceFeatureIndex, 0);
@@ -53,9 +47,17 @@ assert.equal(geometry.metadata.sourceFeatureIndex, 0);
 
 const regionalAssets = buildCuratedRegionalAssets(regionalLayer);
 assert.equal(regionalAssets.length, regionalLayer.regions.length);
+assert.equal(regionalAssets.length, 16);
 assert.equal(regionalAssets.find(({ province: asset }) => asset.identity.id === "anatolia_ottomans").province.ownership.countryId, "ottomans");
 assert.equal(regionalAssets.find(({ province: asset }) => asset.identity.id === "anatolia_byzantium_bithynia").province.ownership.countryId, "byzantium");
 assert.ok(regionalAssets.every(({ province: asset }) => asset.historical.precision === "approximate"));
+assert.ok(regionalAssets.every(({ province: asset }) => asset.historical.borderPrecision <= 2));
+assert.ok(ANATOLIA_LAND_MASK.length >= 2);
+assert.ok(ANATOLIA_CITY_ATLAS.konstantinopolis);
+assert.ok(ANATOLIA_CITY_ATLAS.bursa);
+assert.ok(ANATOLIA_CITY_ATLAS.trabzon);
+assert.ok(Object.keys(ANATOLIA_CITY_ATLAS).length >= 35);
+assert.ok(Object.values(ANATOLIA_CITY_ATLAS).every((city) => Number.isFinite(city.x) && Number.isFinite(city.y)));
 
 assert.equal(normalizeHistoricalCountryName("Đại Viet"), "dai viet");
 assert.equal(resolveCanonicalHistoricalCountryId("Byzantine Empire"), "byzantium");
@@ -64,23 +66,12 @@ assert.equal(resolveCanonicalHistoricalCountryId("Great Khanate"), "yuan");
 assert.equal(resolveCanonicalHistoricalCountryId("Aydinogullari"), "aydin");
 assert.equal(resolveCanonicalHistoricalCountryId("Saruhanogullari"), "saruhan");
 assert.equal(resolveCanonicalHistoricalCountryId("Unknown polity"), null);
-assert.equal(
-  resolveHistoricalCountryId("Test Realm", {
-    test_kingdom: {
-      id: "test_kingdom",
-      name: "Test Kingdom",
-      aliases: ["Test Realm"],
-    },
-  }),
-  "test_kingdom",
-);
+assert.equal(resolveHistoricalCountryId("Test Realm", {
+  test_kingdom: { id: "test_kingdom", name: "Test Kingdom", aliases: ["Test Realm"] },
+}), "test_kingdom");
 
 const unsupported = normalizeHistoricalFeature(
-  {
-    type: "Feature",
-    properties: { NAME: "Invalid" },
-    geometry: { type: "Point", coordinates: [0, 0] },
-  },
+  { type: "Feature", properties: { NAME: "Invalid" }, geometry: { type: "Point", coordinates: [0, 0] } },
   10,
   1300,
 );
@@ -90,10 +81,7 @@ const antarctica = normalizeHistoricalFeature(
   {
     type: "Feature",
     properties: { NAME: "Antarctica" },
-    geometry: {
-      type: "Polygon",
-      coordinates: [[[-30, -90], [30, -90], [30, -60], [-30, -90]]],
-    },
+    geometry: { type: "Polygon", coordinates: [[[-30, -90], [30, -90], [30, -60], [-30, -90]]] },
   },
   11,
   1300,
@@ -130,4 +118,4 @@ assert.equal(DEFAULT_SETTINGS.mapShadows, true);
 assert.equal(DEFAULT_SETTINGS.notifications, true);
 assert.equal(DEFAULT_SETTINGS.autosave, "6m");
 
-console.log("Historical GIS 1300 identity, country resolver, camera, projection and settings tests passed.");
+console.log("Historical GIS 1300 identity, Anatolia map, city atlas, camera, projection and settings tests passed.");

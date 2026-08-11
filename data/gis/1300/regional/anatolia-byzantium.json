@@ -1,26 +1,32 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "anatolia-byzantium-1300",
   "historicalDate": "1300-01-01",
-  "method": "curated-regional-overlay",
   "precision": "approximate",
-  "notice": "These are gameplay regions, not asserted medieval cadastral or administrative boundaries. Coastlines and city anchors are geographic; inter-polity borders are documented historical inferences and deliberately rendered as approximate.",
-  "sources": [
-    {"title": "Encyclopaedia Iranica, C̱elebī, ʿĀref", "url": "https://www.iranicaonline.org/articles/celebi-calabi-aref-670-719-1272-1320-the-son-of-baha-al-din-soltan-walad-q/", "use": "Confirms the early-fourteenth-century Anatolian setting of the Menteşe beylik and its towns."},
-    {"title": "Historical Basemaps", "url": "https://github.com/aourednik/historical-basemaps", "use": "Provides the underlying global 1300 basemap; this overlay does not claim to replace it."}
+  "method": "curated-historical-gameplay-overlay",
+  "notice": "These are historical reconstructions for gameplay, not medieval cadastral boundaries. The political borders are approximate; the coastline is constrained by a physical land mask so the Marmara and other seas remain water.",
+  "sourceReferences": [
+    "TDV İslâm Ansiklopedisi — Anadolu beylikleri entries",
+    "Encyclopaedia Iranica — Saljuqs of Rum and regional entries",
+    "aourednik/historical-basemaps — world_1300.geojson",
+    "Wikimedia Commons — Anatolian Beyliks in 1300"
   ],
   "regions": [
-    {"id":"anatolia_ottomans","name":"Ottoman Beylik (Söğüt)","countryId":"ottomans","anchor":"Söğüt","polygons":[[[29.1,39.5],[30.0,39.25],[30.85,39.65],[30.72,40.35],[29.75,40.55],[29.1,40.1],[29.1,39.5]]]},
-    {"id":"anatolia_byzantium_bithynia","name":"Byzantine Bithynia","countryId":"byzantium","anchor":"Nicaea","polygons":[[[28.25,39.7],[29.1,39.5],[29.1,40.1],[29.75,40.55],[30.72,40.35],[31.45,40.65],[31.5,41.15],[30.35,41.25],[29.15,41.0],[28.25,40.45],[28.25,39.7]]]},
-    {"id":"anatolia_byzantium_thrace","name":"Byzantine Thrace","countryId":"byzantium","anchor":"Constantinople","polygons":[[[25.8,40.45],[28.25,40.45],[29.15,41.0],[29.15,41.55],[27.9,41.9],[26.0,41.7],[25.8,40.45]]]},
-    {"id":"anatolia_karasi","name":"Karasi Beylik","countryId":"karasi","anchor":"Balıkesir","polygons":[[[26.0,38.55],[28.2,38.35],[29.1,39.5],[29.1,40.1],[28.25,40.45],[26.7,40.15],[26.0,39.35],[26.0,38.55]]]},
-    {"id":"anatolia_saruhan","name":"Saruhan Beylik","countryId":"saruhan","anchor":"Manisa","polygons":[[[26.6,37.65],[28.65,37.6],[29.1,39.5],[28.2,38.35],[26.0,38.55],[26.6,37.65]]]},
-    {"id":"anatolia_aydin","name":"Aydin Beylik","countryId":"aydin","anchor":"Birgi","polygons":[[[26.0,36.75],[28.05,36.8],[28.65,37.6],[26.6,37.65],[26.0,37.25],[26.0,36.75]]]},
-    {"id":"anatolia_mentese","name":"Menteşe Beylik","countryId":"mentese","anchor":"Milas","polygons":[[[26.25,36.25],[28.45,36.2],[28.05,36.8],[26.0,36.75],[26.25,36.25]]]},
-    {"id":"anatolia_germiyan","name":"Germiyan Beylik","countryId":"germiyan","anchor":"Kütahya","polygons":[[[28.65,37.6],[30.85,37.75],[31.15,39.2],[30.72,40.35],[29.1,39.5],[28.65,37.6]]]},
-    {"id":"anatolia_karaman","name":"Karaman Beylik","countryId":"karaman","anchor":"Karaman","polygons":[[[30.85,36.55],[34.55,36.6],[34.65,38.55],[31.15,39.2],[30.85,37.75],[30.85,36.55]]]},
-    {"id":"anatolia_candar","name":"Candar Beylik","countryId":"candar","anchor":"Sinop","polygons":[[[31.15,39.2],[34.65,38.55],[35.75,40.65],[35.15,41.9],[33.1,42.0],[31.5,41.15],[30.72,40.35],[31.15,39.2]]]},
-    {"id":"anatolia_trebizond","name":"Empire of Trebizond","countryId":"trebizond","anchor":"Trebizond","polygons":[[[35.15,41.9],[35.75,40.65],[40.75,40.55],[41.15,41.65],[39.8,42.0],[35.15,41.9]]]},
-    {"id":"anatolia_ilkhanate","name":"Ilkhanate Anatolian Marches","countryId":"ilkhanate","anchor":"Erzurum","polygons":[[[34.65,38.55],[40.75,40.55],[35.75,40.65],[34.65,41.85],[34.65,38.55]]]}
+    {"id":"anatolia_byzantium_bithynia","name":"Byzantine Bithynia","countryId":"byzantium","anchor":"Nicaea","borderPrecision":2,"polygons":[[[26.1708,39.4636],[27.2800,40.4200],[28.8200,40.4600],[29.2400,41.2200],[31.1459,41.0876],[30.9200,40.7200],[30.3500,40.6200],[29.7500,40.5500],[29.1000,40.1000],[29.1000,39.5000],[28.2000,38.3500],[26.8000,38.9858],[26.1708,39.4636]]]},
+    {"id":"anatolia_ottomans","name":"Ottoman Beylik","countryId":"ottomans","anchor":"Söğüt","borderPrecision":1,"polygons":[[[29.1000,39.5000],[29.7500,40.5500],[30.3500,40.6200],[30.7200,40.3500],[30.8500,39.6500],[30.0000,39.2500],[29.1000,39.5000]]]},
+    {"id":"anatolia_karasi","name":"Karasi Beylik","countryId":"karasi","anchor":"Balıkesir","borderPrecision":1,"polygons":[[[26.1708,39.4636],[26.8000,38.9858],[28.2000,38.3500],[29.1000,39.5000],[28.6500,39.7500],[27.9000,39.7500],[27.2000,39.5500],[26.7000,39.6500],[26.1708,39.4636]]]},
+    {"id":"anatolia_saruhan","name":"Saruhan Beylik","countryId":"saruhan","anchor":"Manisa","borderPrecision":1,"polygons":[[[26.3182,38.2081],[27.0488,37.6534],[27.6412,36.6588],[28.7329,36.6768],[28.2000,38.3500],[26.8000,38.9858],[26.3182,38.2081]]]},
+    {"id":"anatolia_aydin","name":"Aydin Beylik","countryId":"aydin","anchor":"Birgi","borderPrecision":1,"polygons":[[[27.6412,36.6588],[28.7329,36.6768],[29.7000,36.1444],[30.3911,36.2630],[30.6216,36.6779],[29.9500,37.1000],[29.0500,37.4500],[28.2000,38.3500],[27.6412,36.6588]]]},
+    {"id":"anatolia_mentese","name":"Menteşe Beylik","countryId":"mentese","anchor":"Milas","borderPrecision":1,"polygons":[[[26.3182,38.2081],[27.0488,37.6534],[27.6412,36.6588],[28.2000,38.3500],[27.1000,38.4500],[26.3182,38.2081]]]},
+    {"id":"anatolia_germiyan","name":"Germiyan Beylik","countryId":"germiyan","anchor":"Kütahya","borderPrecision":1,"polygons":[[[28.2000,38.3500],[29.0500,37.4500],[29.9500,37.1000],[30.6216,36.6779],[30.8500,37.7500],[31.1500,39.2000],[30.7200,40.3500],[30.3500,40.6200],[29.7500,40.5500],[29.1000,39.5000],[28.2000,38.3500]]]},
+    {"id":"anatolia_inanc","name":"İnanç Beyliği (Lâdik)","countryId":"inanc","anchor":"Denizli","borderPrecision":1,"polygons":[[[28.2000,38.3500],[29.0500,37.4500],[29.9500,37.1000],[30.2000,37.6000],[30.1000,38.2000],[29.6000,38.5000],[28.7000,38.8000],[28.2000,38.3500]]]},
+    {"id":"anatolia_hamid","name":"Hamid Beyliği","countryId":"hamid","anchor":"Eğirdir","borderPrecision":1,"polygons":[[[29.6000,38.5000],[30.1000,38.2000],[31.1500,39.2000],[30.8500,37.7500],[30.2000,37.6000],[29.9500,37.1000],[29.0500,37.4500],[28.7000,38.8000],[29.6000,38.5000]]]},
+    {"id":"anatolia_sahibata","name":"Sâhib Ata Beyliği","countryId":"sahibata","anchor":"Afyonkarahisar","borderPrecision":1,"polygons":[[[28.7000,38.8000],[29.6000,38.5000],[30.1000,38.2000],[30.8500,39.6500],[30.0000,39.2500],[29.1000,39.5000],[28.2000,38.3500],[28.7000,38.8000]]]},
+    {"id":"anatolia_esref","name":"Eşref Beyliği","countryId":"esref","anchor":"Beyşehir","borderPrecision":1,"polygons":[[[30.2000,37.6000],[30.8500,37.7500],[31.1500,39.2000],[31.7500,38.8000],[32.1000,38.1000],[31.6500,37.4000],[30.2000,37.6000]]]},
+    {"id":"anatolia_karaman","name":"Karaman Beylik","countryId":"karaman","anchor":"Larende","borderPrecision":1,"polygons":[[[31.6500,37.4000],[32.1000,38.1000],[31.7500,38.8000],[31.1500,39.2000],[34.6500,38.5500],[34.5500,36.6000],[32.5092,36.1076],[31.6996,36.6443],[30.6216,36.6779],[30.8500,37.7500],[31.6500,37.4000]]]},
+    {"id":"anatolia_candar","name":"Candar Beylik","countryId":"candar","anchor":"Kastamonu","borderPrecision":1,"polygons":[[[31.1500,39.2000],[34.6500,38.5500],[34.6500,40.0000],[35.1500,41.9000],[33.5133,42.0190],[32.3480,41.7363],[31.1459,41.0876],[30.7200,40.3500],[31.1500,39.2000]]]},
+    {"id":"anatolia_trebizond","name":"Empire of Trebizond","countryId":"trebizond","anchor":"Trebizond","borderPrecision":1,"polygons":[[[35.1500,41.9000],[35.1677,42.0402],[36.9131,41.3354],[38.3477,40.9486],[39.5126,41.1028],[40.3734,41.0137],[41.5541,41.5357],[40.7500,40.5500],[35.7500,40.6500],[35.1500,41.9000]]]},
+    {"id":"anatolia_ilkhanate","name":"Ilkhanid Anatolian Marches","countryId":"ilkhanate","anchor":"Erzurum","borderPrecision":1,"polygons":[[[34.6500,38.5500],[40.7500,40.5500],[39.5126,41.1028],[38.3477,40.9486],[36.9131,41.3354],[35.7500,40.6500],[34.6500,40.0000],[34.6500,38.5500]]]},
+    {"id":"anatolia_cilicia","name":"Armenian Cilicia","countryId":"cilicia","anchor":"Sis","borderPrecision":2,"polygons":[[[32.5092,36.1076],[34.0269,36.2200],[34.7146,36.7955],[35.5509,36.5654],[36.1608,36.6506],[35.7821,36.2750],[36.1498,35.8215],[34.0269,36.2200],[32.5092,36.1076]]]}
   ]
 }
