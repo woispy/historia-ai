@@ -262,6 +262,14 @@ function polygonArea(polygon) {
   return Math.abs(area) / 2;
 }
 
+function polygonCentroid(polygon) {
+  const sum = polygon.reduce(
+    (total, [longitude, latitude]) => [total[0] + longitude, total[1] + latitude],
+    [0, 0],
+  );
+  return [sum[0] / polygon.length, sum[1] / polygon.length];
+}
+
 function createProvinceAsset(metadata, polygons) {
   return {
     header: {
@@ -350,6 +358,11 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     if (!sites[siteIndex].provinceId) continue;
     const cell = buildVoronoiCell(siteIndex, sites);
     if (cell.length < 3 || polygonArea(cell) < 0.00005) continue;
+    // Barrier sites stop cells at the water boundary, but a convex cell can
+    // still straddle a narrow coastline segment. Rejecting non-land centroids
+    // makes the physical land mask an executable invariant instead of relying
+    // on renderer ordering to hide a political leak.
+    if (!isPhysicalLandPoint(polygonCentroid(cell))) continue;
     polygonsByProvince[sites[siteIndex].provinceId].push(roundPolygon(cell));
   }
 
