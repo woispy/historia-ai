@@ -1,14 +1,7 @@
-/**
- * ============================================================================
- * Historia AI
- * Render Root
- * ============================================================================
- */
+import "./RenderRoot.css";
 
-function RenderRoot({
-  children,
-}) {
-  return children;
+function RenderRoot({ children }) {
+  return <div className="map-render-root">{children}</div>;
 }
 
 export default RenderRoot;
