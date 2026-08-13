@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { buildProvinceTopology } from "../../rendering/province/ProvinceTopology";
 import { getProvincePresentation } from "../../rendering/CartographyModel";
 
@@ -6,16 +7,16 @@ function borderPath(border) {
 }
 
 function ProvinceBoundaryLayer({ provinces = [], zoom = 1 }) {
-  const topology = buildProvinceTopology(provinces);
+  const topology = useMemo(() => buildProvinceTopology(provinces), [provinces]);
+  const presentation = getProvincePresentation(zoom);
   const countryBorders = topology.borderSegments.filter((border) => border.kind === "country");
   const provinceBorders = topology.borderSegments.filter((border) => border.kind === "province");
-  const presentation = getProvincePresentation(zoom);
 
   return (
     <g aria-label="Historical province topology" pointerEvents="none">
-      {presentation.showProvinceBoundaries && provinceBorders.map((border) => (
+      {presentation.showProvinceBoundaries && provinceBorders.map((border, index) => (
         <path
-          key={`province-${border.key}`}
+          key={`province-${border.key}-${index}`}
           d={borderPath(border)}
           fill="none"
           stroke="#2a2d28"
@@ -25,9 +26,9 @@ function ProvinceBoundaryLayer({ provinces = [], zoom = 1 }) {
         />
       ))}
 
-      {countryBorders.map((border) => (
+      {countryBorders.map((border, index) => (
         <path
-          key={`country-${border.key}`}
+          key={`country-${border.key}-${index}`}
           d={borderPath(border)}
           fill="none"
           stroke="#171b18"
