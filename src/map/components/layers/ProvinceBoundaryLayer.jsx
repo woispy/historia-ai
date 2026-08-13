@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { buildProvinceTopology } from "../../rendering/province/ProvinceTopology";
 import { getProvincePresentation } from "../../rendering/CartographyModel";
 
@@ -5,8 +6,19 @@ function borderPath(border) {
   return `M ${border.start[0]} ${border.start[1]} L ${border.end[0]} ${border.end[1]}`;
 }
 
+function isRuntimeProvince(entry) {
+  return entry?.province?.historical?.classification !== "curated-regional-gameplay-overlay";
+}
+
 function ProvinceBoundaryLayer({ provinces = [], zoom = 1 }) {
-  const topology = buildProvinceTopology(provinces);
+  const runtimeProvinces = useMemo(
+    () => provinces.filter(isRuntimeProvince),
+    [provinces],
+  );
+  const topology = useMemo(
+    () => buildProvinceTopology(runtimeProvinces),
+    [runtimeProvinces],
+  );
   const countryBorders = topology.borderSegments.filter((border) => border.kind === "country");
   const provinceBorders = topology.borderSegments.filter((border) => border.kind === "province");
   const presentation = getProvincePresentation(zoom);
