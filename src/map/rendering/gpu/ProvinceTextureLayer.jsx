@@ -1,44 +1,87 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { WORLD_LAND_POLYGONS } from "../../physical/WorldPhysicalAtlas";
-import { buildMapTextureSet } from "./MapTextureAtlas";
+import { getProvincePresentation } from "../CartographyModel";
 
-const VERTEX_SHADER = `
-attribute vec2 a_position;
-uniform vec2 u_center;
-uniform vec2 u_viewSize;
-varying vec2 v_uv;
+const DEFAULT_WIDTH = 4096;
+const DEFAULT_HEIGHT = 2048;
+const WATER_COLOR = [16 / 255, 44 / 255, 53 / 255, 1];
+const LAND_COLOR = [40 / 255, 50 / 255, 41 / 255, 1];
+const SELECTED_COLOR = [214 / 255, 176 / 255, 77 / 255, 1];
+
+const VERTEX_SHADER = `#version 300 es
+precision highp float;
+
+in vec2 aPosition;
+in vec2 aUv;
+
+uniform vec2 uCameraCenter;
+uniform vec2 uViewSize;
+uniform vec2 uViewportScale;
+
+out vec2 vUv;
 
 void main() {
-  float longitude = u_center.x + a_position.x * u_viewSize.x * 0.5;
-  float latitude = u_center.y + a_position.y * u_viewSize.y * 0.5;
-  v_uv = vec2((longitude + 180.0) / 360.0, (90.0 - latitude) / 180.0);
-  gl_Position = vec4(a_position, 0.0, 1.0);
+  vec2 normalized = (aPosition - uCameraCenter) / (uViewSize * 0.5);
+  normalized *= uViewportScale;
+  gl_Position = vec4(normalized, 0.0, 1.0);
+  vUv = aUv;
 }
 `;
 
-const FRAGMENT_SHADER = `
-precision mediump float;
-uniform sampler2D u_provinces;
-uniform sampler2D u_landMask;
-uniform vec3 u_landColor;
-varying vec2 v_uv;
+const FRAGMENT_SHADER = `#version 300 es
+precision highp float;
+
+uniform sampler2D uProvinceIds;
+uniform sampler2D uLandMask;
+uniform sampler2D uPalette;
+uniform float uPaletteSize;
+uniform float uSelectedId;
+uniform vec4 uSelectedColor;
+uniform vec4 uWaterColor;
+uniform vec4 uLandColor;
+uniform float uFillOpacity;
+
+in vec2 vUv;
+out vec4 outColor;
+
+float decodeProvinceId(vec4 encoded) {
+  vec3 bytes = floor(encoded.rgb * 255.0 + 0.5);
+  return bytes.r + bytes.g * 256.0 + bytes.b * 65536.0;
+}
 
 void main() {
-  float land = texture2D(u_landMask, v_uv).r;
-  if (land < 0.5) discard;
+  float land = texture(uLandMask, vUv).r;
+  if (land < 0.5) {
+    outColor = uWaterColor;
+    return;
+  }
 
-  vec4 political = texture2D(u_provinces, v_uv);
-  vec3 color = mix(u_landColor, political.rgb, political.a);
-  gl_FragColor = vec4(color, 1.0);
+  float provinceId = decodeProvinceId(texture(uProvinceIds, vUv));
+  if (provinceId < 0.5) {
+    outColor = uLandColor;
+    return;
+  }
+
+  float paletteIndex = provinceId - 1.0;
+  vec2 paletteUv = vec2((paletteIndex + 0.5) / uPaletteSize, 0.5);
+  vec4 color = texture(uPalette, paletteUv);
+
+  if (uSelectedId > 0.5 && abs(provinceId - uSelectedId) < 0.5) {
+    color = mix(color, uSelectedColor, 0.62);
+  }
+
+  color.a *= uFillOpacity;
+  outColor = color;
 }
 `;
 
 function createShader(gl, type, source) {
   const shader = gl.createShader(type);
+  if (!shader) throw new Error("WebGL shader creation failed.");
   gl.shaderSource(shader, source);
   gl.compileShader(shader);
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    const message = gl.getShaderInfoLog(shader) || "Unknown shader compilation error";
+    const message = gl.getShaderInfoLog(shader) ?? "Unknown shader compilation error";
     gl.deleteShader(shader);
     throw new Error(message);
   }
@@ -46,184 +89,359 @@ function createShader(gl, type, source) {
 }
 
 function createProgram(gl) {
-  const vertexShader = createShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER);
-  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, FRAGMENT_SHADER);
+  const vertex = createShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER);
+  const fragment = createShader(gl, gl.FRAGMENT_SHADER, FRAGMENT_SHADER);
   const program = gl.createProgram();
-  gl.attachShader(program, vertexShader);
-  gl.attachShader(program, fragmentShader);
+  if (!program) throw new Error("WebGL program creation failed.");
+  gl.attachShader(program, vertex);
+  gl.attachShader(program, fragment);
   gl.linkProgram(program);
-  gl.deleteShader(vertexShader);
-  gl.deleteShader(fragmentShader);
+  gl.deleteShader(vertex);
+  gl.deleteShader(fragment);
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    const message = gl.getProgramInfoLog(program) || "Unknown WebGL program link error";
+    const message = gl.getProgramInfoLog(program) ?? "Unknown WebGL program error";
     gl.deleteProgram(program);
     throw new Error(message);
   }
   return program;
 }
 
-function createTexture(gl, source, filter = gl.LINEAR) {
+function createRasterCanvas(width, height) {
+  if (typeof OffscreenCanvas !== "undefined") return new OffscreenCanvas(width, height);
+  if (typeof document === "undefined") return null;
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  return canvas;
+}
+
+function projectPoint(point, width, height) {
+  const longitude = Number(point?.[0]);
+  const latitude = Number(point?.[1]);
+  if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) return null;
+  return [
+    ((longitude + 180) / 360) * width,
+    ((90 - latitude) / 180) * height,
+  ];
+}
+
+function drawPolygon(ctx, polygon, width, height) {
+  if (!Array.isArray(polygon) || polygon.length < 3) return false;
+  let started = false;
+  for (const point of polygon) {
+    const projected = projectPoint(point, width, height);
+    if (!projected) continue;
+    if (!started) {
+      ctx.moveTo(projected[0], projected[1]);
+      started = true;
+    } else {
+      ctx.lineTo(projected[0], projected[1]);
+    }
+  }
+  if (!started) return false;
+  ctx.closePath();
+  return true;
+}
+
+function drawPolygons(ctx, polygons, width, height) {
+  ctx.beginPath();
+  let count = 0;
+  for (const polygon of polygons ?? []) {
+    if (drawPolygon(ctx, polygon, width, height)) count += 1;
+  }
+  if (count) ctx.fill();
+}
+
+function encodeId(id) {
+  return [id & 255, (id >> 8) & 255, (id >> 16) & 255];
+}
+
+function parseHexColor(value, fallback = [111, 118, 95]) {
+  if (typeof value !== "string") return fallback;
+  const normalized = value.trim().replace(/^#/, "");
+  if (!/^[0-9a-f]{6}$/i.test(normalized)) return fallback;
+  return [
+    Number.parseInt(normalized.slice(0, 2), 16),
+    Number.parseInt(normalized.slice(2, 4), 16),
+    Number.parseInt(normalized.slice(4, 6), 16),
+  ];
+}
+
+function buildRasterData(provinces, mapStyle) {
+  const provinceCanvas = createRasterCanvas(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+  const landCanvas = createRasterCanvas(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+  if (!provinceCanvas || !landCanvas) return null;
+
+  const provinceContext = provinceCanvas.getContext("2d", { alpha: true });
+  const landContext = landCanvas.getContext("2d", { alpha: true });
+  if (!provinceContext || !landContext) return null;
+
+  provinceContext.clearRect(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+  landContext.clearRect(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+  landContext.fillStyle = "white";
+  drawPolygons(landContext, WORLD_LAND_POLYGONS, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+
+  const runtimeProvinces = provinces.filter((entry) => (
+    entry?.province?.id && Array.isArray(entry?.geometry?.polygons) && entry.geometry.polygons.length > 0
+  ));
+  const provinceIds = [null];
+  const palette = new Uint8Array((runtimeProvinces.length + 1) * 4);
+
+  runtimeProvinces.forEach((entry, index) => {
+    const rasterId = index + 1;
+    const [r, g, b] = encodeId(rasterId);
+    const color = mapStyle === "terrain"
+      ? entry.country?.terrainColor ?? entry.country?.color
+      : entry.country?.color;
+    const [cr, cg, cb] = parseHexColor(color);
+
+    provinceIds[rasterId] = entry.province.id;
+    palette[rasterId * 4] = cr;
+    palette[rasterId * 4 + 1] = cg;
+    palette[rasterId * 4 + 2] = cb;
+    palette[rasterId * 4 + 3] = 255;
+    provinceContext.fillStyle = `rgb(${r} ${g} ${b})`;
+    drawPolygons(provinceContext, entry.geometry.polygons, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+  });
+
+  return {
+    width: DEFAULT_WIDTH,
+    height: DEFAULT_HEIGHT,
+    provinceCanvas,
+    landCanvas,
+    provinceIds,
+    palette,
+  };
+}
+
+function createTexture(gl, source, linear = false) {
   const texture = gl.createTexture();
+  if (!texture) throw new Error("WebGL texture creation failed.");
   gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 0);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, linear ? gl.LINEAR : gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, linear ? gl.LINEAR : gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
   gl.bindTexture(gl.TEXTURE_2D, null);
   return texture;
 }
 
-function resizeCanvas(canvas) {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const width = Math.max(1, Math.round(canvas.clientWidth * dpr));
-  const height = Math.max(1, Math.round(canvas.clientHeight * dpr));
-  if (canvas.width !== width || canvas.height !== height) {
-    canvas.width = width;
-    canvas.height = height;
-  }
+function createPaletteTexture(gl, palette) {
+  const texture = gl.createTexture();
+  if (!texture) throw new Error("WebGL palette texture creation failed.");
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, palette.length / 4, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, palette);
+  gl.bindTexture(gl.TEXTURE_2D, null);
+  return texture;
 }
 
-function renderFrame(renderer, camera) {
-  if (!renderer || !camera) return;
-  const { canvas, gl, program, positionBuffer, uniforms } = renderer;
-  resizeCanvas(canvas);
-  gl.viewport(0, 0, canvas.width, canvas.height);
+function createQuad(gl) {
+  const vertices = [];
+  for (const offset of [-360, 0, 360]) {
+    vertices.push(
+      [-180 + offset, -90, 0, 1], [180 + offset, -90, 1, 1], [180 + offset, 90, 1, 0],
+      [-180 + offset, -90, 0, 1], [180 + offset, 90, 1, 0], [-180 + offset, 90, 0, 0],
+    );
+  }
+  const buffer = gl.createBuffer();
+  if (!buffer) throw new Error("WebGL vertex buffer creation failed.");
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices.flat()), gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, null);
+  return { buffer, count: vertices.length };
+}
+
+function resizeCanvas(canvas, width, height) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const pixelWidth = Math.max(1, Math.round(width * dpr));
+  const pixelHeight = Math.max(1, Math.round(height * dpr));
+  if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+    canvas.width = pixelWidth;
+    canvas.height = pixelHeight;
+  }
+  return { width: pixelWidth, height: pixelHeight };
+}
+
+function renderFrame(state, camera, width, height) {
+  if (!state || !width || !height) return;
+  const pixelSize = resizeCanvas(state.canvas, width, height);
+  const gl = state.gl;
+  gl.viewport(0, 0, pixelSize.width, pixelSize.height);
   gl.clearColor(0, 0, 0, 0);
   gl.clear(gl.COLOR_BUFFER_BIT);
-  gl.useProgram(program);
+  gl.useProgram(state.program);
 
-  const zoom = Math.max(0.75, Number(camera.zoom ?? 1));
-  gl.uniform2f(uniforms.center, Number(camera.x ?? 0), Number(camera.y ?? 0));
-  gl.uniform2f(uniforms.viewSize, 360 / zoom, 180 / zoom);
-  gl.uniform3f(uniforms.landColor, 0.157, 0.196, 0.173);
+  const zoom = Math.max(0.75, Number(camera?.zoom ?? 1));
+  const viewWidth = 360 / zoom;
+  const viewHeight = 180 / zoom;
+  const mapScale = Math.min(pixelSize.width / viewWidth, pixelSize.height / viewHeight);
+  const viewportScale = [
+    (viewWidth * mapScale) / pixelSize.width,
+    (viewHeight * mapScale) / pixelSize.height,
+  ];
+
+  gl.uniform2f(state.uniforms.cameraCenter, Number(camera?.x ?? 0), Number(camera?.y ?? 0));
+  gl.uniform2f(state.uniforms.viewSize, viewWidth, viewHeight);
+  gl.uniform2f(state.uniforms.viewportScale, viewportScale[0], viewportScale[1]);
+  gl.uniform1f(state.uniforms.selectedId, state.selectedRasterId);
+  gl.uniform1f(state.uniforms.paletteSize, Math.max(1, state.paletteSize));
+  gl.uniform1f(state.uniforms.fillOpacity, getProvincePresentation(zoom).fillOpacity);
+  gl.uniform4f(state.uniforms.selectedColor, ...SELECTED_COLOR);
+  gl.uniform4f(state.uniforms.waterColor, ...WATER_COLOR);
+  gl.uniform4f(state.uniforms.landColor, ...LAND_COLOR);
 
   gl.activeTexture(gl.TEXTURE0);
-  gl.bindTexture(gl.TEXTURE_2D, renderer.provinceTexture);
-  gl.uniform1i(uniforms.provinces, 0);
+  gl.bindTexture(gl.TEXTURE_2D, state.provinceTexture);
+  gl.uniform1i(state.uniforms.provinceIds, 0);
   gl.activeTexture(gl.TEXTURE1);
-  gl.bindTexture(gl.TEXTURE_2D, renderer.landMaskTexture);
-  gl.uniform1i(uniforms.landMask, 1);
+  gl.bindTexture(gl.TEXTURE_2D, state.landTexture);
+  gl.uniform1i(state.uniforms.landMask, 1);
+  gl.activeTexture(gl.TEXTURE2);
+  gl.bindTexture(gl.TEXTURE_2D, state.paletteTexture);
+  gl.uniform1i(state.uniforms.palette, 2);
 
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  gl.enableVertexAttribArray(renderer.positionLocation);
-  gl.vertexAttribPointer(renderer.positionLocation, 2, gl.FLOAT, false, 0, 0);
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  gl.bindBuffer(gl.ARRAY_BUFFER, state.quad.buffer);
+  gl.enableVertexAttribArray(state.attributes.position);
+  gl.vertexAttribPointer(state.attributes.position, 2, gl.FLOAT, false, 16, 0);
+  gl.enableVertexAttribArray(state.attributes.uv);
+  gl.vertexAttribPointer(state.attributes.uv, 2, gl.FLOAT, false, 16, 8);
+  gl.drawArrays(gl.TRIANGLES, 0, state.quad.count);
+  gl.bindBuffer(gl.ARRAY_BUFFER, null);
 }
 
-function buildRenderer(canvas, provinces, mapStyle) {
-  const gl = canvas.getContext("webgl", {
+function buildState(canvas, raster) {
+  const gl = canvas.getContext("webgl2", {
     alpha: true,
-    antialias: false,
+    antialias: true,
     depth: false,
     stencil: false,
-    premultipliedAlpha: false,
+    premultipliedAlpha: true,
     preserveDrawingBuffer: false,
   });
   if (!gl) return null;
 
   const maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
-  const runtimeProvinces = provinces.filter(
-    (entry) => entry?.province?.historical?.classification !== "curated-regional-gameplay-overlay",
-  );
-  const colorResolver = ({ country }) => (
-    mapStyle === "terrain" ? country?.terrainColor ?? country?.color : country?.color
-  );
-  const textures = buildMapTextureSet(
-    runtimeProvinces,
-    WORLD_LAND_POLYGONS,
-    maxTextureSize,
-    colorResolver,
-  );
-  if (!textures.provinces || !textures.landMask) return null;
+  if (maxTextureSize < raster.width || maxTextureSize < raster.height) return null;
 
   const program = createProgram(gl);
-  const positionBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  gl.bufferData(
-    gl.ARRAY_BUFFER,
-    new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
-    gl.STATIC_DRAW,
-  );
-
-  const renderer = {
+  const state = {
     gl,
     canvas,
     program,
-    positionBuffer,
-    positionLocation: gl.getAttribLocation(program, "a_position"),
-    provinceTexture: createTexture(gl, textures.provinces, gl.LINEAR),
-    landMaskTexture: createTexture(gl, textures.landMask, gl.NEAREST),
     uniforms: {
-      center: gl.getUniformLocation(program, "u_center"),
-      viewSize: gl.getUniformLocation(program, "u_viewSize"),
-      provinces: gl.getUniformLocation(program, "u_provinces"),
-      landMask: gl.getUniformLocation(program, "u_landMask"),
-      landColor: gl.getUniformLocation(program, "u_landColor"),
+      cameraCenter: gl.getUniformLocation(program, "uCameraCenter"),
+      viewSize: gl.getUniformLocation(program, "uViewSize"),
+      viewportScale: gl.getUniformLocation(program, "uViewportScale"),
+      provinceIds: gl.getUniformLocation(program, "uProvinceIds"),
+      landMask: gl.getUniformLocation(program, "uLandMask"),
+      palette: gl.getUniformLocation(program, "uPalette"),
+      paletteSize: gl.getUniformLocation(program, "uPaletteSize"),
+      selectedId: gl.getUniformLocation(program, "uSelectedId"),
+      selectedColor: gl.getUniformLocation(program, "uSelectedColor"),
+      waterColor: gl.getUniformLocation(program, "uWaterColor"),
+      landColor: gl.getUniformLocation(program, "uLandColor"),
+      fillOpacity: gl.getUniformLocation(program, "uFillOpacity"),
     },
+    attributes: {
+      position: gl.getAttribLocation(program, "aPosition"),
+      uv: gl.getAttribLocation(program, "aUv"),
+    },
+    provinceTexture: createTexture(gl, raster.provinceCanvas, false),
+    landTexture: createTexture(gl, raster.landCanvas, true),
+    paletteTexture: createPaletteTexture(gl, raster.palette),
+    paletteSize: raster.palette.length / 4,
+    selectedRasterId: 0,
+    provinceIds: raster.provinceIds,
+    quad: createQuad(gl),
   };
 
-  gl.disable(gl.DEPTH_TEST);
-  gl.disable(gl.BLEND);
-  gl.bindBuffer(gl.ARRAY_BUFFER, null);
-  return renderer;
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+  return state;
 }
 
-function destroyRenderer(renderer) {
-  if (!renderer) return;
-  renderer.gl.deleteTexture(renderer.provinceTexture);
-  renderer.gl.deleteTexture(renderer.landMaskTexture);
-  renderer.gl.deleteBuffer(renderer.positionBuffer);
-  renderer.gl.deleteProgram(renderer.program);
+function destroyState(state) {
+  if (!state) return;
+  const { gl } = state;
+  gl.deleteTexture(state.provinceTexture);
+  gl.deleteTexture(state.landTexture);
+  gl.deleteTexture(state.paletteTexture);
+  gl.deleteBuffer(state.quad.buffer);
+  gl.deleteProgram(state.program);
 }
 
-function ProvinceTextureLayer({ provinces = [], camera = {}, mapStyle = "detailed", onReady }) {
+function getSelectedRasterId(state, selectedProvinceId) {
+  if (!selectedProvinceId || !state?.provinceIds) return 0;
+  const index = state.provinceIds.indexOf(selectedProvinceId);
+  return index > 0 ? index : 0;
+}
+
+function ProvinceTextureLayer({
+  provinces = [],
+  camera = { x: 0, y: 0, zoom: 1 },
+  selectedProvinceId = null,
+  mapStyle = "detailed",
+  onReady,
+}) {
   const canvasRef = useRef(null);
-  const rendererRef = useRef(null);
-  const cameraRef = useRef(camera);
-  const frameRef = useRef(0);
+  const stateRef = useRef(null);
+  const raster = useMemo(() => buildRasterData(provinces, mapStyle), [provinces, mapStyle]);
+  const selectedProvinceRef = useRef(selectedProvinceId);
 
   useEffect(() => {
-    cameraRef.current = camera;
-    if (frameRef.current) return undefined;
-    frameRef.current = requestAnimationFrame(() => {
-      frameRef.current = 0;
-      renderFrame(rendererRef.current, cameraRef.current);
-    });
-    return undefined;
-  }, [camera]);
+    selectedProvinceRef.current = selectedProvinceId;
+    const state = stateRef.current;
+    if (!state) return;
+    state.selectedRasterId = getSelectedRasterId(state, selectedProvinceId);
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (rect) renderFrame(state, camera, rect.width, rect.height);
+  }, [selectedProvinceId, camera]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return undefined;
-
-    let renderer = null;
-    try {
-      renderer = buildRenderer(canvas, provinces, mapStyle);
-    } catch (error) {
-      console.error("Historia AI map WebGL initialization failed", error);
-    }
-
-    if (!renderer) {
+    if (!canvas || !raster) {
       onReady?.(false);
       return undefined;
     }
 
-    rendererRef.current = renderer;
+    let state = null;
+    try {
+      state = buildState(canvas, raster);
+    } catch (error) {
+      console.error("Historia AI GPU map renderer initialization failed", error);
+    }
+
+    if (!state) {
+      onReady?.(false);
+      return undefined;
+    }
+
+    state.selectedRasterId = getSelectedRasterId(state, selectedProvinceRef.current);
+    stateRef.current = state;
     onReady?.(true);
-    const resizeObserver = new ResizeObserver(() => renderFrame(rendererRef.current, cameraRef.current));
-    resizeObserver.observe(canvas);
-    renderFrame(renderer, cameraRef.current);
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      renderFrame(state, camera, entry.contentRect.width, entry.contentRect.height);
+    });
+    resizeObserver.observe(canvas.parentElement ?? canvas);
+
+    const initialRect = canvas.getBoundingClientRect();
+    renderFrame(state, camera, initialRect.width, initialRect.height);
 
     return () => {
       resizeObserver.disconnect();
-      if (frameRef.current) cancelAnimationFrame(frameRef.current);
-      frameRef.current = 0;
-      destroyRenderer(rendererRef.current);
-      rendererRef.current = null;
+      if (stateRef.current === state) stateRef.current = null;
+      destroyState(state);
     };
-  }, [provinces, mapStyle, onReady]);
+  }, [camera, onReady, raster]);
 
   return (
     <canvas
@@ -243,3 +461,10 @@ function ProvinceTextureLayer({ provinces = [], camera = {}, mapStyle = "detaile
 }
 
 export default ProvinceTextureLayer;
+
+export {
+  DEFAULT_WIDTH,
+  DEFAULT_HEIGHT,
+  encodeId,
+  parseHexColor,
+};
