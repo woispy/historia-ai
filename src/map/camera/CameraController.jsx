@@ -4,24 +4,30 @@ import { getWheelZoomDelta } from "./CameraZoom";
 /**
  * Map-local pointer input.
  *
- * Wheel input is attached by CameraViewport as a native non-passive listener.
- * That keeps preventDefault() legal and avoids Chromium's passive-listener
- * warning while preventing the page from scrolling during map zoom.
+ * Pointer and wheel input are coalesced to one state update per animation
+ * frame. This keeps React rendering out of the browser's high-frequency input
+ * path and makes close-range zooming feel as responsive as world view.
  */
 export function useCameraController({ zoom, move, smooth = true }) {
   const dragging = useRef(false);
   const dragged = useRef(false);
   const pointerId = useRef(null);
   const last = useRef({ x: 0, y: 0 });
-  const pending = useRef({ x: 0, y: 0 });
+  const pending = useRef({ x: 0, y: 0, zoom: 0 });
   const frame = useRef(0);
 
-  const flushMove = useCallback(() => {
+  const flushFrame = useCallback(() => {
     frame.current = 0;
-    const { x, y } = pending.current;
-    pending.current = { x: 0, y: 0 };
-    if (x || y) move(x, y);
-  }, [move]);
+    const pending = pending.current;
+    pending.current = { x: 0, y: 0, zoom: 0 };
+
+    if (pending.x || pending.y) move(pending.x, pending.y);
+    if (pending.zoom) zoom(pending.zoom);
+  }, [move, zoom]);
+
+  const scheduleFrame = useCallback(() => {
+    if (!frame.current) frame.current = requestAnimationFrame(flushFrame);
+  }, [flushFrame]);
 
   const queueMove = useCallback((dx, dy) => {
     if (!smooth) {
@@ -31,18 +37,23 @@ export function useCameraController({ zoom, move, smooth = true }) {
 
     pending.current.x += dx;
     pending.current.y += dy;
-
-    if (!frame.current) {
-      frame.current = requestAnimationFrame(flushMove);
-    }
-  }, [flushMove, move, smooth]);
+    scheduleFrame();
+  }, [move, scheduleFrame, smooth]);
 
   const handleWheel = useCallback((event) => {
     if (event.cancelable) event.preventDefault();
 
     const delta = getWheelZoomDelta(event, zoom);
-    if (delta) zoom(delta);
-  }, [zoom]);
+    if (!delta) return;
+
+    if (!smooth) {
+      zoom(delta);
+      return;
+    }
+
+    pending.current.zoom += delta;
+    scheduleFrame();
+  }, [scheduleFrame, smooth, zoom]);
 
   const handlePointerDown = useCallback((event) => {
     if (event.button !== 0) return;
@@ -76,7 +87,9 @@ export function useCameraController({ zoom, move, smooth = true }) {
   }, []);
 
   const handlePointerCancel = useCallback((event) => {
-    pending.current = { x: 0, y: 0 };
+    pending.current = { x: 0, y: 0, zoom: 0 };
+    if (frame.current) cancelAnimationFrame(frame.current);
+    frame.current = 0;
     stopDragging(event);
   }, [stopDragging]);
 
@@ -90,7 +103,7 @@ export function useCameraController({ zoom, move, smooth = true }) {
   const dispose = useCallback(() => {
     if (frame.current) cancelAnimationFrame(frame.current);
     frame.current = 0;
-    pending.current = { x: 0, y: 0 };
+    pending.current = { x: 0, y: 0, zoom: 0 };
     dragging.current = false;
     pointerId.current = null;
   }, []);
