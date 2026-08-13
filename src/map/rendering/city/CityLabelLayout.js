@@ -1,17 +1,17 @@
 /**
  * Historia AI — adaptive city label layout.
  *
- * Labels are placed in map-space, but rendered with an explicit inverse camera
- * scale so typography remains stable on screen instead of growing with the
- * SVG viewBox zoom. Placement is deterministic: important cities reserve
- * space first, then lower-tier labels yield when they collide.
+ * Labels are placed in map-space, but their visual size is compensated for
+ * camera zoom so they remain readable without becoming oversized. Placement
+ * is deterministic: important cities reserve space first, then lower-tier
+ * labels yield when they collide.
  */
 
 export const CITY_LABEL_TIERS = Object.freeze({
-  capital: Object.freeze({ priority: 100, minZoom: 0.95, screenMapSize: 3.20, markerRadius: 0.18 }),
-  major: Object.freeze({ priority: 70, minZoom: 1.35, screenMapSize: 2.70, markerRadius: 0.13 }),
-  town: Object.freeze({ priority: 40, minZoom: 2.15, screenMapSize: 2.25, markerRadius: 0.095 }),
-  village: Object.freeze({ priority: 15, minZoom: 3.45, screenMapSize: 1.90, markerRadius: 0.065 }),
+  capital: Object.freeze({ priority: 100, minZoom: 0.95, baseSize: 0.66, markerRadius: 0.18 }),
+  major: Object.freeze({ priority: 70, minZoom: 1.35, baseSize: 0.50, markerRadius: 0.13 }),
+  town: Object.freeze({ priority: 40, minZoom: 2.15, baseSize: 0.38, markerRadius: 0.095 }),
+  village: Object.freeze({ priority: 15, minZoom: 3.45, baseSize: 0.30, markerRadius: 0.065 }),
 });
 
 const LABEL_BUDGET = Object.freeze({
@@ -60,23 +60,18 @@ function compareCityPriority(a, b) {
   return String(a.map?.name ?? a.id).localeCompare(String(b.map?.name ?? b.id));
 }
 
-function getInverseZoomScale(zoom) {
-  return 1 / Math.max(0.85, Number(zoom) || 1);
+function getScreenStableScale(zoom) {
+  return Math.max(0.035, Math.min(1.0, 0.95 * zoom ** -0.65));
 }
 
 export function getCityVisualStyle(city, zoom = 1) {
   const config = tierConfig(city);
   const safeZoom = Math.max(0.85, Number(zoom) || 1);
-  const labelScale = getInverseZoomScale(safeZoom);
-  const layoutFontSize = config.screenMapSize * labelScale;
-  return Object.freeze({
-    radius: config.markerRadius,
-    fontSize: config.screenMapSize,
-    layoutFontSize,
-    labelScale,
-    priority: config.priority,
-    minZoom: config.minZoom,
-  });
+  const scale = getScreenStableScale(safeZoom);
+  const radius = Math.max(0.018, Math.min(config.markerRadius, config.markerRadius * scale));
+  const fontSize = Math.max(0.045, Math.min(config.baseSize, config.baseSize * scale));
+  const labelScale = 1 / scale;
+  return Object.freeze({ radius, fontSize, labelScale, priority: config.priority, minZoom: config.minZoom });
 }
 
 export function getCityMarkerBudget(zoom = 1) {
@@ -93,7 +88,7 @@ function getCandidates(city) {
   const gap = tier === "capital" ? 0.15 : tier === "major" ? 0.12 : 0.09;
   const dx = city.map.labelDx ?? 0;
   const dy = city.map.labelDy ?? 0;
-  const side = config.screenMapSize * 0.12;
+  const side = config.baseSize * 0.12;
 
   return [
     { x: x + dx + gap + side, y: y + dy + 0.04, anchor: "start" },
@@ -153,19 +148,13 @@ export function layoutCityLabels(cities, zoom = 1) {
     if (zoom < style.minZoom) continue;
 
     for (const candidate of getCandidates(city)) {
-      const box = labelBox(city, candidate, style.layoutFontSize);
+      const box = labelBox(city, candidate, style.fontSize);
       const blockedByMarker = cities.some((other) => other.id !== city.id && boxesOverlap(box, markerBox(other), 0.02));
       if (blockedByMarker) continue;
       if (placed.some((item) => boxesOverlap(box, item.box))) continue;
 
       placed.push({ box });
-      labels.push({
-        city,
-        ...candidate,
-        fontSize: style.fontSize,
-        labelScale: style.labelScale,
-        priority: style.priority,
-      });
+      labels.push({ city, ...candidate, fontSize: style.fontSize, labelScale: style.labelScale, priority: style.priority });
       break;
     }
   }
