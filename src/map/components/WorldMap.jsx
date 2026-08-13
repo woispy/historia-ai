@@ -2,11 +2,11 @@ import { useCallback, useMemo } from "react";
 import { useWorldMap } from "../hooks";
 import { getAnatoliaCityMapMetadata } from "../data/AnatoliaCityAtlas";
 import {
-  ProvinceLayer,
   CityLayer,
   PhysicalGeographyLayer,
   WorldPhysicalLayer,
   CartographyLayer,
+  ProvinceBoundaryLayer,
 } from "./layers";
 import {
   CameraProvider,
@@ -14,7 +14,12 @@ import {
   useCamera,
   useCameraController,
 } from "../camera";
-import { RenderRoot, RenderLayer, SvgRenderer } from "../rendering";
+import {
+  ProvinceGpuRenderer,
+  RenderRoot,
+  RenderLayer,
+  SvgRenderer,
+} from "../rendering";
 
 function getCityFocusZoom(cityMap) {
   if (cityMap?.tier === "capital") return 3.6;
@@ -47,39 +52,61 @@ function WorldMap({
   }, [camera, onCityClick]);
 
   const worldPhysicalLayer = useMemo(() => <WorldPhysicalLayer />, []);
-  const physicalBaseLayer = useMemo(() => <PhysicalGeographyLayer phase="base" zoom={camera.zoom} />, [camera.zoom]);
-  const provinceLayer = useMemo(() => (
-    <g clipPath="url(#world-landmask)">
-      <ProvinceLayer
-        provinces={provinces}
-        selectedProvinceId={selectedProvinceId}
-        onProvinceClick={onProvinceClick}
-        mapStyle={settings.mapStyle ?? "detailed"}
-        mapShadows={settings.mapShadows !== false}
-        zoom={camera.zoom}
-      />
-    </g>
-  ), [provinces, selectedProvinceId, onProvinceClick, settings.mapStyle, settings.mapShadows, camera.zoom]);
-  const cartographyLayer = useMemo(() => <CartographyLayer zoom={camera.zoom} />, [camera.zoom]);
-  const physicalWaterLayer = useMemo(() => <PhysicalGeographyLayer phase="water" zoom={camera.zoom} />, [camera.zoom]);
-  const physicalDetailLayer = useMemo(() => <PhysicalGeographyLayer phase="detail" zoom={camera.zoom} />, [camera.zoom]);
-  const cityLayer = useMemo(() => <CityLayer cities={cities} zoom={camera.zoom} onCityClick={handleCityClick} />, [cities, camera.zoom, handleCityClick]);
+  const physicalBaseLayer = useMemo(
+    () => <PhysicalGeographyLayer phase="base" zoom={camera.zoom} />,
+    [camera.zoom],
+  );
+  const boundaryLayer = useMemo(
+    () => <ProvinceBoundaryLayer provinces={provinces} zoom={camera.zoom} />,
+    [provinces, camera.zoom],
+  );
+  const cartographyLayer = useMemo(
+    () => <CartographyLayer zoom={camera.zoom} />,
+    [camera.zoom],
+  );
+  const physicalWaterLayer = useMemo(
+    () => <PhysicalGeographyLayer phase="water" zoom={camera.zoom} />,
+    [camera.zoom],
+  );
+  const physicalDetailLayer = useMemo(
+    () => <PhysicalGeographyLayer phase="detail" zoom={camera.zoom} />,
+    [camera.zoom],
+  );
+  const cityLayer = useMemo(
+    () => <CityLayer cities={cities} zoom={camera.zoom} onCityClick={handleCityClick} />,
+    [cities, camera.zoom, handleCityClick],
+  );
 
   const renderLayer = useMemo(() => (
     <RenderLayer>
       {worldPhysicalLayer}
       {physicalBaseLayer}
-      {provinceLayer}
+      {boundaryLayer}
       {cartographyLayer}
       {physicalWaterLayer}
       {physicalDetailLayer}
       {cityLayer}
     </RenderLayer>
-  ), [worldPhysicalLayer, physicalBaseLayer, provinceLayer, cartographyLayer, physicalWaterLayer, physicalDetailLayer, cityLayer]);
+  ), [
+    worldPhysicalLayer,
+    physicalBaseLayer,
+    boundaryLayer,
+    cartographyLayer,
+    physicalWaterLayer,
+    physicalDetailLayer,
+    cityLayer,
+  ]);
 
   return (
     <CameraProvider value={camera}>
       <CameraViewport cameraInput={cameraInput}>
+        <ProvinceGpuRenderer
+          provinces={provinces}
+          camera={camera.camera}
+          selectedProvinceId={selectedProvinceId}
+          onProvinceClick={onProvinceClick}
+          enabled={settings.gpuMap !== false}
+        />
         <RenderRoot>
           <SvgRenderer camera={camera.camera}>
             {renderLayer}
