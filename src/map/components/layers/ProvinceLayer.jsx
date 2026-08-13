@@ -37,9 +37,7 @@ function ProvinceLayer({
   );
 
   const visibleProvinces = useMemo(
-    () => indexedProvinces
-      .filter((item) => isGeometryVisible(item.bounds, viewportBounds))
-      .map(({ bounds, ...item }) => item),
+    () => indexedProvinces.filter((item) => isGeometryVisible(item.bounds, viewportBounds)),
     [indexedProvinces, viewportBounds],
   );
 
