@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import ProvinceSvg from "../ProvinceSvg";
 import ProvincePolygon from "../ProvincePolygon";
 import ProvinceBoundaryLayer from "./ProvinceBoundaryLayer";
@@ -15,9 +16,11 @@ function ProvinceLayer({
   zoom = 1,
   renderFill = true,
 }) {
-  const runtimeProvinces = provinces.filter(
-    ({ province }) => !isCuratedCountryOverlay(province),
+  const runtimeProvinces = useMemo(
+    () => provinces.filter(({ province }) => !isCuratedCountryOverlay(province)),
+    [provinces],
   );
+  const showTopology = zoom >= 2.25;
 
   return (
     <ProvinceSvg>
@@ -35,7 +38,7 @@ function ProvinceLayer({
           renderFill={renderFill}
         />
       ))}
-      <ProvinceBoundaryLayer provinces={runtimeProvinces} zoom={zoom} />
+      {showTopology && <ProvinceBoundaryLayer provinces={runtimeProvinces} zoom={zoom} />}
     </ProvinceSvg>
   );
 }
