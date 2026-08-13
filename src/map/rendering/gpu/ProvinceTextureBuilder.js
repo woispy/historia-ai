@@ -98,6 +98,7 @@ export function buildProvinceRasterData({
   landPolygons = [],
   width = DEFAULT_WIDTH,
   height = DEFAULT_HEIGHT,
+  mapStyle = "detailed",
 } = {}) {
   const provinceCanvas = createRasterCanvas(width, height);
   const landCanvas = createRasterCanvas(width, height);
@@ -141,7 +142,10 @@ export function buildProvinceRasterData({
   runtimeProvinces.forEach((entry, index) => {
     const rasterId = index + 1;
     const [r, g, b] = encodeId(rasterId);
-    const [cr, cg, cb] = parseHexColor(entry.country?.color);
+    const color = mapStyle === "terrain"
+      ? entry.country?.terrainColor ?? entry.country?.color
+      : entry.country?.color;
+    const [cr, cg, cb] = parseHexColor(color);
 
     provinceIds[rasterId] = entry.province.id;
     palette[rasterId * 4] = clampByte(cr);
