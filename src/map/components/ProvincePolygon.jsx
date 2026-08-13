@@ -1,10 +1,9 @@
 /**
  * Historia AI — Province Polygon
  *
- * Province fills are deliberately rendered without their own border stroke.
- * Phase 2D can represent one province with many cartographic sub-polygons;
- * the dedicated ProvinceBoundaryLayer owns the shared border topology so
- * internal geometry fragments never create fake province borders.
+ * The SVG path remains the interaction and selection surface. Visual province
+ * fills can be supplied by the texture compositor so coastline clipping does
+ * not require thousands of vector fragments during camera movement.
  */
 
 import { useMemo } from "react";
@@ -16,7 +15,6 @@ function buildPathData(polygons) {
     .map((polygon) => {
       if (!Array.isArray(polygon) || polygon.length < 3) return "";
       const [first, ...rest] = polygon;
-
       return [
         `M ${first[0]} ${first[1]}`,
         ...rest.map(([x, y]) => `L ${x} ${y}`),
@@ -35,6 +33,7 @@ function ProvincePolygon({
   onClick,
   mapStyle = "detailed",
   zoom = 1,
+  renderFill = true,
 }) {
   const d = useMemo(
     () => buildPathData(geometry?.polygons),
@@ -50,20 +49,14 @@ function ProvincePolygon({
       ? country?.terrainColor ?? country?.color ?? "#6f765f"
       : country?.color ?? "#6f765f";
 
-  const fillOpacity = zoom < 1.35
-    ? 0.88
-    : zoom < 1.9
-      ? 0.94
-      : 1;
+  const fillOpacity = zoom < 1.35 ? 0.88 : zoom < 1.9 ? 0.94 : 1;
 
   return (
     <path
       d={d}
-      fill={fill}
-      fillOpacity={fillOpacity}
-      stroke={selected ? "#f3d77c" : "none"}
-      strokeWidth={selected ? 0.28 : 0}
-      vectorEffect="non-scaling-stroke"
+      fill={renderFill || selected ? fill : "transparent"}
+      fillOpacity={renderFill || selected ? fillOpacity : 0}
+      stroke="none"
       style={{ cursor: "pointer" }}
       onClick={() => onClick?.(province.id)}
     />
