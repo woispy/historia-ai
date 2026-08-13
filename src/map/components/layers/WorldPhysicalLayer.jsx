@@ -10,6 +10,7 @@ function WorldPhysicalLayer() {
         height={180}
         fill={WORLD_PHYSICAL_ATLAS.water.fill}
         pointerEvents="none"
+        opacity="0"
       />
       <rect
         x={WORLD_PHYSICAL_ATLAS.bounds.minX}
