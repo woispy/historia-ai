@@ -57,10 +57,7 @@ function ProvinceLayer({
           renderFill={renderFill}
         />
       ))}
-      <ProvinceBoundaryLayer
-        provinces={runtimeProvinces}
-        camera={camera}
-      />
+      <ProvinceBoundaryLayer provinces={runtimeProvinces} camera={camera} zoom={zoom} />
     </ProvinceSvg>
   );
 }
