@@ -2,9 +2,9 @@
  * Historia AI — GPU map texture atlas.
  *
  * The political fill is rasterized once into a power-of-two RGBA texture and
- * the physical land authority is rasterized into a second single-channel-like
- * RGBA mask. Runtime camera movement then becomes a two-texture GPU sample
- * instead of re-painting hundreds of SVG province paths every frame.
+ * the physical land authority is rasterized into a second RGBA mask. Runtime
+ * camera movement then becomes a two-texture GPU sample instead of repainting
+ * hundreds of SVG province paths every frame.
  */
 
 export const MAP_TEXTURE_ATLAS = Object.freeze({
@@ -80,7 +80,12 @@ function createCanvas(width, height) {
   return canvas;
 }
 
-export function buildProvinceTexture(provinces, width, height) {
+export function buildProvinceTexture(
+  provinces,
+  width,
+  height,
+  colorResolver = ({ country }) => country?.color,
+) {
   const canvas = createCanvas(width, height);
   if (!canvas) return null;
 
@@ -88,11 +93,11 @@ export function buildProvinceTexture(provinces, width, height) {
   ctx.clearRect(0, 0, width, height);
   ctx.imageSmoothingEnabled = true;
 
-  provinces.forEach(({ province, country, geometry }) => {
-    const polygons = geometry?.polygons;
+  provinces.forEach((entry) => {
+    const polygons = entry?.geometry?.polygons;
     if (!Array.isArray(polygons)) return;
 
-    const [r, g, b] = hexToRgb(country?.color);
+    const [r, g, b] = hexToRgb(colorResolver(entry));
     ctx.fillStyle = `rgb(${r} ${g} ${b})`;
     polygons.forEach((polygon) => drawPolygon(ctx, polygon, width, height));
   });
@@ -114,12 +119,22 @@ export function buildLandMaskTexture(landPolygons, width, height) {
   return canvas;
 }
 
-export function buildMapTextureSet(provinces, landPolygons, maxTextureSize = 4096) {
+export function buildMapTextureSet(
+  provinces,
+  landPolygons,
+  maxTextureSize = 4096,
+  colorResolver,
+) {
   const { width, height } = getTextureDimensions(maxTextureSize);
   return {
     width,
     height,
-    provinces: buildProvinceTexture(provinces, width, height),
+    provinces: buildProvinceTexture(
+      provinces,
+      width,
+      height,
+      colorResolver,
+    ),
     landMask: buildLandMaskTexture(landPolygons, width, height),
   };
 }
