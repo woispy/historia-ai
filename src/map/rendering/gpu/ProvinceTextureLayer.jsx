@@ -177,6 +177,12 @@ function destroyRenderer(renderer) {
 function ProvinceTextureLayer({ provinces = [], camera = {}, mapStyle = "detailed", onReady }) {
   const canvasRef = useRef(null);
   const rendererRef = useRef(null);
+  const cameraRef = useRef(camera);
+
+  useEffect(() => {
+    cameraRef.current = camera;
+    renderFrame(rendererRef.current, camera);
+  }, [camera]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -196,9 +202,9 @@ function ProvinceTextureLayer({ provinces = [], camera = {}, mapStyle = "detaile
 
     rendererRef.current = renderer;
     onReady?.(true);
-    const resizeObserver = new ResizeObserver(() => renderFrame(rendererRef.current, camera));
+    const resizeObserver = new ResizeObserver(() => renderFrame(rendererRef.current, cameraRef.current));
     resizeObserver.observe(canvas);
-    renderFrame(renderer, camera);
+    renderFrame(renderer, cameraRef.current);
 
     return () => {
       resizeObserver.disconnect();
@@ -206,10 +212,6 @@ function ProvinceTextureLayer({ provinces = [], camera = {}, mapStyle = "detaile
       rendererRef.current = null;
     };
   }, [provinces, mapStyle, onReady]);
-
-  useEffect(() => {
-    renderFrame(rendererRef.current, camera);
-  }, [camera]);
 
   return (
     <canvas
