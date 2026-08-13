@@ -17,6 +17,14 @@ function getVisibleCities(cities, zoom) {
   return selectVisibleCities(mapped, zoom);
 }
 
+function getLabelScale(zoom) {
+  if (zoom >= 6) return 0.42;
+  if (zoom >= 4) return 0.52;
+  if (zoom >= 3.35) return 0.62;
+  if (zoom >= 2.55) return 0.74;
+  return 1;
+}
+
 function CityMarker({ city, zoom, onClick }) {
   const { x, y, tier, port, fortified } = city.map;
   const { radius } = getCityVisualStyle(city, zoom);
@@ -71,14 +79,14 @@ function CityMarker({ city, zoom, onClick }) {
   );
 }
 
-function CityLabel({ city, fontSize, x, y, anchor }) {
+function CityLabel({ city, fontSize, x, y, anchor, zoom }) {
   return (
     <g transform={`translate(${x} ${y}) scale(1,-1)`} pointerEvents="none">
       <text
         x="0"
         y="0"
         textAnchor={anchor}
-        fontSize={fontSize}
+        fontSize={fontSize * getLabelScale(zoom)}
         fontFamily="Georgia, serif"
         fontWeight={city.map.tier === "capital" ? "700" : "600"}
         fill="#eee7d1"
@@ -111,6 +119,7 @@ function CityLayer({ cities = [], zoom = 1, onCityClick }) {
           x={x}
           y={y}
           anchor={anchor}
+          zoom={zoom}
         />
       ))}
     </g>
