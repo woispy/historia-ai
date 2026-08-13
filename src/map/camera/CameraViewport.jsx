@@ -11,27 +11,14 @@ function CameraViewport({ children, cameraInput = null }) {
 
     if (!viewport || !wheelHandler) return undefined;
 
-    // The map owns wheel input. Register it explicitly as non-passive so the
-    // handler may cancel the browser's default page scroll safely.
-    viewport.addEventListener(
-      "wheel",
-      wheelHandler,
-      NON_PASSIVE_WHEEL_OPTIONS,
-    );
+    viewport.addEventListener("wheel", wheelHandler, NON_PASSIVE_WHEEL_OPTIONS);
 
     return () => {
-      viewport.removeEventListener(
-        "wheel",
-        wheelHandler,
-        NON_PASSIVE_WHEEL_OPTIONS,
-      );
+      viewport.removeEventListener("wheel", wheelHandler, NON_PASSIVE_WHEEL_OPTIONS);
     };
   }, [cameraInput?.onWheel]);
 
-  useEffect(
-    () => () => cameraInput?.dispose?.(),
-    [cameraInput],
-  );
+  useEffect(() => () => cameraInput?.dispose?.(), [cameraInput]);
 
   return (
     <div
@@ -50,6 +37,7 @@ function CameraViewport({ children, cameraInput = null }) {
         touchAction: "none",
         overscrollBehavior: "none",
         cursor: "grab",
+        backgroundColor: "#102c35",
       }}
     >
       {children}
