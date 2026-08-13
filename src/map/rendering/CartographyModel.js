@@ -1,12 +1,11 @@
 /**
  * Historia AI — grand-strategy cartography model.
  *
- * Phase 2E–2H centralises map presentation rules so physical geography,
- * strategic routes, city labels and camera LOD use one deterministic scale.
- *
- * The visual-refinement pass deliberately separates data visibility from
- * presentation density: important features remain available to the engine,
- * while the renderer progressively declutters the screen as needed.
+ * Presentation density is centralised here so the GPU political layer, SVG
+ * topology, physical detail and city labels share one deterministic scale.
+ * Broad hand-drawn terrain/water envelopes are intentionally disabled at
+ * runtime; physical detail must never be able to paint over the authoritative
+ * coastline mask.
  */
 
 export const MAP_LOD = Object.freeze({
@@ -14,7 +13,7 @@ export const MAP_LOD = Object.freeze({
   regional: Object.freeze({ min: 1.15, max: 1.75 }),
   province: Object.freeze({ min: 1.75, max: 2.55 }),
   city: Object.freeze({ min: 2.55, max: 3.35 }),
-  detailed: Object.freeze({ min: 3.35, max: 48 }),
+  detailed: Object.freeze({ min: 3.35, max: 96 }),
 });
 
 export function getMapLod(zoom = 1) {
@@ -54,7 +53,9 @@ export function getPhysicalDetailProfile(zoom = 1) {
     mountainLabels: lod === "city" || lod === "detailed",
     lakes: lod !== "world",
     physicalLabels: lod === "province" || lod === "city" || lod === "detailed",
-    waterChannels: lod === "province" || lod === "city" || lod === "detailed",
+    // Broad sea polygons can fight the GPU land mask. Water is now owned by
+    // the mask/background, while rivers and lakes remain explicit details.
+    waterChannels: false,
   });
 }
 
@@ -71,7 +72,7 @@ export function getProvincePresentation(zoom = 1) {
 export function getCityLabelPolicy(zoom = 1) {
   const lod = getMapLod(zoom);
   return Object.freeze({
-    maxLabels: lod === "world" ? 6 : lod === "regional" ? 12 : lod === "province" ? 18 : lod === "city" ? 24 : 32,
+    maxLabels: lod === "world" ? 6 : lod === "regional" ? 10 : lod === "province" ? 16 : lod === "city" ? 22 : 28,
     showTowns: lod === "province" || lod === "city" || lod === "detailed",
     showVillages: lod === "detailed",
   });
@@ -80,7 +81,9 @@ export function getCityLabelPolicy(zoom = 1) {
 export function getPhysicalPresentation(zoom = 1) {
   const lod = getMapLod(zoom);
   return Object.freeze({
-    terrainOpacity: lod === "world" ? 0.025 : lod === "regional" ? 0.045 : lod === "province" ? 0.075 : 0.095,
+    // Terrain regions are research metadata until they are rasterized through
+    // the same land-mask compositor as political ownership.
+    terrainOpacity: 0,
     riverOpacity: lod === "regional" ? 0.42 : lod === "province" ? 0.56 : 0.66,
     mountainOpacity: lod === "regional" ? 0.07 : lod === "province" ? 0.11 : 0.15,
     lakeOpacity: lod === "regional" ? 0.58 : lod === "province" ? 0.70 : 0.78,
