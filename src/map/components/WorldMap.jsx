@@ -59,6 +59,7 @@ function WorldMap({
         mapStyle={settings.mapStyle ?? "detailed"}
         mapShadows={settings.mapShadows !== false}
         zoom={cameraState.zoom}
+        camera={cameraState}
         renderFill={!textureReady}
       />
     ),
@@ -68,6 +69,7 @@ function WorldMap({
       onProvinceClick,
       settings.mapStyle,
       settings.mapShadows,
+      cameraState,
       cameraState.zoom,
       textureReady,
     ],
@@ -116,6 +118,7 @@ function WorldMap({
           <ProvinceTextureLayer
             provinces={provinces}
             camera={cameraState}
+            selectedProvinceId={selectedProvinceId}
             mapStyle={settings.mapStyle ?? "detailed"}
             onReady={ready}
           />
