@@ -23,6 +23,16 @@ function edgeKey(a, b) {
   return left < right ? `${left}|${right}` : `${right}|${left}`;
 }
 
+function provincePairKey(leftProvinceId, rightProvinceId) {
+  return leftProvinceId < rightProvinceId
+    ? `${leftProvinceId}|${rightProvinceId}`
+    : `${rightProvinceId}|${leftProvinceId}`;
+}
+
+function borderKey(leftProvinceId, rightProvinceId, edge) {
+  return `${provincePairKey(leftProvinceId, rightProvinceId)}:${edgeKey(edge.start, edge.end)}`;
+}
+
 function polygonBounds(polygon) {
   const points = polygon.filter((point) => Array.isArray(point) && point.length >= 2);
   if (!points.length) return null;
@@ -104,6 +114,8 @@ export function buildProvinceTopology(provinces = []) {
   }
 
   const borderSegments = [];
+  const borderKeys = new Set();
+
   for (const entries of edgeIndex.values()) {
     if (entries.length < 2) continue;
 
@@ -123,9 +135,13 @@ export function buildProvinceTopology(provinces = []) {
         const kind = leftNode.ownerId && rightNode.ownerId && leftNode.ownerId !== rightNode.ownerId
           ? "country"
           : "province";
+        const key = borderKey(left.provinceId, right.provinceId, left.edge);
+
+        if (borderKeys.has(key)) continue;
+        borderKeys.add(key);
 
         borderSegments.push({
-          key: `${left.provinceId}:${right.provinceId}:${edgeKey(left.edge.start, left.edge.end)}`,
+          key,
           leftProvinceId: left.provinceId,
           rightProvinceId: right.provinceId,
           kind,
@@ -135,6 +151,8 @@ export function buildProvinceTopology(provinces = []) {
       }
     }
   }
+
+  borderSegments.sort((left, right) => left.key.localeCompare(right.key));
 
   const nodeList = [...nodes.values()];
   for (let leftIndex = 0; leftIndex < nodeList.length; leftIndex += 1) {
@@ -168,6 +186,7 @@ export function buildProvinceTopology(provinces = []) {
 export function validateProvinceTopology(topology) {
   const errors = [];
   const nodes = topology?.nodes ?? {};
+  const borderKeys = new Set();
 
   for (const [id, node] of Object.entries(nodes)) {
     if (node.neighbors.includes(id)) {
@@ -186,6 +205,11 @@ export function validateProvinceTopology(topology) {
   }
 
   for (const border of topology?.borderSegments ?? []) {
+    if (borderKeys.has(border.key)) {
+      errors.push(`Duplicate border segment key: ${border.key}`);
+    }
+    borderKeys.add(border.key);
+
     if (border.leftProvinceId === border.rightProvinceId) {
       errors.push(`Border ${border.key} references the same province twice`);
     }
@@ -200,4 +224,4 @@ export function validateProvinceTopology(topology) {
   return { valid: errors.length === 0, errors };
 }
 
-export { edgeKey, getPolygonEdges, polygonBounds, boundsCouldShareBorder };
+export { borderKey, edgeKey, getPolygonEdges, polygonBounds, boundsCouldShareBorder };
