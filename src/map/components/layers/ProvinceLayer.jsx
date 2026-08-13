@@ -13,6 +13,7 @@ function ProvinceLayer({
   mapStyle,
   mapShadows,
   zoom = 1,
+  renderFill = true,
 }) {
   const runtimeProvinces = provinces.filter(
     ({ province }) => !isCuratedCountryOverlay(province),
@@ -31,6 +32,7 @@ function ProvinceLayer({
           mapStyle={mapStyle}
           mapShadows={mapShadows}
           zoom={zoom}
+          renderFill={renderFill}
         />
       ))}
       <ProvinceBoundaryLayer provinces={runtimeProvinces} zoom={zoom} />
