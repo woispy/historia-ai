@@ -71,16 +71,19 @@ function CityMarker({ city, zoom, onClick }) {
   );
 }
 
-function CityLabel({ city, fontSize, x, y, anchor }) {
+function CityLabel({ city, fontSize, labelScale, x, y, anchor }) {
   return (
-    <g transform={`translate(${x} ${y}) scale(1,-1)`} pointerEvents="none">
+    <g
+      transform={`translate(${x} ${y}) scale(${labelScale},-${labelScale})`}
+      pointerEvents="none"
+      aria-label={`${city.map.name} city label`}
+    >
       <text
         x="0"
         y="0"
         textAnchor={anchor}
         fontFamily="Georgia, serif"
         fontSize={fontSize}
-        style={{ fontSize: `${fontSize}px` }}
         fontWeight={city.map.tier === "capital" ? "700" : "600"}
         fill="#eee7d1"
         stroke="#151916"
@@ -104,11 +107,12 @@ function CityLayer({ cities = [], zoom = 1, onCityClick }) {
       {visibleCities.map((city) => (
         <CityMarker key={city.id} city={city} zoom={zoom} onClick={onCityClick} />
       ))}
-      {labels.map(({ city, fontSize, x, y, anchor }) => (
+      {labels.map(({ city, fontSize, labelScale, x, y, anchor }) => (
         <CityLabel
           key={`${city.id}-label`}
           city={city}
           fontSize={fontSize}
+          labelScale={labelScale}
           x={x}
           y={y}
           anchor={anchor}
