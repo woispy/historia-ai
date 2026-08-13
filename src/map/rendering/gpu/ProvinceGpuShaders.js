@@ -27,6 +27,8 @@ uniform sampler2D uPalette;
 uniform float uPaletteSize;
 uniform float uSelectedId;
 uniform vec4 uSelectedColor;
+uniform vec4 uWaterColor;
+uniform vec4 uLandColor;
 uniform float uFillOpacity;
 
 in vec2 vUv;
@@ -39,10 +41,16 @@ float decodeProvinceId(vec4 encoded) {
 
 void main() {
   float land = texture(uLandMask, vUv).r;
-  if (land < 0.5) discard;
+  if (land < 0.5) {
+    outColor = uWaterColor;
+    return;
+  }
 
   float provinceId = decodeProvinceId(texture(uProvinceIds, vUv));
-  if (provinceId < 0.5) discard;
+  if (provinceId < 0.5) {
+    outColor = uLandColor;
+    return;
+  }
 
   float paletteIndex = provinceId - 1.0;
   vec2 paletteUv = vec2((paletteIndex + 0.5) / uPaletteSize, 0.5);
