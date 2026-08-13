@@ -71,6 +71,17 @@ export {
 } from "./RenderLayer";
 
 /* ============================================================================
+ * GPU Map Renderer
+ * ========================================================================== */
+
+export {
+  ProvinceGpuRenderer,
+  buildProvinceRasterData,
+  DEFAULT_WIDTH as GPU_MAP_TEXTURE_WIDTH,
+  DEFAULT_HEIGHT as GPU_MAP_TEXTURE_HEIGHT,
+} from "./gpu";
+
+/* ============================================================================
  * React Hooks
  * ========================================================================== */
 
