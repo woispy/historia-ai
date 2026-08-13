@@ -24,10 +24,12 @@ uniform vec3 u_landColor;
 varying vec2 v_uv;
 
 void main() {
-  vec4 political = texture2D(u_provinces, v_uv);
   float land = texture2D(u_landMask, v_uv).r;
+  if (land < 0.5) discard;
+
+  vec4 political = texture2D(u_provinces, v_uv);
   vec3 color = mix(u_landColor, political.rgb, political.a);
-  gl_FragColor = vec4(color, land);
+  gl_FragColor = vec4(color, 1.0);
 }
 `;
 
@@ -60,12 +62,12 @@ function createProgram(gl) {
   return program;
 }
 
-function createTexture(gl, source) {
+function createTexture(gl, source, filter = gl.LINEAR) {
   const texture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, texture);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
@@ -88,6 +90,8 @@ function renderFrame(renderer, camera) {
   const { canvas, gl, program, positionBuffer, uniforms } = renderer;
   resizeCanvas(canvas);
   gl.viewport(0, 0, canvas.width, canvas.height);
+  gl.clearColor(0, 0, 0, 0);
+  gl.clear(gl.COLOR_BUFFER_BIT);
   gl.useProgram(program);
 
   const zoom = Math.max(0.75, Number(camera.zoom ?? 1));
@@ -114,7 +118,7 @@ function buildRenderer(canvas, provinces, mapStyle) {
     antialias: false,
     depth: false,
     stencil: false,
-    premultipliedAlpha: true,
+    premultipliedAlpha: false,
     preserveDrawingBuffer: false,
   });
   if (!gl) return null;
@@ -149,8 +153,8 @@ function buildRenderer(canvas, provinces, mapStyle) {
     program,
     positionBuffer,
     positionLocation: gl.getAttribLocation(program, "a_position"),
-    provinceTexture: createTexture(gl, textures.provinces),
-    landMaskTexture: createTexture(gl, textures.landMask),
+    provinceTexture: createTexture(gl, textures.provinces, gl.LINEAR),
+    landMaskTexture: createTexture(gl, textures.landMask, gl.NEAREST),
     uniforms: {
       center: gl.getUniformLocation(program, "u_center"),
       viewSize: gl.getUniformLocation(program, "u_viewSize"),
@@ -178,10 +182,16 @@ function ProvinceTextureLayer({ provinces = [], camera = {}, mapStyle = "detaile
   const canvasRef = useRef(null);
   const rendererRef = useRef(null);
   const cameraRef = useRef(camera);
+  const frameRef = useRef(0);
 
   useEffect(() => {
     cameraRef.current = camera;
-    renderFrame(rendererRef.current, camera);
+    if (frameRef.current) return undefined;
+    frameRef.current = requestAnimationFrame(() => {
+      frameRef.current = 0;
+      renderFrame(rendererRef.current, cameraRef.current);
+    });
+    return undefined;
   }, [camera]);
 
   useEffect(() => {
@@ -208,6 +218,8 @@ function ProvinceTextureLayer({ provinces = [], camera = {}, mapStyle = "detaile
 
     return () => {
       resizeObserver.disconnect();
+      if (frameRef.current) cancelAnimationFrame(frameRef.current);
+      frameRef.current = 0;
       destroyRenderer(rendererRef.current);
       rendererRef.current = null;
     };
