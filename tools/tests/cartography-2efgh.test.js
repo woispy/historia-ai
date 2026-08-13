@@ -42,10 +42,10 @@ assert(getProvincePresentation(0.9).boundaryOpacity < provinceProfile.boundaryOp
 
 const physicalProfile = getPhysicalDetailProfile(2.8);
 assert(physicalProfile.rivers && physicalProfile.mountains && physicalProfile.lakes, "province physical details missing");
-assert(physicalProfile.waterChannels, "province water channels missing");
+assert(!physicalProfile.waterChannels, "water channels must remain disabled while the GPU land mask owns the coastline");
 
 const physicalPresentation = getPhysicalPresentation(2.8);
-assert(physicalPresentation.terrainOpacity > getPhysicalPresentation(1.0).terrainOpacity, "terrain should strengthen after world LOD");
+assert(physicalPresentation.terrainOpacity === 0, "terrain overlays must remain disabled until they are mask-clipped");
 assert(physicalPresentation.riverOpacity > 0 && physicalPresentation.mountainOpacity > 0, "physical presentation profile is incomplete");
 
 assert(getCityLabelPolicy(0.9).maxLabels < getCityLabelPolicy(3.6).maxLabels, "city label budget should grow with zoom");
