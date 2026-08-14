@@ -37,6 +37,11 @@ const LOD_BY_ZOOM = Object.freeze([
   [3.35, "city"],
 ]);
 
+// SVG viewBox zoom changes world-space pixels per unit. This multiplier
+// converts the atlas font/marker units into a comfortable screen-space size
+// while the inverse zoom keeps that size stable as the camera moves closer.
+const SCREEN_STABLE_SIZE = 4.8;
+
 function getLod(zoom) {
   for (const [threshold, lod] of LOD_BY_ZOOM) {
     if (zoom < threshold) return lod;
@@ -67,15 +72,15 @@ function clamp(value, min, max) {
 }
 
 function getScreenStableScale(zoom) {
-  // Deep zooms should reveal more detail, not giant typography.
-  return clamp(1.5 / Math.sqrt(Math.max(1, zoom)), 0.62, 1);
+  const safeZoom = Math.max(0.5, Number(zoom) || 1);
+  return clamp(SCREEN_STABLE_SIZE / safeZoom, 0.25, 4.8);
 }
 
 export function getCityVisualStyle(city, zoom = 1) {
   const config = tierConfig(city);
   const scale = getScreenStableScale(zoom);
-  const radius = clamp(config.markerRadius * scale, 0.045, config.markerRadius);
-  const fontSize = clamp(config.baseSize * scale, 0.16, config.baseSize);
+  const radius = clamp(config.markerRadius * scale, 0.012, config.markerRadius * 4.8);
+  const fontSize = clamp(config.baseSize * scale, 0.045, config.baseSize * 4.8);
   return Object.freeze({ radius, fontSize, priority: config.priority, minZoom: config.minZoom });
 }
 
@@ -138,6 +143,28 @@ function markerBox(city) {
   };
 }
 
+function isLabelInViewport(box, camera) {
+  if (!camera) return true;
+
+  const zoom = Math.max(0.001, Number(camera.zoom) || 1);
+  const viewWidth = 360 / zoom;
+  const viewHeight = 180 / zoom;
+  const centerX = Number(camera.x ?? 0);
+  const centerY = Number(camera.y ?? 0);
+  const minY = centerY - viewHeight / 2;
+  const maxY = centerY + viewHeight / 2;
+  const minX = centerX - viewWidth / 2;
+  const maxX = centerX + viewWidth / 2;
+
+  const verticalFit = box.top >= minY && box.bottom <= maxY;
+  if (!verticalFit) return false;
+
+  const worldWidth = 360;
+  return [0, worldWidth, -worldWidth].some((offset) => (
+    box.left + offset >= minX && box.right + offset <= maxX
+  ));
+}
+
 export function boxesOverlap(a, b, padding = 0.08) {
   return !(
     a.right + padding < b.left ||
@@ -155,7 +182,7 @@ export function selectVisibleCities(cities, zoom = 1) {
     .slice(0, budget);
 }
 
-export function layoutCityLabels(cities, zoom = 1) {
+export function layoutCityLabels(cities, zoom = 1, camera = null) {
   const budget = getCityLabelBudget(zoom);
   const placed = [];
   const labels = [];
@@ -168,6 +195,8 @@ export function layoutCityLabels(cities, zoom = 1) {
 
     for (const candidate of getCandidates(city, style.fontSize)) {
       const box = labelBox(city, candidate, style.fontSize);
+      if (!isLabelInViewport(box, camera)) continue;
+
       const blockedByMarker = orderedCities.some((other) => (
         other.id !== city.id && boxesOverlap(box, markerBox(other), 0.05)
       ));

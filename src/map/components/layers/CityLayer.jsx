@@ -111,11 +111,10 @@ function CityLabel({ city, fontSize, x, y, anchor }) {
         fontWeight={city.map.tier === "capital" ? "700" : "600"}
         fill="#eee7d1"
         fillOpacity="0.96"
-        stroke="#0b1010"
-        strokeOpacity="0.52"
-        strokeWidth="0.08"
+        stroke="#071011"
+        strokeOpacity="0.82"
+        strokeWidth="0.035"
         paintOrder="stroke"
-        filter="url(#map-label-halo)"
       >
         {city.map.name}
       </text>
@@ -125,7 +124,7 @@ function CityLabel({ city, fontSize, x, y, anchor }) {
 
 function CityLayer({ cities = [], zoom = 1, camera, onCityClick }) {
   const visibleCities = getVisibleCities(cities, zoom, camera);
-  const labels = layoutCityLabels(visibleCities, zoom);
+  const labels = layoutCityLabels(visibleCities, zoom, camera);
   const lod = getMapLod(zoom);
 
   return (
