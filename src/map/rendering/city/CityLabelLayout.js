@@ -15,19 +15,19 @@ export const CITY_LABEL_TIERS = Object.freeze({
 });
 
 const LABEL_BUDGET = Object.freeze({
-  world: 5,
-  regional: 8,
-  province: 12,
-  city: 18,
-  detailed: 22,
+  world: 6,
+  regional: 12,
+  province: 18,
+  city: 24,
+  detailed: 32,
 });
 
 const MARKER_BUDGET = Object.freeze({
-  world: 6,
-  regional: 12,
-  province: 20,
-  city: 28,
-  detailed: 34,
+  world: 8,
+  regional: 16,
+  province: 26,
+  city: 34,
+  detailed: 48,
 });
 
 const LOD_BY_ZOOM = Object.freeze([
