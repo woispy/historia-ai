@@ -85,10 +85,4 @@ package = json.loads(package_path.read_text(encoding='utf-8'))
 package['scripts']['test:cartography-foundation'] = 'node tools/tests/cartography-foundation.test.js'
 package_path.write_text(json.dumps(package, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
-ci_path = ROOT / '.github/workflows/ci.yml'
-ci = ci_path.read_text(encoding='utf-8')
-if 'npm run test:cartography-foundation' not in ci and 'npm run test:cartography-2efgh' in ci:
-    ci = ci.replace('npm run test:cartography-2efgh', 'npm run test:cartography-2efgh\n          npm run test:cartography-foundation', 1)
-ci_path.write_text(ci, encoding='utf-8')
-
 print('Cartography foundation source patch prepared.')
