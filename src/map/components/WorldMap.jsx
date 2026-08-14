@@ -46,7 +46,10 @@ function WorldMap({
   }, [camera, onCityClick]);
 
   const world = useMemo(() => <WorldPhysicalLayer />, []);
-  const base = <PhysicalGeographyLayer phase="base" zoom={cameraState.zoom} />;
+  const base = useMemo(
+    () => <PhysicalGeographyLayer phase="base" zoom={cameraState.zoom} />,
+    [cameraState.zoom],
+  );
   const provincesLayer = useMemo(
     () => (
       <ProvinceLayer
@@ -67,7 +70,6 @@ function WorldMap({
       settings.mapStyle,
       settings.mapShadows,
       cameraState,
-      cameraState.zoom,
       textureReady,
     ],
   );
