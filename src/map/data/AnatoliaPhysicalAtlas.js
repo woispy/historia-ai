@@ -114,10 +114,10 @@ export const ANATOLIA_PHYSICAL_ATLAS = Object.freeze({
   ],
 
   labels: [
-    {id:"sea-aegean", name:"EGE DENİZİ", kind:"sea", x:25.85, y:38.70, minZoom:1, maxZoom:3.2, priority:100, fontSize:0.30, offsets:[[0,0],[0.2,0],[-0.2,0],[0,0.18]], bounds:[24.3,37.3,27.0,40.0]},
-    {id:"sea-marmara", name:"MARMARA DENİZİ", kind:"sea", x:28.15, y:40.55, minZoom:1, maxZoom:4, priority:100, fontSize:0.29, offsets:[[0,0],[0,0.16],[0,-0.16]], bounds:[26.7,40.0,29.4,41.0]},
-    {id:"sea-black", name:"KARADENİZ", kind:"sea", x:34.55, y:42.18, minZoom:1, maxZoom:3.4, priority:100, fontSize:0.30, offsets:[[0,0],[0.3,0],[-0.3,0]], bounds:[28.0,41.45,42.5,43.05]},
-    {id:"sea-mediterranean", name:"AKDENİZ", kind:"sea", x:32.90, y:35.05, minZoom:1, maxZoom:3.2, priority:95, fontSize:0.30, offsets:[[0,0],[0.3,0],[-0.3,0]], bounds:[28.0,34.3,38.5,36.0]},
+    {id:"sea-aegean", name:"EGE DENİZİ", kind:"sea", x:25.85, y:38.70, minZoom:1, maxZoom:12, priority:100, fontSize:0.30, offsets:[[0,0],[0.2,0],[-0.2,0],[0,0.18]], bounds:[24.3,37.3,27.0,40.0]},
+    {id:"sea-marmara", name:"MARMARA DENİZİ", kind:"sea", x:28.15, y:40.55, minZoom:1, maxZoom:12, priority:100, fontSize:0.29, offsets:[[0,0],[0,0.16],[0,-0.16]], bounds:[26.7,40.0,29.4,41.0]},
+    {id:"sea-black", name:"KARADENİZ", kind:"sea", x:34.55, y:42.18, minZoom:1, maxZoom:12, priority:100, fontSize:0.30, offsets:[[0,0],[0.3,0],[-0.3,0]], bounds:[28.0,41.45,42.5,43.05]},
+    {id:"sea-mediterranean", name:"AKDENİZ", kind:"sea", x:32.90, y:35.05, minZoom:1, maxZoom:12, priority:95, fontSize:0.30, offsets:[[0,0],[0.3,0],[-0.3,0]], bounds:[28.0,34.3,38.5,36.0]},
     {id:"region-aegean", name:"EGE BÖLGESİ", kind:"region", x:28.50, y:39.00, minZoom:2.5, maxZoom:6, priority:20, fontSize:0.22, offsets:[[0,0],[0,0.18]], bounds:[27.0,37.8,30.5,40.0]},
     {id:"region-central", name:"İÇ ANADOLU", kind:"region", x:33.40, y:39.15, minZoom:2.5, maxZoom:6, priority:20, fontSize:0.22, offsets:[[0,0],[0,0.18]], bounds:[30.5,37.8,36.5,40.4]},
     {id:"region-east", name:"DOĞU ANADOLU", kind:"region", x:40.30, y:38.90, minZoom:2.5, maxZoom:6, priority:20, fontSize:0.22, offsets:[[0,0],[0,0.18]], bounds:[37.0,36.8,43.5,40.5]},
