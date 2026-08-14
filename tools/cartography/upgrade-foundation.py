@@ -11,11 +11,7 @@ def replace_if_present(path, old, new):
         p.write_text(text.replace(old, new, 1), encoding='utf-8')
 
 
-replace_if_present(
-    'src/map/components/WorldMap.jsx',
-    '''  const base = useMemo(\n    () => <PhysicalGeographyLayer phase="base" zoom={cameraState.zoom} />,\n    [cameraState.zoom],\n  );''',
-    '''  const base = <PhysicalGeographyLayer phase="base" zoom={cameraState.zoom} />;''',
-)
+# Keep the already-applied close-zoom vector switch idempotent.
 replace_if_present(
     'src/map/components/WorldMap.jsx',
     '        renderFill={!textureReady}',
@@ -23,23 +19,8 @@ replace_if_present(
 )
 replace_if_present(
     'src/map/components/layers/CityLayer.jsx',
-    '''function getLabelScale(zoom) {\n  if (zoom >= 6) return 0.42;\n  if (zoom >= 4) return 0.52;\n  if (zoom >= 3.35) return 0.62;\n  if (zoom >= 2.55) return 0.74;\n  return 1;\n}\n\n''',
-    '',
-)
-replace_if_present(
-    'src/map/components/layers/CityLayer.jsx',
-    'function CityLabel({ city, fontSize, x, y, anchor, zoom }) {',
-    'function CityLabel({ city, fontSize, x, y, anchor }) {',
-)
-replace_if_present(
-    'src/map/components/layers/CityLayer.jsx',
     '        fontSize={fontSize * getLabelScale(zoom)}',
     '        fontSize={fontSize}',
-)
-replace_if_present(
-    'src/map/components/layers/CityLayer.jsx',
-    '          anchor={anchor}\n          zoom={zoom}',
-    '          anchor={anchor}',
 )
 replace_if_present(
     'src/map/rendering/city/CityLabelLayout.js',
@@ -50,7 +31,8 @@ replace_if_present(
 physical_path = ROOT / 'src/map/data/AnatoliaPhysicalAtlas.js'
 physical = physical_path.read_text(encoding='utf-8')
 for old in ('maxZoom:3.2, priority:100', 'maxZoom:4, priority:100', 'maxZoom:3.4, priority:100', 'maxZoom:3.2, priority:95'):
-    physical = physical.replace(old, old.replace(old.split(',')[0].split(':')[0], 'maxZoom:12'))
+    prefix = old.split(',', 1)[0]
+    physical = physical.replace(old, old.replace(prefix, 'maxZoom:12'))
 physical_path.write_text(physical, encoding='utf-8')
 
 (ROOT / 'tools/tests/cartography-foundation.test.js').write_text(r'''import assert from "node:assert/strict";
@@ -65,7 +47,6 @@ import {
 } from "../../src/map/rendering/city/CityLabelLayout.js";
 
 const cities = Object.entries(ANATOLIA_CITY_ATLAS).map(([id, map]) => ({ id, map }));
-
 assert.equal(getMapLod(1), "world");
 assert.equal(getMapLod(2.8), "city");
 assert.equal(getMapLod(8), "detailed");
