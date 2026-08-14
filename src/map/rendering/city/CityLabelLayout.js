@@ -61,9 +61,9 @@ function compareCityPriority(a, b) {
 }
 
 function getScreenStableScale(zoom) {
-  // SVG viewBox zoom scales map units linearly. A fractional power keeps
-  // typography readable while preventing the large growth seen in deep zooms.
-  return Math.max(0.035, Math.min(1.0, 0.95 * zoom ** -0.65));
+  // Keep labels readable in deep zoom while avoiding the runaway growth of
+  // normal SVG text when the viewBox becomes small.
+  return Math.max(0.22, Math.min(0.55, 1.8 / Math.sqrt(Math.max(1, zoom))));
 }
 
 export function getCityVisualStyle(city, zoom = 1) {
