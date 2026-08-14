@@ -1,3 +1,4 @@
+# Foundation upgrade is deterministic and safe to rerun.
 from pathlib import Path
 import json
 
@@ -11,7 +12,6 @@ def replace_if_present(path, old, new):
         p.write_text(text.replace(old, new, 1), encoding='utf-8')
 
 
-# Keep the already-applied close-zoom vector switch idempotent.
 replace_if_present(
     'src/map/components/WorldMap.jsx',
     '        renderFill={!textureReady}',
