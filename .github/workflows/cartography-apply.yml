@@ -1,4 +1,5 @@
 # Temporary validation workflow; self-removes after a successful run.
+# Corrected physical-atlas transformation; all source edits are idempotent.
 name: Cartography Foundation Apply
 
 on:
