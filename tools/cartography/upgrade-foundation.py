@@ -1,5 +1,5 @@
 # Foundation upgrade is deterministic and safe to rerun.
-# Validation now covers readable deep-zoom labels and vector province LOD.
+# Validation now covers readable deep-zoom labels, vector province LOD, and the updated Phase 2E-2H typography contract.
 from pathlib import Path
 import json
 
