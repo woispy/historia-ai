@@ -70,8 +70,8 @@ const zoom8Style = getCityVisualStyle(capital, 8);
 assert.ok(Math.abs((zoom2Style.fontSize * 2) - (zoom8Style.fontSize * 8)) < 1e-9);
 assert.ok(Math.abs((zoom2Style.radius * 2) - (zoom8Style.radius * 8)) < 1e-9);
 
-// Focused cameras must not return labels whose boxes are already outside the
-// visible world-space viewport. This prevents clipped labels at screen edges.
+// Focused cameras must not return labels whose boxes would be clipped by the
+// visible world-space viewport. This prevents edge-cut typography.
 const focusedCamera = { x: 31.5, y: 39.4, zoom: 4.0 };
 const focusedLabels = layoutCityLabels(cities, focusedCamera.zoom, focusedCamera);
 const viewWidth = 360 / focusedCamera.zoom;
@@ -86,8 +86,8 @@ for (const label of focusedLabels) {
   const right = label.anchor === "start" ? label.x + width : label.anchor === "end" ? label.x : label.x + width / 2;
   const top = label.y - label.fontSize * 0.78;
   const bottom = label.y + label.fontSize * 0.24;
-  assert.ok(right >= minX && left <= maxX, `label escaped horizontal viewport: ${label.city.id}`);
-  assert.ok(bottom >= minY && top <= maxY, `label escaped vertical viewport: ${label.city.id}`);
+  assert.ok(left >= minX && right <= maxX, `label clipped horizontally: ${label.city.id}`);
+  assert.ok(top >= minY && bottom <= maxY, `label clipped vertically: ${label.city.id}`);
 }
 
 for (const zoom of [1.5, 2, 3, 4, 8]) {
