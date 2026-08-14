@@ -1,5 +1,6 @@
 # Foundation upgrade is deterministic and safe to rerun.
 # Validation now covers readable deep-zoom labels, vector province LOD, and the updated Phase 2E-2H typography contract.
+# This run also includes the cleaned regression-test module binding.
 from pathlib import Path
 import json
 
