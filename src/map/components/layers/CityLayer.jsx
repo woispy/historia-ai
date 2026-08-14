@@ -60,7 +60,7 @@ function CityMarker({ city, zoom, onClick }) {
           fill="none"
           stroke="#d9bf68"
           strokeOpacity="0.72"
-          strokeWidth="1.15"
+          strokeWidth="0.055"
           vectorEffect="non-scaling-stroke"
         />
       )}
@@ -70,7 +70,7 @@ function CityMarker({ city, zoom, onClick }) {
         r={radius}
         fill={isCapital ? "#f0d276" : "#e8e1c9"}
         stroke="#151916"
-        strokeWidth="1.00"
+        strokeWidth="0.045"
         vectorEffect="non-scaling-stroke"
       />
       {fortified && detailed && (
@@ -81,7 +81,7 @@ function CityMarker({ city, zoom, onClick }) {
           fill="none"
           stroke="#cbb76f"
           strokeOpacity="0.62"
-          strokeWidth="0.90"
+          strokeWidth="0.045"
           strokeDasharray="3 3"
           vectorEffect="non-scaling-stroke"
         />
@@ -90,7 +90,7 @@ function CityMarker({ city, zoom, onClick }) {
         <path
           d={`M ${x - 0.12} ${y - 0.12} L ${x + 0.12} ${y - 0.12}`}
           stroke="#6f9fa9"
-          strokeWidth="1.00"
+          strokeWidth="0.045"
           strokeLinecap="round"
           vectorEffect="non-scaling-stroke"
         />
@@ -111,11 +111,10 @@ function CityLabel({ city, fontSize, x, y, anchor }) {
         fontWeight={city.map.tier === "capital" ? "700" : "600"}
         fill="#eee7d1"
         fillOpacity="0.96"
-        stroke="#0b1010"
-        strokeOpacity="0.52"
-        strokeWidth="0.08"
+        stroke="#071011"
+        strokeOpacity="0.82"
+        strokeWidth="0.035"
         paintOrder="stroke"
-        filter="url(#map-label-halo)"
       >
         {city.map.name}
       </text>
@@ -125,7 +124,7 @@ function CityLabel({ city, fontSize, x, y, anchor }) {
 
 function CityLayer({ cities = [], zoom = 1, camera, onCityClick }) {
   const visibleCities = getVisibleCities(cities, zoom, camera);
-  const labels = layoutCityLabels(visibleCities, zoom);
+  const labels = layoutCityLabels(visibleCities, zoom, camera);
   const lod = getMapLod(zoom);
 
   return (
