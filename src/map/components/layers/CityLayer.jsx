@@ -60,7 +60,7 @@ function CityMarker({ city, zoom, onClick }) {
           fill="none"
           stroke="#d9bf68"
           strokeOpacity="0.72"
-          strokeWidth="0.055"
+          strokeWidth="1.15"
           vectorEffect="non-scaling-stroke"
         />
       )}
@@ -70,7 +70,7 @@ function CityMarker({ city, zoom, onClick }) {
         r={radius}
         fill={isCapital ? "#f0d276" : "#e8e1c9"}
         stroke="#151916"
-        strokeWidth="0.045"
+        strokeWidth="1.00"
         vectorEffect="non-scaling-stroke"
       />
       {fortified && detailed && (
@@ -81,7 +81,7 @@ function CityMarker({ city, zoom, onClick }) {
           fill="none"
           stroke="#cbb76f"
           strokeOpacity="0.62"
-          strokeWidth="0.045"
+          strokeWidth="0.90"
           strokeDasharray="3 3"
           vectorEffect="non-scaling-stroke"
         />
@@ -90,7 +90,7 @@ function CityMarker({ city, zoom, onClick }) {
         <path
           d={`M ${x - 0.12} ${y - 0.12} L ${x + 0.12} ${y - 0.12}`}
           stroke="#6f9fa9"
-          strokeWidth="0.045"
+          strokeWidth="1.00"
           strokeLinecap="round"
           vectorEffect="non-scaling-stroke"
         />
