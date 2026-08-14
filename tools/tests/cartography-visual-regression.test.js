@@ -57,8 +57,37 @@ for (const zoom of [1, 1.5, 2, 3, 4, 8, 16]) {
   );
 
   const capital = cities.find((city) => city.map.tier === "capital");
-  assert.ok(getCityVisualStyle(capital, zoom).fontSize >= 0.16);
+  assert.ok(getCityVisualStyle(capital, zoom).fontSize >= 0.045);
   assert.ok(getCityMarkerBudget(zoom) >= getCityLabelBudget(zoom));
+}
+
+// The SVG viewBox changes world-space pixels per unit with zoom. The visual
+// style must compensate for that so labels and markers do not grow with every
+// deep zoom step.
+const capital = cities.find((city) => city.map.tier === "capital");
+const zoom2Style = getCityVisualStyle(capital, 2);
+const zoom8Style = getCityVisualStyle(capital, 8);
+assert.ok(Math.abs((zoom2Style.fontSize * 2) - (zoom8Style.fontSize * 8)) < 1e-9);
+assert.ok(Math.abs((zoom2Style.radius * 2) - (zoom8Style.radius * 8)) < 1e-9);
+
+// Focused cameras must not return labels whose boxes are already outside the
+// visible world-space viewport. This prevents clipped labels at screen edges.
+const focusedCamera = { x: 31.5, y: 39.4, zoom: 4.0 };
+const focusedLabels = layoutCityLabels(cities, focusedCamera.zoom, focusedCamera);
+const viewWidth = 360 / focusedCamera.zoom;
+const viewHeight = 180 / focusedCamera.zoom;
+const minX = focusedCamera.x - viewWidth / 2;
+const maxX = focusedCamera.x + viewWidth / 2;
+const minY = focusedCamera.y - viewHeight / 2;
+const maxY = focusedCamera.y + viewHeight / 2;
+for (const label of focusedLabels) {
+  const width = Math.max(label.fontSize * 1.9, label.city.map.name.length * label.fontSize * 0.48);
+  const left = label.anchor === "start" ? label.x : label.anchor === "end" ? label.x - width : label.x - width / 2;
+  const right = label.anchor === "start" ? label.x + width : label.anchor === "end" ? label.x : label.x + width / 2;
+  const top = label.y - label.fontSize * 0.78;
+  const bottom = label.y + label.fontSize * 0.24;
+  assert.ok(right >= minX && left <= maxX, `label escaped horizontal viewport: ${label.city.id}`);
+  assert.ok(bottom >= minY && top <= maxY, `label escaped vertical viewport: ${label.city.id}`);
 }
 
 for (const zoom of [1.5, 2, 3, 4, 8]) {
