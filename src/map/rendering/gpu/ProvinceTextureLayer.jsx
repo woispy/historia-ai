@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { WORLD_LAND_POLYGONS } from "../../physical/WorldPhysicalAtlas";
-import { getProvincePresentation } from "../CartographyModel";
+import { getProvincePresentation, shouldUseGpuProvinceFill } from "../CartographyModel";
 
 const DEFAULT_WIDTH = 4096;
 const DEFAULT_HEIGHT = 2048;
@@ -391,21 +391,25 @@ function ProvinceTextureLayer({
 }) {
   const canvasRef = useRef(null);
   const stateRef = useRef(null);
-  const raster = useMemo(() => buildRasterData(provinces, mapStyle), [provinces, mapStyle]);
+  const gpuEnabled = shouldUseGpuProvinceFill(camera.zoom);
+  const raster = useMemo(
+    () => (gpuEnabled ? buildRasterData(provinces, mapStyle) : null),
+    [gpuEnabled, provinces, mapStyle],
+  );
   const selectedProvinceRef = useRef(selectedProvinceId);
 
   useEffect(() => {
     selectedProvinceRef.current = selectedProvinceId;
     const state = stateRef.current;
-    if (!state) return;
+    if (!state || !gpuEnabled) return;
     state.selectedRasterId = getSelectedRasterId(state, selectedProvinceId);
     const rect = canvasRef.current?.getBoundingClientRect();
     if (rect) renderFrame(state, camera, rect.width, rect.height);
-  }, [selectedProvinceId, camera]);
+  }, [selectedProvinceId, camera, gpuEnabled]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !raster) {
+    if (!gpuEnabled || !canvas || !raster) {
       onReady?.(false);
       return undefined;
     }
@@ -440,8 +444,11 @@ function ProvinceTextureLayer({
       resizeObserver.disconnect();
       if (stateRef.current === state) stateRef.current = null;
       destroyState(state);
+      onReady?.(false);
     };
-  }, [camera, onReady, raster]);
+  }, [camera, gpuEnabled, onReady, raster]);
+
+  if (!gpuEnabled) return null;
 
   return (
     <canvas

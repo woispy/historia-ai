@@ -1,5 +1,5 @@
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../data/AnatoliaPhysicalAtlas";
-import { getPhysicalDetailProfile, getPhysicalPresentation } from "../../rendering/CartographyModel";
+import { getPhysicalDetailProfile, getPhysicalPresentation, getPhysicalStrokeProfile } from "../../rendering/CartographyModel";
 import { layoutPhysicalLabels } from "../../rendering/physical/PhysicalLabelLayout";
 
 function pathFromCoordinates(coordinates, close = false) {
@@ -14,10 +14,10 @@ function pathFromCoordinates(coordinates, close = false) {
 function PhysicalPolygon({ feature, className = "", opacity = 1 }) {
   const d = pathFromCoordinates(feature.coordinates, true);
   if (!d) return null;
-  return <path d={d} className={className} opacity={opacity} pointerEvents="none" />;
+  return <path d={d} className={className} opacity={opacity} vectorEffect="non-scaling-stroke" pointerEvents="none" />;
 }
 
-function PhysicalLine({ feature, className = "", width = 0.12, opacity = 1 }) {
+function PhysicalLine({ feature, className = "", width = 1, opacity = 1 }) {
   const d = pathFromCoordinates(feature.coordinates);
   if (!d) return null;
   return (
@@ -63,6 +63,7 @@ function PhysicalGeographyLayer({ phase = "detail", zoom = 1 }) {
   const atlas = ANATOLIA_PHYSICAL_ATLAS;
   const profile = getPhysicalDetailProfile(zoom);
   const presentation = getPhysicalPresentation(zoom);
+  const stroke = getPhysicalStrokeProfile(zoom);
 
   if (phase === "base") {
     return (
@@ -113,7 +114,7 @@ function PhysicalGeographyLayer({ phase = "detail", zoom = 1 }) {
           key={range.name}
           feature={range}
           className="map-mountain"
-          width={range.rank === 1 ? 0.10 : 0.065}
+          width={range.rank === 1 ? stroke.mountain : stroke.minorMountain}
           opacity={range.rank === 1 ? presentation.mountainOpacity : presentation.mountainOpacity * 0.68}
         />
       ))}
@@ -122,7 +123,7 @@ function PhysicalGeographyLayer({ phase = "detail", zoom = 1 }) {
           key={river.name}
           feature={river}
           className="map-river"
-          width={river.rank === 1 ? 0.10 : 0.065}
+          width={river.rank === 1 ? stroke.river : stroke.minorRiver}
           opacity={river.rank === 1 ? presentation.riverOpacity : presentation.riverOpacity * 0.72}
         />
       ))}

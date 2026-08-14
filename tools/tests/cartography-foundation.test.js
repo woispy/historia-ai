@@ -1,13 +1,22 @@
 import assert from "node:assert/strict";
 import { ANATOLIA_CITY_ATLAS } from "../../src/map/data/AnatoliaCityAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
-import { getMapLod } from "../../src/map/rendering/CartographyModel.js";
+import {
+  getMapLod,
+  getPhysicalStrokeProfile,
+  shouldUseGpuProvinceFill,
+} from "../../src/map/rendering/CartographyModel.js";
 import { boxesOverlap, getCityVisualStyle, layoutCityLabels, selectVisibleCities } from "../../src/map/rendering/city/CityLabelLayout.js";
 
 const cities = Object.entries(ANATOLIA_CITY_ATLAS).map(([id, map]) => ({ id, map }));
 assert.equal(getMapLod(1), "world");
 assert.equal(getMapLod(2.8), "city");
 assert.equal(getMapLod(8), "detailed");
+
+assert.equal(shouldUseGpuProvinceFill(1), true);
+assert.equal(shouldUseGpuProvinceFill(1.74), true);
+assert.equal(shouldUseGpuProvinceFill(1.75), false);
+assert.equal(shouldUseGpuProvinceFill(3.35), false);
 
 for (const zoom of [1.2, 2.8, 3.6, 5, 8]) {
   const visible = selectVisibleCities(cities, zoom);
@@ -35,6 +44,12 @@ assert.ok(getCityVisualStyle(cities[0], 8).fontSize > 0.1);
 assert.ok(ANATOLIA_PHYSICAL_ATLAS.lakes.length >= 8);
 assert.ok(ANATOLIA_PHYSICAL_ATLAS.rivers.length >= 10);
 assert.ok(ANATOLIA_PHYSICAL_ATLAS.labels.filter((label) => label.kind === "sea").every((label) => label.maxZoom >= 8));
+
+const regionalStroke = getPhysicalStrokeProfile(1.3);
+const detailedStroke = getPhysicalStrokeProfile(4);
+assert.ok(detailedStroke.river > regionalStroke.river, "Detailed rivers should remain visually legible");
+assert.ok(detailedStroke.lake > 0, "Detailed lakes need a visible outline");
+
 for (const id of ["konstantinopolis", "iznik", "bursa", "ankara", "konya", "kayseri", "sivas", "trabzon", "erzurum"]) {
   assert.ok(ANATOLIA_CITY_ATLAS[id], `Missing historical city atlas entry: ${id}`);
 }

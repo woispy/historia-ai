@@ -11,6 +11,8 @@ function ProvinceBoundaryLayer({ provinces = [], zoom = 1 }) {
   const presentation = getProvincePresentation(zoom);
   const countryBorders = topology.borderSegments.filter((border) => border.kind === "country");
   const provinceBorders = topology.borderSegments.filter((border) => border.kind === "province");
+  const provinceStroke = presentation.lod === "regional" ? 0.72 : presentation.lod === "province" ? 0.82 : 0.95;
+  const countryStroke = presentation.lod === "detailed" ? 1.25 : presentation.lod === "city" ? 1.15 : 1.00;
 
   return (
     <g aria-label="Historical province topology" pointerEvents="none">
@@ -21,7 +23,7 @@ function ProvinceBoundaryLayer({ provinces = [], zoom = 1 }) {
           fill="none"
           stroke="#2a2d28"
           strokeOpacity={presentation.boundaryOpacity}
-          strokeWidth={presentation.lod === "regional" ? 0.055 : 0.075}
+          strokeWidth={provinceStroke}
           vectorEffect="non-scaling-stroke"
         />
       ))}
@@ -33,7 +35,7 @@ function ProvinceBoundaryLayer({ provinces = [], zoom = 1 }) {
           fill="none"
           stroke="#171b18"
           strokeOpacity={presentation.lod === "world" ? 0.70 : 0.92}
-          strokeWidth={presentation.lod === "detailed" ? 0.15 : 0.12}
+          strokeWidth={countryStroke}
           vectorEffect="non-scaling-stroke"
         />
       ))}

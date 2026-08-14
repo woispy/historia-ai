@@ -24,6 +24,11 @@ export function getMapLod(zoom = 1) {
   return "detailed";
 }
 
+export function shouldUseGpuProvinceFill(zoom = 1) {
+  const lod = getMapLod(zoom);
+  return lod === "world" || lod === "regional";
+}
+
 export function getCityVisibilityTier(zoom = 1) {
   const lod = getMapLod(zoom);
   if (lod === "world") return "capital";
@@ -84,8 +89,22 @@ export function getPhysicalPresentation(zoom = 1) {
     // Terrain regions are research metadata until they are rasterized through
     // the same land-mask compositor as political ownership.
     terrainOpacity: 0,
-    riverOpacity: lod === "regional" ? 0.42 : lod === "province" ? 0.56 : 0.66,
-    mountainOpacity: lod === "regional" ? 0.07 : lod === "province" ? 0.11 : 0.15,
-    lakeOpacity: lod === "regional" ? 0.58 : lod === "province" ? 0.70 : 0.78,
+    riverOpacity: lod === "regional" ? 0.50 : lod === "province" ? 0.64 : 0.78,
+    mountainOpacity: lod === "regional" ? 0.08 : lod === "province" ? 0.13 : 0.18,
+    lakeOpacity: lod === "regional" ? 0.62 : lod === "province" ? 0.74 : 0.84,
   });
+}
+
+export function getPhysicalStrokeProfile(zoom = 1) {
+  const lod = getMapLod(zoom);
+  if (lod === "regional") {
+    return Object.freeze({ river: 1.15, minorRiver: 0.85, mountain: 0.90, minorMountain: 0.70, lake: 0.80 });
+  }
+  if (lod === "province") {
+    return Object.freeze({ river: 1.35, minorRiver: 0.95, mountain: 1.00, minorMountain: 0.78, lake: 0.90 });
+  }
+  if (lod === "city" || lod === "detailed") {
+    return Object.freeze({ river: 1.55, minorRiver: 1.05, mountain: 1.10, minorMountain: 0.82, lake: 1.00 });
+  }
+  return Object.freeze({ river: 0.95, minorRiver: 0.70, mountain: 0.75, minorMountain: 0.60, lake: 0.70 });
 }

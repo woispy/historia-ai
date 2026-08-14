@@ -108,7 +108,7 @@ ul { padding-left: 25px; }
 .map-lake {
   fill: #2c5962;
   stroke: #6d9295;
-  stroke-width: 0.08;
+  stroke-width: 0.8px;
 }
 
 .map-river {
@@ -119,7 +119,7 @@ ul { padding-left: 25px; }
 .map-mountain {
   stroke: #554f3d;
   fill: none;
-  stroke-dasharray: 0.34 0.18;
+  stroke-dasharray: 4px 3px;
 }
 
 .map-coastline {

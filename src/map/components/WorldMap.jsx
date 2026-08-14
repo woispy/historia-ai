@@ -11,6 +11,7 @@ import {
 import { CameraProvider, CameraViewport, useCamera, useCameraController } from "../camera";
 import { RenderRoot, RenderLayer, SvgRenderer } from "../rendering";
 import ProvinceTextureLayer from "../rendering/gpu/ProvinceTextureLayer";
+import { shouldUseGpuProvinceFill } from "../rendering/CartographyModel";
 
 const focusZoom = (metadata) => (
   metadata?.tier === "capital" ? 3.6 : metadata?.tier === "major" ? 3 : 2.55
@@ -50,6 +51,7 @@ function WorldMap({
     () => <PhysicalGeographyLayer phase="base" zoom={cameraState.zoom} />,
     [cameraState.zoom],
   );
+  const useGpuProvinceFill = shouldUseGpuProvinceFill(cameraState.zoom);
   const provincesLayer = useMemo(
     () => (
       <ProvinceLayer
@@ -60,7 +62,7 @@ function WorldMap({
         mapShadows={settings.mapShadows !== false}
         zoom={cameraState.zoom}
         camera={cameraState}
-        renderFill={!textureReady || cameraState.zoom >= 3.35}
+        renderFill={!useGpuProvinceFill || !textureReady}
       />
     ),
     [
@@ -71,6 +73,7 @@ function WorldMap({
       settings.mapShadows,
       cameraState,
       textureReady,
+      useGpuProvinceFill,
     ],
   );
   const cartography = useMemo(
@@ -114,13 +117,15 @@ function WorldMap({
     <CameraProvider value={camera}>
       <CameraViewport cameraInput={cameraInput}>
         <RenderRoot>
-          <ProvinceTextureLayer
-            provinces={provinces}
-            camera={cameraState}
-            selectedProvinceId={selectedProvinceId}
-            mapStyle={settings.mapStyle ?? "detailed"}
-            onReady={ready}
-          />
+          {useGpuProvinceFill && (
+            <ProvinceTextureLayer
+              provinces={provinces}
+              camera={cameraState}
+              selectedProvinceId={selectedProvinceId}
+              mapStyle={settings.mapStyle ?? "detailed"}
+              onReady={ready}
+            />
+          )}
           <SvgRenderer camera={cameraState}>{layers}</SvgRenderer>
         </RenderRoot>
       </CameraViewport>
