@@ -1,11 +1,9 @@
 /**
- * Historia AI — grand-strategy cartography model.
+ * Historia AI — grand-strategy cartography presentation model.
  *
- * Presentation density is centralised here so the GPU political layer, SVG
- * topology, physical detail and city labels share one deterministic scale.
- * Broad hand-drawn terrain/water envelopes are intentionally disabled at
- * runtime; physical detail must never be able to paint over the authoritative
- * coastline mask.
+ * Every visual subsystem reads the same LOD policy. The renderer can swap
+ * between GPU political fills and vector detail without changing the physical
+ * world authority underneath it.
  */
 
 export const MAP_LOD = Object.freeze({
@@ -58,8 +56,6 @@ export function getPhysicalDetailProfile(zoom = 1) {
     mountainLabels: lod === "city" || lod === "detailed",
     lakes: lod !== "world",
     physicalLabels: lod === "province" || lod === "city" || lod === "detailed",
-    // Broad sea polygons can fight the GPU land mask. Water is now owned by
-    // the mask/background, while rivers and lakes remain explicit details.
     waterChannels: false,
   });
 }
@@ -77,7 +73,7 @@ export function getProvincePresentation(zoom = 1) {
 export function getCityLabelPolicy(zoom = 1) {
   const lod = getMapLod(zoom);
   return Object.freeze({
-    maxLabels: lod === "world" ? 6 : lod === "regional" ? 10 : lod === "province" ? 16 : lod === "city" ? 22 : 28,
+    maxLabels: lod === "world" ? 5 : lod === "regional" ? 8 : lod === "province" ? 12 : lod === "city" ? 18 : 22,
     showTowns: lod === "province" || lod === "city" || lod === "detailed",
     showVillages: lod === "detailed",
   });
@@ -86,25 +82,23 @@ export function getCityLabelPolicy(zoom = 1) {
 export function getPhysicalPresentation(zoom = 1) {
   const lod = getMapLod(zoom);
   return Object.freeze({
-    // Terrain regions are research metadata until they are rasterized through
-    // the same land-mask compositor as political ownership.
     terrainOpacity: 0,
-    riverOpacity: lod === "regional" ? 0.50 : lod === "province" ? 0.64 : 0.78,
-    mountainOpacity: lod === "regional" ? 0.08 : lod === "province" ? 0.13 : 0.18,
-    lakeOpacity: lod === "regional" ? 0.62 : lod === "province" ? 0.74 : 0.84,
+    riverOpacity: lod === "regional" ? 0.46 : lod === "province" ? 0.60 : 0.72,
+    mountainOpacity: lod === "regional" ? 0.06 : lod === "province" ? 0.10 : 0.14,
+    lakeOpacity: lod === "regional" ? 0.58 : lod === "province" ? 0.68 : 0.76,
   });
 }
 
 export function getPhysicalStrokeProfile(zoom = 1) {
   const lod = getMapLod(zoom);
   if (lod === "regional") {
-    return Object.freeze({ river: 1.15, minorRiver: 0.85, mountain: 0.90, minorMountain: 0.70, lake: 0.80 });
+    return Object.freeze({ river: 1.05, minorRiver: 0.72, mountain: 0.78, minorMountain: 0.62, lake: 0.85 });
   }
   if (lod === "province") {
-    return Object.freeze({ river: 1.35, minorRiver: 0.95, mountain: 1.00, minorMountain: 0.78, lake: 0.90 });
+    return Object.freeze({ river: 1.20, minorRiver: 0.78, mountain: 0.88, minorMountain: 0.66, lake: 0.90 });
   }
   if (lod === "city" || lod === "detailed") {
-    return Object.freeze({ river: 1.55, minorRiver: 1.05, mountain: 1.10, minorMountain: 0.82, lake: 1.00 });
+    return Object.freeze({ river: 1.35, minorRiver: 0.86, mountain: 0.96, minorMountain: 0.70, lake: 1.00 });
   }
-  return Object.freeze({ river: 0.95, minorRiver: 0.70, mountain: 0.75, minorMountain: 0.60, lake: 0.70 });
+  return Object.freeze({ river: 0.90, minorRiver: 0.64, mountain: 0.70, minorMountain: 0.56, lake: 0.78 });
 }

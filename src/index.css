@@ -67,7 +67,7 @@ button { cursor: pointer; }
 ul { padding-left: 25px; }
 
 /* ==========================================================
-   MAP — PHYSICAL GEOGRAPHY 2.0
+   MAP — PHYSICAL GEOGRAPHY 2.1
 ========================================================== */
 
 .map-land-base {
@@ -106,20 +106,28 @@ ul { padding-left: 25px; }
 }
 
 .map-lake {
-  fill: #2c5962;
-  stroke: #6d9295;
-  stroke-width: 0.8px;
+  fill: #2d6570;
+  fill-opacity: 0.88;
+  stroke: #78a3aa;
+  stroke-opacity: 0.72;
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+
+.map-river-under {
+  stroke: #284c55;
+  fill: none;
 }
 
 .map-river {
-  stroke: #76aab3;
+  stroke: #75aeb8;
   fill: none;
 }
 
 .map-mountain {
-  stroke: #554f3d;
+  stroke: #625d4d;
   fill: none;
-  stroke-dasharray: 4px 3px;
+  stroke-dasharray: 3px 4px;
 }
 
 .map-coastline {

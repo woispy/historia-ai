@@ -78,6 +78,8 @@ jobs:
         run: npm run test:cartography-foundation
       - name: Run map texture atlas regression tests
         run: npm run test:map-texture-atlas
+      - name: Run cartography visual regression tests
+        run: npm run test:cartography-visual
       - name: Generate historical GIS runtime assets
         run: npm run build:historical-gis:1300
       - name: Validate historical GIS runtime assets
@@ -103,6 +105,7 @@ jobs:
           node --check tools/tests/cartography-2efgh.test.js &&
           node --check tools/tests/cartography-foundation.test.js &&
           node --check tools/tests/map-texture-atlas.test.js &&
+          node --check tools/tests/cartography-visual-regression.test.js &&
           node --check src/map/data/AnatoliaProvinceRefinement.js &&
           node --check src/map/data/CartographyAtlas.js &&
           node --check src/map/rendering/CartographyModel.js &&

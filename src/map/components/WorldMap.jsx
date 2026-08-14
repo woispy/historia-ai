@@ -48,8 +48,8 @@ function WorldMap({
 
   const world = useMemo(() => <WorldPhysicalLayer />, []);
   const base = useMemo(
-    () => <PhysicalGeographyLayer phase="base" zoom={cameraState.zoom} />,
-    [cameraState.zoom],
+    () => <PhysicalGeographyLayer phase="base" zoom={cameraState.zoom} camera={cameraState} />,
+    [cameraState.zoom, cameraState],
   );
   const useGpuProvinceFill = shouldUseGpuProvinceFill(cameraState.zoom);
   const provincesLayer = useMemo(
@@ -81,22 +81,23 @@ function WorldMap({
     [cameraState.zoom],
   );
   const water = useMemo(
-    () => <PhysicalGeographyLayer phase="water" zoom={cameraState.zoom} />,
-    [cameraState.zoom],
+    () => <PhysicalGeographyLayer phase="water" zoom={cameraState.zoom} camera={cameraState} />,
+    [cameraState.zoom, cameraState],
   );
   const detail = useMemo(
-    () => <PhysicalGeographyLayer phase="detail" zoom={cameraState.zoom} />,
-    [cameraState.zoom],
+    () => <PhysicalGeographyLayer phase="detail" zoom={cameraState.zoom} camera={cameraState} />,
+    [cameraState.zoom, cameraState],
   );
   const citiesLayer = useMemo(
     () => (
       <CityLayer
         cities={cities}
         zoom={cameraState.zoom}
+        camera={cameraState}
         onCityClick={cityClick}
       />
     ),
-    [cities, cameraState.zoom, cityClick],
+    [cities, cameraState.zoom, cameraState, cityClick],
   );
   const layers = useMemo(
     () => (

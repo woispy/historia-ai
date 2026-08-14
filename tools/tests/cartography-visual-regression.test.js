@@ -1,0 +1,82 @@
+import assert from "node:assert/strict";
+import { ANATOLIA_CITY_ATLAS } from "../../src/map/data/AnatoliaCityAtlas.js";
+import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
+import {
+  getCityLabelBudget,
+  getCityMarkerBudget,
+  getCityVisualStyle,
+  layoutCityLabels,
+  boxesOverlap,
+} from "../../src/map/rendering/city/CityLabelLayout.js";
+import {
+  getMapLod,
+  getPhysicalPresentation,
+  getPhysicalStrokeProfile,
+  shouldUseGpuProvinceFill,
+} from "../../src/map/rendering/CartographyModel.js";
+
+const cities = Object.entries(ANATOLIA_CITY_ATLAS).map(([id, map]) => ({ id, map }));
+
+assert.equal(getMapLod(1), "world");
+assert.equal(getMapLod(2.8), "city");
+assert.equal(getMapLod(8), "detailed");
+assert.equal(shouldUseGpuProvinceFill(1), true);
+assert.equal(shouldUseGpuProvinceFill(1.75), false);
+
+for (const zoom of [1, 1.5, 2, 3, 4, 8, 16]) {
+  const labels = layoutCityLabels(cities, zoom);
+  assert.ok(labels.length <= getCityLabelBudget(zoom));
+
+  for (let index = 0; index < labels.length; index += 1) {
+    const left = labels[index];
+    const leftWidth = Math.max(left.fontSize * 1.9, left.city.map.name.length * left.fontSize * 0.48);
+    const leftBox = {
+      left: left.anchor === "start" ? left.x : left.anchor === "end" ? left.x - leftWidth : left.x - leftWidth / 2,
+      right: left.anchor === "start" ? left.x + leftWidth : left.anchor === "end" ? left.x : left.x + leftWidth / 2,
+      top: left.y - left.fontSize * 0.78,
+      bottom: left.y + left.fontSize * 0.24,
+    };
+
+    for (let rightIndex = index + 1; rightIndex < labels.length; rightIndex += 1) {
+      const right = labels[rightIndex];
+      const rightWidth = Math.max(right.fontSize * 1.9, right.city.map.name.length * right.fontSize * 0.48);
+      const rightBox = {
+        left: right.anchor === "start" ? right.x : right.anchor === "end" ? right.x - rightWidth : right.x - rightWidth / 2,
+        right: right.anchor === "start" ? right.x + rightWidth : right.anchor === "end" ? right.x : right.x + rightWidth / 2,
+        top: right.y - right.fontSize * 0.78,
+        bottom: right.y + right.fontSize * 0.24,
+      };
+      assert.equal(boxesOverlap(leftBox, rightBox, 0.08), false, `label collision at zoom ${zoom}`);
+    }
+  }
+
+  const secondPass = layoutCityLabels(cities, zoom);
+  assert.deepEqual(
+    labels.map(({ city, x, y, anchor, fontSize }) => [city.id, x, y, anchor, fontSize]),
+    secondPass.map(({ city, x, y, anchor, fontSize }) => [city.id, x, y, anchor, fontSize]),
+  );
+
+  const capital = cities.find((city) => city.map.tier === "capital");
+  assert.ok(getCityVisualStyle(capital, zoom).fontSize >= 0.16);
+  assert.ok(getCityMarkerBudget(zoom) >= getCityLabelBudget(zoom));
+}
+
+for (const zoom of [1.5, 2, 3, 4, 8]) {
+  const presentation = getPhysicalPresentation(zoom);
+  const stroke = getPhysicalStrokeProfile(zoom);
+  assert.ok(presentation.riverOpacity > 0);
+  assert.ok(presentation.lakeOpacity > 0);
+  assert.ok(stroke.river > stroke.minorRiver);
+  assert.ok(stroke.mountain > stroke.minorMountain);
+}
+
+for (const lake of ANATOLIA_PHYSICAL_ATLAS.lakes) {
+  assert.ok(lake.coordinates.length >= 6, `${lake.name} needs enough control points for smoothing`);
+  assert.ok(new Set(lake.coordinates.map(([x, y]) => `${x},${y}`)).size >= 5, `${lake.name} is degenerate`);
+}
+
+for (const river of ANATOLIA_PHYSICAL_ATLAS.rivers) {
+  assert.ok(river.coordinates.length >= 3, `${river.name} needs a continuous path`);
+}
+
+console.log(`Cartography visual regression tests passed: ${cities.length} cities, ${ANATOLIA_PHYSICAL_ATLAS.rivers.length} rivers, ${ANATOLIA_PHYSICAL_ATLAS.lakes.length} lakes, deterministic collision-safe labels across 7 zoom levels.`);

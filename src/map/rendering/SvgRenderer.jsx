@@ -14,8 +14,6 @@ function SvgRenderer({ children, camera = {} }) {
   const viewX = centerX - viewWidth / 2;
   const viewY = -centerY - viewHeight / 2;
 
-  // Three copies remain sufficient for the supported camera range, including
-  // the slightly wider overview viewport at minZoom 0.85.
   const copyCenter = Math.floor(centerX / 360);
   const copies = [copyCenter - 1, copyCenter, copyCenter + 1];
 
@@ -25,10 +23,21 @@ function SvgRenderer({ children, camera = {} }) {
       height="100%"
       viewBox={`${viewX} ${viewY} ${viewWidth} ${viewHeight}`}
       preserveAspectRatio="xMidYMid meet"
-      shapeRendering="auto"
+      shapeRendering="geometricPrecision"
       textRendering="geometricPrecision"
       style={{ display: "block" }}
     >
+      <defs>
+        <filter id="map-label-halo" x="-30%" y="-45%" width="160%" height="190%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="1.15" result="blur" />
+          <feFlood floodColor="#071011" floodOpacity="0.82" result="color" />
+          <feComposite in="color" in2="blur" operator="in" result="halo" />
+          <feMerge>
+            <feMergeNode in="halo" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
       <g transform="scale(1,-1)">
         {copies.map((copy) => (
           <g key={copy} transform={`translate(${copy * 360} 0)`}>

@@ -6,15 +6,38 @@ import {
   selectVisibleCities,
 } from "../../rendering/city/CityLabelLayout.js";
 
+const WORLD_WIDTH = 360;
+
 function mergeCityMetadata(city) {
   const atlas = getAnatoliaCityMapMetadata(city.id);
   if (!atlas) return null;
   return { ...city, map: atlas };
 }
 
-function getVisibleCities(cities, zoom) {
+function longitudeDelta(a, b) {
+  let delta = Number(a) - Number(b);
+  while (delta > 180) delta -= WORLD_WIDTH;
+  while (delta < -180) delta += WORLD_WIDTH;
+  return delta;
+}
+
+function isCityInViewport(city, camera, padding = 0.18) {
+  if (!camera) return true;
+  const zoom = Math.max(0.001, Number(camera.zoom) || 1);
+  const viewWidth = WORLD_WIDTH / zoom;
+  const viewHeight = 180 / zoom;
+  const horizontalPadding = viewWidth * padding;
+  const verticalPadding = viewHeight * padding;
+  return (
+    Math.abs(longitudeDelta(city.map.x, camera.x ?? 0)) <= viewWidth / 2 + horizontalPadding
+    && Math.abs(city.map.y - Number(camera.y ?? 0)) <= viewHeight / 2 + verticalPadding
+  );
+}
+
+function getVisibleCities(cities, zoom, camera) {
   const mapped = cities.map(mergeCityMetadata).filter(Boolean);
-  return selectVisibleCities(mapped, zoom);
+  const viewportCities = mapped.filter((city) => isCityInViewport(city, camera));
+  return selectVisibleCities(viewportCities, zoom);
 }
 
 function CityMarker({ city, zoom, onClick }) {
@@ -24,7 +47,11 @@ function CityMarker({ city, zoom, onClick }) {
   const detailed = zoom >= 2.55;
 
   return (
-    <g key={city.id} onClick={() => onClick?.(city.id, city.map)} style={{ cursor: onClick ? "pointer" : "default" }}>
+    <g
+      key={city.id}
+      onClick={() => onClick?.(city.id, city.map)}
+      style={{ cursor: onClick ? "pointer" : "default" }}
+    >
       {isCapital && (
         <circle
           cx={x}
@@ -33,7 +60,7 @@ function CityMarker({ city, zoom, onClick }) {
           fill="none"
           stroke="#d9bf68"
           strokeOpacity="0.72"
-          strokeWidth="0.90"
+          strokeWidth="1.15"
           vectorEffect="non-scaling-stroke"
         />
       )}
@@ -43,7 +70,7 @@ function CityMarker({ city, zoom, onClick }) {
         r={radius}
         fill={isCapital ? "#f0d276" : "#e8e1c9"}
         stroke="#151916"
-        strokeWidth="0.80"
+        strokeWidth="1.00"
         vectorEffect="non-scaling-stroke"
       />
       {fortified && detailed && (
@@ -54,8 +81,8 @@ function CityMarker({ city, zoom, onClick }) {
           fill="none"
           stroke="#cbb76f"
           strokeOpacity="0.62"
-          strokeWidth="0.70"
-          strokeDasharray="2 2"
+          strokeWidth="0.90"
+          strokeDasharray="3 3"
           vectorEffect="non-scaling-stroke"
         />
       )}
@@ -63,7 +90,8 @@ function CityMarker({ city, zoom, onClick }) {
         <path
           d={`M ${x - 0.12} ${y - 0.12} L ${x + 0.12} ${y - 0.12}`}
           stroke="#6f9fa9"
-          strokeWidth="0.80"
+          strokeWidth="1.00"
+          strokeLinecap="round"
           vectorEffect="non-scaling-stroke"
         />
       )}
@@ -82,10 +110,12 @@ function CityLabel({ city, fontSize, x, y, anchor }) {
         fontFamily="Georgia, serif"
         fontWeight={city.map.tier === "capital" ? "700" : "600"}
         fill="#eee7d1"
-        stroke="#151916"
-        strokeWidth="0.65"
+        fillOpacity="0.96"
+        stroke="#0b1010"
+        strokeOpacity="0.52"
+        strokeWidth="0.08"
         paintOrder="stroke"
-        vectorEffect="non-scaling-stroke"
+        filter="url(#map-label-halo)"
       >
         {city.map.name}
       </text>
@@ -93,8 +123,8 @@ function CityLabel({ city, fontSize, x, y, anchor }) {
   );
 }
 
-function CityLayer({ cities = [], zoom = 1, onCityClick }) {
-  const visibleCities = getVisibleCities(cities, zoom);
+function CityLayer({ cities = [], zoom = 1, camera, onCityClick }) {
+  const visibleCities = getVisibleCities(cities, zoom, camera);
   const labels = layoutCityLabels(visibleCities, zoom);
   const lod = getMapLod(zoom);
 
