@@ -41,10 +41,9 @@ function getVisibleCities(cities, zoom, camera) {
 }
 
 function CityMarker({ city, zoom, onClick }) {
-  const { x, y, tier, port, fortified } = city.map;
+  const { x, y, tier } = city.map;
   const { radius } = getCityVisualStyle(city, zoom);
   const isCapital = tier === "capital";
-  const detailed = zoom >= 2.55;
 
   return (
     <g
@@ -73,28 +72,6 @@ function CityMarker({ city, zoom, onClick }) {
         strokeWidth="1.00"
         vectorEffect="non-scaling-stroke"
       />
-      {fortified && detailed && (
-        <circle
-          cx={x}
-          cy={y}
-          r={radius + 0.055}
-          fill="none"
-          stroke="#cbb76f"
-          strokeOpacity="0.62"
-          strokeWidth="0.90"
-          strokeDasharray="3 3"
-          vectorEffect="non-scaling-stroke"
-        />
-      )}
-      {port && zoom >= 2.0 && (
-        <path
-          d={`M ${x - 0.12} ${y - 0.12} L ${x + 0.12} ${y - 0.12}`}
-          stroke="#6f9fa9"
-          strokeWidth="1.00"
-          strokeLinecap="round"
-          vectorEffect="non-scaling-stroke"
-        />
-      )}
     </g>
   );
 }
@@ -111,11 +88,10 @@ function CityLabel({ city, fontSize, x, y, anchor }) {
         fontWeight={city.map.tier === "capital" ? "700" : "600"}
         fill="#eee7d1"
         fillOpacity="0.96"
-        stroke="#0b1010"
-        strokeOpacity="0.52"
-        strokeWidth="0.08"
+        stroke="#071011"
+        strokeOpacity="0.82"
+        strokeWidth="0.035"
         paintOrder="stroke"
-        filter="url(#map-label-halo)"
       >
         {city.map.name}
       </text>
@@ -125,7 +101,7 @@ function CityLabel({ city, fontSize, x, y, anchor }) {
 
 function CityLayer({ cities = [], zoom = 1, camera, onCityClick }) {
   const visibleCities = getVisibleCities(cities, zoom, camera);
-  const labels = layoutCityLabels(visibleCities, zoom);
+  const labels = layoutCityLabels(visibleCities, zoom, camera);
   const lod = getMapLod(zoom);
 
   return (
