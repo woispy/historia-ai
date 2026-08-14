@@ -105,22 +105,24 @@ ul { padding-left: 25px; }
   stroke: none;
 }
 
+/* Water bodies stay subdued so political fills and city markers remain the
+   primary strategic layer. The contour is intentionally softer than before. */
 .map-lake {
-  fill: #2d6570;
-  fill-opacity: 0.88;
-  stroke: #78a3aa;
-  stroke-opacity: 0.72;
-  stroke-width: 1px;
+  fill: #315b60;
+  fill-opacity: 0.70;
+  stroke: #71969b;
+  stroke-opacity: 0.54;
+  stroke-width: 0.85px;
   vector-effect: non-scaling-stroke;
 }
 
 .map-river-under {
-  stroke: #284c55;
+  stroke: #23464e;
   fill: none;
 }
 
 .map-river {
-  stroke: #75aeb8;
+  stroke: #669da7;
   fill: none;
 }
 
