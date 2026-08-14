@@ -18,6 +18,7 @@ on:
       - feat/phase2efgh-cartography
       - feat/cartography-visual-refinement
       - feat/cartography-foundation-v2
+      - feat/map-gpu-texture-architecture
   push:
     branches:
       - master
