@@ -1,3 +1,4 @@
+# Temporary validation workflow; self-removes after a successful run.
 name: Cartography Foundation Apply
 
 on:
