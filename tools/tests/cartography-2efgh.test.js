@@ -1,4 +1,3 @@
-import assert from "node:assert/strict";
 import { ANATOLIA_REGION_LABELS, ANATOLIA_STRATEGIC_CORRIDORS, ANATOLIA_STRATEGIC_PASSES, ANATOLIA_STRATEGIC_CROSSINGS } from "../../src/map/data/AnatoliaStrategicAtlas.js";
 import { ANATOLIA_CITY_ATLAS } from "../../src/map/data/AnatoliaCityAtlas.js";
 import { getMapLod } from "../../src/map/rendering/CartographyModel.js";
