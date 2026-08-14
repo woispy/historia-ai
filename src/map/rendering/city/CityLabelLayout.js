@@ -156,11 +156,13 @@ function isLabelInViewport(box, camera) {
   const minX = centerX - viewWidth / 2;
   const maxX = centerX + viewWidth / 2;
 
-  if (box.bottom < minY || box.top > maxY) return false;
+  const verticalFit = box.top >= minY && box.bottom <= maxY;
+  if (!verticalFit) return false;
 
   const worldWidth = 360;
-  const candidates = [box.left, box.right, box.left + worldWidth, box.right + worldWidth, box.left - worldWidth, box.right - worldWidth];
-  return candidates.some((value) => value >= minX && value <= maxX);
+  return [0, worldWidth, -worldWidth].some((offset) => (
+    box.left + offset >= minX && box.right + offset <= maxX
+  ));
 }
 
 export function boxesOverlap(a, b, padding = 0.08) {
