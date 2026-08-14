@@ -60,7 +60,7 @@ function WorldMap({
         mapShadows={settings.mapShadows !== false}
         zoom={cameraState.zoom}
         camera={cameraState}
-        renderFill={!textureReady}
+        renderFill={!textureReady || cameraState.zoom >= 3.35}
       />
     ),
     [
@@ -70,7 +70,6 @@ function WorldMap({
       settings.mapStyle,
       settings.mapShadows,
       cameraState,
-      cameraState.zoom,
       textureReady,
     ],
   );

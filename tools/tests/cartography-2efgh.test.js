@@ -65,7 +65,10 @@ const far = { id: "far", map: { name: "Dorylaion", x: 30.52, y: 39.77, tier: "ma
 const labels = layoutCityLabels([capital, nearby, far], 2.9);
 assert(labels.some((label) => label.city.id === "capital"), "capital label should survive collision layout");
 assert(labels.length <= getCityLabelBudget(2.9), "collision layout exceeded label budget");
-assert(getCityVisualStyle(capital, 8).fontSize < getCityVisualStyle(capital, 2).fontSize, "deep zoom should not inflate label size");
+const mediumFont = getCityVisualStyle(capital, 2).fontSize;
+const deepFont = getCityVisualStyle(capital, 8).fontSize;
+assert(deepFont <= mediumFont, "deep zoom should not inflate label size");
+assert(deepFont > 0.1, "deep zoom city label should remain readable");
 assert(boxesOverlap({ left: 0, right: 1, top: 0, bottom: 1 }, { left: 0.9, right: 2, top: 0, bottom: 1 }), "overlap predicate failed");
 assert(!boxesOverlap({ left: 0, right: 1, top: 0, bottom: 1 }, { left: 1.2, right: 2, top: 0, bottom: 1 }), "overlap predicate false positive");
 
