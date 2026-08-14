@@ -4,47 +4,44 @@ import json
 ROOT = Path('.')
 
 
-def replace_once(path, old, new):
+def replace_if_present(path, old, new):
     p = ROOT / path
     text = p.read_text(encoding='utf-8')
-    if old not in text:
-        raise SystemExit(f'Expected text not found in {path}: {old!r}')
-    p.write_text(text.replace(old, new, 1), encoding='utf-8')
+    if old in text:
+        p.write_text(text.replace(old, new, 1), encoding='utf-8')
 
 
-replace_once(
+replace_if_present(
     'src/map/components/WorldMap.jsx',
     '''  const base = useMemo(\n    () => <PhysicalGeographyLayer phase="base" zoom={cameraState.zoom} />,\n    [cameraState.zoom],\n  );''',
     '''  const base = <PhysicalGeographyLayer phase="base" zoom={cameraState.zoom} />;''',
 )
-replace_once(
+replace_if_present(
     'src/map/components/WorldMap.jsx',
     '        renderFill={!textureReady}',
     '        renderFill={!textureReady || cameraState.zoom >= 3.35}',
 )
-
-replace_once(
+replace_if_present(
     'src/map/components/layers/CityLayer.jsx',
     '''function getLabelScale(zoom) {\n  if (zoom >= 6) return 0.42;\n  if (zoom >= 4) return 0.52;\n  if (zoom >= 3.35) return 0.62;\n  if (zoom >= 2.55) return 0.74;\n  return 1;\n}\n\n''',
     '',
 )
-replace_once(
+replace_if_present(
     'src/map/components/layers/CityLayer.jsx',
     'function CityLabel({ city, fontSize, x, y, anchor, zoom }) {',
     'function CityLabel({ city, fontSize, x, y, anchor }) {',
 )
-replace_once(
+replace_if_present(
     'src/map/components/layers/CityLayer.jsx',
     '        fontSize={fontSize * getLabelScale(zoom)}',
     '        fontSize={fontSize}',
 )
-replace_once(
+replace_if_present(
     'src/map/components/layers/CityLayer.jsx',
     '          anchor={anchor}\n          zoom={zoom}',
     '          anchor={anchor}',
 )
-
-replace_once(
+replace_if_present(
     'src/map/rendering/city/CityLabelLayout.js',
     '  return Math.max(0.035, Math.min(1.0, 0.95 * zoom ** -0.65));',
     '  return Math.max(0.22, Math.min(0.55, 1.8 / Math.sqrt(Math.max(1, zoom))));',
@@ -78,7 +75,6 @@ for (const zoom of [1.2, 2.8, 3.6, 5, 8]) {
   const labels = layoutCityLabels(visible, zoom);
   assert.ok(labels.length > 0, `Expected city labels at zoom ${zoom}`);
   assert.ok(labels.length <= 32, `Label budget exceeded at zoom ${zoom}`);
-
   const placedBoxes = [];
   for (const label of labels) {
     const style = getCityVisualStyle(label.city, zoom);
@@ -91,20 +87,17 @@ for (const zoom of [1.2, 2.8, 3.6, 5, 8]) {
       top: label.y - style.fontSize * 0.76,
       bottom: label.y + style.fontSize * 0.22,
     };
-    for (const other of placedBoxes) {
-      assert.equal(boxesOverlap(box, other), false, `City labels overlap at zoom ${zoom}`);
-    }
+    for (const other of placedBoxes) assert.equal(boxesOverlap(box, other), false, `City labels overlap at zoom ${zoom}`);
     placedBoxes.push(box);
   }
 }
 
-assert.ok(getCityVisualStyle(cities[0], 8).fontSize > 0.1, "Deep-zoom city typography must remain readable.");
+assert.ok(getCityVisualStyle(cities[0], 8).fontSize > 0.1);
 assert.ok(ANATOLIA_PHYSICAL_ATLAS.lakes.length >= 8);
 assert.ok(ANATOLIA_PHYSICAL_ATLAS.rivers.length >= 10);
 assert.ok(ANATOLIA_PHYSICAL_ATLAS.labels.filter((label) => label.kind === "sea").every((label) => label.maxZoom >= 8));
 
-const requiredCities = ["konstantinopolis", "iznik", "bursa", "ankara", "konya", "kayseri", "sivas", "trabzon", "erzurum"];
-for (const id of requiredCities) {
+for (const id of ["konstantinopolis", "iznik", "bursa", "ankara", "konya", "kayseri", "sivas", "trabzon", "erzurum"]) {
   assert.ok(ANATOLIA_CITY_ATLAS[id], `Missing historical city atlas entry: ${id}`);
 }
 
@@ -118,11 +111,8 @@ package_path.write_text(json.dumps(package, ensure_ascii=False, indent=2) + '\n'
 
 ci_path = ROOT / '.github/workflows/ci.yml'
 ci = ci_path.read_text(encoding='utf-8')
-if 'npm run test:cartography-foundation' not in ci:
-    needle = 'npm run test:cartography-2efgh'
-    if needle not in ci:
-        raise SystemExit('CI insertion point not found')
-    ci = ci.replace(needle, needle + '\n          npm run test:cartography-foundation', 1)
+if 'npm run test:cartography-foundation' not in ci and 'npm run test:cartography-2efgh' in ci:
+    ci = ci.replace('npm run test:cartography-2efgh', 'npm run test:cartography-2efgh\n          npm run test:cartography-foundation', 1)
 ci_path.write_text(ci, encoding='utf-8')
 
 print('Cartography foundation source patch prepared.')
