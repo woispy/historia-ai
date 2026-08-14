@@ -8,6 +8,7 @@ on:
       - feat/cartography-foundation-v2
     paths:
       - '.github/workflows/cartography-apply.yml'
+      - 'tools/cartography/upgrade-foundation.py'
 
 permissions:
   contents: write
