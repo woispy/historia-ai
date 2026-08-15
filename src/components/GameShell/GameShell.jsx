@@ -8,7 +8,7 @@ import OverlayManager from "./OverlayManager/OverlayManager";
 import NotificationToast from "../NotificationToast/NotificationToast";
 import { getCurrentGame, updateCurrentGame, setCurrentGame, clearCurrentGame } from "../../game/currentGame";
 import { getCurrentDate, getTimeline, getPendingActions } from "../../state";
-import { advanceWeek, advanceMonth, advanceSixMonths, advanceYear } from "../../systems/Action";
+import { GameEngine } from "../../engine";
 import {
   saveGame,
   loadGame,
@@ -67,12 +67,17 @@ function GameShell() {
     };
   }, [settings]);
 
-  function advance(simulator) {
+  function advanceBy(unit, amount) {
     if (busy) return;
     setBusy(true);
 
     setGameSession((previousSession) => {
-      const nextSession = simulator(previousSession);
+      const nextSession = GameEngine.advance(
+        previousSession,
+        unit,
+        amount
+      );
+
       updateCurrentGame(nextSession);
 
       if (shouldAutoSave(previousSession, nextSession, settings.autosave)) {
@@ -83,13 +88,6 @@ function GameShell() {
     });
 
     setBusy(false);
-  }
-
-  function advanceBy(unit, amount) {
-    if (unit === "week" && amount === 1) return advance(advanceWeek);
-    if (unit === "month" && amount === 1) return advance(advanceMonth);
-    if (unit === "month" && amount === 6) return advance(advanceSixMonths);
-    if (unit === "year" && amount === 1) return advance(advanceYear);
   }
 
   function toggleSettings(nextOpen) {
@@ -130,7 +128,7 @@ function GameShell() {
     navigate("/");
   }
 
-  const simulation = gameSession.runtime?.simulation ?? {};
+  const simulation = gameSession.state?.simulation ?? {};
 
   return (
     <Layout title="">
