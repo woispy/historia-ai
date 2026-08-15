@@ -2,14 +2,13 @@ import { createScenarioDefinition } from "./ScenarioDefinition.js";
 import { loadResourceFolder } from "./ResourceLoader.js";
 
 /**
- * Loads scenario definitions in both Vite/browser and native Node ESM.
- *
- * Browser builds use Vite's import.meta.glob transform.
- * Native runtime tests resolve scenario.json directly through Node's
- * synchronous builtin filesystem API.
+ * Browser asset discovery is compiled by Vite, while native Node ESM uses
+ * the filesystem fallback below. The environment guard is intentionally
+ * separate from the glob call: `import.meta.glob` is a Vite compile-time API
+ * and does not exist in native Node.
  */
 const viteScenarioFiles =
-  typeof import.meta.glob === "function"
+  import.meta.env?.DEV || import.meta.env?.PROD
     ? import.meta.glob(
         "../../data/scenarios/*/scenario.json",
         {
