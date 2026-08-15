@@ -1,5 +1,5 @@
-import { interpretAction } from "../Interpreter";
-import { processTurn } from "../Turn";
+import { interpretAction } from "../Interpreter/index.js";
+import { processTurn } from "../Turn/TurnEngine.js";
 
 function rebuildGameSession(gameSession, state) {
   return { ...gameSession, state };
