@@ -1,5 +1,5 @@
-import { createScenarioDefinition } from "./ScenarioDefinition";
-import { loadResourceFolder } from "./ResourceLoader";
+import { createScenarioDefinition } from "./ScenarioDefinition.js";
+import { loadResourceFolder } from "./ResourceLoader.js";
 
 /**
  * Loads every scenario.json file at build time.
