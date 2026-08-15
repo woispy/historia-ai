@@ -1,17 +1,17 @@
-import { createGameSession } from "../engine";
+import { createGameSession } from "../engine/index.js";
 
 import {
   loadScenario,
   validateScenario,
-} from "../scenarios";
+} from "../scenarios/index.js";
 
 import {
   createRuntimeState,
-} from "../state";
+} from "../state/index.js";
 
 import {
   bootstrapWorld,
-} from "../world";
+} from "../world/index.js";
 
 export function createGame({
   scenarioId,
