@@ -1,4 +1,4 @@
-import { createCharacterModel } from "./CharacterModel";
+import { createCharacterModel } from "./CharacterModel.js";
 
 /**
  * ============================================================================
