@@ -1,4 +1,4 @@
-import { getRuntime, updateRuntime } from "../../../state";
+import { getState, updateState } from "../../../state";
 import { addTimelineEvent } from "../../Timeline";
 
 function clamp(value, min, max) {
@@ -6,8 +6,8 @@ function clamp(value, min, max) {
 }
 
 export function processEconomy(gameSession) {
-  const runtime = getRuntime(gameSession);
-  const simulation = runtime.simulation ?? {};
+  const state = getState(gameSession);
+  const simulation = state.simulation ?? {};
   const playerCountryId = gameSession.player?.countryId;
   const cities = Object.values(
     gameSession.world.repositories.cities?.byId ?? {}
@@ -39,8 +39,8 @@ export function processEconomy(gameSession) {
         : `Hazine ${Math.abs(net)} altın azaldı.`,
   };
 
-  let nextSession = updateRuntime(gameSession, {
-    ...runtime,
+  let nextSession = updateState(gameSession, {
+    ...state,
     simulation: nextSimulation,
   });
 
