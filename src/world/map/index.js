@@ -1,5 +1,6 @@
 export {
   createMap,
-} from "./MapFactory";
+} from "./MapFactory.js";
 
-export * from "./geometry";
+export * from "./geometry/index.js";
+export * from "./geometry.js";
