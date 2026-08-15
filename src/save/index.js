@@ -5,4 +5,4 @@ export {
   deleteGame,
   hasGameSave,
   getGameSaveInfo,
-} from "./SaveManager";
+} from "./SaveManager.js";
