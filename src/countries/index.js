@@ -1,25 +1,25 @@
 export {
   createCountry,
-} from "./CountryFactory";
+} from "./CountryFactory.js";
 
 export {
   createCountryModel,
-} from "./CountryModel";
+} from "./CountryModel.js";
 
 export {
   createCountryRepository,
   addCountry,
   updateCountry,
   removeCountry,
-} from "./CountryRepository";
+} from "./CountryRepository.js";
 
 export {
   createCountryRepositoryFromArray,
-} from "./CountryBootstrap";
+} from "./CountryBootstrap.js";
 
 export {
   getCountry,
   getCountries,
   getCountryCapital,
   getPlayableCountries,
-} from "./CountryQueries";
+} from "./CountryQueries.js";
