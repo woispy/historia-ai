@@ -1,128 +1,75 @@
 import { useState } from "react";
 
 import {
-  queueAction,
-  updateAction,
-  removeAction,
-} from "../systems/Action";
+  GameEngine,
+} from "../engine";
 
 import {
   updateCurrentGame,
 } from "../game/currentGame";
 
-export function useDecisionEditor(
-  setGameSession
-) {
-  const [
-    editingAction,
-    setEditingAction,
-  ] = useState(null);
-
-  const [
-    decisionText,
-    setDecisionText,
-  ] = useState("");
+export function useDecisionEditor(setGameSession) {
+  const [editingAction, setEditingAction] = useState(null);
+  const [decisionText, setDecisionText] = useState("");
 
   function submitAction() {
-    const text =
-      decisionText.trim();
+    const text = decisionText.trim();
 
     if (!text) {
       return;
     }
 
-    setGameSession(
-      (previousSession) => {
-        let nextSession;
+    setGameSession((previousSession) => {
+      const nextSession = editingAction
+        ? GameEngine.updateAction(
+            previousSession,
+            editingAction.id,
+            { text }
+          )
+        : GameEngine.queueAction(previousSession, text);
 
-        if (editingAction) {
-          nextSession =
-            updateAction(
-              previousSession,
-              editingAction.id,
-              {
-                text,
-              }
-            );
-        } else {
-          nextSession =
-            queueAction(
-              previousSession,
-              text
-            );
-        }
-
-        updateCurrentGame(
-          nextSession
-        );
-
-        return nextSession;
-      }
-    );
+      updateCurrentGame(nextSession);
+      return nextSession;
+    });
 
     setEditingAction(null);
-
     setDecisionText("");
   }
 
-  function startEditing(
-    action
-  ) {
+  function startEditing(action) {
     setEditingAction(action);
-
-    setDecisionText(
-      action.text
-    );
+    setDecisionText(action.text);
   }
 
   function cancelEditing() {
     setEditingAction(null);
-
     setDecisionText("");
   }
 
-  function deleteAction(
-    actionId
-  ) {
-    setGameSession(
-      (previousSession) => {
-        const nextSession =
-          removeAction(
-            previousSession,
-            actionId
-          );
+  function deleteAction(actionId) {
+    setGameSession((previousSession) => {
+      const nextSession = GameEngine.removeAction(
+        previousSession,
+        actionId
+      );
 
-        updateCurrentGame(
-          nextSession
-        );
+      updateCurrentGame(nextSession);
+      return nextSession;
+    });
 
-        return nextSession;
-      }
-    );
-
-    if (
-      editingAction?.id ===
-      actionId
-    ) {
+    if (editingAction?.id === actionId) {
       setEditingAction(null);
-
       setDecisionText("");
     }
   }
 
   return {
     editingAction,
-
     decisionText,
-
     setDecisionText,
-
     submitAction,
-
     startEditing,
-
     cancelEditing,
-
     deleteAction,
   };
 }
