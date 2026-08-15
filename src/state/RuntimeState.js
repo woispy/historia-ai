@@ -1,4 +1,4 @@
-import { createGameTime } from "../systems/Time";
+import { createGameTime } from "../systems/Time/index.js";
 
 function parseStartDate(startDate) {
   if (!startDate) return undefined;
