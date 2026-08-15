@@ -7,14 +7,6 @@ export {
 } from "./WorldMap";
 
 export {
-  default as MapProvince,
-} from "./MapProvince";
-
-export {
-  default as MapProvinceLabel,
-} from "./MapProvinceLabel";
-
-export {
   default as ProvincePolygon,
 } from "./ProvincePolygon";
 
