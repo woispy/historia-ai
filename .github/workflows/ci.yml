@@ -88,6 +88,8 @@ jobs:
         run: npm run test:map-rendering-contract
       - name: Run new game state tests
         run: npm run test:new-game
+      - name: Run new game startup tests
+        run: npm run test:new-game-startup
       - name: Run ESM import contract tests
         run: npm run test:esm-import-contract
       - name: Run runtime engine tests
@@ -120,6 +122,7 @@ jobs:
           node --check tools/tests/cartography-visual-regression.test.js &&
           node --check tools/tests/map-rendering-contract.test.js &&
           node --check tools/tests/new-game-state.test.js &&
+          node --check tools/tests/new-game-startup.test.js &&
           node --check tools/tests/esm-import-contract.test.js &&
           node --check tools/tests/runtime-engine.test.js &&
           node --check src/engine/GameSession.js &&
