@@ -43,6 +43,7 @@ on:
       - feat/cartography-visual-refinement
       - feat/map-gpu-texture-architecture
       - feat/cartography-foundation-v2
+      - feat/phase3-runtime-engine
 
 jobs:
   validate:
