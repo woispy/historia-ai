@@ -1,15 +1,15 @@
-export { KnowledgeTypes } from "./KnowledgeTypes";
+export { KnowledgeTypes } from "./KnowledgeTypes.js";
 
-export { createKnowledge } from "./KnowledgeFactory";
+export { createKnowledge } from "./KnowledgeFactory.js";
 
-export { createKnowledgeModel } from "./KnowledgeModel";
+export { createKnowledgeModel } from "./KnowledgeModel.js";
 
 export {
   createKnowledgeRepository,
   addKnowledge,
   updateKnowledge,
   removeKnowledge,
-} from "./KnowledgeRepository";
+} from "./KnowledgeRepository.js";
 
 export {
   getKnowledge,
@@ -17,4 +17,4 @@ export {
   getKnowledgeByType,
   getReliableKnowledge,
   getRumors,
-} from "./KnowledgeQueries";
+} from "./KnowledgeQueries.js";

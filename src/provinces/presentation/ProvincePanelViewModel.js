@@ -1,6 +1,6 @@
 import {
   createProvinceViewModelFromProvince,
-} from "../ProvinceViewModelFactory";
+} from "../ProvinceViewModelFactory.js";
 
 /**
  * ============================================================================

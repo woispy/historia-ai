@@ -1,5 +1,5 @@
-import { addTimelineEvent } from "../../Timeline";
-import { getRuntime, updateRuntime } from "../../../state";
+import { addTimelineEvent } from "../../Timeline/index.js";
+import { getRuntime, updateRuntime } from "../../../state/index.js";
 
 export function handleDiplomacyAction(gameSession, action) {
   const runtime = getRuntime(gameSession);

@@ -7,7 +7,7 @@ import {
   processMilitary,
   processEvents,
   processTimeline,
-} from "./processors";
+} from "./processors/index.js";
 
 /**
  * ============================================================================

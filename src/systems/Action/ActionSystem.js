@@ -1,16 +1,16 @@
-import { processTurn } from "../Turn";
-import { interpretAction } from "../Interpreter";
+import { interpretAction } from "../Interpreter/index.js";
+import { processTurn } from "../Turn/TurnEngine.js";
 
-function rebuildGameSession(gameSession, runtime) {
-  return { ...gameSession, runtime };
+function rebuildGameSession(gameSession, state) {
+  return { ...gameSession, state };
 }
 
 export function advanceWeek(gameSession) {
-  return processTurn(gameSession, "week");
+  return processTurn(gameSession, "week", 1);
 }
 
 export function advanceMonth(gameSession) {
-  return processTurn(gameSession, "month");
+  return processTurn(gameSession, "month", 1);
 }
 
 export function advanceSixMonths(gameSession) {
@@ -18,7 +18,7 @@ export function advanceSixMonths(gameSession) {
 }
 
 export function advanceYear(gameSession) {
-  return processTurn(gameSession, "year");
+  return processTurn(gameSession, "year", 1);
 }
 
 export function advanceDays(gameSession, days) {
@@ -30,14 +30,14 @@ export function queueAction(gameSession, actionText) {
     return gameSession;
   }
 
-  const runtime = gameSession.runtime;
+  const state = gameSession.state;
   const interpretation = interpretAction(actionText);
   const action = {
     id: crypto.randomUUID(),
     type: "player",
     source: "player",
     status: "pending",
-    createdAt: { ...runtime.time.currentDate },
+    createdAt: { ...state.time.currentDate },
     priority: 0,
     text: actionText.trim(),
     interpretation,
@@ -45,26 +45,26 @@ export function queueAction(gameSession, actionText) {
   };
 
   return rebuildGameSession(gameSession, {
-    ...runtime,
-    pendingActions: [...runtime.pendingActions, action],
+    ...state,
+    pendingActions: [...state.pendingActions, action],
   });
 }
 
 export function updateAction(gameSession, actionId, changes) {
-  const runtime = gameSession.runtime;
+  const state = gameSession.state;
   return rebuildGameSession(gameSession, {
-    ...runtime,
-    pendingActions: runtime.pendingActions.map((action) =>
+    ...state,
+    pendingActions: state.pendingActions.map((action) =>
       action.id === actionId ? { ...action, ...changes } : action
     ),
   });
 }
 
 export function removeAction(gameSession, actionId) {
-  const runtime = gameSession.runtime;
+  const state = gameSession.state;
   return rebuildGameSession(gameSession, {
-    ...runtime,
-    pendingActions: runtime.pendingActions.filter(
+    ...state,
+    pendingActions: state.pendingActions.filter(
       (action) => action.id !== actionId
     ),
   });
@@ -72,7 +72,7 @@ export function removeAction(gameSession, actionId) {
 
 export function clearPendingActions(gameSession) {
   return rebuildGameSession(gameSession, {
-    ...gameSession.runtime,
+    ...gameSession.state,
     pendingActions: [],
   });
 }

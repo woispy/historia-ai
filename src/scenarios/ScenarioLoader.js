@@ -1,34 +1,73 @@
-import { createScenarioDefinition } from "./ScenarioDefinition";
-import { loadResourceFolder } from "./ResourceLoader";
+import { createScenarioDefinition } from "./ScenarioDefinition.js";
+import { loadResourceFolder } from "./ResourceLoader.js";
 
 /**
- * Loads every scenario.json file at build time.
+ * Loads scenario definitions in both Vite/browser and native Node ESM.
  *
- * Key:
- * ../../data/scenarios/1300/scenario.json
+ * Browser builds use Vite's import.meta.glob transform.
+ * Native runtime tests resolve scenario.json directly through Node's
+ * synchronous builtin filesystem API.
  */
-const scenarioFiles = import.meta.glob(
-  "../../data/scenarios/*/scenario.json",
-  {
-    eager: true,
-    import: "default",
+const viteScenarioFiles =
+  typeof import.meta.glob === "function"
+    ? import.meta.glob(
+        "../../data/scenarios/*/scenario.json",
+        {
+          eager: true,
+          import: "default",
+        }
+      )
+    : null;
+
+const nodeProcess = globalThis.process;
+
+const nodeFs =
+  nodeProcess &&
+  typeof nodeProcess.getBuiltinModule === "function"
+    ? nodeProcess.getBuiltinModule("fs")
+    : null;
+
+function loadNodeScenario(scenarioId) {
+  if (!nodeFs) {
+    return null;
   }
-);
+
+  const fileUrl = new URL(
+    `../../data/scenarios/${scenarioId}/scenario.json`,
+    import.meta.url
+  );
+
+  if (!nodeFs.existsSync(fileUrl)) {
+    return null;
+  }
+
+  return JSON.parse(
+    nodeFs.readFileSync(fileUrl, "utf8")
+  );
+}
+
+function getScenarioData(scenarioId) {
+  if (!viteScenarioFiles) {
+    return loadNodeScenario(scenarioId);
+  }
+
+  const filePath = Object.keys(viteScenarioFiles).find((path) =>
+    path.endsWith(`/${scenarioId}/scenario.json`)
+  );
+
+  return filePath ? viteScenarioFiles[filePath] : null;
+}
 
 export function loadScenarioDefinition(scenarioId) {
   if (!scenarioId) {
     throw new Error("Scenario id is required.");
   }
 
-  const filePath = Object.keys(scenarioFiles).find((path) =>
-    path.endsWith(`/${scenarioId}/scenario.json`)
-  );
+  const scenario = getScenarioData(scenarioId);
 
-  if (!filePath) {
+  if (!scenario) {
     throw new Error(`Scenario "${scenarioId}" was not found.`);
   }
-
-  const scenario = scenarioFiles[filePath];
 
   return createScenarioDefinition({
     id: scenario.id,

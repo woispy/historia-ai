@@ -1,11 +1,11 @@
-import { createCountryRepositoryFromArray } from "../countries";
-import { createCityRepositoryFromArray } from "../cities";
-import { loadHistoricalProvinceRepository } from "../provinces";
-import { createCharacterRepository } from "../characters";
-import { createFamilyRepository } from "../family";
-import { createKnowledgeRepository } from "../knowledge";
-import { createSelectionRepository } from "../selection";
-import { ANATOLIA_CITY_ATLAS } from "../map/data/AnatoliaCityAtlas";
+import { createCountryRepositoryFromArray } from "../countries/index.js";
+import { createCityRepositoryFromArray } from "../cities/index.js";
+import { loadHistoricalProvinceRepository } from "../provinces/index.js";
+import { createCharacterRepository } from "../characters/index.js";
+import { createFamilyRepository } from "../family/index.js";
+import { createKnowledgeRepository } from "../knowledge/index.js";
+import { createSelectionRepository } from "../selection/index.js";
+import { ANATOLIA_CITY_ATLAS } from "../map/data/AnatoliaCityAtlas.js";
 
 function getHistoricalRegistry(scenario) {
   return Object.values(scenario.data.historical ?? {})[0] ?? null;

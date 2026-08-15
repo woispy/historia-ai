@@ -1,13 +1,13 @@
-export { createCharacter } from "./CharacterFactory";
+export { createCharacter } from "./CharacterFactory.js";
 
-export { createCharacterModel } from "./CharacterModel";
+export { createCharacterModel } from "./CharacterModel.js";
 
 export {
   createCharacterRepository,
   addCharacter,
   updateCharacter,
   removeCharacter,
-} from "./CharacterRepository";
+} from "./CharacterRepository.js";
 
 export {
   getCharacter,
@@ -18,4 +18,4 @@ export {
   getCharactersByCulture,
   getCharactersByReligion,
   getCharactersByFamily,
-} from "./CharacterQueries";
+} from "./CharacterQueries.js";

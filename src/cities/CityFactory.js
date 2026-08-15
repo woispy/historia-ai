@@ -1,4 +1,4 @@
-import { createCityModel } from "./CityModel";
+import { createCityModel } from "./CityModel.js";
 
 /**
  * ============================================================================

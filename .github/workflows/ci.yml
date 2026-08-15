@@ -3,6 +3,7 @@ name: Historia AI CI
 on:
   pull_request:
     branches:
+      - main
       - master
       - feat/phase1-polish
       - feat/phase1-historical-gis-runtime
@@ -21,6 +22,7 @@ on:
       - feat/map-gpu-texture-architecture
   push:
     branches:
+      - main
       - master
       - feat/living-game-foundation
       - feat/phase1-polish
@@ -41,6 +43,7 @@ on:
       - feat/cartography-visual-refinement
       - feat/map-gpu-texture-architecture
       - feat/cartography-foundation-v2
+      - feat/phase3-runtime-engine
 
 jobs:
   validate:
@@ -83,6 +86,12 @@ jobs:
         run: npm run test:cartography-visual
       - name: Run map rendering contract tests
         run: npm run test:map-rendering-contract
+      - name: Run new game state tests
+        run: npm run test:new-game
+      - name: Run ESM import contract tests
+        run: npm run test:esm-import-contract
+      - name: Run runtime engine tests
+        run: npm run test:runtime-engine
       - name: Generate historical GIS runtime assets
         run: npm run build:historical-gis:1300
       - name: Validate historical GIS runtime assets
@@ -110,6 +119,26 @@ jobs:
           node --check tools/tests/map-texture-atlas.test.js &&
           node --check tools/tests/cartography-visual-regression.test.js &&
           node --check tools/tests/map-rendering-contract.test.js &&
+          node --check tools/tests/new-game-state.test.js &&
+          node --check tools/tests/esm-import-contract.test.js &&
+          node --check tools/tests/runtime-engine.test.js &&
+          node --check src/engine/GameSession.js &&
+          node --check src/engine/GameEngine.js &&
+          node --check src/state/RuntimeState.js &&
+          node --check src/state/index.js &&
+          node --check src/systems/Action/ActionSystem.js &&
+          node --check src/systems/Simulation/SimulationEngine.js &&
+          node --check src/systems/Simulation/processors/ActionProcessor.js &&
+          node --check src/systems/Simulation/processors/EconomyProcessor.js &&
+          node --check src/systems/Simulation/processors/PopulationProcessor.js &&
+          node --check src/systems/Simulation/processors/DiplomacyProcessor.js &&
+          node --check src/systems/Simulation/processors/MilitaryProcessor.js &&
+          node --check src/systems/Simulation/processors/EventProcessor.js &&
+          node --check src/systems/Simulation/processors/TimeProcessor.js &&
+          node --check src/systems/Simulation/processors/TimelineProcessor.js &&
+          node --check src/systems/Simulation/processors/NotificationProcessor.js &&
+          node --check src/systems/Timeline/TimelineSystem.js &&
+          node --check src/save/SaveSerializer.js &&
           node --check src/map/data/AnatoliaProvinceRefinement.js &&
           node --check src/map/data/CartographyAtlas.js &&
           node --check src/map/rendering/CartographyModel.js &&

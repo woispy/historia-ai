@@ -1,39 +1,22 @@
 import {
   clearPendingActions,
   handleAction,
-} from "../../Action";
+} from "../../Action/index.js";
 
-import {
-  getRuntime,
-} from "../../../state";
+import { getState } from "../../../state/index.js";
 
-export function processActions(
-  gameSession
-) {
-  const runtime =
-    getRuntime(gameSession);
+export function processActions(gameSession) {
+  const state = getState(gameSession);
 
-  if (
-    runtime.pendingActions.length === 0
-  ) {
+  if (state.pendingActions.length === 0) {
     return gameSession;
   }
 
-  let nextSession =
-    gameSession;
+  let nextSession = gameSession;
 
-  for (const action of runtime.pendingActions) {
-    nextSession =
-      handleAction(
-        nextSession,
-        action
-      );
+  for (const action of state.pendingActions) {
+    nextSession = handleAction(nextSession, action);
   }
 
-  nextSession =
-    clearPendingActions(
-      nextSession
-    );
-
-  return nextSession;
+  return clearPendingActions(nextSession);
 }

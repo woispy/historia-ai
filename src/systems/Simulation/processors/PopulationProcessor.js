@@ -1,13 +1,13 @@
-import { getRuntime, updateRuntime } from "../../../state";
-import { updateCity } from "../../../cities/CityRepository";
+import { getState, updateState } from "../../../state/index.js";
+import { updateCity } from "../../../cities/CityRepository.js";
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
 export function processPopulation(gameSession) {
-  const runtime = getRuntime(gameSession);
-  const simulation = runtime.simulation ?? {};
+  const state = getState(gameSession);
+  const simulation = state.simulation ?? {};
   const cityRepository = gameSession.world.repositories.cities;
   let nextCities = cityRepository;
   let totalPopulation = 0;
@@ -47,8 +47,8 @@ export function processPopulation(gameSession) {
     },
   };
 
-  return updateRuntime(nextSession, {
-    ...runtime,
+  return updateState(nextSession, {
+    ...state,
     simulation: {
       ...simulation,
       population: totalPopulation,

@@ -1,4 +1,4 @@
-import { SelectionTypes } from "./SelectionTypes";
+import { SelectionTypes } from "./SelectionTypes.js";
 
 /**
  * ============================================================================

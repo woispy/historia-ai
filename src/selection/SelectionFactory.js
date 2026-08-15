@@ -1,4 +1,4 @@
-import { createSelectionModel } from "./SelectionModel";
+import { createSelectionModel } from "./SelectionModel.js";
 
 /**
  * ============================================================================

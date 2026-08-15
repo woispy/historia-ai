@@ -1,9 +1,9 @@
-export { handleAction } from "./ActionHandler";
+export { handleAction } from "./ActionHandler.js";
 
-export { handleMilitaryAction } from "./MilitaryHandler";
+export { handleMilitaryAction } from "./MilitaryHandler.js";
 
-export { handleEconomyAction } from "./EconomyHandler";
+export { handleEconomyAction } from "./EconomyHandler.js";
 
-export { handleDiplomacyAction } from "./DiplomacyHandler";
+export { handleDiplomacyAction } from "./DiplomacyHandler.js";
 
-export { handleConstructionAction } from "./ConstructionHandler";
+export { handleConstructionAction } from "./ConstructionHandler.js";

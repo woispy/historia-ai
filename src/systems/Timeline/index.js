@@ -1,2 +1,2 @@
-export { resolveTimelineMessage } from "./TimelineMessages";
-export { addTimelineEvent } from "./TimelineSystem";
+export { resolveTimelineMessage } from "./TimelineMessages.js";
+export { addTimelineEvent } from "./TimelineSystem.js";

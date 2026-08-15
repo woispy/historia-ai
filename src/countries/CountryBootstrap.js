@@ -1,9 +1,9 @@
 import {
   createCountryRepository,
   addCountry,
-} from "./CountryRepository";
+} from "./CountryRepository.js";
 
-import { createCountry } from "./CountryFactory";
+import { createCountry } from "./CountryFactory.js";
 
 /**
  * ============================================================================

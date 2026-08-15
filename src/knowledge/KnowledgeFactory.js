@@ -1,7 +1,6 @@
-import { createKnowledgeModel } from "./KnowledgeModel";
+import { createKnowledgeModel } from "./KnowledgeModel.js";
 
 export function createKnowledge(data) {
-
   if (!data) {
     throw new Error("Knowledge data is required.");
   }
@@ -35,5 +34,4 @@ export function createKnowledge(data) {
   }
 
   return createKnowledgeModel(data);
-
 }

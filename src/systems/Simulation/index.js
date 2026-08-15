@@ -1,3 +1,3 @@
 export {
   simulateTurn,
-} from "./SimulationEngine";
+} from "./SimulationEngine.js";

@@ -1,15 +1,15 @@
 export {
   createProvincePanelViewModel,
-} from "./ProvincePanelViewModel";
+} from "./ProvincePanelViewModel.js";
 
 export {
   createProvinceTooltipViewModel,
-} from "./ProvinceTooltipViewModel";
+} from "./ProvinceTooltipViewModel.js";
 
 export {
   createProvinceReportViewModel,
-} from "./ProvinceReportViewModel";
+} from "./ProvinceReportViewModel.js";
 
 export {
   createProvinceAdvisorViewModel,
-} from "./ProvinceAdvisorViewModel";
+} from "./ProvinceAdvisorViewModel.js";

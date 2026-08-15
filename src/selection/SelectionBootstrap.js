@@ -1,6 +1,6 @@
 import {
   createSelectionRepository,
-} from "./SelectionRepository";
+} from "./SelectionRepository.js";
 
 /**
  * ============================================================================

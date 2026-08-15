@@ -1,28 +1,28 @@
 export {
   createCity,
-} from "./CityFactory";
+} from "./CityFactory.js";
 
 export {
   createCityModel,
-} from "./CityModel";
+} from "./CityModel.js";
 
 export {
   createCityRepository,
   addCity,
   updateCity,
   removeCity,
-} from "./CityRepository";
+} from "./CityRepository.js";
 
 export {
   createCityRepositoryFromArray,
-} from "./CityBootstrap";
+} from "./CityBootstrap.js";
 
 export {
   getCity,
   getCities,
   getCitiesByOwner,
-} from "./CityQueries";
+} from "./CityQueries.js";
 
 export {
   setCityUnderSiege,
-} from "./CityMutations";
+} from "./CityMutations.js";

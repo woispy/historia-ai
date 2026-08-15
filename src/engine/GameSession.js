@@ -4,57 +4,42 @@
  * GameSession
  * ============================================================================
  *
- * Represents one active game session.
+ * GameSession is the single root runtime model for an active game.
  *
- * This object is the root of the entire game runtime.
+ * Runtime-only data belongs to `session.state`.
+ * World data belongs to `session.world`.
  */
 
 export function createGameSession({
   scenario,
   world,
-  runtime,
+  state,
   player = {},
   settings = {},
 }) {
   if (!scenario) {
-    throw new Error(
-      "GameSession requires a scenario."
-    );
+    throw new Error("GameSession requires a scenario.");
   }
 
   if (!world) {
-    throw new Error(
-      "GameSession requires a world."
-    );
+    throw new Error("GameSession requires a world.");
   }
 
-  if (!runtime) {
-    throw new Error(
-      "GameSession requires a runtime."
-    );
+  if (!state) {
+    throw new Error("GameSession requires state.");
   }
 
   return Object.freeze({
     id: crypto.randomUUID(),
-
-    version: 1,
-
-    createdAt:
-      new Date().toISOString(),
-
+    version: 2,
+    createdAt: new Date().toISOString(),
     scenario,
-
     world,
-
-    runtime,
-
+    state,
     player,
-
     settings,
-
     statistics: {
       totalTurns: 0,
-
       totalPlayTime: 0,
     },
   });

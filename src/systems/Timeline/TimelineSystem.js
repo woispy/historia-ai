@@ -1,7 +1,7 @@
 import {
-  getRuntime,
-  updateRuntime,
-} from "../../state";
+  getState,
+  updateState,
+} from "../../state/index.js";
 
 /**
  * ============================================================================
@@ -9,47 +9,29 @@ import {
  * Timeline System
  * ============================================================================
  *
- * Adds timeline entries to the current GameSession runtime.
+ * Adds timeline entries to GameSession state.
  */
 
-export function addTimelineEvent(
-  gameSession,
-  event
-) {
-  const runtime =
-    getRuntime(gameSession);
+export function addTimelineEvent(gameSession, event) {
+  const state = getState(gameSession);
 
   const timelineEntry = {
     id: crypto.randomUUID(),
-
     date: {
-      ...runtime.time.currentDate,
+      ...state.time.currentDate,
     },
-
-    category:
-      event.category ?? "system",
-
-    source:
-      event.source ?? "system",
-
+    category: event.category ?? "system",
+    source: event.source ?? "system",
     key: event.key,
-
-    data:
-      event.data ?? {},
-
-    editable:
-      event.editable ?? false,
+    data: event.data ?? {},
+    editable: event.editable ?? false,
   };
 
-  return updateRuntime(
-    gameSession,
-    {
-      ...runtime,
-
-      timeline: [
-        timelineEntry,
-        ...runtime.timeline,
-      ],
-    }
-  );
+  return updateState(gameSession, {
+    ...state,
+    timeline: [
+      timelineEntry,
+      ...state.timeline,
+    ],
+  });
 }

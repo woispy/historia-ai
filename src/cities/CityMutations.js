@@ -1,6 +1,6 @@
 import {
   updateCity,
-} from "./CityRepository";
+} from "./CityRepository.js";
 
 /**
  * ============================================================================

@@ -1,4 +1,4 @@
-import { createCountryModel } from "./CountryModel";
+import { createCountryModel } from "./CountryModel.js";
 
 /**
  * ============================================================================

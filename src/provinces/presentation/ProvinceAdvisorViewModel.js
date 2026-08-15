@@ -1,6 +1,6 @@
 import {
   getProvinceDisplayName,
-} from "../ProvincePresentation";
+} from "../ProvincePresentation.js";
 
 /**
  * ============================================================================

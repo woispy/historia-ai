@@ -20,6 +20,8 @@
     "test:cartography-2efgh": "node tools/tests/cartography-2efgh.test.js",
     "test:map-texture-atlas": "node tools/tests/map-texture-atlas.test.js",
     "test:new-game": "node tools/tests/new-game-state.test.js",
+    "test:runtime-engine": "node tools/tests/runtime-engine.test.js",
+    "test:esm-import-contract": "node tools/tests/esm-import-contract.test.js",
     "test:cartography-visual": "node tools/tests/cartography-visual-regression.test.js",
     "test:map-rendering-contract": "node tools/tests/map-rendering-contract.test.js",
     "validate:historical-gis:1300": "node tools/historical-gis/cli/validate-1300.js",

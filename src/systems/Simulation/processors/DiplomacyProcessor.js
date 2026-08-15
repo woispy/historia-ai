@@ -1,13 +1,13 @@
-import { getRuntime, updateRuntime } from "../../../state";
-import { addTimelineEvent } from "../../Timeline";
+import { getState, updateState } from "../../../state/index.js";
+import { addTimelineEvent } from "../../Timeline/index.js";
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
 export function processDiplomacy(gameSession) {
-  const runtime = getRuntime(gameSession);
-  const simulation = runtime.simulation ?? {};
+  const state = getState(gameSession);
+  const simulation = state.simulation ?? {};
   const countries = Object.values(
     gameSession.world.repositories.countries?.byId ?? {}
   );
@@ -22,15 +22,15 @@ export function processDiplomacy(gameSession) {
     relationships[country.id] = clamp(current, -100, 100);
   }
 
-  let nextSession = updateRuntime(gameSession, {
-    ...runtime,
+  let nextSession = updateState(gameSession, {
+    ...state,
     simulation: {
       ...simulation,
       relationships,
     },
   });
 
-  if (countries.length > 1 && runtime.time.turn % 4 === 0) {
+  if (countries.length > 1 && state.time.turn % 4 === 0) {
     nextSession = addTimelineEvent(nextSession, {
       category: "diplomacy",
       source: "diplomacy-engine",
