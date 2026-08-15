@@ -21,6 +21,10 @@ function resolveLocalModule(importerPath, specifier) {
     specifier
   );
 
+  if (path.extname(specifier)) {
+    return fs.existsSync(resolved) ? resolved : null;
+  }
+
   const candidates = [
     `${resolved}.js`,
     path.join(resolved, "index.js"),
@@ -44,23 +48,20 @@ function inspectFile(absolutePath) {
     const extension = path.extname(specifier);
     const resolved = resolveLocalModule(absolutePath, specifier);
 
-    if (extension) {
-      if (resolved) {
-        inspectFile(resolved);
+    if (!extension) {
+      if (!resolved) {
+        continue;
       }
-      continue;
+
+      violations.push({
+        file: path.relative(projectRoot, absolutePath),
+        specifier,
+      });
     }
 
-    if (!resolved) {
-      continue;
+    if (resolved) {
+      inspectFile(resolved);
     }
-
-    violations.push({
-      file: path.relative(projectRoot, absolutePath),
-      specifier,
-    });
-
-    inspectFile(resolved);
   }
 }
 
