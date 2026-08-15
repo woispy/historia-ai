@@ -7,13 +7,13 @@ import MapView from "./MapView/MapView";
 import OverlayManager from "./OverlayManager/OverlayManager";
 import NotificationToast from "../NotificationToast/NotificationToast";
 import { getCurrentGame, updateCurrentGame, setCurrentGame, clearCurrentGame } from "../../game/currentGame";
-import { getCurrentDate, getTimeline, getPendingActions } from "../../state";
-import { GameEngine } from "../../engine";
+import { getCurrentDate, getTimeline, getPendingActions } from "../../state/index.js";
+import { GameEngine } from "../../engine/index.js";
 import {
   saveGame,
   loadGame,
   deleteGame,
-} from "../../save";
+} from "../../save/index.js";
 import { useDecisionEditor } from "../../hooks/useDecisionEditor";
 import { readSettings, STORAGE_KEY } from "./SettingsMenu/SettingsConfig";
 
