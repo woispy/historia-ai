@@ -1,4 +1,4 @@
-import { createFamilyModel } from "./FamilyModel";
+import { createFamilyModel } from "./FamilyModel.js";
 
 /**
  * ============================================================================
