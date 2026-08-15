@@ -20,6 +20,8 @@ import {
  *
  * New-game selection is treated as a transactional input: it must contain
  * the selected scenario, country and character before the runtime is created.
+ * Persistence is deliberately best-effort here: a browser storage failure
+ * must not prevent the newly created game from entering the active runtime.
  */
 export function initializeGame() {
   const newGame = getNewGame();
@@ -59,8 +61,15 @@ export function initializeGame() {
 
     console.log("Game Session:", session);
 
+    // The active runtime is authoritative. Saving is a persistence concern
+    // and must never block the transition into the game itself.
     setCurrentGame(session);
-    saveGame(session);
+
+    try {
+      saveGame(session);
+    } catch (saveError) {
+      console.warn("[GameInitializer] Initial save skipped:", saveError);
+    }
 
     // The pending setup has been consumed successfully. Keep the new-game
     // buffer clean so a later game cannot inherit stale scenario data.
