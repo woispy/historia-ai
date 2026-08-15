@@ -1,4 +1,4 @@
-import { getRuntime, updateRuntime } from "../../../state";
+import { getState, updateState } from "../../../state";
 import { updateCity } from "../../../cities/CityRepository";
 
 function clamp(value, min, max) {
@@ -6,8 +6,8 @@ function clamp(value, min, max) {
 }
 
 export function processPopulation(gameSession) {
-  const runtime = getRuntime(gameSession);
-  const simulation = runtime.simulation ?? {};
+  const state = getState(gameSession);
+  const simulation = state.simulation ?? {};
   const cityRepository = gameSession.world.repositories.cities;
   let nextCities = cityRepository;
   let totalPopulation = 0;
@@ -47,8 +47,8 @@ export function processPopulation(gameSession) {
     },
   };
 
-  return updateRuntime(nextSession, {
-    ...runtime,
+  return updateState(nextSession, {
+    ...state,
     simulation: {
       ...simulation,
       population: totalPopulation,
