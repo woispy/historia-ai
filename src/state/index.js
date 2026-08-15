@@ -1,6 +1,6 @@
 export {
   createRuntimeState,
-} from "./RuntimeState";
+} from "./RuntimeState.js";
 
 export function getState(gameSession) {
   if (!gameSession) {
