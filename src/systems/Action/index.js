@@ -8,6 +8,6 @@ export {
   updateAction,
   removeAction,
   clearPendingActions,
-} from "./ActionSystem";
+} from "./ActionSystem.js";
 
-export { handleAction } from "./handlers";
+export { handleAction } from "./handlers/index.js";
