@@ -3,9 +3,9 @@ import {
   handleEconomyAction,
   handleDiplomacyAction,
   handleConstructionAction,
-} from "./index";
+} from "./index.js";
 
-import { addTimelineEvent } from "../../Timeline";
+import { addTimelineEvent } from "../../Timeline/index.js";
 
 /**
  * Dispatches a player action to the appropriate handler.
