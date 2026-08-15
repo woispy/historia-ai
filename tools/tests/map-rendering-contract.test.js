@@ -52,7 +52,7 @@ assert.ok(gpuLayer.includes("createTexture(gl, raster.landCanvas, false)"));
 
 // Camera movement must redraw the existing GPU state, not rebuild the 4096x2048
 // political texture on every mouse-wheel/pan update.
-assert.match(gpuLayer, /useEffect\(\(\) => \{\n    cameraRef\.current = camera/);
+assert.match(gpuLayer, /useEffect\(\(\) => \{\n\s{4}cameraRef\.current = camera/);
 assert.match(gpuLayer, /\}, \[gpuEnabled, onReady, raster\]\);/);
 assert.ok(gpuLayer.includes("renderFrame(state, camera, rect.width, rect.height)"));
 
