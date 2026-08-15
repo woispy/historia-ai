@@ -21,6 +21,7 @@
     "test:map-texture-atlas": "node tools/tests/map-texture-atlas.test.js",
     "test:new-game": "node tools/tests/new-game-state.test.js",
     "test:new-game-startup": "node tools/tests/new-game-startup.test.js",
+    "test:scenario-loading": "node tools/tests/scenario-loading-contract.test.js",
     "test:runtime-engine": "node tools/tests/runtime-engine.test.js",
     "test:esm-import-contract": "node tools/tests/esm-import-contract.test.js",
     "test:cartography-visual": "node tools/tests/cartography-visual-regression.test.js",
