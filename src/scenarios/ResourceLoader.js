@@ -1,13 +1,13 @@
 /**
  * Loads scenario JSON resources in both Vite/browser and native Node ESM.
  *
- * Browser builds use Vite's import.meta.glob transform.
+ * Browser builds use Vite's compile-time import.meta.glob transform.
  * Native runtime tests use Node 22's process.getBuiltinModule so the
  * executable GameEngine never depends on a Vite-only API.
  */
 
 const viteResourceFiles =
-  typeof import.meta.glob === "function"
+  import.meta.env?.DEV || import.meta.env?.PROD
     ? import.meta.glob(
         "../../data/scenarios/*/*/*.json",
         {
