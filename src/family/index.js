@@ -1,13 +1,13 @@
-export { createFamily } from "./FamilyFactory";
+export { createFamily } from "./FamilyFactory.js";
 
-export { createFamilyModel } from "./FamilyModel";
+export { createFamilyModel } from "./FamilyModel.js";
 
 export {
   createFamilyRepository,
   addFamily,
   updateFamily,
   removeFamily,
-} from "./FamilyRepository";
+} from "./FamilyRepository.js";
 
 export {
   getFamily,
@@ -15,4 +15,4 @@ export {
   getActiveFamilies,
   getFamiliesByCulture,
   getFamiliesByReligion,
-} from "./FamilyQueries";
+} from "./FamilyQueries.js";
