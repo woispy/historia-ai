@@ -4,8 +4,6 @@ import { getProvincePresentation, shouldUseGpuProvinceFill } from "../Cartograph
 
 const DEFAULT_WIDTH = 4096;
 const DEFAULT_HEIGHT = 2048;
-const WATER_COLOR = [16 / 255, 44 / 255, 53 / 255, 1];
-const LAND_COLOR = [40 / 255, 50 / 255, 41 / 255, 1];
 const SELECTED_COLOR = [214 / 255, 176 / 255, 77 / 255, 1];
 
 const VERTEX_SHADER = `#version 300 es
@@ -37,8 +35,6 @@ uniform sampler2D uPalette;
 uniform float uPaletteSize;
 uniform float uSelectedId;
 uniform vec4 uSelectedColor;
-uniform vec4 uWaterColor;
-uniform vec4 uLandColor;
 uniform float uFillOpacity;
 
 in vec2 vUv;
@@ -50,17 +46,13 @@ float decodeProvinceId(vec4 encoded) {
 }
 
 void main() {
-  float land = texture(uLandMask, vUv).r;
-  if (land < 0.5) {
-    outColor = uWaterColor;
-    return;
-  }
+  // The SVG physical world is the only owner of the ocean/land base. The GPU
+  // layer is deliberately transparent outside political land so there is no
+  // second map underneath/over the physical coastline.
+  if (texture(uLandMask, vUv).r < 0.5) discard;
 
   float provinceId = decodeProvinceId(texture(uProvinceIds, vUv));
-  if (provinceId < 0.5) {
-    outColor = uLandColor;
-    return;
-  }
+  if (provinceId < 0.5) discard;
 
   float paletteIndex = provinceId - 1.0;
   vec2 paletteUv = vec2((paletteIndex + 0.5) / uPaletteSize, 0.5);
@@ -293,8 +285,6 @@ function renderFrame(state, camera, width, height) {
   gl.uniform1f(state.uniforms.paletteSize, Math.max(1, state.paletteSize));
   gl.uniform1f(state.uniforms.fillOpacity, getProvincePresentation(zoom).fillOpacity);
   gl.uniform4f(state.uniforms.selectedColor, ...SELECTED_COLOR);
-  gl.uniform4f(state.uniforms.waterColor, ...WATER_COLOR);
-  gl.uniform4f(state.uniforms.landColor, ...LAND_COLOR);
 
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, state.provinceTexture);
@@ -344,8 +334,6 @@ function buildState(canvas, raster) {
       paletteSize: gl.getUniformLocation(program, "uPaletteSize"),
       selectedId: gl.getUniformLocation(program, "uSelectedId"),
       selectedColor: gl.getUniformLocation(program, "uSelectedColor"),
-      waterColor: gl.getUniformLocation(program, "uWaterColor"),
-      landColor: gl.getUniformLocation(program, "uLandColor"),
       fillOpacity: gl.getUniformLocation(program, "uFillOpacity"),
     },
     attributes: {
@@ -353,7 +341,7 @@ function buildState(canvas, raster) {
       uv: gl.getAttribLocation(program, "aUv"),
     },
     provinceTexture: createTexture(gl, raster.provinceCanvas, false),
-    landTexture: createTexture(gl, raster.landCanvas, true),
+    landTexture: createTexture(gl, raster.landCanvas, false),
     paletteTexture: createPaletteTexture(gl, raster.palette),
     paletteSize: raster.palette.length / 4,
     selectedRasterId: 0,
