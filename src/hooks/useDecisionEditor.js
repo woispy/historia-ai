@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import {
   GameEngine,
-} from "../engine";
+} from "../engine/index.js";
 
 import {
   updateCurrentGame,
