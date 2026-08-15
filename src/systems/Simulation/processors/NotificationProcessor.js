@@ -1,6 +1,6 @@
 import {
-  getRuntime,
-  updateRuntime,
+  getState,
+  updateState,
 } from "../../../state";
 
 /**
@@ -9,43 +9,28 @@ import {
  * ============================================================================
  *
  * Creates engine notifications after each processed turn.
- *
- * Works only with the GameSession runtime model.
  */
 
-export function processNotifications(
-  gameSession
-) {
-  const runtime =
-    getRuntime(gameSession);
+export function processNotifications(gameSession) {
+  const state = getState(gameSession);
 
   const timelineEntry = {
-    id: runtime.time.turn,
-
+    id: state.time.turn,
     date: {
-      ...runtime.time.currentDate,
+      ...state.time.currentDate,
     },
-
     category: "system",
-
     source: "engine",
-
     key: "week_passed",
-
     data: {},
-
     editable: false,
   };
 
-  return updateRuntime(
-    gameSession,
-    {
-      ...runtime,
-
-      timeline: [
-        ...runtime.timeline,
-        timelineEntry,
-      ],
-    }
-  );
+  return updateState(gameSession, {
+    ...state,
+    timeline: [
+      ...state.timeline,
+      timelineEntry,
+    ],
+  });
 }
