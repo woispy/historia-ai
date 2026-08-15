@@ -1,10 +1,10 @@
-import { createProvinceViewModel } from "./ProvinceViewModel";
+import { createProvinceViewModel } from "./ProvinceViewModel.js";
 
 import {
   getProvinceDisplayName,
   getProvincePopulationText,
   getProvinceDevelopmentText,
-} from "./ProvincePresentation";
+} from "./ProvincePresentation.js";
 
 /**
  * ============================================================================
@@ -23,36 +23,17 @@ export function createProvinceViewModelFromProvince(
 
   return createProvinceViewModel({
     id: province.id,
-
-    displayName: getProvinceDisplayName(
-      province
-    ),
-
+    displayName: getProvinceDisplayName(province),
     owner: province.owner,
-
     controller: province.controller,
-
     terrain: province.terrain,
-
-    population: getProvincePopulationText(
-      province
-    ),
-
-    development:
-      getProvinceDevelopmentText(
-        province
-      ),
-
+    population: getProvincePopulationText(province),
+    development: getProvinceDevelopmentText(province),
     governor: province.governor,
-
     fortLevel: province.fortLevel,
-
     hasPort: province.port,
-
     hasRiver: province.river,
-
     culture: province.culture,
-
     religion: province.religion,
   });
 }
