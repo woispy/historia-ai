@@ -393,6 +393,7 @@ function ProvinceTextureLayer({
 }) {
   const canvasRef = useRef(null);
   const stateRef = useRef(null);
+  const cameraRef = useRef(camera);
   const gpuEnabled = shouldUseGpuProvinceFill(camera.zoom);
   const raster = useMemo(
     () => (gpuEnabled ? buildRasterData(provinces, mapStyle) : null),
@@ -401,13 +402,21 @@ function ProvinceTextureLayer({
   const selectedProvinceRef = useRef(selectedProvinceId);
 
   useEffect(() => {
+    cameraRef.current = camera;
+    const state = stateRef.current;
+    if (!state || !gpuEnabled) return;
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (rect) renderFrame(state, camera, rect.width, rect.height);
+  }, [camera, gpuEnabled]);
+
+  useEffect(() => {
     selectedProvinceRef.current = selectedProvinceId;
     const state = stateRef.current;
     if (!state || !gpuEnabled) return;
     state.selectedRasterId = getSelectedRasterId(state, selectedProvinceId);
     const rect = canvasRef.current?.getBoundingClientRect();
-    if (rect) renderFrame(state, camera, rect.width, rect.height);
-  }, [selectedProvinceId, camera, gpuEnabled]);
+    if (rect) renderFrame(state, cameraRef.current, rect.width, rect.height);
+  }, [selectedProvinceId, gpuEnabled]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -434,12 +443,12 @@ function ProvinceTextureLayer({
     const resizeObserver = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (!entry) return;
-      renderFrame(state, camera, entry.contentRect.width, entry.contentRect.height);
+      renderFrame(state, cameraRef.current, entry.contentRect.width, entry.contentRect.height);
     });
     resizeObserver.observe(canvas.parentElement ?? canvas);
 
     const initialRect = canvas.getBoundingClientRect();
-    renderFrame(state, camera, initialRect.width, initialRect.height);
+    renderFrame(state, cameraRef.current, initialRect.width, initialRect.height);
     // Handoff happens only after the first GPU frame has been rendered, so the
     // CPU fallback and GPU compositor are never visibly active at once.
     onReady?.(true);
@@ -450,7 +459,7 @@ function ProvinceTextureLayer({
       destroyState(state);
       onReady?.(false);
     };
-  }, [camera, gpuEnabled, onReady, raster]);
+  }, [gpuEnabled, onReady, raster]);
 
   if (!gpuEnabled) return null;
 
