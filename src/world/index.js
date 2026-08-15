@@ -1,4 +1,4 @@
-export * from "./WorldBootstrap";
-export * from "./RepositoryBootstrap";
+export * from "./WorldBootstrap.js";
+export * from "./RepositoryBootstrap.js";
 
-export * from "./map";
+export * from "./map/index.js";
