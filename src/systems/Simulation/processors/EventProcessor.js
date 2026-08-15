@@ -1,9 +1,9 @@
-import { getRuntime, updateRuntime } from "../../../state";
+import { getState, updateState } from "../../../state";
 import { addTimelineEvent } from "../../Timeline";
 
 export function processEvents(gameSession) {
-  const runtime = getRuntime(gameSession);
-  const simulation = runtime.simulation ?? {};
+  const state = getState(gameSession);
+  const simulation = state.simulation ?? {};
   const recentEvents = [...(simulation.recentEvents ?? [])];
   let nextSession = gameSession;
 
@@ -18,8 +18,8 @@ export function processEvents(gameSession) {
     };
 
     recentEvents.unshift(event);
-    nextSession = updateRuntime(nextSession, {
-      ...runtime,
+    nextSession = updateState(nextSession, {
+      ...state,
       simulation: {
         ...simulation,
         treasury: Math.max(0, (simulation.treasury ?? 0) + event.impact.treasury),
@@ -36,8 +36,8 @@ export function processEvents(gameSession) {
       editable: false,
     });
   } else {
-    nextSession = updateRuntime(nextSession, {
-      ...runtime,
+    nextSession = updateState(nextSession, {
+      ...state,
       simulation: {
         ...simulation,
         recentEvents: recentEvents.slice(0, 8),
