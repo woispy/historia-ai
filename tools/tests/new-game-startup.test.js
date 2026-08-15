@@ -35,9 +35,12 @@ const localStorage = {
 globalThis.window = { sessionStorage };
 globalThis.localStorage = localStorage;
 
-const newGame = await import("../../src/game/newGame.js?new-game-startup-test=1");
-const initializer = await import("../../src/bootstrap/GameInitializer.js?new-game-startup-test=1");
-const currentGame = await import("../../src/game/currentGame.js?new-game-startup-test=1");
+// Import the exact module URLs used by the application. A previous version of
+// this regression test added query strings and accidentally created duplicate
+// ESM module instances, which hid the real shared new-game state.
+const newGame = await import("../../src/game/newGame.js");
+const initializer = await import("../../src/bootstrap/GameInitializer.js");
+const currentGame = await import("../../src/game/currentGame.js");
 
 newGame.resetNewGame();
 newGame.updateNewGame({
