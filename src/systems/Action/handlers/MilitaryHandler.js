@@ -1,5 +1,5 @@
-import { addTimelineEvent } from "../../Timeline";
-import { updateCity } from "../../../cities/CityRepository";
+import { addTimelineEvent } from "../../Timeline/index.js";
+import { updateCity } from "../../../cities/CityRepository.js";
 
 export function handleMilitaryAction(gameSession, action) {
   const intent = action.interpretation?.intent;
