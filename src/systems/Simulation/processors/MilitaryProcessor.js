@@ -1,10 +1,10 @@
-import { getRuntime, updateRuntime } from "../../../state";
+import { getState, updateState } from "../../../state";
 import { updateCity } from "../../../cities/CityRepository";
 import { addTimelineEvent } from "../../Timeline";
 
 export function processMilitary(gameSession) {
-  const runtime = getRuntime(gameSession);
-  const simulation = runtime.simulation ?? {};
+  const state = getState(gameSession);
+  const simulation = state.simulation ?? {};
   const cityRepository = gameSession.world.repositories.cities;
   let nextCities = cityRepository;
   const activeSieges = [];
@@ -52,8 +52,8 @@ export function processMilitary(gameSession) {
     },
   };
 
-  nextSession = updateRuntime(nextSession, {
-    ...runtime,
+  nextSession = updateState(nextSession, {
+    ...state,
     simulation: {
       ...simulation,
       activeWars: simulation.activeWars ?? [],
