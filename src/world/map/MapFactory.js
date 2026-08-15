@@ -1,5 +1,5 @@
-import regionsData from "./data/regions.json";
-import terrainData from "./data/terrain.json";
+import regionsData from "./data/regions.json" with { type: "json" };
+import terrainData from "./data/terrain.json" with { type: "json" };
 
 import { createRegion } from "./RegionFactory.js";
 import { createTerrain } from "./TerrainFactory.js";
