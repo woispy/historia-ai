@@ -1,9 +1,9 @@
 import {
   createCityRepository,
   addCity,
-} from "./CityRepository";
+} from "./CityRepository.js";
 
-import { createCity } from "./CityFactory";
+import { createCity } from "./CityFactory.js";
 
 /**
  * ============================================================================
