@@ -29,6 +29,19 @@ export function updateState(gameSession, state) {
   };
 }
 
+/**
+ * Compatibility facade for action processors that historically called the
+ * canonical game state "runtime". These helpers never create or read a
+ * session.runtime property; they operate exclusively on GameSession.state.
+ */
+export function getRuntime(gameSession) {
+  return getState(gameSession);
+}
+
+export function updateRuntime(gameSession, state) {
+  return updateState(gameSession, state);
+}
+
 export function getCurrentDate(gameSession) {
   return getState(gameSession).time.currentDate;
 }
