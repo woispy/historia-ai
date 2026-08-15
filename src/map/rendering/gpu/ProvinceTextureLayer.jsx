@@ -46,12 +46,14 @@ float decodeProvinceId(vec4 encoded) {
 }
 
 void main() {
-  // The SVG physical world is the only owner of the ocean/land base. The GPU
-  // layer is deliberately transparent outside political land so there is no
-  // second map underneath/over the physical coastline.
+  // Physical land is the only owner of the coastline. Political color is
+  // never allowed to survive outside that mask.
   if (texture(uLandMask, vUv).r < 0.5) discard;
 
-  float provinceId = decodeProvinceId(texture(uProvinceIds, vUv));
+  vec4 encodedProvince = texture(uProvinceIds, vUv);
+  if (encodedProvince.a < 0.5) discard;
+
+  float provinceId = decodeProvinceId(encodedProvince);
   if (provinceId < 0.5) discard;
 
   float paletteIndex = provinceId - 1.0;
@@ -144,6 +146,13 @@ function drawPolygons(ctx, polygons, width, height) {
   if (count) ctx.fill();
 }
 
+function applyLandMask(ctx, landCanvas) {
+  ctx.save();
+  ctx.globalCompositeOperation = "destination-in";
+  ctx.drawImage(landCanvas, 0, 0);
+  ctx.restore();
+}
+
 function encodeId(id) {
   return [id & 255, (id >> 8) & 255, (id >> 16) & 255];
 }
@@ -195,6 +204,11 @@ function buildRasterData(provinces, mapStyle) {
     provinceContext.fillStyle = `rgb(${r} ${g} ${b})`;
     drawPolygons(provinceContext, entry.geometry.polygons, DEFAULT_WIDTH, DEFAULT_HEIGHT);
   });
+
+  // Hard-clip the political raster itself. The shader repeats the check for
+  // defence in depth, but no political pixels outside physical land are ever
+  // uploaded as visible texture content.
+  applyLandMask(provinceContext, landCanvas);
 
   return {
     width: DEFAULT_WIDTH,
@@ -379,6 +393,7 @@ function ProvinceTextureLayer({
 }) {
   const canvasRef = useRef(null);
   const stateRef = useRef(null);
+  const cameraRef = useRef(camera);
   const gpuEnabled = shouldUseGpuProvinceFill(camera.zoom);
   const raster = useMemo(
     () => (gpuEnabled ? buildRasterData(provinces, mapStyle) : null),
@@ -387,13 +402,21 @@ function ProvinceTextureLayer({
   const selectedProvinceRef = useRef(selectedProvinceId);
 
   useEffect(() => {
+    cameraRef.current = camera;
+    const state = stateRef.current;
+    if (!state || !gpuEnabled) return;
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (rect) renderFrame(state, camera, rect.width, rect.height);
+  }, [camera, gpuEnabled]);
+
+  useEffect(() => {
     selectedProvinceRef.current = selectedProvinceId;
     const state = stateRef.current;
     if (!state || !gpuEnabled) return;
     state.selectedRasterId = getSelectedRasterId(state, selectedProvinceId);
     const rect = canvasRef.current?.getBoundingClientRect();
-    if (rect) renderFrame(state, camera, rect.width, rect.height);
-  }, [selectedProvinceId, camera, gpuEnabled]);
+    if (rect) renderFrame(state, cameraRef.current, rect.width, rect.height);
+  }, [selectedProvinceId, gpuEnabled]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -416,17 +439,19 @@ function ProvinceTextureLayer({
 
     state.selectedRasterId = getSelectedRasterId(state, selectedProvinceRef.current);
     stateRef.current = state;
-    onReady?.(true);
 
     const resizeObserver = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (!entry) return;
-      renderFrame(state, camera, entry.contentRect.width, entry.contentRect.height);
+      renderFrame(state, cameraRef.current, entry.contentRect.width, entry.contentRect.height);
     });
     resizeObserver.observe(canvas.parentElement ?? canvas);
 
     const initialRect = canvas.getBoundingClientRect();
-    renderFrame(state, camera, initialRect.width, initialRect.height);
+    renderFrame(state, cameraRef.current, initialRect.width, initialRect.height);
+    // Handoff happens only after the first GPU frame has been rendered, so the
+    // CPU fallback and GPU compositor are never visibly active at once.
+    onReady?.(true);
 
     return () => {
       resizeObserver.disconnect();
@@ -434,7 +459,7 @@ function ProvinceTextureLayer({
       destroyState(state);
       onReady?.(false);
     };
-  }, [camera, gpuEnabled, onReady, raster]);
+  }, [gpuEnabled, onReady, raster]);
 
   if (!gpuEnabled) return null;
 
@@ -462,4 +487,5 @@ export {
   DEFAULT_HEIGHT,
   encodeId,
   parseHexColor,
+  applyLandMask,
 };

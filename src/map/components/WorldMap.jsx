@@ -47,11 +47,9 @@ function WorldMap({
   }, [camera, onCityClick]);
 
   const world = useMemo(() => <WorldPhysicalLayer />, []);
-  const base = useMemo(
-    () => <PhysicalGeographyLayer phase="base" zoom={cameraState.zoom} camera={cameraState} />,
-    [cameraState],
-  );
   const useGpuProvinceFill = shouldUseGpuProvinceFill(cameraState.zoom);
+  const gpuProvinceActive = useGpuProvinceFill && textureReady;
+
   const provincesLayer = useMemo(
     () => (
       <ProvinceLayer
@@ -62,7 +60,7 @@ function WorldMap({
         mapShadows={settings.mapShadows !== false}
         zoom={cameraState.zoom}
         camera={cameraState}
-        renderFill={!useGpuProvinceFill || !textureReady}
+        renderFill={!gpuProvinceActive}
       />
     ),
     [
@@ -72,17 +70,13 @@ function WorldMap({
       settings.mapStyle,
       settings.mapShadows,
       cameraState,
-      textureReady,
-      useGpuProvinceFill,
+      gpuProvinceActive,
     ],
   );
+
   const cartography = useMemo(
     () => <CartographyLayer zoom={cameraState.zoom} />,
     [cameraState.zoom],
-  );
-  const water = useMemo(
-    () => <PhysicalGeographyLayer phase="water" zoom={cameraState.zoom} camera={cameraState} />,
-    [cameraState],
   );
   const detail = useMemo(
     () => <PhysicalGeographyLayer phase="detail" zoom={cameraState.zoom} camera={cameraState} />,
@@ -103,15 +97,13 @@ function WorldMap({
     () => (
       <RenderLayer>
         {world}
-        {base}
         {provincesLayer}
         {cartography}
-        {water}
         {detail}
         {citiesLayer}
       </RenderLayer>
     ),
-    [world, base, provincesLayer, cartography, water, detail, citiesLayer],
+    [world, provincesLayer, cartography, detail, citiesLayer],
   );
 
   return (
