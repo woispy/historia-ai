@@ -1,5 +1,5 @@
-import { getState, updateState } from "../../../state";
-import { updateCity } from "../../../cities/CityRepository";
+import { getState, updateState } from "../../../state/index.js";
+import { updateCity } from "../../../cities/CityRepository.js";
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
