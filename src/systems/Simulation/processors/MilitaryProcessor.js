@@ -1,6 +1,6 @@
-import { getState, updateState } from "../../../state";
-import { updateCity } from "../../../cities/CityRepository";
-import { addTimelineEvent } from "../../Timeline";
+import { getState, updateState } from "../../../state/index.js";
+import { updateCity } from "../../../cities/CityRepository.js";
+import { addTimelineEvent } from "../../Timeline/index.js";
 
 export function processMilitary(gameSession) {
   const state = getState(gameSession);
