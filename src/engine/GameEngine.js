@@ -16,8 +16,8 @@ import {
   queueAction,
   updateAction,
   removeAction,
-} from "../systems/Action";
-import { processTurn } from "../systems/Turn";
+} from "../systems/Action/ActionSystem.js";
+import { processTurn } from "../systems/Turn/TurnEngine.js";
 
 const TURN_UNITS = new Set([
   "day",
@@ -56,9 +56,6 @@ function normalizeUnit(unit) {
   return unit;
 }
 
-/**
- * Advance the simulation through the canonical runtime pipeline.
- */
 export function advanceGame(gameSession, unit = "week", amount = 1) {
   assertSession(gameSession);
 
