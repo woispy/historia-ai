@@ -1,6 +1,4 @@
-import {
-  simulateTurn,
-} from "../Simulation";
+import { simulateTurn } from "../Simulation/index.js";
 
 /**
  * ============================================================================
