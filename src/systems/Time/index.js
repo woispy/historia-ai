@@ -5,6 +5,6 @@ export {
   advanceWeeks,
   advanceMonths,
   advanceYears,
-} from "./TimeSystem";
+} from "./TimeSystem.js";
 
-export { formatDate, getMonthName } from "./timeUtils";
+export { formatDate, getMonthName } from "./timeUtils.js";
