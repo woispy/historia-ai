@@ -4,12 +4,12 @@ import {
   writeSave,
   deleteSave as storageDeleteSave,
   getSaveInfo,
-} from "./SaveStorage";
+} from "./SaveStorage.js";
 
 import {
   serializeGame,
   deserializeGame,
-} from "./SaveSerializer";
+} from "./SaveSerializer.js";
 
 /**
  * ============================================================================
