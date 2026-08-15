@@ -1,4 +1,4 @@
-export { SelectionTypes } from "./SelectionTypes";
+export { SelectionTypes } from "./SelectionTypes.js";
 
 /* ============================================================================
  * Factory
@@ -6,7 +6,7 @@ export { SelectionTypes } from "./SelectionTypes";
 
 export {
   createSelection,
-} from "./SelectionFactory";
+} from "./SelectionFactory.js";
 
 /* ============================================================================
  * Model
@@ -14,7 +14,7 @@ export {
 
 export {
   createSelectionModel,
-} from "./SelectionModel";
+} from "./SelectionModel.js";
 
 /* ============================================================================
  * Repository
@@ -24,7 +24,7 @@ export {
   createSelectionRepository,
   setSelection,
   clearSelection,
-} from "./SelectionRepository";
+} from "./SelectionRepository.js";
 
 /* ============================================================================
  * Bootstrap
@@ -32,7 +32,7 @@ export {
 
 export {
   createSelectionRepositoryFromSelection,
-} from "./SelectionBootstrap";
+} from "./SelectionBootstrap.js";
 
 /* ============================================================================
  * Queries
@@ -48,4 +48,4 @@ export {
   isCharacterSelected,
   isCitySelected,
   isArmySelected,
-} from "./SelectionQueries";
+} from "./SelectionQueries.js";
