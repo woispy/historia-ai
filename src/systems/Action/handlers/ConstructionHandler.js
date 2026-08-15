@@ -1,6 +1,6 @@
-import { addTimelineEvent } from "../../Timeline";
-import { getRuntime, updateRuntime } from "../../../state";
-import { updateCity } from "../../../cities/CityRepository";
+import { addTimelineEvent } from "../../Timeline/index.js";
+import { getRuntime, updateRuntime } from "../../../state/index.js";
+import { updateCity } from "../../../cities/CityRepository.js";
 
 export function handleConstructionAction(gameSession, action) {
   const runtime = getRuntime(gameSession);
