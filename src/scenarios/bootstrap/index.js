@@ -1,3 +1,3 @@
 export {
   bootstrapScenario,
-} from "./ScenarioBootstrap";
+} from "./ScenarioBootstrap.js";
