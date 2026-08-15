@@ -1,5 +1,5 @@
-import { getState, updateState } from "../../../state";
-import { addTimelineEvent } from "../../Timeline";
+import { getState, updateState } from "../../../state/index.js";
+import { addTimelineEvent } from "../../Timeline/index.js";
 
 export function processEvents(gameSession) {
   const state = getState(gameSession);
