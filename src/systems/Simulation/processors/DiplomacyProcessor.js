@@ -1,5 +1,5 @@
-import { getState, updateState } from "../../../state";
-import { addTimelineEvent } from "../../Timeline";
+import { getState, updateState } from "../../../state/index.js";
+import { addTimelineEvent } from "../../Timeline/index.js";
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
