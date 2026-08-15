@@ -51,10 +51,12 @@ assert.ok(!gpuLayer.includes("uLandColor"));
 assert.ok(gpuLayer.includes("createTexture(gl, raster.landCanvas, false)"));
 
 // Camera movement must redraw the existing GPU state, not rebuild the 4096x2048
-// political texture on every mouse-wheel/pan update.
+// political texture on every mouse-wheel/pan update. The camera effect owns
+// only frame updates; raster creation remains memoized by GPU LOD/data/style.
 assert.match(gpuLayer, /useEffect\(\(\) => \{\n\s{4}cameraRef\.current = camera/);
-assert.match(gpuLayer, /\}, \[gpuEnabled, onReady, raster\]\);/);
+assert.match(gpuLayer, /\}, \[camera, gpuEnabled\]\);/);
 assert.ok(gpuLayer.includes("renderFrame(state, camera, rect.width, rect.height)"));
+assert.ok(gpuLayer.includes("useMemo(") && gpuLayer.includes("[gpuEnabled, provinces, mapStyle]"));
 
 // CPU and GPU political fills have an explicit handoff: only one visible
 // compositor is active after the first GPU frame has rendered.
