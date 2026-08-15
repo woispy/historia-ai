@@ -1,9 +1,9 @@
 import {
   clearPendingActions,
   handleAction,
-} from "../../Action";
+} from "../../Action/index.js";
 
-import { getState } from "../../../state";
+import { getState } from "../../../state/index.js";
 
 export function processActions(gameSession) {
   const state = getState(gameSession);
