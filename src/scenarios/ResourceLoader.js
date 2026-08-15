@@ -17,10 +17,12 @@ const viteResourceFiles =
       )
     : null;
 
+const nodeProcess = globalThis.process;
+
 const nodeFs =
-  typeof process !== "undefined" &&
-  typeof process.getBuiltinModule === "function"
-    ? process.getBuiltinModule("fs")
+  nodeProcess &&
+  typeof nodeProcess.getBuiltinModule === "function"
+    ? nodeProcess.getBuiltinModule("fs")
     : null;
 
 function loadNodeResourceFolder(scenarioId, resourceName) {
