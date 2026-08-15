@@ -1,3 +1,3 @@
-export { interpretAction } from "./ActionInterpreter";
-export { resolveIntent } from "./IntentResolver";
-export { resolveEntities } from "./EntityResolver";
+export { interpretAction } from "./ActionInterpreter.js";
+export { resolveIntent } from "./IntentResolver.js";
+export { resolveEntities } from "./EntityResolver.js";
