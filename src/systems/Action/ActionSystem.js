@@ -1,38 +1,28 @@
 import { interpretAction } from "../Interpreter";
-import { advanceWeek, advanceMonth, advanceSixMonths, advanceYear } from "../Turn";
+import { processTurn } from "../Turn";
 
 function rebuildGameSession(gameSession, state) {
   return { ...gameSession, state };
 }
 
 export function advanceWeek(gameSession) {
-  return advanceGame(gameSession, "week", 1);
+  return processTurn(gameSession, "week", 1);
 }
 
 export function advanceMonth(gameSession) {
-  return advanceGame(gameSession, "month", 1);
+  return processTurn(gameSession, "month", 1);
 }
 
 export function advanceSixMonths(gameSession) {
-  return advanceGame(gameSession, "month", 6);
+  return processTurn(gameSession, "month", 6);
 }
 
 export function advanceYear(gameSession) {
-  return advanceGame(gameSession, "year", 1);
+  return processTurn(gameSession, "year", 1);
 }
 
 export function advanceDays(gameSession, days) {
-  return advanceGame(gameSession, "day", days);
-}
-
-function advanceGame(gameSession, unit, amount) {
-  // This internal import-free dispatch keeps legacy action exports usable while
-  // the public gameplay path is migrated to GameEngine.
-  if (unit === "week" && amount === 1) return advanceWeek(gameSession);
-  if (unit === "month" && amount === 1) return advanceMonth(gameSession);
-  if (unit === "month" && amount === 6) return advanceSixMonths(gameSession);
-  if (unit === "year" && amount === 1) return advanceYear(gameSession);
-  return gameSession;
+  return processTurn(gameSession, "day", days);
 }
 
 export function queueAction(gameSession, actionText) {
