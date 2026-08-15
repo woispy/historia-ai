@@ -1,4 +1,4 @@
-import { addTimelineEvent } from "../../Timeline";
+import { addTimelineEvent } from "../../Timeline/index.js";
 
 export function processTimeline(gameSession) {
   const state = gameSession.state;
