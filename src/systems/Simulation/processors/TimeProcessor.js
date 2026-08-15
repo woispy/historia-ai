@@ -3,8 +3,8 @@ import {
   advanceWeeks,
   advanceMonths,
   advanceYears,
-} from "../../Time";
-import { getState, updateState } from "../../../state";
+} from "../../Time/index.js";
+import { getState, updateState } from "../../../state/index.js";
 
 export function processTime(gameSession, unit = "week", amount = 1) {
   const state = getState(gameSession);
