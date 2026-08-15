@@ -1,15 +1,15 @@
-export { processTime } from "./TimeProcessor";
+export { processTime } from "./TimeProcessor.js";
 
-export { processActions } from "./ActionProcessor";
+export { processActions } from "./ActionProcessor.js";
 
-export { processEconomy } from "./EconomyProcessor";
+export { processEconomy } from "./EconomyProcessor.js";
 
-export { processPopulation } from "./PopulationProcessor";
+export { processPopulation } from "./PopulationProcessor.js";
 
-export { processDiplomacy } from "./DiplomacyProcessor";
+export { processDiplomacy } from "./DiplomacyProcessor.js";
 
-export { processMilitary } from "./MilitaryProcessor";
+export { processMilitary } from "./MilitaryProcessor.js";
 
-export { processEvents } from "./EventProcessor";
+export { processEvents } from "./EventProcessor.js";
 
-export { processTimeline } from "./TimelineProcessor";
+export { processTimeline } from "./TimelineProcessor.js";
