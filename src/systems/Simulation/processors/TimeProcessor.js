@@ -4,11 +4,11 @@ import {
   advanceMonths,
   advanceYears,
 } from "../../Time";
-import { getRuntime, updateRuntime } from "../../../state";
+import { getState, updateState } from "../../../state";
 
 export function processTime(gameSession, unit = "week", amount = 1) {
-  const runtime = getRuntime(gameSession);
-  let nextDate = runtime.time.currentDate;
+  const state = getState(gameSession);
+  let nextDate = state.time.currentDate;
 
   switch (unit) {
     case "day":
@@ -27,12 +27,12 @@ export function processTime(gameSession, unit = "week", amount = 1) {
       return gameSession;
   }
 
-  return updateRuntime(gameSession, {
-    ...runtime,
+  return updateState(gameSession, {
+    ...state,
     time: {
-      ...runtime.time,
+      ...state.time,
       currentDate: nextDate,
-      turn: runtime.time.turn + 1,
+      turn: state.time.turn + 1,
       lastUnit: unit,
       lastAmount: amount,
     },
