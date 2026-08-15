@@ -34,7 +34,7 @@ export function createGame({
   }
 
   const world = bootstrapWorld(scenario);
-  const runtime = createRuntimeState({
+  const state = createRuntimeState({
     startDate: scenario.startDate,
     scenario,
     player,
@@ -43,7 +43,7 @@ export function createGame({
   return createGameSession({
     scenario,
     world,
-    runtime,
+    state,
     player,
     settings,
   });
