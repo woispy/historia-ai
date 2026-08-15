@@ -37,21 +37,19 @@ function inspectFile(absolutePath) {
   visited.add(absolutePath);
 
   const source = fs.readFileSync(absolutePath, "utf8");
-  const importPattern = /(?:from\s*|import\s*\()(["'])(\.\.?\/[^"']+)\1/g;
+  const importPattern = /(?:\bfrom\s+|\bimport\s*\()\s*["'](\.{1,2}\/[^"']+)["']/g;
 
   for (const match of source.matchAll(importPattern)) {
-    const specifier = match[2];
+    const specifier = match[1];
     const extension = path.extname(specifier);
+    const resolved = resolveLocalModule(absolutePath, specifier);
 
     if (extension) {
-      const resolved = resolveLocalModule(absolutePath, specifier);
       if (resolved) {
         inspectFile(resolved);
       }
       continue;
     }
-
-    const resolved = resolveLocalModule(absolutePath, specifier);
 
     if (!resolved) {
       continue;
