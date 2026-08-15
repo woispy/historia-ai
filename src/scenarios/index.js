@@ -1,24 +1,24 @@
 export {
   createScenario,
-} from "./ScenarioFactory";
+} from "./ScenarioFactory.js";
 
 export {
   loadScenario,
   loadScenarioDefinition,
-} from "./ScenarioLoader";
+} from "./ScenarioLoader.js";
 
 export {
   loadResourceFolder,
-} from "./ResourceLoader";
+} from "./ResourceLoader.js";
 
 export {
   validateScenario,
-} from "./ScenarioValidator";
+} from "./ScenarioValidator.js";
 
 export {
   createScenarioDefinition,
-} from "./ScenarioDefinition";
+} from "./ScenarioDefinition.js";
 
 export {
   ScenarioTypes,
-} from "./ScenarioTypes";
+} from "./ScenarioTypes.js";
