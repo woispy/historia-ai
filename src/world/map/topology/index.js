@@ -1,1 +1,1 @@
-export { createTopology } from "./TopologyFactory";
+export { createTopology } from "./TopologyFactory.js";
