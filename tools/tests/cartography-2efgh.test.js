@@ -49,8 +49,9 @@ assert(physicalPresentation.terrainOpacity === 0, "terrain overlays must remain 
 assert(physicalPresentation.riverOpacity > 0 && physicalPresentation.mountainOpacity > 0, "physical presentation profile is incomplete");
 
 assert(getCityLabelPolicy(0.9).maxLabels < getCityLabelPolicy(3.6).maxLabels, "city label budget should grow with zoom");
-assert(getCityLabelBudget(1.3) === 12, "regional label budget failed");
-assert(getCityMarkerBudget(2.0) === 26, "province marker budget failed");
+assert(getCityLabelPolicy(0.9).maxLabels === 0, "world city labels should be hidden");
+assert(getCityLabelBudget(1.3) === 4, "regional label budget failed");
+assert(getCityMarkerBudget(2.0) === 20, "province marker budget failed");
 
 const cities = Object.entries(ANATOLIA_CITY_ATLAS).map(([id, map]) => ({ id, map }));
 const regionalCities = selectVisibleCities(cities, 1.4);
