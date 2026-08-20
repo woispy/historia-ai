@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
 import { useWorldMap } from "../hooks";
-import { getAnatoliaCityMapMetadata } from "../data/AnatoliaCityAtlas";
 import {
   ProvinceLayer,
   CityLayer,
@@ -13,21 +12,20 @@ import { RenderRoot, RenderLayer, SvgRenderer } from "../rendering";
 import ProvinceTextureLayer from "../rendering/gpu/ProvinceTextureLayer";
 import { shouldUseGpuProvinceFill } from "../rendering/CartographyModel";
 
-const focusZoom = (metadata) => (
-  metadata?.tier === "capital" ? 3.6 : metadata?.tier === "major" ? 3 : 2.55
-);
-
 function WorldMap({
   runtime,
   selectedProvinceId,
   onProvinceClick,
   onCityClick,
+  selectedCityId: controlledSelectedCityId = null,
   settings = {},
 }) {
   const { provinces, cities } = useWorldMap(runtime);
   const camera = useCamera();
   const cameraState = camera.camera;
   const [textureReady, setTextureReady] = useState(false);
+  const [internalSelectedCityId, setInternalSelectedCityId] = useState(null);
+  const selectedCityId = controlledSelectedCityId ?? internalSelectedCityId;
 
   const cameraInput = useCameraController({
     zoom: camera.zoom,
@@ -37,14 +35,10 @@ function WorldMap({
 
   const ready = useCallback((value) => setTextureReady(Boolean(value)), []);
 
-  const cityClick = useCallback((cityId, cityMap) => {
-    const metadata = cityMap ?? getAnatoliaCityMapMetadata(cityId);
-    if (metadata) {
-      camera.focus(metadata.x, metadata.y, { type: "city", id: cityId });
-      camera.setZoom(focusZoom(metadata));
-    }
+  const cityClick = useCallback((cityId) => {
+    setInternalSelectedCityId(cityId);
     onCityClick?.(cityId);
-  }, [camera, onCityClick]);
+  }, [onCityClick]);
 
   const useGpuProvinceFill = shouldUseGpuProvinceFill(cameraState.zoom);
   const gpuProvinceActive = useGpuProvinceFill && textureReady;
@@ -92,10 +86,11 @@ function WorldMap({
         cities={cities}
         zoom={cameraState.zoom}
         camera={cameraState}
+        selectedCityId={selectedCityId}
         onCityClick={cityClick}
       />
     ),
-    [cities, cameraState, cityClick],
+    [cities, cameraState, selectedCityId, cityClick],
   );
   const layers = useMemo(
     () => (
