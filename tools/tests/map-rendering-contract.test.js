@@ -22,7 +22,7 @@ const physicalLayer = read("src/map/components/layers/WorldPhysicalLayer.jsx");
 // One physical coastline authority and one map viewport. The game viewport
 // must not mount a second legacy/far-zoom map or empty overlay map layers.
 assert.equal((worldMap.match(/<SvgRenderer\b/g) ?? []).length, 1);
-assert.equal((worldMap.match(/<WorldPhysicalLayer\s*\/>/g) ?? []).length, 1);
+assert.equal((worldMap.match(/<WorldPhysicalLayer\b[^>]*\/>/g) ?? []).length, 1);
 assert.equal((worldMap.match(/<ProvinceTextureLayer\b/g) ?? []).length, 1);
 assert.equal((mapView.match(/<WorldMap\b/g) ?? []).length, 1);
 assert.ok(!mapView.includes("country-layer"));
