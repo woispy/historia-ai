@@ -1,6 +1,7 @@
 name: Historia AI CI
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - main
@@ -45,6 +46,7 @@ on:
       - feat/cartography-foundation-v2
       - feat/phase3-runtime-engine
       - feat/runtime-province-selection
+      - feat/historical-map-clean-foundation
 
 jobs:
   validate:
@@ -63,6 +65,10 @@ jobs:
         run: npm run lint
       - name: Generate world physical geometry assets
         run: npm run build:assets
+      - name: Generate historical GIS runtime assets
+        run: npm run build:historical-gis:1300
+      - name: Validate historical GIS runtime assets
+        run: npm run validate:historical-gis:1300
       - name: Run historical GIS identity tests
         run: npm run test:historical-gis
       - name: Run physical geography tests
@@ -101,10 +107,6 @@ jobs:
         run: npm run test:esm-import-contract
       - name: Run runtime engine tests
         run: npm run test:runtime-engine
-      - name: Generate historical GIS runtime assets
-        run: npm run build:historical-gis:1300
-      - name: Validate historical GIS runtime assets
-        run: npm run validate:historical-gis:1300
       - name: Build
         run: npm run build
       - name: Verify historical GIS and map scripts
@@ -159,6 +161,7 @@ jobs:
           node --check src/map/rendering/MapViewportCulling.js &&
           node --check src/world/historical/HistoricalCountryResolver.js &&
           node --check src/world/historical/HistoricalWorld1300Registry.js &&
+          node --check src/world/map/HistoricalMapContract.js &&
           node --check src/provinces/HistoricalProvinceRepository.js &&
           node --check src/provinces/ProvinceFactory.js &&
           node --check src/provinces/ProvinceModel.js &&
