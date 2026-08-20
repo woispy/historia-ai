@@ -45,6 +45,14 @@ for (const zoom of [1.2, 2.8, 3.6, 5, 8]) {
 // validated in screen-space rather than by requiring the world-space value to
 // grow, which would contradict the screen-stable inverse-zoom policy.
 assert.ok(getCityVisualStyle(cities[0], 8).fontSize * 8 > 0.1);
+
+// Screen-space label size must remain stable across the zoom range instead of
+// growing again after the minimum scale floor is reached. Allow a small
+// tolerance for floating-point arithmetic while checking the actual policy.
+for (const zoom of [1.2, 2, 2.8, 3.6, 5, 8, 12]) {
+  const style = getCityVisualStyle(cities[0], zoom);
+  assert.ok(style.fontSize * zoom <= 0.42, `City label grew in screen-space at zoom ${zoom}`);
+}
 assert.ok(ANATOLIA_PHYSICAL_ATLAS.lakes.length >= 8);
 assert.ok(ANATOLIA_PHYSICAL_ATLAS.rivers.length >= 10);
 assert.ok(ANATOLIA_PHYSICAL_ATLAS.labels.filter((label) => label.kind === "sea").every((label) => label.maxZoom >= 8));
