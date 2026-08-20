@@ -3,6 +3,7 @@ import ProvinceSvg from "../ProvinceSvg";
 import ProvincePolygon from "../ProvincePolygon";
 import ProvinceBoundaryLayer from "./ProvinceBoundaryLayer";
 import { getGeometryBounds, getViewportBounds, isGeometryVisible } from "../../rendering/MapViewportCulling";
+import { MAP_LOD } from "../../rendering/CartographyModel";
 
 function isCuratedCountryOverlay(province) {
   return province?.historical?.classification === "curated-regional-gameplay-overlay";
@@ -36,10 +37,15 @@ function ProvinceLayer({
     [camera],
   );
 
-  const visibleProvinces = useMemo(
-    () => indexedProvinces.filter((item) => isGeometryVisible(item.bounds, viewportBounds)),
-    [indexedProvinces, viewportBounds],
-  );
+  // At world/regional LOD the GPU owns the political surface. Keeping every
+  // province as an SVG hit path still forces the browser to layout, retain and
+  // hit-test hundreds/thousands of complex paths during camera movement.
+  const interactionActive = zoom >= MAP_LOD.province.min || Boolean(selectedProvinceId);
+
+  const visibleProvinces = useMemo(() => {
+    if (!interactionActive) return [];
+    return indexedProvinces.filter((item) => isGeometryVisible(item.bounds, viewportBounds));
+  }, [indexedProvinces, viewportBounds, interactionActive]);
 
   return (
     <ProvinceSvg>
