@@ -40,34 +40,37 @@ function getVisibleCities(cities, zoom, camera) {
   return selectVisibleCities(viewportCities, zoom);
 }
 
-function CityMarker({ city, zoom, onClick }) {
+function CityMarker({ city, zoom, selected, onClick }) {
   const { x, y, tier } = city.map;
   const { radius } = getCityVisualStyle(city, zoom);
   const isCapital = tier === "capital";
+  const selectedRadius = radius + (selected ? 0.06 : 0);
 
   return (
     <g
       key={city.id}
       onClick={() => onClick?.(city.id, city.map)}
       style={{ cursor: onClick ? "pointer" : "default" }}
+      aria-label={`${city.map.name}${selected ? " selected" : ""}`}
+      aria-selected={selected}
     >
-      {isCapital && (
+      {(isCapital || selected) && (
         <circle
           cx={x}
           cy={y}
-          r={radius + 0.055}
+          r={selectedRadius + 0.055}
           fill="none"
-          stroke="#d9bf68"
-          strokeOpacity="0.72"
-          strokeWidth="1.15"
+          stroke={selected ? "#f4e5a8" : "#d9bf68"}
+          strokeOpacity={selected ? "0.96" : "0.72"}
+          strokeWidth={selected ? "1.35" : "1.15"}
           vectorEffect="non-scaling-stroke"
         />
       )}
       <circle
         cx={x}
         cy={y}
-        r={radius}
-        fill={isCapital ? "#f0d276" : "#e8e1c9"}
+        r={selectedRadius}
+        fill={selected ? "#fff0a6" : isCapital ? "#f0d276" : "#e8e1c9"}
         stroke="#151916"
         strokeWidth="1.00"
         vectorEffect="non-scaling-stroke"
@@ -99,7 +102,7 @@ function CityLabel({ city, fontSize, x, y, anchor }) {
   );
 }
 
-function CityLayer({ cities = [], zoom = 1, camera, onCityClick }) {
+function CityLayer({ cities = [], zoom = 1, camera, selectedCityId = null, onCityClick }) {
   const visibleCities = getVisibleCities(cities, zoom, camera);
   const labels = layoutCityLabels(visibleCities, zoom, camera);
   const lod = getMapLod(zoom);
@@ -107,7 +110,13 @@ function CityLayer({ cities = [], zoom = 1, camera, onCityClick }) {
   return (
     <g aria-label={`Historical cities (${lod} LOD)`}>
       {visibleCities.map((city) => (
-        <CityMarker key={city.id} city={city} zoom={zoom} onClick={onCityClick} />
+        <CityMarker
+          key={city.id}
+          city={city}
+          zoom={zoom}
+          selected={city.id === selectedCityId}
+          onClick={onCityClick}
+        />
       ))}
       {labels.map(({ city, fontSize, x, y, anchor }) => (
         <CityLabel
