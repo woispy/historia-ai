@@ -13,42 +13,33 @@ function mergeCityMetadata(city) {
   if (!atlas) return null;
   return { ...city, map: atlas };
 }
-
 function longitudeDelta(a, b) {
   let delta = Number(a) - Number(b);
   while (delta > 180) delta -= WORLD_WIDTH;
   while (delta < -180) delta += WORLD_WIDTH;
   return delta;
 }
-
 function isCityInViewport(city, camera, padding = 0.18) {
   if (!camera) return true;
-  const zoom = Math.max(0.001, Number(camera.zoom) || 1);
-  const viewWidth = WORLD_WIDTH / zoom;
-  const viewHeight = 180 / zoom;
-  const horizontalPadding = viewWidth * padding;
-  const verticalPadding = viewHeight * padding;
-  return (
-    Math.abs(longitudeDelta(city.map.x, camera.x ?? 0)) <= viewWidth / 2 + horizontalPadding
-    && Math.abs(city.map.y - Number(camera.y ?? 0)) <= viewHeight / 2 + verticalPadding
-  );
+  const zoom = Math.max(0.001, Number(camera.zoom) || 1), viewWidth = WORLD_WIDTH / zoom, viewHeight = 180 / zoom;
+  return Math.abs(longitudeDelta(city.map.x, camera.x ?? 0)) <= viewWidth / 2 + viewWidth * padding
+    && Math.abs(city.map.y - Number(camera.y ?? 0)) <= viewHeight / 2 + viewHeight * padding;
 }
-
 function getVisibleCities(cities, zoom, camera) {
   const mapped = cities.map(mergeCityMetadata).filter(Boolean);
-  const viewportCities = mapped.filter((city) => isCityInViewport(city, camera));
-  return selectVisibleCities(viewportCities, zoom);
+  return selectVisibleCities(mapped.filter((city) => isCityInViewport(city, camera)), zoom);
 }
 
 function CityMarker({ city, zoom, selected, onClick }) {
   const { x, y, tier } = city.map;
-  const { radius } = getCityVisualStyle(city, zoom);
+  const { radius, markerScreenScale } = getCityVisualStyle(city, zoom);
   const isCapital = tier === "capital";
   const selectedRadius = radius + (selected ? 0.06 : 0);
 
   return (
     <g
       key={city.id}
+      transform={`translate(${x} ${y}) scale(${markerScreenScale})`}
       onClick={() => onClick?.(city.id, city.map)}
       style={{ cursor: onClick ? "pointer" : "default" }}
       aria-label={`${city.map.name}${selected ? " selected" : ""}`}
@@ -56,8 +47,8 @@ function CityMarker({ city, zoom, selected, onClick }) {
     >
       {(isCapital || selected) && (
         <circle
-          cx={x}
-          cy={y}
+          cx="0"
+          cy="0"
           r={selectedRadius + 0.055}
           fill="none"
           stroke={selected ? "#f4e5a8" : "#d9bf68"}
@@ -67,8 +58,8 @@ function CityMarker({ city, zoom, selected, onClick }) {
         />
       )}
       <circle
-        cx={x}
-        cy={y}
+        cx="0"
+        cy="0"
         r={selectedRadius}
         fill={selected ? "#fff0a6" : isCapital ? "#f0d276" : "#e8e1c9"}
         stroke="#151916"
@@ -81,10 +72,7 @@ function CityMarker({ city, zoom, selected, onClick }) {
 
 function CityLabel({ city, fontSize, screenScale, x, y, anchor }) {
   return (
-    <g
-      transform={`translate(${x} ${y}) scale(${screenScale} ${-screenScale})`}
-      pointerEvents="none"
-    >
+    <g transform={`translate(${x} ${y}) scale(${screenScale} ${-screenScale})`} pointerEvents="none">
       <text
         x="0"
         y="0"
@@ -122,15 +110,7 @@ function CityLayer({ cities = [], zoom = 1, camera, selectedCityId = null, onCit
         />
       ))}
       {labels.map(({ city, fontSize, screenScale, x, y, anchor }) => (
-        <CityLabel
-          key={`${city.id}-label`}
-          city={city}
-          fontSize={fontSize}
-          screenScale={screenScale}
-          x={x}
-          y={y}
-          anchor={anchor}
-        />
+        <CityLabel key={`${city.id}-label`} city={city} fontSize={fontSize} screenScale={screenScale} x={x} y={y} anchor={anchor} />
       ))}
     </g>
   );
