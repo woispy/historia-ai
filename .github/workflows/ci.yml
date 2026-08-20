@@ -69,6 +69,13 @@ jobs:
         run: npm run build:historical-gis:1300
       - name: Validate historical GIS runtime assets
         run: npm run validate:historical-gis:1300
+      - name: Verify generated assets do not dirty the repository
+        run: |
+          if [ -n "$(git status --short --untracked-files=all)" ]; then
+            echo "Generated asset pipeline modified the repository working tree."
+            git status --short --untracked-files=all
+            exit 1
+          fi
       - name: Run historical GIS identity tests
         run: npm run test:historical-gis
       - name: Run physical geography tests
@@ -113,6 +120,13 @@ jobs:
         run: npm run test:runtime-engine
       - name: Build
         run: npm run build
+      - name: Verify generated assets remain repository-clean after full build
+        run: |
+          if [ -n "$(git status --short --untracked-files=all)" ]; then
+            echo "The full build left generated or modified files in the repository working tree."
+            git status --short --untracked-files=all
+            exit 1
+          fi
       - name: Verify historical GIS and map scripts
         run: >-
           node --check tools/asset-builder/cli/fetch-natural-earth-50m.js &&
