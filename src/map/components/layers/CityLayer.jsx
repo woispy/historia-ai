@@ -79,9 +79,12 @@ function CityMarker({ city, zoom, selected, onClick }) {
   );
 }
 
-function CityLabel({ city, fontSize, x, y, anchor }) {
+function CityLabel({ city, fontSize, screenScale, x, y, anchor }) {
   return (
-    <g transform={`translate(${x} ${y}) scale(1,-1)`} pointerEvents="none">
+    <g
+      transform={`translate(${x} ${y}) scale(${screenScale} ${-screenScale})`}
+      pointerEvents="none"
+    >
       <text
         x="0"
         y="0"
@@ -118,11 +121,12 @@ function CityLayer({ cities = [], zoom = 1, camera, selectedCityId = null, onCit
           onClick={onCityClick}
         />
       ))}
-      {labels.map(({ city, fontSize, x, y, anchor }) => (
+      {labels.map(({ city, fontSize, screenScale, x, y, anchor }) => (
         <CityLabel
           key={`${city.id}-label`}
           city={city}
           fontSize={fontSize}
+          screenScale={screenScale}
           x={x}
           y={y}
           anchor={anchor}
