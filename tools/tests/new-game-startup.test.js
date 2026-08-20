@@ -56,23 +56,38 @@ newGame.updateNewGame({
   },
 });
 
-rejectSave = true;
+let warningCount = 0;
+const originalWarn = console.warn;
+console.warn = (...args) => {
+  if (String(args[0]).includes("Initial save skipped")) {
+    warningCount += 1;
+    return;
+  }
+  originalWarn(...args);
+};
 
-const session = initializer.initializeGame();
+try {
+  rejectSave = true;
 
-assert.ok(session);
-assert.equal(session.version, 2);
-assert.ok(session.id);
-assert.ok(session.state);
-assert.equal(currentGame.getCurrentGame(), session);
-assert.deepEqual(newGame.getNewGame(), {
-  scenarioId: null,
-  countryId: null,
-  character: null,
-  settings: {},
-});
+  const session = initializer.initializeGame();
 
-currentGame.clearCurrentGame();
-rejectSave = false;
+  assert.ok(session);
+  assert.equal(session.version, 2);
+  assert.ok(session.id);
+  assert.ok(session.state);
+  assert.equal(currentGame.getCurrentGame(), session);
+  assert.deepEqual(newGame.getNewGame(), {
+    scenarioId: null,
+    countryId: null,
+    character: null,
+    settings: {},
+  });
+  assert.equal(warningCount, 1, "Expected the simulated save failure to be handled as a warning");
+
+  currentGame.clearCurrentGame();
+  rejectSave = false;
+} finally {
+  console.warn = originalWarn;
+}
 
 console.log("new-game-startup.test.js: game initialization succeeds even when browser save persistence fails");
