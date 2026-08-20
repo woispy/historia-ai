@@ -37,6 +37,7 @@ const LOD_BY_ZOOM = Object.freeze([
 ]);
 
 const SCREEN_STABLE_SIZE = 3.2;
+const MIN_SCREEN_STABLE_SCALE = 0.4;
 
 function getLod(zoom) {
   for (const [threshold, lod] of LOD_BY_ZOOM) {
@@ -69,7 +70,7 @@ function clamp(value, min, max) {
 
 function getScreenStableScale(zoom) {
   const safeZoom = Math.max(1, Number(zoom) || 1);
-  return clamp(SCREEN_STABLE_SIZE / safeZoom, 0.72, SCREEN_STABLE_SIZE);
+  return clamp(SCREEN_STABLE_SIZE / safeZoom, MIN_SCREEN_STABLE_SCALE, SCREEN_STABLE_SIZE);
 }
 
 export function getCityVisualStyle(city, zoom = 1) {
