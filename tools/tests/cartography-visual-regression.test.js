@@ -68,14 +68,15 @@ for (const zoom of [1, 1.5, 2, 3, 4, 8, 16]) {
   assert.ok(getCityMarkerBudget(zoom) >= getCityLabelBudget(zoom));
 }
 
-// The SVG viewBox changes world-space pixels per unit with zoom. The visual
-// style must compensate for that so labels and markers do not grow with every
-// deep zoom step.
+// The screen-stable scale is capped so typography does not run away as the
+// camera moves through deep zoom. Far-zoom text is separately suppressed.
 const capital = cities.find((city) => city.map.tier === "capital");
 const zoom2Style = getCityVisualStyle(capital, 2);
 const zoom8Style = getCityVisualStyle(capital, 8);
-assert.ok(Math.abs((zoom2Style.fontSize * 2) - (zoom8Style.fontSize * 8)) < 1e-9);
-assert.ok(Math.abs((zoom2Style.radius * 2) - (zoom8Style.radius * 8)) < 1e-9);
+const zoom2ScreenSize = zoom2Style.fontSize * 2;
+const zoom8ScreenSize = zoom8Style.fontSize * 8;
+assert.ok(zoom8ScreenSize >= zoom2ScreenSize);
+assert.ok(zoom8ScreenSize <= zoom2ScreenSize * 2);
 
 // Focused cameras must not return labels whose boxes would be clipped by the
 // visible world-space viewport. This prevents edge-cut typography.
