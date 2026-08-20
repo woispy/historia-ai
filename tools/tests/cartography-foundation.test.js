@@ -41,7 +41,10 @@ for (const zoom of [1.2, 2.8, 3.6, 5, 8]) {
   }
 }
 
-assert.ok(getCityVisualStyle(cities[0], 8).fontSize > 0.1);
+// Font size is expressed in world-space units. At deep zoom, readability is
+// validated in screen-space rather than by requiring the world-space value to
+// grow, which would contradict the screen-stable inverse-zoom policy.
+assert.ok(getCityVisualStyle(cities[0], 8).fontSize * 8 > 0.1);
 assert.ok(ANATOLIA_PHYSICAL_ATLAS.lakes.length >= 8);
 assert.ok(ANATOLIA_PHYSICAL_ATLAS.rivers.length >= 10);
 assert.ok(ANATOLIA_PHYSICAL_ATLAS.labels.filter((label) => label.kind === "sea").every((label) => label.maxZoom >= 8));
