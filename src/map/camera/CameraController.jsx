@@ -15,6 +15,7 @@ export function useCameraController({ zoom, move, smooth = true }) {
   const pointerCaptured = useRef(false);
   const pointerId = useRef(null);
   const viewportTarget = useRef(null);
+  const origin = useRef({ x: 0, y: 0 });
   const last = useRef({ x: 0, y: 0 });
   const pending = useRef({ x: 0, y: 0 });
   const frame = useRef(0);
@@ -55,6 +56,7 @@ export function useCameraController({ zoom, move, smooth = true }) {
     pointerCaptured.current = false;
     pointerId.current = event.pointerId;
     viewportTarget.current = event.currentTarget;
+    origin.current = { x: event.clientX, y: event.clientY };
     last.current = { x: event.clientX, y: event.clientY };
   }, []);
 
@@ -63,9 +65,9 @@ export function useCameraController({ zoom, move, smooth = true }) {
 
     const dx = event.clientX - last.current.x;
     const dy = event.clientY - last.current.y;
-    const distance = Math.abs(event.clientX - last.current.x) + Math.abs(event.clientY - last.current.y);
+    const totalDistance = Math.abs(event.clientX - origin.current.x) + Math.abs(event.clientY - origin.current.y);
 
-    if (distance > 2) {
+    if (totalDistance > 2) {
       if (!pointerCaptured.current) {
         viewportTarget.current?.setPointerCapture?.(event.pointerId);
         pointerCaptured.current = true;
@@ -77,7 +79,7 @@ export function useCameraController({ zoom, move, smooth = true }) {
     last.current = { x: event.clientX, y: event.clientY };
   }, [queueMove]);
 
-  const stopDragging = useCallback((event) => {
+  const stopDragging = useCallback(() => {
     if (pointerCaptured.current) {
       viewportTarget.current?.releasePointerCapture?.(pointerId.current);
     }
@@ -88,9 +90,9 @@ export function useCameraController({ zoom, move, smooth = true }) {
     viewportTarget.current = null;
   }, []);
 
-  const handlePointerCancel = useCallback((event) => {
+  const handlePointerCancel = useCallback(() => {
     pending.current = { x: 0, y: 0 };
-    stopDragging(event);
+    stopDragging();
   }, [stopDragging]);
 
   const handleClickCapture = useCallback((event) => {
