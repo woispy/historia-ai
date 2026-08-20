@@ -46,9 +46,13 @@ function WorldMap({
     onCityClick?.(cityId);
   }, [camera, onCityClick]);
 
-  const world = useMemo(() => <WorldPhysicalLayer />, []);
   const useGpuProvinceFill = shouldUseGpuProvinceFill(cameraState.zoom);
   const gpuProvinceActive = useGpuProvinceFill && textureReady;
+
+  const world = useMemo(
+    () => <WorldPhysicalLayer zoom={cameraState.zoom} />,
+    [cameraState.zoom],
+  );
 
   const provincesLayer = useMemo(
     () => (
