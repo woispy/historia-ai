@@ -35,7 +35,9 @@ assert.ok(gameShell.includes("currentId === provinceId ? null : provinceId"));
 
 // A click must remain a click: camera pointer capture begins only after the
 // drag threshold, otherwise the viewport can swallow province click events.
-const pointerDownBlock = cameraController.match(/const handlePointerDown = useCallback\(\(event\) => \{([\s\S]*?)\n  \}, \[\]\);/)?.[1] ?? "";
+const pointerDownStart = cameraController.indexOf("const handlePointerDown = useCallback");
+const pointerDownEnd = cameraController.indexOf("  }, []);", pointerDownStart);
+const pointerDownBlock = cameraController.slice(pointerDownStart, pointerDownEnd);
 assert.ok(!pointerDownBlock.includes("setPointerCapture"));
 assert.ok(cameraController.includes("totalDistance > 2"));
 
