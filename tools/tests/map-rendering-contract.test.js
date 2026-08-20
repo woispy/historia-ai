@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "../..");
-const read = (path) => readFileSync(resolve(root, path), "utf8");
+const read = (path) => readFileSync(resolve(root, path), "utf8").replace(/\r\n/g, "\n");
 
 const svgRenderer = read("src/map/rendering/SvgRenderer.jsx");
 const worldMap = read("src/map/components/WorldMap.jsx");
