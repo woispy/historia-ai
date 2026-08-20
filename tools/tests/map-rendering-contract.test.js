@@ -64,7 +64,9 @@ assert.ok(provincePolygon.includes("event.stopPropagation()"));
 // Pointer capture is delayed until a real drag begins. Capturing on pointer
 // down retargets a click to the viewport and breaks province selection.
 assert.ok(cameraController.includes("origin = useRef({ x: 0, y: 0 });"));
-const pointerDownBlock = cameraController.match(/const handlePointerDown = useCallback\(\(event\) => \{([\s\S]*?)\n  \}, \[\]\);/)?.[1] ?? "";
+const pointerDownStart = cameraController.indexOf("const handlePointerDown = useCallback");
+const pointerDownEnd = cameraController.indexOf("  }, []);", pointerDownStart);
+const pointerDownBlock = cameraController.slice(pointerDownStart, pointerDownEnd);
 assert.ok(pointerDownBlock.includes("dragging.current = true"));
 assert.ok(!pointerDownBlock.includes("setPointerCapture"));
 assert.ok(cameraController.includes("totalDistance > 2"));
