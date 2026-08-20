@@ -21,7 +21,8 @@ assert.equal(getMapLod(1), "world");
 assert.equal(getMapLod(2.8), "city");
 assert.equal(getMapLod(8), "detailed");
 assert.equal(shouldUseGpuProvinceFill(1), true);
-assert.equal(shouldUseGpuProvinceFill(1.75), false);
+assert.equal(shouldUseGpuProvinceFill(1.75), true);
+assert.equal(shouldUseGpuProvinceFill(1.85), false);
 
 for (const zoom of [1, 1.5, 2, 3, 4, 8, 16]) {
   const labels = layoutCityLabels(cities, zoom);
