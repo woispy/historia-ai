@@ -13,13 +13,18 @@ assert.equal(getMapLod(1), "world");
 assert.equal(getMapLod(2.8), "city");
 assert.equal(getMapLod(8), "detailed");
 
+// The political GPU surface remains stable through normal navigation and
+// hands control back to SVG only at deep zoom where vector fidelity is useful.
 assert.equal(shouldUseGpuProvinceFill(1), true);
 assert.equal(shouldUseGpuProvinceFill(1.74), true);
-assert.equal(shouldUseGpuProvinceFill(1.75), true);
-assert.equal(shouldUseGpuProvinceFill(1.85), false);
-assert.equal(shouldUseGpuProvinceFill(3.35), false);
+assert.equal(shouldUseGpuProvinceFill(1.85), true);
+assert.equal(shouldUseGpuProvinceFill(3.35), true);
+assert.equal(shouldUseGpuProvinceFill(4.49), true);
+assert.equal(shouldUseGpuProvinceFill(4.5), false);
 
-for (const zoom of [1.2, 2.8, 3.6, 5, 8]) {
+// Far world/regional views keep markers but suppress city text. Labels begin
+// at province zoom where there is enough room to place them cleanly.
+for (const zoom of [1.85, 2.0, 2.8, 3.6, 5, 8]) {
   const visible = selectVisibleCities(cities, zoom);
   const labels = layoutCityLabels(visible, zoom);
   assert.ok(labels.length > 0, `Expected city labels at zoom ${zoom}`);
@@ -41,6 +46,7 @@ for (const zoom of [1.2, 2.8, 3.6, 5, 8]) {
   }
 }
 
+assert.equal(layoutCityLabels(selectVisibleCities(cities, 1.3), 1.3).length, 0);
 assert.ok(getCityVisualStyle(cities[0], 8).fontSize > 0.1);
 assert.ok(ANATOLIA_PHYSICAL_ATLAS.lakes.length >= 8);
 assert.ok(ANATOLIA_PHYSICAL_ATLAS.rivers.length >= 10);
