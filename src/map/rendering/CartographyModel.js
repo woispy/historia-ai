@@ -22,9 +22,12 @@ export function getMapLod(zoom = 1) {
   return "detailed";
 }
 
+// Keep the same political surface through normal regional/city navigation.
+// Switching from the GPU raster to SVG at the old 1.85 threshold caused the
+// visible "map changes while zooming" artifact. Only very deep zoom uses the
+// vector fill again, where its higher geometric fidelity is useful.
 export function shouldUseGpuProvinceFill(zoom = 1) {
-  const lod = getMapLod(zoom);
-  return lod === "world" || lod === "regional";
+  return Number(zoom) < 4.5;
 }
 
 export function getCityVisibilityTier(zoom = 1) {
@@ -66,14 +69,18 @@ export function getProvincePresentation(zoom = 1) {
     lod,
     showProvinceBoundaries: lod !== "world",
     boundaryOpacity: lod === "world" ? 0 : lod === "regional" ? 0.34 : lod === "province" ? 0.56 : 0.70,
-    fillOpacity: lod === "world" ? 0.84 : 1,
+    // Keep the political fill visually identical at the GPU/SVG boundary.
+    fillOpacity: 1,
   });
 }
 
 export function getCityLabelPolicy(zoom = 1) {
   const lod = getMapLod(zoom);
   return Object.freeze({
-    maxLabels: lod === "world" ? 3 : lod === "regional" ? 7 : lod === "province" ? 12 : lod === "city" ? 18 : 22,
+    // City text is absent from the two farthest LODs. This prevents
+    // screen-stable labels from becoming disproportionately large while the
+    // entire world is visible.
+    maxLabels: lod === "world" || lod === "regional" ? 0 : lod === "province" ? 12 : lod === "city" ? 18 : 22,
     showTowns: lod === "province" || lod === "city" || lod === "detailed",
     showVillages: lod === "detailed",
   });
