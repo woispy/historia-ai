@@ -179,6 +179,7 @@ function GameShell() {
         onCancelEditing={cancelEditing}
         advisorOpen={advisorOpen}
         onAdvisorOpenChange={setAdvisorOpen}
+        world={gameSession}
         settingsOpen={settingsOpen}
       />
     </Layout>

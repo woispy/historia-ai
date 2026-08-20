@@ -17,6 +17,7 @@ function OverlayManager({
   onCancelEditing,
   advisorOpen = false,
   onAdvisorOpenChange,
+  world,
   settingsOpen = false,
 }) {
   const [leftOpen, setLeftOpen] = useState(false);
@@ -56,7 +57,7 @@ function OverlayManager({
         onCancelEditing={onCancelEditing}
       />
 
-      <RightOverlay isOpen={advisorOpen} />
+      <RightOverlay isOpen={advisorOpen} world={world} />
 
       <OverlayButtons
         leftOpen={leftOpen}

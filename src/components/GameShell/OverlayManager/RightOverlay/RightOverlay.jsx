@@ -1,23 +1,36 @@
 import "./RightOverlay.css";
 import { useState } from "react";
 
+import { askAdvisor } from "../../../../ai";
 import { PromptInput } from "../../../UI/PromptInput";
 
-function RightOverlay({ isOpen }) {
+function RightOverlay({ isOpen, world }) {
   const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit() {
+  async function handleSubmit() {
     const text = message.trim();
 
-    if (!text) {
+    if (!text || loading) {
       return;
     }
 
-    // Diplomasi sistemi Sprint 11'de eklenecek.
-
-    console.log(text);
-
     setMessage("");
+    setMessages((current) => [...current, { role: "user", text }]);
+    setLoading(true);
+
+    try {
+      const answer = await askAdvisor({ world, question: text });
+      setMessages((current) => [...current, { role: "advisor", text: answer }]);
+    } catch (error) {
+      setMessages((current) => [
+        ...current,
+        { role: "advisor", text: `Danışman yanıt veremedi: ${error.message}` },
+      ]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -33,6 +46,12 @@ function RightOverlay({ isOpen }) {
           <br />
           Bugün ekonomi istikrarlı görünüyor.
         </div>
+        {messages.map((entry, index) => (
+          <div className={`advisor-message ${entry.role}`} key={`${entry.role}-${index}`}>
+            {entry.text}
+          </div>
+        ))}
+        {loading && <div className="advisor-message">Danışman düşünüyor...</div>}
       </div>
 
       <PromptInput
