@@ -1,9 +1,13 @@
 import { useEffect, useMemo, useRef } from "react";
 import { WORLD_LAND_POLYGONS } from "../../physical/WorldPhysicalAtlas";
-import { getProvincePresentation, shouldUseGpuProvinceFill } from "../CartographyModel";
+import {
+  getProvincePresentation,
+  getProvinceTextureProfile,
+  shouldUseGpuProvinceFill,
+} from "../CartographyModel";
 
-const DEFAULT_WIDTH = 4096;
-const DEFAULT_HEIGHT = 2048;
+const DEFAULT_WIDTH = 2048;
+const DEFAULT_HEIGHT = 1024;
 const SELECTED_COLOR = [214 / 255, 176 / 255, 77 / 255, 1];
 
 const VERTEX_SHADER = `#version 300 es
@@ -30,7 +34,6 @@ const FRAGMENT_SHADER = `#version 300 es
 precision highp float;
 
 uniform sampler2D uProvinceIds;
-uniform sampler2D uLandMask;
 uniform sampler2D uPalette;
 uniform float uPaletteSize;
 uniform float uSelectedId;
@@ -46,10 +49,8 @@ float decodeProvinceId(vec4 encoded) {
 }
 
 void main() {
-  // Physical land is the only owner of the coastline. Political color is
-  // never allowed to survive outside that mask.
-  if (texture(uLandMask, vUv).r < 0.5) discard;
-
+  // The political raster is hard-clipped against the physical land mask
+  // before upload. Alpha is therefore the authoritative coastline guard.
   vec4 encodedProvince = texture(uProvinceIds, vUv);
   if (encodedProvince.a < 0.5) discard;
 
@@ -168,19 +169,21 @@ function parseHexColor(value, fallback = [111, 118, 95]) {
   ];
 }
 
-function buildRasterData(provinces, mapStyle) {
-  const provinceCanvas = createRasterCanvas(DEFAULT_WIDTH, DEFAULT_HEIGHT);
-  const landCanvas = createRasterCanvas(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+function buildRasterData(provinces, mapStyle, profile = {}) {
+  const width = Number(profile.width) || DEFAULT_WIDTH;
+  const height = Number(profile.height) || DEFAULT_HEIGHT;
+  const provinceCanvas = createRasterCanvas(width, height);
+  const landCanvas = createRasterCanvas(width, height);
   if (!provinceCanvas || !landCanvas) return null;
 
   const provinceContext = provinceCanvas.getContext("2d", { alpha: true });
   const landContext = landCanvas.getContext("2d", { alpha: true });
   if (!provinceContext || !landContext) return null;
 
-  provinceContext.clearRect(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
-  landContext.clearRect(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+  provinceContext.clearRect(0, 0, width, height);
+  landContext.clearRect(0, 0, width, height);
   landContext.fillStyle = "white";
-  drawPolygons(landContext, WORLD_LAND_POLYGONS, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+  drawPolygons(landContext, WORLD_LAND_POLYGONS, width, height);
 
   const runtimeProvinces = provinces.filter((entry) => (
     entry?.province?.id && Array.isArray(entry?.geometry?.polygons) && entry.geometry.polygons.length > 0
@@ -202,19 +205,17 @@ function buildRasterData(provinces, mapStyle) {
     palette[rasterId * 4 + 2] = cb;
     palette[rasterId * 4 + 3] = 255;
     provinceContext.fillStyle = `rgb(${r} ${g} ${b})`;
-    drawPolygons(provinceContext, entry.geometry.polygons, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+    drawPolygons(provinceContext, entry.geometry.polygons, width, height);
   });
 
-  // Hard-clip the political raster itself. The shader repeats the check for
-  // defence in depth, but no political pixels outside physical land are ever
-  // uploaded as visible texture content.
+  // Hard-clip the political raster itself. The GPU now needs only one
+  // province texture; land-mask alpha is already encoded in its pixels.
   applyLandMask(provinceContext, landCanvas);
 
   return {
-    width: DEFAULT_WIDTH,
-    height: DEFAULT_HEIGHT,
+    width,
+    height,
     provinceCanvas,
-    landCanvas,
     provinceIds,
     palette,
   };
@@ -248,9 +249,6 @@ function createPaletteTexture(gl, palette) {
 }
 
 function createQuad(gl) {
-  // The camera is finite and non-wrapping. A single quad is therefore the
-  // only valid texture surface; additional ±360 copies created the distant
-  // duplicate-map artifact and could drift from the SVG world.
   const vertices = [
     [-180, -90, 0, 1], [180, -90, 1, 1], [180, 90, 1, 0],
     [-180, -90, 0, 1], [180, 90, 1, 0], [-180, 90, 0, 0],
@@ -304,11 +302,8 @@ function renderFrame(state, camera, width, height) {
   gl.bindTexture(gl.TEXTURE_2D, state.provinceTexture);
   gl.uniform1i(state.uniforms.provinceIds, 0);
   gl.activeTexture(gl.TEXTURE1);
-  gl.bindTexture(gl.TEXTURE_2D, state.landTexture);
-  gl.uniform1i(state.uniforms.landMask, 1);
-  gl.activeTexture(gl.TEXTURE2);
   gl.bindTexture(gl.TEXTURE_2D, state.paletteTexture);
-  gl.uniform1i(state.uniforms.palette, 2);
+  gl.uniform1i(state.uniforms.palette, 1);
 
   gl.bindBuffer(gl.ARRAY_BUFFER, state.quad.buffer);
   gl.enableVertexAttribArray(state.attributes.position);
@@ -343,7 +338,6 @@ function buildState(canvas, raster) {
       viewSize: gl.getUniformLocation(program, "uViewSize"),
       viewportScale: gl.getUniformLocation(program, "uViewportScale"),
       provinceIds: gl.getUniformLocation(program, "uProvinceIds"),
-      landMask: gl.getUniformLocation(program, "uLandMask"),
       palette: gl.getUniformLocation(program, "uPalette"),
       paletteSize: gl.getUniformLocation(program, "uPaletteSize"),
       selectedId: gl.getUniformLocation(program, "uSelectedId"),
@@ -355,7 +349,6 @@ function buildState(canvas, raster) {
       uv: gl.getAttribLocation(program, "aUv"),
     },
     provinceTexture: createTexture(gl, raster.provinceCanvas, false),
-    landTexture: createTexture(gl, raster.landCanvas, false),
     paletteTexture: createPaletteTexture(gl, raster.palette),
     paletteSize: raster.palette.length / 4,
     selectedRasterId: 0,
@@ -372,7 +365,6 @@ function destroyState(state) {
   if (!state) return;
   const { gl } = state;
   gl.deleteTexture(state.provinceTexture);
-  gl.deleteTexture(state.landTexture);
   gl.deleteTexture(state.paletteTexture);
   gl.deleteBuffer(state.quad.buffer);
   gl.deleteProgram(state.program);
@@ -395,9 +387,10 @@ function ProvinceTextureLayer({
   const stateRef = useRef(null);
   const cameraRef = useRef(camera);
   const gpuEnabled = shouldUseGpuProvinceFill(camera.zoom);
+  const textureProfile = getProvinceTextureProfile(camera.zoom);
   const raster = useMemo(
-    () => (gpuEnabled ? buildRasterData(provinces, mapStyle) : null),
-    [gpuEnabled, provinces, mapStyle],
+    () => (gpuEnabled ? buildRasterData(provinces, mapStyle, textureProfile) : null),
+    [gpuEnabled, provinces, mapStyle, textureProfile.width, textureProfile.height],
   );
   const selectedProvinceRef = useRef(selectedProvinceId);
 
