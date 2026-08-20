@@ -1,46 +1,42 @@
 /**
  * Historia AI — deterministic city label layout.
  *
- * Labels are map-space entities with a screen-stable visual scale. Important
- * cities reserve space first; lower-priority labels yield when they collide
- * with another label or city marker. The algorithm is deterministic so the
- * same camera/atlas state always produces the same composition.
+ * City markers and labels are screen-stable, budgeted and LOD-aware. World
+ * view deliberately shows only a few capital/strategic labels; smaller names
+ * are not rendered until the camera is close enough to make them useful.
  */
 
 export const CITY_LABEL_TIERS = Object.freeze({
-  capital: Object.freeze({ priority: 100, minZoom: 0.95, baseSize: 0.60, markerRadius: 0.16 }),
-  major: Object.freeze({ priority: 70, minZoom: 1.45, baseSize: 0.45, markerRadius: 0.11 }),
-  town: Object.freeze({ priority: 40, minZoom: 2.75, baseSize: 0.34, markerRadius: 0.075 }),
-  village: Object.freeze({ priority: 15, minZoom: 4.50, baseSize: 0.27, markerRadius: 0.055 }),
+  capital: Object.freeze({ priority: 100, minZoom: 1.00, baseSize: 0.36, markerRadius: 0.11 }),
+  major: Object.freeze({ priority: 70, minZoom: 1.45, baseSize: 0.30, markerRadius: 0.085 }),
+  town: Object.freeze({ priority: 40, minZoom: 2.65, baseSize: 0.27, markerRadius: 0.060 }),
+  village: Object.freeze({ priority: 15, minZoom: 4.75, baseSize: 0.23, markerRadius: 0.045 }),
 });
 
 const LABEL_BUDGET = Object.freeze({
-  world: 6,
-  regional: 12,
-  province: 18,
-  city: 24,
-  detailed: 32,
+  world: 3,
+  regional: 7,
+  province: 12,
+  city: 18,
+  detailed: 24,
 });
 
 const MARKER_BUDGET = Object.freeze({
-  world: 8,
-  regional: 16,
-  province: 26,
-  city: 34,
-  detailed: 48,
+  world: 5,
+  regional: 12,
+  province: 20,
+  city: 30,
+  detailed: 42,
 });
 
 const LOD_BY_ZOOM = Object.freeze([
-  [1.15, "world"],
-  [1.75, "regional"],
-  [2.55, "province"],
-  [3.35, "city"],
+  [1.20, "world"],
+  [1.85, "regional"],
+  [2.65, "province"],
+  [3.50, "city"],
 ]);
 
-// SVG viewBox zoom changes world-space pixels per unit. This multiplier
-// converts the atlas font/marker units into a comfortable screen-space size
-// while the inverse zoom keeps that size stable as the camera moves closer.
-const SCREEN_STABLE_SIZE = 4.8;
+const SCREEN_STABLE_SIZE = 3.2;
 
 function getLod(zoom) {
   for (const [threshold, lod] of LOD_BY_ZOOM) {
@@ -72,15 +68,15 @@ function clamp(value, min, max) {
 }
 
 function getScreenStableScale(zoom) {
-  const safeZoom = Math.max(0.5, Number(zoom) || 1);
-  return clamp(SCREEN_STABLE_SIZE / safeZoom, 0.25, 4.8);
+  const safeZoom = Math.max(1, Number(zoom) || 1);
+  return clamp(SCREEN_STABLE_SIZE / safeZoom, 0.72, SCREEN_STABLE_SIZE);
 }
 
 export function getCityVisualStyle(city, zoom = 1) {
   const config = tierConfig(city);
   const scale = getScreenStableScale(zoom);
-  const radius = clamp(config.markerRadius * scale, 0.012, config.markerRadius * 4.8);
-  const fontSize = clamp(config.baseSize * scale, 0.045, config.baseSize * 4.8);
+  const radius = clamp(config.markerRadius * scale, 0.035, config.markerRadius * SCREEN_STABLE_SIZE);
+  const fontSize = clamp(config.baseSize * scale, 0.085, config.baseSize * SCREEN_STABLE_SIZE);
   return Object.freeze({ radius, fontSize, priority: config.priority, minZoom: config.minZoom });
 }
 
@@ -96,14 +92,14 @@ function getCandidates(city, fontSize) {
   const { x, y, tier } = city.map;
   const dx = Number(city.map.labelDx ?? 0);
   const dy = Number(city.map.labelDy ?? 0);
-  const gap = Math.max(tier === "capital" ? 0.18 : 0.14, fontSize * 0.78);
-  const side = Math.max(0.06, fontSize * 0.34);
+  const gap = Math.max(tier === "capital" ? 0.14 : 0.11, fontSize * 0.72);
+  const side = Math.max(0.045, fontSize * 0.30);
   const diagonal = gap * 0.82;
 
   return [
-    { x: x + dx + gap + side, y: y + dy + 0.04, anchor: "start" },
+    { x: x + dx + gap + side, y: y + dy + 0.03, anchor: "start" },
     { x: x + dx, y: y + dy - gap - side, anchor: "middle" },
-    { x: x + dx - gap - side, y: y + dy + 0.04, anchor: "end" },
+    { x: x + dx - gap - side, y: y + dy + 0.03, anchor: "end" },
     { x: x + dx, y: y + dy + gap + side, anchor: "middle" },
     { x: x + dx + diagonal, y: y + dy - diagonal, anchor: "start" },
     { x: x + dx - diagonal, y: y + dy - diagonal, anchor: "end" },
@@ -112,7 +108,7 @@ function getCandidates(city, fontSize) {
 
 function estimateTextWidth(city, fontSize) {
   const characters = String(city.map?.name ?? city.id).length;
-  return Math.max(fontSize * 1.9, characters * fontSize * 0.48);
+  return Math.max(fontSize * 1.8, characters * fontSize * 0.46);
 }
 
 function labelBox(city, candidate, fontSize) {
@@ -134,7 +130,7 @@ function labelBox(city, candidate, fontSize) {
 }
 
 function markerBox(city) {
-  const radius = tierConfig(city).markerRadius + 0.055;
+  const radius = tierConfig(city).markerRadius + 0.045;
   return {
     left: city.map.x - radius,
     right: city.map.x + radius,
@@ -146,7 +142,7 @@ function markerBox(city) {
 function isLabelInViewport(box, camera) {
   if (!camera) return true;
 
-  const zoom = Math.max(0.001, Number(camera.zoom) || 1);
+  const zoom = Math.max(1, Number(camera.zoom) || 1);
   const viewWidth = 360 / zoom;
   const viewHeight = 180 / zoom;
   const centerX = Number(camera.x ?? 0);
@@ -159,13 +155,10 @@ function isLabelInViewport(box, camera) {
   const verticalFit = box.top >= minY && box.bottom <= maxY;
   if (!verticalFit) return false;
 
-  const worldWidth = 360;
-  return [0, worldWidth, -worldWidth].some((offset) => (
-    box.left + offset >= minX && box.right + offset <= maxX
-  ));
+  return box.left >= minX && box.right <= maxX;
 }
 
-export function boxesOverlap(a, b, padding = 0.08) {
+export function boxesOverlap(a, b, padding = 0.06) {
   return !(
     a.right + padding < b.left ||
     a.left - padding > b.right ||
@@ -198,10 +191,10 @@ export function layoutCityLabels(cities, zoom = 1, camera = null) {
       if (!isLabelInViewport(box, camera)) continue;
 
       const blockedByMarker = orderedCities.some((other) => (
-        other.id !== city.id && boxesOverlap(box, markerBox(other), 0.05)
+        other.id !== city.id && boxesOverlap(box, markerBox(other), 0.045)
       ));
       if (blockedByMarker) continue;
-      if (placed.some((item) => boxesOverlap(box, item.box, 0.08))) continue;
+      if (placed.some((item) => boxesOverlap(box, item.box, 0.06))) continue;
 
       placed.push({ box });
       labels.push({
