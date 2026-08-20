@@ -387,10 +387,14 @@ function ProvinceTextureLayer({
   const stateRef = useRef(null);
   const cameraRef = useRef(camera);
   const gpuEnabled = shouldUseGpuProvinceFill(camera.zoom);
-  const textureProfile = getProvinceTextureProfile(camera.zoom);
+  const { width: textureWidth, height: textureHeight } = getProvinceTextureProfile(camera.zoom);
   const raster = useMemo(
-    () => (gpuEnabled ? buildRasterData(provinces, mapStyle, textureProfile) : null),
-    [gpuEnabled, provinces, mapStyle, textureProfile.width, textureProfile.height],
+    () => (
+      gpuEnabled
+        ? buildRasterData(provinces, mapStyle, { width: textureWidth, height: textureHeight })
+        : null
+    ),
+    [gpuEnabled, provinces, mapStyle, textureWidth, textureHeight],
   );
   const selectedProvinceRef = useRef(selectedProvinceId);
 
@@ -442,8 +446,6 @@ function ProvinceTextureLayer({
 
     const initialRect = canvas.getBoundingClientRect();
     renderFrame(state, cameraRef.current, initialRect.width, initialRect.height);
-    // Handoff happens only after the first GPU frame has been rendered, so the
-    // CPU fallback and GPU compositor are never visibly active at once.
     onReady?.(true);
 
     return () => {
