@@ -11,6 +11,7 @@ const worldMap = read("src/map/components/WorldMap.jsx");
 const provinceLayer = read("src/map/components/layers/ProvinceLayer.jsx");
 const provincePolygon = read("src/map/components/ProvincePolygon.jsx");
 const inspector = read("src/components/GameShell/MapView/ProvinceInspector.jsx");
+const cameraController = read("src/map/camera/CameraController.jsx");
 
 // Province selection is a runtime UI concern, not persisted simulation state.
 // GameShell owns the selection and passes it through MapView -> WorldMap ->
@@ -24,11 +25,21 @@ assert.ok(mapView.includes("<ProvinceInspector"));
 assert.ok(worldMap.includes("selectedProvinceId"));
 assert.ok(worldMap.includes("onProvinceClick"));
 assert.ok(provinceLayer.includes("selected={province.id === selectedProvinceId}"));
-assert.ok(provincePolygon.includes("onClick={() => onClick?.(province.id)}"));
+assert.ok(provincePolygon.includes("onClick={(event) =>"));
+assert.ok(provincePolygon.includes("onClick?.(province.id)"));
+assert.ok(provincePolygon.includes("pointerEvents=\"all\""));
 
 // Clicking the selected province again closes the inspector rather than
 // leaving an unreachable selection behind.
 assert.ok(gameShell.includes("currentId === provinceId ? null : provinceId"));
+
+// A click must remain a click: camera pointer capture begins only after the
+// drag threshold, otherwise the viewport can swallow province click events.
+const pointerDownStart = cameraController.indexOf("const handlePointerDown = useCallback");
+const pointerDownEnd = cameraController.indexOf("  }, []);", pointerDownStart);
+const pointerDownBlock = cameraController.slice(pointerDownStart, pointerDownEnd);
+assert.ok(!pointerDownBlock.includes("setPointerCapture"));
+assert.ok(cameraController.includes("totalDistance > 2"));
 
 // The inspector is presentation-only: it consumes the existing province
 // ViewModel pipeline and never mutates the simulation/runtime session.

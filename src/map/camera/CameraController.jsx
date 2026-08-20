@@ -5,13 +5,17 @@ import { getWheelZoomDelta } from "./CameraZoom";
  * Map-local pointer input.
  *
  * Wheel input is attached by CameraViewport as a native non-passive listener.
- * That keeps preventDefault() legal and avoids Chromium's passive-listener
- * warning while preventing the page from scrolling during map zoom.
+ * Pointer capture is intentionally delayed until a drag threshold is crossed;
+ * capturing on pointer-down retargets click sequences to the viewport and can
+ * prevent province SVG paths from receiving their click event.
  */
 export function useCameraController({ zoom, move, smooth = true }) {
   const dragging = useRef(false);
   const dragged = useRef(false);
+  const pointerCaptured = useRef(false);
   const pointerId = useRef(null);
+  const viewportTarget = useRef(null);
+  const origin = useRef({ x: 0, y: 0 });
   const last = useRef({ x: 0, y: 0 });
   const pending = useRef({ x: 0, y: 0 });
   const frame = useRef(0);
@@ -49,9 +53,11 @@ export function useCameraController({ zoom, move, smooth = true }) {
 
     dragging.current = true;
     dragged.current = false;
+    pointerCaptured.current = false;
     pointerId.current = event.pointerId;
+    viewportTarget.current = event.currentTarget;
+    origin.current = { x: event.clientX, y: event.clientY };
     last.current = { x: event.clientX, y: event.clientY };
-    event.currentTarget.setPointerCapture?.(event.pointerId);
   }, []);
 
   const handlePointerMove = useCallback((event) => {
@@ -59,25 +65,34 @@ export function useCameraController({ zoom, move, smooth = true }) {
 
     const dx = event.clientX - last.current.x;
     const dy = event.clientY - last.current.y;
+    const totalDistance = Math.abs(event.clientX - origin.current.x) + Math.abs(event.clientY - origin.current.y);
 
-    if (Math.abs(dx) + Math.abs(dy) > 2) dragged.current = true;
+    if (totalDistance > 2) {
+      if (!pointerCaptured.current) {
+        viewportTarget.current?.setPointerCapture?.(event.pointerId);
+        pointerCaptured.current = true;
+      }
+      dragged.current = true;
+    }
 
     queueMove(dx, dy);
     last.current = { x: event.clientX, y: event.clientY };
   }, [queueMove]);
 
-  const stopDragging = useCallback((event) => {
-    if (pointerId.current !== null) {
-      event.currentTarget.releasePointerCapture?.(pointerId.current);
+  const stopDragging = useCallback(() => {
+    if (pointerCaptured.current) {
+      viewportTarget.current?.releasePointerCapture?.(pointerId.current);
     }
 
     dragging.current = false;
+    pointerCaptured.current = false;
     pointerId.current = null;
+    viewportTarget.current = null;
   }, []);
 
-  const handlePointerCancel = useCallback((event) => {
+  const handlePointerCancel = useCallback(() => {
     pending.current = { x: 0, y: 0 };
-    stopDragging(event);
+    stopDragging();
   }, [stopDragging]);
 
   const handleClickCapture = useCallback((event) => {
@@ -92,7 +107,9 @@ export function useCameraController({ zoom, move, smooth = true }) {
     frame.current = 0;
     pending.current = { x: 0, y: 0 };
     dragging.current = false;
+    pointerCaptured.current = false;
     pointerId.current = null;
+    viewportTarget.current = null;
   }, []);
 
   return useMemo(() => ({

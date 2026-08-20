@@ -3,24 +3,18 @@ import { WORLD_LAND_PATH } from "../physical/WorldPhysicalAtlas";
 /**
  * Historia AI — SVG Renderer
  *
- * One SVG root owns the map. The world is repeated horizontally so the camera
- * can cross the antimeridian continuously without changing geometry data.
- *
- * The physical land mask is defined here once and reused by political SVG
- * layers. Political geometry can change with history; the physical coastline
- * cannot be painted over by that geometry.
+ * One SVG root owns the map and renders exactly one finite world copy. The
+ * camera is clamped to that world, so physical geography, political fills and
+ * interaction geometry always occupy the same coordinate space.
  */
 function SvgRenderer({ children, camera = {} }) {
-  const zoom = Math.max(0.85, Number(camera.zoom ?? 1));
+  const zoom = Math.max(1, Number(camera.zoom ?? 1));
   const viewWidth = 360 / zoom;
   const viewHeight = 180 / zoom;
   const centerX = Number(camera.x ?? 0);
   const centerY = Number(camera.y ?? 0);
   const viewX = centerX - viewWidth / 2;
   const viewY = -centerY - viewHeight / 2;
-
-  const copyCenter = Math.floor(centerX / 360);
-  const copies = [copyCenter - 1, copyCenter, copyCenter + 1];
 
   return (
     <svg
@@ -47,11 +41,7 @@ function SvgRenderer({ children, camera = {} }) {
         </filter>
       </defs>
       <g transform="scale(1,-1)">
-        {copies.map((copy) => (
-          <g key={copy} transform={`translate(${copy * 360} 0)`}>
-            {children}
-          </g>
-        ))}
+        {children}
       </g>
     </svg>
   );
