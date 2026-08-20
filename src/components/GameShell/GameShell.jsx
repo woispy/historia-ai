@@ -38,6 +38,7 @@ function GameShell() {
   const navigate = useNavigate();
   const [gameSession, setGameSession] = useState(() => getCurrentGame());
   const [selectedProvinceId, setSelectedProvinceId] = useState(null);
+  const [selectedCityId, setSelectedCityId] = useState(null);
   const [busy, setBusy] = useState(false);
   const [timeMenuOpen, setTimeMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -112,6 +113,7 @@ function GameShell() {
       setGameSession(loaded);
       setCurrentGame(loaded);
       setSelectedProvinceId(null);
+      setSelectedCityId(null);
       setAdvisorOpen(false);
       setTimeMenuOpen(false);
       return true;
@@ -125,14 +127,23 @@ function GameShell() {
   }
 
   function handleProvinceClick(provinceId) {
+    setSelectedCityId(null);
     setSelectedProvinceId((currentId) => (
       currentId === provinceId ? null : provinceId
+    ));
+  }
+
+  function handleCityClick(cityId) {
+    setSelectedProvinceId(null);
+    setSelectedCityId((currentId) => (
+      currentId === cityId ? null : cityId
     ));
   }
 
   function leaveToMainMenu() {
     clearCurrentGame();
     setSelectedProvinceId(null);
+    setSelectedCityId(null);
     setSettingsOpen(false);
     navigate("/");
   }
@@ -164,8 +175,11 @@ function GameShell() {
         gameSession={gameSession}
         settings={settings}
         selectedProvinceId={selectedProvinceId}
+        selectedCityId={selectedCityId}
         onProvinceClick={handleProvinceClick}
         onProvinceClose={() => setSelectedProvinceId(null)}
+        onCityClick={handleCityClick}
+        onCityClose={() => setSelectedCityId(null)}
       />
       <OverlayManager
         timeline={getTimeline(gameSession)}
