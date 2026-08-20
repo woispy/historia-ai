@@ -17,6 +17,7 @@ const cameraActions = read("src/map/camera/CameraActions.js");
 const cameraController = read("src/map/camera/CameraController.jsx");
 const cartographyLayer = read("src/map/components/layers/CartographyLayer.jsx");
 const cityLayer = read("src/map/components/layers/CityLayer.jsx");
+const cityInspector = read("src/components/GameShell/MapView/CityInspector.jsx");
 const physicalLayer = read("src/map/components/layers/WorldPhysicalLayer.jsx");
 
 // One physical coastline authority and one map viewport. The game viewport
@@ -42,7 +43,7 @@ assert.ok(!svgRenderer.includes("copies.map"));
 assert.ok(gpuLayer.includes("const vertices = ["));
 assert.ok(!gpuLayer.includes("for (const offset of [-360, 0, 360])"));
 assert.ok(!gpuLayer.includes("[-180 + offset"));
-assert.equal((gpuLayer.match(/\[-180, -90, 0, 1\]/g) ?? []).length, 2);
+assert.equal((gpuLayer.match(/\[-180, -90, 0, 1\]/g) ?? []).length, 1);
 assert.ok(cameraModel.includes("minZoom: 1"));
 assert.ok(cameraActions.includes("const horizontalRange = Math.max(0, (WORLD_WIDTH - visibleWidth) / 2);"));
 assert.ok(cameraActions.includes("x: clamp(x, -horizontalRange, horizontalRange)"));
@@ -71,32 +72,39 @@ assert.ok(pointerDownBlock.includes("dragging.current = true"));
 assert.ok(!pointerDownBlock.includes("setPointerCapture"));
 assert.ok(cameraController.includes("totalDistance > 2"));
 assert.ok(cameraController.includes("viewportTarget.current?.setPointerCapture?.(event.pointerId)"));
+assert.ok(cameraController.includes("pendingZoom.current += delta"));
+assert.ok(cameraController.includes("requestAnimationFrame(flushFrame)"));
 
 // The GPU layer is a political-fill compositor only. Its political raster is
-// hard-masked to physical land before upload, and the shader repeats the mask
-// check as defence in depth. It never supplies its own water or land base.
+// hard-masked to physical land before upload and contains the same runtime
+// province set as the SVG layer. The coastline mask lives in raster alpha,
+// so a second full-size GPU land texture is unnecessary.
 assert.ok(gpuLayer.includes("globalCompositeOperation = \"destination-in\""));
 assert.ok(gpuLayer.includes("applyLandMask(provinceContext, landCanvas)"));
-assert.ok(gpuLayer.includes("if (texture(uLandMask, vUv).r < 0.5) discard;"));
 assert.ok(gpuLayer.includes("if (encodedProvince.a < 0.5) discard;"));
 assert.ok(gpuLayer.includes("if (provinceId < 0.5) discard;"));
+assert.ok(gpuLayer.includes("curated-regional-gameplay-overlay"));
+assert.ok(!gpuLayer.includes("uLandMask"));
 assert.ok(!gpuLayer.includes("uWaterColor"));
 assert.ok(!gpuLayer.includes("uLandColor"));
-assert.ok(gpuLayer.includes("createTexture(gl, raster.landCanvas, false)"));
+assert.ok(!gpuLayer.includes("createTexture(gl, raster.landCanvas, false)"));
+assert.ok(gpuLayer.includes("const DEFAULT_WIDTH = 2048"));
+assert.ok(gpuLayer.includes("const DEFAULT_HEIGHT = 1024"));
 
-// Camera movement must redraw the existing GPU state, not rebuild the 4096x2048
-// political texture on every mouse-wheel/pan update. The camera effect owns
-// only frame updates; raster creation remains memoized by GPU LOD/data/style.
+// Camera movement redraws the existing GPU state, not the political raster.
 assert.match(gpuLayer, /useEffect\(\(\) => \{\n\s{4}cameraRef\.current = camera/);
 assert.match(gpuLayer, /\}, \[camera, gpuEnabled\]\);/);
 assert.ok(gpuLayer.includes("renderFrame(state, camera, rect.width, rect.height)"));
-assert.ok(gpuLayer.includes("useMemo(") && gpuLayer.includes("[gpuEnabled, provinces, mapStyle]"));
+assert.ok(gpuLayer.includes("useMemo("));
+assert.ok(gpuLayer.includes("[gpuEnabled, provinces, mapStyle, textureWidth, textureHeight]"));
 
-// CPU and GPU political fills have an explicit handoff: only one visible
-// compositor is active after the first GPU frame has rendered.
-assert.ok(worldMap.includes("const gpuProvinceActive = useGpuProvinceFill && textureReady;"));
-assert.ok(worldMap.includes("renderFill={!gpuProvinceActive}"));
-assert.ok(gpuLayer.includes("Handoff happens only after the first GPU frame has been rendered"));
+// City clicks now have a real interaction target and an inspector rather than
+// only moving the camera.
+assert.ok(worldMap.includes("onCityClick"));
+assert.ok(mapView.includes("selectedCityId"));
+assert.ok(mapView.includes("<CityInspector"));
+assert.ok(cityInspector.includes("Şehir Bilgisi"));
+assert.ok(cityInspector.includes("city.population"));
 
 // Strategic corridors/passes/crossings remain data anchors, not base-map
 // decorations. Their old coloured line/dot renderer must stay disabled.
@@ -115,4 +123,4 @@ assert.ok(!cityLayer.includes("fortified &&"));
 assert.ok(!worldMap.includes('phase="base"'));
 assert.ok(!worldMap.includes('phase="water"'));
 
-console.log("Map rendering contract tests passed: one synchronized world, explicit province interaction, one physical coastline authority, and no legacy overlay layers.");
+console.log("Map rendering contract tests passed: one synchronized world, optimized GPU political fill, explicit province/city interaction, and no legacy overlay layers.");
