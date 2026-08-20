@@ -91,7 +91,7 @@ assert.ok(worldMap.includes("renderFill={!gpuProvinceActive}"));
 assert.ok(gpuLayer.includes("Handoff happens only after the first GPU frame has been rendered"));
 
 // City interaction must produce UI state in addition to camera focus.
-assert.ok(worldMap.includes("onCityClick={onCityClick}"));
+assert.ok(worldMap.includes("onCityClick={cityClick}"));
 assert.ok(worldMap.includes("onCityClick?.(cityId)"));
 assert.ok(mapView.includes("onCityClick={handleCityClick}"));
 assert.ok(mapView.includes("const [selectedCityId, setSelectedCityId] = useState(null);"));
