@@ -5,6 +5,7 @@ import { getCountry } from "../../../countries";
 import { getProvince } from "../../../provinces";
 import { getCity } from "../../../cities";
 import { WorldMap } from "../../../map";
+import { getAnatoliaCityMapMetadata } from "../../../map/data/AnatoliaCityAtlas.js";
 import ProvinceInspector from "./ProvinceInspector";
 import CityInspector from "./CityInspector";
 
@@ -35,6 +36,9 @@ function MapView({
     : null;
   const selectedCityProvince = selectedCity?.province && provinceRepository
     ? getProvince(provinceRepository, selectedCity.province)
+    : null;
+  const selectedCityMapMetadata = selectedCityId
+    ? getAnatoliaCityMapMetadata(selectedCityId)
     : null;
 
   function handleCityClick(cityId) {
@@ -77,7 +81,7 @@ function MapView({
           country={selectedCityCountry}
           province={selectedCityProvince}
           onClose={handleCityClose}
-          mapMetadata={null}
+          mapMetadata={selectedCityMapMetadata}
         />
       )}
     </main>
