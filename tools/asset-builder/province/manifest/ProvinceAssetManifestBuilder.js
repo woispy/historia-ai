@@ -41,7 +41,7 @@ export function buildProvinceManifest(
         file,
         index
       ) =>
-        `import province${index} from "./${file}";`
+        `import province${index} from "./${file}" with { type: "json" };`
     );
 
   const entries =
