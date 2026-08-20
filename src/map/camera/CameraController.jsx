@@ -4,7 +4,8 @@ import { getWheelZoomDelta } from "./CameraZoom";
 /**
  * Map-local pointer input.
  *
- * Wheel input is attached by CameraViewport as a native non-passive listener.
+ * Wheel and drag updates are batched to animation frames so a high-resolution
+ * mouse wheel cannot force a React/SVG render for every native wheel event.
  * Pointer capture is intentionally delayed until a drag threshold is crossed;
  * capturing on pointer-down retargets click sequences to the viewport and can
  * prevent province SVG paths from receiving their click event.
@@ -18,14 +19,25 @@ export function useCameraController({ zoom, move, smooth = true }) {
   const origin = useRef({ x: 0, y: 0 });
   const last = useRef({ x: 0, y: 0 });
   const pending = useRef({ x: 0, y: 0 });
+  const pendingZoom = useRef(0);
   const frame = useRef(0);
 
-  const flushMove = useCallback(() => {
+  const flushFrame = useCallback(() => {
     frame.current = 0;
     const { x, y } = pending.current;
+    const zoomDelta = pendingZoom.current;
     pending.current = { x: 0, y: 0 };
+    pendingZoom.current = 0;
+
     if (x || y) move(x, y);
-  }, [move]);
+    if (zoomDelta) zoom(zoomDelta);
+  }, [move, zoom]);
+
+  const scheduleFrame = useCallback(() => {
+    if (!frame.current) {
+      frame.current = requestAnimationFrame(flushFrame);
+    }
+  }, [flushFrame]);
 
   const queueMove = useCallback((dx, dy) => {
     if (!smooth) {
@@ -35,18 +47,18 @@ export function useCameraController({ zoom, move, smooth = true }) {
 
     pending.current.x += dx;
     pending.current.y += dy;
-
-    if (!frame.current) {
-      frame.current = requestAnimationFrame(flushMove);
-    }
-  }, [flushMove, move, smooth]);
+    scheduleFrame();
+  }, [move, scheduleFrame, smooth]);
 
   const handleWheel = useCallback((event) => {
     if (event.cancelable) event.preventDefault();
 
     const delta = getWheelZoomDelta(event, zoom);
-    if (delta) zoom(delta);
-  }, [zoom]);
+    if (!delta) return;
+
+    pendingZoom.current += delta;
+    scheduleFrame();
+  }, [scheduleFrame, zoom]);
 
   const handlePointerDown = useCallback((event) => {
     if (event.button !== 0) return;
@@ -106,6 +118,7 @@ export function useCameraController({ zoom, move, smooth = true }) {
     if (frame.current) cancelAnimationFrame(frame.current);
     frame.current = 0;
     pending.current = { x: 0, y: 0 };
+    pendingZoom.current = 0;
     dragging.current = false;
     pointerCaptured.current = false;
     pointerId.current = null;
