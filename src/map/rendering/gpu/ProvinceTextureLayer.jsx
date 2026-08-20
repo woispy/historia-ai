@@ -248,13 +248,13 @@ function createPaletteTexture(gl, palette) {
 }
 
 function createQuad(gl) {
-  const vertices = [];
-  for (const offset of [-360, 0, 360]) {
-    vertices.push(
-      [-180 + offset, -90, 0, 1], [180 + offset, -90, 1, 1], [180 + offset, 90, 1, 0],
-      [-180 + offset, -90, 0, 1], [180 + offset, 90, 1, 0], [-180 + offset, 90, 0, 0],
-    );
-  }
+  // The camera is finite and non-wrapping. A single quad is therefore the
+  // only valid texture surface; additional ±360 copies created the distant
+  // duplicate-map artifact and could drift from the SVG world.
+  const vertices = [
+    [-180, -90, 0, 1], [180, -90, 1, 1], [180, 90, 1, 0],
+    [-180, -90, 0, 1], [180, 90, 1, 0], [-180, 90, 0, 0],
+  ];
   const buffer = gl.createBuffer();
   if (!buffer) throw new Error("WebGL vertex buffer creation failed.");
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -283,7 +283,7 @@ function renderFrame(state, camera, width, height) {
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.useProgram(state.program);
 
-  const zoom = Math.max(0.75, Number(camera?.zoom ?? 1));
+  const zoom = Math.max(1, Number(camera?.zoom ?? 1));
   const viewWidth = 360 / zoom;
   const viewHeight = 180 / zoom;
   const mapScale = Math.min(pixelSize.width / viewWidth, pixelSize.height / viewHeight);
