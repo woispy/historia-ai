@@ -44,6 +44,7 @@ on:
       - feat/map-gpu-texture-architecture
       - feat/cartography-foundation-v2
       - feat/phase3-runtime-engine
+      - feat/runtime-province-selection
 
 jobs:
   validate:
@@ -86,6 +87,8 @@ jobs:
         run: npm run test:cartography-visual
       - name: Run map rendering contract tests
         run: npm run test:map-rendering-contract
+      - name: Run province selection contract tests
+        run: npm run test:province-selection
       - name: Run new game state tests
         run: npm run test:new-game
       - name: Run new game startup tests
@@ -123,6 +126,7 @@ jobs:
           node --check tools/tests/map-texture-atlas.test.js &&
           node --check tools/tests/cartography-visual-regression.test.js &&
           node --check tools/tests/map-rendering-contract.test.js &&
+          node --check tools/tests/province-selection-contract.test.js &&
           node --check tools/tests/new-game-state.test.js &&
           node --check tools/tests/new-game-startup.test.js &&
           node --check tools/tests/scenario-loading-contract.test.js &&

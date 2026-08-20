@@ -37,6 +37,7 @@ function shouldAutoSave(previousSession, nextSession, autosave) {
 function GameShell() {
   const navigate = useNavigate();
   const [gameSession, setGameSession] = useState(() => getCurrentGame());
+  const [selectedProvinceId, setSelectedProvinceId] = useState(null);
   const [busy, setBusy] = useState(false);
   const [timeMenuOpen, setTimeMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -110,6 +111,7 @@ function GameShell() {
 
       setGameSession(loaded);
       setCurrentGame(loaded);
+      setSelectedProvinceId(null);
       setAdvisorOpen(false);
       setTimeMenuOpen(false);
       return true;
@@ -122,8 +124,15 @@ function GameShell() {
     deleteGame();
   }
 
+  function handleProvinceClick(provinceId) {
+    setSelectedProvinceId((currentId) => (
+      currentId === provinceId ? null : provinceId
+    ));
+  }
+
   function leaveToMainMenu() {
     clearCurrentGame();
+    setSelectedProvinceId(null);
     setSettingsOpen(false);
     navigate("/");
   }
@@ -151,7 +160,13 @@ function GameShell() {
         onExitGame={leaveToMainMenu}
       />
       {settings.notifications && <NotificationToast />}
-      <MapView gameSession={gameSession} settings={settings} />
+      <MapView
+        gameSession={gameSession}
+        settings={settings}
+        selectedProvinceId={selectedProvinceId}
+        onProvinceClick={handleProvinceClick}
+        onProvinceClose={() => setSelectedProvinceId(null)}
+      />
       <OverlayManager
         timeline={getTimeline(gameSession)}
         pendingActions={getPendingActions(gameSession)}
