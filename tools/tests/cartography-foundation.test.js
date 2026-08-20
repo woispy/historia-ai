@@ -4,9 +4,16 @@ import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtla
 import {
   getMapLod,
   getPhysicalStrokeProfile,
+  getProvinceTextureProfile,
   shouldUseGpuProvinceFill,
 } from "../../src/map/rendering/CartographyModel.js";
-import { boxesOverlap, getCityVisualStyle, layoutCityLabels, selectVisibleCities } from "../../src/map/rendering/city/CityLabelLayout.js";
+import {
+  boxesOverlap,
+  getCityLabelBudget,
+  getCityVisualStyle,
+  layoutCityLabels,
+  selectVisibleCities,
+} from "../../src/map/rendering/city/CityLabelLayout.js";
 
 const cities = Object.entries(ANATOLIA_CITY_ATLAS).map(([id, map]) => ({ id, map }));
 assert.equal(getMapLod(1), "world");
@@ -19,7 +26,16 @@ assert.equal(shouldUseGpuProvinceFill(1.75), true);
 assert.equal(shouldUseGpuProvinceFill(1.85), false);
 assert.equal(shouldUseGpuProvinceFill(3.35), false);
 
-for (const zoom of [1.2, 2.8, 3.6, 5, 8]) {
+assert.deepEqual(getProvinceTextureProfile(1), { width: 2048, height: 1024 });
+assert.deepEqual(getProvinceTextureProfile(1.7), { width: 2048, height: 1024 });
+assert.deepEqual(getProvinceTextureProfile(2), { width: 0, height: 0 });
+assert.equal(getCityLabelBudget(1), 0, "World view must not render city names");
+assert.equal(getCityLabelBudget(1.3), 4, "Regional view must use a small major-city label budget");
+
+const worldLabels = layoutCityLabels(selectVisibleCities(cities, 1), 1);
+assert.equal(worldLabels.length, 0, "World view city labels must remain hidden");
+
+for (const zoom of [1.3, 2.8, 3.6, 5, 8]) {
   const visible = selectVisibleCities(cities, zoom);
   const labels = layoutCityLabels(visible, zoom);
   assert.ok(labels.length > 0, `Expected city labels at zoom ${zoom}`);
@@ -54,4 +70,4 @@ assert.ok(detailedStroke.lake > 0, "Detailed lakes need a visible outline");
 for (const id of ["konstantinopolis", "iznik", "bursa", "ankara", "konya", "kayseri", "sivas", "trabzon", "erzurum"]) {
   assert.ok(ANATOLIA_CITY_ATLAS[id], `Missing historical city atlas entry: ${id}`);
 }
-console.log(`Cartography foundation tests passed: ${cities.length} cities, ${ANATOLIA_PHYSICAL_ATLAS.rivers.length} rivers, ${ANATOLIA_PHYSICAL_ATLAS.lakes.length} lakes, deterministic labels across 5 zoom levels.`);
+console.log(`Cartography foundation tests passed: ${cities.length} cities, ${ANATOLIA_PHYSICAL_ATLAS.rivers.length} rivers, ${ANATOLIA_PHYSICAL_ATLAS.lakes.length} lakes, deterministic labels across regional and close zoom levels.`);
