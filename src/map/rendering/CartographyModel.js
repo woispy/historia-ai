@@ -78,7 +78,11 @@ export function getProvincePresentation(zoom = 1) {
 export function getCityLabelPolicy(zoom = 1) {
   const lod = getMapLod(zoom);
   return Object.freeze({
-    maxLabels: lod === "world" ? 5 : lod === "regional" ? 8 : lod === "province" ? 12 : lod === "city" ? 18 : 22,
+    // Do not render city text in the two farthest LODs. This prevents
+    // screen-stable labels from becoming disproportionately large while the
+    // entire world is visible. City text begins once there is enough room for
+    // readable, non-overlapping placement.
+    maxLabels: lod === "world" || lod === "regional" ? 0 : lod === "province" ? 12 : lod === "city" ? 18 : 22,
     showTowns: lod === "province" || lod === "city" || lod === "detailed",
     showVillages: lod === "detailed",
   });
