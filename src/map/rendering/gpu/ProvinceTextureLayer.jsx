@@ -185,8 +185,14 @@ function buildRasterData(provinces, mapStyle, profile = {}) {
   landContext.fillStyle = "white";
   drawPolygons(landContext, WORLD_LAND_POLYGONS, width, height);
 
+  // Keep the GPU set exactly identical to ProvinceLayer. Curated country
+  // overlays are research metadata and must never become a second political
+  // geometry source at world/regional LOD.
   const runtimeProvinces = provinces.filter((entry) => (
-    entry?.province?.id && Array.isArray(entry?.geometry?.polygons) && entry.geometry.polygons.length > 0
+    entry?.province?.historical?.classification !== "curated-regional-gameplay-overlay"
+    && entry?.province?.id
+    && Array.isArray(entry?.geometry?.polygons)
+    && entry.geometry.polygons.length > 0
   ));
   const provinceIds = [null];
   const palette = new Uint8Array((runtimeProvinces.length + 1) * 4);
