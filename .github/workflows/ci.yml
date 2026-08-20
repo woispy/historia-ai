@@ -77,6 +77,10 @@ jobs:
         run: npm run test:world-map
       - name: Run historical world anchor tests
         run: npm run test:historical-world
+      - name: Run historical map contract tests
+        run: npm run test:historical-map-contract
+      - name: Run city label scale regression tests
+        run: npm run test:city-label-scale
       - name: Run Phase 2 province topology tests
         run: npm run test:province-topology
       - name: Run Phase 2B Anatolia reconstruction tests
@@ -122,6 +126,8 @@ jobs:
           node --check tools/tests/physical-geography-1300.test.js &&
           node --check tools/tests/world-land-mask.test.js &&
           node --check tools/tests/historical-world-1300.test.js &&
+          node --check tools/tests/historical-map-contract.test.js &&
+          node --check tools/tests/city-label-scale.test.js &&
           node --check tools/tests/province-topology.test.js &&
           node --check tools/tests/anatolia-phase2b.test.js &&
           node --check tools/tests/anatolia-phase2c.test.js &&
