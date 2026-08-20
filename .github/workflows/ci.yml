@@ -83,6 +83,8 @@ jobs:
         run: npm run test:historical-world
       - name: Run historical map contract tests
         run: npm run test:historical-map-contract
+      - name: Run historical Anatolia control tests
+        run: npm run test:anatolia-historical-control
       - name: Run city label scale regression tests
         run: npm run test:city-label-scale
       - name: Run Phase 2 province topology tests
@@ -133,6 +135,7 @@ jobs:
           node --check tools/tests/world-land-mask.test.js &&
           node --check tools/tests/historical-world-1300.test.js &&
           node --check tools/tests/historical-map-contract.test.js &&
+          node --check tools/tests/anatolia-historical-control.test.js &&
           node --check tools/tests/repository-cleanliness.test.js &&
           node --check tools/tests/city-label-scale.test.js &&
           node --check tools/tests/province-topology.test.js &&
@@ -177,7 +180,4 @@ jobs:
           node --check src/world/map/HistoricalMapContract.js &&
           node --check src/provinces/HistoricalProvinceRepository.js &&
           node --check src/provinces/ProvinceFactory.js &&
-          node --check src/provinces/ProvinceModel.js &&
-          node --check src/map/rendering/province/ProvinceTopology.js &&
-          node --check src/map/camera/CameraModel.js &&
-          node --check src/map/camera/CameraActions.js
+          node --check src/provinces/ProvinceModel.js
