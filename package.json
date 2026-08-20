@@ -14,6 +14,7 @@
     "test:world-map": "node tools/tests/world-land-mask.test.js",
     "test:historical-world": "node tools/tests/historical-world-1300.test.js",
     "test:historical-map-contract": "node tools/tests/historical-map-contract.test.js",
+    "test:repository-cleanliness": "node tools/tests/repository-cleanliness.test.js",
     "test:city-label-scale": "node tools/tests/city-label-scale.test.js",
     "test:province-topology": "node tools/tests/province-topology.test.js",
     "test:anatolia-phase2b": "node tools/tests/anatolia-phase2b.test.js",

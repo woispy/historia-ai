@@ -65,8 +65,12 @@ jobs:
         run: npm run lint
       - name: Generate world physical geometry assets
         run: npm run build:assets
+      - name: Verify repository cleanliness after physical assets
+        run: npm run test:repository-cleanliness
       - name: Generate historical GIS runtime assets
         run: npm run build:historical-gis:1300
+      - name: Verify repository cleanliness after historical GIS
+        run: npm run test:repository-cleanliness
       - name: Validate historical GIS runtime assets
         run: npm run validate:historical-gis:1300
       - name: Run historical GIS identity tests
@@ -113,6 +117,8 @@ jobs:
         run: npm run test:runtime-engine
       - name: Build
         run: npm run build
+      - name: Verify repository cleanliness after production build
+        run: npm run test:repository-cleanliness
       - name: Verify historical GIS and map scripts
         run: >-
           node --check tools/asset-builder/cli/fetch-natural-earth-50m.js &&
@@ -127,6 +133,7 @@ jobs:
           node --check tools/tests/world-land-mask.test.js &&
           node --check tools/tests/historical-world-1300.test.js &&
           node --check tools/tests/historical-map-contract.test.js &&
+          node --check tools/tests/repository-cleanliness.test.js &&
           node --check tools/tests/city-label-scale.test.js &&
           node --check tools/tests/province-topology.test.js &&
           node --check tools/tests/anatolia-phase2b.test.js &&
