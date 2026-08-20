@@ -61,6 +61,8 @@ jobs:
         run: npm ci
       - name: Lint
         run: npm run lint
+      - name: Generate world physical geometry assets
+        run: npm run build:assets
       - name: Run historical GIS identity tests
         run: npm run test:historical-gis
       - name: Run physical geography tests
@@ -107,6 +109,7 @@ jobs:
         run: npm run build
       - name: Verify historical GIS and map scripts
         run: >-
+          node --check tools/asset-builder/cli/fetch-natural-earth-50m.js &&
           node --check tools/historical-gis/HistoricalAssetId.js &&
           node --check tools/historical-gis/HistoricalGeometryImporter.js &&
           node --check tools/historical-gis/HistoricalProvinceAssetBuilder.js &&
