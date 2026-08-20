@@ -41,7 +41,7 @@ export function buildGeometryManifest(
         file,
         index
       ) =>
-        `import geometry${index} from "./${file}";`
+        `import geometry${index} from "./${file}" with { type: "json" };`
     );
 
   const entries =
