@@ -27,21 +27,38 @@ for (const zoom of [1.2, 2.8, 3.6, 5, 8]) {
   const placedBoxes = [];
   for (const label of labels) {
     const style = getCityVisualStyle(label.city, zoom);
-    assert.ok(style.fontSize >= 0.045, `City label became sub-pixel at zoom ${zoom}`);
-    const width = Math.max(0.34, String(label.city.map.name).length * style.fontSize * 0.44);
+    assert.ok(style.fontSize >= 0.045, `City label authored size became unreadable at zoom ${zoom}`);
+    assert.ok(style.screenScale > 0, `City label render scale must remain positive at zoom ${zoom}`);
+    const width = Math.max(0.34, String(label.city.map.name).length * style.effectiveFontSize * 0.44);
     const half = width / 2;
     const box = {
       left: label.anchor === "start" ? label.x : label.anchor === "end" ? label.x - width : label.x - half,
       right: label.anchor === "start" ? label.x + width : label.anchor === "end" ? label.x : label.x + half,
-      top: label.y - style.fontSize * 0.76,
-      bottom: label.y + style.fontSize * 0.22,
+      top: label.y - style.effectiveFontSize * 0.76,
+      bottom: label.y + style.effectiveFontSize * 0.22,
     };
     for (const other of placedBoxes) assert.equal(boxesOverlap(box, other), false, `City labels overlap at zoom ${zoom}`);
     placedBoxes.push(box);
   }
 }
 
-assert.ok(getCityVisualStyle(cities[0], 8).fontSize > 0.1);
+// The public fontSize remains a readable authored size. screenSize is the
+// actual rendered size after the nested inverse-zoom transform.
+const capital = cities.find((city) => city.map.tier === "capital");
+assert.ok(capital, "The historical city atlas must contain a capital city.");
+for (const zoom of [1.2, 2, 2.8, 3.6, 5, 8, 12, 16]) {
+  const style = getCityVisualStyle(capital, zoom);
+  assert.ok(style.fontSize >= 0.045, `City label authored size became unreadable at zoom ${zoom}`);
+  assert.ok(style.screenSize > 0, `City label screen size must remain positive at zoom ${zoom}`);
+  assert.ok(style.screenSize <= 0.42, `City label grew in screen-space at zoom ${zoom}`);
+}
+
+const screenSizes = [1.2, 2, 2.8, 3.6, 5, 8, 12, 16]
+  .map((zoom) => getCityVisualStyle(capital, zoom).screenSize);
+for (let index = 1; index < screenSizes.length; index += 1) {
+  assert.ok(Math.abs(screenSizes[index] - screenSizes[1]) < 1e-9, "City label screen-space size must remain stable across deep zoom");
+}
+
 assert.ok(ANATOLIA_PHYSICAL_ATLAS.lakes.length >= 8);
 assert.ok(ANATOLIA_PHYSICAL_ATLAS.rivers.length >= 10);
 assert.ok(ANATOLIA_PHYSICAL_ATLAS.labels.filter((label) => label.kind === "sea").every((label) => label.maxZoom >= 8));

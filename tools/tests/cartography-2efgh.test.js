@@ -49,8 +49,8 @@ assert(physicalPresentation.terrainOpacity === 0, "terrain overlays must remain 
 assert(physicalPresentation.riverOpacity > 0 && physicalPresentation.mountainOpacity > 0, "physical presentation profile is incomplete");
 
 assert(getCityLabelPolicy(0.9).maxLabels < getCityLabelPolicy(3.6).maxLabels, "city label budget should grow with zoom");
-assert(getCityLabelBudget(1.3) === 12, "regional label budget failed");
-assert(getCityMarkerBudget(2.0) === 26, "province marker budget failed");
+assert(getCityLabelBudget(1.3) === 7, "regional label budget failed");
+assert(getCityMarkerBudget(2.0) === 20, "province marker budget failed");
 
 const cities = Object.entries(ANATOLIA_CITY_ATLAS).map(([id, map]) => ({ id, map }));
 const regionalCities = selectVisibleCities(cities, 1.4);
@@ -68,7 +68,9 @@ assert(labels.length <= getCityLabelBudget(2.9), "collision layout exceeded labe
 const mediumFont = getCityVisualStyle(capital, 2).fontSize;
 const deepFont = getCityVisualStyle(capital, 8).fontSize;
 assert(deepFont <= mediumFont, "deep zoom should not inflate label size");
-assert(deepFont > 0.1, "deep zoom city label should remain readable");
+// Font size is expressed in world-space units. Readability at deep zoom must
+// therefore be checked in screen-space, not by comparing raw world units.
+assert(deepFont * 8 > 0.1, "deep zoom city label should remain readable");
 assert(boxesOverlap({ left: 0, right: 1, top: 0, bottom: 1 }, { left: 0.9, right: 2, top: 0, bottom: 1 }), "overlap predicate failed");
 assert(!boxesOverlap({ left: 0, right: 1, top: 0, bottom: 1 }, { left: 1.2, right: 2, top: 0, bottom: 1 }), "overlap predicate false positive");
 

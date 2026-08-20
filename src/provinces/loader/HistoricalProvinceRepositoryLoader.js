@@ -19,11 +19,24 @@ function buildRepository(assets) {
 
 export function loadHistoricalProvinceRepository(historicalRegistry) {
   const date = historicalRegistry?.date ?? null;
+
+  if (!date) {
+    return createHistoricalProvinceRepository(
+      buildRepository(loadProvinceAssets()),
+      historicalRegistry,
+    );
+  }
+
   const historicalRuntime = loadHistoricalRuntimeAsset(date);
-  const assets = historicalRuntime?.provinces ?? loadProvinceAssets();
+  if (!historicalRuntime?.provinces) {
+    throw new Error(
+      `Historical province runtime asset is missing for ${String(date)}. `
+      + "Generate the historical GIS runtime assets before starting a dated scenario."
+    );
+  }
 
   return createHistoricalProvinceRepository(
-    buildRepository(assets),
+    buildRepository(historicalRuntime.provinces),
     historicalRegistry,
   );
 }

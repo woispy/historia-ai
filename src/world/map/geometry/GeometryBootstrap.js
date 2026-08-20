@@ -6,14 +6,24 @@ import {
 /**
  * Builds the runtime Geometry Repository.
  *
- * A date-specific historical geometry repository takes precedence when an
- * imported asset manifest exists. Otherwise the generated modern fallback is
- * used without changing the simulation state.
+ * Historical scenarios are strict: a dated scenario must resolve to its
+ * historical runtime geometry. Falling back to modern Admin-0 country
+ * geometry would silently turn modern countries into historical provinces.
+ *
+ * The undated path remains available for tooling and generic map previews.
  */
 export function bootstrapGeometry(date = null) {
-  const historicalRepository = date
-    ? loadHistoricalGeometryRepository(date)
-    : null;
+  if (!date) {
+    return loadGeometryRepository();
+  }
 
-  return historicalRepository ?? loadGeometryRepository();
+  const historicalRepository = loadHistoricalGeometryRepository(date);
+  if (!historicalRepository) {
+    throw new Error(
+      `Historical geometry runtime asset is missing for ${String(date)}. `
+      + "Generate the historical GIS runtime assets before starting a dated scenario."
+    );
+  }
+
+  return historicalRepository;
 }
