@@ -149,7 +149,6 @@ jobs:
           node --check src/systems/Simulation/processors/NotificationProcessor.js &&
           node --check src/systems/Timeline/TimelineSystem.js &&
           node --check src/save/SaveSerializer.js &&
-          node --check src/components/GameShell/MapView/ProvinceInspector.jsx &&
           node --check src/map/data/AnatoliaProvinceRefinement.js &&
           node --check src/map/data/CartographyAtlas.js &&
           node --check src/map/rendering/CartographyModel.js &&
