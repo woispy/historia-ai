@@ -41,7 +41,7 @@ const LOD_BY_ZOOM = Object.freeze([
 // dominate the entire world map. The lower bound preserves readable city
 // labels at deep zoom without allowing them to grow with camera zoom.
 const SCREEN_STABLE_SIZE = 1.15;
-const MIN_SCREEN_STABLE_SCALE = 0.28;
+const MIN_SCREEN_STABLE_SCALE = 0.125;
 
 function getLod(zoom) {
   for (const [threshold, lod] of LOD_BY_ZOOM) {
