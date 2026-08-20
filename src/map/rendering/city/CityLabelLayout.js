@@ -36,7 +36,12 @@ const LOD_BY_ZOOM = Object.freeze([
   [3.50, "city"],
 ]);
 
-const SCREEN_STABLE_SIZE = 3.2;
+// World-space text is inversely scaled against camera zoom. A smaller
+// coefficient keeps far-view labels compact instead of allowing capitals to
+// dominate the entire world map. The lower bound only prevents zero-sized
+// labels at very deep zooms.
+const SCREEN_STABLE_SIZE = 1.15;
+const MIN_SCREEN_STABLE_SCALE = 0.125;
 
 function getLod(zoom) {
   for (const [threshold, lod] of LOD_BY_ZOOM) {
@@ -69,14 +74,14 @@ function clamp(value, min, max) {
 
 function getScreenStableScale(zoom) {
   const safeZoom = Math.max(1, Number(zoom) || 1);
-  return clamp(SCREEN_STABLE_SIZE / safeZoom, 0.72, SCREEN_STABLE_SIZE);
+  return Math.max(MIN_SCREEN_STABLE_SCALE, SCREEN_STABLE_SIZE / safeZoom);
 }
 
 export function getCityVisualStyle(city, zoom = 1) {
   const config = tierConfig(city);
   const scale = getScreenStableScale(zoom);
-  const radius = clamp(config.markerRadius * scale, 0.035, config.markerRadius * SCREEN_STABLE_SIZE);
-  const fontSize = clamp(config.baseSize * scale, 0.085, config.baseSize * SCREEN_STABLE_SIZE);
+  const radius = clamp(config.markerRadius * scale, 0.020, config.markerRadius * SCREEN_STABLE_SIZE);
+  const fontSize = clamp(config.baseSize * scale, 0.045, config.baseSize * SCREEN_STABLE_SIZE);
   return Object.freeze({ radius, fontSize, priority: config.priority, minZoom: config.minZoom });
 }
 
