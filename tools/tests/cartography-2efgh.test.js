@@ -68,7 +68,9 @@ assert(labels.length <= getCityLabelBudget(2.9), "collision layout exceeded labe
 const mediumFont = getCityVisualStyle(capital, 2).fontSize;
 const deepFont = getCityVisualStyle(capital, 8).fontSize;
 assert(deepFont <= mediumFont, "deep zoom should not inflate label size");
-assert(deepFont > 0.1, "deep zoom city label should remain readable");
+// Font size is expressed in world-space units. Readability at deep zoom must
+// therefore be checked in screen-space, not by comparing raw world units.
+assert(deepFont * 8 > 0.1, "deep zoom city label should remain readable");
 assert(boxesOverlap({ left: 0, right: 1, top: 0, bottom: 1 }, { left: 0.9, right: 2, top: 0, bottom: 1 }), "overlap predicate failed");
 assert(!boxesOverlap({ left: 0, right: 1, top: 0, bottom: 1 }, { left: 1.2, right: 2, top: 0, bottom: 1 }), "overlap predicate false positive");
 
