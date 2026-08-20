@@ -38,10 +38,10 @@ const LOD_BY_ZOOM = Object.freeze([
 
 // World-space text is inversely scaled against camera zoom. A smaller
 // coefficient keeps far-view labels compact instead of allowing capitals to
-// dominate the entire world map. The lower bound only prevents zero-sized
-// labels at very deep zooms.
+// dominate the entire world map. The lower bound preserves readable city
+// labels at deep zoom without allowing them to grow with camera zoom.
 const SCREEN_STABLE_SIZE = 1.15;
-const MIN_SCREEN_STABLE_SCALE = 0.125;
+const MIN_SCREEN_STABLE_SCALE = 0.28;
 
 function getLod(zoom) {
   for (const [threshold, lod] of LOD_BY_ZOOM) {
