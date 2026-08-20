@@ -50,15 +50,21 @@ function ProvincePolygon({
       : country?.color ?? "#6f765f";
 
   const fillOpacity = zoom < 1.35 ? 0.88 : zoom < 1.9 ? 0.94 : 1;
+  const visualFill = renderFill || selected ? fill : "rgba(0,0,0,0)";
+  const visualOpacity = renderFill || selected ? fillOpacity : 0;
 
   return (
     <path
       d={d}
-      fill={renderFill || selected ? fill : "transparent"}
-      fillOpacity={renderFill || selected ? fillOpacity : 0}
+      fill={visualFill}
+      fillOpacity={visualOpacity}
       stroke="none"
-      style={{ cursor: "pointer" }}
-      onClick={() => onClick?.(province.id)}
+      pointerEvents="all"
+      style={{ cursor: "pointer", pointerEvents: "all" }}
+      onClick={(event) => {
+        event.stopPropagation();
+        onClick?.(province.id);
+      }}
     />
   );
 }
