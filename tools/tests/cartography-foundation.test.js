@@ -15,7 +15,8 @@ assert.equal(getMapLod(8), "detailed");
 
 assert.equal(shouldUseGpuProvinceFill(1), true);
 assert.equal(shouldUseGpuProvinceFill(1.74), true);
-assert.equal(shouldUseGpuProvinceFill(1.75), false);
+assert.equal(shouldUseGpuProvinceFill(1.75), true);
+assert.equal(shouldUseGpuProvinceFill(1.85), false);
 assert.equal(shouldUseGpuProvinceFill(3.35), false);
 
 for (const zoom of [1.2, 2.8, 3.6, 5, 8]) {
