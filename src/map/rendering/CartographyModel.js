@@ -27,6 +27,20 @@ export function shouldUseGpuProvinceFill(zoom = 1) {
   return lod === "world" || lod === "regional";
 }
 
+/**
+ * GPU political fill is a single world texture, not a collection of SVG
+ * fragments. Keep it deliberately smaller than the old 4096×2048 atlas: at
+ * world/regional LOD the texture is only an area fill and 2048×1024 removes a
+ * large amount of CPU canvas work, VRAM pressure and texture upload time.
+ */
+export function getProvinceTextureProfile(zoom = 1) {
+  const lod = getMapLod(zoom);
+  if (lod === "world" || lod === "regional") {
+    return Object.freeze({ width: 2048, height: 1024 });
+  }
+  return Object.freeze({ width: 0, height: 0 });
+}
+
 export function getCityVisibilityTier(zoom = 1) {
   const lod = getMapLod(zoom);
   if (lod === "world") return "capital";
@@ -73,7 +87,7 @@ export function getProvincePresentation(zoom = 1) {
 export function getCityLabelPolicy(zoom = 1) {
   const lod = getMapLod(zoom);
   return Object.freeze({
-    maxLabels: lod === "world" ? 3 : lod === "regional" ? 7 : lod === "province" ? 12 : lod === "city" ? 18 : 22,
+    maxLabels: lod === "world" ? 0 : lod === "regional" ? 4 : lod === "province" ? 10 : lod === "city" ? 16 : 22,
     showTowns: lod === "province" || lod === "city" || lod === "detailed",
     showVillages: lod === "detailed",
   });
