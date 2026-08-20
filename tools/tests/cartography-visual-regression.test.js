@@ -20,9 +20,15 @@ const cities = Object.entries(ANATOLIA_CITY_ATLAS).map(([id, map]) => ({ id, map
 assert.equal(getMapLod(1), "world");
 assert.equal(getMapLod(2.8), "city");
 assert.equal(getMapLod(8), "detailed");
+
+// The political surface stays on the GPU through normal navigation. The
+// vector fill only takes over at deep zoom where its geometric fidelity is
+// useful, preventing a visible map swap while zooming.
 assert.equal(shouldUseGpuProvinceFill(1), true);
 assert.equal(shouldUseGpuProvinceFill(1.75), true);
-assert.equal(shouldUseGpuProvinceFill(1.85), false);
+assert.equal(shouldUseGpuProvinceFill(1.85), true);
+assert.equal(shouldUseGpuProvinceFill(3.35), true);
+assert.equal(shouldUseGpuProvinceFill(4.5), false);
 
 for (const zoom of [1, 1.5, 2, 3, 4, 8, 16]) {
   const labels = layoutCityLabels(cities, zoom);
