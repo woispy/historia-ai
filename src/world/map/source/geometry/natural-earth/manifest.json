@@ -8,8 +8,10 @@
     {
       "id": "admin-0-countries",
       "name": "Admin 0 Countries",
-      "description": "World country boundaries",
+      "description": "World country boundaries at 1:50m scale",
+      "scale": "50m",
       "file": "admin-0-countries.geojson",
+      "sourceUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson",
       "geometryType": "MultiPolygon",
       "featureType": "country",
       "enabled": true
