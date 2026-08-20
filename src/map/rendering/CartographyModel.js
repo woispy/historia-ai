@@ -1,9 +1,10 @@
 /**
  * Historia AI — grand-strategy cartography presentation model.
  *
- * Every visual subsystem reads the same LOD policy. The renderer can swap
- * between GPU political fills and vector detail without changing the physical
- * world authority underneath it.
+ * Every visual subsystem reads the same LOD policy. Political ownership uses
+ * one GPU raster across the normal navigation range so zooming does not swap
+ * the coastline/fill geometry underneath the camera. SVG remains responsible
+ * for high-detail interaction and boundary overlays.
  */
 
 export const MAP_LOD = Object.freeze({
@@ -22,9 +23,12 @@ export function getMapLod(zoom = 1) {
   return "detailed";
 }
 
+// Keep the same political surface through normal regional/city navigation.
+// Switching from the GPU raster to SVG at a low threshold was the source of
+// the visible "map changes while zooming" artifact. Only very deep zoom uses
+// the vector fill again, where its higher geometric fidelity is useful.
 export function shouldUseGpuProvinceFill(zoom = 1) {
-  const lod = getMapLod(zoom);
-  return lod === "world" || lod === "regional";
+  return Number(zoom) < 4.5;
 }
 
 export function getCityVisibilityTier(zoom = 1) {
@@ -66,7 +70,8 @@ export function getProvincePresentation(zoom = 1) {
     lod,
     showProvinceBoundaries: lod !== "world",
     boundaryOpacity: lod === "world" ? 0.18 : lod === "regional" ? 0.38 : lod === "province" ? 0.56 : 0.70,
-    fillOpacity: lod === "world" ? 0.86 : 1,
+    // Keep the political fill visually identical at the GPU/SVG boundary.
+    fillOpacity: 1,
   });
 }
 
