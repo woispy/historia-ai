@@ -36,12 +36,13 @@ const LOD_BY_ZOOM = Object.freeze([
   [3.50, "city"],
 ]);
 
-// World-space text is inversely scaled against camera zoom. A smaller
-// coefficient keeps far-view labels compact instead of allowing capitals to
-// dominate the entire world map. The lower bound preserves readable city
-// labels at deep zoom without allowing them to grow with camera zoom.
+// Text remains authored in readable world-space units, but the nested SVG
+// label transform compensates for camera zoom. This keeps the public
+// fontSize readable for hit/layout calculations while screenScale applies the
+// actual inverse-zoom correction at render time. No minimum world-space font
+// floor is allowed to fight the screen-stable policy.
 const SCREEN_STABLE_SIZE = 1.15;
-const MIN_SCREEN_STABLE_SCALE = 0.125;
+const MIN_RENDER_SCALE = 0.20;
 
 function getLod(zoom) {
   for (const [threshold, lod] of LOD_BY_ZOOM) {
@@ -72,17 +73,28 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
-function getScreenStableScale(zoom) {
+function getScreenStableWorldSize(city, zoom) {
+  const config = tierConfig(city);
   const safeZoom = Math.max(1, Number(zoom) || 1);
-  return Math.max(MIN_SCREEN_STABLE_SCALE, SCREEN_STABLE_SIZE / safeZoom);
+  return (config.baseSize * SCREEN_STABLE_SIZE) / safeZoom;
 }
 
 export function getCityVisualStyle(city, zoom = 1) {
   const config = tierConfig(city);
-  const scale = getScreenStableScale(zoom);
-  const radius = clamp(config.markerRadius * scale, 0.020, config.markerRadius * SCREEN_STABLE_SIZE);
-  const fontSize = clamp(config.baseSize * scale, 0.045, config.baseSize * SCREEN_STABLE_SIZE);
-  return Object.freeze({ radius, fontSize, priority: config.priority, minZoom: config.minZoom });
+  const screenStableWorldSize = getScreenStableWorldSize(city, zoom);
+  const authoredFontSize = Math.max(0.045, config.baseSize);
+  const screenScale = clamp(screenStableWorldSize / authoredFontSize, MIN_RENDER_SCALE, 1);
+  const radius = clamp(config.markerRadius / Math.max(1, Number(zoom) || 1), 0.020, config.markerRadius * SCREEN_STABLE_SIZE);
+
+  return Object.freeze({
+    radius,
+    fontSize: authoredFontSize,
+    screenScale,
+    effectiveFontSize: authoredFontSize * screenScale,
+    screenSize: authoredFontSize * screenScale * Math.max(1, Number(zoom) || 1),
+    priority: config.priority,
+    minZoom: config.minZoom,
+  });
 }
 
 export function getCityMarkerBudget(zoom = 1) {
@@ -190,9 +202,10 @@ export function layoutCityLabels(cities, zoom = 1, camera = null) {
     if (labels.length >= budget) break;
     const style = getCityVisualStyle(city, zoom);
     if (zoom < style.minZoom) continue;
+    const layoutFontSize = style.effectiveFontSize;
 
-    for (const candidate of getCandidates(city, style.fontSize)) {
-      const box = labelBox(city, candidate, style.fontSize);
+    for (const candidate of getCandidates(city, layoutFontSize)) {
+      const box = labelBox(city, candidate, layoutFontSize);
       if (!isLabelInViewport(box, camera)) continue;
 
       const blockedByMarker = orderedCities.some((other) => (
@@ -206,6 +219,8 @@ export function layoutCityLabels(cities, zoom = 1, camera = null) {
         city,
         ...candidate,
         fontSize: style.fontSize,
+        screenScale: style.screenScale,
+        effectiveFontSize: layoutFontSize,
         priority: style.priority,
       });
       break;
