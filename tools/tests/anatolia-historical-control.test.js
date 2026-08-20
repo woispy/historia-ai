@@ -27,7 +27,7 @@ assert.equal(metadataById.size, 38, "1300 Anatolia province IDs must be unique")
 
 for (const province of ANATOLIA_PROVINCE_METADATA) {
   assert.ok(province.id, "Every historical province needs a stable identity");
-  assert.ok(province.cityId, `${province.id} must retain a city anchor");
+  assert.ok(province.cityId, `${province.id} must retain a city anchor`);
   assert.ok(Array.isArray(province.centroid) && province.centroid.length === 2, `${province.id} must retain a geographic anchor`);
   assert.notEqual(province.countryId, "turkey", `${province.id} must not use a modern Turkey identity`);
   assert.notEqual(province.countryId, "türkiye", `${province.id} must not use a modern Türkiye identity`);
