@@ -2,8 +2,8 @@
  * Historia AI — deterministic city label layout.
  *
  * City markers and labels are screen-stable, budgeted and LOD-aware. World
- * view deliberately shows only a few capital/strategic labels; smaller names
- * are not rendered until the camera is close enough to make them useful.
+ * and regional views deliberately show markers without city text; names are
+ * introduced only once the camera is close enough to place them cleanly.
  */
 
 export const CITY_LABEL_TIERS = Object.freeze({
@@ -14,8 +14,8 @@ export const CITY_LABEL_TIERS = Object.freeze({
 });
 
 const LABEL_BUDGET = Object.freeze({
-  world: 3,
-  regional: 7,
+  world: 0,
+  regional: 0,
   province: 12,
   city: 18,
   detailed: 24,
