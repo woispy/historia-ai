@@ -22,11 +22,13 @@ function constrainPosition(camera, x, y, viewport) {
   if (!viewport?.width || !viewport?.height) return { x, y };
 
   const degrees = getWorldDegreesPerPixel(viewport, camera.zoom);
+  const visibleWidth = viewport.width * degrees.x;
   const visibleHeight = viewport.height * degrees.y;
+  const horizontalRange = Math.max(0, (WORLD_WIDTH - visibleWidth) / 2);
   const verticalRange = Math.max(0, (WORLD_HEIGHT - visibleHeight) / 2);
 
   return {
-    x,
+    x: clamp(x, -horizontalRange, horizontalRange),
     y: clamp(y, -verticalRange, verticalRange),
   };
 }
