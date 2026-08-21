@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { ANATOLIA_CITY_ATLAS, getAnatoliaCityMapMetadata } from "../../src/map/data/AnatoliaCityAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
+import { WORLD_LAND_POLYGONS } from "../../src/map/physical/WorldPhysicalAtlas.js";
 import {
   PHYSICAL_GEOMETRY_RULES,
   pointInPolygon,
@@ -27,6 +28,7 @@ assert.equal(atlas.version, 2);
 assert.equal(atlas.projection, "EPSG:4326");
 assert.equal(atlas.landPolygons.length, 1);
 assert.ok(atlas.landPolygons[0].length >= 100, "The land mask must retain detailed coastline sampling.");
+assert.ok(WORLD_LAND_POLYGONS.length > 0, "Generated Natural Earth land assets must be available before physical tests.");
 assert.ok(atlas.seas.length >= 8);
 assert.ok(atlas.channels.length >= 2);
 assert.ok(atlas.islands.length >= 8);
@@ -103,13 +105,14 @@ for (let i = 0; i < zoomThree.length; i += 1) {
   }
 }
 
-// P0 — every historical city anchor must remain on physical land. Lake
-// geometry is checked as an exclusion zone, with the explicit shoreline
-// tolerance documented by the validation authority.
+// P0 — every historical city anchor must remain on the global physical land
+// authority. The Anatolia atlas is a lightweight regional detail layer and is
+// intentionally not used as the city land validator because it is not the
+// authoritative coastline source.
 for (const [cityId, city] of Object.entries(ANATOLIA_CITY_ATLAS)) {
   const result = validateCityPhysicalPosition(
     city,
-    atlas.landPolygons,
+    WORLD_LAND_POLYGONS,
     atlas.lakes,
   );
   assert.equal(result.onLand, true, `${cityId} must remain on physical land.`);
