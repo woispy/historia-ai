@@ -23,7 +23,10 @@ function validateGeoJson(text, source) {
   try {
     json = JSON.parse(text);
   } catch (error) {
-    throw new Error(`Natural Earth 10m ${source.key} download failed validation: invalid JSON (${error.message}).`);
+    throw new Error(
+      `Natural Earth 10m ${source.key} download failed validation: invalid JSON (${error.message}).`,
+      { cause: error },
+    );
   }
 
   if (json?.type !== "FeatureCollection" || !Array.isArray(json.features) || json.features.length === 0) {
