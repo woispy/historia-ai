@@ -79,6 +79,17 @@ function CharacterCreate() {
           sessionId: session.id,
         },
       });
+
+      // Browser history/navigation can be disrupted by a stale document,
+      // an extension, or a transient router remount. The initial save created
+      // by initializeGame is already durable, so use it as a deterministic
+      // recovery path only if the SPA transition did not actually land on
+      // /game. Under normal operation this timer does nothing.
+      window.setTimeout(() => {
+        if (window.location.pathname !== "/game") {
+          window.location.assign("/game");
+        }
+      }, 0);
     } catch (initializationError) {
       setIsStartingGame(false);
       setError(
