@@ -1,38 +1,124 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import Layout from "../layouts/Layout/Layout";
+import { getCurrentGame, hasCurrentGame, setCurrentGame } from "../game/currentGame";
+import { getGameSaveInfo, hasGameSave, loadGame } from "../save";
+
+function formatSaveDate(value) {
+  if (!value) return "";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return new Intl.DateTimeFormat("tr-TR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}
 
 function MainMenu() {
+  const navigate = useNavigate();
+  const [saveState, setSaveState] = useState(() => ({
+    available: false,
+    info: null,
+  }));
+  const [continueError, setContinueError] = useState("");
 
-    const navigate = useNavigate();
+  function refreshSaveState() {
+    try {
+      setSaveState({
+        available: hasCurrentGame() || hasGameSave(),
+        info: getGameSaveInfo(),
+      });
+    } catch {
+      setSaveState({ available: hasCurrentGame(), info: null });
+    }
+  }
 
-    return (
+  useEffect(() => {
+    refreshSaveState();
+  }, []);
 
-        <Layout title="A Living Grand Strategy">
+  function handleContinue() {
+    setContinueError("");
 
-            <div className="menu">
+    try {
+      if (hasCurrentGame()) {
+        const session = getCurrentGame();
+        navigate("/game", {
+          replace: true,
+          state: { handoff: "main-menu-current-game", sessionId: session.id },
+        });
+        return;
+      }
 
-                <button onClick={() => navigate("/scenario")}>
-                    🗡 Yeni Oyun
-                </button>
+      if (!hasGameSave()) {
+        setContinueError("Devam edilecek bir kayıt bulunamadı.");
+        refreshSaveState();
+        return;
+      }
 
-                <button>
-                    💾 Devam Et
-                </button>
+      const session = loadGame();
+      if (!session?.id) {
+        throw new Error("Kayıt okunamadı veya kayıt bozuk.");
+      }
 
-                <button onClick={() => navigate("/settings")}>
-                    ⚙ Ayarlar
-                </button>
+      setCurrentGame(session);
+      navigate("/game", {
+        replace: true,
+        state: { handoff: "main-menu-save", sessionId: session.id },
+      });
+    } catch (error) {
+      setContinueError(
+        error instanceof Error
+          ? error.message
+          : "Kayıt yüklenemedi.",
+      );
+      refreshSaveState();
+    }
+  }
 
-                <button>
-                    🚪 Çıkış
-                </button>
+  const saveDate = formatSaveDate(saveState.info?.lastPlayed);
 
-            </div>
+  return (
+    <Layout title="A Living Grand Strategy">
+      <div className="menu">
+        <button type="button" onClick={() => navigate("/scenario")}>
+          🗡 Yeni Oyun
+        </button>
 
-        </Layout>
+        <button
+          type="button"
+          onClick={handleContinue}
+          disabled={!saveState.available}
+          title={saveState.available ? "Kayıtlı oyuna devam et" : "Kayıt bulunamadı"}
+        >
+          💾 Devam Et
+        </button>
 
-    );
+        <button type="button" onClick={() => navigate("/settings")}>
+          ⚙ Ayarlar
+        </button>
 
+        <button type="button" disabled>
+          🚪 Çıkış
+        </button>
+
+        {saveState.available && saveDate && (
+          <p aria-live="polite">
+            Son kayıt: {saveDate}
+          </p>
+        )}
+
+        {continueError && (
+          <p role="alert" style={{ color: "#d66" }}>
+            {continueError}
+          </p>
+        )}
+      </div>
+    </Layout>
+  );
 }
 
 export default MainMenu;
