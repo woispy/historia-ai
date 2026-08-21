@@ -7,7 +7,10 @@ function normalizeLake(feature) {
     name: feature.name,
     nameEn: feature.nameEn,
     rank: feature.rank,
-    coordinates: feature.rings,
+    // Legacy callers expect a single polygon coordinate array. Preserve the
+    // outer ring there while exposing the complete polygon topology through
+    // `rings` for exact rendering and validation.
+    coordinates: feature.rings?.[0] ?? [],
     rings: feature.rings,
     bounds: feature.bounds,
     geometrySource: "natural-earth-10m",
