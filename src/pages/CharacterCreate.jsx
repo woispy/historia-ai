@@ -14,6 +14,10 @@ import {
   initializeGame,
 } from "../bootstrap";
 
+import {
+  setGameEntryHandoff,
+} from "../game/gameEntryHandoff";
+
 function CharacterCreate() {
   const navigate = useNavigate();
 
@@ -70,10 +74,16 @@ function CharacterCreate() {
         throw new Error("Oyun oturumu oluşturulamadı.");
       }
 
-      // currentGame is already the authoritative runtime store. Do not put
-      // the complete GameSession into browser history state: the session
-      // contains the full world/runtime graph and should not cross the
-      // History structured-clone boundary.
+      // The runtime store remains authoritative, but the browser transition
+      // must also survive a full document navigation. sessionStorage provides
+      // a short-lived handoff without depending on persistent save success.
+      if (setGameEntryHandoff(session)) {
+        window.location.replace("/game");
+        return;
+      }
+
+      // If browser session storage is unavailable, keep the in-memory runtime
+      // and use the SPA transition as the best-effort fallback.
       navigate("/game", {
         replace: true,
         state: {

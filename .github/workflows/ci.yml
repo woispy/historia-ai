@@ -118,6 +118,8 @@ jobs:
         run: npm run test:new-game-startup
       - name: Run game entry handoff tests
         run: npm run test:game-entry-handoff
+      - name: Run browser game entry handoff tests
+        run: npm run test:browser-game-entry-handoff
       - name: Run main menu entry integration tests
         run: npm run test:main-menu-entry
       - name: Run scenario loading contract tests
