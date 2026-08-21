@@ -15,6 +15,8 @@ const countries = Object.fromEntries([
   ["karaman", { id: "karaman", name: "Karamanid Beylik", color: "#A33F3F" }],
   ["pervane", { id: "pervane", name: "Pervâneoğlu Beylik", color: "#6B7280" }],
   ["candar", { id: "candar", name: "Candarid Beylik", color: "#7A6A3A" }],
+  ["trebizond", { id: "trebizond", name: "Empire of Trebizond", color: "#5D6B8A" }],
+  ["cilicia", { id: "cilicia", name: "Armenian Kingdom of Cilicia", color: "#8B3A3A" }],
 ].map(([id, country]) => [id, {
   ...country,
   id,
@@ -45,6 +47,8 @@ assert.equal(model.find((entry) => entry.province.id === "phrygia-kutahya").coun
 assert.equal(model.find((entry) => entry.province.id === "lycaonia-konya").country.id, "karaman");
 assert.equal(model.find((entry) => entry.province.id === "pontus-sinop").country.id, "pervane");
 assert.equal(model.find((entry) => entry.province.id === "pontus-kastamon").country.id, "candar");
+assert.equal(model.find((entry) => entry.province.id === "pontus-trebizond").country.id, "trebizond");
+assert.equal(model.find((entry) => entry.province.id === "cilicia-sis").country.id, "cilicia");
 
 for (const entry of model) {
   assert.equal(entry.country.type, "polity");
@@ -55,6 +59,7 @@ for (const entry of model) {
 
 assert.equal(model.find((entry) => entry.province.id === "ionia-ayasuluk").country.id, "local_polities");
 assert.equal(model.find((entry) => entry.province.id === "phrygia-eskisehir").country.id, "local_polities");
+assert.equal(model.find((entry) => entry.province.id === "cappadocia-kayseri").country.id, "local_polities");
 assert.equal(createHistoricalPoliticalMapModel({
   date: "1301-01-01",
   provinces: sourceProvinces,
@@ -71,5 +76,5 @@ assert.throws(
 
 console.log(
   `Historical Political Map v1 tests passed: ${model.length} Anatolia provinces, `
-  + "historical polity presentation enforced, 1300-only model active.",
+  + "12 historical polity presentations, neutral layered provinces preserved, 1300-only model active.",
 );
