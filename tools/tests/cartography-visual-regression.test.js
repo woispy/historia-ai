@@ -68,8 +68,11 @@ for (const zoom of [1.5, 2, 3, 4, 8]) {
   assert.ok(stroke.mountain > stroke.minorMountain);
 }
 for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) {
-  assert.ok(lake.coordinates.length >= 6, `${lake.name} needs enough control points for smoothing`);
-  assert.ok(new Set(lake.coordinates.map(([x, y]) => `${x},${y}`)).size >= 5, `${lake.name} is degenerate`);
+  assert.ok(Array.isArray(lake.rings) && lake.rings.length > 0, `${lake.name} needs polygon rings`);
+  for (const ring of lake.rings) {
+    assert.ok(Array.isArray(ring) && ring.length >= 4, `${lake.name} needs enough control points for smoothing`);
+    assert.ok(new Set(ring.map(([x, y]) => `${x},${y}`)).size >= 3, `${lake.name} has a degenerate ring`);
+  }
 }
 for (const river of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers) assert.ok(river.coordinates.length >= 3, `${river.name} needs a continuous path`);
 console.log(`Cartography visual regression tests passed: ${cities.length} cities, ${ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers.length} rivers, ${ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.length} lakes, deterministic collision-safe labels across 7 zoom levels.`);
