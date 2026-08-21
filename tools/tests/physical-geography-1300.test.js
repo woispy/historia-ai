@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
+import { ANATOLIA_CITY_ATLAS, getAnatoliaCityMapMetadata } from "../../src/map/data/AnatoliaCityAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
+import {
+  PHYSICAL_GEOMETRY_RULES,
+  pointInPolygon,
+  validateCityPhysicalPosition,
+} from "../../src/map/rendering/physical/PhysicalGeometryValidation.js";
 import { estimatePhysicalLabelBox, layoutPhysicalLabels } from "../../src/map/rendering/physical/PhysicalLabelLayout.js";
 
 const atlas = ANATOLIA_PHYSICAL_ATLAS;
@@ -60,6 +66,11 @@ for (const name of requiredLakes) {
   assert.ok(atlas.lakes.some((lake) => lake.name === name), `Missing major lake: ${name}`);
 }
 
+const vanLake = atlas.lakes.find((lake) => lake.name === "Van Lake");
+assert.ok(vanLake, "Van Gölü must remain a first-class physical lake feature.");
+assert.ok(vanLake.coordinates.length >= 8, "Van Gölü geometry must not collapse to a marker or rectangle.");
+assert.equal(pointInPolygon([43.30, 38.30], vanLake.coordinates), true, "Van Gölü interior anchor must remain water.");
+
 const requiredRanges = ["Pontic Mountains", "Western Taurus", "Central Taurus", "Eastern Taurus", "Anti-Taurus"];
 for (const name of requiredRanges) {
   assert.ok(atlas.mountainRanges.some((range) => range.name === name), `Missing mountain system: ${name}`);
@@ -92,4 +103,34 @@ for (let i = 0; i < zoomThree.length; i += 1) {
   }
 }
 
-console.log(`Physical Geography 2.0 tests passed: ${atlas.seas.length} water bodies, ${atlas.rivers.length} rivers, ${atlas.lakes.length} lakes, ${atlas.mountainRanges.length} mountain systems.`);
+// P0 — every historical city anchor must remain on physical land. Lake
+// geometry is checked as an exclusion zone, with the explicit shoreline
+// tolerance documented by the validation authority.
+for (const [cityId, city] of Object.entries(ANATOLIA_CITY_ATLAS)) {
+  const result = validateCityPhysicalPosition(
+    city,
+    atlas.landPolygons,
+    atlas.lakes,
+  );
+  assert.equal(result.onLand, true, `${cityId} must remain on physical land.`);
+  assert.equal(result.valid, true, `${cityId} must not be inside a lake interior.`);
+  assert.deepEqual(getAnatoliaCityMapMetadata(cityId), city);
+}
+
+const syntheticLand = [[[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]]];
+const syntheticLake = [{
+  name: "Synthetic Lake",
+  coordinates: [[4, 4], [6, 4], [6, 6], [4, 6], [4, 4]],
+}];
+assert.equal(
+  validateCityPhysicalPosition({ x: 2, y: 2 }, syntheticLand, syntheticLake).valid,
+  true,
+);
+assert.equal(
+  validateCityPhysicalPosition({ x: 5, y: 5 }, syntheticLand, syntheticLake).valid,
+  false,
+  "A city in the lake interior must be rejected.",
+);
+assert.ok(PHYSICAL_GEOMETRY_RULES.shorelineToleranceDegrees > 0);
+
+console.log(`Physical Geography 2.0 / P0 tests passed: ${atlas.seas.length} water bodies, ${atlas.rivers.length} rivers, ${atlas.lakes.length} lakes, ${atlas.mountainRanges.length} mountain systems, ${Object.keys(ANATOLIA_CITY_ATLAS).length} validated city anchors.`);
