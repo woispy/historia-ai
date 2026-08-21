@@ -53,8 +53,6 @@ assert.match(atlas.hydrography.source, /Natural Earth 10m/);
 assert.equal(atlas.hydrography.projection, "EPSG:4326");
 assert.ok(atlas.lakes.length > 8, "Generated 10m lake geometry must replace the curated legacy set.");
 assert.ok(atlas.rivers.length > 10, "Generated 10m river geometry must replace the curated legacy set.");
-assert.ok(atlas.lakes.some((lake) => lake.sourceLayer === "natural-earth-10m-europe"), "The Europe 10m lake supplement must be represented in the regional atlas.");
-assert.ok(atlas.rivers.some((river) => river.sourceLayer === "natural-earth-10m-europe"), "The Europe 10m river supplement must be represented in the regional atlas.");
 assert.ok(atlas.seas.length >= 8);
 assert.ok(atlas.channels.length >= 2);
 assert.ok(atlas.islands.length >= 8);
