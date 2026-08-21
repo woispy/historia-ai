@@ -3,6 +3,7 @@ import {
   assertHistoricalProvinceRecord,
   createHistoricalMapDescriptor,
 } from "../HistoricalMapContract.js";
+import { createHistoricalProvincePoliticalStates } from "./HistoricalProvincePoliticalState.js";
 
 const POLITY_DEFINITIONS = Object.freeze([
   ["byzantium", "Byzantine Empire", "empire"],
@@ -15,12 +16,14 @@ const POLITY_DEFINITIONS = Object.freeze([
   ["karaman", "Karaman Beylik", "beylik"],
   ["pervane", "Pervâneoğlu Beylik", "local-polity"],
   ["candar", "Candar Beylik", "local-polity"],
+  ["trebizond", "Empire of Trebizond", "empire"],
+  ["cilicia", "Armenian Kingdom of Cilicia", "kingdom"],
 ]);
 
 const POLITY_BY_ID = new Map(
   POLITY_DEFINITIONS.map(([id, name, kind]) => [
     id,
-    Object.freeze({ id, name, kind, type: "polity", timeModel: "historical" }),
+    Object.freeze({ id, name, kind, type: "polity", timeModel: "historical", sourceType: "historical-runtime" }),
   ]),
 );
 
@@ -81,9 +84,6 @@ export function createHistoricalPoliticalRuntime({ date, provinceMetadata = [] }
     throw new TypeError("provinceMetadata must be an array.");
   }
 
-  // Validate the source boundary before converting records. This is important:
-  // once a modern Admin-0 record is projected into a historical shape it would
-  // otherwise look historical and the provenance firewall could be bypassed.
   provinceMetadata.forEach(assertHistoricalProvinceRecord);
 
   const provinces = provinceMetadata.map((metadata) => toHistoricalProvince(metadata, normalizedDate));
@@ -92,10 +92,18 @@ export function createHistoricalPoliticalRuntime({ date, provinceMetadata = [] }
 
   assertHistoricalPoliticalIdentitiesAndProvinces({ polities, provinces });
 
-  return createHistoricalMapDescriptor({
+  const descriptor = createHistoricalMapDescriptor({
     date: normalizedDate,
     polities,
     provinces,
+  });
+
+  return Object.freeze({
+    ...descriptor,
+    provincePoliticalStates: createHistoricalProvincePoliticalStates({
+      date: normalizedDate,
+      provinces,
+    }),
   });
 }
 
