@@ -3,8 +3,31 @@ import { getPhysicalDetailProfile, getPhysicalPresentation, getPhysicalStrokePro
 import { getViewportBounds } from "../../rendering/MapViewportCulling";
 import { layoutPhysicalLabels } from "../../rendering/physical/PhysicalLabelLayout";
 
+const ANATOLIA_LAND_CLIP_ID = "physical-anatolia-land-clip";
+const ANATOLIA_TERRAIN_LAND_CLIP_ID = "physical-anatolia-terrain-land-clip";
+
 function midpoint(a, b) {
   return [(Number(a[0]) + Number(b[0])) / 2, (Number(a[1]) + Number(b[1])) / 2];
+}
+
+function linearPathFromCoordinates(coordinates, close = false) {
+  if (!Array.isArray(coordinates) || coordinates.length < 2) return "";
+  const points = coordinates.filter((point) => Array.isArray(point) && point.length >= 2);
+  if (points.length < 2) return "";
+
+  const commands = [`M ${points[0][0]} ${points[0][1]}`];
+  for (let index = 1; index < points.length; index += 1) {
+    commands.push(`L ${points[index][0]} ${points[index][1]}`);
+  }
+  if (close) commands.push("Z");
+  return commands.join(" ");
+}
+
+function polygonPath(polygons = []) {
+  return polygons
+    .map((polygon) => linearPathFromCoordinates(polygon, true))
+    .filter(Boolean)
+    .join(" ");
 }
 
 function smoothPathFromCoordinates(coordinates, close = false) {
@@ -145,15 +168,29 @@ function PhysicalLabel({ label }) {
   );
 }
 
+function PhysicalFeatureClipPaths() {
+  const landPath = polygonPath(ANATOLIA_PHYSICAL_ATLAS.landPolygons);
+  const lakePath = polygonPath(ANATOLIA_PHYSICAL_ATLAS.lakes.map((lake) => lake.coordinates));
+
+  return (
+    <defs>
+      <clipPath id={ANATOLIA_LAND_CLIP_ID} clipPathUnits="userSpaceOnUse">
+        <path d={landPath} fillRule="evenodd" />
+      </clipPath>
+      <clipPath id={ANATOLIA_TERRAIN_LAND_CLIP_ID} clipPathUnits="userSpaceOnUse">
+        <path d={`${landPath} ${lakePath}`} fillRule="evenodd" />
+      </clipPath>
+    </defs>
+  );
+}
+
 function PhysicalGeographyLayer({ phase = "detail", zoom = 1, camera }) {
   const atlas = ANATOLIA_PHYSICAL_ATLAS;
   const profile = getPhysicalDetailProfile(zoom);
   const presentation = getPhysicalPresentation(zoom);
   const stroke = getPhysicalStrokeProfile(zoom);
 
-  if (phase === "base") {
-    return null;
-  }
+  if (phase === "base") return null;
 
   if (phase === "water") {
     if (!profile.waterChannels) return null;
@@ -183,6 +220,8 @@ function PhysicalGeographyLayer({ phase = "detail", zoom = 1, camera }) {
 
   return (
     <g aria-label="Anatolia physical geography detail">
+      <PhysicalFeatureClipPaths />
+
       {visibleLakes.map((lake) => (
         <PhysicalPolygon
           key={lake.name}
@@ -191,26 +230,33 @@ function PhysicalGeographyLayer({ phase = "detail", zoom = 1, camera }) {
           opacity={presentation.lakeOpacity}
         />
       ))}
-      {visibleMountains.map((range) => (
-        <PhysicalLine
-          key={range.name}
-          feature={range}
-          className="map-mountain"
-          width={range.rank === 1 ? stroke.mountain : stroke.minorMountain}
-          opacity={range.rank === 1 ? presentation.mountainOpacity : presentation.mountainOpacity * 0.68}
-        />
-      ))}
-      {visibleRivers.map((river) => (
-        <PhysicalLine
-          key={river.name}
-          feature={river}
-          className="map-river"
-          underClassName="map-river-under"
-          width={river.rank === 1 ? stroke.river : stroke.minorRiver}
-          underWidth={river.rank === 1 ? stroke.river + 1.1 : stroke.minorRiver + 0.8}
-          opacity={river.rank === 1 ? presentation.riverOpacity : presentation.riverOpacity * 0.72}
-        />
-      ))}
+
+      <g clipPath={`url(#${ANATOLIA_TERRAIN_LAND_CLIP_ID})`}>
+        {visibleMountains.map((range) => (
+          <PhysicalLine
+            key={range.name}
+            feature={range}
+            className="map-mountain"
+            width={range.rank === 1 ? stroke.mountain : stroke.minorMountain}
+            opacity={range.rank === 1 ? presentation.mountainOpacity : presentation.mountainOpacity * 0.68}
+          />
+        ))}
+      </g>
+
+      <g clipPath={`url(#${ANATOLIA_LAND_CLIP_ID})`}>
+        {visibleRivers.map((river) => (
+          <PhysicalLine
+            key={river.name}
+            feature={river}
+            className="map-river"
+            underClassName="map-river-under"
+            width={river.rank === 1 ? stroke.river : stroke.minorRiver}
+            underWidth={river.rank === 1 ? stroke.river + 1.1 : stroke.minorRiver + 0.8}
+            opacity={river.rank === 1 ? presentation.riverOpacity : presentation.riverOpacity * 0.72}
+          />
+        ))}
+      </g>
+
       {profile.mountainLabels && labels.map((label) => <PhysicalLabel key={label.id} label={label} />)}
     </g>
   );
