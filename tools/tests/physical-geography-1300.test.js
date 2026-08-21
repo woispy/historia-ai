@@ -116,8 +116,11 @@ for (const required of sourceNativeRequiredRiverIds) {
 const documentedNaturalEarthGaps = new Set(["kizilirmak", "yesilirmak"]);
 assert.deepEqual([...documentedNaturalEarthGaps].sort(), ["kizilirmak", "yesilirmak"]);
 
+// The anchors are intentionally placed well inside each lake rather than on
+// the shoreline. This avoids coupling the regression to a particular shoreline
+// vertex while still requiring the real 10m polygon to contain the anchor.
 const requiredLakeAnchors = [
-  ["Van Gölü", [43.30, 38.30]],
+  ["Van Gölü", [43.00, 38.50]],
   ["Tuz Gölü", [33.40, 38.75]],
   ["İznik Gölü", [29.72, 40.43]],
   ["Sapanca Gölü", [30.28, 40.70]],
@@ -131,7 +134,7 @@ for (const [name, anchor] of requiredLakeAnchors) {
   assert.ok(containingLake.rings[0].length >= 4, `${name} must retain valid shoreline topology.`);
 }
 
-const van = atlas.lakes.find((lake) => pointInPolygon([43.30, 38.30], lake.rings[0]));
+const van = atlas.lakes.find((lake) => pointInPolygon([43.00, 38.50], lake.rings[0]));
 assert.ok(van, "Van Gölü must be represented by Natural Earth 10m geometry.");
 
 const sakaryaSegments = atlas.rivers.filter((river) => river.canonicalId === "sakarya");
