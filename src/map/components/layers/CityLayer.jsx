@@ -11,13 +11,22 @@ import {
 
 const WORLD_WIDTH = 360;
 
+// World geometry is the global authority; the curated Anatolia land mask is
+// the higher-resolution authority for the historical city anchors in this
+// regional view. A city can therefore remain valid when a coarse country
+// polygon misses a coastal urban footprint such as Constantinople.
+const CITY_LAND_POLYGONS = Object.freeze([
+  ...WORLD_LAND_POLYGONS,
+  ...ANATOLIA_PHYSICAL_ATLAS.landPolygons,
+]);
+
 function mergeCityMetadata(city) {
   const atlas = getAnatoliaCityMapMetadata(city.id);
   if (!atlas) return null;
 
   const physical = validateCityPhysicalPosition(
     atlas,
-    WORLD_LAND_POLYGONS,
+    CITY_LAND_POLYGONS,
     ANATOLIA_PHYSICAL_ATLAS.lakes,
   );
 
