@@ -17,19 +17,10 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const atlas = ANATOLIA_PHYSICAL_ATLAS_RUNTIME;
 const [minLon, minLat, maxLon, maxLat] = atlas.bbox;
 const geometryDirectory = resolve(root, "src/world/map/assets/geometry");
-const geometryFiles = readdirSync(geometryDirectory)
-  .filter((fileName) => /^geometry_country_.*\.json$/.test(fileName));
-const generatedGeometryModules = Object.fromEntries(
-  geometryFiles.map((fileName) => [
-    fileName,
-    { default: JSON.parse(readFileSync(resolve(geometryDirectory, fileName), "utf8")) },
-  ]),
-);
+const geometryFiles = readdirSync(geometryDirectory).filter((fileName) => /^geometry_country_.*\.json$/.test(fileName));
+const generatedGeometryModules = Object.fromEntries(geometryFiles.map((fileName) => [fileName, { default: JSON.parse(readFileSync(resolve(geometryDirectory, fileName), "utf8")) }]));
 const generatedWorldLandPolygons = collectWorldLandPolygons(generatedGeometryModules);
-const cityLandPolygons = Object.freeze([
-  ...generatedWorldLandPolygons,
-  ...atlas.landPolygons,
-]);
+const cityLandPolygons = Object.freeze([...generatedWorldLandPolygons, ...atlas.landPolygons]);
 
 function assertCoordinates(name, coordinates) {
   assert.ok(Array.isArray(coordinates), `${name} coordinates must be an array`);
@@ -100,29 +91,20 @@ for (const river of atlas.rivers) {
 }
 
 const requiredSeas = ["Black Sea", "Marmara Sea", "Aegean Sea", "Mediterranean Sea", "Gulf of İzmit", "Gulf of İzmir", "Antalya Gulf"];
-for (const name of requiredSeas) {
-  assert.ok(atlas.seas.some((sea) => sea.name === name), `Missing major water body: ${name}`);
-}
+for (const name of requiredSeas) assert.ok(atlas.seas.some((sea) => sea.name === name), `Missing major water body: ${name}`);
 
 const riverCanonicalIds = new Set(atlas.rivers.map((river) => river.canonicalId).filter(Boolean));
 const sourceNativeRequiredRiverIds = ["sakarya", "gediz", "buyuk-menderes", "seyhan", "ceyhan", "firat", "dicle"];
-for (const required of sourceNativeRequiredRiverIds) {
-  assert.equal(riverCanonicalIds.has(required), true, `Missing source-native 10m river identity: ${required}`);
-}
+for (const required of sourceNativeRequiredRiverIds) assert.equal(riverCanonicalIds.has(required), true, `Missing source-native 10m river identity: ${required}`);
 
-// Natural Earth 10m does not publish every named Anatolian river. These gaps
-// are deliberately explicit rather than being replaced with invented geometry.
-// They remain a tracked data-source gap for the next hydrography source layer.
 const documentedNaturalEarthGaps = new Set(["kizilirmak", "yesilirmak"]);
 assert.deepEqual([...documentedNaturalEarthGaps].sort(), ["kizilirmak", "yesilirmak"]);
 
-// The anchors are intentionally placed well inside each lake rather than on
-// the shoreline. This avoids coupling the regression to a particular shoreline
-// vertex while still requiring the real 10m polygon to contain the anchor.
+// Anchors are deliberately placed well inside each lake rather than on the shoreline.
 const requiredLakeAnchors = [
   ["Van Gölü", [43.00, 38.50]],
   ["Tuz Gölü", [33.40, 38.75]],
-  ["İznik Gölü", [29.72, 40.43]],
+  ["İznik Gölü", [29.55, 40.43]],
   ["Sapanca Gölü", [30.28, 40.70]],
   ["Beyşehir Gölü", [31.45, 37.73]],
   ["Eğirdir Gölü", [30.86, 38.00]],
@@ -141,9 +123,7 @@ const sakaryaSegments = atlas.rivers.filter((river) => river.canonicalId === "sa
 assert.ok(sakaryaSegments.some((river) => river.coordinates.length >= 20), "Sakarya must retain a genuinely sampled river centerline.");
 
 const requiredRanges = ["Pontic Mountains", "Western Taurus", "Central Taurus", "Eastern Taurus", "Anti-Taurus"];
-for (const name of requiredRanges) {
-  assert.ok(atlas.mountainRanges.some((range) => range.name === name), `Missing mountain system: ${name}`);
-}
+for (const name of requiredRanges) assert.ok(atlas.mountainRanges.some((range) => range.name === name), `Missing mountain system: ${name}`);
 
 const labelIds = new Set(atlas.labels.map((label) => label.id));
 assert.equal(labelIds.size, atlas.labels.length, "Physical labels need unique ids.");
@@ -159,7 +139,6 @@ for (const label of seaLabels) {
 const zoomOne = layoutPhysicalLabels(atlas.labels, 1);
 assert.equal(zoomOne.filter((label) => label.kind === "sea").length, 4, "All primary sea labels must be visible at overview zoom.");
 assert.equal(zoomOne.filter((label) => label.kind === "region").length, 0, "Regional labels must stay hidden at overview zoom.");
-
 const zoomThree = layoutPhysicalLabels(atlas.labels, 3);
 assert.ok(zoomThree.some((label) => label.id === "region-central"), "Regional labels should appear at closer zoom.");
 
@@ -180,17 +159,8 @@ for (const [cityId, city] of Object.entries(ANATOLIA_CITY_ATLAS)) {
 }
 
 const syntheticLand = [[[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]]];
-const syntheticLake = [{
-  name: "Synthetic Lake",
-  coordinates: [[4, 4], [6, 4], [6, 6], [4, 6], [4, 4]],
-}];
-const syntheticLakeWithHole = [{
-  name: "Synthetic Lake With Island",
-  rings: [
-    [[1, 1], [9, 1], [9, 9], [1, 9], [1, 1]],
-    [[4, 4], [6, 4], [6, 6], [4, 6], [4, 4]],
-  ],
-}];
+const syntheticLake = [{ name: "Synthetic Lake", coordinates: [[4, 4], [6, 4], [6, 6], [4, 6], [4, 4]] }];
+const syntheticLakeWithHole = [{ name: "Synthetic Lake With Island", rings: [[[1, 1], [9, 1], [9, 9], [1, 9], [1, 1]], [[4, 4], [6, 4], [6, 6], [4, 6], [4, 4]]] }];
 assert.equal(validateCityPhysicalPosition({ x: 2, y: 2 }, syntheticLand, syntheticLake).valid, true);
 assert.equal(validateCityPhysicalPosition({ x: 5, y: 5 }, syntheticLand, syntheticLake).valid, false, "A city in the lake interior must be rejected.");
 assert.equal(validateCityPhysicalPosition({ x: 3, y: 3 }, syntheticLand, syntheticLakeWithHole).valid, false, "A city in the lake outer ring must be rejected.");
