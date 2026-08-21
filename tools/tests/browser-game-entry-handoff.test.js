@@ -24,8 +24,14 @@ assert.match(
 
 assert.match(
   characterCreate,
+  /navigate\("\/game",\s*\{[\s\S]*sessionId:\s*session\.id,/,
+  "CharacterCreate must use the SPA router for normal game entry.",
+);
+
+assert.doesNotMatch(
+  characterCreate,
   /window\.location\.replace\("\/game"\)/,
-  "CharacterCreate must use deterministic document navigation when the handoff is available.",
+  "CharacterCreate must not force a full document reload for normal game entry.",
 );
 
 assert.match(
@@ -71,5 +77,5 @@ assert.match(
 );
 
 console.log(
-  "browser-game-entry-handoff.test.js: deterministic browser entry contract passed",
+  "browser-game-entry-handoff.test.js: SPA and reload-safe browser entry contract passed",
 );
