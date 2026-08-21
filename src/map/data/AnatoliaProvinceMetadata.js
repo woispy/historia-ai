@@ -76,7 +76,7 @@ export const ANATOLIA_PROVINCE_METADATA = Object.freeze([
 
   province("cilicia-sis", "Sis", "sis", "cilicia", "cilicia", [35.80, 37.45], { terrain: "mountain", strategic: true, borderConfidence: "medium", historicalControl: { statusAt1300: "established-kingdom", confidence: "high", controllerAt1300: "cilicia", startYear: 1198, note: "Cilician Armenian core." } }),
   province("cilicia-tarsos", "Tarsos", "tarsus", "cilicia", "cilicia", [34.90, 36.92], { coastal: true, terrain: "coast", strategic: true, borderConfidence: "medium", historicalControl: { statusAt1300: "established-kingdom", confidence: "medium", controllerAt1300: "cilicia", startYear: 1198, note: "Southern Cilician urban anchor." } }),
-  province("cilicia-alaiye", "Alaiye", null, "cilicia", null, [31.99, 36.55], { coastal: true, port: true, terrain: "coast", strategic: true, borderConfidence: "low", historicalControl: { statusAt1300: "contested-southern-frontier", confidence: "low", controllerAt1300: null, startYear: null, note: "Alaiye should not be projected backward from later Karamanid control without a dedicated 1300 source review." } }),
+  province("cilicia-alaiye", "Alaiye", "alaiye", "cilicia", null, [31.99, 36.55], { coastal: true, port: true, terrain: "coast", strategic: true, borderConfidence: "low", historicalControl: { statusAt1300: "contested-southern-frontier", confidence: "low", controllerAt1300: null, startYear: null, note: "Alaiye should not be projected backward from later Karamanid control without a dedicated 1300 source review." } }),
 ]);
 
 export const ANATOLIA_PROVINCE_BY_ID = Object.freeze(
