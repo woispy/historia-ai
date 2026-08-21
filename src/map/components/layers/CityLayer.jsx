@@ -1,5 +1,5 @@
 import { getAnatoliaCityMapMetadata } from "../../data/AnatoliaCityAtlas.js";
-import { ANATOLIA_PHYSICAL_ATLAS } from "../../data/AnatoliaPhysicalAtlas.js";
+import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../data/AnatoliaPhysicalAtlasRuntime.js";
 import { WORLD_LAND_POLYGONS } from "../../physical/WorldPhysicalAtlas.js";
 import { getMapLod } from "../../rendering/CartographyModel.js";
 import { validateCityPhysicalPosition } from "../../rendering/physical/PhysicalGeometryValidation.js";
@@ -17,7 +17,7 @@ const WORLD_WIDTH = 360;
 // polygon misses a coastal urban footprint such as Constantinople.
 const CITY_LAND_POLYGONS = Object.freeze([
   ...WORLD_LAND_POLYGONS,
-  ...ANATOLIA_PHYSICAL_ATLAS.landPolygons,
+  ...ANATOLIA_PHYSICAL_ATLAS_RUNTIME.landPolygons,
 ]);
 
 function mergeCityMetadata(city) {
@@ -27,7 +27,7 @@ function mergeCityMetadata(city) {
   const physical = validateCityPhysicalPosition(
     atlas,
     CITY_LAND_POLYGONS,
-    ANATOLIA_PHYSICAL_ATLAS.lakes,
+    ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes,
   );
 
   if (!physical.valid) return null;
