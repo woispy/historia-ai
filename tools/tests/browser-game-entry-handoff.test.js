@@ -23,10 +23,10 @@ assert.doesNotMatch(
   "CharacterCreate must not put the complete GameSession into router state.",
 );
 
-assert.doesNotMatch(
+assert.match(
   characterCreate,
   /window\.location\.replace\("\/game"\)/,
-  "CharacterCreate must use the SPA router for final game entry.",
+  "CharacterCreate must retain a document-level game-entry fallback.",
 );
 
 assert.match(
@@ -54,5 +54,5 @@ assert.match(
 );
 
 console.log(
-  "browser-game-entry-handoff.test.js: router session entry contract passed",
+  "browser-game-entry-handoff.test.js: document navigation fallback contract passed",
 );
