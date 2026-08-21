@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { ANATOLIA_CITY_ATLAS } from "../../src/map/data/AnatoliaCityAtlas.js";
-import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
+import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { getCityLabelBudget, getCityMarkerBudget, getCityVisualStyle, layoutCityLabels, boxesOverlap } from "../../src/map/rendering/city/CityLabelLayout.js";
 import { getMapLod, getPhysicalPresentation, getPhysicalStrokeProfile, shouldUseGpuProvinceFill } from "../../src/map/rendering/CartographyModel.js";
 
@@ -67,9 +67,9 @@ for (const zoom of [1.5, 2, 3, 4, 8]) {
   assert.ok(stroke.river > stroke.minorRiver);
   assert.ok(stroke.mountain > stroke.minorMountain);
 }
-for (const lake of ANATOLIA_PHYSICAL_ATLAS.lakes) {
+for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) {
   assert.ok(lake.coordinates.length >= 6, `${lake.name} needs enough control points for smoothing`);
   assert.ok(new Set(lake.coordinates.map(([x, y]) => `${x},${y}`)).size >= 5, `${lake.name} is degenerate`);
 }
-for (const river of ANATOLIA_PHYSICAL_ATLAS.rivers) assert.ok(river.coordinates.length >= 3, `${river.name} needs a continuous path`);
-console.log(`Cartography visual regression tests passed: ${cities.length} cities, ${ANATOLIA_PHYSICAL_ATLAS.rivers.length} rivers, ${ANATOLIA_PHYSICAL_ATLAS.lakes.length} lakes, deterministic collision-safe labels across 7 zoom levels.`);
+for (const river of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers) assert.ok(river.coordinates.length >= 3, `${river.name} needs a continuous path`);
+console.log(`Cartography visual regression tests passed: ${cities.length} cities, ${ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers.length} rivers, ${ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.length} lakes, deterministic collision-safe labels across 7 zoom levels.`);
