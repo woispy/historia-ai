@@ -12,7 +12,8 @@ const runtime = createHistoricalPoliticalRuntime({
 
 assert.equal(runtime.date, "1300-01-01");
 assert.equal(runtime.provinces.length, 38);
-assert.equal(runtime.polities.length, 10);
+assert.equal(runtime.polities.length, 12);
+assert.equal(runtime.provincePoliticalStates.length, runtime.provinces.length);
 
 const provinceById = new Map(runtime.provinces.map((province) => [province.id, province]));
 
@@ -37,10 +38,17 @@ assert.equal(provinceById.get("phrygia-kutahya").polityId, "germiyan");
 assert.equal(provinceById.get("lycaonia-konya").polityId, "karaman");
 assert.equal(provinceById.get("pontus-sinop").polityId, "pervane");
 assert.equal(provinceById.get("pontus-kastamon").polityId, "candar");
+assert.equal(provinceById.get("pontus-trebizond").polityId, "trebizond");
+assert.equal(provinceById.get("cilicia-sis").polityId, "cilicia");
 
 for (const provinceId of ["ionia-ayasuluk", "lydia-birgi", "phrygia-uluborlu", "pisidia-egirdir"]) {
   assert.equal(provinceById.get(provinceId).polityId, null);
 }
+
+const kayseriState = runtime.provincePoliticalStates.find((state) => state.provinceId === "cappadocia-kayseri");
+assert.equal(kayseriState.sovereignPolityId, null);
+assert.equal(kayseriState.suzeraintyPolityId, "ilkhanate");
+assert.equal(kayseriState.controlMode, "layered-suzerainty");
 
 assert.equal(getHistoricalPolity("byzantium").type, "polity");
 assert.equal(getHistoricalPolity("byzantium").timeModel, "historical");
@@ -57,5 +65,5 @@ assert.throws(
 
 console.log(
   `Historical political runtime tests passed: ${runtime.provinces.length} provinces, `
-  + `${runtime.polities.length} historical polities, Admin-0 firewall active.`,
+  + `${runtime.polities.length} historical polities, layered suzerainty preserved, Admin-0 firewall active.`,
 );
