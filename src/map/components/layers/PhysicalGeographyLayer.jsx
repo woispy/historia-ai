@@ -1,6 +1,7 @@
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../data/AnatoliaPhysicalAtlasRuntime.js";
 import { getPhysicalDetailProfile, getPhysicalPresentation, getPhysicalStrokeProfile } from "../../rendering/CartographyModel.js";
 import { getViewportBounds } from "../../rendering/MapViewportCulling.js";
+import { exactAreaPath, flattenCoordinatePoints, linearPathFromCoordinates, polygonPath } from "../../rendering/physical/PhysicalGeometryPath.js";
 import { layoutPhysicalLabels } from "../../rendering/physical/PhysicalLabelLayout.js";
 
 const ANATOLIA_LAND_CLIP_ID = "physical-anatolia-land-clip";
@@ -8,41 +9,6 @@ const ANATOLIA_TERRAIN_LAND_CLIP_ID = "physical-anatolia-terrain-land-clip";
 
 function midpoint(a, b) {
   return [(Number(a[0]) + Number(b[0])) / 2, (Number(a[1]) + Number(b[1])) / 2];
-}
-
-function pointsFromCoordinates(coordinates, output = []) {
-  if (!Array.isArray(coordinates)) return output;
-  if (coordinates.length >= 2 && Number.isFinite(Number(coordinates[0])) && Number.isFinite(Number(coordinates[1]))) {
-    output.push([Number(coordinates[0]), Number(coordinates[1])]);
-    return output;
-  }
-  for (const child of coordinates) pointsFromCoordinates(child, output);
-  return output;
-}
-
-function linearPathFromCoordinates(coordinates, close = false) {
-  const points = pointsFromCoordinates(coordinates);
-  if (points.length < 2) return "";
-  const commands = [`M ${points[0][0]} ${points[0][1]}`];
-  for (let index = 1; index < points.length; index += 1) {
-    commands.push(`L ${points[index][0]} ${points[index][1]}`);
-  }
-  if (close) commands.push("Z");
-  return commands.join(" ");
-}
-
-function exactAreaPath(rings = []) {
-  return rings
-    .map((ring) => linearPathFromCoordinates(ring, true))
-    .filter(Boolean)
-    .join(" ");
-}
-
-function polygonPath(polygons = []) {
-  return polygons
-    .map((polygon) => exactAreaPath([polygon]))
-    .filter(Boolean)
-    .join(" ");
 }
 
 function smoothPathFromCoordinates(coordinates, close = false) {
@@ -83,7 +49,7 @@ function getFeatureBounds(feature) {
       maxY: Number(feature.bounds[3]),
     };
   }
-  const points = pointsFromCoordinates(feature?.coordinates ?? feature?.rings ?? []);
+  const points = flattenCoordinatePoints(feature?.coordinates ?? feature?.rings ?? []);
   if (!points.length) return null;
   return points.reduce((bounds, [x, y]) => ({
     minX: Math.min(bounds.minX, x),
@@ -227,7 +193,7 @@ function PhysicalGeographyLayer({ phase = "detail", zoom = 1, camera }) {
         {atlas.channels
           .filter((channel) => isFeatureVisible(channel, camera))
           .map((channel) => (
-            <PhysicalPolygon key={channel.name} feature={channel} className="map-sea-channel" opacity={0.88} />
+            <PhysicalPolygon key={channel.name} feature={channel} className="map-sea-channel" opacity={0.88} exact />
           ))}
       </g>
     );
