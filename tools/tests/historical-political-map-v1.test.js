@@ -55,7 +55,6 @@ for (const entry of model) {
   assert.equal(entry.country.sourceType, "historical-runtime");
   assert.ok(/^#[0-9a-f]{6}$/i.test(entry.country.color));
 
-  const city = ANATOLIA_CITY_ATLAS[entry.province.id === "bithynia-nicomedia" ? "nikomedia" : entry.province.id];
   const metadata = ANATOLIA_PROVINCE_METADATA.find((province) => province.id === entry.province.id);
   assert.ok(metadata, `Missing metadata for ${entry.province.id}`);
   assert.ok(ANATOLIA_CITY_ATLAS[metadata.cityId], `${entry.province.id} must resolve to a known city atlas record`);
