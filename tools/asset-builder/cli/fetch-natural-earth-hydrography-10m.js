@@ -3,28 +3,34 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+// Pin the upstream repository revision so CI/build output remains reproducible.
+// The source revision is the Natural Earth Vector master commit used for this
+// P0 foundation; future source upgrades must be deliberate and reviewed.
+const NATURAL_EARTH_REVISION = "ca96624a56bd078437bca8184e78163e5039ad19";
+const RAW_BASE = `https://raw.githubusercontent.com/nvkelso/natural-earth-vector/${NATURAL_EARTH_REVISION}/geojson`;
+
 const SOURCES = [
   {
     key: "lakes",
-    url: "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_lakes.geojson",
+    url: `${RAW_BASE}/ne_10m_lakes.geojson`,
     output: "src/world/map/source/physical/ne_10m_lakes.geojson",
     geometryTypes: new Set(["Polygon", "MultiPolygon"]),
   },
   {
     key: "lakes_europe",
-    url: "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_lakes_europe.geojson",
+    url: `${RAW_BASE}/ne_10m_lakes_europe.geojson`,
     output: "src/world/map/source/physical/ne_10m_lakes_europe.geojson",
     geometryTypes: new Set(["Polygon", "MultiPolygon"]),
   },
   {
     key: "rivers",
-    url: "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_rivers_lake_centerlines.geojson",
+    url: `${RAW_BASE}/ne_10m_rivers_lake_centerlines.geojson`,
     output: "src/world/map/source/physical/ne_10m_rivers_lake_centerlines.geojson",
     geometryTypes: new Set(["LineString", "MultiLineString", "GeometryCollection"]),
   },
   {
     key: "rivers_europe",
-    url: "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_rivers_europe.geojson",
+    url: `${RAW_BASE}/ne_10m_rivers_europe.geojson`,
     output: "src/world/map/source/physical/ne_10m_rivers_europe.geojson",
     geometryTypes: new Set(["LineString", "MultiLineString", "GeometryCollection"]),
   },
@@ -87,5 +93,5 @@ for (const source of SOURCES) {
   const outputPath = path.resolve(source.output);
   await mkdir(path.dirname(outputPath), { recursive: true });
   await writeFile(outputPath, `${JSON.stringify(json)}\n`, "utf8");
-  console.log(`Downloaded Natural Earth 10m ${source.key}: ${json.features.length} GeoJSON features.`);
+  console.log(`Downloaded Natural Earth 10m ${source.key} from ${NATURAL_EARTH_REVISION}: ${json.features.length} GeoJSON features.`);
 }
