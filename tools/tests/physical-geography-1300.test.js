@@ -104,14 +104,6 @@ for (const name of requiredSeas) {
   assert.ok(atlas.seas.some((sea) => sea.name === name), `Missing major water body: ${name}`);
 }
 
-function normalized(value) {
-  return String(value ?? "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "");
-}
-
 const riverCanonicalIds = new Set(atlas.rivers.map((river) => river.canonicalId).filter(Boolean));
 const sourceNativeRequiredRiverIds = ["sakarya", "gediz", "buyuk-menderes", "seyhan", "ceyhan", "firat", "dicle"];
 for (const required of sourceNativeRequiredRiverIds) {
