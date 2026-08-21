@@ -1,19 +1,15 @@
-import { getMapLod } from "../../rendering/CartographyModel";
 import { WORLD_LAND_PATH, WORLD_PHYSICAL_ATLAS } from "../../physical/WorldPhysicalAtlas";
 
 /**
  * Physical geography authority.
  *
- * At world/regional LOD the WebGL political compositor already clips its
- * country-scale fill against the same 50m physical land mask. Keeping the SVG
- * land silhouette underneath it would duplicate that edge and make tiny
- * raster/vector differences look like a second map. The SVG land silhouette
- * therefore returns only when vector detail becomes active.
+ * The SVG land silhouette is deliberately retained at every LOD. The GPU
+ * political compositor is an ownership layer, not a physical-land authority;
+ * a missing or intentionally unowned province must never turn a real landmass
+ * into ocean. This is especially important at world zoom where the political
+ * raster is sparse relative to the full physical map.
  */
-function WorldPhysicalLayer({ zoom = 1 }) {
-  const lod = getMapLod(zoom);
-  const gpuOwnsLandSilhouette = lod === "world" || lod === "regional";
-
+function WorldPhysicalLayer() {
   return (
     <g aria-label="Global physical geography" pointerEvents="none">
       <rect
@@ -23,13 +19,15 @@ function WorldPhysicalLayer({ zoom = 1 }) {
         height={180}
         fill={WORLD_PHYSICAL_ATLAS.water.fill}
       />
-      {!gpuOwnsLandSilhouette && (
-        <path
-          d={WORLD_LAND_PATH}
-          fill={WORLD_PHYSICAL_ATLAS.land.baseFill}
-          fillRule="evenodd"
-        />
-      )}
+      <path
+        d={WORLD_LAND_PATH}
+        fill={WORLD_PHYSICAL_ATLAS.land.baseFill}
+        fillRule="evenodd"
+        stroke={WORLD_PHYSICAL_ATLAS.water.coastline}
+        strokeWidth="0.16"
+        strokeOpacity="0.56"
+        vectorEffect="non-scaling-stroke"
+      />
     </g>
   );
 }
