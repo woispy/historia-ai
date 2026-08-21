@@ -30,8 +30,22 @@ function normalizeRiver(feature) {
 const generatedLakes = hydrography.lakes.map(normalizeLake);
 const generatedRivers = hydrography.rivers.map(normalizeRiver);
 
+// The curated atlas still owns broad physical context (coastline, seas,
+// channels, islands, terrain and labels), but its historical lake/river arrays
+// are legacy compatibility data. Generated 10m hydrography is the sole runtime
+// authority for those two feature classes. Keep the exclusion explicit here so
+// future callers cannot accidentally consume the legacy arrays through spread.
+const {
+  lakes: _legacyLakes,
+  rivers: _legacyRivers,
+  ...staticPhysicalAtlas
+} = ANATOLIA_PHYSICAL_ATLAS;
+
+void _legacyLakes;
+void _legacyRivers;
+
 export const ANATOLIA_PHYSICAL_ATLAS_RUNTIME = Object.freeze({
-  ...ANATOLIA_PHYSICAL_ATLAS,
+  ...staticPhysicalAtlas,
   hydrography: Object.freeze({
     source: hydrography.source,
     version: hydrography.version,
