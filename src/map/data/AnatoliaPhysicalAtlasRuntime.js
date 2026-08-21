@@ -17,6 +17,7 @@ function normalizeLake(feature) {
 function normalizeRiver(feature) {
   return {
     id: feature.id,
+    canonicalId: feature.canonicalId ?? null,
     name: feature.name,
     nameEn: feature.nameEn,
     rank: feature.rank,
