@@ -1,4 +1,5 @@
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
+import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 
 const BBOX = [25.45, 35.72, 44.85, 42.35];
@@ -27,7 +28,7 @@ function pointInPolygon(point, polygon) {
 
 function pointInWaterEnvelope(point) {
   return ANATOLIA_PHYSICAL_ATLAS.seas.some((sea) => pointInPolygon(point, sea.coordinates))
-    || ANATOLIA_PHYSICAL_ATLAS.lakes.some((lake) => pointInPolygon(point, lake.coordinates));
+    || ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygon(point, lake.coordinates));
 }
 
 function pointToSegmentDistanceSquared(point, start, end) {
@@ -178,7 +179,7 @@ function addPhysicalBarrierSites(sites, seen) {
     addBarrierSitesAlongPolygon(sites, seen, sea.coordinates, "water-barrier");
   }
 
-  for (const lake of ANATOLIA_PHYSICAL_ATLAS.lakes) {
+  for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) {
     addBarrierSitesAlongPolygon(sites, seen, lake.coordinates, "lake-barrier");
   }
 }
