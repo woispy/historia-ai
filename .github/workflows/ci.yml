@@ -47,6 +47,7 @@ on:
       - feat/phase3-runtime-engine
       - feat/runtime-province-selection
       - feat/historical-map-clean-foundation
+      - feat/historical-political-map-v1
 
 jobs:
   validate:
@@ -85,6 +86,8 @@ jobs:
         run: npm run test:historical-map-contract
       - name: Run historical political runtime tests
         run: npm run test:historical-political-runtime
+      - name: Run historical political map v1 tests
+        run: npm run test:historical-political-map-v1
       - name: Run historical Anatolia control tests
         run: npm run test:anatolia-historical-control
       - name: Run city label scale regression tests
@@ -138,6 +141,7 @@ jobs:
           node --check tools/tests/historical-world-1300.test.js &&
           node --check tools/tests/historical-map-contract.test.js &&
           node --check tools/tests/historical-political-runtime.test.js &&
+          node --check tools/tests/historical-political-map-v1.test.js &&
           node --check tools/tests/anatolia-historical-control.test.js &&
           node --check tools/tests/repository-cleanliness.test.js &&
           node --check tools/tests/city-label-scale.test.js &&
@@ -178,10 +182,14 @@ jobs:
           node --check src/map/rendering/CartographyModel.js &&
           node --check src/map/rendering/city/CityLabelLayout.js &&
           node --check src/map/rendering/MapViewportCulling.js &&
+          node --check src/map/hooks/useWorldMap.js &&
           node --check src/world/historical/HistoricalCountryResolver.js &&
           node --check src/world/historical/HistoricalWorld1300Registry.js &&
           node --check src/world/map/HistoricalMapContract.js &&
           node --check src/world/map/historical/HistoricalPoliticalRuntime.js &&
+          node --check src/world/map/historical/HistoricalPoliticalPresentation.js &&
+          node --check src/world/map/historical/HistoricalPoliticalMapModel.js &&
+          node --check src/world/RepositoryBootstrap.js &&
           node --check src/provinces/HistoricalProvinceRepository.js &&
           node --check src/provinces/ProvinceFactory.js &&
           node --check src/provinces/ProvinceModel.js

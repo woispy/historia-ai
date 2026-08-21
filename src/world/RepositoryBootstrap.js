@@ -11,6 +11,14 @@ function getHistoricalRegistry(scenario) {
   return Object.values(scenario.data.historical ?? {})[0] ?? null;
 }
 
+function tagHistoricalCountry(country) {
+  return {
+    ...country,
+    timeModel: "historical",
+    sourceType: "historical-runtime",
+  };
+}
+
 function mergeHistoricalCityAtlas(scenarioCities, provinceRepository) {
   const merged = { ...scenarioCities };
 
@@ -48,15 +56,20 @@ export function createRepositories(scenario) {
   const historicalCountries = Object.values(historicalRegistry?.countries ?? {});
   const countriesById = {};
 
+  // A historical scenario is not allowed to silently inherit modern country
+  // presentation metadata. Tag the source at the repository boundary so the
+  // map renderer can enforce the same provenance firewall as the simulation.
   for (const country of historicalCountries) {
-    countriesById[country.id] = country;
+    countriesById[country.id] = tagHistoricalCountry(country);
   }
 
   for (const country of scenarioCountries) {
-    countriesById[country.id] = {
-      ...(countriesById[country.id] ?? {}),
-      ...country,
-    };
+    const existing = countriesById[country.id];
+    if (existing?.sourceType === "historical-runtime") {
+      countriesById[country.id] = tagHistoricalCountry({ ...existing, ...country });
+    } else {
+      countriesById[country.id] = country;
+    }
   }
 
   const provinces = loadHistoricalProvinceRepository(historicalRegistry);

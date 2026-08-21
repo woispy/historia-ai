@@ -15,6 +15,7 @@
     "test:historical-world": "node tools/tests/historical-world-1300.test.js",
     "test:historical-map-contract": "node tools/tests/historical-map-contract.test.js",
     "test:historical-political-runtime": "node tools/tests/historical-political-runtime.test.js",
+    "test:historical-political-map-v1": "node tools/tests/historical-political-map-v1.test.js",
     "test:repository-cleanliness": "node tools/tests/repository-cleanliness.test.js",
     "test:city-label-scale": "node tools/tests/city-label-scale.test.js",
     "test:province-topology": "node tools/tests/province-topology.test.js",

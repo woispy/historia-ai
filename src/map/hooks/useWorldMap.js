@@ -2,7 +2,13 @@ import { useMemo } from "react";
 import { getProvinces } from "../../provinces";
 import { getCities } from "../../cities";
 import { getGeometry } from "../../world/map/geometry";
-import { getCountry } from "../../countries";
+import { createHistoricalPoliticalMapModel } from "../../world/map/historical/HistoricalPoliticalMapModel";
+
+function getScenarioStartDate(gameSession) {
+  return gameSession?.scenario?.startDate
+    ?? gameSession?.world?.scenario?.startDate
+    ?? null;
+}
 
 export function useWorldMap(gameSession) {
   return useMemo(() => {
@@ -12,14 +18,40 @@ export function useWorldMap(gameSession) {
     const cityRepository = gameSession.world.repositories.cities;
     const countryRepository = gameSession.world.repositories.countries;
     const geometryRepository = gameSession.world.map.geometry;
+    const sourceProvinces = getProvinces(provinceRepository);
+    const historicalModel = createHistoricalPoliticalMapModel({
+      date: getScenarioStartDate(gameSession),
+      provinces: sourceProvinces,
+      countryRepository,
+    });
 
-    const provinces = getProvinces(provinceRepository).map((province) => ({
-      province,
-      country: province.owner ? getCountry(countryRepository, province.owner) : null,
-      geometry: province.geometryId
-        ? getGeometry(geometryRepository, province.geometryId)
-        : null,
-    }));
+    const historicalById = historicalModel
+      ? new Map(historicalModel.map((entry) => [entry.province.id, entry]))
+      : null;
+
+    const provinces = sourceProvinces.map((province) => {
+      const historical = historicalById?.get(province.id) ?? null;
+      return historical
+        ? {
+          ...historical,
+          geometry: province.geometryId
+            ? getGeometry(geometryRepository, province.geometryId)
+            : null,
+        }
+        : {
+          province,
+          country: province.owner
+            ? gameSession.world.repositories.countries.byId?.[province.owner] ?? null
+            : null,
+          sourceCountry: province.owner
+            ? gameSession.world.repositories.countries.byId?.[province.owner] ?? null
+            : null,
+          historicalPolitical: null,
+          geometry: province.geometryId
+            ? getGeometry(geometryRepository, province.geometryId)
+            : null,
+        };
+    });
 
     const cities = getCities(cityRepository);
 
