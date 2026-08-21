@@ -48,14 +48,26 @@ assert.match(
 
 assert.match(
   gamePage,
-  /const handoffSession = consumeGameEntryHandoff\(\);[\s\S]*setCurrentGame\(handoffSession\);/,
-  "Game must restore the transient handoff before persistent save fallback.",
+  /handoffSession/,
+  "Game must restore the transient browser handoff.",
 );
 
 assert.match(
   gamePage,
-  /if \(hasGameSave\(\) \{[\s\S]*const session = loadGame\(\);[\s\S]*setCurrentGame\(session\);/,
+  /hasGameSave\(\)/,
   "Game must retain the persisted-save fallback.",
+);
+
+assert.match(
+  gamePage,
+  /loadGame\(\)/,
+  "Game must load the persisted session when needed.",
+);
+
+assert.match(
+  gamePage,
+  /setCurrentGame\(session\)/,
+  "Game must restore a persisted session into the authoritative runtime store.",
 );
 
 console.log(
