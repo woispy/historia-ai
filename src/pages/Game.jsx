@@ -1,17 +1,12 @@
-import { useLocation } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 
 import GameShell from "../components/GameShell/GameShell";
 import { hasCurrentGame, setCurrentGame, getCurrentGame } from "../game/currentGame";
 import { hasGameSave, loadGame } from "../save";
 
-function ensureCurrentGame(handoffSession) {
+function ensureCurrentGame() {
   if (hasCurrentGame()) {
     return getCurrentGame();
-  }
-
-  if (handoffSession) {
-    setCurrentGame(handoffSession);
-    return handoffSession;
   }
 
   if (hasGameSave()) {
@@ -27,10 +22,19 @@ function ensureCurrentGame(handoffSession) {
 
 function Game() {
   const location = useLocation();
-  const session = ensureCurrentGame(location.state?.session);
+  const session = ensureCurrentGame();
 
   if (!session) {
-    return null;
+    return (
+      <Navigate
+        to="/new-game"
+        replace
+        state={{
+          reason: "missing-game-session",
+          from: location.pathname,
+        }}
+      />
+    );
   }
 
   return <GameShell />;
