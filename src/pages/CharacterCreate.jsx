@@ -74,19 +74,15 @@ function CharacterCreate() {
         throw new Error("Oyun oturumu oluşturulamadı.");
       }
 
-      // Keep a short-lived browser handoff as a reload-safe fallback, but use
-      // the SPA transition for normal entry. The active runtime session is
-      // already owned by currentGame, so a full document navigation is not
-      // necessary and would make the entry path unnecessarily fragile.
+      // The active runtime is already stored in currentGame. The transient
+      // handoff makes the entry path safe even when the browser performs a
+      // full document navigation and the in-memory runtime is recreated.
       setGameEntryHandoff(session);
 
-      navigate("/game", {
-        replace: true,
-        state: {
-          handoff: "new-game",
-          sessionId: session.id,
-        },
-      });
+      // Use a deterministic document navigation here. This avoids depending
+      // on a React Router transition while the new runtime is being mounted,
+      // and Game.jsx can restore the session from sessionStorage after reload.
+      window.location.replace("/game");
     } catch (initializationError) {
       setIsStartingGame(false);
       setError(
