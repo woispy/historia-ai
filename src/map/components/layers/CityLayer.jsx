@@ -133,5 +133,3 @@ function CityLayer({ cities = [], zoom = 1, camera, selectedCityId = null, onCit
 }
 
 export default CityLayer;
-
-export { getVisibleCities, mergeCityMetadata };
