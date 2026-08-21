@@ -11,9 +11,21 @@ const SOURCES = [
     geometryTypes: new Set(["Polygon", "MultiPolygon"]),
   },
   {
+    key: "lakes_europe",
+    url: "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_lakes_europe.geojson",
+    output: "src/world/map/source/physical/ne_10m_lakes_europe.geojson",
+    geometryTypes: new Set(["Polygon", "MultiPolygon"]),
+  },
+  {
     key: "rivers",
     url: "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_rivers_lake_centerlines.geojson",
     output: "src/world/map/source/physical/ne_10m_rivers_lake_centerlines.geojson",
+    geometryTypes: new Set(["LineString", "MultiLineString", "GeometryCollection"]),
+  },
+  {
+    key: "rivers_europe",
+    url: "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_rivers_europe.geojson",
+    output: "src/world/map/source/physical/ne_10m_rivers_europe.geojson",
     geometryTypes: new Set(["LineString", "MultiLineString", "GeometryCollection"]),
   },
 ];
