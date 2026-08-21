@@ -53,6 +53,8 @@ assert.match(atlas.hydrography.source, /Natural Earth 10m/);
 assert.equal(atlas.hydrography.projection, "EPSG:4326");
 assert.ok(atlas.lakes.length > 8, "Generated 10m lake geometry must replace the curated legacy set.");
 assert.ok(atlas.rivers.length > 10, "Generated 10m river geometry must replace the curated legacy set.");
+assert.ok(atlas.lakes.some((lake) => lake.sourceLayer === "natural-earth-10m-europe"), "The Europe 10m lake supplement must be represented in the regional atlas.");
+assert.ok(atlas.rivers.some((river) => river.sourceLayer === "natural-earth-10m-europe"), "The Europe 10m river supplement must be represented in the regional atlas.");
 assert.ok(atlas.seas.length >= 8);
 assert.ok(atlas.channels.length >= 2);
 assert.ok(atlas.islands.length >= 8);
@@ -105,20 +107,28 @@ function normalized(value) {
     .replace(/[^a-z0-9]+/g, "");
 }
 
-const lakeNames = atlas.lakes.map((lake) => normalized(`${lake.name} ${lake.nameEn}`));
 const riverNames = atlas.rivers.map((river) => normalized(`${river.name} ${river.nameEn}`));
-
-for (const required of ["van", "tuz", "iznik", "sapanca", "beysehir", "egirdir"]) {
-  assert.ok(lakeNames.some((name) => name.includes(required)), `Missing 10m lake geometry containing: ${required}`);
-}
-
 for (const required of ["sakarya", "kizilirmak", "yesilirmak", "gediz", "buyukmenderes", "seyhan", "ceyhan", "firat", "dicle"]) {
   assert.ok(riverNames.some((name) => name.includes(required)), `Missing 10m river geometry containing: ${required}`);
 }
 
-const van = atlas.lakes.find((lake) => normalized(`${lake.name} ${lake.nameEn}`).includes("van"));
+const requiredLakeAnchors = [
+  ["Van Gölü", [43.30, 38.30]],
+  ["Tuz Gölü", [33.40, 38.75]],
+  ["İznik Gölü", [29.72, 40.43]],
+  ["Sapanca Gölü", [30.28, 40.70]],
+  ["Beyşehir Gölü", [31.45, 37.73]],
+  ["Eğirdir Gölü", [30.86, 38.00]],
+];
+
+for (const [name, anchor] of requiredLakeAnchors) {
+  const containingLake = atlas.lakes.find((lake) => pointInPolygon(anchor, lake.rings[0]));
+  assert.ok(containingLake, `${name} must have a Natural Earth 10m lake polygon containing its physical anchor.`);
+  assert.ok(containingLake.rings[0].length >= 8, `${name} must retain detailed shoreline sampling.`);
+}
+
+const van = atlas.lakes.find((lake) => pointInPolygon([43.30, 38.30], lake.rings[0]));
 assert.ok(van, "Van Gölü must be represented by Natural Earth 10m geometry.");
-assert.equal(pointInPolygon([43.30, 38.30], van.rings[0]), true, "Van Gölü interior anchor must remain water in the 10m geometry.");
 
 const sakaryaSegments = atlas.rivers.filter((river) => normalized(`${river.name} ${river.nameEn}`).includes("sakarya"));
 assert.ok(sakaryaSegments.some((river) => river.coordinates.length >= 20), "Sakarya must retain a genuinely sampled river centerline.");
@@ -155,9 +165,6 @@ for (let i = 0; i < zoomThree.length; i += 1) {
   }
 }
 
-// Historical city anchors use the generated global land authority plus the
-// regional physical land mask, while the exact generated 10m lake polygons
-// remain hard exclusions.
 for (const [cityId, city] of Object.entries(ANATOLIA_CITY_ATLAS)) {
   const result = validateCityPhysicalPosition(city, cityLandPolygons, atlas.lakes);
   assert.equal(result.onLand, true, `${cityId} must remain on physical land.`);
