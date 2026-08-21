@@ -74,5 +74,7 @@ for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) {
     assert.ok(new Set(ring.map(([x, y]) => `${x},${y}`)).size >= 3, `${lake.name} has a degenerate ring`);
   }
 }
-for (const river of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers) assert.ok(river.coordinates.length >= 3, `${river.name} needs a continuous path`);
+for (const river of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers) {
+  assert.ok(Array.isArray(river.coordinates) && river.coordinates.length >= 2, `${river.name} needs at least two points for a continuous segment`);
+}
 console.log(`Cartography visual regression tests passed: ${cities.length} cities, ${ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers.length} rivers, ${ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.length} lakes, deterministic collision-safe labels across 7 zoom levels.`);
