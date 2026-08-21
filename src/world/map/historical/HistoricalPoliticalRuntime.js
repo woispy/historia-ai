@@ -5,22 +5,33 @@ import {
 } from "../HistoricalMapContract.js";
 
 const POLITY_DEFINITIONS = Object.freeze([
-  ["byzantium", "Byzantine Empire", "empire"],
-  ["ottomans", "Ottoman Beylik", "beylik"],
-  ["karasi", "Karasi Beylik", "beylik"],
-  ["saruhan", "Saruhan Beylik", "beylik"],
-  ["mentese", "Menteşe Beylik", "beylik"],
-  ["esref", "Eşrefoğlu Beylik", "beylik"],
-  ["germiyan", "Germiyan Beylik", "beylik"],
-  ["karaman", "Karaman Beylik", "beylik"],
-  ["pervane", "Pervâneoğlu Beylik", "local-polity"],
-  ["candar", "Candar Beylik", "local-polity"],
+  ["byzantium", "Byzantine Empire", "empire", "#6A1B9A"],
+  ["ottomans", "Ottoman Beylik", "beylik", "#0F7A32"],
+  ["karasi", "Karasi Beylik", "beylik", "#B87333"],
+  ["saruhan", "Saruhan Beylik", "beylik", "#786A9D"],
+  ["mentese", "Menteşe Beylik", "beylik", "#3E7C59"],
+  ["esref", "Eşrefoğlu Beylik", "beylik", "#7B6840"],
+  ["germiyan", "Germiyan Beylik", "beylik", "#8C5A2B"],
+  ["karaman", "Karaman Beylik", "beylik", "#A33F3F"],
+  ["pervane", "Pervâneoğlu Beylik", "local-polity", "#6B7280"],
+  ["candar", "Candar Beylik", "local-polity", "#7A6A3A"],
+  ["trebizond", "Empire of Trebizond", "empire", "#4A7896"],
+  ["cilicia", "Kingdom of Cilicia", "kingdom", "#8B4A62"],
 ]);
 
 const POLITY_BY_ID = new Map(
-  POLITY_DEFINITIONS.map(([id, name, kind]) => [
+  POLITY_DEFINITIONS.map(([id, name, kind, color]) => [
     id,
-    Object.freeze({ id, name, kind, type: "polity", timeModel: "historical" }),
+    Object.freeze({
+      id,
+      name,
+      kind,
+      type: "polity",
+      timeModel: "historical",
+      sourceType: "historical-runtime",
+      color,
+      terrainColor: color,
+    }),
   ]),
 );
 
@@ -88,7 +99,14 @@ export function createHistoricalPoliticalRuntime({ date, provinceMetadata = [] }
 
   const provinces = provinceMetadata.map((metadata) => toHistoricalProvince(metadata, normalizedDate));
   const polityIds = new Set(provinces.map((province) => province.polityId).filter(Boolean));
-  const polities = [...polityIds].map(clonePolity).filter(Boolean);
+  const polities = [...polityIds].map(clonePolity);
+
+  const unknownPolityIds = [...polityIds].filter((id) => !POLITY_BY_ID.has(id));
+  if (unknownPolityIds.length) {
+    throw new Error(
+      `Historical runtime contains unregistered polity identities: ${unknownPolityIds.join(", ")}`,
+    );
+  }
 
   assertHistoricalPoliticalIdentitiesAndProvinces({ polities, provinces });
 
