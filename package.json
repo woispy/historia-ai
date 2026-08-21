@@ -11,6 +11,7 @@
     "build:historical-gis:1300": "node tools/historical-gis/cli/import-1300.js",
     "test:historical-gis": "node tools/historical-gis/cli/test-1300.js",
     "test:physical-geography": "node tools/tests/physical-geography-1300.test.js",
+    "test:hydrography-10m": "node tools/tests/hydrography-10m.test.js",
     "test:world-map": "node tools/tests/world-land-mask.test.js",
     "test:historical-world": "node tools/tests/historical-world-1300.test.js",
     "test:historical-map-contract": "node tools/tests/historical-map-contract.test.js",
