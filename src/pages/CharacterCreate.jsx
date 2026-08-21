@@ -60,8 +60,18 @@ function CharacterCreate() {
 
     try {
       updateNewGame({ character });
-      initializeGame();
-      navigate("/game", { replace: true });
+      const session = initializeGame();
+
+      // Carry the freshly-created runtime session through the router handoff.
+      // This keeps the transition deterministic even if a browser/runtime
+      // boundary causes the module-level current-game reference to be lost.
+      navigate("/game", {
+        replace: true,
+        state: {
+          handoff: "new-game",
+          session,
+        },
+      });
     } catch (initializationError) {
       setError(
         initializationError instanceof Error

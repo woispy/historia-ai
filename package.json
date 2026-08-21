@@ -27,6 +27,7 @@
     "test:map-texture-atlas": "node tools/tests/map-texture-atlas.test.js",
     "test:new-game": "node tools/tests/new-game-state.test.js",
     "test:new-game-startup": "node tools/tests/new-game-startup.test.js",
+    "test:game-entry-handoff": "node tools/tests/game-entry-handoff.test.js",
     "test:scenario-loading": "node tools/tests/scenario-loading-contract.test.js",
     "test:province-selection": "node tools/tests/province-selection-contract.test.js",
     "test:runtime-engine": "node tools/tests/runtime-engine.test.js",
