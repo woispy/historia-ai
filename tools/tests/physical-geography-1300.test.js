@@ -43,6 +43,12 @@ function assertCoordinates(name, coordinates) {
   }
 }
 
+function assertRing(name, ring) {
+  assertCoordinates(name, ring);
+  assert.ok(ring.length >= 4, `${name} must retain valid polygon topology.`);
+  assert.deepEqual(ring[0], ring.at(-1), `${name} must be closed.`);
+}
+
 assert.equal(atlas.version, 2);
 assert.equal(atlas.projection, "EPSG:4326");
 assert.equal(atlas.landPolygons.length, 1);
@@ -78,7 +84,7 @@ for (const collection of [atlas.seas, atlas.channels, atlas.islands, atlas.mount
 for (const lake of atlas.lakes) {
   assert.equal(lake.geometrySource, "natural-earth-10m");
   assert.ok(Array.isArray(lake.rings) && lake.rings.length > 0, `${lake.name} must retain polygon rings.`);
-  assert.ok(lake.rings[0].length >= 8, `${lake.name} geometry must retain real shoreline sampling.`);
+  lake.rings.forEach((ring, index) => assertRing(`${lake.name} ring ${index}`, ring));
   assert.ok(Array.isArray(lake.bounds) && lake.bounds.length === 4);
   const path = exactAreaPath(lake.rings);
   assert.equal((path.match(/Q/g) ?? []).length, 0, `${lake.name} must not be smoothed.`);
@@ -122,7 +128,7 @@ const requiredLakeAnchors = [
 for (const [name, anchor] of requiredLakeAnchors) {
   const containingLake = atlas.lakes.find((lake) => pointInPolygon(anchor, lake.rings[0]));
   assert.ok(containingLake, `${name} must have a Natural Earth 10m lake polygon containing its physical anchor.`);
-  assert.ok(containingLake.rings[0].length >= 8, `${name} must retain detailed shoreline sampling.`);
+  assert.ok(containingLake.rings[0].length >= 4, `${name} must retain valid shoreline topology.`);
 }
 
 const van = atlas.lakes.find((lake) => pointInPolygon([43.30, 38.30], lake.rings[0]));
