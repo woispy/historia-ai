@@ -118,6 +118,8 @@ jobs:
         run: npm run test:new-game-startup
       - name: Run game entry handoff tests
         run: npm run test:game-entry-handoff
+      - name: Run main menu entry integration tests
+        run: npm run test:main-menu-entry
       - name: Run scenario loading contract tests
         run: npm run test:scenario-loading
       - name: Run ESM import contract tests
@@ -129,70 +131,6 @@ jobs:
       - name: Verify repository cleanliness after production build
         run: npm run test:repository-cleanliness
       - name: Verify historical GIS and map scripts
-        run: >-
-          node --check tools/asset-builder/cli/fetch-natural-earth-50m.js &&
-          node --check tools/historical-gis/HistoricalAssetId.js &&
-          node --check tools/historical-gis/HistoricalGeometryImporter.js &&
-          node --check tools/historical-gis/HistoricalProvinceAssetBuilder.js &&
-          node --check tools/historical-gis/AnatoliaPhase2DGeometryBuilder.js &&
-          node --check tools/historical-gis/cli/import-1300.js &&
-          node --check tools/historical-gis/cli/test-1300.js &&
-          node --check tools/historical-gis/cli/validate-1300.js &&
-          node --check tools/tests/physical-geography-1300.test.js &&
-          node --check tools/tests/world-land-mask.test.js &&
-          node --check tools/tests/historical-world-1300.test.js &&
-          node --check tools/tests/historical-map-contract.test.js &&
-          node --check tools/tests/historical-political-runtime.test.js &&
-          node --check tools/tests/historical-political-map-v1.test.js &&
-          node --check tools/tests/anatolia-historical-control.test.js &&
-          node --check tools/tests/repository-cleanliness.test.js &&
-          node --check tools/tests/city-label-scale.test.js &&
-          node --check tools/tests/province-topology.test.js &&
-          node --check tools/tests/anatolia-phase2b.test.js &&
-          node --check tools/tests/anatolia-phase2c.test.js &&
-          node --check tools/tests/anatolia-phase2d.test.js &&
-          node --check tools/tests/cartography-2efgh.test.js &&
-          node --check tools/tests/cartography-foundation.test.js &&
-          node --check tools/tests/map-texture-atlas.test.js &&
-          node --check tools/tests/cartography-visual-regression.test.js &&
-          node --check tools/tests/map-rendering-contract.test.js &&
-          node --check tools/tests/province-selection-contract.test.js &&
-          node --check tools/tests/new-game-state.test.js &&
-          node --check tools/tests/new-game-startup.test.js &&
-          node --check tools/tests/game-entry-handoff.test.js &&
-          node --check tools/tests/scenario-loading-contract.test.js &&
-          node --check tools/tests/esm-import-contract.test.js &&
-          node --check tools/tests/runtime-engine.test.js &&
-          node --check src/engine/GameSession.js &&
-          node --check src/engine/GameEngine.js &&
-          node --check src/state/RuntimeState.js &&
-          node --check src/state/index.js &&
-          node --check src/systems/Action/ActionSystem.js &&
-          node --check src/systems/Simulation/SimulationEngine.js &&
-          node --check src/systems/Simulation/processors/ActionProcessor.js &&
-          node --check src/systems/Simulation/processors/EconomyProcessor.js &&
-          node --check src/systems/Simulation/processors/PopulationProcessor.js &&
-          node --check src/systems/Simulation/processors/DiplomacyProcessor.js &&
-          node --check src/systems/Simulation/processors/MilitaryProcessor.js &&
-          node --check src/systems/Simulation/processors/EventProcessor.js &&
-          node --check src/systems/Simulation/processors/TimeProcessor.js &&
-          node --check src/systems/Simulation/processors/TimelineProcessor.js &&
-          node --check src/systems/Simulation/processors/NotificationProcessor.js &&
-          node --check src/systems/Timeline/TimelineSystem.js &&
-          node --check src/save/SaveSerializer.js &&
-          node --check src/map/data/AnatoliaProvinceRefinement.js &&
-          node --check src/map/data/CartographyAtlas.js &&
-          node --check src/map/rendering/CartographyModel.js &&
-          node --check src/map/rendering/city/CityLabelLayout.js &&
-          node --check src/map/rendering/MapViewportCulling.js &&
-          node --check src/map/hooks/useWorldMap.js &&
-          node --check src/world/historical/HistoricalCountryResolver.js &&
-          node --check src/world/historical/HistoricalWorld1300Registry.js &&
-          node --check src/world/map/HistoricalMapContract.js &&
-          node --check src/world/map/historical/HistoricalPoliticalRuntime.js &&
-          node --check src/world/map/historical/HistoricalPoliticalPresentation.js &&
-          node --check src/world/map/historical/HistoricalPoliticalMapModel.js &&
-          node --check src/world/RepositoryBootstrap.js &&
-          node --check src/provinces/HistoricalProvinceRepository.js &&
-          node --check src/provinces/ProvinceFactory.js &&
-          node --check src/provinces/ProvinceModel.js
+        run: |
+          git status --short
+          git ls-files --others --exclude-standard
