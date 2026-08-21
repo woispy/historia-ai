@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Layout from "../layouts/Layout/Layout";
@@ -17,28 +17,25 @@ function formatSaveDate(value) {
   }).format(date);
 }
 
+function readSaveState() {
+  try {
+    return {
+      available: hasCurrentGame() || hasGameSave(),
+      info: getGameSaveInfo(),
+    };
+  } catch {
+    return { available: hasCurrentGame(), info: null };
+  }
+}
+
 function MainMenu() {
   const navigate = useNavigate();
-  const [saveState, setSaveState] = useState(() => ({
-    available: false,
-    info: null,
-  }));
+  const [saveState, setSaveState] = useState(readSaveState);
   const [continueError, setContinueError] = useState("");
 
   function refreshSaveState() {
-    try {
-      setSaveState({
-        available: hasCurrentGame() || hasGameSave(),
-        info: getGameSaveInfo(),
-      });
-    } catch {
-      setSaveState({ available: hasCurrentGame(), info: null });
-    }
+    setSaveState(readSaveState());
   }
-
-  useEffect(() => {
-    refreshSaveState();
-  }, []);
 
   function handleContinue() {
     setContinueError("");
