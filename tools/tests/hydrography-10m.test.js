@@ -37,18 +37,23 @@ for (const required of ["sakarya", "gediz", "buyukmenderes", "seyhan", "ceyhan",
   assert.ok(riverNames.some((name) => name.includes(required)), `Missing source-native 10m river geometry containing: ${required}`);
 }
 
+// Natural Earth 10m does not currently provide every important Anatolian
+// watercourse. Keep the known gaps explicit until a reproducible supplemental
+// source is added; never replace them with invented geometry.
 const documentedNaturalEarthRiverGaps = new Set(["kizilirmak", "yesilirmak"]);
 assert.deepEqual([...documentedNaturalEarthRiverGaps].sort(), ["kizilirmak", "yesilirmak"]);
 
 const documentedNaturalEarthLakeGaps = new Set(["sapanca"]);
 assert.deepEqual([...documentedNaturalEarthLakeGaps], ["sapanca"]);
 
-// Anchors are deliberately placed well inside each lake rather than on the shoreline.
+// Anchors are deliberately placed well inside each source-native lake rather
+// than on the shoreline. These must stay synchronized with the physical-map
+// regression anchors so the two test layers cannot drift apart.
 const requiredLakeAnchors = [
   ["Van Gölü", [43.00, 38.50]],
   ["Tuz Gölü", [33.40, 38.75]],
   ["İznik Gölü", [29.55, 40.43]],
-  ["Beyşehir Gölü", [31.45, 37.73]],
+  ["Beyşehir Gölü", [31.5033, 37.7946]],
   ["Eğirdir Gölü", [30.86, 38.00]],
 ];
 
