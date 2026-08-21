@@ -74,16 +74,12 @@ function CharacterCreate() {
         throw new Error("Oyun oturumu oluşturulamadı.");
       }
 
-      // The runtime store remains authoritative, but the browser transition
-      // must also survive a full document navigation. sessionStorage provides
-      // a short-lived handoff without depending on persistent save success.
-      if (setGameEntryHandoff(session)) {
-        window.location.replace("/game");
-        return;
-      }
+      // Keep a short-lived browser handoff as a reload-safe fallback, but use
+      // the SPA transition for normal entry. The active runtime session is
+      // already owned by currentGame, so a full document navigation is not
+      // necessary and would make the entry path unnecessarily fragile.
+      setGameEntryHandoff(session);
 
-      // If browser session storage is unavailable, keep the in-memory runtime
-      // and use the SPA transition as the best-effort fallback.
       navigate("/game", {
         replace: true,
         state: {
