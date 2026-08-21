@@ -19,7 +19,7 @@ assert.match(
 
 assert.match(
   characterCreate,
-  /state:\s*\{[\s\S]*handoff:\s*[\"']new-game[\"'][\s\S]*session,/,
+  /state:\s*\{[\s\S]*handoff:\s*["']new-game["'][\s\S]*session,/,
   "CharacterCreate must pass the new session through router state.",
 );
 
