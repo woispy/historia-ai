@@ -27,9 +27,11 @@ dist-ssr
 # Local source-data caches / generated GIS input
 data/gis/1300/source/
 src/world/map/source/geometry/natural-earth/admin-0-countries.geojson
+src/world/map/source/physical/
 
 # Generated map runtime assets. They are rebuilt deterministically from the
 # source contracts before dev/build and must not dirty the working tree.
 src/world/map/assets/geometry/
 src/world/map/assets/provinces/
 src/world/map/assets/historical/1300/
+src/map/data/generated/anatolia-hydrography-10m.json

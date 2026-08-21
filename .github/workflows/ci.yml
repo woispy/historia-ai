@@ -78,6 +78,10 @@ jobs:
         run: npm run test:historical-gis
       - name: Run physical geography tests
         run: npm run test:physical-geography
+      - name: Run Natural Earth 10m hydrography tests
+        run: npm run test:hydrography-10m
+      - name: Run hydrography LOD visibility tests
+        run: npm run test:hydrography-visibility
       - name: Run world map land-mask tests
         run: npm run test:world-map
       - name: Run historical world anchor tests

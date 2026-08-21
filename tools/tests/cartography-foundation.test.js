@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { ANATOLIA_CITY_ATLAS } from "../../src/map/data/AnatoliaCityAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
+import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import {
   getMapLod,
   getPhysicalStrokeProfile,
@@ -42,8 +43,6 @@ for (const zoom of [1.2, 2.8, 3.6, 5, 8]) {
   }
 }
 
-// The public fontSize remains a readable authored size. screenSize is the
-// actual rendered size after the nested inverse-zoom transform.
 const capital = cities.find((city) => city.map.tier === "capital");
 assert.ok(capital, "The historical city atlas must contain a capital city.");
 for (const zoom of [1.2, 2, 2.8, 3.6, 5, 8, 12, 16]) {
@@ -59,8 +58,8 @@ for (let index = 1; index < screenSizes.length; index += 1) {
   assert.ok(Math.abs(screenSizes[index] - screenSizes[1]) < 1e-9, "City label screen-space size must remain stable across deep zoom");
 }
 
-assert.ok(ANATOLIA_PHYSICAL_ATLAS.lakes.length >= 8);
-assert.ok(ANATOLIA_PHYSICAL_ATLAS.rivers.length >= 10);
+assert.ok(ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.length >= 8);
+assert.ok(ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers.length >= 10);
 assert.ok(ANATOLIA_PHYSICAL_ATLAS.labels.filter((label) => label.kind === "sea").every((label) => label.maxZoom >= 8));
 
 const regionalStroke = getPhysicalStrokeProfile(1.3);
@@ -71,4 +70,4 @@ assert.ok(detailedStroke.lake > 0, "Detailed lakes need a visible outline");
 for (const id of ["konstantinopolis", "iznik", "bursa", "ankara", "konya", "kayseri", "sivas", "trabzon", "erzurum"]) {
   assert.ok(ANATOLIA_CITY_ATLAS[id], `Missing historical city atlas entry: ${id}`);
 }
-console.log(`Cartography foundation tests passed: ${cities.length} cities, ${ANATOLIA_PHYSICAL_ATLAS.rivers.length} rivers, ${ANATOLIA_PHYSICAL_ATLAS.lakes.length} lakes, deterministic labels across 5 zoom levels.`);
+console.log(`Cartography foundation tests passed: ${cities.length} cities, ${ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers.length} rivers, ${ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.length} lakes, deterministic labels across 5 zoom levels.`);

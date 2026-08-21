@@ -3,7 +3,10 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-const SOURCE_URL = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson";
+// Keep the world land source reproducible. Upgrade this revision explicitly
+// when the Natural Earth source is intentionally refreshed.
+const NATURAL_EARTH_REVISION = "ca96624a56bd078437bca8184e78163e5039ad19";
+const SOURCE_URL = `https://raw.githubusercontent.com/nvkelso/natural-earth-vector/${NATURAL_EARTH_REVISION}/geojson/ne_50m_admin_0_countries.geojson`;
 const OUTPUT_PATH = path.resolve("src/world/map/source/geometry/natural-earth/admin-0-countries.geojson");
 
 const response = await fetch(SOURCE_URL, {
@@ -25,4 +28,4 @@ if (!source.includes("ne_50m_admin_0_countries")) {
 await mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
 await writeFile(OUTPUT_PATH, source, "utf8");
 
-console.log(`Downloaded Natural Earth 50m Admin-0 countries to ${OUTPUT_PATH}.`);
+console.log(`Downloaded Natural Earth 50m Admin-0 countries from ${NATURAL_EARTH_REVISION} to ${OUTPUT_PATH}.`);

@@ -51,7 +51,10 @@ export function getPhysicalDetailProfile(zoom = 1) {
   const lod = getMapLod(zoom);
   return Object.freeze({
     rivers: lod !== "world",
-    minorRivers: lod === "city" || lod === "detailed",
+    // Natural Earth 10m is now the physical river authority. Major rivers are
+    // sufficient for the regional overview; every source segment is revealed
+    // from province LOD onward without inventing or resampling its geometry.
+    minorRivers: lod === "province" || lod === "city" || lod === "detailed",
     mountains: lod !== "world",
     mountainLabels: lod === "city" || lod === "detailed",
     lakes: lod !== "world",

@@ -10,7 +10,7 @@ import {
   buildWorldPath,
   collectWorldLandPolygons,
   normalizeGeometryModule,
-} from "./WorldLandMask";
+} from "./WorldLandMask.js";
 
 const geometryModules = import.meta.glob(
   "../../world/map/assets/geometry/geometry_country_*.json",
