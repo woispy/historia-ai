@@ -3,17 +3,10 @@ import { Navigate, useLocation } from "react-router-dom";
 import GameShell from "../components/GameShell/GameShell";
 import { hasCurrentGame, setCurrentGame, getCurrentGame } from "../game/currentGame";
 import { hasGameSave, loadGame } from "../save";
-import { consumeGameEntryHandoff } from "../game/gameEntryHandoff";
 
 function ensureCurrentGame() {
   if (hasCurrentGame()) {
     return getCurrentGame();
-  }
-
-  const handoffSession = consumeGameEntryHandoff();
-  if (handoffSession) {
-    setCurrentGame(handoffSession);
-    return handoffSession;
   }
 
   if (hasGameSave()) {
