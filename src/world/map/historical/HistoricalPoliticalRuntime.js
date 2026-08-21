@@ -1,5 +1,6 @@
 import {
   assertHistoricalPoliticalIdentitiesAndProvinces,
+  assertHistoricalProvinceRecord,
   createHistoricalMapDescriptor,
 } from "../HistoricalMapContract.js";
 
@@ -79,6 +80,11 @@ export function createHistoricalPoliticalRuntime({ date, provinceMetadata = [] }
   if (!Array.isArray(provinceMetadata)) {
     throw new TypeError("provinceMetadata must be an array.");
   }
+
+  // Validate the source boundary before converting records. This is important:
+  // once a modern Admin-0 record is projected into a historical shape it would
+  // otherwise look historical and the provenance firewall could be bypassed.
+  provinceMetadata.forEach(assertHistoricalProvinceRecord);
 
   const provinces = provinceMetadata.map((metadata) => toHistoricalProvince(metadata, normalizedDate));
   const polityIds = new Set(provinces.map((province) => province.polityId).filter(Boolean));
