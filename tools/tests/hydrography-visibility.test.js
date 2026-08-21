@@ -17,7 +17,7 @@ assert.equal(getHydrographyVisibilityProfile(3.50), "detailed");
 const majorRiver = { canonicalId: "kizilirmak", rank: 99, bounds: [34, 38, 34.1, 38.1] };
 const rankedMediumRiver = { canonicalId: "minor-a", rank: 2, bounds: [34, 38, 34.01, 38.01] };
 const rankedMinorRiver = { canonicalId: "minor-b", rank: 4, bounds: [34, 38, 34.01, 38.01] };
-const unrankedLongRiver = { canonicalId: null, bounds: [30, 36, 30.2, 36.2] };
+const unrankedLongRiver = { canonicalId: null, bounds: [30, 36, 30.4, 36.4] };
 const unrankedTinyRiver = { canonicalId: null, bounds: [30, 36, 30.01, 36.01] };
 
 assert.equal(isImportantRiver(majorRiver, "regional"), true, "Major canonical rivers must survive every hydrography LOD.");
@@ -40,8 +40,8 @@ assert.equal(isImportantLake(tinyLake, "world"), false);
 
 const rivers = [majorRiver, rankedMediumRiver, rankedMinorRiver, unrankedLongRiver, unrankedTinyRiver];
 assert.equal(filterVisibleRivers(rivers, 1.30).length, 2, "Regional view must keep only major/meaningful rivers.");
-assert.equal(filterVisibleRivers(rivers, 2.00).length, 4, "Province view must add rank-2 rivers without flooding the scene with tiny drainage.");
-assert.equal(filterVisibleRivers(rivers, 3.00).length, 4, "City view must still omit low-rank tiny rivers.");
+assert.equal(filterVisibleRivers(rivers, 2.00).length, 3, "Province view must add rank-2 rivers without flooding the scene with tiny drainage.");
+assert.equal(filterVisibleRivers(rivers, 3.00).length, 3, "City view must still omit low-rank tiny rivers.");
 
 const lakes = [majorLake, mediumLake, tinyLake];
 assert.equal(filterVisibleLakes(lakes, 1.30).length, 2, "Regional view must omit tiny lakes.");
