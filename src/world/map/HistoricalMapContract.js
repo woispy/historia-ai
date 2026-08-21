@@ -22,6 +22,7 @@ export const HISTORICAL_MAP_POLICY = Object.freeze({
   cityClickChangesZoomOnly: false,
 });
 
+const HISTORICAL_POLITICAL_TYPES = Object.freeze(["polity", "territory", "province"]);
 const MODERN_ADMIN0_PROVENANCE = Object.freeze([
   "modern-admin0",
   "admin-0-countries",
@@ -61,7 +62,7 @@ export function assertHistoricalPoliticalIdentity(entity = {}) {
   }
 
   const type = normalize(entity.type);
-  if (type && !["polity", "territory", "province"].includes(type)) {
+  if (type && !HISTORICAL_POLITICAL_TYPES.includes(type)) {
     throw new Error(`Historical political runtime does not accept entity type: ${entity.type}`);
   }
 
@@ -78,14 +79,39 @@ export function assertHistoricalPoliticalIdentities(entities = []) {
   return true;
 }
 
-export function createHistoricalMapDescriptor({ date, polities = [] } = {}) {
+export function assertHistoricalProvinceRecord(province = {}) {
+  if (!province || typeof province !== "object") {
+    throw new TypeError("Historical province must be an object.");
+  }
+  if (!normalize(province.id)) throw new Error("Historical province requires a stable id.");
+  if (isModernAdmin0Identity(province)) {
+    throw new Error(`Modern Admin-0 identity cannot enter historical province runtime: ${province.id}`);
+  }
+  if (province.type && normalize(province.type) !== "province") {
+    throw new Error(`Historical province has invalid entity type: ${province.type}`);
+  }
+  if (province.polityId !== null && province.polityId !== undefined && !normalize(province.polityId)) {
+    throw new Error(`Historical province ${province.id} has an invalid polityId.`);
+  }
+  return true;
+}
+
+export function assertHistoricalPoliticalIdentitiesAndProvinces({ polities = [], provinces = [] } = {}) {
   assertHistoricalPoliticalIdentities(polities);
+  if (!Array.isArray(provinces)) throw new TypeError("Historical provinces must be an array.");
+  provinces.forEach(assertHistoricalProvinceRecord);
+  return true;
+}
+
+export function createHistoricalMapDescriptor({ date, polities = [], provinces = [] } = {}) {
+  assertHistoricalPoliticalIdentitiesAndProvinces({ polities, provinces });
 
   return Object.freeze({
     date: date ?? null,
     entityTypes: HISTORICAL_MAP_ENTITY_TYPES,
     policy: HISTORICAL_MAP_POLICY,
     polities: Object.freeze([...polities]),
+    provinces: Object.freeze([...provinces]),
   });
 }
 
