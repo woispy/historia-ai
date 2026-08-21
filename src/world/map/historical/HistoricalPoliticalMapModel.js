@@ -1,6 +1,9 @@
 import { getCountry } from "../../../countries/index.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../../map/data/AnatoliaProvinceMetadata.js";
-import { createHistoricalPoliticalRuntime } from "./HistoricalPoliticalRuntime.js";
+import {
+  createHistoricalPoliticalRuntime,
+  getHistoricalPolity,
+} from "./HistoricalPoliticalRuntime.js";
 import { createHistoricalPoliticalPresentation } from "./HistoricalPoliticalPresentation.js";
 
 const HISTORICAL_1300_DATE = "1300-01-01";
@@ -41,12 +44,14 @@ export function createHistoricalPoliticalMapModel({
     const polityId = historicalProvince
       ? historicalProvince.polityId
       : null;
-    const historicalCountry = polityId
-      ? getCountry(countryRepository, polityId)
-      : null;
+
+    // Presentation comes from the historical runtime registry, never from the
+    // modern country repository. The repository remains available only as the
+    // source/simulation identity for diagnostics and compatibility.
+    const historicalPolity = polityId ? getHistoricalPolity(polityId) : null;
     const historicalPolitical = createHistoricalPoliticalPresentation({
       polityId,
-      country: historicalCountry,
+      country: historicalPolity,
     });
 
     return Object.freeze({
