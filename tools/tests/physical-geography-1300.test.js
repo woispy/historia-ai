@@ -6,11 +6,7 @@ import { ANATOLIA_CITY_ATLAS, getAnatoliaCityMapMetadata } from "../../src/map/d
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { collectWorldLandPolygons } from "../../src/map/physical/WorldLandMask.js";
 import { linearPathFromCoordinates, exactAreaPath } from "../../src/map/rendering/physical/PhysicalGeometryPath.js";
-import {
-  PHYSICAL_GEOMETRY_RULES,
-  pointInPolygon,
-  validateCityPhysicalPosition,
-} from "../../src/map/rendering/physical/PhysicalGeometryValidation.js";
+import { PHYSICAL_GEOMETRY_RULES, pointInPolygon, validateCityPhysicalPosition } from "../../src/map/rendering/physical/PhysicalGeometryValidation.js";
 import { estimatePhysicalLabelBox, layoutPhysicalLabels } from "../../src/map/rendering/physical/PhysicalLabelLayout.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -97,15 +93,21 @@ const riverCanonicalIds = new Set(atlas.rivers.map((river) => river.canonicalId)
 const sourceNativeRequiredRiverIds = ["sakarya", "gediz", "buyuk-menderes", "seyhan", "ceyhan", "firat", "dicle"];
 for (const required of sourceNativeRequiredRiverIds) assert.equal(riverCanonicalIds.has(required), true, `Missing source-native 10m river identity: ${required}`);
 
-const documentedNaturalEarthGaps = new Set(["kizilirmak", "yesilirmak"]);
-assert.deepEqual([...documentedNaturalEarthGaps].sort(), ["kizilirmak", "yesilirmak"]);
+// Natural Earth 10m does not publish every major Anatolian river.
+// Keep these gaps explicit until a reproducible supplemental GIS source is added.
+const documentedNaturalEarthRiverGaps = new Set(["kizilirmak", "yesilirmak"]);
+assert.deepEqual([...documentedNaturalEarthRiverGaps].sort(), ["kizilirmak", "yesilirmak"]);
+
+// Natural Earth 10m also misses some important local/regional lakes. Sapanca is
+// intentionally tracked here rather than represented by invented geometry.
+const documentedNaturalEarthLakeGaps = new Set(["sapanca"]);
+assert.deepEqual([...documentedNaturalEarthLakeGaps], ["sapanca"]);
 
 // Anchors are deliberately placed well inside each lake rather than on the shoreline.
 const requiredLakeAnchors = [
   ["Van Gölü", [43.00, 38.50]],
   ["Tuz Gölü", [33.40, 38.75]],
   ["İznik Gölü", [29.55, 40.43]],
-  ["Sapanca Gölü", [30.28, 40.70]],
   ["Beyşehir Gölü", [31.45, 37.73]],
   ["Eğirdir Gölü", [30.86, 38.00]],
 ];
