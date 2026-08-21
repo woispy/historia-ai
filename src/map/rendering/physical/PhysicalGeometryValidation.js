@@ -4,8 +4,8 @@
  * This module is intentionally render-independent. It provides the single
  * geometry contract used by city placement and physical-map regression tests:
  * cities must land on physical land and must not sit inside the interior of a
- * lake. A shoreline tolerance is allowed because the current gameplay lake
- * polygons are lightweight WGS84 geometry rather than parcel-level GIS.
+ * lake. Generated Natural Earth lakes may contain outer rings and interior
+ * holes, so validation preserves that topology.
  */
 
 const EPSILON = 1e-9;
@@ -102,11 +102,26 @@ export function distanceToPolygonBoundary(point, polygon) {
   return distance;
 }
 
+function getLakeRings(lake) {
+  if (Array.isArray(lake?.rings) && lake.rings.length > 0) return lake.rings;
+  if (isPolygon(lake?.coordinates)) return [lake.coordinates];
+  return [];
+}
+
 export function isPointInLakeInterior(point, lakes = [], shorelineTolerance = SHORELINE_TOLERANCE_DEGREES) {
   return lakes.some((lake) => {
-    const polygon = lake?.coordinates;
-    if (!pointInPolygon(point, polygon)) return false;
-    return distanceToPolygonBoundary(point, polygon) > shorelineTolerance;
+    const rings = getLakeRings(lake);
+    const [outerRing, ...holes] = rings;
+    if (!isPolygon(outerRing) || !pointInPolygon(point, outerRing)) return false;
+
+    // A point in an interior hole is land, not lake water.
+    if (holes.some((hole) => pointInPolygon(point, hole))) return false;
+
+    const boundaryDistance = rings.reduce(
+      (distance, ring) => Math.min(distance, distanceToPolygonBoundary(point, ring)),
+      Number.POSITIVE_INFINITY,
+    );
+    return boundaryDistance > shorelineTolerance;
   });
 }
 
