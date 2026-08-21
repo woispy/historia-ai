@@ -53,11 +53,15 @@ function rankFromProperties(properties) {
   return Number.isFinite(rank) ? Math.max(1, Math.round(rank)) : 9;
 }
 
-function addGeometry(geometry, properties, index, kind, output) {
+function geometryKey(value) {
+  return JSON.stringify(value);
+}
+
+function addGeometry(geometry, properties, index, kind, output, sourceLayer) {
   if (!geometry) return;
   if (geometry.type === "GeometryCollection") {
     for (const [childIndex, child] of geometry.geometries.entries()) {
-      addGeometry(child, properties, `${index}-${childIndex}`, kind, output);
+      addGeometry(child, properties, `${index}-${childIndex}`, kind, output, sourceLayer);
     }
     return;
   }
@@ -76,12 +80,13 @@ function addGeometry(geometry, properties, index, kind, output) {
       const bounds = boundsForCoordinates(coordinates);
       if (!intersectsBbox(bounds) || coordinates.length < 2) continue;
       output.push({
-        id: `river-${index}-${segmentIndex}`,
+        id: `river-${sourceLayer}-${index}-${segmentIndex}`,
         name,
         nameEn,
         rank,
         coordinates,
         bounds: [bounds.minX, bounds.minY, bounds.maxX, bounds.maxY],
+        sourceLayer,
       });
     }
     return;
@@ -96,12 +101,13 @@ function addGeometry(geometry, properties, index, kind, output) {
     const bounds = boundsForCoordinates(rings);
     if (!intersectsBbox(bounds) || !rings?.[0]?.length) continue;
     output.push({
-      id: `lake-${index}-${polygonIndex}`,
+      id: `lake-${sourceLayer}-${index}-${polygonIndex}`,
       name,
       nameEn,
       rank,
       rings,
       bounds: [bounds.minX, bounds.minY, bounds.maxX, bounds.maxY],
+      sourceLayer,
     });
   }
 }
@@ -115,26 +121,63 @@ async function readGeoJson(fileName) {
   return json.features;
 }
 
-const [lakeFeatures, riverFeatures] = await Promise.all([
+const [lakeFeatures, lakeEuropeFeatures, riverFeatures, riverEuropeFeatures] = await Promise.all([
+  readGeoJson("ne_10m_lakes_europe.geojson"),
   readGeoJson("ne_10m_lakes.geojson"),
+  readGeoJson("ne_10m_rivers_europe.geojson"),
   readGeoJson("ne_10m_rivers_lake_centerlines.geojson"),
 ]);
 
 const lakes = [];
 const rivers = [];
+const seenLakeGeometry = new Set();
+const seenRiverGeometry = new Set();
+
 for (const [index, feature] of lakeFeatures.entries()) {
-  addGeometry(feature.geometry, feature.properties, index, "lake", lakes);
+  const before = lakes.length;
+  addGeometry(feature.geometry, feature.properties, index, "lake", lakes, "natural-earth-10m-europe");
+  for (const lake of lakes.slice(before)) seenLakeGeometry.add(geometryKey(lake.rings));
 }
+
+for (const [index, feature] of lakeEuropeFeatures.entries()) {
+  const candidates = [];
+  addGeometry(feature.geometry, feature.properties, index, "lake", candidates, "natural-earth-10m");
+  for (const lake of candidates) {
+    const key = geometryKey(lake.rings);
+    if (seenLakeGeometry.has(key)) continue;
+    seenLakeGeometry.add(key);
+    lakes.push(lake);
+  }
+}
+
 for (const [index, feature] of riverFeatures.entries()) {
-  addGeometry(feature.geometry, feature.properties, index, "river", rivers);
+  const candidates = [];
+  addGeometry(feature.geometry, feature.properties, index, "river", candidates, "natural-earth-10m-europe");
+  for (const river of candidates) {
+    const key = geometryKey(river.coordinates);
+    if (seenRiverGeometry.has(key)) continue;
+    seenRiverGeometry.add(key);
+    rivers.push(river);
+  }
+}
+
+for (const [index, feature] of riverEuropeFeatures.entries()) {
+  const candidates = [];
+  addGeometry(feature.geometry, feature.properties, index, "river", candidates, "natural-earth-10m");
+  for (const river of candidates) {
+    const key = geometryKey(river.coordinates);
+    if (seenRiverGeometry.has(key)) continue;
+    seenRiverGeometry.add(key);
+    rivers.push(river);
+  }
 }
 
 lakes.sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
 rivers.sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
 
 const payload = {
-  version: 1,
-  source: "Natural Earth 10m lakes + rivers_lake_centerlines",
+  version: 2,
+  source: "Natural Earth 10m lakes + Europe supplement + rivers_lake_centerlines + Europe supplement",
   projection: "EPSG:4326",
   bbox: BBOX,
   lakes,
