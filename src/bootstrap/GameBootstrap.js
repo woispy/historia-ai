@@ -13,6 +13,21 @@ import {
   bootstrapWorld,
 } from "../world/index.js";
 
+function runBootstrapStage(stage, callback) {
+  try {
+    return callback();
+  } catch (error) {
+    const detail = error instanceof Error
+      ? error.message
+      : String(error);
+
+    throw new Error(
+      `Game bootstrap failed during ${stage}.\n\n${detail}`,
+      { cause: error },
+    );
+  }
+}
+
 export function createGame({
   scenarioId,
   player = {},
@@ -22,8 +37,13 @@ export function createGame({
     throw new Error("Scenario id is required.");
   }
 
-  const scenario = loadScenario(scenarioId);
-  const validation = validateScenario(scenario);
+  const scenario = runBootstrapStage("scenario loading", () =>
+    loadScenario(scenarioId)
+  );
+
+  const validation = runBootstrapStage("scenario validation", () =>
+    validateScenario(scenario)
+  );
 
   if (!validation.valid) {
     const messages = validation.errors
@@ -33,18 +53,25 @@ export function createGame({
     throw new Error(`Scenario validation failed.\n\n${messages}`);
   }
 
-  const world = bootstrapWorld(scenario);
-  const state = createRuntimeState({
-    startDate: scenario.startDate,
-    scenario,
-    player,
-  });
+  const world = runBootstrapStage("world bootstrap", () =>
+    bootstrapWorld(scenario)
+  );
 
-  return createGameSession({
-    scenario,
-    world,
-    state,
-    player,
-    settings,
-  });
+  const state = runBootstrapStage("runtime state creation", () =>
+    createRuntimeState({
+      startDate: scenario.startDate,
+      scenario,
+      player,
+    })
+  );
+
+  return runBootstrapStage("game session creation", () =>
+    createGameSession({
+      scenario,
+      world,
+      state,
+      player,
+      settings,
+    })
+  );
 }
