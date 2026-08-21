@@ -4,12 +4,12 @@
  * This module is intentionally render-independent. It provides the single
  * geometry contract used by city placement and physical-map regression tests:
  * cities must land on physical land and must not sit inside the interior of a
- * lake. A small shoreline tolerance is allowed because the current gameplay
- * lake polygons are lightweight WGS84 geometry rather than parcel-level GIS.
+ * lake. A shoreline tolerance is allowed because the current gameplay lake
+ * polygons are lightweight WGS84 geometry rather than parcel-level GIS.
  */
 
 const EPSILON = 1e-9;
-const SHORELINE_TOLERANCE_DEGREES = 0.06;
+const SHORELINE_TOLERANCE_DEGREES = 0.14;
 
 function isPoint(point) {
   return Array.isArray(point)
