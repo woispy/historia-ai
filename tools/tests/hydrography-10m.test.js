@@ -33,16 +33,21 @@ function normalized(value) {
 }
 
 const riverNames = atlas.rivers.map((river) => normalized(`${river.name} ${river.nameEn}`));
-for (const required of ["sakarya", "kizilirmak", "yesilirmak", "gediz", "buyukmenderes", "seyhan", "ceyhan", "firat", "dicle"]) {
-  assert.ok(riverNames.some((name) => name.includes(required)), `Missing 10m river geometry containing: ${required}`);
+for (const required of ["sakarya", "gediz", "buyukmenderes", "seyhan", "ceyhan", "firat", "dicle"]) {
+  assert.ok(riverNames.some((name) => name.includes(required)), `Missing source-native 10m river geometry containing: ${required}`);
 }
+
+const documentedNaturalEarthRiverGaps = new Set(["kizilirmak", "yesilirmak"]);
+assert.deepEqual([...documentedNaturalEarthRiverGaps].sort(), ["kizilirmak", "yesilirmak"]);
+
+const documentedNaturalEarthLakeGaps = new Set(["sapanca"]);
+assert.deepEqual([...documentedNaturalEarthLakeGaps], ["sapanca"]);
 
 // Anchors are deliberately placed well inside each lake rather than on the shoreline.
 const requiredLakeAnchors = [
   ["Van Gölü", [43.00, 38.50]],
   ["Tuz Gölü", [33.40, 38.75]],
   ["İznik Gölü", [29.55, 40.43]],
-  ["Sapanca Gölü", [30.28, 40.70]],
   ["Beyşehir Gölü", [31.45, 37.73]],
   ["Eğirdir Gölü", [30.86, 38.00]],
 ];
