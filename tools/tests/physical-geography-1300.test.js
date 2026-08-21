@@ -25,6 +25,10 @@ const generatedGeometryModules = Object.fromEntries(
   ]),
 );
 const generatedWorldLandPolygons = collectWorldLandPolygons(generatedGeometryModules);
+const cityLandPolygons = Object.freeze([
+  ...generatedWorldLandPolygons,
+  ...atlas.landPolygons,
+]);
 
 function assertCoordinates(name, coordinates) {
   assert.ok(Array.isArray(coordinates), `${name} coordinates must be an array`);
@@ -120,13 +124,14 @@ for (let i = 0; i < zoomThree.length; i += 1) {
   }
 }
 
-// P0 — every historical city anchor must remain on the generated Natural
-// Earth land authority. The Anatolia atlas is a lightweight regional detail
-// layer and is intentionally not the city land validator.
+// P0 — historical city anchors use the global generated land authority plus
+// the higher-resolution Anatolia physical land mask. The regional layer is
+// necessary for coastal city points that are intentionally more precise than
+// a country-level 50m polygon, while lake interiors remain hard exclusions.
 for (const [cityId, city] of Object.entries(ANATOLIA_CITY_ATLAS)) {
   const result = validateCityPhysicalPosition(
     city,
-    generatedWorldLandPolygons,
+    cityLandPolygons,
     atlas.lakes,
   );
   assert.equal(result.onLand, true, `${cityId} must remain on physical land.`);
