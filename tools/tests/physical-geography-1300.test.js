@@ -170,8 +170,17 @@ const syntheticLake = [{
   name: "Synthetic Lake",
   coordinates: [[4, 4], [6, 4], [6, 6], [4, 6], [4, 4]],
 }];
+const syntheticLakeWithHole = [{
+  name: "Synthetic Lake With Island",
+  rings: [
+    [[1, 1], [9, 1], [9, 9], [1, 9], [1, 1]],
+    [[4, 4], [6, 4], [6, 6], [4, 6], [4, 4]],
+  ],
+}];
 assert.equal(validateCityPhysicalPosition({ x: 2, y: 2 }, syntheticLand, syntheticLake).valid, true);
 assert.equal(validateCityPhysicalPosition({ x: 5, y: 5 }, syntheticLand, syntheticLake).valid, false, "A city in the lake interior must be rejected.");
+assert.equal(validateCityPhysicalPosition({ x: 3, y: 3 }, syntheticLand, syntheticLakeWithHole).valid, false, "A city in the lake outer ring must be rejected.");
+assert.equal(validateCityPhysicalPosition({ x: 5, y: 5 }, syntheticLand, syntheticLakeWithHole).valid, true, "A city on a lake island must remain valid.");
 assert.ok(PHYSICAL_GEOMETRY_RULES.shorelineToleranceDegrees > 0);
 
 console.log(`Physical Geography 2.0 / P0 tests passed: ${atlas.seas.length} water bodies, ${atlas.rivers.length} Natural Earth 10m river segments, ${atlas.lakes.length} Natural Earth 10m lake polygons, ${atlas.mountainRanges.length} mountain systems, ${Object.keys(ANATOLIA_CITY_ATLAS).length} validated city anchors.`);
