@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
+import { ANATOLIA_CITY_ATLAS } from "../../src/map/data/AnatoliaCityAtlas.js";
 import { createHistoricalPoliticalMapModel } from "../../src/world/map/historical/HistoricalPoliticalMapModel.js";
 import { createHistoricalPoliticalPresentation } from "../../src/world/map/historical/HistoricalPoliticalPresentation.js";
 
@@ -25,7 +26,9 @@ const countries = Object.fromEntries([
 const repository = { byId: countries };
 const sourceProvinces = ANATOLIA_PROVINCE_METADATA.map((metadata) => ({
   id: metadata.id,
-  owner: metadata.historicalControl?.controllerAt1300 ?? "local_polities",
+  // Deliberately preserve the persistent province owner here. The historical
+  // model must not use this field when dated historicalControl says null.
+  owner: metadata.countryId,
 }));
 
 const model = createHistoricalPoliticalMapModel({
@@ -51,10 +54,35 @@ for (const entry of model) {
   assert.equal(entry.country.timeModel, "historical");
   assert.equal(entry.country.sourceType, "historical-runtime");
   assert.ok(/^#[0-9a-f]{6}$/i.test(entry.country.color));
+
+  const city = ANATOLIA_CITY_ATLAS[entry.province.id === "bithynia-nicomedia" ? "nikomedia" : entry.province.id];
+  const metadata = ANATOLIA_PROVINCE_METADATA.find((province) => province.id === entry.province.id);
+  assert.ok(metadata, `Missing metadata for ${entry.province.id}`);
+  assert.ok(ANATOLIA_CITY_ATLAS[metadata.cityId], `${entry.province.id} must resolve to a known city atlas record`);
+  assert.equal(
+    ANATOLIA_CITY_ATLAS[metadata.cityId].mapProvinceId,
+    entry.province.id,
+    `${metadata.cityId} must point back to its owning historical province`,
+  );
 }
 
 assert.equal(model.find((entry) => entry.province.id === "ionia-ayasuluk").country.id, "local_polities");
+assert.equal(model.find((entry) => entry.province.id === "lydia-birgi").country.id, "local_polities");
 assert.equal(model.find((entry) => entry.province.id === "phrygia-eskisehir").country.id, "local_polities");
+assert.equal(model.find((entry) => entry.province.id === "phrygia-denizli").country.id, "local_polities");
+assert.equal(model.find((entry) => entry.province.id === "galatia-ankara").country.id, "local_polities");
+assert.equal(model.find((entry) => entry.province.id === "cappadocia-kayseri").country.id, "local_polities");
+
+// A persistent simulation owner is intentionally different from dated
+// historical control here. The historical layer must stay neutral rather than
+// inheriting the owner and thereby painting an anachronistic political border.
+const anachronisticOwnerProvince = sourceProvinces.find((province) => province.id === "phrygia-eskisehir");
+assert.equal(anachronisticOwnerProvince.owner, "ottomans");
+assert.equal(
+  model.find((entry) => entry.province.id === "phrygia-eskisehir").historicalProvince.polityId,
+  null,
+);
+
 assert.equal(createHistoricalPoliticalMapModel({
   date: "1301-01-01",
   provinces: sourceProvinces,
@@ -71,5 +99,5 @@ assert.throws(
 
 console.log(
   `Historical Political Map v1 tests passed: ${model.length} Anatolia provinces, `
-  + "historical polity presentation enforced, 1300-only model active.",
+  + "city↔province identity links validated, historical polity presentation enforced, 1300-only model active.",
 );
