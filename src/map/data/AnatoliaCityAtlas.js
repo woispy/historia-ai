@@ -45,6 +45,7 @@ export const ANATOLIA_CITY_ATLAS = Object.freeze({
   erzurum: { name: "Theodosiopolis", modernName: "Erzurum", x: 41.2769, y: 39.9043, tier: "major", port: false, fortified: true, mapProvinceId: "eastern-anatolia-erzurum" },
   sis: { name: "Sis", modernName: "Kozan", x: 35.8000, y: 37.4500, tier: "capital", port: false, fortified: true, mapProvinceId: "cilicia-sis" },
   tarsus: { name: "Tarsos", modernName: "Tarsus", x: 34.8950, y: 36.9167, tier: "major", port: false, fortified: true, mapProvinceId: "cilicia-tarsos" },
+  alaiye: { name: "Alaiye", modernName: "Alanya", x: 31.9980, y: 36.5440, tier: "major", port: true, fortified: true, mapProvinceId: "cilicia-alaiye" },
 });
 
 export function getAnatoliaCityMapMetadata(cityId) {
