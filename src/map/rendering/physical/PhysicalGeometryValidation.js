@@ -9,7 +9,7 @@
  */
 
 const EPSILON = 1e-9;
-const SHORELINE_TOLERANCE_DEGREES = 0.14;
+const SHORELINE_TOLERANCE_DEGREES = 0.01;
 
 function isPoint(point) {
   return Array.isArray(point)
