@@ -80,13 +80,19 @@ function CharacterCreate() {
         },
       });
 
-      // The current browser has repeatedly shown that the React Router
-      // transition can remain visually mounted on CharacterCreate even after
-      // initializeGame() succeeds. Force the document-level route immediately
-      // after the SPA handoff so /game is actually loaded. Game.jsx can restore
-      // the session from the durable save if the document is recreated.
-      window.location.replace("/game");
+      // Keep a document-level fallback for browsers where the router remains
+      // mounted during the transition. The Game page can restore the session
+      // from the persisted save after a full document navigation.
+      window.setTimeout(() => {
+        if (window.location.pathname !== "/game") {
+          window.location.replace("/game");
+        }
+      }, 0);
     } catch (initializationError) {
+      console.error(
+        "[CharacterCreate] Game start failed:",
+        initializationError,
+      );
       setIsStartingGame(false);
       setError(
         initializationError instanceof Error
@@ -117,7 +123,7 @@ function CharacterCreate() {
       </button>
 
       {error && (
-        <p role="alert" style={{ color: "#d66" }}>
+        <p role="alert" aria-live="assertive" style={{ color: "#d66" }}>
           {error}
         </p>
       )}
