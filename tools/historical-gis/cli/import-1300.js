@@ -4,6 +4,8 @@ import { fileURLToPath } from "node:url";
 import { downloadHistorical1300GeoJson, importHistoricalGeoJson } from "../HistoricalGeometryImporter.js";
 import { buildHistoricalGeometryAsset, buildHistoricalProvinceAsset } from "../HistoricalProvinceAssetBuilder.js";
 import { buildAnatoliaPhase2DAssets, isAnatoliaGeometryPoint } from "../AnatoliaPhase2DGeometryBuilder.js";
+import { ANATOLIA_PHYSICAL_ATLAS } from "../../../src/map/data/AnatoliaPhysicalAtlas.js";
+import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const inputArgument = process.argv[2] ?? "--download";
@@ -24,6 +26,15 @@ if (!regions.length) throw new Error("The 1300 historical GIS source contains no
 
 await fs.rm(runtimeDir, { recursive: true, force: true });
 await fs.mkdir(runtimeDir, { recursive: true });
+
+// Historical Phase 2D geometry still consumes the shared atlas object, but
+// hydrography must come from the generated/pinned GIS source rather than the
+// removed legacy curated lake/river arrays. This keeps the historical builder
+// on the same physical-hydrography authority as the runtime map.
+Object.assign(ANATOLIA_PHYSICAL_ATLAS, {
+  lakes: ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes,
+  rivers: ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers,
+});
 
 const provinces = [];
 const geometries = [];
