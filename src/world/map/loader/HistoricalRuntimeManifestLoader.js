@@ -1,13 +1,12 @@
-const viteHistoricalRuntimeAssets =
-  typeof import.meta.glob === "function"
-    ? import.meta.glob(
-        "../assets/historical/*/runtime.json",
-        {
-          eager: true,
-          import: "default",
-        }
-      )
-    : null;
+const viteHistoricalRuntimeAssets = import.meta.env
+  ? import.meta.glob(
+      "../assets/historical/*/runtime.json",
+      {
+        eager: true,
+        import: "default",
+      }
+    )
+  : null;
 
 const nodeProcess = globalThis.process;
 
@@ -44,13 +43,13 @@ export function loadHistoricalRuntimeAsset(date) {
   const year = normalizeYear(date);
   if (!year) return null;
 
-  if (!viteHistoricalRuntimeAssets) {
-    return loadNodeHistoricalRuntimeAsset(year);
+  if (viteHistoricalRuntimeAssets) {
+    const entry = Object.entries(viteHistoricalRuntimeAssets).find(([path]) =>
+      path.includes(`/historical/${year}/runtime.json`)
+    );
+
+    return entry?.[1] ?? null;
   }
 
-  const entry = Object.entries(viteHistoricalRuntimeAssets).find(([path]) =>
-    path.includes(`/historical/${year}/runtime.json`)
-  );
-
-  return entry?.[1] ?? null;
+  return loadNodeHistoricalRuntimeAsset(year);
 }
