@@ -31,7 +31,16 @@ export function createHistoricalPoliticalMapModel({
       ? getCountry(countryRepository, province.owner)
       : null;
     const historicalProvince = metadataByProvinceId.get(province.id) ?? null;
-    const polityId = historicalProvince?.polityId ?? province.owner ?? null;
+
+    // Historical control is authoritative for the historical political layer.
+    // A null controller is meaningful: it represents an intentionally neutral,
+    // contested, layered, or not-yet-resolved locality. Falling back to the
+    // simulation province owner here would leak a non-historical identity into
+    // the 1300 presentation and would erase the distinction between geography
+    // and dated political control.
+    const polityId = historicalProvince
+      ? historicalProvince.polityId
+      : null;
     const historicalCountry = polityId
       ? getCountry(countryRepository, polityId)
       : null;
