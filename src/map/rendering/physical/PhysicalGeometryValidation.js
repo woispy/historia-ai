@@ -10,6 +10,7 @@
 
 const EPSILON = 1e-9;
 const SHORELINE_TOLERANCE_DEGREES = 0.01;
+const COASTAL_CITY_TOLERANCE_DEGREES = 0.05;
 
 function isPoint(point) {
   return Array.isArray(point)
@@ -102,6 +103,13 @@ export function distanceToPolygonBoundary(point, polygon) {
   return distance;
 }
 
+export function distanceToAnyPolygonBoundary(point, polygons = []) {
+  return polygons.reduce(
+    (distance, polygon) => Math.min(distance, distanceToPolygonBoundary(point, polygon)),
+    Number.POSITIVE_INFINITY,
+  );
+}
+
 function getLakeRings(lake) {
   if (Array.isArray(lake?.rings) && lake.rings.length > 0) return lake.rings;
   if (isPolygon(lake?.coordinates)) return [lake.coordinates];
@@ -132,7 +140,11 @@ export function validateCityPhysicalPosition(
   shorelineTolerance = SHORELINE_TOLERANCE_DEGREES,
 ) {
   const point = [Number(city?.x), Number(city?.y)];
-  const onLand = pointInAnyPolygon(point, landPolygons);
+  const directLand = pointInAnyPolygon(point, landPolygons);
+  const coastalLand = !directLand
+    && city?.port === true
+    && distanceToAnyPolygonBoundary(point, landPolygons) <= COASTAL_CITY_TOLERANCE_DEGREES;
+  const onLand = directLand || coastalLand;
   const inLakeInterior = isPointInLakeInterior(point, lakes, shorelineTolerance);
 
   return {
@@ -144,4 +156,5 @@ export function validateCityPhysicalPosition(
 
 export const PHYSICAL_GEOMETRY_RULES = Object.freeze({
   shorelineToleranceDegrees: SHORELINE_TOLERANCE_DEGREES,
+  coastalCityToleranceDegrees: COASTAL_CITY_TOLERANCE_DEGREES,
 });
