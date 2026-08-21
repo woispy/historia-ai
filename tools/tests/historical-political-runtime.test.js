@@ -3,6 +3,7 @@ import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceM
 import {
   createHistoricalPoliticalRuntime,
   getHistoricalPolity,
+  getHistoricalPolityIds,
 } from "../../src/world/map/historical/HistoricalPoliticalRuntime.js";
 
 const runtime = createHistoricalPoliticalRuntime({
@@ -12,7 +13,8 @@ const runtime = createHistoricalPoliticalRuntime({
 
 assert.equal(runtime.date, "1300-01-01");
 assert.equal(runtime.provinces.length, 38);
-assert.equal(runtime.polities.length, 10);
+assert.equal(runtime.polities.length, 12);
+assert.deepEqual(new Set(getHistoricalPolityIds()), new Set(runtime.polities.map((polity) => polity.id)));
 
 const provinceById = new Map(runtime.provinces.map((province) => [province.id, province]));
 
@@ -37,6 +39,8 @@ assert.equal(provinceById.get("phrygia-kutahya").polityId, "germiyan");
 assert.equal(provinceById.get("lycaonia-konya").polityId, "karaman");
 assert.equal(provinceById.get("pontus-sinop").polityId, "pervane");
 assert.equal(provinceById.get("pontus-kastamon").polityId, "candar");
+assert.equal(provinceById.get("pontus-trebizond").polityId, "trebizond");
+assert.equal(provinceById.get("cilicia-sis").polityId, "cilicia");
 
 for (const provinceId of ["ionia-ayasuluk", "lydia-birgi", "phrygia-uluborlu", "pisidia-egirdir"]) {
   assert.equal(provinceById.get(provinceId).polityId, null);
@@ -44,6 +48,8 @@ for (const provinceId of ["ionia-ayasuluk", "lydia-birgi", "phrygia-uluborlu", "
 
 assert.equal(getHistoricalPolity("byzantium").type, "polity");
 assert.equal(getHistoricalPolity("byzantium").timeModel, "historical");
+assert.equal(getHistoricalPolity("trebizond").sourceType, "historical-runtime");
+assert.equal(getHistoricalPolity("cilicia").sourceType, "historical-runtime");
 assert.equal(getHistoricalPolity("turkey"), null);
 assert.equal(getHistoricalPolity("türkiye"), null);
 
