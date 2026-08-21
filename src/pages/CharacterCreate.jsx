@@ -14,10 +14,6 @@ import {
   initializeGame,
 } from "../bootstrap";
 
-import {
-  setGameEntryHandoff,
-} from "../game/gameEntryHandoff";
-
 function CharacterCreate() {
   const navigate = useNavigate();
 
@@ -74,15 +70,15 @@ function CharacterCreate() {
         throw new Error("Oyun oturumu oluşturulamadı.");
       }
 
-      // The active runtime is already stored in currentGame. The transient
-      // handoff makes the entry path safe even when the browser performs a
-      // full document navigation and the in-memory runtime is recreated.
-      setGameEntryHandoff(session);
-
-      // Use a deterministic document navigation here. This avoids depending
-      // on a React Router transition while the new runtime is being mounted,
-      // and Game.jsx can restore the session from sessionStorage after reload.
-      window.location.replace("/game");
+      // The runtime session is authoritative and has already been registered
+      // by initializeGame. Router state carries only the opaque session id;
+      // the complete GameSession never crosses the route boundary.
+      navigate("/game", {
+        replace: true,
+        state: {
+          sessionId: session.id,
+        },
+      });
     } catch (initializationError) {
       setIsStartingGame(false);
       setError(
