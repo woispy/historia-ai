@@ -43,7 +43,7 @@ assert.match(
 
 assert.match(
   gamePage,
-  /if \(hasGameSave\(\) \{[\s\S]*const session = loadGame\(\);[\s\S]*setCurrentGame\(session\);/,
+  /if \(hasGameSave\(\)\) \{[\s\S]*const session = loadGame\(\);[\s\S]*setCurrentGame\(session\);/,
   "Game must retain the persisted-save fallback.",
 );
 
