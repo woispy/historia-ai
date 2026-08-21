@@ -121,7 +121,7 @@ async function readGeoJson(fileName) {
   return json.features;
 }
 
-const [lakeFeatures, lakeEuropeFeatures, riverFeatures, riverEuropeFeatures] = await Promise.all([
+const [europeLakeFeatures, baseLakeFeatures, europeRiverFeatures, baseRiverFeatures] = await Promise.all([
   readGeoJson("ne_10m_lakes_europe.geojson"),
   readGeoJson("ne_10m_lakes.geojson"),
   readGeoJson("ne_10m_rivers_europe.geojson"),
@@ -133,13 +133,16 @@ const rivers = [];
 const seenLakeGeometry = new Set();
 const seenRiverGeometry = new Set();
 
-for (const [index, feature] of lakeFeatures.entries()) {
-  const before = lakes.length;
+// Natural Earth's Europe supplement has precedence because it supplies the
+// denser regional hydrography intended for country/region maps. The base 10m
+// theme fills gaps not present in the supplement. Exact duplicate geometry is
+// emitted only once.
+for (const [index, feature] of europeLakeFeatures.entries()) {
   addGeometry(feature.geometry, feature.properties, index, "lake", lakes, "natural-earth-10m-europe");
-  for (const lake of lakes.slice(before)) seenLakeGeometry.add(geometryKey(lake.rings));
 }
+for (const lake of lakes) seenLakeGeometry.add(geometryKey(lake.rings));
 
-for (const [index, feature] of lakeEuropeFeatures.entries()) {
+for (const [index, feature] of baseLakeFeatures.entries()) {
   const candidates = [];
   addGeometry(feature.geometry, feature.properties, index, "lake", candidates, "natural-earth-10m");
   for (const lake of candidates) {
@@ -150,7 +153,7 @@ for (const [index, feature] of lakeEuropeFeatures.entries()) {
   }
 }
 
-for (const [index, feature] of riverFeatures.entries()) {
+for (const [index, feature] of europeRiverFeatures.entries()) {
   const candidates = [];
   addGeometry(feature.geometry, feature.properties, index, "river", candidates, "natural-earth-10m-europe");
   for (const river of candidates) {
@@ -161,7 +164,7 @@ for (const [index, feature] of riverFeatures.entries()) {
   }
 }
 
-for (const [index, feature] of riverEuropeFeatures.entries()) {
+for (const [index, feature] of baseRiverFeatures.entries()) {
   const candidates = [];
   addGeometry(feature.geometry, feature.properties, index, "river", candidates, "natural-earth-10m");
   for (const river of candidates) {
