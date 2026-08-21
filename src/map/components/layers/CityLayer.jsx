@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import { getAnatoliaCityMapMetadata } from "../../data/AnatoliaCityAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../data/AnatoliaPhysicalAtlasRuntime.js";
 import { WORLD_LAND_POLYGONS } from "../../physical/WorldPhysicalAtlas.js";
@@ -50,9 +51,8 @@ function isCityInViewport(city, camera, padding = 0.18) {
     && Math.abs(city.map.y - Number(camera.y ?? 0)) <= viewHeight / 2 + viewHeight * padding;
 }
 
-function getVisibleCities(cities, zoom, camera) {
-  const mapped = cities.map(mergeCityMetadata).filter(Boolean);
-  return selectVisibleCities(mapped.filter((city) => isCityInViewport(city, camera)), zoom);
+function getVisibleCities(mappedCities, zoom, camera) {
+  return selectVisibleCities(mappedCities.filter((city) => isCityInViewport(city, camera)), zoom);
 }
 
 function CityMarker({ city, zoom, selected, onClick }) {
@@ -119,7 +119,11 @@ function CityLabel({ city, fontSize, screenScale, x, y, anchor }) {
 }
 
 function CityLayer({ cities = [], zoom = 1, camera, selectedCityId = null, onCityClick }) {
-  const visibleCities = getVisibleCities(cities, zoom, camera);
+  const mappedCities = useMemo(
+    () => cities.map(mergeCityMetadata).filter(Boolean),
+    [cities],
+  );
+  const visibleCities = getVisibleCities(mappedCities, zoom, camera);
   const labels = layoutCityLabels(visibleCities, zoom, camera);
   const lod = getMapLod(zoom);
 
@@ -141,4 +145,10 @@ function CityLayer({ cities = [], zoom = 1, camera, selectedCityId = null, onCit
   );
 }
 
-export default CityLayer;
+export default memo(CityLayer, (previous, next) => (
+  previous.cities === next.cities
+  && previous.zoom === next.zoom
+  && previous.camera === next.camera
+  && previous.selectedCityId === next.selectedCityId
+  && previous.onCityClick === next.onCityClick
+));
