@@ -57,6 +57,14 @@ function geometryKey(value) {
   return JSON.stringify(value);
 }
 
+function normalizedName(value) {
+  return String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
+}
+
 function addGeometry(geometry, properties, index, kind, output, sourceLayer) {
   if (!geometry) return;
   if (geometry.type === "GeometryCollection") {
@@ -87,6 +95,7 @@ function addGeometry(geometry, properties, index, kind, output, sourceLayer) {
         coordinates,
         bounds: [bounds.minX, bounds.minY, bounds.maxX, bounds.maxY],
         sourceLayer,
+        geometrySource: "natural-earth-10m",
       });
     }
     return;
@@ -108,6 +117,7 @@ function addGeometry(geometry, properties, index, kind, output, sourceLayer) {
       rings,
       bounds: [bounds.minX, bounds.minY, bounds.maxX, bounds.maxY],
       sourceLayer,
+      geometrySource: "natural-earth-10m",
     });
   }
 }
@@ -133,10 +143,6 @@ const rivers = [];
 const seenLakeGeometry = new Set();
 const seenRiverGeometry = new Set();
 
-// Natural Earth's Europe supplement has precedence because it supplies the
-// denser regional hydrography intended for country/region maps. The base 10m
-// theme fills gaps not present in the supplement. Exact duplicate geometry is
-// emitted only once.
 for (const [index, feature] of europeLakeFeatures.entries()) {
   addGeometry(feature.geometry, feature.properties, index, "lake", lakes, "natural-earth-10m-europe");
 }
@@ -173,6 +179,24 @@ for (const [index, feature] of baseRiverFeatures.entries()) {
     seenRiverGeometry.add(key);
     rivers.push(river);
   }
+}
+
+const canonicalRiverIdentities = [
+  { id: "sakarya", aliases: ["sakarya"] },
+  { id: "kizilirmak", aliases: ["kizilirmak", "kizil irmak"] },
+  { id: "yesilirmak", aliases: ["yesilirmak", "yesil irmak"] },
+  { id: "gediz", aliases: ["gediz"] },
+  { id: "buyuk-menderes", aliases: ["buyukmenderes", "buyuk menderes"] },
+  { id: "seyhan", aliases: ["seyhan"] },
+  { id: "ceyhan", aliases: ["ceyhan"] },
+  { id: "firat", aliases: ["firat", "euphrates"] },
+  { id: "dicle", aliases: ["dicle", "tigris"] },
+];
+
+for (const river of rivers) {
+  const searchable = normalizedName(`${river.name} ${river.nameEn}`);
+  const identity = canonicalRiverIdentities.find(({ aliases }) => aliases.some((alias) => searchable.includes(normalizedName(alias))));
+  if (identity) river.canonicalId = identity.id;
 }
 
 lakes.sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
