@@ -28,6 +28,7 @@
     "test:new-game": "node tools/tests/new-game-state.test.js",
     "test:new-game-startup": "node tools/tests/new-game-startup.test.js",
     "test:game-entry-handoff": "node tools/tests/game-entry-handoff.test.js",
+    "test:main-menu-entry": "node tools/tests/main-menu-entry.test.js",
     "test:scenario-loading": "node tools/tests/scenario-loading-contract.test.js",
     "test:province-selection": "node tools/tests/province-selection-contract.test.js",
     "test:runtime-engine": "node tools/tests/runtime-engine.test.js",
@@ -52,7 +53,6 @@
     "eslint": "^10.6.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
-    "globals": "^17.7.0",
     "vite": "^8.1.1"
   }
 }
