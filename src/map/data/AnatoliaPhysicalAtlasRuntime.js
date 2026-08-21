@@ -3,6 +3,7 @@ import { ANATOLIA_PHYSICAL_ATLAS } from "./AnatoliaPhysicalAtlas.js";
 
 function normalizeLake(feature) {
   return {
+    id: feature.id,
     name: feature.name,
     nameEn: feature.nameEn,
     rank: feature.rank,
@@ -15,6 +16,7 @@ function normalizeLake(feature) {
 
 function normalizeRiver(feature) {
   return {
+    id: feature.id,
     name: feature.name,
     nameEn: feature.nameEn,
     rank: feature.rank,
