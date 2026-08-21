@@ -57,13 +57,23 @@ for (const entry of model) {
 
   const metadata = ANATOLIA_PROVINCE_METADATA.find((province) => province.id === entry.province.id);
   assert.ok(metadata, `Missing metadata for ${entry.province.id}`);
-  assert.ok(ANATOLIA_CITY_ATLAS[metadata.cityId], `${entry.province.id} must resolve to a known city atlas record`);
-  assert.equal(
-    ANATOLIA_CITY_ATLAS[metadata.cityId].mapProvinceId,
-    entry.province.id,
+  const city = ANATOLIA_CITY_ATLAS[metadata.cityId];
+  assert.ok(city, `${entry.province.id} must resolve to a known city atlas record`);
+
+  const reverseProvinceIds = Array.isArray(city.mapProvinceIds)
+    ? city.mapProvinceIds
+    : [city.mapProvinceId].filter(Boolean);
+  assert.ok(
+    reverseProvinceIds.includes(entry.province.id),
     `${metadata.cityId} must point back to its owning historical province`,
   );
 }
+
+assert.deepEqual(
+  ANATOLIA_CITY_ATLAS.eskisehir.mapProvinceIds,
+  ["bithynia-sangarios", "phrygia-eskisehir"],
+);
+assert.equal(ANATOLIA_CITY_ATLAS.eskisehir.mapProvinceId, "phrygia-eskisehir");
 
 assert.equal(model.find((entry) => entry.province.id === "ionia-ayasuluk").country.id, "local_polities");
 assert.equal(model.find((entry) => entry.province.id === "lydia-birgi").country.id, "local_polities");
@@ -98,5 +108,5 @@ assert.throws(
 
 console.log(
   `Historical Political Map v1 tests passed: ${model.length} Anatolia provinces, `
-  + "city↔province identity links validated, historical polity presentation enforced, 1300-only model active.",
+  + "city↔province identity links validated, shared frontier anchors supported, historical polity presentation enforced, 1300-only model active.",
 );
