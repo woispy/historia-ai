@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
+import { readdirSync, readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { ANATOLIA_CITY_ATLAS, getAnatoliaCityMapMetadata } from "../../src/map/data/AnatoliaCityAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
-import { WORLD_LAND_POLYGONS } from "../../src/map/physical/WorldPhysicalAtlas.js";
+import { collectWorldLandPolygons } from "../../src/map/physical/WorldLandMask.js";
 import {
   PHYSICAL_GEOMETRY_RULES,
   pointInPolygon,
@@ -9,8 +12,19 @@ import {
 } from "../../src/map/rendering/physical/PhysicalGeometryValidation.js";
 import { estimatePhysicalLabelBox, layoutPhysicalLabels } from "../../src/map/rendering/physical/PhysicalLabelLayout.js";
 
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const atlas = ANATOLIA_PHYSICAL_ATLAS;
 const [minLon, minLat, maxLon, maxLat] = atlas.bbox;
+const geometryDirectory = resolve(root, "src/world/map/assets/geometry");
+const geometryFiles = readdirSync(geometryDirectory)
+  .filter((fileName) => /^geometry_country_.*\.json$/.test(fileName));
+const generatedGeometryModules = Object.fromEntries(
+  geometryFiles.map((fileName) => [
+    fileName,
+    { default: JSON.parse(readFileSync(resolve(geometryDirectory, fileName), "utf8")) },
+  ]),
+);
+const generatedWorldLandPolygons = collectWorldLandPolygons(generatedGeometryModules);
 
 function assertCoordinates(name, coordinates) {
   assert.ok(Array.isArray(coordinates), `${name} coordinates must be an array`);
@@ -28,7 +42,8 @@ assert.equal(atlas.version, 2);
 assert.equal(atlas.projection, "EPSG:4326");
 assert.equal(atlas.landPolygons.length, 1);
 assert.ok(atlas.landPolygons[0].length >= 100, "The land mask must retain detailed coastline sampling.");
-assert.ok(WORLD_LAND_POLYGONS.length > 0, "Generated Natural Earth land assets must be available before physical tests.");
+assert.equal(generatedGeometryModules ? geometryFiles.length : 0, 242, "Natural Earth 50m geometry generation must produce the expected country asset set.");
+assert.ok(generatedWorldLandPolygons.length > 0, "Generated Natural Earth land assets must be available before physical tests.");
 assert.ok(atlas.seas.length >= 8);
 assert.ok(atlas.channels.length >= 2);
 assert.ok(atlas.islands.length >= 8);
@@ -105,14 +120,13 @@ for (let i = 0; i < zoomThree.length; i += 1) {
   }
 }
 
-// P0 — every historical city anchor must remain on the global physical land
-// authority. The Anatolia atlas is a lightweight regional detail layer and is
-// intentionally not used as the city land validator because it is not the
-// authoritative coastline source.
+// P0 — every historical city anchor must remain on the generated Natural
+// Earth land authority. The Anatolia atlas is a lightweight regional detail
+// layer and is intentionally not the city land validator.
 for (const [cityId, city] of Object.entries(ANATOLIA_CITY_ATLAS)) {
   const result = validateCityPhysicalPosition(
     city,
-    WORLD_LAND_POLYGONS,
+    generatedWorldLandPolygons,
     atlas.lakes,
   );
   assert.equal(result.onLand, true, `${cityId} must remain on physical land.`);
