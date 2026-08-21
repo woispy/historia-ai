@@ -24,14 +24,14 @@ assert.match(
 
 assert.match(
   characterCreate,
-  /navigate\("\/game"[\s\S]*sessionId:\s*session\.id,/,
-  "CharacterCreate must use the SPA transition with the session id as the handoff state.",
+  /window\.location\.replace\("\/game"\)/,
+  "CharacterCreate must use deterministic document navigation after staging the handoff.",
 );
 
 assert.doesNotMatch(
   characterCreate,
-  /window\.location\.replace\("\/game"\)/,
-  "CharacterCreate must not force a full document navigation for normal game entry.",
+  /navigate\("\/game"[\s\S]*sessionId:\s*session\.id,/,
+  "CharacterCreate must not depend on SPA navigation for the final game entry.",
 );
 
 assert.match(
@@ -77,5 +77,5 @@ assert.match(
 );
 
 console.log(
-  "browser-game-entry-handoff.test.js: SPA-safe browser entry contract passed",
+  "browser-game-entry-handoff.test.js: deterministic document entry contract passed",
 );
