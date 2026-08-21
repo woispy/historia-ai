@@ -70,9 +70,9 @@ function CharacterCreate() {
         throw new Error("Oyun oturumu oluşturulamadı.");
       }
 
-      // The runtime session is authoritative and has already been registered
-      // by initializeGame. Router state carries only the opaque session id;
-      // the complete GameSession never crosses the route boundary.
+      // Keep the router handoff minimal: only the opaque session id crosses
+      // the route boundary. The active runtime and the initial persisted save
+      // were already established by initializeGame().
       navigate("/game", {
         replace: true,
         state: {
@@ -80,16 +80,12 @@ function CharacterCreate() {
         },
       });
 
-      // Browser history/navigation can be disrupted by a stale document,
-      // an extension, or a transient router remount. The initial save created
-      // by initializeGame is already durable, so use it as a deterministic
-      // recovery path only if the SPA transition did not actually land on
-      // /game. Under normal operation this timer does nothing.
-      window.setTimeout(() => {
-        if (window.location.pathname !== "/game") {
-          window.location.assign("/game");
-        }
-      }, 0);
+      // The current browser has repeatedly shown that the React Router
+      // transition can remain visually mounted on CharacterCreate even after
+      // initializeGame() succeeds. Force the document-level route immediately
+      // after the SPA handoff so /game is actually loaded. Game.jsx can restore
+      // the session from the durable save if the document is recreated.
+      window.location.replace("/game");
     } catch (initializationError) {
       setIsStartingGame(false);
       setError(
