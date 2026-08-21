@@ -1,5 +1,8 @@
 import { getAnatoliaCityMapMetadata } from "../../data/AnatoliaCityAtlas.js";
+import { ANATOLIA_PHYSICAL_ATLAS } from "../../data/AnatoliaPhysicalAtlas.js";
+import { WORLD_LAND_POLYGONS } from "../../physical/WorldPhysicalAtlas.js";
 import { getMapLod } from "../../rendering/CartographyModel.js";
+import { validateCityPhysicalPosition } from "../../rendering/physical/PhysicalGeometryValidation.js";
 import {
   getCityVisualStyle,
   layoutCityLabels,
@@ -11,20 +14,33 @@ const WORLD_WIDTH = 360;
 function mergeCityMetadata(city) {
   const atlas = getAnatoliaCityMapMetadata(city.id);
   if (!atlas) return null;
+
+  const physical = validateCityPhysicalPosition(
+    atlas,
+    WORLD_LAND_POLYGONS,
+    ANATOLIA_PHYSICAL_ATLAS.lakes,
+  );
+
+  if (!physical.valid) return null;
   return { ...city, map: atlas };
 }
+
 function longitudeDelta(a, b) {
   let delta = Number(a) - Number(b);
   while (delta > 180) delta -= WORLD_WIDTH;
   while (delta < -180) delta += WORLD_WIDTH;
   return delta;
 }
+
 function isCityInViewport(city, camera, padding = 0.18) {
   if (!camera) return true;
-  const zoom = Math.max(0.001, Number(camera.zoom) || 1), viewWidth = WORLD_WIDTH / zoom, viewHeight = 180 / zoom;
+  const zoom = Math.max(0.001, Number(camera.zoom) || 1);
+  const viewWidth = WORLD_WIDTH / zoom;
+  const viewHeight = 180 / zoom;
   return Math.abs(longitudeDelta(city.map.x, camera.x ?? 0)) <= viewWidth / 2 + viewWidth * padding
     && Math.abs(city.map.y - Number(camera.y ?? 0)) <= viewHeight / 2 + viewHeight * padding;
 }
+
 function getVisibleCities(cities, zoom, camera) {
   const mapped = cities.map(mergeCityMetadata).filter(Boolean);
   return selectVisibleCities(mapped.filter((city) => isCityInViewport(city, camera)), zoom);
@@ -117,3 +133,5 @@ function CityLayer({ cities = [], zoom = 1, camera, selectedCityId = null, onCit
 }
 
 export default CityLayer;
+
+export { getVisibleCities, mergeCityMetadata };
