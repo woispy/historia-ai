@@ -20,6 +20,7 @@ function CharacterCreate() {
   const [description, setDescription] = useState("");
   const [character, setCharacter] = useState(null);
   const [error, setError] = useState("");
+  const [isStartingGame, setIsStartingGame] = useState(false);
 
   useEffect(() => {
     const newGame = getNewGame();
@@ -42,18 +43,21 @@ function CharacterCreate() {
   }
 
   function acceptCharacter() {
-    if (!character) return;
+    if (!character || isStartingGame) return;
 
     setError("");
+    setIsStartingGame(true);
 
     const newGame = getNewGame();
 
     if (!newGame.scenarioId) {
+      setIsStartingGame(false);
       navigate("/scenario", { replace: true });
       return;
     }
 
     if (!newGame.countryId) {
+      setIsStartingGame(false);
       navigate("/country", { replace: true });
       return;
     }
@@ -62,17 +66,23 @@ function CharacterCreate() {
       updateNewGame({ character });
       const session = initializeGame();
 
-      // Carry the freshly-created runtime session through the router handoff.
-      // This keeps the transition deterministic even if a browser/runtime
-      // boundary causes the module-level current-game reference to be lost.
+      if (!session?.id) {
+        throw new Error("Oyun oturumu oluşturulamadı.");
+      }
+
+      // currentGame is already the authoritative runtime store. Do not put
+      // the complete GameSession into browser history state: the session
+      // contains the full world/runtime graph and should not cross the
+      // History structured-clone boundary.
       navigate("/game", {
         replace: true,
         state: {
           handoff: "new-game",
-          session,
+          sessionId: session.id,
         },
       });
     } catch (initializationError) {
+      setIsStartingGame(false);
       setError(
         initializationError instanceof Error
           ? initializationError.message
@@ -97,7 +107,7 @@ function CharacterCreate() {
       <br />
       <br />
 
-      <button onClick={generateCharacter}>
+      <button type="button" onClick={generateCharacter}>
         Karakteri Oluştur
       </button>
 
@@ -130,8 +140,12 @@ function CharacterCreate() {
             ))}
           </ul>
 
-          <button onClick={acceptCharacter}>
-            Karakteri Kabul Et
+          <button
+            type="button"
+            onClick={acceptCharacter}
+            disabled={isStartingGame}
+          >
+            {isStartingGame ? "Oyun Başlatılıyor..." : "Karakteri Kabul Et"}
           </button>
         </>
       )}
