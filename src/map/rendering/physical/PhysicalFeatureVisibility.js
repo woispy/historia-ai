@@ -9,7 +9,7 @@
 const MAJOR_RIVER_IDS = new Set([
   "sakarya",
   "gediz",
-  "buyuk-menderes",
+  "buyukmenderes",
   "seyhan",
   "ceyhan",
   "firat",
@@ -19,17 +19,17 @@ const MAJOR_RIVER_IDS = new Set([
 ]);
 
 const MAJOR_LAKE_NAMES = new Set([
-  "van gölü",
+  "van golu",
   "van lake",
-  "tuz gölü",
+  "tuz golu",
   "tuz lake",
-  "iznik gölü",
+  "iznik golu",
   "iznik lake",
-  "sapanca gölü",
+  "sapanca golu",
   "sapanca lake",
-  "beyşehir gölü",
+  "beysehir golu",
   "beysehir lake",
-  "eğirdir gölü",
+  "egirdir golu",
   "egirdir lake",
 ]);
 
