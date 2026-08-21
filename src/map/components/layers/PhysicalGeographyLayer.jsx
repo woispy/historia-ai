@@ -2,6 +2,7 @@ import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../data/AnatoliaPhysicalAtla
 import { getPhysicalDetailProfile, getPhysicalPresentation, getPhysicalStrokeProfile } from "../../rendering/CartographyModel.js";
 import { getViewportBounds } from "../../rendering/MapViewportCulling.js";
 import { exactAreaPath, flattenCoordinatePoints, linearPathFromCoordinates, polygonPath } from "../../rendering/physical/PhysicalGeometryPath.js";
+import { filterVisibleLakes, filterVisibleRivers } from "../../rendering/physical/PhysicalFeatureVisibility.js";
 import { layoutPhysicalLabels } from "../../rendering/physical/PhysicalLabelLayout.js";
 
 const ANATOLIA_LAND_CLIP_ID = "physical-anatolia-land-clip";
@@ -206,10 +207,10 @@ function PhysicalGeographyLayer({ phase = "detail", zoom = 1, camera }) {
     ? atlas.mountainRanges.filter((range) => profile.minorRivers || range.rank === 1).filter((range) => isFeatureVisible(range, camera))
     : [];
   const visibleRivers = profile.rivers
-    ? atlas.rivers.filter((river) => profile.minorRivers || river.rank === 1).filter((river) => isFeatureVisible(river, camera))
+    ? filterVisibleRivers(atlas.rivers, zoom).filter((river) => isFeatureVisible(river, camera))
     : [];
   const visibleLakes = profile.lakes
-    ? atlas.lakes.filter((lake) => isFeatureVisible(lake, camera))
+    ? filterVisibleLakes(atlas.lakes, zoom).filter((lake) => isFeatureVisible(lake, camera))
     : [];
 
   return (
