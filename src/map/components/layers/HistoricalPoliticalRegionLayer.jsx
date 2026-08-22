@@ -5,6 +5,7 @@ import { getHistoricalPoliticalOverlayMode } from "./HistoricalPoliticalOverlayM
 const HISTORICAL_1300_DATE = "1300-01-01";
 const DEFAULT_POLITICAL_COLOR = "#6f765f";
 const HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID = "historical-anatolia-political-land-clip";
+const COASTAL_POLITICAL_EXPANSION = 0.08;
 
 function buildPathData(polygons) {
   if (!Array.isArray(polygons)) return "";
@@ -68,6 +69,11 @@ function getPoliticalClipPath(entry) {
   return "url(#world-land-mask)";
 }
 
+function isCoastalCuratedProvince(entry) {
+  return entry?.historicalProvince?.geometryAuthority === "anatolia-curated"
+    && (entry?.historicalProvince?.coastal === true || entry?.historicalProvince?.port === true);
+}
+
 function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces = [] }) {
   if (date !== HISTORICAL_1300_DATE) return null;
 
@@ -99,9 +105,22 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
               ? "url(#historical-neutral-hatch)"
               : null;
         const clipPath = getPoliticalClipPath(entry);
+        const coastal = isCoastalCuratedProvince(entry);
 
         return (
           <g key={entry?.province?.id ?? entry?.historicalProvince?.id} clipPath={clipPath}>
+            {coastal && (
+              <path
+                d={d}
+                fill={color}
+                fillOpacity={getPoliticalFillOpacity(mode)}
+                stroke={color}
+                strokeWidth={COASTAL_POLITICAL_EXPANSION}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                aria-hidden="true"
+              />
+            )}
             <path
               d={d}
               fill={color}
