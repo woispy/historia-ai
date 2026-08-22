@@ -49,21 +49,33 @@ function getPoliticalFillOpacity(mode) {
   return 0.90;
 }
 
+function getPoliticalClipPath(entry) {
+  // The 38 curated Anatolia provinces were generated against the dedicated
+  // P0 physical Anatolia atlas. Using the global Natural Earth mask here can
+  // shave their coastal cells because the two physical datasets have
+  // different vertex resolutions. Historical political geometry must obey the
+  // same physical coastline authority that generated it.
+  if (entry?.historicalProvince) return "url(#physical-anatolia-land-clip)";
+  return "url(#world-land-mask)";
+}
+
 function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces = [] }) {
   if (date !== HISTORICAL_1300_DATE) return null;
 
   return (
-    <g clipPath="url(#world-land-mask)" pointerEvents="none">
+    <g pointerEvents="none">
       <PoliticalOverlayDefs />
-      <rect
-        x="-180"
-        y="-90"
-        width="360"
-        height="180"
-        fill={DEFAULT_POLITICAL_COLOR}
-        fillOpacity="0.24"
-        aria-label="Historical unassigned land presentation"
-      />
+      <g clipPath="url(#world-land-mask)">
+        <rect
+          x="-180"
+          y="-90"
+          width="360"
+          height="180"
+          fill={DEFAULT_POLITICAL_COLOR}
+          fillOpacity="0.24"
+          aria-label="Historical unassigned land presentation"
+        />
+      </g>
       {provinces.map((entry) => {
         const d = buildPathData(entry?.geometry?.polygons);
         if (!d) return null;
@@ -77,9 +89,10 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
             : mode === "neutral"
               ? "url(#historical-neutral-hatch)"
               : null;
+        const clipPath = getPoliticalClipPath(entry);
 
         return (
-          <g key={entry?.province?.id ?? entry?.historicalProvince?.id}>
+          <g key={entry?.province?.id ?? entry?.historicalProvince?.id} clipPath={clipPath}>
             <path
               d={d}
               fill={color}
