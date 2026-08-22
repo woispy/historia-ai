@@ -29,26 +29,33 @@ function WorldPhysicalLayer() {
   }, []);
 
   return (
-    <g aria-label="Global physical geography" pointerEvents="none" aria-busy={!landPath}>
-      <rect
-        x={WORLD_PHYSICAL_ATLAS.bounds.minX}
-        y={WORLD_PHYSICAL_ATLAS.bounds.minY}
-        width={360}
-        height={180}
-        fill={WORLD_PHYSICAL_ATLAS.water.fill}
-      />
-      {landPath && (
-        <path
-          d={landPath}
-          fill={WORLD_PHYSICAL_ATLAS.land.baseFill}
-          fillRule="evenodd"
-          stroke={WORLD_PHYSICAL_ATLAS.water.coastline}
-          strokeWidth="0.16"
-          strokeOpacity="0.56"
-          vectorEffect="non-scaling-stroke"
+    <>
+      <defs>
+        <clipPath id="world-land-mask" clipPathUnits="userSpaceOnUse">
+          {landPath && <path d={landPath} fillRule="evenodd" />}
+        </clipPath>
+      </defs>
+      <g aria-label="Global physical geography" pointerEvents="none" aria-busy={!landPath}>
+        <rect
+          x={WORLD_PHYSICAL_ATLAS.bounds.minX}
+          y={WORLD_PHYSICAL_ATLAS.bounds.minY}
+          width={360}
+          height={180}
+          fill={WORLD_PHYSICAL_ATLAS.water.fill}
         />
-      )}
-    </g>
+        {landPath && (
+          <path
+            d={landPath}
+            fill={WORLD_PHYSICAL_ATLAS.land.baseFill}
+            fillRule="evenodd"
+            stroke={WORLD_PHYSICAL_ATLAS.water.coastline}
+            strokeWidth="0.16"
+            strokeOpacity="0.56"
+            vectorEffect="non-scaling-stroke"
+          />
+        )}
+      </g>
+    </>
   );
 }
 
