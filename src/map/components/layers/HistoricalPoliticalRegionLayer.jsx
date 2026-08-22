@@ -1,7 +1,10 @@
+import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../data/AnatoliaPhysicalAtlasRuntime.js";
+import { polygonPath } from "../../rendering/physical/PhysicalGeometryPath.js";
 import { getHistoricalPoliticalOverlayMode } from "./HistoricalPoliticalOverlayModel";
 
 const HISTORICAL_1300_DATE = "1300-01-01";
 const DEFAULT_POLITICAL_COLOR = "#6f765f";
+const HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID = "historical-anatolia-political-land-clip";
 
 function buildPathData(polygons) {
   if (!Array.isArray(polygons)) return "";
@@ -21,8 +24,13 @@ function buildPathData(polygons) {
 }
 
 function PoliticalOverlayDefs() {
+  const anatoliaLandPath = polygonPath(ANATOLIA_PHYSICAL_ATLAS_RUNTIME.landPolygons);
+
   return (
     <defs>
+      <clipPath id={HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID} clipPathUnits="userSpaceOnUse">
+        <path d={anatoliaLandPath} fillRule="evenodd" />
+      </clipPath>
       <pattern id="historical-suzerainty-hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
         <line x1="0" y1="0" x2="0" y2="10" stroke="rgba(255,255,255,0.30)" strokeWidth="2.5" />
       </pattern>
@@ -51,11 +59,9 @@ function getPoliticalFillOpacity(mode) {
 
 function getPoliticalClipPath(entry) {
   // The 38 curated Anatolia provinces were generated against the dedicated
-  // P0 physical Anatolia atlas. Using the global Natural Earth mask here can
-  // shave their coastal cells because the two physical datasets have
-  // different vertex resolutions. Historical political geometry must obey the
-  // same physical coastline authority that generated it.
-  if (entry?.historicalProvince) return "url(#physical-anatolia-land-clip)";
+  // P0 physical atlas. The political layer therefore uses that same land
+  // authority, while source-derived world coverage stays on the global mask.
+  if (entry?.historicalProvince) return `url(#${HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID})`;
   return "url(#world-land-mask)";
 }
 
