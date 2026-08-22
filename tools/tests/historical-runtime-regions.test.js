@@ -8,11 +8,15 @@ const runtimeDir = path.join(root, "src/world/map/assets/historical/1300");
 const manifestPath = path.join(runtimeDir, "manifest.json");
 
 const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
+assert.equal(manifest.schemaVersion, 3);
 assert.equal(manifest.assetType, "historical-runtime-manifest");
 assert.equal(manifest.historicalDate, "1300-01-01");
 assert.ok(Array.isArray(manifest.regions));
 assert.ok(manifest.regions.length >= 2, "Historical runtime must be split into multiple regions");
 assert.equal(manifest.counts.provinces, manifest.counts.geometries);
+assert.equal(manifest.provinceIndex.length, manifest.counts.provinces);
+assert.equal(new Set(manifest.provinceIndex.map((province) => province.identity.id)).size, manifest.counts.provinces);
+assert.ok(manifest.provinceIndex.every((province) => typeof province.runtimeRegion === "string"));
 
 const provinceIds = new Set();
 const geometryIds = new Set();
@@ -23,14 +27,13 @@ let polygonCount = 0;
 for (const region of manifest.regions) {
   assert.match(region.id, /^[a-z0-9-]+$/);
   assert.match(region.file, /^regions\/[a-z0-9-]+\.json$/);
+  assert.ok(region.bounds && Number.isFinite(region.bounds.minX));
 
-  const regionAsset = JSON.parse(
-    await fs.readFile(path.join(runtimeDir, region.file), "utf8"),
-  );
-
+  const regionAsset = JSON.parse(await fs.readFile(path.join(runtimeDir, region.file), "utf8"));
   assert.equal(regionAsset.assetType, "historical-runtime-region");
   assert.equal(regionAsset.regionId, region.id);
   assert.equal(regionAsset.historicalDate, "1300-01-01");
+  assert.deepEqual(regionAsset.bounds, region.bounds);
   assert.equal(regionAsset.counts.provinces, region.provinceCount);
   assert.equal(regionAsset.counts.geometries, region.geometryCount);
   assert.equal(regionAsset.counts.polygons, region.polygonCount);
@@ -65,12 +68,11 @@ assert.deepEqual(selectedRuntime.loadedRegions, [selectedRegion.id]);
 assert.equal(selectedRuntime.counts.provinces, selectedRegion.provinceCount);
 assert.equal(selectedRuntime.counts.geometries, selectedRegion.geometryCount);
 
-const mergedRuntime = await loader.loadHistoricalRuntimeAsset("1300");
-assert.equal(mergedRuntime.counts.provinces, manifest.counts.provinces);
-assert.equal(mergedRuntime.counts.geometries, manifest.counts.geometries);
+const provinceIndex = await loader.loadHistoricalRuntimeProvinceIndex("1300");
+assert.equal(provinceIndex.length, manifest.provinceIndex.length);
 assert.deepEqual(
-  [...mergedRuntime.provinces].map((province) => province.identity.id).sort(),
-  [...provinceIds].sort(),
+  provinceIndex.map((province) => province.identity.id).sort(),
+  manifest.provinceIndex.map((province) => province.identity.id).sort(),
 );
 
 await assert.rejects(
@@ -80,6 +82,4 @@ await assert.rejects(
 
 loader.clearHistoricalRuntimeCache();
 
-console.log(
-  `historical-runtime-regions.test.js: ${manifest.regions.length} regions, ${provinceCount} provinces, ${geometryCount} geometries and selective loading validated`,
-);
+console.log(`historical-runtime-regions.test.js: ${manifest.regions.length} regions, ${provinceCount} indexed provinces, ${geometryCount} geometry assets and selective loading validated`);
