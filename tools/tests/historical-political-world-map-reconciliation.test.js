@@ -29,7 +29,14 @@ for (const metadata of ANATOLIA_PROVINCE_METADATA) {
   });
 }
 
-const provinces = buildHistoricalWorldSourceProvinces([], geometryRepository);
+const sourceProvinces = [{
+  id: "bithynia-nicomedia",
+  name: "stale source province",
+  geometryId: "modern-bithynia-nicomedia",
+  owner: "modern-country",
+}];
+
+const provinces = buildHistoricalWorldSourceProvinces(sourceProvinces, geometryRepository);
 const byId = new Map(provinces.map((province) => [province.id, province]));
 
 assert.equal(
@@ -41,15 +48,15 @@ assert.equal(
 assert.equal(
   byId.get("bithynia-nicomedia").geometryId,
   "phase2d-alias-bithynia-nicomedia",
-  "curated identity must retain the actual runtime geometry id",
+  "curated identity must replace stale source geometry with the Phase 2D geometry",
 );
 
 assert.equal(
-  byId.get("bithynia-nicomedia").historical,
-  undefined,
-  "reconciliation must not remove curated provinces from the interaction layer",
+  byId.get("bithynia-nicomedia").owner,
+  "modern-country",
+  "reconciliation must not mutate gameplay ownership data while selecting geometry",
 );
 
 console.log(
-  `Historical political world-map reconciliation passed: ${ANATOLIA_PROVINCE_METADATA.length} curated provinces retained.`,
+  `Historical political world-map reconciliation passed: ${ANATOLIA_PROVINCE_METADATA.length} curated provinces retained and stale geometry replaced.`,
 );
