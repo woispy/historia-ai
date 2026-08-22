@@ -33,13 +33,18 @@ assert.match(
 );
 assert.match(
   layerSource,
-  /COASTAL_POLITICAL_EXPANSION = 0\.08/,
-  "curated coastal political fills must have a small controlled expansion before land clipping",
+  /ANATOLIA_PROVINCE_METADATA/,
+  "1300 political rendering must use the curated 38-province historical metadata",
 );
 assert.match(
   layerSource,
-  /stroke=\{color\}/,
-  "coastal political expansion must use the owning historical polity colour",
+  /buildVoronoiCell/,
+  "curated political rendering must use a complete province control mesh rather than sparse source slivers",
+);
+assert.match(
+  layerSource,
+  /HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID/,
+  "curated political rendering must be clipped by the physical Anatolia land authority",
 );
 assert.match(
   worldMapSource,
@@ -88,6 +93,11 @@ assert.equal(
   politicalModel.every((entry) => /^#[0-9a-f]{6}$/i.test(entry.historicalPolitical?.color ?? "")),
   true,
   "every province presentation must provide an explicit political colour",
+);
+assert.equal(
+  ANATOLIA_PROVINCE_METADATA.length,
+  38,
+  "the curated historical political mesh must remain anchored to exactly 38 provinces",
 );
 
 const byProvince = new Map(politicalModel.map((entry) => [entry.province.id, entry]));
