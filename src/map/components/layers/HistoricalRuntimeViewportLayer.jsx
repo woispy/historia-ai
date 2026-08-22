@@ -2,10 +2,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   loadHistoricalRuntimeManifest,
   loadHistoricalRuntimeRegions,
-} from "../../world/map/loader/HistoricalRuntimeManifestLoader.js";
-import { selectHistoricalRuntimeRegionsByBounds } from "../../world/map/loader/HistoricalRuntimeRegionSelector.js";
-import { createHistoricalWorldPoliticalPresentation } from "../../world/map/historical/HistoricalWorldPoliticalCoverage.js";
-import { getVisibleWorldBounds } from "../camera/viewport/VisibleWorldBoundsService.js";
+} from "../../../world/map/loader/HistoricalRuntimeManifestLoader.js";
+import { selectHistoricalRuntimeRegionsByBounds } from "../../../world/map/loader/HistoricalRuntimeRegionSelector.js";
+import { createHistoricalWorldPoliticalPresentation } from "../../../world/map/historical/HistoricalWorldPoliticalCoverage.js";
+import { getVisibleWorldBounds } from "../../camera/viewport/VisibleWorldBoundsService.js";
 
 const HISTORICAL_1300_DATE = "1300-01-01";
 const MAX_VISIBLE_REGIONS = 8;
@@ -40,6 +40,10 @@ function buildEntries(runtime) {
     const id = geometry?.identity?.id;
     const province = provinceById.get(id);
     const political = createHistoricalWorldPoliticalPresentation({ metadata: geometry?.metadata });
+    const sourceSubject = String(geometry?.metadata?.subject ?? "").toLowerCase();
+    const controlStatus = sourceSubject.includes("ilkhan")
+      ? "Ilkhanid-suzerainty"
+      : (political.id === "local_polities" ? "historical-source-unresolved" : "historical-source-derived");
     return {
       id,
       geometry,
@@ -47,8 +51,7 @@ function buildEntries(runtime) {
       historicalProvince: {
         id,
         polityId: political.id === "local_polities" ? null : political.id,
-        controlStatus: province?.historicalControl?.statusAt1300
-          ?? (political.id === "local_polities" ? "historical-source-unresolved" : "historical-source-derived"),
+        controlStatus: province?.historical?.controlStatus ?? controlStatus,
         controlConfidence: geometry?.metadata?.borderPrecision >= 3 ? "high" : "medium",
       },
     };
