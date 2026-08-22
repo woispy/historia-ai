@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../data/AnatoliaPhysicalAtlas.js";
 import { createHydrographyRegionLoader } from "../../physical/HydrographyRegionLoader.js";
 import { selectHydrographyRegions } from "../../physical/HydrographyViewportSelector.js";
@@ -66,6 +66,7 @@ function RegionalHydrographyLayer({ zoom, camera }) {
   const profile = getPhysicalDetailProfile(zoom);
   const [manifest, setManifest] = useState(null);
   const [regions, setRegions] = useState([]);
+  const requestGeneration = useRef(0);
   const viewport = useMemo(() => getViewportBounds(camera, 0.2), [camera]);
   const selectorViewport = useMemo(() => ({
     minLon: viewport.minX, maxLon: viewport.maxX, minLat: viewport.minY, maxLat: viewport.maxY,
@@ -84,11 +85,22 @@ function RegionalHydrographyLayer({ zoom, camera }) {
   }, []);
 
   useEffect(() => {
-    if (!regionIds.length) return undefined;
+    const generation = ++requestGeneration.current;
+    if (!regionIds.length) {
+      setRegions([]);
+      return undefined;
+    }
+
     let cancelled = false;
     loader.loadRegions(regionIds)
-      .then((values) => { if (!cancelled) setRegions(values); })
-      .catch((error) => console.error("[RegionalHydrographyLayer] Failed to load regions:", error));
+      .then((values) => {
+        if (!cancelled && generation === requestGeneration.current) setRegions(values);
+      })
+      .catch((error) => {
+        if (!cancelled && generation === requestGeneration.current) {
+          console.error("[RegionalHydrographyLayer] Failed to load regions:", error);
+        }
+      });
     return () => { cancelled = true; };
   }, [regionIds]);
 
