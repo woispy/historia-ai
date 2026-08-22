@@ -19,6 +19,7 @@ const POLITY_DEFINITIONS = Object.freeze([
   ["sahibata", "Sâhib Ata Beyliği", "local-polity", "#806A4A"],
   ["karaman", "Karaman Beylik", "beylik", "#A33F3F"],
   ["pervane", "Pervâneoğlu Beylik", "local-polity", "#6B7280"],
+  ["cobanid", "Çobanoğulları Beylik", "local-polity", "#8A7358"],
   ["candar", "Candar Beylik", "local-polity", "#7A6A3A"],
   ["trebizond", "Empire of Trebizond", "empire", "#4A7896"],
   ["ilkhanate", "Ilkhanate Suzerainty", "suzerain", "#3D73B9"],
