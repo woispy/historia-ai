@@ -66,6 +66,7 @@ function RegionalHydrographyLayer({ zoom, camera }) {
   const profile = getPhysicalDetailProfile(zoom);
   const [manifest, setManifest] = useState(null);
   const [regions, setRegions] = useState([]);
+  const [loadedRegionKey, setLoadedRegionKey] = useState("");
   const requestGeneration = useRef(0);
   const viewport = useMemo(() => getViewportBounds(camera, 0.2), [camera]);
   const selectorViewport = useMemo(() => ({
@@ -75,6 +76,7 @@ function RegionalHydrographyLayer({ zoom, camera }) {
     () => (manifest ? selectHydrographyRegions(manifest, selectorViewport, 8) : []),
     [manifest, selectorViewport],
   );
+  const regionKey = regionIds.join("|");
 
   useEffect(() => {
     let cancelled = false;
@@ -86,15 +88,15 @@ function RegionalHydrographyLayer({ zoom, camera }) {
 
   useEffect(() => {
     const generation = ++requestGeneration.current;
-    if (!regionIds.length) {
-      setRegions([]);
-      return undefined;
-    }
+    if (!regionIds.length) return undefined;
 
     let cancelled = false;
     loader.loadRegions(regionIds)
       .then((values) => {
-        if (!cancelled && generation === requestGeneration.current) setRegions(values);
+        if (!cancelled && generation === requestGeneration.current) {
+          setRegions(values);
+          setLoadedRegionKey(regionKey);
+        }
       })
       .catch((error) => {
         if (!cancelled && generation === requestGeneration.current) {
@@ -102,11 +104,11 @@ function RegionalHydrographyLayer({ zoom, camera }) {
         }
       });
     return () => { cancelled = true; };
-  }, [regionIds]);
+  }, [regionIds, regionKey]);
 
   const hydrography = useMemo(
-    () => mergeRegions(regionIds.length ? regions : []),
-    [regionIds, regions],
+    () => mergeRegions(loadedRegionKey === regionKey && regionIds.length ? regions : []),
+    [loadedRegionKey, regionKey, regionIds, regions],
   );
   const presentation = getPhysicalPresentation(zoom);
   const stroke = getPhysicalStrokeProfile(zoom);
