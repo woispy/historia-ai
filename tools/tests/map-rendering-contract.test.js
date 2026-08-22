@@ -43,13 +43,16 @@ assert.ok(cameraModel.includes("minZoom: 1"));
 assert.ok(cameraActions.includes("const horizontalRange = Math.max(0, (WORLD_WIDTH - visibleWidth) / 2);"));
 assert.ok(cameraActions.includes("x: clamp(x, -horizontalRange, horizontalRange)"));
 
-// The physical world owns the complete water/land base. Political geometry
-// may only appear inside its land silhouette.
-assert.match(svgRenderer, /id="world-land-mask"/);
-assert.match(svgRenderer, /WORLD_LAND_PATH/);
+// The physical world owns the complete water/land base. Heavy land geometry
+// is loaded by the physical layer, which also owns the shared land clip-path.
+// Political geometry must never pull the global geometry into SVG bootstrap.
+assert.ok(!svgRenderer.includes("world-land-mask"));
+assert.ok(!svgRenderer.includes("WORLD_LAND_PATH"));
 assert.match(provinceLayer, /clipPath="url\(#world-land-mask\)"/);
+assert.match(physicalLayer, /id="world-land-mask"/);
 assert.match(physicalLayer, /WORLD_LAND_PATH/);
 assert.match(physicalLayer, /WORLD_PHYSICAL_ATLAS\.water\.fill/);
+assert.match(physicalLayer, /import\("\.\.\/\.\.\/physical\/WorldPhysicalAtlasRuntime\.js"\)/);
 
 // Province paths remain explicit interaction surfaces.
 assert.ok(provincePolygon.includes("pointerEvents=\"all\""));
@@ -88,4 +91,4 @@ assert.ok(!cityLayer.includes("fortified &&"));
 assert.ok(!worldMap.includes('phase="base"'));
 assert.ok(!worldMap.includes('phase="water"'));
 
-console.log("Map rendering contract tests passed: one synchronized world, explicit province interaction, one physical coastline authority, and no obsolete GPU province compositor.");
+console.log("Map rendering contract tests passed: one synchronized world, explicit province interaction, one lazy physical coastline authority, and no obsolete GPU province compositor.");
