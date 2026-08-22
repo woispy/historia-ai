@@ -4,7 +4,7 @@ import { createGame } from "../../src/bootstrap/GameBootstrap.js";
 import { GameEngine } from "../../src/engine/index.js";
 import { deserializeGame, serializeGame } from "../../src/save/SaveSerializer.js";
 
-const session = createGame({
+const session = await createGame({
   scenarioId: "1300",
   player: {
     countryId: "ottomans",

@@ -6,6 +6,7 @@ const BBOX = [25.45, 35.72, 44.85, 42.35];
 const SITE_EPSILON = 1e-6;
 const COAST_SAMPLE_STEP = 0.12;
 const COASTAL_TOLERANCE = 0.06;
+const COAST_INTERIOR_OFFSET = 0.004;
 
 function distanceSquared(a, b) {
   const dx = a[0] - b[0];
@@ -194,8 +195,8 @@ function addCoastInteriorSites(sites, seen) {
       const length = Math.sqrt(dx * dx + dy * dy) || 1;
       const left = [-dy / length, dx / length];
       const midpoint = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
-      const candidateA = [midpoint[0] + left[0] * 0.045, midpoint[1] + left[1] * 0.045];
-      const candidateB = [midpoint[0] - left[0] * 0.045, midpoint[1] - left[1] * 0.045];
+      const candidateA = [midpoint[0] + left[0] * COAST_INTERIOR_OFFSET, midpoint[1] + left[1] * COAST_INTERIOR_OFFSET];
+      const candidateB = [midpoint[0] - left[0] * COAST_INTERIOR_OFFSET, midpoint[1] - left[1] * COAST_INTERIOR_OFFSET];
       const inward = pointInAnatoliaLand(candidateA) ? candidateA : candidateB;
       if (isPoliticalCartographicPoint(inward)) {
         addSite(sites, seen, inward, nearestProvinceId(inward), "coastline-interior");

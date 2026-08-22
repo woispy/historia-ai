@@ -1,27 +1,11 @@
 /**
- * Historia AI — World physical geography authority.
+ * Historia AI — World physical geography authority metadata.
  *
- * The physical layer is deliberately independent from historical ownership.
- * Repository geometry assets are Natural Earth-derived and are used only as
- * a stable global land/coast authority. Political history is stored elsewhere.
+ * Generated Natural Earth geometry is intentionally not imported here. The
+ * geometry lives in WorldPhysicalAtlasRuntime.js and is loaded only by the
+ * physical map renderer. This prevents the global land dataset from becoming
+ * part of the application bootstrap bundle.
  */
-
-import {
-  buildWorldPath,
-  collectWorldLandPolygons,
-  normalizeGeometryModule,
-} from "./WorldLandMask.js";
-
-const geometryModules = import.meta.glob(
-  "../../world/map/assets/geometry/geometry_country_*.json",
-  { eager: true, import: "default" },
-);
-
-export { normalizeGeometryModule };
-
-export const WORLD_LAND_POLYGONS = Object.freeze(
-  collectWorldLandPolygons(geometryModules),
-);
 
 export const WORLD_PHYSICAL_BOUNDS = Object.freeze({
   minX: -180,
@@ -31,11 +15,10 @@ export const WORLD_PHYSICAL_BOUNDS = Object.freeze({
 });
 
 export const WORLD_PHYSICAL_ATLAS = Object.freeze({
-  version: 1,
+  version: 2,
   authority: "natural-earth-derived-country-land-assets",
   coordinateSystem: "EPSG:4326",
   bounds: WORLD_PHYSICAL_BOUNDS,
-  landPolygonCount: WORLD_LAND_POLYGONS.length,
   water: {
     fill: "#102c35",
     coastline: "#9db7ad",
@@ -44,5 +27,3 @@ export const WORLD_PHYSICAL_ATLAS = Object.freeze({
     baseFill: "#283229",
   },
 });
-
-export const WORLD_LAND_PATH = buildWorldPath(WORLD_LAND_POLYGONS);

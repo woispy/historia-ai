@@ -69,7 +69,7 @@ console.warn = (...args) => {
 try {
   rejectSave = true;
 
-  const session = initializer.initializeGame();
+  const session = await initializer.initializeGame();
 
   assert.ok(session);
   assert.equal(session.version, 2);

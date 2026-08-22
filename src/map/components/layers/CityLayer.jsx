@@ -1,6 +1,5 @@
 import { getAnatoliaCityMapMetadata } from "../../data/AnatoliaCityAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../data/AnatoliaPhysicalAtlasRuntime.js";
-import { WORLD_LAND_POLYGONS } from "../../physical/WorldPhysicalAtlas.js";
 import { getMapLod } from "../../rendering/CartographyModel.js";
 import { validateCityPhysicalPosition } from "../../rendering/physical/PhysicalGeometryValidation.js";
 import {
@@ -9,21 +8,16 @@ import {
   selectVisibleCities,
 } from "../../rendering/city/CityLabelLayout.js";
 
-const WORLD_WIDTH = 360;
-
-// World geometry is the global authority; the curated Anatolia land mask is
-// the higher-resolution authority for the historical city anchors in this
-// regional view. A city can therefore remain valid when a coarse country
-// polygon misses a coastal urban footprint such as Constantinople.
-const CITY_LAND_POLYGONS = Object.freeze([
-  ...WORLD_LAND_POLYGONS,
-  ...ANATOLIA_PHYSICAL_ATLAS_RUNTIME.landPolygons,
-]);
+const CITY_LAND_POLYGONS = ANATOLIA_PHYSICAL_ATLAS_RUNTIME.landPolygons;
 
 function mergeCityMetadata(city) {
   const atlas = getAnatoliaCityMapMetadata(city.id);
   if (!atlas) return null;
 
+  // All cities currently rendered by this historical atlas are Anatolian
+  // anchors. Use the curated regional land authority here rather than pulling
+  // the entire 242-country Natural Earth geometry graph into the city chunk.
+  // Global land authority remains owned by WorldPhysicalLayer.
   const physical = validateCityPhysicalPosition(
     atlas,
     CITY_LAND_POLYGONS,
@@ -36,15 +30,15 @@ function mergeCityMetadata(city) {
 
 function longitudeDelta(a, b) {
   let delta = Number(a) - Number(b);
-  while (delta > 180) delta -= WORLD_WIDTH;
-  while (delta < -180) delta += WORLD_WIDTH;
+  while (delta > 180) delta -= 360;
+  while (delta < -180) delta += 360;
   return delta;
 }
 
 function isCityInViewport(city, camera, padding = 0.18) {
   if (!camera) return true;
   const zoom = Math.max(0.001, Number(camera.zoom) || 1);
-  const viewWidth = WORLD_WIDTH / zoom;
+  const viewWidth = 360 / zoom;
   const viewHeight = 180 / zoom;
   return Math.abs(longitudeDelta(city.map.x, camera.x ?? 0)) <= viewWidth / 2 + viewWidth * padding
     && Math.abs(city.map.y - Number(camera.y ?? 0)) <= viewHeight / 2 + viewHeight * padding;
