@@ -13,6 +13,9 @@ const countries = Object.fromEntries([
   ["mentese", { id: "mentese", name: "Menteshe Beylik", color: "#3E7C59" }],
   ["esref", { id: "esref", name: "Eşrefoğulları Beylik", color: "#7B6840" }],
   ["germiyan", { id: "germiyan", name: "Germiyanid Beylik", color: "#8C5A2B" }],
+  ["inanc", { id: "inanc", name: "İnanç Beyliği", color: "#5E8C61" }],
+  ["hamid", { id: "hamid", name: "Hamid Beyliği", color: "#4F8065" }],
+  ["sahibata", { id: "sahibata", name: "Sâhib Ata Beyliği", color: "#806A4A" }],
   ["karaman", { id: "karaman", name: "Karamanid Beylik", color: "#A33F3F" }],
   ["pervane", { id: "pervane", name: "Pervâneoğlu Beylik", color: "#6B7280" }],
   ["candar", { id: "candar", name: "Candarid Beylik", color: "#7A6A3A" }],
@@ -28,8 +31,6 @@ const countries = Object.fromEntries([
 const repository = { byId: countries };
 const sourceProvinces = ANATOLIA_PROVINCE_METADATA.map((metadata) => ({
   id: metadata.id,
-  // Deliberately preserve the persistent province owner here. The historical
-  // model must not use this field when dated historicalControl says null.
   owner: metadata.countryId,
 }));
 
@@ -47,11 +48,16 @@ assert.equal(model.find((entry) => entry.province.id === "lydia-magnesia").count
 assert.equal(model.find((entry) => entry.province.id === "caria-mylasa").country.id, "mentese");
 assert.equal(model.find((entry) => entry.province.id === "pisidia-beysehir").country.id, "esref");
 assert.equal(model.find((entry) => entry.province.id === "phrygia-kutahya").country.id, "germiyan");
+assert.equal(model.find((entry) => entry.province.id === "phrygia-denizli").country.id, "inanc");
+assert.equal(model.find((entry) => entry.province.id === "phrygia-uluborlu").country.id, "hamid");
+assert.equal(model.find((entry) => entry.province.id === "phrygia-afyon").country.id, "sahibata");
 assert.equal(model.find((entry) => entry.province.id === "lycaonia-konya").country.id, "karaman");
 assert.equal(model.find((entry) => entry.province.id === "pontus-sinop").country.id, "pervane");
 assert.equal(model.find((entry) => entry.province.id === "pontus-kastamon").country.id, "candar");
 assert.equal(model.find((entry) => entry.province.id === "pontus-trebizond").country.id, "trebizond");
 assert.equal(model.find((entry) => entry.province.id === "cilicia-sis").country.id, "cilicia");
+assert.equal(model.find((entry) => entry.province.id === "ionia-ayasuluk").country.id, "byzantium");
+assert.equal(model.find((entry) => entry.province.id === "lydia-birgi").country.id, "byzantium");
 
 for (const entry of model) {
   assert.equal(entry.country.type, "polity");
@@ -79,16 +85,14 @@ assert.deepEqual(
 );
 assert.equal(ANATOLIA_CITY_ATLAS.eskisehir.mapProvinceId, "phrygia-eskisehir");
 
-assert.equal(model.find((entry) => entry.province.id === "ionia-ayasuluk").country.id, "local_polities");
-assert.equal(model.find((entry) => entry.province.id === "lydia-birgi").country.id, "local_polities");
-assert.equal(model.find((entry) => entry.province.id === "phrygia-eskisehir").country.id, "local_polities");
-assert.equal(model.find((entry) => entry.province.id === "phrygia-denizli").country.id, "local_polities");
-assert.equal(model.find((entry) => entry.province.id === "galatia-ankara").country.id, "local_polities");
-assert.equal(model.find((entry) => entry.province.id === "cappadocia-kayseri").country.id, "local_polities");
+// Neutral/contested provinces still receive a complete historical presentation
+// color; they are never rendered as transparent or as a modern country.
+for (const provinceId of ["phrygia-eskisehir", "lydia-smyrna", "galatia-ankara", "cappadocia-kayseri", "pontus-amasya"]) {
+  const entry = model.find((item) => item.province.id === provinceId);
+  assert.ok(entry.country, `${provinceId} must never render without a political presentation`);
+  assert.equal(entry.country.id, "local_polities");
+}
 
-// A persistent simulation owner is intentionally different from dated
-// historical control here. The historical layer must stay neutral rather than
-// inheriting the owner and thereby painting an anachronistic political border.
 const anachronisticOwnerProvince = sourceProvinces.find((province) => province.id === "phrygia-eskisehir");
 assert.equal(anachronisticOwnerProvince.owner, "ottomans");
 assert.equal(
@@ -112,5 +116,5 @@ assert.throws(
 
 console.log(
   `Historical Political Map v1 tests passed: ${model.length} Anatolia provinces, `
-  + "city↔province identity links validated, shared frontier anchors supported, historical polity presentation enforced, 1300-only model active.",
+  + "complete political presentation, city↔province identity links, historical polity presentation enforced, 1300-only model active.",
 );
