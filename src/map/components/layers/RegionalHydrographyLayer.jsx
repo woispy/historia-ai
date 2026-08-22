@@ -92,8 +92,10 @@ function RegionalHydrographyLayer({ zoom, camera }) {
     return () => { cancelled = true; };
   }, [regionIds]);
 
-  const activeRegions = regionIds.length ? regions : [];
-  const hydrography = useMemo(() => mergeRegions(activeRegions), [activeRegions]);
+  const hydrography = useMemo(
+    () => mergeRegions(regionIds.length ? regions : []),
+    [regionIds, regions],
+  );
   const presentation = getPhysicalPresentation(zoom);
   const stroke = getPhysicalStrokeProfile(zoom);
   const rivers = profile.rivers ? filterVisibleRivers(hydrography.rivers, zoom).filter((river) => visible(river, camera)) : [];
