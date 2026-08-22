@@ -13,6 +13,32 @@ function aiApiPlugin() {
   };
 }
 
+function bundleDiagnosticsPlugin() {
+  return {
+    name: "historia-ai-bundle-diagnostics",
+    apply: "build",
+    generateBundle(_options, bundle) {
+      const chunks = Object.values(bundle)
+        .filter((item) => item.type === "chunk")
+        .sort((a, b) => b.code.length - a.code.length);
+
+      console.log("[Bundle Diagnostics] Largest JavaScript chunks:");
+      for (const chunk of chunks.slice(0, 8)) {
+        const modules = Object.entries(chunk.modules ?? {})
+          .map(([id, module]) => ({ id, size: module.renderedLength ?? module.originalLength ?? 0 }))
+          .filter(({ size }) => size > 0)
+          .sort((a, b) => b.size - a.size);
+        const topModules = modules
+          .slice(0, 8)
+          .map(({ id, size }) => `${(size / 1024).toFixed(1)} KiB ${id}`)
+          .join(" | ");
+        console.log(`  ${chunk.fileName}: ${(chunk.code.length / 1024).toFixed(1)} KiB`);
+        if (topModules) console.log(`    top modules: ${topModules}`);
+      }
+    },
+  };
+}
+
 async function handleAIRequest(request, response) {
   if (request.method !== "POST") {
     response.statusCode = 405;
@@ -73,7 +99,7 @@ async function handleAIRequest(request, response) {
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), aiApiPlugin()],
+  plugins: [react(), aiApiPlugin(), bundleDiagnosticsPlugin()],
   build: {
     rolldownOptions: {
       output: {
