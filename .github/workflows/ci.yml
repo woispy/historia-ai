@@ -110,6 +110,8 @@ jobs:
         run: npm run test:cartography-foundation
       - name: Run map texture atlas regression tests
         run: npm run test:map-texture-atlas
+      - name: Run P3 map performance regression tests
+        run: npm run test:map-performance
       - name: Run cartography visual regression tests
         run: npm run test:cartography-visual
       - name: Run map rendering contract tests
