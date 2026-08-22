@@ -79,6 +79,8 @@ function toHistoricalProvince(metadata, date) {
     cityId: metadata.cityId,
     regionId: metadata.regionId,
     centroid: metadata.centroid,
+    coastal: metadata.coastal === true,
+    port: metadata.port === true,
     polityId,
     controlStatus: control?.statusAt1300 ?? "unknown",
     controlConfidence: control?.confidence ?? "low",
