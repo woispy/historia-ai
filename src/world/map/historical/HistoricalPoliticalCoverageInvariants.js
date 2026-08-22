@@ -2,7 +2,7 @@
  * World-scale invariants for the 1300 political overlay.
  *
  * These helpers deliberately operate on polygons rather than on province
- * ownership.  That keeps the physical land/coast authority independent from
+ * ownership. That keeps the physical land/coast authority independent from
  * historical political identity and lets the same checks cover the entire
  * world, not only the 38 Anatolian gameplay provinces.
  */
@@ -51,29 +51,47 @@ function polygonCentroid(polygon) {
   return [sum[0] / polygon.length, sum[1] / polygon.length];
 }
 
+function polygonSamples(polygon) {
+  if (!Array.isArray(polygon) || polygon.length < 3) return [];
+
+  const samples = [];
+  for (let index = 0; index < polygon.length; index += 1) {
+    const current = polygon[index];
+    const next = polygon[(index + 1) % polygon.length];
+    samples.push(current);
+    samples.push([(current[0] + next[0]) / 2, (current[1] + next[1]) / 2]);
+  }
+
+  const centroid = polygonCentroid(polygon);
+  if (centroid) samples.push(centroid);
+  return samples;
+}
+
+function collectSamples(polygons) {
+  return polygons.flatMap((polygon) => polygonSamples(polygon));
+}
+
 function isCovered(point, polygons) {
   return polygons.some((polygon) => pointInPolygon(point, polygon));
 }
 
 /**
- * Audits the two hard world-map rules that can be checked without a GIS
- * boolean-clipping dependency:
+ * Audits the two hard world-map rules without requiring a GIS boolean
+ * clipping dependency:
  *
- * - representative physical-land samples must have political coverage;
- * - representative political samples must remain on physical land.
+ * - vertices, edge midpoints and centroids of physical-land polygons must
+ *   have political coverage;
+ * - vertices, edge midpoints and centroids of political polygons must remain
+ *   on physical land.
  *
  * The renderer still performs the final exact sea clipping through the P0
- * world-land-mask.  This audit therefore complements, rather than replaces,
- * that physical clipping authority.
+ * world-land-mask. This audit therefore catches source-geometry gaps/leaks
+ * while the renderer provides the exact final visual exclusion at the coast.
  */
 export function auditHistoricalPoliticalCoverage({ landPolygons = [], politicalEntries = [] } = {}) {
   const politicalPolygons = flattenPolygons(politicalEntries);
-  const landSamples = landPolygons
-    .map((polygon) => polygonCentroid(polygon))
-    .filter(Boolean);
-  const politicalSamples = politicalPolygons
-    .map((polygon) => polygonCentroid(polygon))
-    .filter(Boolean);
+  const landSamples = collectSamples(landPolygons);
+  const politicalSamples = collectSamples(politicalPolygons);
 
   const uncoveredLandSamples = landSamples.filter((point) => !isCovered(point, politicalPolygons));
   const politicalSamplesOutsideLand = politicalSamples.filter((point) => !isCovered(point, landPolygons));
