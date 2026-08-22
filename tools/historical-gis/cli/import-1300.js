@@ -173,7 +173,9 @@ function classifyRuntimeRegion(region) {
     .reduce((sum, [x, y]) => [sum[0] + x, sum[1] + y], [0, 0])
     .map((value) => value / polygon.length);
 
-  if (longitude < -30) return "americas";
+  if (longitude < -30) {
+    return latitude < 0 ? "south-americas" : "north-americas";
+  }
   if (longitude >= 110 && latitude < 25) return "oceania";
   if (longitude >= 100) return "east-asia";
   if (longitude >= 80 && latitude < 35) return "south-asia";
