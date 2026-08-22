@@ -1,6 +1,6 @@
 import "./App.css";
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router";
 
 const MainMenu = lazy(() => import("./pages/MainMenu"));
 const NewGame = lazy(() => import("./pages/NewGame"));
