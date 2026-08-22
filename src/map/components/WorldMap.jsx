@@ -50,8 +50,13 @@ function WorldMap({
   );
 
   const politicalRegions = useMemo(
-    () => <HistoricalPoliticalRegionLayer date={runtime?.scenario?.startDate ?? "1300-01-01"} />,
-    [runtime?.scenario?.startDate],
+    () => (
+      <HistoricalPoliticalRegionLayer
+        date={runtime?.scenario?.startDate ?? "1300-01-01"}
+        provinces={provinces}
+      />
+    ),
+    [runtime?.scenario?.startDate, provinces],
   );
 
   const provincesLayer = useMemo(
@@ -102,14 +107,14 @@ function WorldMap({
     () => (
       <RenderLayer>
         {world}
-        {politicalRegions}
         {provincesLayer}
+        {politicalRegions}
         {cartography}
         {detail}
         {citiesLayer}
       </RenderLayer>
     ),
-    [world, politicalRegions, provincesLayer, cartography, detail, citiesLayer],
+    [world, provincesLayer, politicalRegions, cartography, detail, citiesLayer],
   );
 
   return (
