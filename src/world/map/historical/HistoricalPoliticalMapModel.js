@@ -7,6 +7,7 @@ import {
 import { createHistoricalPoliticalPresentation } from "./HistoricalPoliticalPresentation.js";
 
 const HISTORICAL_1300_DATE = "1300-01-01";
+const ILKHANID_SUZERAINTY_STATUS = "ilkhANID-suzerainty";
 
 function create1300ProvinceIndex() {
   const runtime = createHistoricalPoliticalRuntime({
@@ -44,13 +45,17 @@ export function createHistoricalPoliticalMapModel({
     const polityId = historicalProvince
       ? historicalProvince.polityId
       : null;
+    const isIlkhanidSuzerainty = historicalProvince?.controlStatus?.toLowerCase() === "ilkhanid-suzerainty";
+    const presentationPolityId = polityId ?? (isIlkhanidSuzerainty ? "ilkhanate" : null);
 
     // Presentation comes from the historical runtime registry, never from the
     // modern country repository. The repository remains available only as the
     // source/simulation identity for diagnostics and compatibility.
-    const historicalPolity = polityId ? getHistoricalPolity(polityId) : null;
+    const historicalPolity = presentationPolityId
+      ? getHistoricalPolity(presentationPolityId)
+      : null;
     const historicalPolitical = createHistoricalPoliticalPresentation({
-      polityId,
+      polityId: presentationPolityId,
       country: historicalPolity,
     });
 
