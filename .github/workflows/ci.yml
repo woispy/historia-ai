@@ -152,6 +152,8 @@ jobs:
         run: npm run test:runtime-engine
       - name: Build
         run: npm run build
+      - name: Measure production bundle and regional payload
+        run: npm run test:production-bundle
       - name: Verify repository cleanliness after production build
         run: npm run test:repository-cleanliness
       - name: Verify historical GIS and map scripts
