@@ -44,7 +44,18 @@ export function buildHistoricalWorldSourceProvinces(sourceProvinces, geometryRep
     // merely because a loader changed the runtime geometry key.
     const curatedProvinceId = getCuratedProvinceId(geometry, geometryId);
     const provinceId = curatedProvinceId ?? geometryId;
-    if (byId.has(provinceId)) continue;
+
+    if (byId.has(provinceId)) {
+      if (curatedProvinceId) {
+        const existing = byId.get(provinceId);
+        byId.set(provinceId, {
+          ...existing,
+          name: geometry.metadata?.name ?? existing.name ?? provinceId,
+          geometryId,
+        });
+      }
+      continue;
+    }
 
     byId.set(provinceId, {
       id: provinceId,
