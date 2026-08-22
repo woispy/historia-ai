@@ -48,12 +48,12 @@ test("deduplicates region requests and bounds the cache", async () => {
           ],
         });
       }
-      return response({ rivers: [], lakes: [], id: url });
+      return response({ rivers: [{ id: url }], lakes: [] });
     },
   });
 
   const [a, duplicateA] = await loader.loadRegions(["a", "a"]);
-  assert.equal(a.id, duplicateA.id);
+  assert.equal(a.rivers[0].id, duplicateA.rivers[0].id);
   await loader.loadRegion("b");
   await loader.loadRegion("a");
 
