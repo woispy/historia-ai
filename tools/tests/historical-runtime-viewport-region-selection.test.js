@@ -28,9 +28,11 @@ assert.deepEqual(
   ["anatolia", "balkans", "levant"],
 );
 
+// Reversed X/Y bounds are normalized by the shared spatial selector. The
+// normalized viewport remains entirely below Anatolia's minY=35 boundary.
 assert.deepEqual(
   selectHistoricalRuntimeRegionsByBounds(manifest, { minX: 44, minY: 34, maxX: 35, maxY: 28 }),
-  ["anatolia", "levant"],
+  ["levant"],
 );
 
 assert.deepEqual(
