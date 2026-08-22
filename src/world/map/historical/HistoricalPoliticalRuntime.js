@@ -4,6 +4,7 @@ import {
   createHistoricalMapDescriptor,
 } from "../HistoricalMapContract.js";
 import { createHistoricalProvincePoliticalStates } from "./HistoricalProvincePoliticalState.js";
+import { getVerified1300Control } from "./Historical1300ControlOverrides.js";
 
 const POLITY_DEFINITIONS = Object.freeze([
   ["byzantium", "Byzantine Empire", "empire", "#6A1B9A"],
@@ -55,7 +56,8 @@ function clonePolity(id) {
 }
 
 function controllerForDate(metadata, date) {
-  const control = metadata?.historicalControl;
+  const override = date === "1300-01-01" ? getVerified1300Control(metadata.id) : null;
+  const control = override ?? metadata?.historicalControl;
   if (!control) return null;
   const year = Number(date.slice(0, 4));
   if (!Number.isFinite(year)) return null;
@@ -65,6 +67,8 @@ function controllerForDate(metadata, date) {
 }
 
 function toHistoricalProvince(metadata, date) {
+  const override = date === "1300-01-01" ? getVerified1300Control(metadata.id) : null;
+  const control = override ?? metadata.historicalControl;
   const polityId = controllerForDate(metadata, date);
   return {
     id: metadata.id,
@@ -74,9 +78,9 @@ function toHistoricalProvince(metadata, date) {
     regionId: metadata.regionId,
     centroid: metadata.centroid,
     polityId,
-    controlStatus: metadata.historicalControl?.statusAt1300 ?? "unknown",
-    controlConfidence: metadata.historicalControl?.confidence ?? "low",
-    controlNote: metadata.historicalControl?.note ?? null,
+    controlStatus: control?.statusAt1300 ?? "unknown",
+    controlConfidence: control?.confidence ?? "low",
+    controlNote: control?.note ?? null,
     timeModel: "historical",
     sourceType: "historical-runtime",
   };
