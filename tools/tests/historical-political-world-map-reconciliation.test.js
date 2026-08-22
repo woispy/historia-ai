@@ -45,9 +45,9 @@ assert.equal(
 );
 
 assert.equal(
-  byId.get("bithynia-nicomedia").historical.classification,
-  "curated-regional-gameplay-overlay",
-  "curated Anatolia geometry must remain marked as a historical overlay",
+  byId.get("bithynia-nicomedia").historical,
+  undefined,
+  "reconciliation must not remove curated provinces from the interaction layer",
 );
 
 console.log(
