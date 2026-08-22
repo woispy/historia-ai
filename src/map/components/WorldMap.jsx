@@ -5,6 +5,7 @@ import {
   HistoricalPoliticalRegionLayer,
   CityLayer,
   PhysicalGeographyLayer,
+  RegionalHydrographyLayer,
   WorldPhysicalLayer,
   CartographyLayer,
 } from "./layers";
@@ -86,6 +87,10 @@ function WorldMap({
     () => <PhysicalGeographyLayer phase="detail" zoom={cameraState.zoom} camera={cameraState} />,
     [cameraState],
   );
+  const hydrography = useMemo(
+    () => <RegionalHydrographyLayer zoom={cameraState.zoom} camera={cameraState} />,
+    [cameraState],
+  );
   const citiesLayer = useMemo(
     () => (
       <CityLayer
@@ -106,10 +111,11 @@ function WorldMap({
         {politicalRegions}
         {cartography}
         {detail}
+        {hydrography}
         {citiesLayer}
       </RenderLayer>
     ),
-    [world, provincesLayer, politicalRegions, cartography, detail, citiesLayer],
+    [world, provincesLayer, politicalRegions, cartography, detail, hydrography, citiesLayer],
   );
 
   return (
