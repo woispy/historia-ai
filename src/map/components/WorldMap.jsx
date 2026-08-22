@@ -13,10 +13,18 @@ import { RenderRoot, RenderLayer, SvgRenderer } from "../rendering";
 
 const HISTORICAL_1300_DATE = "1300-01-01";
 
+function normalizeScenarioDate(value) {
+  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  const normalized = String(value ?? "").trim();
+  return /^\d{4}-\d{2}-\d{2}$/.test(normalized) ? normalized : null;
+}
+
 function getScenarioStartDate(runtime) {
-  return runtime?.scenario?.startDate
-    ?? runtime?.world?.scenario?.startDate
-    ?? null;
+  return normalizeScenarioDate(
+    runtime?.scenario?.startDate
+      ?? runtime?.world?.scenario?.startDate
+      ?? null,
+  );
 }
 
 function WorldMap({
