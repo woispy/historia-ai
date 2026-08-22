@@ -84,10 +84,7 @@ function RegionalHydrographyLayer({ zoom, camera }) {
   }, []);
 
   useEffect(() => {
-    if (!regionIds.length) {
-      setRegions([]);
-      return undefined;
-    }
+    if (!regionIds.length) return undefined;
     let cancelled = false;
     loader.loadRegions(regionIds)
       .then((values) => { if (!cancelled) setRegions(values); })
@@ -95,7 +92,8 @@ function RegionalHydrographyLayer({ zoom, camera }) {
     return () => { cancelled = true; };
   }, [regionIds]);
 
-  const hydrography = useMemo(() => mergeRegions(regions), [regions]);
+  const activeRegions = regionIds.length ? regions : [];
+  const hydrography = useMemo(() => mergeRegions(activeRegions), [activeRegions]);
   const presentation = getPhysicalPresentation(zoom);
   const stroke = getPhysicalStrokeProfile(zoom);
   const rivers = profile.rivers ? filterVisibleRivers(hydrography.rivers, zoom).filter((river) => visible(river, camera)) : [];
