@@ -16,6 +16,7 @@
     "test:world-map": "node tools/tests/world-land-mask.test.js",
     "test:historical-world": "node tools/tests/historical-world-1300.test.js",
     "test:historical-world-political-coverage": "node tools/tests/historical-world-political-coverage.test.js",
+    "test:historical-political-coverage-invariants": "node tools/tests/historical-political-coverage-invariants.test.js",
     "test:historical-map-contract": "node tools/tests/historical-map-contract.test.js",
     "test:historical-political-runtime": "node tools/tests/historical-political-runtime.test.js",
     "test:historical-political-map-v1": "node tools/tests/historical-political-map-v1.test.js",
