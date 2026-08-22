@@ -7,7 +7,6 @@ import {
 import { createHistoricalPoliticalPresentation } from "./HistoricalPoliticalPresentation.js";
 
 const HISTORICAL_1300_DATE = "1300-01-01";
-const ILKHANID_SUZERAINTY_STATUS = "ilkhANID-suzerainty";
 
 function create1300ProvinceIndex() {
   const runtime = createHistoricalPoliticalRuntime({
