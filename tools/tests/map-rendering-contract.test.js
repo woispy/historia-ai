@@ -9,6 +9,7 @@ const svgRenderer = read("src/map/rendering/SvgRenderer.jsx");
 const worldMap = read("src/map/components/WorldMap.jsx");
 const useWorldMap = read("src/map/hooks/useWorldMap.js");
 const geometryBootstrap = read("src/world/map/geometry/GeometryBootstrap.js");
+const historicalGeometryLoader = read("src/world/map/geometry/loader/HistoricalGeometryRepositoryLoader.js");
 const mapView = read("src/components/GameShell/MapView/MapView.jsx");
 const mapViewCss = read("src/components/GameShell/MapView/MapView.css");
 const provinceLayer = read("src/map/components/layers/ProvinceLayer.jsx");
@@ -68,6 +69,8 @@ assert.match(useWorldMap, /if \(ignore\) return;/);
 assert.match(useWorldMap, /if \(!geometryRepository\)/);
 assert.match(geometryBootstrap, /export async function bootstrapGeometry/);
 assert.match(geometryBootstrap, /await loadHistoricalGeometryRepository\(date\)/);
+assert.match(historicalGeometryLoader, /export async function loadHistoricalGeometryRepository/);
+assert.match(historicalGeometryLoader, /await loadHistoricalRuntimeAsset\(date\)/);
 
 // Province paths remain explicit interaction surfaces.
 assert.ok(provincePolygon.includes("pointerEvents=\"all\""));
