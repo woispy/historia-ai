@@ -171,12 +171,12 @@ function classifyRuntimeRegion(region) {
   if (longitude >= 110 && latitude < 25) return "oceania";
   if (longitude >= 100) return "east-asia";
   if (longitude >= 80 && latitude < 35) return "south-asia";
-  if (longitude >= 45 && latitude >= 35) return "central-asia";
-  if (latitude < 35 && longitude >= -20 && longitude < 45) return "africa";
   if (longitude >= 35 && longitude < 55 && latitude >= 35 && latitude < 50) return "caucasus";
   if (longitude >= 25 && longitude < 45 && latitude >= 35 && latitude < 44) return "anatolia";
   if (longitude >= 10 && longitude < 30 && latitude >= 35 && latitude < 50) return "balkans";
-  if (longitude >= -25 && longitude < 45 && latitude >= 35) return "europe";
   if (longitude >= 30 && longitude < 45 && latitude < 35) return "levant";
+  if (latitude < 35 && longitude >= -20 && longitude < 55) return "africa";
+  if (longitude >= 45 && latitude >= 35) return "central-asia";
+  if (longitude >= -25 && longitude < 45 && latitude >= 35) return "europe";
   return "west-asia";
 }
