@@ -43,6 +43,21 @@ assert.match(
 );
 assert.match(
   layerSource,
+  /loadWorldLandPath\(\[ANATOLIA_PHYSICAL_COUNTRY_ID\]\)/,
+  "curated political rendering must load the real physical Anatolia coastline instead of the lightweight oval atlas envelope",
+);
+assert.match(
+  layerSource,
+  /ANATOLIA_PHYSICAL_COUNTRY_ID = "tur"/,
+  "the Anatolia political clip must use the generated Natural Earth Turkey geometry only as a physical coastline authority",
+);
+assert.doesNotMatch(
+  layerSource,
+  /ANATOLIA_PHYSICAL_ATLAS_RUNTIME/,
+  "the historical political clip must not use the lightweight P0 atlas land envelope",
+);
+assert.match(
+  layerSource,
   /HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID/,
   "curated political rendering must be clipped by the physical Anatolia land authority",
 );
