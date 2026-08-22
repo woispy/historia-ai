@@ -3,7 +3,7 @@ import historicalAtlas from "../../data/gis/1300/regional/anatolia-byzantium.jso
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 import { createHistoricalPoliticalMapModel } from "../../src/world/map/historical/HistoricalPoliticalMapModel.js";
 import { getHistoricalPolity } from "../../src/world/map/historical/HistoricalPoliticalRuntime.js";
-import { getHistoricalPoliticalOverlayMode } from "../../src/map/components/layers/HistoricalPoliticalRegionLayer.jsx";
+import { getHistoricalPoliticalOverlayMode } from "../../src/map/components/layers/HistoricalPoliticalOverlayModel.js";
 
 assert.equal(historicalAtlas.historicalDate, "1300-01-01");
 assert.ok(Array.isArray(historicalAtlas.regions));
