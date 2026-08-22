@@ -44,6 +44,12 @@ function createHistoricalWorldEntry(province, geometry, historicalEntry) {
     return {
       ...historicalEntry,
       geometry,
+      // These are the curated Phase 2D 1300 Anatolia provinces. They use the
+      // dedicated P0 physical atlas as their political coastline authority.
+      historicalProvince: {
+        ...historicalEntry.historicalProvince,
+        geometryAuthority: "anatolia-curated",
+      },
     };
   }
 
@@ -59,6 +65,10 @@ function createHistoricalWorldEntry(province, geometry, historicalEntry) {
     country: political,
     sourceCountry: null,
     historicalPolitical: political,
+    // This record carries source-derived historical presentation state, but
+    // its geometry belongs to the global historical GIS source. It must never
+    // be mistaken for one of the 38 curated Anatolia province geometries when
+    // choosing the political coastline clip.
     historicalProvince: {
       id: province.id,
       type: "province",
@@ -71,6 +81,7 @@ function createHistoricalWorldEntry(province, geometry, historicalEntry) {
         : "Source-derived 1300 GIS coverage",
       timeModel: "historical",
       sourceType: "historical-runtime",
+      geometryAuthority: "world-source",
     },
     geometry,
   };
