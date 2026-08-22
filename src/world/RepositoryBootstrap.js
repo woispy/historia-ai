@@ -48,7 +48,7 @@ function mergeHistoricalCityAtlas(scenarioCities, provinceRepository) {
   return merged;
 }
 
-export function createRepositories(scenario) {
+export async function createRepositories(scenario) {
   if (!scenario) throw new Error("Scenario is required.");
 
   const historicalRegistry = getHistoricalRegistry(scenario);
@@ -56,9 +56,6 @@ export function createRepositories(scenario) {
   const historicalCountries = Object.values(historicalRegistry?.countries ?? {});
   const countriesById = {};
 
-  // A historical scenario is not allowed to silently inherit modern country
-  // presentation metadata. Tag the source at the repository boundary so the
-  // map renderer can enforce the same provenance firewall as the simulation.
   for (const country of historicalCountries) {
     countriesById[country.id] = tagHistoricalCountry(country);
   }
@@ -72,7 +69,7 @@ export function createRepositories(scenario) {
     }
   }
 
-  const provinces = loadHistoricalProvinceRepository(historicalRegistry);
+  const provinces = await loadHistoricalProvinceRepository(historicalRegistry);
   const scenarioCities = mergeHistoricalCityAtlas(
     scenario.data.cities ?? {},
     provinces,
