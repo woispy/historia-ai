@@ -22,11 +22,6 @@ export function getMapLod(zoom = 1) {
   return "detailed";
 }
 
-export function shouldUseGpuProvinceFill(zoom = 1) {
-  const lod = getMapLod(zoom);
-  return lod === "world" || lod === "regional";
-}
-
 export function getCityVisibilityTier(zoom = 1) {
   const lod = getMapLod(zoom);
   if (lod === "world") return "capital";
