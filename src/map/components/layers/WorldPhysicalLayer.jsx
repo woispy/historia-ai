@@ -16,8 +16,9 @@ function WorldPhysicalLayer() {
     let cancelled = false;
 
     import("../../physical/WorldPhysicalAtlasRuntime.js")
-      .then(({ WORLD_LAND_PATH }) => {
-        if (!cancelled) setLandPath(WORLD_LAND_PATH);
+      .then(({ loadWorldLandPath }) => loadWorldLandPath())
+      .then((path) => {
+        if (!cancelled) setLandPath(path ?? "");
       })
       .catch((error) => {
         console.error("[WorldPhysicalLayer] Failed to load world land geometry:", error);
