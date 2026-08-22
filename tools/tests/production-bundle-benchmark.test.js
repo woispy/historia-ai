@@ -31,7 +31,7 @@ function formatBytes(bytes) {
 }
 
 function normalizeAssetReference(value) {
-  return value.replace(/^\.\//, "").replace(/\\/g, "/");
+  return value.replace(/^\/+/, "").replace(/^\.\//, "").replace(/\\/g, "/");
 }
 
 async function findInitialJsFiles(distFiles, htmlFiles) {
@@ -39,7 +39,7 @@ async function findInitialJsFiles(distFiles, htmlFiles) {
 
   for (const htmlFile of htmlFiles) {
     const html = await readFile(htmlFile, "utf8");
-    for (const match of html.matchAll(/(?:<script[^>]+src|<link[^>]+href)=["']([^"']+\.js)["']/g)) {
+    for (const match of html.matchAll(/(?:<script[^>]+src|<link[^>]+href)=["']([^"']+\.js)(?:\?[^"']*)?["']/g)) {
       references.add(normalizeAssetReference(match[1]));
     }
   }
