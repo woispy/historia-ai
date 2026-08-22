@@ -11,6 +11,10 @@ const layerSource = readFileSync(
   resolve("src/map/components/layers/HistoricalPoliticalRegionLayer.jsx"),
   "utf8",
 );
+const worldMapSource = readFileSync(
+  resolve("src/map/components/WorldMap.jsx"),
+  "utf8",
+);
 
 assert.match(
   layerSource,
@@ -26,6 +30,26 @@ assert.match(
   layerSource,
   /fill=\{DEFAULT_POLITICAL_COLOR\}/,
   "historical unassigned land presentation must use the explicit neutral political colour",
+);
+assert.match(
+  layerSource,
+  /COASTAL_POLITICAL_EXPANSION = 0\.08/,
+  "curated coastal political fills must have a small controlled expansion before land clipping",
+);
+assert.match(
+  layerSource,
+  /stroke=\{color\}/,
+  "coastal political expansion must use the owning historical polity colour",
+);
+assert.match(
+  worldMapSource,
+  /runtime\?\.world\?\.scenario\?\.startDate/,
+  "WorldMap must use the same nested scenario-date contract as the geometry bootstrap",
+);
+assert.match(
+  worldMapSource,
+  /renderFill=\{!isHistoricalPoliticalMap\}/,
+  "modern province fills must be disabled for the 1300 historical political layer",
 );
 
 assert.equal(historicalAtlas.historicalDate, "1300-01-01");
@@ -74,6 +98,8 @@ assert.equal(byProvince.get("lydia-birgi").historicalPolitical.id, "byzantium");
 assert.equal(byProvince.get("phrygia-denizli").historicalPolitical.id, "inanc");
 assert.equal(byProvince.get("phrygia-uluborlu").historicalPolitical.id, "hamid");
 assert.equal(byProvince.get("phrygia-afyon").historicalPolitical.id, "sahibata");
+assert.equal(byProvince.get("bithynia-nicomedia").historicalProvince.coastal, true);
+assert.equal(byProvince.get("pontus-sinop").historicalProvince.port, true);
 
 assert.equal(
   getHistoricalPoliticalOverlayMode(byProvince.get("cappadocia-kayseri")),
