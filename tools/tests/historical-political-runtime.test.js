@@ -57,7 +57,7 @@ assert.equal(provinceById.get("lydia-birgi").polityId, "byzantium");
 assert.equal(politicalStateByProvinceId.get("ionia-ayasuluk").controlStatus, "Byzantine-coastal-before-1304");
 assert.equal(politicalStateByProvinceId.get("phrygia-denizli").controlConfidence, "high");
 assert.equal(politicalStateByProvinceId.get("phrygia-afyon").controlStatus, "established-local-beylik");
-assert.equal(politicalStateByProvinceId.get("phrygia-eskisehir").polityId, null);
+assert.equal(politicalStateByProvinceId.get("phrygia-eskisehir").sovereignPolityId, null);
 assert.equal(politicalStateByProvinceId.get("cappadocia-kayseri").suzeraintyPolityId, "ilkhanate");
 
 assert.equal(getHistoricalPolity("inanc").type, "polity");
