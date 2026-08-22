@@ -49,6 +49,7 @@ on:
       - feat/historical-map-clean-foundation
       - feat/historical-political-map-v1
       - feat/p1-historical-political-map-foundation
+      - feat/p1-historical-political-map-runtime-fix
 
 jobs:
   validate:
