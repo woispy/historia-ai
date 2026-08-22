@@ -13,6 +13,12 @@ import { RenderRoot, RenderLayer, SvgRenderer } from "../rendering";
 
 const HISTORICAL_1300_DATE = "1300-01-01";
 
+function getScenarioStartDate(runtime) {
+  return runtime?.scenario?.startDate
+    ?? runtime?.world?.scenario?.startDate
+    ?? null;
+}
+
 function WorldMap({
   runtime,
   selectedProvinceId,
@@ -26,7 +32,8 @@ function WorldMap({
   const cameraState = camera.camera;
   const [internalSelectedCityId, setInternalSelectedCityId] = useState(null);
   const selectedCityId = controlledSelectedCityId ?? internalSelectedCityId;
-  const isHistoricalPoliticalMap = runtime?.scenario?.startDate === HISTORICAL_1300_DATE;
+  const scenarioDate = getScenarioStartDate(runtime);
+  const isHistoricalPoliticalMap = scenarioDate === HISTORICAL_1300_DATE;
 
   const cameraInput = useCameraController({
     zoom: camera.zoom,
@@ -47,11 +54,11 @@ function WorldMap({
   const politicalRegions = useMemo(
     () => (
       <HistoricalPoliticalRegionLayer
-        date={runtime?.scenario?.startDate ?? "1300-01-01"}
+        date={scenarioDate}
         provinces={provinces}
       />
     ),
-    [runtime?.scenario?.startDate, provinces],
+    [scenarioDate, provinces],
   );
 
   const provincesLayer = useMemo(
