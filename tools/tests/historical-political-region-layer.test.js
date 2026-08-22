@@ -37,6 +37,11 @@ assert.equal(
   true,
   "every province must have a visible historical political presentation, including neutral areas",
 );
+assert.equal(
+  politicalModel.every((entry) => /^#[0-9a-f]{6}$/i.test(entry.historicalPolitical?.color ?? "")),
+  true,
+  "every province presentation must provide an explicit political colour",
+);
 
 const byProvince = new Map(politicalModel.map((entry) => [entry.province.id, entry]));
 assert.equal(byProvince.get("cappadocia-kayseri").historicalPolitical.id, "ilkhanate");
