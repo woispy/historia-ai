@@ -74,4 +74,21 @@ async function handleAIRequest(request, response) {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), aiApiPlugin()],
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            {
+              name: "world-geometry",
+              test: /[\\/]src[\\/]world[\\/]map[\\/]assets[\\/]geometry[\\/]geometry_country_.*\\.json$/,
+              minSize: 20_000,
+              maxSize: 350_000,
+              priority: 20,
+            },
+          ],
+        },
+      },
+    },
+  },
 })
