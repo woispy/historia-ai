@@ -48,9 +48,16 @@ function findNearestCoastSegment(point) {
   let best = null;
 
   for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
-    for (let index = 0; index < polygon.length - 1; index += 1) {
+    if (!Array.isArray(polygon) || polygon.length < 2) continue;
+
+    // Physical land rings are allowed to be either explicitly closed or
+    // implicitly closed. The previous implementation omitted the final→first
+    // edge for implicitly closed rings, which could select an inland segment
+    // for coastal provinces such as Pergamon. Political coastline coverage must
+    // use the exact same closed-ring edge set as the physical coastline tests.
+    for (let index = 0; index < polygon.length; index += 1) {
       const start = polygon[index];
-      const end = polygon[index + 1];
+      const end = polygon[(index + 1) % polygon.length];
       const distance = pointToSegmentDistanceSquared(point, start, end);
       if (!best || distance < best.distance) {
         best = { start, end, distance };
