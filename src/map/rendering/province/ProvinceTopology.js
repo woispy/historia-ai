@@ -76,6 +76,13 @@ export function getGeometryBounds(geometry) {
   };
 }
 
+function getPoliticalOwnerId(item) {
+  const historicalPoliticalId = item?.historicalPolitical?.id;
+  if (historicalPoliticalId) return historicalPoliticalId;
+
+  return item?.province?.owner ?? null;
+}
+
 export function buildProvinceTopology(provinces = []) {
   const nodes = new Map();
   const edgeIndex = new Map();
@@ -89,7 +96,7 @@ export function buildProvinceTopology(provinces = []) {
     const bounds = getGeometryBounds(geometry);
     nodes.set(id, {
       id,
-      ownerId: item.province.owner ?? null,
+      ownerId: getPoliticalOwnerId(item),
       bounds,
       neighbors: new Set(),
     });
