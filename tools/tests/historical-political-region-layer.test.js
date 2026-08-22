@@ -1,9 +1,32 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import historicalAtlas from "../../data/gis/1300/regional/anatolia-byzantium.json" with { type: "json" };
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 import { createHistoricalPoliticalMapModel } from "../../src/world/map/historical/HistoricalPoliticalMapModel.js";
 import { getHistoricalPolity } from "../../src/world/map/historical/HistoricalPoliticalRuntime.js";
 import { getHistoricalPoliticalOverlayMode } from "../../src/map/components/layers/HistoricalPoliticalOverlayModel.js";
+
+const layerSource = readFileSync(
+  resolve("src/map/components/layers/HistoricalPoliticalRegionLayer.jsx"),
+  "utf8",
+);
+
+assert.match(
+  layerSource,
+  /clipPath="url\(#world-land-mask\)"/,
+  "historical political rendering must be clipped to the physical world land mask",
+);
+assert.match(
+  layerSource,
+  /aria-label="Historical unassigned land presentation"/,
+  "historical political rendering must provide a visible fallback for land without a source polity",
+);
+assert.match(
+  layerSource,
+  /fill=\{DEFAULT_POLITICAL_COLOR\}/,
+  "historical unassigned land presentation must use the explicit neutral political colour",
+);
 
 assert.equal(historicalAtlas.historicalDate, "1300-01-01");
 assert.ok(Array.isArray(historicalAtlas.regions));
