@@ -1,3 +1,5 @@
+import { getHistoricalPoliticalOverlayMode } from "./HistoricalPoliticalOverlayModel";
+
 const HISTORICAL_1300_DATE = "1300-01-01";
 
 function buildPathData(polygons) {
@@ -15,20 +17,6 @@ function buildPathData(polygons) {
     })
     .filter(Boolean)
     .join(" ");
-}
-
-function normalizeStatus(value) {
-  return String(value ?? "").trim().toLowerCase();
-}
-
-export function getHistoricalPoliticalOverlayMode(entry) {
-  const status = normalizeStatus(entry?.historicalProvince?.controlStatus);
-  if (status === "ilkhanid-suzerainty") return "suzerainty";
-  if (status.includes("contested") || status.includes("frontier")) return "contested";
-  if (!entry?.historicalPolitical?.id || entry.historicalPolitical.id === "local_polities") {
-    return "neutral";
-  }
-  return "sovereign";
 }
 
 function PoliticalOverlayDefs() {
