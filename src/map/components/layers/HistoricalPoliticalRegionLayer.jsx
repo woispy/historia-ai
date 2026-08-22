@@ -1,6 +1,7 @@
 import { getHistoricalPoliticalOverlayMode } from "./HistoricalPoliticalOverlayModel";
 
 const HISTORICAL_1300_DATE = "1300-01-01";
+const DEFAULT_POLITICAL_COLOR = "#6f765f";
 
 function buildPathData(polygons) {
   if (!Array.isArray(polygons)) return "";
@@ -35,6 +36,19 @@ function PoliticalOverlayDefs() {
   );
 }
 
+function getPoliticalColor(entry) {
+  return entry?.historicalPolitical?.color
+    ?? entry?.country?.color
+    ?? DEFAULT_POLITICAL_COLOR;
+}
+
+function getPoliticalFillOpacity(mode) {
+  if (mode === "neutral") return 0.72;
+  if (mode === "contested") return 0.82;
+  if (mode === "suzerainty") return 0.88;
+  return 0.90;
+}
+
 function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces = [] }) {
   if (date !== HISTORICAL_1300_DATE) return null;
 
@@ -46,22 +60,32 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
         if (!d) return null;
 
         const mode = getHistoricalPoliticalOverlayMode(entry);
-        if (mode === "sovereign") return null;
-
+        const color = getPoliticalColor(entry);
         const pattern = mode === "suzerainty"
           ? "url(#historical-suzerainty-hatch)"
           : mode === "contested"
             ? "url(#historical-contested-hatch)"
-            : "url(#historical-neutral-hatch)";
+            : mode === "neutral"
+              ? "url(#historical-neutral-hatch)"
+              : null;
 
         return (
-          <path
-            key={entry?.province?.id ?? entry?.historicalProvince?.id}
-            d={d}
-            fill={pattern}
-            fillOpacity={mode === "neutral" ? 0.34 : 0.48}
-            stroke="none"
-          />
+          <g key={entry?.province?.id ?? entry?.historicalProvince?.id}>
+            <path
+              d={d}
+              fill={color}
+              fillOpacity={getPoliticalFillOpacity(mode)}
+              stroke="none"
+            />
+            {pattern && (
+              <path
+                d={d}
+                fill={pattern}
+                fillOpacity={mode === "neutral" ? 0.42 : 0.55}
+                stroke="none"
+              />
+            )}
+          </g>
         );
       })}
     </g>
