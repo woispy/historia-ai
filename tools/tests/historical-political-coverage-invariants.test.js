@@ -1,9 +1,15 @@
 import assert from "node:assert/strict";
+import { readdirSync, readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
+import { collectWorldLandPolygons } from "../../src/map/physical/WorldLandMask.js";
 import {
   auditHistoricalPoliticalCoverage,
   pointInPolygon,
 } from "../../src/world/map/historical/HistoricalPoliticalCoverageInvariants.js";
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
 test("historical political coverage detects land gaps", () => {
   const landPolygons = [
@@ -47,4 +53,35 @@ test("historical political coverage passes when land and political extents coinc
 
 test("point-in-polygon treats coastline points as covered", () => {
   assert.equal(pointInPolygon([0, 5], [[0, 0], [10, 0], [10, 10], [0, 10]]), true);
+});
+
+test("generated 1300 political geometry covers physical land and never samples outside it", () => {
+  const geometryDirectory = resolve(root, "src/world/map/assets/geometry");
+  const geometryFiles = readdirSync(geometryDirectory)
+    .filter((fileName) => /^geometry_country_.*\.json$/.test(fileName));
+  const generatedGeometryModules = Object.fromEntries(
+    geometryFiles.map((fileName) => [
+      fileName,
+      { default: JSON.parse(readFileSync(resolve(geometryDirectory, fileName), "utf8")) },
+    ]),
+  );
+  const landPolygons = collectWorldLandPolygons(generatedGeometryModules);
+
+  const manifestPath = resolve(root, "src/world/map/assets/historical/1300/manifest.json");
+  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+  const politicalEntries = manifest.regions.flatMap((region) => {
+    const regionAsset = JSON.parse(
+      readFileSync(resolve(root, "src/world/map/assets/historical/1300", region.file), "utf8"),
+    );
+    return regionAsset.geometries ?? [];
+  });
+
+  assert.ok(landPolygons.length > 0, "Generated physical land geometry must exist before the coverage audit.");
+  assert.ok(politicalEntries.length > 0, "Generated 1300 political geometry must exist before the coverage audit.");
+
+  const audit = auditHistoricalPoliticalCoverage({ landPolygons, politicalEntries });
+  assert.equal(audit.pass, true, audit.pass
+    ? ""
+    : `1300 political coverage failed: ${audit.uncoveredLandSamples.length} uncovered land samples, `
+      + `${audit.politicalSamplesOutsideLand.length} political samples outside physical land.`);
 });
