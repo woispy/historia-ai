@@ -1,11 +1,13 @@
-import { WORLD_LAND_PATH } from "../physical/WorldPhysicalAtlas";
-
 /**
  * Historia AI — SVG Renderer
  *
  * One SVG root owns the map and renders exactly one finite world copy. The
  * camera is clamped to that world, so physical geography, political fills and
  * interaction geometry always occupy the same coordinate space.
+ *
+ * The global land geometry is intentionally not referenced here. It is a
+ * map-time resource owned by WorldPhysicalLayer, which keeps Natural Earth
+ * geometry out of the renderer/bootstrap dependency graph.
  */
 function SvgRenderer({ children, camera = {} }) {
   const zoom = Math.max(1, Number(camera.zoom ?? 1));
@@ -27,9 +29,6 @@ function SvgRenderer({ children, camera = {} }) {
       style={{ display: "block" }}
     >
       <defs>
-        <clipPath id="world-land-mask" clipPathUnits="userSpaceOnUse">
-          <path d={WORLD_LAND_PATH} fillRule="evenodd" />
-        </clipPath>
         <filter id="map-label-halo" x="-30%" y="-45%" width="160%" height="190%">
           <feGaussianBlur in="SourceAlpha" stdDeviation="1.15" result="blur" />
           <feFlood floodColor="#071011" floodOpacity="0.82" result="color" />
