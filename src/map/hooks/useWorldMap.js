@@ -31,7 +31,7 @@ function getCuratedProvinceId(geometry, geometryId) {
   return candidates.find((candidate) => CURATED_ANATOLIA_IDS.has(candidate)) ?? null;
 }
 
-function buildHistoricalWorldSourceProvinces(sourceProvinces, geometryRepository) {
+export function buildHistoricalWorldSourceProvinces(sourceProvinces, geometryRepository) {
   const byId = new Map(sourceProvinces.map((province) => [province.id, province]));
 
   for (const geometryId of geometryRepository?.allIds ?? []) {
