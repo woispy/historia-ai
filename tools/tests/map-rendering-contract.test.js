@@ -8,6 +8,7 @@ const read = (path) => readFileSync(resolve(root, path), "utf8").replace(/\r\n/g
 const svgRenderer = read("src/map/rendering/SvgRenderer.jsx");
 const worldMap = read("src/map/components/WorldMap.jsx");
 const useWorldMap = read("src/map/hooks/useWorldMap.js");
+const historicalPoliticalLayer = read("src/map/components/layers/HistoricalPoliticalRegionLayer.jsx");
 const geometryBootstrap = read("src/world/map/geometry/GeometryBootstrap.js");
 const historicalGeometryLoader = read("src/world/map/geometry/loader/HistoricalGeometryRepositoryLoader.js");
 const mapView = read("src/components/GameShell/MapView/MapView.jsx");
@@ -77,6 +78,16 @@ assert.match(geometryBootstrap, /await loadHistoricalGeometryRepository\(date\)/
 assert.match(historicalGeometryLoader, /export async function loadHistoricalGeometryRepository/);
 assert.match(historicalGeometryLoader, /await loadHistoricalRuntimeAsset\(date\)/);
 
+// Historical political geometry has two explicit scopes. The 38 curated
+// Phase 2D Anatolia provinces use the P0 physical atlas; source-derived world
+// regions use the global land mask. A generic historicalProvince record must
+// never silently route the whole world through the Anatolia clip.
+assert.match(useWorldMap, /geometryAuthority: "anatolia-curated"/);
+assert.match(useWorldMap, /geometryAuthority: "world-source"/);
+assert.match(historicalPoliticalLayer, /geometryAuthority === "anatolia-curated"/);
+assert.match(historicalPoliticalLayer, /return "url\(#world-land-mask\)"/);
+assert.match(historicalPoliticalLayer, /fillOpacity="0\.24"/);
+
 // Province paths remain explicit interaction surfaces.
 assert.ok(provincePolygon.includes("pointerEvents=\"all\""));
 assert.ok(provincePolygon.includes("pointerEvents: \"all\""));
@@ -114,4 +125,4 @@ assert.ok(!cityLayer.includes("fortified &&"));
 assert.ok(!worldMap.includes('phase="base"'));
 assert.ok(!worldMap.includes('phase="water"'));
 
-console.log("Map rendering contract tests passed: one synchronized world, explicit province interaction, one lazy physical coastline authority, async deferred geometry bootstrap with stale-response guard, and no obsolete GPU province compositor.");
+console.log("Map rendering contract tests passed: one synchronized world, explicit province interaction, one lazy physical coastline authority, async deferred geometry bootstrap with stale-response guard, historical political scope separation, and no obsolete GPU province compositor.");
