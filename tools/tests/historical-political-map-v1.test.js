@@ -5,7 +5,7 @@ import { createHistoricalPoliticalMapModel } from "../../src/world/map/historica
 import { createHistoricalPoliticalPresentation } from "../../src/world/map/historical/HistoricalPoliticalPresentation.js";
 
 const countries = Object.fromEntries([
-  ["local_polities", { id: "local_polities", name: "Local Polities", color: "#6f765f" }],
+  ["local_polities", { id: "local_polities", name: "Local Polities", color: "#777777" }],
   ["byzantium", { id: "byzantium", name: "Eastern Roman Empire", color: "#6A1B9A" }],
   ["ottomans", { id: "ottomans", name: "Ottoman Beylik", color: "#0F7A32" }],
   ["karasi", { id: "karasi", name: "Karasi Beylik", color: "#B87333" }],
@@ -18,6 +18,7 @@ const countries = Object.fromEntries([
   ["sahibata", { id: "sahibata", name: "Sâhib Ata Beyliği", color: "#806A4A" }],
   ["karaman", { id: "karaman", name: "Karamanid Beylik", color: "#A33F3F" }],
   ["pervane", { id: "pervane", name: "Pervâneoğlu Beylik", color: "#6B7280" }],
+  ["cobanid", { id: "cobanid", name: "Çobanoğulları Beylik", color: "#8A7358" }],
   ["candar", { id: "candar", name: "Candarid Beylik", color: "#7A6A3A" }],
   ["trebizond", { id: "trebizond", name: "Empire of Trebizond", color: "#4A7896" }],
   ["cilicia", { id: "cilicia", name: "Kingdom of Cilicia", color: "#8B4A62" }],
@@ -53,7 +54,7 @@ assert.equal(model.find((entry) => entry.province.id === "phrygia-uluborlu").cou
 assert.equal(model.find((entry) => entry.province.id === "phrygia-afyon").country.id, "sahibata");
 assert.equal(model.find((entry) => entry.province.id === "lycaonia-konya").country.id, "karaman");
 assert.equal(model.find((entry) => entry.province.id === "pontus-sinop").country.id, "pervane");
-assert.equal(model.find((entry) => entry.province.id === "pontus-kastamon").country.id, "candar");
+assert.equal(model.find((entry) => entry.province.id === "pontus-kastamon").country.id, "cobanid");
 assert.equal(model.find((entry) => entry.province.id === "pontus-trebizond").country.id, "trebizond");
 assert.equal(model.find((entry) => entry.province.id === "cilicia-sis").country.id, "cilicia");
 assert.equal(model.find((entry) => entry.province.id === "ionia-ayasuluk").country.id, "byzantium");
@@ -92,6 +93,11 @@ for (const provinceId of ["phrygia-eskisehir", "lydia-smyrna", "galatia-ankara",
   assert.ok(entry.country, `${provinceId} must never render without a political presentation`);
   assert.equal(entry.country.id, "local_polities");
 }
+
+assert.equal(
+  model.find((entry) => entry.province.id === "cappadocia-kayseri").historicalPolitical.id,
+  "ilkhanate",
+);
 
 const anachronisticOwnerProvince = sourceProvinces.find((province) => province.id === "phrygia-eskisehir");
 assert.equal(anachronisticOwnerProvince.owner, "ottomans");
