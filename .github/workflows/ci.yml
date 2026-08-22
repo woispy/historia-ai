@@ -82,6 +82,8 @@ jobs:
         run: npm run test:historical-gis
       - name: Run historical runtime regionalization tests
         run: npm run test:historical-runtime-regions
+      - name: Benchmark historical runtime region payloads
+        run: node tools/tests/historical-runtime-region-benchmark.test.js
       - name: Run physical geography tests
         run: npm run test:physical-geography
       - name: Run Natural Earth 10m hydrography tests
