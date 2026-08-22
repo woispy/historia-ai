@@ -23,16 +23,20 @@ const byProvince = new Map(states.map((state) => [state.provinceId, state]));
 assert.equal(byProvince.get("bithynia-nicaea").sovereignPolityId, "byzantium");
 assert.equal(byProvince.get("phrygia-sogut").sovereignPolityId, "ottomans");
 assert.equal(byProvince.get("phrygia-kutahya").sovereignPolityId, "germiyan");
+assert.equal(byProvince.get("phrygia-denizli").sovereignPolityId, "inanc");
+assert.equal(byProvince.get("phrygia-uluborlu").sovereignPolityId, "hamid");
+assert.equal(byProvince.get("pisidia-egirdir").sovereignPolityId, "hamid");
+assert.equal(byProvince.get("phrygia-afyon").sovereignPolityId, "sahibata");
 assert.equal(byProvince.get("pontus-sinop").sovereignPolityId, "pervane");
 assert.equal(byProvince.get("pontus-trebizond").sovereignPolityId, "trebizond");
 assert.equal(byProvince.get("cilicia-sis").sovereignPolityId, "cilicia");
+assert.equal(byProvince.get("ionia-ayasuluk").sovereignPolityId, "byzantium");
+assert.equal(byProvince.get("lydia-birgi").sovereignPolityId, "byzantium");
 assert.equal(byProvince.get("cappadocia-kayseri").sovereignPolityId, null);
 assert.equal(byProvince.get("cappadocia-kayseri").suzeraintyPolityId, "ilkhanate");
 assert.equal(byProvince.get("cappadocia-kayseri").controlMode, "layered-suzerainty");
 assert.equal(byProvince.get("galatia-ankara").controlMode, "layered-suzerainty");
 assert.equal(byProvince.get("phrygia-eskisehir").controlMode, "contested-frontier");
-assert.equal(byProvince.get("ionia-ayasuluk").sovereignPolityId, null);
-assert.equal(byProvince.get("ionia-ayasuluk").suzeraintyPolityId, null);
 
 assert.throws(
   () => createHistoricalProvincePoliticalStates({ date: "1300", provinces: runtime.provinces }),
