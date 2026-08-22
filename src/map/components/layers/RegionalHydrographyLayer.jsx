@@ -3,12 +3,11 @@ import { ANATOLIA_PHYSICAL_ATLAS } from "../../data/AnatoliaPhysicalAtlas.js";
 import { createHydrographyRegionLoader } from "../../physical/HydrographyRegionLoader.js";
 import { selectHydrographyRegions } from "../../physical/HydrographyViewportSelector.js";
 import { getViewportBounds } from "../../rendering/MapViewportCulling.js";
-import { exactAreaPath, flattenCoordinatePoints, linearPathFromCoordinates } from "../../rendering/physical/PhysicalGeometryPath.js";
+import { exactAreaPath, flattenCoordinatePoints, linearPathFromCoordinates, polygonPath } from "../../rendering/physical/PhysicalGeometryPath.js";
 import { filterVisibleLakes, filterVisibleRivers } from "../../rendering/physical/PhysicalFeatureVisibility.js";
-import { getPhysicalPresentation, getPhysicalStrokeProfile } from "../../rendering/CartographyModel.js";
+import { getPhysicalDetailProfile, getPhysicalPresentation, getPhysicalStrokeProfile } from "../../rendering/CartographyModel.js";
 
 const LAND_CLIP_ID = "physical-anatolia-land-clip";
-const TERRAIN_LAND_CLIP_ID = "physical-anatolia-terrain-land-clip";
 const loader = createHydrographyRegionLoader({ maxCachedRegions: 8 });
 
 function boundsFromFeature(feature) {
@@ -32,14 +31,9 @@ function visible(feature, camera) {
 }
 
 function normalizeRegionFeature(feature, kind) {
-  if (kind === "lake") {
-    return {
-      ...feature,
-      coordinates: feature.rings?.[0] ?? feature.coordinates ?? [],
-      rings: feature.rings,
-    };
-  }
-  return feature;
+  return kind === "lake"
+    ? { ...feature, coordinates: feature.rings?.[0] ?? feature.coordinates ?? [], rings: feature.rings }
+    : feature;
 }
 
 function mergeRegions(regions) {
@@ -68,16 +62,13 @@ function Lake({ feature, opacity }) {
   return d ? <path d={d} className="map-lake" opacity={opacity} fillRule="evenodd" pointerEvents="none" /> : null;
 }
 
-function RegionalHydrographyLayer({ zoom, camera, profile }) {
+function RegionalHydrographyLayer({ zoom, camera }) {
+  const profile = getPhysicalDetailProfile(zoom);
   const [manifest, setManifest] = useState(null);
   const [regions, setRegions] = useState([]);
-
   const viewport = useMemo(() => getViewportBounds(camera, 0.2), [camera]);
   const selectorViewport = useMemo(() => ({
-    minLon: viewport.minX,
-    maxLon: viewport.maxX,
-    minLat: viewport.minY,
-    maxLat: viewport.maxY,
+    minLon: viewport.minX, maxLon: viewport.maxX, minLat: viewport.minY, maxLat: viewport.maxY,
   }), [viewport]);
   const regionIds = useMemo(
     () => (manifest ? selectHydrographyRegions(manifest, selectorViewport, 8) : []),
@@ -109,20 +100,15 @@ function RegionalHydrographyLayer({ zoom, camera, profile }) {
   const stroke = getPhysicalStrokeProfile(zoom);
   const rivers = profile.rivers ? filterVisibleRivers(hydrography.rivers, zoom).filter((river) => visible(river, camera)) : [];
   const lakes = profile.lakes ? filterVisibleLakes(hydrography.lakes, zoom).filter((lake) => visible(lake, camera)) : [];
-  const landPath = ANATOLIA_PHYSICAL_ATLAS.landPolygons;
-  const lakePath = hydrography.lakes.map((lake) => exactAreaPath(lake.rings ?? [lake.coordinates])).filter(Boolean).join(" ");
+  const landPath = polygonPath(ANATOLIA_PHYSICAL_ATLAS.landPolygons);
 
   return (
     <>
       <defs>
         <clipPath id={LAND_CLIP_ID} clipPathUnits="userSpaceOnUse">
-          <path d={landPath.map((polygon) => polygon.map(([x, y]) => `${x},${y}`).join(" ")).join(" ")} fillRule="evenodd" />
-        </clipPath>
-        <clipPath id={TERRAIN_LAND_CLIP_ID} clipPathUnits="userSpaceOnUse">
-          <path d={`${landPath.map((polygon) => polygon.map(([x, y]) => `${x},${y}`).join(" ")).join(" ")} ${lakePath}`} fillRule="evenodd" />
+          <path d={landPath} fillRule="evenodd" />
         </clipPath>
       </defs>
-      <path d="" aria-hidden="true" style={{ display: "none" }} />
       <g clipPath={`url(#${LAND_CLIP_ID})`}>
         {rivers.map((river) => (
           <River key={river.id} feature={river} width={river.rank === 1 ? stroke.river : stroke.minorRiver} underWidth={river.rank === 1 ? stroke.river + 1.1 : stroke.minorRiver + 0.8} opacity={river.rank === 1 ? presentation.riverOpacity : presentation.riverOpacity * 0.72} />
