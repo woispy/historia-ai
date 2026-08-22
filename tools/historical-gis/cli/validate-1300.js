@@ -12,6 +12,12 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+function validateBounds(bounds, label) {
+  assert(bounds && Number.isFinite(bounds.minX) && Number.isFinite(bounds.maxX) && Number.isFinite(bounds.minY) && Number.isFinite(bounds.maxY), `${label} has invalid bounds.`);
+  assert(bounds.minX <= bounds.maxX && bounds.minY <= bounds.maxY, `${label} has inverted bounds.`);
+  assert(bounds.minX >= -180 && bounds.maxX <= 180 && bounds.minY >= -90 && bounds.maxY <= 90, `${label} bounds are outside EPSG:4326.`);
+}
+
 function validatePolygonRing(polygon, label) {
   assert(Array.isArray(polygon) && polygon.length >= 3, `${label} has an invalid polygon ring.`);
   for (const coordinate of polygon) {
@@ -28,7 +34,7 @@ const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
 
 assert(Array.isArray(sourceRaw.features), "Historical GIS source must contain a features array.");
 assert(sourceRaw.features.length === normalizedRegions.length, `Source/normalized feature count mismatch: ${sourceRaw.features.length} vs ${normalizedRegions.length}.`);
-assert(manifest.schemaVersion === 1, "Unsupported historical runtime manifest schema.");
+assert(manifest.schemaVersion === 2, "Unsupported historical runtime manifest schema.");
 assert(manifest.assetType === "historical-runtime-manifest", "Invalid historical runtime manifest type.");
 assert(manifest.historicalDate === "1300-01-01", "Historical runtime manifest date mismatch.");
 assert(Array.isArray(manifest.regions) && manifest.regions.length >= 2, "Historical runtime must contain multiple regions.");
@@ -39,10 +45,13 @@ assert(manifest.source?.phase2D?.provinceCount === 38, "Phase 2D must provide ex
 
 const regionAssets = [];
 for (const region of manifest.regions) {
+  validateBounds(region.bounds, `Manifest region ${region.id}`);
   const asset = JSON.parse(await fs.readFile(path.join(runtimeDir, region.file), "utf8"));
   assert(asset.assetType === "historical-runtime-region", `Invalid historical runtime region asset: ${region.id}.`);
   assert(asset.regionId === region.id, `Region identity mismatch: ${region.id}.`);
   assert(asset.historicalDate === manifest.historicalDate, `Region date mismatch: ${region.id}.`);
+  validateBounds(asset.bounds, `Region asset ${region.id}`);
+  assert(JSON.stringify(asset.bounds) === JSON.stringify(region.bounds), `Region bounds mismatch: ${region.id}.`);
   assert(asset.counts?.provinces === asset.provinces.length, `Region province count mismatch: ${region.id}.`);
   assert(asset.counts?.geometries === asset.geometries.length, `Region geometry count mismatch: ${region.id}.`);
   regionAssets.push(asset);
