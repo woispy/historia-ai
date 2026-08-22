@@ -1,15 +1,9 @@
 const viteHistoricalRuntimeManifestAssets = import.meta.env
-  ? import.meta.glob(
-      "../assets/historical/*/manifest.json",
-      { import: "default" },
-    )
+  ? import.meta.glob("../assets/historical/*/manifest.json", { import: "default" })
   : null;
 
 const viteHistoricalRuntimeRegionAssets = import.meta.env
-  ? import.meta.glob(
-      "../assets/historical/*/regions/*.json",
-      { import: "default" },
-    )
+  ? import.meta.glob("../assets/historical/*/regions/*.json", { import: "default" })
   : null;
 
 const runtimeCache = new Map();
@@ -19,8 +13,7 @@ const manifestCache = new Map();
 const nodeProcess = globalThis.process;
 
 const nodeFs =
-  nodeProcess &&
-  typeof nodeProcess.getBuiltinModule === "function"
+  nodeProcess && typeof nodeProcess.getBuiltinModule === "function"
     ? nodeProcess.getBuiltinModule("fs")
     : null;
 
@@ -154,9 +147,7 @@ export async function loadHistoricalRuntimeAsset(date, regionIds = null) {
     throw new Error(`Historical runtime regions are missing for ${year}: ${missing.join(", ")}`);
   }
 
-  const loadedRegions = await Promise.all(
-    selectedRegions.map((region) => loadRegion(year, region)),
-  );
+  const loadedRegions = await Promise.all(selectedRegions.map((region) => loadRegion(year, region)));
   if (loadedRegions.some((region) => !region)) {
     throw new Error(`Historical runtime region asset is missing for ${year}.`);
   }
@@ -175,6 +166,14 @@ export async function loadHistoricalRuntimeRegions(date, regionIds) {
 
 export async function loadHistoricalRuntimeManifest(date) {
   return loadManifest(normalizeYear(date));
+}
+
+export async function loadHistoricalRuntimeProvinceIndex(date) {
+  const manifest = await loadManifest(normalizeYear(date));
+  if (!Array.isArray(manifest?.provinceIndex)) {
+    throw new Error(`Historical runtime province index is missing for ${normalizeYear(date)}.`);
+  }
+  return manifest.provinceIndex;
 }
 
 export function clearHistoricalRuntimeCache() {
