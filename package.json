@@ -11,6 +11,7 @@
     "build:historical-gis:1300": "node tools/historical-gis/cli/import-1300.js",
     "test:historical-gis": "node tools/historical-gis/cli/test-1300.js",
     "test:historical-runtime-regions": "node tools/tests/historical-runtime-regions.test.js",
+    "test:historical-runtime-region-benchmark": "node tools/tests/historical-runtime-region-benchmark.test.js",
     "test:physical-geography": "node tools/tests/physical-geography-1300.test.js",
     "test:hydrography-10m": "node tools/tests/hydrography-10m.test.js",
     "test:hydrography-visibility": "node tools/tests/hydrography-visibility.test.js",
