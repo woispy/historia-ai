@@ -21,6 +21,13 @@ assert.deepEqual(
   ["anatolia", "balkans"],
 );
 
+// This viewport straddles the shared Y=35 boundary and therefore intersects
+// all three fixture regions: Balkans, Levant, and Anatolia.
+assert.deepEqual(
+  selectHistoricalRuntimeRegionsByBounds(manifest, { minX: 30, minY: 34, maxX: 40, maxY: 36 }),
+  ["anatolia", "balkans", "levant"],
+);
+
 assert.deepEqual(
   selectHistoricalRuntimeRegionsByBounds(manifest, { minX: 44, minY: 34, maxX: 35, maxY: 28 }),
   ["anatolia", "levant"],
