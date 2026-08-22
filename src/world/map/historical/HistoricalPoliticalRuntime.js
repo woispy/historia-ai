@@ -24,6 +24,7 @@ const POLITY_DEFINITIONS = Object.freeze([
   ["trebizond", "Empire of Trebizond", "empire", "#4A7896"],
   ["ilkhanate", "Ilkhanate Suzerainty", "suzerain", "#3D73B9"],
   ["cilicia", "Kingdom of Cilicia", "kingdom", "#8B4A62"],
+  ["local_polities", "Unresolved Local Polities", "neutral", "#777777"],
 ]);
 
 const POLITY_BY_ID = new Map(
