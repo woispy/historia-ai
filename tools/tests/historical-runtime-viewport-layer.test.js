@@ -11,7 +11,7 @@ assert.match(layer, /loadHistoricalRuntimeRegions/);
 assert.match(layer, /requestGeneration/);
 assert.match(layer, /generation !== requestGeneration\.current/);
 assert.match(layer, /if \(!regionIds\.length\)/);
-assert.match(layer, /clipPath=\"url\(#world-land-mask\)\"/);
+assert.match(layer, /clipPath="url\(#world-land-mask\)"/);
 assert.match(layer, /fill=\{entry\.historicalPolitical\?\.color/);
 
 assert.match(worldMap, /isHistoricalPoliticalMap/);
