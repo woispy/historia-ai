@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { getProvinces } from "../../provinces";
 import { getCities } from "../../cities";
 import { getGeometry } from "../../world/map/geometry";
+import { bootstrapGeometry } from "../../world/map/geometry/GeometryBootstrap.js";
 import { createHistoricalPoliticalMapModel } from "../../world/map/historical/HistoricalPoliticalMapModel";
 import { createHistoricalWorldPoliticalPresentation } from "../../world/map/historical/HistoricalWorldPoliticalCoverage";
 
@@ -78,9 +79,10 @@ export function useWorldMap(gameSession) {
     const provinceRepository = gameSession.world.repositories.provinces;
     const cityRepository = gameSession.world.repositories.cities;
     const countryRepository = gameSession.world.repositories.countries;
-    const geometryRepository = gameSession.world.map.geometry;
-    const sourceProvinces = getProvinces(provinceRepository);
     const scenarioDate = getScenarioStartDate(gameSession);
+    const geometryRepository = gameSession.world.map.geometry
+      ?? bootstrapGeometry(scenarioDate);
+    const sourceProvinces = getProvinces(provinceRepository);
     const isHistorical1300 = scenarioDate === HISTORICAL_1300_DATE;
 
     // A dated world map is geometry-driven. The historical runtime asset contains
