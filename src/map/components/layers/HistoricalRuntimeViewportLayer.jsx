@@ -1,8 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  loadHistoricalRuntimeManifest,
-  loadHistoricalRuntimeRegions,
-} from "../../../world/map/loader/HistoricalRuntimeManifestLoader.js";
+import { loadHistoricalRuntimeManifest, loadHistoricalRuntimeRegions } from "../../../world/map/loader/HistoricalRuntimeManifestLoader.js";
 import { selectHistoricalRuntimeRegionsByBounds } from "../../../world/map/loader/HistoricalRuntimeRegionSelector.js";
 import { createHistoricalWorldPoliticalPresentation } from "../../../world/map/historical/HistoricalWorldPoliticalCoverage.js";
 import { getVisibleWorldBounds } from "../../camera/viewport/VisibleWorldBoundsService.js";
@@ -85,22 +82,26 @@ function HistoricalRuntimeViewportLayer({ date = HISTORICAL_1300_DATE, camera, v
     () => (manifest && bounds ? selectHistoricalRuntimeRegionsByBounds(manifest, bounds, maxRegions) : []),
     [manifest, bounds, maxRegions],
   );
+  const requestedRegionKey = regionIds.join(",");
+  const loadedRegionKey = runtime?.loadedRegions?.join(",") ?? "";
 
   useEffect(() => {
     let cancelled = false;
-    setError(null);
     loadHistoricalRuntimeManifest(date)
-      .then((value) => { if (!cancelled) setManifest(value); })
-      .catch((loadError) => { if (!cancelled) setError(loadError); });
+      .then((value) => {
+        if (cancelled) return;
+        setManifest(value);
+        setError(null);
+      })
+      .catch((loadError) => {
+        if (!cancelled) setError(loadError);
+      });
     return () => { cancelled = true; };
   }, [date]);
 
   useEffect(() => {
     const generation = ++requestGeneration.current;
-    if (!regionIds.length) {
-      setRuntime(null);
-      return undefined;
-    }
+    if (!regionIds.length) return undefined;
 
     let cancelled = false;
     loadHistoricalRuntimeRegions(date, regionIds)
@@ -117,7 +118,10 @@ function HistoricalRuntimeViewportLayer({ date = HISTORICAL_1300_DATE, camera, v
     return () => { cancelled = true; };
   }, [date, regionIds]);
 
-  const entries = useMemo(() => buildEntries(runtime), [runtime]);
+  const entries = useMemo(
+    () => (requestedRegionKey === loadedRegionKey ? buildEntries(runtime) : []),
+    [requestedRegionKey, loadedRegionKey, runtime],
+  );
   if (date !== HISTORICAL_1300_DATE || error) return null;
 
   return (
