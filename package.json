@@ -17,6 +17,7 @@
     "test:hydrography-visibility": "node tools/tests/hydrography-visibility.test.js",
     "test:hydrography-regions": "node tools/tests/hydrography-regions.test.js",
     "test:visible-world-bounds": "node tools/tests/visible-world-bounds.test.js",
+    "test:shared-spatial-region-selection": "node tools/tests/shared-spatial-region-selection.test.js",
     "test:world-map": "node tools/tests/world-land-mask.test.js",
     "test:historical-world": "node tools/tests/historical-world-1300.test.js",
     "test:historical-world-political-coverage": "node tools/tests/historical-world-political-coverage.test.js",
