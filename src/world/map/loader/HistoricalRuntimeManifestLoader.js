@@ -2,12 +2,12 @@ const viteHistoricalRuntimeAssets = import.meta.env
   ? import.meta.glob(
       "../assets/historical/*/runtime.json",
       {
-        eager: true,
         import: "default",
       }
     )
   : null;
 
+const runtimeCache = new Map();
 const nodeProcess = globalThis.process;
 
 const nodeFs =
@@ -21,35 +21,43 @@ function normalizeYear(value) {
 }
 
 function loadNodeHistoricalRuntimeAsset(year) {
-  if (!nodeFs) {
-    return null;
-  }
+  if (!nodeFs) return null;
 
   const fileUrl = new URL(
     `../assets/historical/${year}/runtime.json`,
     import.meta.url
   );
 
-  if (!nodeFs.existsSync(fileUrl)) {
-    return null;
-  }
+  if (!nodeFs.existsSync(fileUrl)) return null;
 
-  return JSON.parse(
-    nodeFs.readFileSync(fileUrl, "utf8")
-  );
+  return JSON.parse(nodeFs.readFileSync(fileUrl, "utf8"));
 }
 
-export function loadHistoricalRuntimeAsset(date) {
+export async function loadHistoricalRuntimeAsset(date) {
   const year = normalizeYear(date);
   if (!year) return null;
+
+  if (runtimeCache.has(year)) {
+    return runtimeCache.get(year);
+  }
 
   if (viteHistoricalRuntimeAssets) {
     const entry = Object.entries(viteHistoricalRuntimeAssets).find(([path]) =>
       path.includes(`/historical/${year}/runtime.json`)
     );
 
-    return entry?.[1] ?? null;
+    if (!entry?.[1]) return null;
+
+    const runtime = await entry[1]();
+    runtimeCache.set(year, runtime);
+    return runtime;
   }
 
-  return loadNodeHistoricalRuntimeAsset(year);
+  const runtime = loadNodeHistoricalRuntimeAsset(year);
+  runtimeCache.set(year, runtime);
+  return runtime;
+}
+
+export function clearHistoricalRuntimeCache() {
+  runtimeCache.clear();
 }
