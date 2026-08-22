@@ -31,6 +31,8 @@ for (const province of runtime.provinces) {
   assert.ok(province.cityId);
   assert.ok(Array.isArray(province.centroid));
   assert.notEqual(province.id, province.cityId, `${province.id} must remain distinct from its city anchor`);
+  assert.equal(typeof province.coastal, "boolean");
+  assert.equal(typeof province.port, "boolean");
 }
 
 assert.equal(provinceById.get("bithynia-nicomedia").polityId, "byzantium");
@@ -53,6 +55,11 @@ assert.equal(provinceById.get("pontus-trebizond").polityId, "trebizond");
 assert.equal(provinceById.get("cilicia-sis").polityId, "cilicia");
 assert.equal(provinceById.get("ionia-ayasuluk").polityId, "byzantium");
 assert.equal(provinceById.get("lydia-birgi").polityId, "byzantium");
+
+assert.equal(provinceById.get("bithynia-nicomedia").coastal, true);
+assert.equal(provinceById.get("pontus-sinop").coastal, true);
+assert.equal(provinceById.get("lydia-magnesia").coastal, false);
+assert.equal(provinceById.get("bithynia-nicomedia").port, true);
 
 assert.equal(politicalStateByProvinceId.get("ionia-ayasuluk").controlStatus, "Byzantine-coastal-before-1304");
 assert.equal(politicalStateByProvinceId.get("phrygia-denizli").controlConfidence, "high");
