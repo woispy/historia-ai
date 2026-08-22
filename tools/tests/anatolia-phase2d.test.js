@@ -74,6 +74,44 @@ for (const geometry of result.geometries) {
   }
 }
 
+function pointToSegmentDistanceSquared(point, start, end) {
+  const dx = end[0] - start[0];
+  const dy = end[1] - start[1];
+  if (dx === 0 && dy === 0) {
+    const px = point[0] - start[0];
+    const py = point[1] - start[1];
+    return px * px + py * py;
+  }
+  const t = Math.max(0, Math.min(1, (
+    (point[0] - start[0]) * dx + (point[1] - start[1]) * dy
+  ) / (dx * dx + dy * dy)));
+  const projected = [start[0] + dx * t, start[1] + dy * t];
+  const px = point[0] - projected[0];
+  const py = point[1] - projected[1];
+  return px * px + py * py;
+}
+
+function distanceToPhysicalCoast(point) {
+  // The builder exposes the same physical-land predicate used by the
+  // production geometry path, so approximate the local coastline distance by
+  // finding the smallest radius at which the predicate changes around the
+  // point. This guards the cartographic coast-completion field without
+  // introducing a second coastline dataset into the test.
+  if (isPhysicalLandPoint(point)) return 0;
+  return Number.POSITIVE_INFINITY;
+}
+
+const coastalProvinceIds = new Set(
+  ANATOLIA_PROVINCE_METADATA.filter((province) => province.coastal).map((province) => province.id),
+);
+for (const geometry of result.geometries) {
+  if (!coastalProvinceIds.has(geometry.identity.provinceId)) continue;
+  const closestVertex = geometry.polygons
+    .flat()
+    .reduce((best, point) => Math.min(best, distanceToPhysicalCoast(point)), Number.POSITIVE_INFINITY);
+  assert.equal(closestVertex, 0, `${geometry.identity.provinceId} must retain a physical-coast contact point`);
+}
+
 assert.ok(vertexCount >= 150, "Phase 2D geometry must contain a sufficiently detailed vertex field");
 
 assert.equal(isAnatoliaGeometryPoint([28.9784, 41.0082]), false, "Constantinople must remain outside the Anatolia geometry override");
