@@ -58,10 +58,13 @@ function getPoliticalFillOpacity(mode) {
 }
 
 function getPoliticalClipPath(entry) {
-  // The 38 curated Anatolia provinces were generated against the dedicated
-  // P0 physical atlas. The political layer therefore uses that same land
-  // authority, while source-derived world coverage stays on the global mask.
-  if (entry?.historicalProvince) return `url(#${HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID})`;
+  // Only the 38 curated Phase 2D Anatolia provinces use the dedicated P0
+  // physical atlas. Source-derived historical GIS regions must use the global
+  // land mask; treating every historicalProvince record as Anatolia geometry
+  // would clip the entire world political layer away.
+  if (entry?.historicalProvince?.geometryAuthority === "anatolia-curated") {
+    return `url(#${HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID})`;
+  }
   return "url(#world-land-mask)";
 }
 
