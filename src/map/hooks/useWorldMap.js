@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getProvinces } from "../../provinces";
 import { getCities } from "../../cities";
 import { getGeometry } from "../../world/map/geometry";
@@ -73,16 +73,62 @@ function createHistoricalWorldEntry(province, geometry, historicalEntry) {
 }
 
 export function useWorldMap(gameSession) {
+  const scenarioDate = getScenarioStartDate(gameSession);
+  const [geometryRepository, setGeometryRepository] = useState(
+    () => gameSession?.world?.map?.geometry ?? null,
+  );
+  const [geometryError, setGeometryError] = useState(null);
+
+  useEffect(() => {
+    let ignore = false;
+    const existingGeometry = gameSession?.world?.map?.geometry ?? null;
+
+    setGeometryRepository(existingGeometry);
+    setGeometryError(null);
+
+    if (!gameSession || existingGeometry) {
+      return () => {
+        ignore = true;
+      };
+    }
+
+    bootstrapGeometry(scenarioDate)
+      .then((repository) => {
+        if (ignore) return;
+        setGeometryRepository(repository);
+      })
+      .catch((error) => {
+        if (ignore) return;
+        console.error("[useWorldMap] Historical geometry bootstrap failed:", error);
+        setGeometryError(error);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [gameSession, scenarioDate]);
+
   return useMemo(() => {
-    if (!gameSession) return { provinces: [], cities: [] };
+    if (!gameSession) return { provinces: [], cities: [], geometryLoading: false, geometryError: null };
 
     const provinceRepository = gameSession.world.repositories.provinces;
     const cityRepository = gameSession.world.repositories.cities;
     const countryRepository = gameSession.world.repositories.countries;
-    const scenarioDate = getScenarioStartDate(gameSession);
-    const geometryRepository = gameSession.world.map.geometry
-      ?? bootstrapGeometry(scenarioDate);
     const sourceProvinces = getProvinces(provinceRepository);
+    const cities = getCities(cityRepository);
+
+    // MapFactory intentionally defers geometry construction. Until the lazy
+    // historical runtime asset resolves, keep the map mounted with no
+    // political/province entries instead of dereferencing a null repository.
+    if (!geometryRepository) {
+      return {
+        provinces: [],
+        cities,
+        geometryLoading: !geometryError,
+        geometryError,
+      };
+    }
+
     const isHistorical1300 = scenarioDate === HISTORICAL_1300_DATE;
 
     // A dated world map is geometry-driven. The historical runtime asset contains
@@ -131,8 +177,6 @@ export function useWorldMap(gameSession) {
         };
     });
 
-    const cities = getCities(cityRepository);
-
-    return { provinces, cities };
-  }, [gameSession]);
+    return { provinces, cities, geometryLoading: false, geometryError: null };
+  }, [gameSession, scenarioDate, geometryRepository, geometryError]);
 }
