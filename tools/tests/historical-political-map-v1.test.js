@@ -16,6 +16,8 @@ const countries = Object.fromEntries([
   ["karaman", { id: "karaman", name: "Karamanid Beylik", color: "#A33F3F" }],
   ["pervane", { id: "pervane", name: "Pervâneoğlu Beylik", color: "#6B7280" }],
   ["candar", { id: "candar", name: "Candarid Beylik", color: "#7A6A3A" }],
+  ["trebizond", { id: "trebizond", name: "Empire of Trebizond", color: "#4A7896" }],
+  ["cilicia", { id: "cilicia", name: "Kingdom of Cilicia", color: "#8B4A62" }],
 ].map(([id, country]) => [id, {
   ...country,
   id,
@@ -48,6 +50,8 @@ assert.equal(model.find((entry) => entry.province.id === "phrygia-kutahya").coun
 assert.equal(model.find((entry) => entry.province.id === "lycaonia-konya").country.id, "karaman");
 assert.equal(model.find((entry) => entry.province.id === "pontus-sinop").country.id, "pervane");
 assert.equal(model.find((entry) => entry.province.id === "pontus-kastamon").country.id, "candar");
+assert.equal(model.find((entry) => entry.province.id === "pontus-trebizond").country.id, "trebizond");
+assert.equal(model.find((entry) => entry.province.id === "cilicia-sis").country.id, "cilicia");
 
 for (const entry of model) {
   assert.equal(entry.country.type, "polity");
