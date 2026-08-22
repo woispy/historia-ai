@@ -14,6 +14,10 @@ function getScenarioStartDate(gameSession) {
     ?? null;
 }
 
+function getGeometryBootstrapKey(gameSession, scenarioDate) {
+  return `${gameSession?.id ?? "none"}:${scenarioDate ?? "none"}`;
+}
+
 function buildHistoricalWorldSourceProvinces(sourceProvinces, geometryRepository) {
   const byId = new Map(sourceProvinces.map((province) => [province.id, province]));
 
@@ -74,39 +78,44 @@ function createHistoricalWorldEntry(province, geometry, historicalEntry) {
 
 export function useWorldMap(gameSession) {
   const scenarioDate = getScenarioStartDate(gameSession);
-  const [geometryRepository, setGeometryRepository] = useState(
-    () => gameSession?.world?.map?.geometry ?? null,
-  );
-  const [geometryError, setGeometryError] = useState(null);
+  const existingGeometry = gameSession?.world?.map?.geometry ?? null;
+  const bootstrapKey = getGeometryBootstrapKey(gameSession, scenarioDate);
+  const [geometryBootstrapState, setGeometryBootstrapState] = useState(() => ({
+    key: bootstrapKey,
+    repository: existingGeometry,
+    error: null,
+  }));
 
   useEffect(() => {
-    let ignore = false;
-    const existingGeometry = gameSession?.world?.map?.geometry ?? null;
-
-    setGeometryRepository(existingGeometry);
-    setGeometryError(null);
-
     if (!gameSession || existingGeometry) {
-      return () => {
-        ignore = true;
-      };
+      return undefined;
     }
+
+    let ignore = false;
 
     bootstrapGeometry(scenarioDate)
       .then((repository) => {
         if (ignore) return;
-        setGeometryRepository(repository);
+        setGeometryBootstrapState({
+          key: bootstrapKey,
+          repository,
+          error: null,
+        });
       })
       .catch((error) => {
         if (ignore) return;
         console.error("[useWorldMap] Historical geometry bootstrap failed:", error);
-        setGeometryError(error);
+        setGeometryBootstrapState({
+          key: bootstrapKey,
+          repository: null,
+          error,
+        });
       });
 
     return () => {
       ignore = true;
     };
-  }, [gameSession, scenarioDate]);
+  }, [bootstrapKey, existingGeometry, gameSession, scenarioDate]);
 
   return useMemo(() => {
     if (!gameSession) return { provinces: [], cities: [], geometryLoading: false, geometryError: null };
@@ -116,6 +125,11 @@ export function useWorldMap(gameSession) {
     const countryRepository = gameSession.world.repositories.countries;
     const sourceProvinces = getProvinces(provinceRepository);
     const cities = getCities(cityRepository);
+    const geometryRepository = existingGeometry
+      ?? (geometryBootstrapState.key === bootstrapKey ? geometryBootstrapState.repository : null);
+    const geometryError = geometryBootstrapState.key === bootstrapKey
+      ? geometryBootstrapState.error
+      : null;
 
     // MapFactory intentionally defers geometry construction. Until the lazy
     // historical runtime asset resolves, keep the map mounted with no
@@ -178,5 +192,5 @@ export function useWorldMap(gameSession) {
     });
 
     return { provinces, cities, geometryLoading: false, geometryError: null };
-  }, [gameSession, scenarioDate, geometryRepository, geometryError]);
+  }, [gameSession, scenarioDate, existingGeometry, bootstrapKey, geometryBootstrapState]);
 }
