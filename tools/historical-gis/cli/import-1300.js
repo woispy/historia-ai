@@ -77,6 +77,7 @@ for (const regionId of [...regionIds].sort()) {
     .filter((geometry) => geometry.__runtimeRegion === regionId)
     .map(stripRuntimeRegion);
   const polygonCount = regionGeometries.reduce((total, geometry) => total + geometry.polygons.length, 0);
+  const bounds = calculateBounds(regionGeometries);
   const file = `regions/${regionId}.json`;
 
   await fs.writeFile(
@@ -86,6 +87,7 @@ for (const regionId of [...regionIds].sort()) {
       assetType: "historical-runtime-region",
       historicalDate: "1300-01-01",
       regionId,
+      bounds,
       source: {
         provider: "historical-basemaps",
         dataset: "world_1300.geojson",
@@ -110,6 +112,7 @@ for (const regionId of [...regionIds].sort()) {
   regionManifest.push({
     id: regionId,
     file,
+    bounds,
     provinceCount: regionProvinces.length,
     geometryCount: regionGeometries.length,
     polygonCount,
@@ -119,7 +122,7 @@ for (const regionId of [...regionIds].sort()) {
 await fs.writeFile(
   manifestPath,
   `${JSON.stringify({
-    schemaVersion: 1,
+    schemaVersion: 2,
     assetType: "historical-runtime-manifest",
     historicalDate: "1300-01-01",
     source: {
@@ -164,6 +167,28 @@ function stripRuntimeRegion(asset) {
   const sanitized = { ...asset };
   delete sanitized.__runtimeRegion;
   return sanitized;
+}
+
+function calculateBounds(geometryAssets) {
+  const values = geometryAssets.flatMap((geometry) => geometry.polygons ?? []).flat();
+  if (!values.length) throw new Error("Historical runtime region contains no polygon coordinates.");
+
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  for (const point of values) {
+    if (!Array.isArray(point) || point.length < 2 || !Number.isFinite(point[0]) || !Number.isFinite(point[1])) {
+      throw new Error("Historical runtime region contains an invalid polygon coordinate.");
+    }
+    minX = Math.min(minX, point[0]);
+    minY = Math.min(minY, point[1]);
+    maxX = Math.max(maxX, point[0]);
+    maxY = Math.max(maxY, point[1]);
+  }
+
+  return { minX, minY, maxX, maxY };
 }
 
 function classifyRuntimeRegion(region) {
