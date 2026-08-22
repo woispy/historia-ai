@@ -53,9 +53,6 @@ export function buildHistoricalWorldSourceProvinces(sourceProvinces, geometryRep
       geometryId,
       owner: null,
       controller: null,
-      historical: curatedProvinceId
-        ? { classification: "curated-regional-gameplay-overlay" }
-        : undefined,
     });
   }
 
@@ -75,7 +72,6 @@ export function buildHistoricalWorldSourceProvinces(sourceProvinces, geometryRep
       geometryId: metadata.id,
       owner: null,
       controller: null,
-      historical: { classification: "curated-regional-gameplay-overlay" },
     });
   }
 
