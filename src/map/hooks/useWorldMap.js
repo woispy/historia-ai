@@ -3,10 +3,15 @@ import { getProvinces } from "../../provinces";
 import { getCities } from "../../cities";
 import { getGeometry } from "../../world/map/geometry";
 import { bootstrapGeometry } from "../../world/map/geometry/GeometryBootstrap.js";
+import { ANATOLIA_PROVINCE_METADATA } from "../data/AnatoliaProvinceMetadata.js";
 import { createHistoricalPoliticalMapModel } from "../../world/map/historical/HistoricalPoliticalMapModel";
 import { createHistoricalWorldPoliticalPresentation } from "../../world/map/historical/HistoricalWorldPoliticalCoverage";
 
 const HISTORICAL_1300_DATE = "1300-01-01";
+const CURATED_ANATOLIA_IDS = new Set(ANATOLIA_PROVINCE_METADATA.map((province) => province.id));
+const CURATED_ANATOLIA_METADATA_BY_ID = new Map(
+  ANATOLIA_PROVINCE_METADATA.map((province) => [province.id, province]),
+);
 
 function getScenarioStartDate(gameSession) {
   return gameSession?.scenario?.startDate
@@ -18,19 +23,67 @@ function getGeometryBootstrapKey(gameSession, scenarioDate) {
   return `${gameSession?.id ?? "none"}:${scenarioDate ?? "none"}`;
 }
 
-function buildHistoricalWorldSourceProvinces(sourceProvinces, geometryRepository) {
+function getCuratedProvinceId(geometry, geometryId) {
+  const candidates = [
+    geometry?.metadata?.sourceFeatureId,
+    geometry?.identity?.provinceId,
+    geometry?.identity?.id,
+    geometryId,
+  ];
+
+  return candidates.find((candidate) => CURATED_ANATOLIA_IDS.has(candidate)) ?? null;
+}
+
+export function buildHistoricalWorldSourceProvinces(sourceProvinces, geometryRepository) {
   const byId = new Map(sourceProvinces.map((province) => [province.id, province]));
 
   for (const geometryId of geometryRepository?.allIds ?? []) {
-    if (byId.has(geometryId)) continue;
     const geometry = getGeometry(geometryRepository, geometryId);
     if (!geometry?.polygons?.length) continue;
 
-    byId.set(geometryId, {
-      id: geometryId,
-      name: geometry.metadata?.name ?? geometryId,
+    // Phase 2D geometry carries a stable curated sourceFeatureId. Reconcile
+    // that identity before the historical political model runs so the 38
+    // curated Anatolia provinces can never silently fall back to neutral land
+    // merely because a loader changed the runtime geometry key.
+    const curatedProvinceId = getCuratedProvinceId(geometry, geometryId);
+    const provinceId = curatedProvinceId ?? geometryId;
+
+    if (byId.has(provinceId)) {
+      if (curatedProvinceId) {
+        const existing = byId.get(provinceId);
+        byId.set(provinceId, {
+          ...existing,
+          name: geometry.metadata?.name ?? existing.name ?? provinceId,
+          geometryId,
+        });
+      }
+      continue;
+    }
+
+    byId.set(provinceId, {
+      id: provinceId,
+      name: geometry.metadata?.name ?? provinceId,
       type: "province",
       geometryId,
+      owner: null,
+      controller: null,
+    });
+  }
+
+  // Make the 38 curated identities explicit even when a runtime repository
+  // exposes a geometry through a non-curated alias. This is intentionally
+  // geometry-backed: no synthetic province is created without real geometry.
+  for (const metadata of ANATOLIA_PROVINCE_METADATA) {
+    if (byId.has(metadata.id)) continue;
+
+    const geometry = getGeometry(geometryRepository, metadata.id);
+    if (!geometry?.polygons?.length) continue;
+
+    byId.set(metadata.id, {
+      id: metadata.id,
+      name: metadata.name,
+      type: "province",
+      geometryId: metadata.id,
       owner: null,
       controller: null,
     });
@@ -41,14 +94,21 @@ function buildHistoricalWorldSourceProvinces(sourceProvinces, geometryRepository
 
 function createHistoricalWorldEntry(province, geometry, historicalEntry) {
   if (historicalEntry?.historicalProvince) {
+    const curatedMetadata = CURATED_ANATOLIA_METADATA_BY_ID.get(province.id);
+
     return {
       ...historicalEntry,
       geometry,
       // These are the curated Phase 2D 1300 Anatolia provinces. They use the
       // dedicated P0 physical atlas as their political coastline authority.
+      // Carry the canonical coastal/port flags forward explicitly because the
+      // political renderer uses them to add the small landward-safe coastline
+      // expansion before clipping to the physical land mask.
       historicalProvince: {
         ...historicalEntry.historicalProvince,
         geometryAuthority: "anatolia-curated",
+        coastal: curatedMetadata?.coastal === true,
+        port: curatedMetadata?.port === true,
       },
     };
   }
