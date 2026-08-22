@@ -19,7 +19,6 @@ on:
       - feat/phase2d-anatolia-province-geometry
       - feat/phase2efgh-cartography
       - feat/cartography-visual-refinement
-      - feat/cartography-foundation-v2
       - feat/map-gpu-texture-architecture
       - feat/p1-historical-political-map-foundation
   push:
@@ -56,9 +55,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22.22.0
           cache: npm
