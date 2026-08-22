@@ -9,7 +9,7 @@ import { getVerified1300Control } from "./Historical1300ControlOverrides.js";
 const POLITY_DEFINITIONS = Object.freeze([
   ["byzantium", "Byzantine Empire", "empire", "#6A1B9A"],
   ["ottomans", "Ottoman Beylik", "beylik", "#0F7A32"],
-  ["karasi", "Karasi Beylik", "beylik", "#B87333"],
+  ["karasi", "Karasi Beylik", "beylik", "#B87332"],
   ["saruhan", "Saruhan Beylik", "beylik", "#786A9D"],
   ["mentese", "Menteşe Beylik", "beylik", "#3E7C59"],
   ["esref", "Eşrefoğlu Beylik", "beylik", "#7B6840"],
@@ -79,6 +79,8 @@ function toHistoricalProvince(metadata, date) {
     cityId: metadata.cityId,
     regionId: metadata.regionId,
     centroid: metadata.centroid,
+    coastal: metadata.coastal === true,
+    port: metadata.port === true,
     polityId,
     controlStatus: control?.statusAt1300 ?? "unknown",
     controlConfidence: control?.confidence ?? "low",
