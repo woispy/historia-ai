@@ -8,13 +8,13 @@ import { createRepositories } from "./RepositoryBootstrap.js";
  * World Bootstrap
  * ============================================================================
  */
-export function bootstrapWorld(scenario) {
+export async function bootstrapWorld(scenario) {
   if (!scenario) {
     throw new Error("Scenario is required.");
   }
 
   const runtimeScenario = bootstrapScenario(scenario);
-  const repositories = createRepositories(runtimeScenario);
+  const repositories = await createRepositories(runtimeScenario);
   const map = createMap(repositories.provinces, runtimeScenario.startDate);
 
   return {
