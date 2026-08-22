@@ -3,10 +3,12 @@ import { getProvinces } from "../../provinces";
 import { getCities } from "../../cities";
 import { getGeometry } from "../../world/map/geometry";
 import { bootstrapGeometry } from "../../world/map/geometry/GeometryBootstrap.js";
+import { ANATOLIA_PROVINCE_METADATA } from "../data/AnatoliaProvinceMetadata.js";
 import { createHistoricalPoliticalMapModel } from "../../world/map/historical/HistoricalPoliticalMapModel";
 import { createHistoricalWorldPoliticalPresentation } from "../../world/map/historical/HistoricalWorldPoliticalCoverage";
 
 const HISTORICAL_1300_DATE = "1300-01-01";
+const CURATED_ANATOLIA_IDS = new Set(ANATOLIA_PROVINCE_METADATA.map((province) => province.id));
 
 function getScenarioStartDate(gameSession) {
   return gameSession?.scenario?.startDate
@@ -18,21 +20,62 @@ function getGeometryBootstrapKey(gameSession, scenarioDate) {
   return `${gameSession?.id ?? "none"}:${scenarioDate ?? "none"}`;
 }
 
+function getCuratedProvinceId(geometry, geometryId) {
+  const candidates = [
+    geometry?.metadata?.sourceFeatureId,
+    geometry?.identity?.provinceId,
+    geometry?.identity?.id,
+    geometryId,
+  ];
+
+  return candidates.find((candidate) => CURATED_ANATOLIA_IDS.has(candidate)) ?? null;
+}
+
 function buildHistoricalWorldSourceProvinces(sourceProvinces, geometryRepository) {
   const byId = new Map(sourceProvinces.map((province) => [province.id, province]));
 
   for (const geometryId of geometryRepository?.allIds ?? []) {
-    if (byId.has(geometryId)) continue;
     const geometry = getGeometry(geometryRepository, geometryId);
     if (!geometry?.polygons?.length) continue;
 
-    byId.set(geometryId, {
-      id: geometryId,
-      name: geometry.metadata?.name ?? geometryId,
+    // Phase 2D geometry carries a stable curated sourceFeatureId. Reconcile
+    // that identity before the historical political model runs so the 38
+    // curated Anatolia provinces can never silently fall back to neutral land
+    // merely because a loader changed the runtime geometry key.
+    const curatedProvinceId = getCuratedProvinceId(geometry, geometryId);
+    const provinceId = curatedProvinceId ?? geometryId;
+    if (byId.has(provinceId)) continue;
+
+    byId.set(provinceId, {
+      id: provinceId,
+      name: geometry.metadata?.name ?? provinceId,
       type: "province",
       geometryId,
       owner: null,
       controller: null,
+      historical: curatedProvinceId
+        ? { classification: "curated-regional-gameplay-overlay" }
+        : undefined,
+    });
+  }
+
+  // Make the 38 curated identities explicit even when a runtime repository
+  // exposes a geometry through a non-curated alias. This is intentionally
+  // geometry-backed: no synthetic province is created without real geometry.
+  for (const metadata of ANATOLIA_PROVINCE_METADATA) {
+    if (byId.has(metadata.id)) continue;
+
+    const geometry = getGeometry(geometryRepository, metadata.id);
+    if (!geometry?.polygons?.length) continue;
+
+    byId.set(metadata.id, {
+      id: metadata.id,
+      name: metadata.name,
+      type: "province",
+      geometryId: metadata.id,
+      owner: null,
+      controller: null,
+      historical: { classification: "curated-regional-gameplay-overlay" },
     });
   }
 
