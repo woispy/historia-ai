@@ -20,6 +20,7 @@ const cameraController = read("src/map/camera/CameraController.jsx");
 const cartographyLayer = read("src/map/components/layers/CartographyLayer.jsx");
 const cityLayer = read("src/map/components/layers/CityLayer.jsx");
 const physicalLayer = read("src/map/components/layers/WorldPhysicalLayer.jsx");
+const physicalRuntime = read("src/map/physical/WorldPhysicalAtlasRuntime.js");
 
 // One physical coastline authority and one map viewport. The game viewport
 // must not mount a second legacy/far-zoom map or empty overlay map layers.
@@ -53,9 +54,13 @@ assert.ok(!svgRenderer.includes("world-land-mask"));
 assert.ok(!svgRenderer.includes("WORLD_LAND_PATH"));
 assert.match(provinceLayer, /clipPath="url\(#world-land-mask\)"/);
 assert.match(physicalLayer, /id="world-land-mask"/);
-assert.match(physicalLayer, /WORLD_LAND_PATH/);
+assert.match(physicalLayer, /loadWorldLandPath/);
+assert.ok(!physicalLayer.includes("WORLD_LAND_PATH"));
 assert.match(physicalLayer, /WORLD_PHYSICAL_ATLAS\.water\.fill/);
 assert.match(physicalLayer, /import\("\.\.\/\.\.\/physical\/WorldPhysicalAtlasRuntime\.js"\)/);
+assert.match(physicalRuntime, /export async function loadWorldLandPath/);
+assert.match(physicalRuntime, /return buildWorldPath\(collectWorldLandPolygons/);
+assert.ok(!physicalRuntime.includes("export const WORLD_LAND_PATH"));
 
 // WorldMap receives a session whose MapFactory geometry descriptor is
 // intentionally deferred. The browser loader is asynchronous because
