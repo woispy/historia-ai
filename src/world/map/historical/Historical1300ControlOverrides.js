@@ -51,6 +51,13 @@ export const VERIFIED_1300_CONTROL_OVERRIDES = Object.freeze({
     startYear: 1275,
     note: "Sâhib Ataoğulları held the Afyonkarahisar/Karahisar-ı Sâhib area as a distinct local beylik in the period 1275-1341.",
   }),
+  "pontus-kastamon": Object.freeze({
+    statusAt1300: "Cobanoid-local-rule",
+    confidence: "high",
+    controllerAt1300: "cobanid",
+    startYear: null,
+    note: "Kastamonu remained in the Çobanoğulları sphere until Candarid Süleyman's later conquest; Yaman Candar's initial grant was Eflani and he remained there until around 1308.",
+  }),
 });
 
 export function getVerified1300Control(provinceId) {
