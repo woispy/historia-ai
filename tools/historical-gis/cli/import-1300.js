@@ -72,10 +72,10 @@ const regionManifest = [];
 for (const regionId of [...regionIds].sort()) {
   const regionProvinces = provinces
     .filter((province) => province.__runtimeRegion === regionId)
-    .map(({ __runtimeRegion, ...province }) => province);
+    .map(stripRuntimeRegion);
   const regionGeometries = geometries
     .filter((geometry) => geometry.__runtimeRegion === regionId)
-    .map(({ __runtimeRegion, ...geometry }) => geometry);
+    .map(stripRuntimeRegion);
   const polygonCount = regionGeometries.reduce((total, geometry) => total + geometry.polygons.length, 0);
   const file = `regions/${regionId}.json`;
 
@@ -159,6 +159,12 @@ console.log(`Generated ${regionManifest.length} historical runtime regions conta
 console.log(`Historical runtime manifest: ${manifestPath}`);
 console.log("Phase 2D: Anatolia uses curated cartographic province geometry; the rest of the world remains source-derived.");
 console.log("Generated GIS source/assets are reproducible build artifacts and should not be committed unless redistribution is explicitly approved by the source license.");
+
+function stripRuntimeRegion(asset) {
+  const sanitized = { ...asset };
+  delete sanitized.__runtimeRegion;
+  return sanitized;
+}
 
 function classifyRuntimeRegion(region) {
   const polygon = region.polygons?.find((candidate) => Array.isArray(candidate) && candidate.length >= 3);
