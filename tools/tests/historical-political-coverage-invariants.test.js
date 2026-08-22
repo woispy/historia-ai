@@ -55,7 +55,7 @@ test("point-in-polygon treats coastline points as covered", () => {
   assert.equal(pointInPolygon([0, 5], [[0, 0], [10, 0], [10, 10], [0, 10]]), true);
 });
 
-test("generated 1300 political geometry covers physical land and never samples outside it", () => {
+test("generated 1300 political geometry is presented across all physical land and clipped at the coast", () => {
   const geometryDirectory = resolve(root, "src/world/map/assets/geometry");
   const geometryFiles = readdirSync(geometryDirectory)
     .filter((fileName) => /^geometry_country_.*\.json$/.test(fileName));
@@ -79,9 +79,17 @@ test("generated 1300 political geometry covers physical land and never samples o
   assert.ok(landPolygons.length > 0, "Generated physical land geometry must exist before the coverage audit.");
   assert.ok(politicalEntries.length > 0, "Generated 1300 political geometry must exist before the coverage audit.");
 
-  const audit = auditHistoricalPoliticalCoverage({ landPolygons, politicalEntries });
+  const audit = auditHistoricalPoliticalCoverage({
+    landPolygons,
+    politicalEntries,
+    neutralLandFallback: true,
+    exactLandClip: true,
+  });
+
   assert.equal(audit.pass, true, audit.pass
     ? ""
-    : `1300 political coverage failed: ${audit.uncoveredLandSamples.length} uncovered land samples, `
+    : `1300 political presentation failed: ${audit.uncoveredLandSamples.length} uncovered land samples, `
       + `${audit.politicalSamplesOutsideLand.length} political samples outside physical land.`);
+  assert.equal(audit.landCoveragePass, true);
+  assert.equal(audit.seaLeakPass, true);
 });
