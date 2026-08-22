@@ -4,6 +4,7 @@ import {
   isAnatoliaGeometryPoint,
   isPhysicalLandPoint,
 } from "../historical-gis/AnatoliaPhase2DGeometryBuilder.js";
+import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 
 const result = buildAnatoliaPhase2DAssets([
@@ -78,27 +79,26 @@ function pointToSegmentDistanceSquared(point, start, end) {
   const dx = end[0] - start[0];
   const dy = end[1] - start[1];
   if (dx === 0 && dy === 0) {
-    const px = point[0] - start[0];
-    const py = point[1] - start[1];
-    return px * px + py * py;
+    return (point[0] - start[0]) ** 2 + (point[1] - start[1]) ** 2;
   }
   const t = Math.max(0, Math.min(1, (
     (point[0] - start[0]) * dx + (point[1] - start[1]) * dy
   ) / (dx * dx + dy * dy)));
   const projected = [start[0] + dx * t, start[1] + dy * t];
-  const px = point[0] - projected[0];
-  const py = point[1] - projected[1];
-  return px * px + py * py;
+  return (point[0] - projected[0]) ** 2 + (point[1] - projected[1]) ** 2;
 }
 
 function distanceToPhysicalCoast(point) {
-  // The builder exposes the same physical-land predicate used by the
-  // production geometry path, so approximate the local coastline distance by
-  // finding the smallest radius at which the predicate changes around the
-  // point. This guards the cartographic coast-completion field without
-  // introducing a second coastline dataset into the test.
-  if (isPhysicalLandPoint(point)) return 0;
-  return Number.POSITIVE_INFINITY;
+  let best = Number.POSITIVE_INFINITY;
+  for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
+    for (let index = 0; index < polygon.length; index += 1) {
+      best = Math.min(
+        best,
+        pointToSegmentDistanceSquared(point, polygon[index], polygon[(index + 1) % polygon.length]),
+      );
+    }
+  }
+  return Math.sqrt(best);
 }
 
 const coastalProvinceIds = new Set(
@@ -109,7 +109,10 @@ for (const geometry of result.geometries) {
   const closestVertex = geometry.polygons
     .flat()
     .reduce((best, point) => Math.min(best, distanceToPhysicalCoast(point)), Number.POSITIVE_INFINITY);
-  assert.equal(closestVertex, 0, `${geometry.identity.provinceId} must retain a physical-coast contact point`);
+  assert.ok(
+    closestVertex <= 0.01,
+    `${geometry.identity.provinceId} must retain a political geometry vertex within 0.01 degrees of the physical coastline (got ${closestVertex})`,
+  );
 }
 
 assert.ok(vertexCount >= 150, "Phase 2D geometry must contain a sufficiently detailed vertex field");
