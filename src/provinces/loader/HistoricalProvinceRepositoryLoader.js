@@ -17,7 +17,7 @@ function buildRepository(assets) {
   return repository;
 }
 
-export function loadHistoricalProvinceRepository(historicalRegistry) {
+export async function loadHistoricalProvinceRepository(historicalRegistry) {
   const date = historicalRegistry?.date ?? null;
 
   if (!date) {
@@ -27,7 +27,7 @@ export function loadHistoricalProvinceRepository(historicalRegistry) {
     );
   }
 
-  const historicalRuntime = loadHistoricalRuntimeAsset(date);
+  const historicalRuntime = await loadHistoricalRuntimeAsset(date);
   if (!historicalRuntime?.provinces) {
     throw new Error(
       `Historical province runtime asset is missing for ${String(date)}. `
