@@ -11,9 +11,14 @@ assert.match(layer, /loadHistoricalRuntimeRegions/);
 assert.match(layer, /requestGeneration/);
 assert.match(layer, /generation !== requestGeneration\.current/);
 assert.match(layer, /if \(!regionIds\.length\)/);
-assert.match(worldMap, /HistoricalRuntimeViewportLayer/);
-assert.match(worldMap, /onViewportSizeChange=\{setViewport\}/);
-assert.doesNotMatch(worldMap, /<HistoricalPoliticalRegionLayer[\s\S]*isHistoricalPoliticalMap/);
+
+assert.match(worldMap, /isHistoricalPoliticalMap/);
+assert.match(worldMap, /<HistoricalPoliticalRegionLayer/);
+assert.match(worldMap, /<HistoricalRuntimeViewportLayer/);
+assert.match(worldMap, /isHistoricalPoliticalMap \? null/);
+assert.match(worldMap, /isHistoricalPoliticalMap && viewport\.width > 0 && viewport\.height > 0/);
+assert.match(worldMap, /renderFill=\{!isHistoricalPoliticalMap\}/);
+
 assert.match(viewport, /ResizeObserver/);
 assert.match(viewport, /onViewportSizeChange/);
 
