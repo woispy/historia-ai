@@ -119,10 +119,18 @@ for (const regionId of [...regionIds].sort()) {
   });
 }
 
+const provinceIndex = provinces
+  .map(stripRuntimeRegion)
+  .sort((a, b) => a.identity.id.localeCompare(b.identity.id))
+  .map((province) => ({
+    ...province,
+    runtimeRegion: regionManifest.find((region) => region.id === provinces.find((candidate) => candidate.identity.id === province.identity.id).__runtimeRegion)?.id ?? null,
+  }));
+
 await fs.writeFile(
   manifestPath,
   `${JSON.stringify({
-    schemaVersion: 2,
+    schemaVersion: 3,
     assetType: "historical-runtime-manifest",
     historicalDate: "1300-01-01",
     source: {
@@ -150,6 +158,7 @@ await fs.writeFile(
       geometries: geometries.length,
       polygons: geometries.reduce((total, geometry) => total + geometry.polygons.length, 0),
     },
+    provinceIndex,
     regions: regionManifest,
   }, null, 2)}\n`,
   "utf8",
