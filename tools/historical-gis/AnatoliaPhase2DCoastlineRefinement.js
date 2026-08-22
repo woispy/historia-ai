@@ -139,10 +139,15 @@ export function refineAnatoliaPhase2DCoastline(result) {
     ...province,
     polygons: polygonsById.get(province.identity.id) ?? province.polygons,
   }));
+  const polygonCount = geometries.reduce(
+    (total, geometry) => total + geometry.polygons.length,
+    0,
+  );
 
   return {
     ...result,
     geometryVersion: Math.max(2, Number(result.geometryVersion ?? 1)),
+    polygonCount,
     provinces,
     geometries,
     coastlineRefinement: {
