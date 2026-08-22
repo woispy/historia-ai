@@ -55,6 +55,15 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
   return (
     <g clipPath="url(#world-land-mask)" pointerEvents="none">
       <PoliticalOverlayDefs />
+      <rect
+        x="-180"
+        y="-90"
+        width="360"
+        height="180"
+        fill={DEFAULT_POLITICAL_COLOR}
+        fillOpacity="0.24"
+        aria-label="Historical unassigned land presentation"
+      />
       {provinces.map((entry) => {
         const d = buildPathData(entry?.geometry?.polygons);
         if (!d) return null;
