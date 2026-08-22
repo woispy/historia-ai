@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useWorldMap } from "../hooks";
 import {
   ProvinceLayer,
+  HistoricalPoliticalRegionLayer,
   CityLayer,
   PhysicalGeographyLayer,
   WorldPhysicalLayer,
@@ -46,6 +47,11 @@ function WorldMap({
   const world = useMemo(
     () => <WorldPhysicalLayer zoom={cameraState.zoom} />,
     [cameraState.zoom],
+  );
+
+  const politicalRegions = useMemo(
+    () => <HistoricalPoliticalRegionLayer date={runtime?.scenario?.startDate ?? "1300-01-01"} />,
+    [runtime?.scenario?.startDate],
   );
 
   const provincesLayer = useMemo(
@@ -96,13 +102,14 @@ function WorldMap({
     () => (
       <RenderLayer>
         {world}
+        {politicalRegions}
         {provincesLayer}
         {cartography}
         {detail}
         {citiesLayer}
       </RenderLayer>
     ),
-    [world, provincesLayer, cartography, detail, citiesLayer],
+    [world, politicalRegions, provincesLayer, cartography, detail, citiesLayer],
   );
 
   return (
