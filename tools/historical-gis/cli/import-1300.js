@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { downloadHistorical1300GeoJson, importHistoricalGeoJson } from "../HistoricalGeometryImporter.js";
 import { buildHistoricalGeometryAsset, buildHistoricalProvinceAsset } from "../HistoricalProvinceAssetBuilder.js";
 import { buildAnatoliaPhase2DAssets, isAnatoliaGeometryPoint } from "../AnatoliaPhase2DGeometryBuilder.js";
+import { refineAnatoliaPhase2DCoastline } from "../AnatoliaPhase2DCoastlineRefinement.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const inputArgument = process.argv[2] ?? "--download";
@@ -41,7 +42,7 @@ for (const region of regions) {
   sourceRegionsOutsidePhase2D.push(region);
 }
 
-const phase2D = buildAnatoliaPhase2DAssets(regions);
+const phase2D = refineAnatoliaPhase2DCoastline(buildAnatoliaPhase2DAssets(regions));
 for (const province of phase2D.provinces) {
   if (assetIds.has(province.identity.id)) throw new Error(`Duplicate Phase 2D province id: ${province.identity.id}`);
   assetIds.add(province.identity.id);
@@ -94,6 +95,7 @@ for (const regionId of [...regionIds].sort()) {
           status: "runtime",
           dataset: phase2D.dataset,
           geometryVersion: phase2D.geometryVersion,
+          coastlineRefinement: phase2D.coastlineRefinement ?? null,
         },
       },
       counts: {
@@ -140,6 +142,7 @@ await fs.writeFile(
         siteCount: phase2D.siteCount,
         polygonCount: phase2D.polygonCount,
         sourceFeatureCountReplaced: regions.length - sourceRegionsOutsidePhase2D.length,
+        coastlineRefinement: phase2D.coastlineRefinement ?? null,
       },
     },
     counts: {
@@ -154,6 +157,7 @@ await fs.writeFile(
 
 console.log(`Imported ${regions.length} historical GIS features for 1300.`);
 console.log(`Phase 2D generated ${phase2D.provinceCount} Anatolia provinces from ${phase2D.siteCount} cartographic sites.`);
+console.log(`Phase 2D coastline refinement applied to ${phase2D.coastlineRefinement?.coastalProvinceCount ?? 0} coastal provinces.`);
 console.log(`Phase 2D replaced ${regions.length - sourceRegionsOutsidePhase2D.length} coarse source features in the Anatolia envelope.`);
 console.log(`Generated ${regionManifest.length} historical runtime regions containing ${provinces.length} provinces and ${geometries.length} geometries.`);
 console.log(`Historical runtime manifest: ${manifestPath}`);
