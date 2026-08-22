@@ -8,7 +8,7 @@ function assertManifest(manifest) {
   }
 }
 
-function toSpatialBounds(bounds) {
+function toSpatialBounds(bounds, label) {
   if (Array.isArray(bounds) && bounds.length === 4) {
     const [minLon, minLat, maxLon, maxLat] = bounds.map(Number);
     if ([minLon, minLat, maxLon, maxLat].every(Number.isFinite)) {
@@ -25,7 +25,7 @@ function toSpatialBounds(bounds) {
     };
   }
 
-  throw new Error("Invalid hydrography region bounds");
+  throw new Error(`Invalid hydrography ${label}`);
 }
 
 export function selectHydrographyRegions(manifest, viewport, maxTiles = DEFAULT_MAX_TILES) {
@@ -33,8 +33,8 @@ export function selectHydrographyRegions(manifest, viewport, maxTiles = DEFAULT_
   if (!Number.isInteger(maxTiles) || maxTiles < 1) throw new Error("maxTiles must be a positive integer");
 
   return selectIntersectingSpatialRegions(
-    manifest.regions.map((region) => ({ ...region, bounds: toSpatialBounds(region.bounds) })),
-    toSpatialBounds(viewport),
+    manifest.regions.map((region) => ({ ...region, bounds: toSpatialBounds(region.bounds, "region bounds") })),
+    toSpatialBounds(viewport, "viewport"),
     maxTiles,
   );
 }
