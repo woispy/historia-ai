@@ -27,7 +27,8 @@ export async function loadHistoricalProvinceRepository(historicalRegistry) {
     );
   }
 
-  const historicalRuntime = await loadHistoricalRuntimeAsset(date);
+  const runtimeRegions = historicalRegistry?.runtimeRegions ?? null;
+  const historicalRuntime = await loadHistoricalRuntimeAsset(date, runtimeRegions);
   if (!historicalRuntime?.provinces) {
     throw new Error(
       `Historical province runtime asset is missing for ${String(date)}. `
