@@ -3,6 +3,7 @@ import {
   assertHistoricalProvinceRecord,
   createHistoricalMapDescriptor,
 } from "../HistoricalMapContract.js";
+import { createHistoricalProvincePoliticalStates } from "./HistoricalProvincePoliticalState.js";
 
 const POLITY_DEFINITIONS = Object.freeze([
   ["byzantium", "Byzantine Empire", "empire", "#6A1B9A"],
@@ -110,10 +111,18 @@ export function createHistoricalPoliticalRuntime({ date, provinceMetadata = [] }
 
   assertHistoricalPoliticalIdentitiesAndProvinces({ polities, provinces });
 
-  return createHistoricalMapDescriptor({
+  const descriptor = createHistoricalMapDescriptor({
     date: normalizedDate,
     polities,
     provinces,
+  });
+
+  return Object.freeze({
+    ...descriptor,
+    provincePoliticalStates: createHistoricalProvincePoliticalStates({
+      date: normalizedDate,
+      provinces,
+    }),
   });
 }
 
