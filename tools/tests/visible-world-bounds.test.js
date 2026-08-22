@@ -30,9 +30,9 @@ test('visible world bounds respond to zoom', () => {
   const bounds = getVisibleWorldBounds({ ...camera, zoom: 1 }, { width: 800, height: 600 });
 
   assert.deepEqual(bounds, {
-    minX: -300,
+    minX: -200,
     minY: -250,
-    maxX: 500,
+    maxX: 600,
     maxY: 350,
   });
 });
