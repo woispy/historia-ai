@@ -86,16 +86,22 @@ assert.deepEqual(
 );
 assert.equal(ANATOLIA_CITY_ATLAS.eskisehir.mapProvinceId, "phrygia-eskisehir");
 
-// Neutral/contested provinces still receive a complete historical presentation
-// color; they are never rendered as transparent or as a modern country.
-for (const provinceId of ["phrygia-eskisehir", "lydia-smyrna", "galatia-ankara", "cappadocia-kayseri", "pontus-amasya"]) {
+// Unresolved provinces receive a complete neutral presentation; they are never
+// rendered as transparent or as a modern country.
+for (const provinceId of ["phrygia-eskisehir", "lydia-smyrna", "galatia-ankara", "pontus-amasya"]) {
   const entry = model.find((item) => item.province.id === provinceId);
   assert.ok(entry.country, `${provinceId} must never render without a political presentation`);
   assert.equal(entry.country.id, "local_polities");
 }
 
+// Kayseri is a layered historical case: Ilkhanid suzerainty must remain visible
+// instead of being collapsed into the neutral presentation.
 assert.equal(
   model.find((entry) => entry.province.id === "cappadocia-kayseri").historicalPolitical.id,
+  "ilkhanate",
+);
+assert.equal(
+  model.find((entry) => entry.province.id === "cappadocia-kayseri").historicalProvince.suzeraintyPolityId,
   "ilkhanate",
 );
 
