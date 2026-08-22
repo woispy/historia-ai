@@ -1,5 +1,5 @@
 import { loadProvinceAssets } from "./ProvinceAssetLoader.js";
-import { loadHistoricalRuntimeAsset } from "../../world/map/loader/HistoricalRuntimeManifestLoader.js";
+import { loadHistoricalRuntimeProvinceIndex } from "../../world/map/loader/HistoricalRuntimeManifestLoader.js";
 import { createProvince } from "../ProvinceFactory.js";
 import {
   createProvinceRepository,
@@ -27,17 +27,11 @@ export async function loadHistoricalProvinceRepository(historicalRegistry) {
     );
   }
 
-  const runtimeRegions = historicalRegistry?.runtimeRegions ?? null;
-  const historicalRuntime = await loadHistoricalRuntimeAsset(date, runtimeRegions);
-  if (!historicalRuntime?.provinces) {
-    throw new Error(
-      `Historical province runtime asset is missing for ${String(date)}. `
-      + "Generate the historical GIS runtime assets before starting a dated scenario."
-    );
-  }
-
+  // Historical bootstrap owns only lightweight province metadata. Polygon
+  // geometry is a viewport asset and is loaded by the map-time regional layer.
+  const provinceIndex = await loadHistoricalRuntimeProvinceIndex(date);
   return createHistoricalProvinceRepository(
-    buildRepository(historicalRuntime.provinces),
+    buildRepository(provinceIndex),
     historicalRegistry,
   );
 }
