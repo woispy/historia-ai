@@ -10,8 +10,9 @@ import {
 } from "./layers";
 import { CameraProvider, CameraViewport, useCamera, useCameraController } from "../camera";
 import { RenderRoot, RenderLayer, SvgRenderer } from "../rendering";
-import ProvinceTextureLayer from "../rendering/gpu/ProvinceTextureLayer";
 import { shouldUseGpuProvinceFill } from "../rendering/CartographyModel";
+
+const HISTORICAL_1300_DATE = "1300-01-01";
 
 function WorldMap({
   runtime,
@@ -24,9 +25,9 @@ function WorldMap({
   const { provinces, cities } = useWorldMap(runtime);
   const camera = useCamera();
   const cameraState = camera.camera;
-  const [textureReady, setTextureReady] = useState(false);
   const [internalSelectedCityId, setInternalSelectedCityId] = useState(null);
   const selectedCityId = controlledSelectedCityId ?? internalSelectedCityId;
+  const isHistoricalPoliticalMap = runtime?.scenario?.startDate === HISTORICAL_1300_DATE;
 
   const cameraInput = useCameraController({
     zoom: camera.zoom,
@@ -34,15 +35,15 @@ function WorldMap({
     smooth: settings.smoothCamera !== false,
   });
 
-  const ready = useCallback((value) => setTextureReady(Boolean(value)), []);
-
   const cityClick = useCallback((cityId) => {
     setInternalSelectedCityId(cityId);
     onCityClick?.(cityId);
   }, [onCityClick]);
 
-  const useGpuProvinceFill = shouldUseGpuProvinceFill(cameraState.zoom);
-  const gpuProvinceActive = useGpuProvinceFill && textureReady;
+  // The GPU province texture is still the fast path for normal simulation maps.
+  // Historical 1300 uses the dated political layer as the sole colour authority
+  // so modern province-owner colours cannot leak underneath the political map.
+  const useGpuProvinceFill = shouldUseGpuProvinceFill(cameraState.zoom) && !isHistoricalPoliticalMap;
 
   const world = useMemo(
     () => <WorldPhysicalLayer zoom={cameraState.zoom} />,
@@ -69,7 +70,7 @@ function WorldMap({
         mapShadows={settings.mapShadows !== false}
         zoom={cameraState.zoom}
         camera={cameraState}
-        renderFill={!gpuProvinceActive}
+        renderFill={!isHistoricalPoliticalMap && !useGpuProvinceFill}
       />
     ),
     [
@@ -79,7 +80,8 @@ function WorldMap({
       settings.mapStyle,
       settings.mapShadows,
       cameraState,
-      gpuProvinceActive,
+      isHistoricalPoliticalMap,
+      useGpuProvinceFill,
     ],
   );
 
@@ -121,15 +123,6 @@ function WorldMap({
     <CameraProvider value={camera}>
       <CameraViewport cameraInput={cameraInput}>
         <RenderRoot>
-          {useGpuProvinceFill && (
-            <ProvinceTextureLayer
-              provinces={provinces}
-              camera={cameraState}
-              selectedProvinceId={selectedProvinceId}
-              mapStyle={settings.mapStyle ?? "detailed"}
-              onReady={ready}
-            />
-          )}
           <SvgRenderer camera={cameraState}>{layers}</SvgRenderer>
         </RenderRoot>
       </CameraViewport>
