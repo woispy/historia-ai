@@ -11,7 +11,7 @@ import { ANATOLIA_PHYSICAL_ATLAS } from "./AnatoliaPhysicalAtlas.js";
 export const ANATOLIA_PHYSICAL_ATLAS_RUNTIME = Object.freeze({
   ...ANATOLIA_PHYSICAL_ATLAS,
   hydrography: Object.freeze({
-    source: "natural-earth-10m-regional",
+    source: "Natural Earth 10m",
     version: 1,
     projection: "EPSG:4326",
   }),
