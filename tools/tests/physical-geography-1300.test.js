@@ -85,7 +85,7 @@ for (const river of hydrography.rivers) {
   assert.equal(river.geometrySource, "natural-earth-10m");
   assert.ok(Array.isArray(river.coordinates) && river.coordinates.length >= 2, `${river.name} must retain a line geometry.`);
   assert.ok(Array.isArray(river.bounds) && river.bounds.length === 4);
-  assert.equal(river.canonicalId === null || typeof river.canonicalId === "string", true);
+  assert.equal(river.canonicalId == null || typeof river.canonicalId === "string", true);
   const path = linearPathFromCoordinates(river.coordinates);
   assert.equal((path.match(/Q/g) ?? []).length, 0, `${river.name} must not be smoothed.`);
 }
