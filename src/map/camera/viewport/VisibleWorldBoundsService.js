@@ -20,12 +20,15 @@ export function getVisibleWorldBounds(camera, viewport) {
   if (!Number.isFinite(width) || !Number.isFinite(height) || width < 0 || height < 0) {
     throw new RangeError('viewport width and height must be finite non-negative numbers');
   }
+  if (!Number.isFinite(camera.x) || !Number.isFinite(camera.y) || !Number.isFinite(camera.zoom) || camera.zoom <= 0) {
+    throw new RangeError('camera x, y and zoom must be finite; zoom must be positive');
+  }
 
   const corners = [
-    screenToWorld(0, 0, camera),
-    screenToWorld(width, 0, camera),
-    screenToWorld(0, height, camera),
-    screenToWorld(width, height, camera),
+    screenToWorld(0, 0, camera, viewport),
+    screenToWorld(width, 0, camera, viewport),
+    screenToWorld(0, height, camera, viewport),
+    screenToWorld(width, height, camera, viewport),
   ];
 
   return {
