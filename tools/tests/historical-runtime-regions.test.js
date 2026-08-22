@@ -58,6 +58,28 @@ assert.equal(geometryCount, manifest.counts.geometries);
 assert.equal(polygonCount, manifest.counts.polygons);
 assert.deepEqual([...provinceIds].sort(), [...geometryIds].sort());
 
+const loader = await import("../../src/world/map/loader/HistoricalRuntimeManifestLoader.js");
+const selectedRegion = manifest.regions[0];
+const selectedRuntime = await loader.loadHistoricalRuntimeRegions("1300", selectedRegion.id);
+assert.deepEqual(selectedRuntime.loadedRegions, [selectedRegion.id]);
+assert.equal(selectedRuntime.counts.provinces, selectedRegion.provinceCount);
+assert.equal(selectedRuntime.counts.geometries, selectedRegion.geometryCount);
+
+const mergedRuntime = await loader.loadHistoricalRuntimeAsset("1300");
+assert.equal(mergedRuntime.counts.provinces, manifest.counts.provinces);
+assert.equal(mergedRuntime.counts.geometries, manifest.counts.geometries);
+assert.deepEqual(
+  [...mergedRuntime.provinces].map((province) => province.identity.id).sort(),
+  [...provinceIds].sort(),
+);
+
+await assert.rejects(
+  () => loader.loadHistoricalRuntimeRegions("1300", "missing-region"),
+  /Historical runtime regions are missing/,
+);
+
+loader.clearHistoricalRuntimeCache();
+
 console.log(
-  `historical-runtime-regions.test.js: ${manifest.regions.length} regions, ${provinceCount} provinces, ${geometryCount} geometries validated`,
+  `historical-runtime-regions.test.js: ${manifest.regions.length} regions, ${provinceCount} provinces, ${geometryCount} geometries and selective loading validated`,
 );
