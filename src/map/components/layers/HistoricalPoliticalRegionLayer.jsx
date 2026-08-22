@@ -75,7 +75,10 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
               d={d}
               fill={color}
               fillOpacity={getPoliticalFillOpacity(mode)}
-              stroke="none"
+              stroke="rgba(24,30,24,0.34)"
+              strokeWidth="0.42"
+              vectorEffect="non-scaling-stroke"
+              strokeLinejoin="round"
             />
             {pattern && (
               <path
