@@ -42,7 +42,7 @@ function CharacterCreate() {
     setCharacter(result);
   }
 
-  function acceptCharacter() {
+  async function acceptCharacter() {
     if (!character || isStartingGame) return;
 
     setError("");
@@ -64,7 +64,7 @@ function CharacterCreate() {
 
     try {
       updateNewGame({ character });
-      const session = initializeGame();
+      const session = await initializeGame();
 
       if (!session?.id) {
         throw new Error("Oyun oturumu oluşturulamadı.");
