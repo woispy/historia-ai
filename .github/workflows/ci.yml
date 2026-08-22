@@ -86,6 +86,8 @@ jobs:
         run: node tools/tests/historical-runtime-region-benchmark.test.js
       - name: Run historical viewport region selection tests
         run: npm run test:historical-runtime-viewport-region-selection
+      - name: Run historical viewport orchestration tests
+        run: npm run test:historical-runtime-viewport-layer
       - name: Run physical geography tests
         run: npm run test:physical-geography
       - name: Run Natural Earth 10m hydrography tests
