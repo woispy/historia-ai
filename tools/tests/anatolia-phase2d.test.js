@@ -4,13 +4,14 @@ import {
   isAnatoliaGeometryPoint,
   isPhysicalLandPoint,
 } from "../historical-gis/AnatoliaPhase2DGeometryBuilder.js";
+import { refineAnatoliaPhase2DCoastline } from "../historical-gis/AnatoliaPhase2DCoastlineRefinement.js";
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 
-const result = buildAnatoliaPhase2DAssets([
+const result = refineAnatoliaPhase2DCoastline(buildAnatoliaPhase2DAssets([
   { polygons: [[[29.9, 40.7], [30.1, 40.7], [30.1, 40.9], [29.9, 40.7]]] },
   { polygons: [[[27.4, 38.4], [27.7, 38.4], [27.7, 38.7], [27.4, 38.4]]] },
-]);
+]));
 
 assert.equal(result.historicalDate, "1300-01-01");
 assert.equal(result.provinceCount, ANATOLIA_PROVINCE_METADATA.length);
@@ -24,6 +25,7 @@ assert.ok(
 );
 assert.ok(result.polygonCount >= result.provinceCount, "Every province must contain at least one polygon");
 assert.equal(result.provinces.length, result.geometries.length);
+assert.equal(result.coastlineRefinement?.coastalProvinceCount, ANATOLIA_PROVINCE_METADATA.filter((province) => province.coastal).length);
 
 const provinceIds = new Set();
 let vertexCount = 0;
@@ -59,9 +61,8 @@ for (const geometry of result.geometries) {
     assert.ok(polygon.length >= 3);
     vertexCount += polygon.length;
     const centroid = polygonCentroid(polygon);
-    // Tiny anchor fallbacks are explicit reconciliation placeholders for
-    // coarse physical-atlas cells; normal geometry must satisfy the hard
-    // physical-land invariant.
+    // Tiny coastline reconciliation fragments may include exact coastline
+    // vertices; normal geometry must still satisfy the physical-land invariant.
     if (polygonArea(polygon) >= 0.00005) {
       assert.ok(
         isPhysicalLandPoint(centroid),
