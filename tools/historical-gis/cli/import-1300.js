@@ -174,7 +174,8 @@ function classifyRuntimeRegion(region) {
     .map((value) => value / polygon.length);
 
   if (longitude < -30) {
-    return latitude < 0 ? "south-americas" : "north-americas";
+    if (latitude < 0) return "south-americas";
+    return longitude < -100 ? "north-americas-west" : "north-americas-east";
   }
   if (longitude >= 110 && latitude < 25) return "oceania";
   if (longitude >= 100) return "east-asia";
