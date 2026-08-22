@@ -9,6 +9,9 @@ import { createHistoricalWorldPoliticalPresentation } from "../../world/map/hist
 
 const HISTORICAL_1300_DATE = "1300-01-01";
 const CURATED_ANATOLIA_IDS = new Set(ANATOLIA_PROVINCE_METADATA.map((province) => province.id));
+const CURATED_ANATOLIA_METADATA_BY_ID = new Map(
+  ANATOLIA_PROVINCE_METADATA.map((province) => [province.id, province]),
+);
 
 function getScenarioStartDate(gameSession) {
   return gameSession?.scenario?.startDate
@@ -91,14 +94,21 @@ export function buildHistoricalWorldSourceProvinces(sourceProvinces, geometryRep
 
 function createHistoricalWorldEntry(province, geometry, historicalEntry) {
   if (historicalEntry?.historicalProvince) {
+    const curatedMetadata = CURATED_ANATOLIA_METADATA_BY_ID.get(province.id);
+
     return {
       ...historicalEntry,
       geometry,
       // These are the curated Phase 2D 1300 Anatolia provinces. They use the
       // dedicated P0 physical atlas as their political coastline authority.
+      // Carry the canonical coastal/port flags forward explicitly because the
+      // political renderer uses them to add the small landward-safe coastline
+      // expansion before clipping to the physical land mask.
       historicalProvince: {
         ...historicalEntry.historicalProvince,
         geometryAuthority: "anatolia-curated",
+        coastal: curatedMetadata?.coastal === true,
+        port: curatedMetadata?.port === true,
       },
     };
   }
