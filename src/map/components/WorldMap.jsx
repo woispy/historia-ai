@@ -10,6 +10,7 @@ import {
 import { CameraProvider, CameraViewport, useCamera, useCameraController } from "../camera";
 import { RenderRoot, RenderLayer, SvgRenderer } from "../rendering";
 import ProvinceTextureLayer from "../rendering/gpu/ProvinceTextureLayer";
+import { getCameraCullingKey, getCameraCullingSnapshot } from "../rendering/MapViewportCulling";
 import { shouldUseGpuProvinceFill } from "../rendering/CartographyModel";
 
 function WorldMap({
@@ -43,9 +44,18 @@ function WorldMap({
   const useGpuProvinceFill = shouldUseGpuProvinceFill(cameraState.zoom);
   const gpuProvinceActive = useGpuProvinceFill && textureReady;
 
+  // Camera transform remains continuous. Expensive geometry visibility/layout
+  // work uses a coarse snapshot so panning does not reconcile every SVG path
+  // on every animation frame.
+  const cullingKey = getCameraCullingKey(cameraState);
+  const cullingCamera = useMemo(
+    () => getCameraCullingSnapshot(cameraState),
+    [cullingKey],
+  );
+
   const world = useMemo(
-    () => <WorldPhysicalLayer zoom={cameraState.zoom} />,
-    [cameraState.zoom],
+    () => <WorldPhysicalLayer />,
+    [],
   );
 
   const provincesLayer = useMemo(
@@ -57,7 +67,7 @@ function WorldMap({
         mapStyle={settings.mapStyle ?? "detailed"}
         mapShadows={settings.mapShadows !== false}
         zoom={cameraState.zoom}
-        camera={cameraState}
+        camera={cullingCamera}
         renderFill={!gpuProvinceActive}
       />
     ),
@@ -67,7 +77,8 @@ function WorldMap({
       onProvinceClick,
       settings.mapStyle,
       settings.mapShadows,
-      cameraState,
+      cameraState.zoom,
+      cullingCamera,
       gpuProvinceActive,
     ],
   );
@@ -77,20 +88,20 @@ function WorldMap({
     [cameraState.zoom],
   );
   const detail = useMemo(
-    () => <PhysicalGeographyLayer phase="detail" zoom={cameraState.zoom} camera={cameraState} />,
-    [cameraState],
+    () => <PhysicalGeographyLayer phase="detail" zoom={cameraState.zoom} camera={cullingCamera} />,
+    [cameraState.zoom, cullingCamera],
   );
   const citiesLayer = useMemo(
     () => (
       <CityLayer
         cities={cities}
         zoom={cameraState.zoom}
-        camera={cameraState}
+        camera={cullingCamera}
         selectedCityId={selectedCityId}
         onCityClick={cityClick}
       />
     ),
-    [cities, cameraState, selectedCityId, cityClick],
+    [cities, cameraState.zoom, cullingCamera, selectedCityId, cityClick],
   );
   const layers = useMemo(
     () => (

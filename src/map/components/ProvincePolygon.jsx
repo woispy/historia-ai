@@ -4,9 +4,12 @@
  * The SVG path remains the interaction and selection surface. Visual province
  * fills can be supplied by the texture compositor so coastline clipping does
  * not require thousands of vector fragments during camera movement.
+ *
+ * P3: geometry/path generation is stable data. React should not reconcile
+ * unchanged province paths merely because the camera is moving.
  */
 
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 
 function buildPathData(polygons) {
   if (!Array.isArray(polygons)) return "";
@@ -69,4 +72,4 @@ function ProvincePolygon({
   );
 }
 
-export default ProvincePolygon;
+export default memo(ProvincePolygon);

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../data/AnatoliaPhysicalAtlasRuntime.js";
 import { getPhysicalDetailProfile, getPhysicalPresentation, getPhysicalStrokeProfile } from "../../rendering/CartographyModel.js";
 import { getViewportBounds } from "../../rendering/MapViewportCulling.js";
@@ -259,4 +260,8 @@ function PhysicalGeographyLayer({ phase = "detail", zoom = 1, camera }) {
   );
 }
 
-export default PhysicalGeographyLayer;
+export default memo(PhysicalGeographyLayer, (previous, next) => (
+  previous.phase === next.phase
+  && previous.zoom === next.zoom
+  && previous.camera === next.camera
+));
