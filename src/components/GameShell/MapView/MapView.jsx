@@ -1,9 +1,11 @@
+import { lazy, Suspense } from "react";
 import "./MapView.css";
 
 import { getCountry } from "../../../countries";
 import { getProvince } from "../../../provinces";
-import { WorldMap } from "../../../map";
 import ProvinceInspector from "./ProvinceInspector";
+
+const WorldMap = lazy(() => import("../../../map/components/WorldMap"));
 
 function MapView({
   gameSession,
@@ -27,12 +29,14 @@ function MapView({
       title={settings.tips ? "Haritayı sürükleyerek gezinebilir, tekerlek ile yakınlaşıp uzaklaşabilirsiniz." : undefined}
       aria-label="Dünya haritası"
     >
-      <WorldMap
-        runtime={gameSession}
-        selectedProvinceId={selectedProvinceId}
-        onProvinceClick={onProvinceClick}
-        settings={settings}
-      />
+      <Suspense fallback={<div className="map-loading" role="status" aria-live="polite">Loading map…</div>}>
+        <WorldMap
+          runtime={gameSession}
+          selectedProvinceId={selectedProvinceId}
+          onProvinceClick={onProvinceClick}
+          settings={settings}
+        />
+      </Suspense>
       {selectedProvince && (
         <ProvinceInspector
           province={selectedProvince}
