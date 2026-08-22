@@ -96,6 +96,8 @@ jobs:
         run: npm run test:historical-province-political-state
       - name: Run historical political region coverage tests
         run: npm run test:historical-political-region-layer
+      - name: Run historical political world coverage invariant tests
+        run: npm run test:historical-political-coverage-invariants
       - name: Run historical political map v1 tests
         run: npm run test:historical-political-map-v1
       - name: Run historical Anatolia control tests
