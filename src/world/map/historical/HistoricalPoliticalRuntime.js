@@ -13,10 +13,14 @@ const POLITY_DEFINITIONS = Object.freeze([
   ["mentese", "Menteşe Beylik", "beylik", "#3E7C59"],
   ["esref", "Eşrefoğlu Beylik", "beylik", "#7B6840"],
   ["germiyan", "Germiyan Beylik", "beylik", "#8C5A2B"],
+  ["inanc", "İnanç Beyliği", "local-polity", "#5E8C61"],
+  ["hamid", "Hamid Beyliği", "beylik", "#4F8065"],
+  ["sahibata", "Sâhib Ata Beyliği", "local-polity", "#806A4A"],
   ["karaman", "Karaman Beylik", "beylik", "#A33F3F"],
   ["pervane", "Pervâneoğlu Beylik", "local-polity", "#6B7280"],
   ["candar", "Candar Beylik", "local-polity", "#7A6A3A"],
   ["trebizond", "Empire of Trebizond", "empire", "#4A7896"],
+  ["ilkhanate", "Ilkhanate Suzerainty", "suzerain", "#3D73B9"],
   ["cilicia", "Kingdom of Cilicia", "kingdom", "#8B4A62"],
 ]);
 
@@ -53,10 +57,8 @@ function clonePolity(id) {
 function controllerForDate(metadata, date) {
   const control = metadata?.historicalControl;
   if (!control) return null;
-
   const year = Number(date.slice(0, 4));
   if (!Number.isFinite(year)) return null;
-
   const startYear = Number.isFinite(Number(control.startYear)) ? Number(control.startYear) : null;
   if (startYear !== null && year < startYear) return null;
   return control.controllerAt1300 ?? null;
@@ -64,7 +66,6 @@ function controllerForDate(metadata, date) {
 
 function toHistoricalProvince(metadata, date) {
   const polityId = controllerForDate(metadata, date);
-
   return {
     id: metadata.id,
     type: "province",
@@ -81,23 +82,13 @@ function toHistoricalProvince(metadata, date) {
   };
 }
 
-/**
- * Builds the historical political layer without using Admin-0 country data.
- *
- * The presentation metadata remains responsible for persistent geography and
- * historical interpretation. This runtime owns the dated political identity.
- */
 export function createHistoricalPoliticalRuntime({ date, provinceMetadata = [] } = {}) {
   const normalizedDate = normalizeDate(date);
   if (!Array.isArray(provinceMetadata)) {
     throw new TypeError("provinceMetadata must be an array.");
   }
 
-  // Validate the source boundary before converting records. This is important:
-  // once a modern Admin-0 record is projected into a historical shape it would
-  // otherwise look historical and the provenance firewall could be bypassed.
   provinceMetadata.forEach(assertHistoricalProvinceRecord);
-
   const provinces = provinceMetadata.map((metadata) => toHistoricalProvince(metadata, normalizedDate));
   const polityIds = new Set(provinces.map((province) => province.polityId).filter(Boolean));
   const polities = [...polityIds].map(clonePolity);
