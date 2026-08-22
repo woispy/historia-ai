@@ -85,6 +85,12 @@ jobs:
         run: npm run test:physical-geography
       - name: Run Natural Earth 10m hydrography tests
         run: npm run test:hydrography-10m
+      - name: Run hydrography regional parity tests
+        run: npm run test:hydrography-regions
+      - name: Run hydrography region loader tests
+        run: node tools/tests/hydrography-region-loader.test.js
+      - name: Run hydrography viewport selector tests
+        run: node tools/tests/hydrography-viewport-selector.test.js
       - name: Run hydrography LOD visibility tests
         run: npm run test:hydrography-visibility
       - name: Run world map land-mask tests
