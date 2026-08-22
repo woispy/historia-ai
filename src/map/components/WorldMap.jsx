@@ -10,7 +10,6 @@ import {
 } from "./layers";
 import { CameraProvider, CameraViewport, useCamera, useCameraController } from "../camera";
 import { RenderRoot, RenderLayer, SvgRenderer } from "../rendering";
-import { shouldUseGpuProvinceFill } from "../rendering/CartographyModel";
 
 const HISTORICAL_1300_DATE = "1300-01-01";
 
@@ -40,11 +39,6 @@ function WorldMap({
     onCityClick?.(cityId);
   }, [onCityClick]);
 
-  // The GPU province texture is still the fast path for normal simulation maps.
-  // Historical 1300 uses the dated political layer as the sole colour authority
-  // so modern province-owner colours cannot leak underneath the political map.
-  const useGpuProvinceFill = shouldUseGpuProvinceFill(cameraState.zoom) && !isHistoricalPoliticalMap;
-
   const world = useMemo(
     () => <WorldPhysicalLayer zoom={cameraState.zoom} />,
     [cameraState.zoom],
@@ -70,7 +64,7 @@ function WorldMap({
         mapShadows={settings.mapShadows !== false}
         zoom={cameraState.zoom}
         camera={cameraState}
-        renderFill={!isHistoricalPoliticalMap && !useGpuProvinceFill}
+        renderFill={!isHistoricalPoliticalMap}
       />
     ),
     [
@@ -81,7 +75,6 @@ function WorldMap({
       settings.mapShadows,
       cameraState,
       isHistoricalPoliticalMap,
-      useGpuProvinceFill,
     ],
   );
 
