@@ -1,16 +1,9 @@
 import historicalAtlas from "../../../../data/gis/1300/regional/anatolia-byzantium.json";
 import { getHistoricalPolity } from "../../../world/map/historical/HistoricalPoliticalRuntime";
 
-const POLITY_OVERRIDE_BY_REGION = Object.freeze({
-  // The source overlay predates the verified 1 Jan 1300 control review and
-  // labels this western area as Aydinid. Aydinid control begins in 1308, so
-  // the 1300 visual uses the Byzantine/pre-Aydinid frontier identity instead.
-  anatolia_aydin: "byzantium",
-});
-
 const CONTESTED_REGION_IDS = new Set([
   "anatolia_ottomans",
-  "anatolia_aydin",
+  "anatolia_aydin_pre1308",
   "anatolia_sahibata",
   "anatolia_candar",
 ]);
@@ -53,15 +46,14 @@ function HistoricalPoliticalRegionLayer({ date = "1300-01-01" }) {
     <g clipPath="url(#world-land-mask)" pointerEvents="none">
       <RegionStyleDefs />
       {regions.map((region) => {
-        const polityId = POLITY_OVERRIDE_BY_REGION[region.id] ?? region.countryId;
-        const polity = getHistoricalPolity(polityId);
+        const polity = getHistoricalPolity(region.countryId);
         if (!polity) return null;
 
         const d = buildPathData(region.polygons);
         if (!d) return null;
 
         const contested = CONTESTED_REGION_IDS.has(region.id);
-        const suzerainty = polityId === "ilkhanate";
+        const suzerainty = region.countryId === "ilkhanate";
 
         return (
           <g key={region.id}>
