@@ -8,6 +8,7 @@ const read = (path) => readFileSync(resolve(root, path), "utf8").replace(/\r\n/g
 const svgRenderer = read("src/map/rendering/SvgRenderer.jsx");
 const worldMap = read("src/map/components/WorldMap.jsx");
 const useWorldMap = read("src/map/hooks/useWorldMap.js");
+const geometryBootstrap = read("src/world/map/geometry/GeometryBootstrap.js");
 const mapView = read("src/components/GameShell/MapView/MapView.jsx");
 const mapViewCss = read("src/components/GameShell/MapView/MapView.css");
 const provinceLayer = read("src/map/components/layers/ProvinceLayer.jsx");
@@ -56,11 +57,17 @@ assert.match(physicalLayer, /WORLD_PHYSICAL_ATLAS\.water\.fill/);
 assert.match(physicalLayer, /import\("\.\.\/\.\.\/physical\/WorldPhysicalAtlasRuntime\.js"\)/);
 
 // WorldMap receives a session whose MapFactory geometry descriptor is
-// intentionally deferred. The map hook must materialize the matching runtime
-// geometry before dereferencing repository.byId, otherwise the game page can
-// crash with a null geometry repository after a successful game bootstrap.
+// intentionally deferred. The browser loader is asynchronous because
+// historical runtime regions are lazy-loaded; the hook must wait for the
+// repository before dereferencing geometry IDs and must ignore stale results.
 assert.match(useWorldMap, /import \{ bootstrapGeometry \} from "\.\.\/\.\.\/world\/map\/geometry\/GeometryBootstrap\.js";/);
-assert.match(useWorldMap, /const geometryRepository = gameSession\.world\.map\.geometry\s*\?\? bootstrapGeometry\(scenarioDate\);/);
+assert.match(useWorldMap, /useEffect/);
+assert.match(useWorldMap, /bootstrapGeometry\(scenarioDate\)/);
+assert.match(useWorldMap, /\.then\(\(repository\) =>/);
+assert.match(useWorldMap, /if \(ignore\) return;/);
+assert.match(useWorldMap, /if \(!geometryRepository\)/);
+assert.match(geometryBootstrap, /export async function bootstrapGeometry/);
+assert.match(geometryBootstrap, /await loadHistoricalGeometryRepository\(date\)/);
 
 // Province paths remain explicit interaction surfaces.
 assert.ok(provincePolygon.includes("pointerEvents=\"all\""));
@@ -99,4 +106,4 @@ assert.ok(!cityLayer.includes("fortified &&"));
 assert.ok(!worldMap.includes('phase="base"'));
 assert.ok(!worldMap.includes('phase="water"'));
 
-console.log("Map rendering contract tests passed: one synchronized world, explicit province interaction, one lazy physical coastline authority, deferred geometry bootstrap, and no obsolete GPU province compositor.");
+console.log("Map rendering contract tests passed: one synchronized world, explicit province interaction, one lazy physical coastline authority, async deferred geometry bootstrap with stale-response guard, and no obsolete GPU province compositor.");
