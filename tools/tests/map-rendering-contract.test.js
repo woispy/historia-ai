@@ -11,6 +11,7 @@ const mapView = read("src/components/GameShell/MapView/MapView.jsx");
 const mapViewCss = read("src/components/GameShell/MapView/MapView.css");
 const provinceLayer = read("src/map/components/layers/ProvinceLayer.jsx");
 const provincePolygon = read("src/map/components/ProvincePolygon.jsx");
+const historicalRuntimeLayer = read("src/map/components/layers/HistoricalRuntimeViewportLayer.jsx");
 const cameraModel = read("src/map/camera/CameraModel.js");
 const cameraActions = read("src/map/camera/CameraActions.js");
 const cameraController = read("src/map/camera/CameraController.jsx");
@@ -49,10 +50,18 @@ assert.ok(cameraActions.includes("x: clamp(x, -horizontalRange, horizontalRange)
 assert.ok(!svgRenderer.includes("world-land-mask"));
 assert.ok(!svgRenderer.includes("WORLD_LAND_PATH"));
 assert.match(provinceLayer, /clipPath="url\(#world-land-mask\)"/);
+assert.match(historicalRuntimeLayer, /clipPath="url\(#world-land-mask\)"/);
 assert.match(physicalLayer, /id="world-land-mask"/);
 assert.match(physicalLayer, /WORLD_LAND_PATH/);
 assert.match(physicalLayer, /WORLD_PHYSICAL_ATLAS\.water\.fill/);
 assert.match(physicalLayer, /import\("\.\.\/\.\.\/physical\/WorldPhysicalAtlasRuntime\.js"\)/);
+
+// Historical political fills use the same physical land mask as province
+// interaction geometry. This prevents political colour from entering the sea
+// and makes the coastline the final authority rather than a second political
+// coastline approximation.
+assert.match(historicalRuntimeLayer, /fill=\{entry\.historicalPolitical\?\.color/);
+assert.match(historicalRuntimeLayer, /getOpacity\(mode\)/);
 
 // Province paths remain explicit interaction surfaces.
 assert.ok(provincePolygon.includes("pointerEvents=\"all\""));
@@ -91,4 +100,4 @@ assert.ok(!cityLayer.includes("fortified &&"));
 assert.ok(!worldMap.includes('phase="base"'));
 assert.ok(!worldMap.includes('phase="water"'));
 
-console.log("Map rendering contract tests passed: one synchronized world, explicit province interaction, one lazy physical coastline authority, and no obsolete GPU province compositor.");
+console.log("Map rendering contract tests passed: one synchronized world, shared land-mask authority for physical/province/historical political geometry, explicit province interaction, and no obsolete GPU province compositor.");

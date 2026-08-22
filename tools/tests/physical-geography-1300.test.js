@@ -11,6 +11,7 @@ import { estimatePhysicalLabelBox, layoutPhysicalLabels } from "../../src/map/re
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const atlas = ANATOLIA_PHYSICAL_ATLAS_RUNTIME;
+const hydrography = JSON.parse(readFileSync(resolve(root, "src/map/data/generated/anatolia-hydrography-10m.json"), "utf8"));
 const [minLon, minLat, maxLon, maxLat] = atlas.bbox;
 const geometryDirectory = resolve(root, "src/world/map/assets/geometry");
 const geometryFiles = readdirSync(geometryDirectory).filter((fileName) => /^geometry_country_.*\.json$/.test(fileName));
@@ -44,8 +45,11 @@ assert.equal(geometryFiles.length, 242, "Natural Earth 50m geometry generation m
 assert.ok(generatedWorldLandPolygons.length > 0, "Generated Natural Earth land assets must be available before physical tests.");
 assert.match(atlas.hydrography.source, /Natural Earth 10m/);
 assert.equal(atlas.hydrography.projection, "EPSG:4326");
-assert.ok(atlas.lakes.length > 8, "Generated 10m lake geometry must replace the curated legacy set.");
-assert.ok(atlas.rivers.length > 10, "Generated 10m river geometry must replace the curated legacy set.");
+assert.equal(hydrography.projection, "EPSG:4326");
+assert.ok(hydrography.lakes.length > 8, "Generated 10m lake geometry must replace the curated legacy set.");
+assert.ok(hydrography.rivers.length > 10, "Generated 10m river geometry must replace the curated legacy set.");
+assert.deepEqual(atlas.lakes, [], "Runtime atlas must not eagerly embed hydrography lakes.");
+assert.deepEqual(atlas.rivers, [], "Runtime atlas must not eagerly embed hydrography rivers.");
 assert.ok(atlas.seas.length >= 8);
 assert.ok(atlas.channels.length >= 2);
 assert.ok(atlas.islands.length >= 8);
@@ -68,7 +72,7 @@ for (const collection of [atlas.seas, atlas.channels, atlas.islands, atlas.mount
   }
 }
 
-for (const lake of atlas.lakes) {
+for (const lake of hydrography.lakes) {
   assert.equal(lake.geometrySource, "natural-earth-10m");
   assert.ok(Array.isArray(lake.rings) && lake.rings.length > 0, `${lake.name} must retain polygon rings.`);
   lake.rings.forEach((ring, index) => assertRing(`${lake.name} ring ${index}`, ring));
@@ -77,11 +81,11 @@ for (const lake of atlas.lakes) {
   assert.equal((path.match(/Q/g) ?? []).length, 0, `${lake.name} must not be smoothed.`);
 }
 
-for (const river of atlas.rivers) {
+for (const river of hydrography.rivers) {
   assert.equal(river.geometrySource, "natural-earth-10m");
   assert.ok(Array.isArray(river.coordinates) && river.coordinates.length >= 2, `${river.name} must retain a line geometry.`);
   assert.ok(Array.isArray(river.bounds) && river.bounds.length === 4);
-  assert.equal(river.canonicalId === null || typeof river.canonicalId === "string", true);
+  assert.equal(river.canonicalId == null || typeof river.canonicalId === "string", true);
   const path = linearPathFromCoordinates(river.coordinates);
   assert.equal((path.match(/Q/g) ?? []).length, 0, `${river.name} must not be smoothed.`);
 }
@@ -89,21 +93,15 @@ for (const river of atlas.rivers) {
 const requiredSeas = ["Black Sea", "Marmara Sea", "Aegean Sea", "Mediterranean Sea", "Gulf of İzmit", "Gulf of İzmir", "Antalya Gulf"];
 for (const name of requiredSeas) assert.ok(atlas.seas.some((sea) => sea.name === name), `Missing major water body: ${name}`);
 
-const riverCanonicalIds = new Set(atlas.rivers.map((river) => river.canonicalId).filter(Boolean));
+const riverCanonicalIds = new Set(hydrography.rivers.map((river) => river.canonicalId).filter(Boolean));
 const sourceNativeRequiredRiverIds = ["sakarya", "gediz", "buyuk-menderes", "seyhan", "ceyhan", "firat", "dicle"];
 for (const required of sourceNativeRequiredRiverIds) assert.equal(riverCanonicalIds.has(required), true, `Missing source-native 10m river identity: ${required}`);
 
-// Natural Earth 10m does not publish every major Anatolian river.
-// Keep these gaps explicit until a reproducible supplemental GIS source is added.
 const documentedNaturalEarthRiverGaps = new Set(["kizilirmak", "yesilirmak"]);
 assert.deepEqual([...documentedNaturalEarthRiverGaps].sort(), ["kizilirmak", "yesilirmak"]);
-
-// Natural Earth 10m also misses some important local/regional lakes. Sapanca is
-// intentionally tracked here rather than represented by invented geometry.
 const documentedNaturalEarthLakeGaps = new Set(["sapanca"]);
 assert.deepEqual([...documentedNaturalEarthLakeGaps], ["sapanca"]);
 
-// Anchors are deliberately placed well inside each lake rather than on the shoreline.
 const requiredLakeAnchors = [
   ["Van Gölü", [43.00, 38.50]],
   ["Tuz Gölü", [33.40, 38.75]],
@@ -113,15 +111,15 @@ const requiredLakeAnchors = [
 ];
 
 for (const [name, anchor] of requiredLakeAnchors) {
-  const containingLake = atlas.lakes.find((lake) => pointInPolygon(anchor, lake.rings[0]));
+  const containingLake = hydrography.lakes.find((lake) => pointInPolygon(anchor, lake.rings[0]));
   assert.ok(containingLake, `${name} must have a Natural Earth 10m lake polygon containing its physical anchor.`);
   assert.ok(containingLake.rings[0].length >= 4, `${name} must retain valid shoreline topology.`);
 }
 
-const van = atlas.lakes.find((lake) => pointInPolygon([43.00, 38.50], lake.rings[0]));
+const van = hydrography.lakes.find((lake) => pointInPolygon([43.00, 38.50], lake.rings[0]));
 assert.ok(van, "Van Gölü must be represented by Natural Earth 10m geometry.");
 
-const sakaryaSegments = atlas.rivers.filter((river) => river.canonicalId === "sakarya");
+const sakaryaSegments = hydrography.rivers.filter((river) => river.canonicalId === "sakarya");
 assert.ok(sakaryaSegments.some((river) => river.coordinates.length >= 20), "Sakarya must retain a genuinely sampled river centerline.");
 
 const requiredRanges = ["Pontic Mountains", "Western Taurus", "Central Taurus", "Eastern Taurus", "Anti-Taurus"];
@@ -154,7 +152,7 @@ for (let i = 0; i < zoomThree.length; i += 1) {
 }
 
 for (const [cityId, city] of Object.entries(ANATOLIA_CITY_ATLAS)) {
-  const result = validateCityPhysicalPosition(city, cityLandPolygons, atlas.lakes);
+  const result = validateCityPhysicalPosition(city, cityLandPolygons, hydrography.lakes);
   assert.equal(result.onLand, true, `${cityId} must remain on physical land.`);
   assert.equal(result.valid, true, `${cityId} must not be inside a lake interior.`);
   assert.deepEqual(getAnatoliaCityMapMetadata(cityId), city);
@@ -169,4 +167,4 @@ assert.equal(validateCityPhysicalPosition({ x: 3, y: 3 }, syntheticLand, synthet
 assert.equal(validateCityPhysicalPosition({ x: 5, y: 5 }, syntheticLand, syntheticLakeWithHole).valid, true, "A city on a lake island must remain valid.");
 assert.ok(PHYSICAL_GEOMETRY_RULES.shorelineToleranceDegrees > 0);
 
-console.log(`Physical Geography 2.0 / P0 tests passed: ${atlas.seas.length} water bodies, ${atlas.rivers.length} Natural Earth 10m river segments, ${atlas.lakes.length} Natural Earth 10m lake polygons, ${atlas.mountainRanges.length} mountain systems, ${Object.keys(ANATOLIA_CITY_ATLAS).length} validated city anchors.`);
+console.log(`Physical Geography 2.0 / P0 tests passed: ${atlas.seas.length} water bodies, ${hydrography.rivers.length} Natural Earth 10m river segments, ${hydrography.lakes.length} Natural Earth 10m lake polygons, ${atlas.mountainRanges.length} mountain systems, ${Object.keys(ANATOLIA_CITY_ATLAS).length} validated city anchors.`);

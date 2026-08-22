@@ -3,8 +3,10 @@ import { useWorldMap } from "../hooks";
 import {
   ProvinceLayer,
   HistoricalPoliticalRegionLayer,
+  HistoricalRuntimeViewportLayer,
   CityLayer,
   PhysicalGeographyLayer,
+  RegionalHydrographyLayer,
   WorldPhysicalLayer,
   CartographyLayer,
 } from "./layers";
@@ -24,6 +26,7 @@ function WorldMap({
   const { provinces, cities } = useWorldMap(runtime);
   const camera = useCamera();
   const cameraState = camera.camera;
+  const [viewport, setViewport] = useState({ width: 0, height: 0 });
   const [internalSelectedCityId, setInternalSelectedCityId] = useState(null);
   const selectedCityId = controlledSelectedCityId ?? internalSelectedCityId;
   const isHistoricalPoliticalMap = runtime?.scenario?.startDate === HISTORICAL_1300_DATE;
@@ -39,19 +42,27 @@ function WorldMap({
     onCityClick?.(cityId);
   }, [onCityClick]);
 
-  const world = useMemo(
-    () => <WorldPhysicalLayer zoom={cameraState.zoom} />,
-    [cameraState.zoom],
-  );
+  const world = useMemo(() => <WorldPhysicalLayer zoom={cameraState.zoom} />, [cameraState.zoom]);
 
   const politicalRegions = useMemo(
-    () => (
+    () => (isHistoricalPoliticalMap ? null : (
       <HistoricalPoliticalRegionLayer
-        date={runtime?.scenario?.startDate ?? "1300-01-01"}
+        date={runtime?.scenario?.startDate ?? HISTORICAL_1300_DATE}
         provinces={provinces}
       />
-    ),
-    [runtime?.scenario?.startDate, provinces],
+    )),
+    [isHistoricalPoliticalMap, runtime?.scenario?.startDate, provinces],
+  );
+
+  const historicalRuntime = useMemo(
+    () => (isHistoricalPoliticalMap && viewport.width > 0 && viewport.height > 0 ? (
+      <HistoricalRuntimeViewportLayer
+        date={HISTORICAL_1300_DATE}
+        camera={cameraState}
+        viewport={viewport}
+      />
+    ) : null),
+    [isHistoricalPoliticalMap, cameraState, viewport],
   );
 
   const provincesLayer = useMemo(
@@ -67,23 +78,16 @@ function WorldMap({
         renderFill={!isHistoricalPoliticalMap}
       />
     ),
-    [
-      provinces,
-      selectedProvinceId,
-      onProvinceClick,
-      settings.mapStyle,
-      settings.mapShadows,
-      cameraState,
-      isHistoricalPoliticalMap,
-    ],
+    [provinces, selectedProvinceId, onProvinceClick, settings.mapStyle, settings.mapShadows, cameraState, isHistoricalPoliticalMap],
   );
 
-  const cartography = useMemo(
-    () => <CartographyLayer zoom={cameraState.zoom} />,
-    [cameraState.zoom],
-  );
+  const cartography = useMemo(() => <CartographyLayer zoom={cameraState.zoom} />, [cameraState.zoom]);
   const detail = useMemo(
     () => <PhysicalGeographyLayer phase="detail" zoom={cameraState.zoom} camera={cameraState} />,
+    [cameraState],
+  );
+  const hydrography = useMemo(
+    () => <RegionalHydrographyLayer zoom={cameraState.zoom} camera={cameraState} />,
     [cameraState],
   );
   const citiesLayer = useMemo(
@@ -104,17 +108,19 @@ function WorldMap({
         {world}
         {provincesLayer}
         {politicalRegions}
+        {historicalRuntime}
         {cartography}
         {detail}
+        {hydrography}
         {citiesLayer}
       </RenderLayer>
     ),
-    [world, provincesLayer, politicalRegions, cartography, detail, citiesLayer],
+    [world, provincesLayer, politicalRegions, historicalRuntime, cartography, detail, hydrography, citiesLayer],
   );
 
   return (
     <CameraProvider value={camera}>
-      <CameraViewport cameraInput={cameraInput}>
+      <CameraViewport cameraInput={cameraInput} onViewportSizeChange={setViewport}>
         <RenderRoot>
           <SvgRenderer camera={cameraState}>{layers}</SvgRenderer>
         </RenderRoot>

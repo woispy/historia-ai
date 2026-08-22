@@ -77,6 +77,7 @@ for (const regionId of [...regionIds].sort()) {
     .filter((geometry) => geometry.__runtimeRegion === regionId)
     .map(stripRuntimeRegion);
   const polygonCount = regionGeometries.reduce((total, geometry) => total + geometry.polygons.length, 0);
+  const bounds = calculateBounds(regionGeometries);
   const file = `regions/${regionId}.json`;
 
   await fs.writeFile(
@@ -86,6 +87,7 @@ for (const regionId of [...regionIds].sort()) {
       assetType: "historical-runtime-region",
       historicalDate: "1300-01-01",
       regionId,
+      bounds,
       source: {
         provider: "historical-basemaps",
         dataset: "world_1300.geojson",
@@ -110,16 +112,25 @@ for (const regionId of [...regionIds].sort()) {
   regionManifest.push({
     id: regionId,
     file,
+    bounds,
     provinceCount: regionProvinces.length,
     geometryCount: regionGeometries.length,
     polygonCount,
   });
 }
 
+const provinceIndex = provinces
+  .map(stripRuntimeRegion)
+  .sort((a, b) => a.identity.id.localeCompare(b.identity.id))
+  .map((province) => ({
+    ...province,
+    runtimeRegion: regionManifest.find((region) => region.id === provinces.find((candidate) => candidate.identity.id === province.identity.id).__runtimeRegion)?.id ?? null,
+  }));
+
 await fs.writeFile(
   manifestPath,
   `${JSON.stringify({
-    schemaVersion: 1,
+    schemaVersion: 3,
     assetType: "historical-runtime-manifest",
     historicalDate: "1300-01-01",
     source: {
@@ -147,6 +158,7 @@ await fs.writeFile(
       geometries: geometries.length,
       polygons: geometries.reduce((total, geometry) => total + geometry.polygons.length, 0),
     },
+    provinceIndex,
     regions: regionManifest,
   }, null, 2)}\n`,
   "utf8",
@@ -166,6 +178,28 @@ function stripRuntimeRegion(asset) {
   return sanitized;
 }
 
+function calculateBounds(geometryAssets) {
+  const values = geometryAssets.flatMap((geometry) => geometry.polygons ?? []).flat();
+  if (!values.length) throw new Error("Historical runtime region contains no polygon coordinates.");
+
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  for (const point of values) {
+    if (!Array.isArray(point) || point.length < 2 || !Number.isFinite(point[0]) || !Number.isFinite(point[1])) {
+      throw new Error("Historical runtime region contains an invalid polygon coordinate.");
+    }
+    minX = Math.min(minX, point[0]);
+    minY = Math.min(minY, point[1]);
+    maxX = Math.max(maxX, point[0]);
+    maxY = Math.max(maxY, point[1]);
+  }
+
+  return { minX, minY, maxX, maxY };
+}
+
 function classifyRuntimeRegion(region) {
   const polygon = region.polygons?.find((candidate) => Array.isArray(candidate) && candidate.length >= 3);
   if (!polygon) return "unknown";
@@ -173,7 +207,10 @@ function classifyRuntimeRegion(region) {
     .reduce((sum, [x, y]) => [sum[0] + x, sum[1] + y], [0, 0])
     .map((value) => value / polygon.length);
 
-  if (longitude < -30) return "americas";
+  if (longitude < -30) {
+    if (latitude < 0) return "south-americas";
+    return longitude < -100 ? "north-americas-west" : "north-americas-east";
+  }
   if (longitude >= 110 && latitude < 25) return "oceania";
   if (longitude >= 100) return "east-asia";
   if (longitude >= 80 && latitude < 35) return "south-asia";

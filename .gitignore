@@ -35,3 +35,4 @@ src/world/map/assets/geometry/
 src/world/map/assets/provinces/
 src/world/map/assets/historical/1300/
 src/map/data/generated/anatolia-hydrography-10m.json
+public/assets/hydrography-regions/

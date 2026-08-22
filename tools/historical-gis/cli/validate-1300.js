@@ -12,6 +12,12 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+function validateBounds(bounds, label) {
+  assert(bounds && Number.isFinite(bounds.minX) && Number.isFinite(bounds.maxX) && Number.isFinite(bounds.minY) && Number.isFinite(bounds.maxY), `${label} has invalid bounds.`);
+  assert(bounds.minX <= bounds.maxX && bounds.minY <= bounds.maxY, `${label} has inverted bounds.`);
+  assert(bounds.minX >= -180 && bounds.maxX <= 180 && bounds.minY >= -90 && bounds.maxY <= 90, `${label} bounds are outside EPSG:4326.`);
+}
+
 function validatePolygonRing(polygon, label) {
   assert(Array.isArray(polygon) && polygon.length >= 3, `${label} has an invalid polygon ring.`);
   for (const coordinate of polygon) {
@@ -28,21 +34,33 @@ const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
 
 assert(Array.isArray(sourceRaw.features), "Historical GIS source must contain a features array.");
 assert(sourceRaw.features.length === normalizedRegions.length, `Source/normalized feature count mismatch: ${sourceRaw.features.length} vs ${normalizedRegions.length}.`);
-assert(manifest.schemaVersion === 1, "Unsupported historical runtime manifest schema.");
+assert(manifest.schemaVersion === 3, "Unsupported historical runtime manifest schema.");
 assert(manifest.assetType === "historical-runtime-manifest", "Invalid historical runtime manifest type.");
 assert(manifest.historicalDate === "1300-01-01", "Historical runtime manifest date mismatch.");
 assert(Array.isArray(manifest.regions) && manifest.regions.length >= 2, "Historical runtime must contain multiple regions.");
+assert(Array.isArray(manifest.provinceIndex) && manifest.provinceIndex.length === manifest.counts.provinces, "Historical runtime province index mismatch.");
 assert(manifest.source?.sourceFeatureCount === normalizedRegions.length, "Runtime source feature count mismatch.");
 assert(manifest.source?.regionalOverlay?.status === "research-only", "Runtime regional overlay policy must be research-only.");
 assert(manifest.source?.phase2D?.status === "runtime", "Phase 2D runtime geometry is missing.");
 assert(manifest.source?.phase2D?.provinceCount === 38, "Phase 2D must provide exactly 38 Anatolia provinces.");
 
 const regionAssets = [];
+const indexIds = new Set();
+for (const province of manifest.provinceIndex) {
+  assert(province?.identity?.id, "Historical runtime province index contains an invalid identity.");
+  assert(!indexIds.has(province.identity.id), `Duplicate historical runtime province index id: ${province.identity.id}.`);
+  indexIds.add(province.identity.id);
+  assert(typeof province.runtimeRegion === "string" && province.runtimeRegion.length > 0, `Province ${province.identity.id} is missing runtimeRegion.`);
+}
+
 for (const region of manifest.regions) {
+  validateBounds(region.bounds, `Manifest region ${region.id}`);
   const asset = JSON.parse(await fs.readFile(path.join(runtimeDir, region.file), "utf8"));
   assert(asset.assetType === "historical-runtime-region", `Invalid historical runtime region asset: ${region.id}.`);
   assert(asset.regionId === region.id, `Region identity mismatch: ${region.id}.`);
   assert(asset.historicalDate === manifest.historicalDate, `Region date mismatch: ${region.id}.`);
+  validateBounds(asset.bounds, `Region asset ${region.id}`);
+  assert(JSON.stringify(asset.bounds) === JSON.stringify(region.bounds), `Region bounds mismatch: ${region.id}.`);
   assert(asset.counts?.provinces === asset.provinces.length, `Region province count mismatch: ${region.id}.`);
   assert(asset.counts?.geometries === asset.geometries.length, `Region geometry count mismatch: ${region.id}.`);
   regionAssets.push(asset);
@@ -60,6 +78,7 @@ const runtime = {
 
 assert(runtime.provinces.length === manifest.counts.provinces, "Manifest province count mismatch.");
 assert(runtime.geometries.length === manifest.counts.geometries, "Manifest geometry count mismatch.");
+assert(new Set(runtime.provinces.map((province) => province.identity.id)).size === indexIds.size, "Province index and region assets disagree on province identity coverage.");
 
 const phase2DProvinceCount = runtime.source.phase2D.provinceCount;
 const replacedSourceFeatureCount = runtime.source.phase2D.sourceFeatureCountReplaced;
@@ -129,4 +148,4 @@ assert(polygonCount >= Math.ceil(phase2DProvinceCount * 1.5), "Phase 2D geometry
 assert(vertexCount >= 350, "Phase 2D geometry vertex field is unexpectedly sparse.");
 assert(runtime.source.phase2D.siteCount >= 3000, "Phase 2D cartographic site field is unexpectedly sparse.");
 
-console.log(`Validated 1300 regional runtime: ${manifest.regions.length} regions, ${sourceDerivedCount} source-derived provinces + ${phase2DCount} Phase 2D Anatolia provinces, ${polygonCount} polygon rings, ${vertexCount} vertices.`);
+console.log(`Validated 1300 regional runtime: ${manifest.regions.length} regions, ${sourceDerivedCount} source-derived provinces + ${phase2DCount} Phase 2D Anatolia provinces, ${polygonCount} polygon rings, ${vertexCount} vertices; lightweight province index validated.`);
