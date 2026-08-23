@@ -70,7 +70,17 @@ assert.ok(!historicalPoliticalLayer.includes('clipPath="url(#world-land-mask)"')
 // modern/previous geometry repository happens to be attached to the session.
 assert.ok(useWorldMap.includes("loadHistoricalGeometryRepository"));
 assert.ok(useWorldMap.includes("loadHistoricalGeometryRepository(date) ?? sourceRepository"));
-assert.ok(useWorldMap.includes("geometry: province.geometryId"));
+assert.ok(useWorldMap.includes("createHistoricalWorldRegions"));
+assert.ok(useWorldMap.includes("getGeometries(geometryRepository)"));
+assert.ok(worldMap.includes("regions={historicalRegions}"));
+assert.ok(historicalPoliticalLayer.includes("HistoricalWorldRegionPaths"));
+assert.ok(historicalPoliticalLayer.includes("getStableSourceColor(region.subject)"));
+
+// The 1300 political layer must not expose a visually blank land surface when
+// a source feature is absent. The land fallback is still clipped to the single
+// physical coastline authority, while all available GIS regions are painted.
+assert.ok(historicalPoliticalLayer.includes("Historical unassigned land presentation"));
+assert.ok(historicalPoliticalLayer.includes("fill={getStableSourceColor(region.subject)}"));
 
 // Province paths are explicit interaction surfaces. This remains true when
 // GPU compositing hides the CPU fill; transparent pixels must still be clickable.
@@ -139,4 +149,4 @@ assert.ok(!cityLayer.includes("fortified &&"));
 assert.ok(!worldMap.includes('phase="base"'));
 assert.ok(!worldMap.includes('phase="water"'));
 
-console.log("Map rendering contract tests passed: one synchronized world, explicit province interaction, one physical coastline authority, historical political compositor handoff, dated GIS geometry handoff, and no legacy overlay layers.");
+console.log("Map rendering contract tests passed: one synchronized world, explicit province interaction, one physical coastline authority, complete dated political GIS handoff, and no legacy overlay layers.");
