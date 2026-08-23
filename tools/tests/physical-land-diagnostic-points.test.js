@@ -9,21 +9,19 @@ const points = [
   { name: "Prusa", point: [29.0611, 40.1917] },
 ];
 
-const diagnostics = points.map(({ name, point }) => ({
-  name,
-  point,
-  polygonHits: ANATOLIA_PHYSICAL_ATLAS.landPolygons.map((polygon, index) => ({
+const diagnostics = points.map(({ name, point }) => {
+  const polygonHits = ANATOLIA_PHYSICAL_ATLAS.landPolygons.map((polygon, index) => ({
     index,
     hit: pointInPolygon(point, polygon),
     minLon: Math.min(...polygon.map(([lon]) => lon)),
     maxLon: Math.max(...polygon.map(([lon]) => lon)),
     minLat: Math.min(...polygon.map(([, lat]) => lat)),
     maxLat: Math.max(...polygon.map(([, lat]) => lat)),
-  })),
-})));
+  }));
+  return { name, point, polygonHits };
+});
 
 console.log(JSON.stringify(diagnostics, null, 2));
-
 for (const diagnostic of diagnostics) {
   assert.ok(
     diagnostic.polygonHits.some(({ hit }) => hit),
