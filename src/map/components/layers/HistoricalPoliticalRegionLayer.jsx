@@ -6,6 +6,7 @@ import { HISTORICAL_POLITICAL_COVERAGE_CONTRACT, assertHistoricalPoliticalCovera
 
 const HISTORICAL_1300_DATE = "1300-01-01";
 const DEFAULT_POLITICAL_COLOR = "#6f765f";
+const HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID = "historical-anatolia-political-land-clip";
 const HISTORICAL_POLITICAL_WORLD_LAND_CLIP_ID = HISTORICAL_POLITICAL_COVERAGE_CONTRACT.landClip;
 const COASTAL_POLITICAL_EXPANSION = 0.08;
 
@@ -33,7 +34,7 @@ function PoliticalOverlayDefs() {
 
   return (
     <defs>
-      <clipPath id={HISTORICAL_POLITICAL_WORLD_LAND_CLIP_ID} clipPathUnits="userSpaceOnUse">
+      <clipPath id={HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID} clipPathUnits="userSpaceOnUse">
         <path d={anatoliaLandPath} fillRule="evenodd" />
       </clipPath>
       <pattern id="historical-suzerainty-hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
@@ -64,7 +65,7 @@ function getPoliticalFillOpacity(mode) {
 
 function getPoliticalClipPath(entry) {
   if (entry?.historicalProvince?.geometryAuthority === "anatolia-curated") {
-    return `url(#${HISTORICAL_POLITICAL_WORLD_LAND_CLIP_ID})`;
+    return `url(#${HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID})`;
   }
   return `url(#${HISTORICAL_POLITICAL_WORLD_LAND_CLIP_ID})`;
 }
