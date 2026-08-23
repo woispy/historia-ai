@@ -40,10 +40,6 @@ function isCanonicalPhysicalLandPoint(point) {
   );
 }
 
-function isUsableLandPoint(point) {
-  return isCanonicalPhysicalLandPoint(point);
-}
-
 function findUsableRepresentativePoint(center) {
   if (!Array.isArray(center)) return null;
   if (isCanonicalPhysicalLandPoint(center)) return [...center];
@@ -142,9 +138,6 @@ function hasUsablePolygonSamples(polygon) {
       if (!isCanonicalPhysicalLandPoint(sample)) return false;
     }
 
-    // Every edge-to-centroid segment is sampled as an interior witness. This
-    // prevents a polygon whose boundary happens to stay on land from spanning
-    // across a gulf/channel or a lake between otherwise valid vertices.
     for (const fraction of INTERIOR_SAMPLE_FRACTIONS) {
       const sample = [
         areaCentroid[0] + (start[0] - areaCentroid[0]) * fraction,
@@ -182,125 +175,38 @@ function reconcilePolygonCentroid(polygon, metadata) {
   return null;
 }
 
-function roundPolygon(polygon) {
-  return polygon.map(([x, y]) => [Number(x.toFixed(5)), Number(y.toFixed(5))]);
+function refineCoastlinePolygon(polygon, metadata) {
+  if (!Array.isArray(polygon) || polygon.length < 3) return polygon;
+  const nearest = findNearestCoastSegment(polygonCentroid(polygon));
+  if (!nearest) return reconcilePolygonCentroid(polygon, metadata);
+
+  const dx = nearest.end[0] - nearest.start[0];
+  const dy = nearest.end[1] - nearest.start[1];
+  const length = Math.hypot(dx, dy);
+  if (length < EPSILON) return reconcilePolygonCentroid(polygon, metadata);
+
+  const normal = [-dy / length, dx / length];
+  const offset = COAST_INTERIOR_OFFSET;
+  const candidates = [1, -1].map((sign) => polygon.map(([longitude, latitude]) => [
+    longitude + normal[0] * offset * sign,
+    latitude + normal[1] * offset * sign,
+  ]));
+
+  const valid = candidates.find((candidate) => hasUsablePolygonSamples(candidate));
+  if (valid) return valid;
+
+  return reconcilePolygonCentroid(polygon, metadata);
 }
 
-function finalizePolygon(polygon) {
-  if (!Array.isArray(polygon) || polygon.length < 3) return null;
-  const rounded = roundPolygon(polygon);
-  return hasUsablePolygonSamples(rounded) ? rounded : null;
+export function refineAnatoliaPhase2DCoastline(polygons) {
+  if (!Array.isArray(polygons)) return [];
+  return polygons.map((polygon) => {
+    const metadata = ANATOLIA_PROVINCE_METADATA[polygon?.provinceId] ?? null;
+    return refineCoastlinePolygon(polygon?.coordinates ?? polygon, metadata);
+  }).filter(Boolean);
 }
 
-function createRepresentativePolygon(metadata) {
-  const point = findUsableRepresentativePoint(metadata?.centroid ?? null);
-  if (!point) return null;
-
-  for (let radius = 0.035; radius >= 0.005; radius -= 0.005) {
-    const polygon = Array.from({ length: 8 }, (_, index) => {
-      const angle = (index / 8) * Math.PI * 2;
-      return [point[0] + Math.cos(angle) * radius, point[1] + Math.sin(angle) * radius];
-    });
-    const finalized = finalizePolygon(polygon);
-    if (finalized) return finalized;
-  }
-
-  return null;
-}
-
-function createCoastalCoverageFragment(metadata) {
-  const coast = findNearestCoastSegment(metadata.centroid);
-  if (!coast) return null;
-
-  const dx = coast.end[0] - coast.start[0];
-  const dy = coast.end[1] - coast.start[1];
-  const length = Math.sqrt(dx * dx + dy * dy) || 1;
-  const tangent = [dx / length, dy / length];
-  const normal = [-tangent[1], tangent[0]];
-  const center = coast.projection;
-  const halfLength = Math.min(COAST_FRAGMENT_HALF_LENGTH, length / 3);
-  const alongA = [center[0] - tangent[0] * halfLength, center[1] - tangent[1] * halfLength];
-  const alongB = [center[0] + tangent[0] * halfLength, center[1] + tangent[1] * halfLength];
-
-  for (const direction of [1, -1]) {
-    for (let coastOffset = COAST_INTERIOR_OFFSET; coastOffset <= COAST_INTERIOR_SEARCH; coastOffset += COAST_INTERIOR_OFFSET) {
-      const coastA = [alongA[0] + normal[0] * direction * coastOffset, alongA[1] + normal[1] * direction * coastOffset];
-      const coastB = [alongB[0] + normal[0] * direction * coastOffset, alongB[1] + normal[1] * direction * coastOffset];
-      const interior = [
-        center[0] + normal[0] * direction * (coastOffset + COAST_INTERIOR_OFFSET),
-        center[1] + normal[1] * direction * (coastOffset + COAST_INTERIOR_OFFSET),
-      ];
-      const polygon = finalizePolygon([coastA, coastB, interior]);
-      if (polygon) return polygon;
-    }
-  }
-
-  return null;
-}
-
-export function refineAnatoliaPhase2DCoastline(result) {
-  if (!result || !Array.isArray(result.geometries) || !Array.isArray(result.provinces)) {
-    throw new TypeError("Phase 2D result must contain province and geometry arrays.");
-  }
-
-  const coastalIds = new Set(
-    ANATOLIA_PROVINCE_METADATA.filter((province) => province.coastal).map((province) => province.id),
-  );
-  const metadataById = new Map(ANATOLIA_PROVINCE_METADATA.map((province) => [province.id, province]));
-
-  const geometries = result.geometries.map((geometry) => {
-    const metadata = metadataById.get(geometry?.identity?.provinceId);
-    if (!metadata) return geometry;
-
-    let polygons = (geometry.polygons ?? [])
-      .map((polygon) => reconcilePolygonCentroid(polygon, metadata))
-      .map(finalizePolygon)
-      .filter(Boolean);
-
-    if (!polygons.length) {
-      const representative = createRepresentativePolygon(metadata);
-      if (representative) polygons = [representative];
-    }
-
-    if (coastalIds.has(geometry?.identity?.provinceId)) {
-      const fragment = createCoastalCoverageFragment(metadata);
-      if (fragment) polygons = [...polygons, fragment];
-    }
-
-    // Final postcondition: no geometry leaves this stage unless the exact
-    // rounded polygon satisfies the same physical-land authority used by the
-    // Phase 2D test contract. This is deliberately the last operation so no
-    // later transform can reintroduce a water centroid.
-    polygons = polygons.map(finalizePolygon).filter(Boolean);
-
-    return { ...geometry, polygons };
-  });
-
-  const polygonsById = new Map(geometries.map((geometry) => [geometry.identity.provinceId, geometry.polygons]));
-  const provinces = result.provinces.map((province) => ({
-    ...province,
-    polygons: polygonsById.get(province.identity.id) ?? province.polygons,
-  }));
-  const polygonCount = geometries.reduce((total, geometry) => total + geometry.polygons.length, 0);
-
-  return {
-    ...result,
-    geometryVersion: Math.max(2, Number(result.geometryVersion ?? 1)),
-    polygonCount,
-    provinces,
-    geometries,
-    coastlineRefinement: {
-      method: "strict physical-land polygon reconciliation with canonical land authority, centroid, boundary, interior-edge sampling and shared physical-land authority",
-      clippedByPhysicalLandMask: true,
-      clippedByGeneratedHydrography: true,
-      coastalProvinceCount: coastalIds.size,
-      landCentroidReconciliation: true,
-      sourceProvinceGeometryPreserved: true,
-      vertexCentroidLandInvariant: true,
-      polygonBoundaryLandInvariant: true,
-      waterExclusionInvariant: true,
-      interiorSampleInvariant: true,
-      finalPolygonValidation: true,
-    },
-  };
-}
+export {
+  hasUsablePolygonSamples,
+  isCanonicalPhysicalLandPoint,
+};
