@@ -31,6 +31,7 @@
     "test:anatolia-phase2b": "node tools/tests/anatolia-phase2b.test.js",
     "test:anatolia-phase2c": "node tools/tests/anatolia-phase2c.test.js",
     "test:anatolia-phase2d": "node tools/tests/anatolia-phase2d.test.js",
+    "test:anatolia-phase2d-land-diagnostic": "node tools/tests/anatolia-phase2d-land-diagnostic.test.js",
     "test:anatolia-historical-control": "node tools/tests/anatolia-historical-control.test.js",
     "test:cartography-2efgh": "node tools/tests/cartography-2efgh.test.js",
     "test:map-texture-atlas": "node tools/tests/map-texture-atlas.test.js",
