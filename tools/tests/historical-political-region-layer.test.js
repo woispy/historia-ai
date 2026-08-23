@@ -7,6 +7,7 @@ import { createHistoricalPoliticalMapModel } from "../../src/world/map/historica
 import { getHistoricalPolity } from "../../src/world/map/historical/HistoricalPoliticalRuntime.js";
 import { getHistoricalPoliticalOverlayMode } from "../../src/map/components/layers/HistoricalPoliticalOverlayModel.js";
 import { buildCartographicInternalBoundaryPath } from "../../src/map/rendering/historical/HistoricalPoliticalBoundary.js";
+import { HISTORICAL_POLITICAL_COVERAGE_CONTRACT } from "../../src/world/map/historical/HistoricalPoliticalCoverageContract.js";
 
 const read = (path) => readFileSync(resolve(path), "utf8").replace(/\r\n/g, "\n");
 const layerSource = read("src/map/components/layers/HistoricalPoliticalRegionLayer.jsx");
@@ -16,6 +17,10 @@ const worldMapHookSource = read("src/map/hooks/useWorldMap.js");
 const provinceLayerSource = read("src/map/components/layers/ProvinceLayer.jsx");
 
 assert.match(layerSource, /clipPath="url\(#world-land-mask\)"/, "historical political rendering must be clipped to the physical world land mask");
+assert.match(layerSource, /HISTORICAL_POLITICAL_COVERAGE_CONTRACT/, "historical political rendering must consume the global coverage contract");
+assert.match(layerSource, /HISTORICAL_POLITICAL_WORLD_LAND_CLIP_ID = HISTORICAL_POLITICAL_COVERAGE_CONTRACT\.landClip/, "global political clipping must come from the physical-land coverage contract");
+assert.equal(HISTORICAL_POLITICAL_COVERAGE_CONTRACT.landClip, "world-land-mask");
+assert.equal(HISTORICAL_POLITICAL_COVERAGE_CONTRACT.sourceOfTruth, "physical-world-land-mask");
 assert.match(layerSource, /aria-label="Historical unassigned land presentation"/, "historical political rendering must provide a visible fallback for land without a source polity");
 assert.match(layerSource, /fill=\{DEFAULT_POLITICAL_COLOR\}/, "historical unassigned land presentation must use the explicit neutral political colour");
 assert.match(layerSource, /COASTAL_POLITICAL_EXPANSION = 0\.08/, "curated coastal political fills must have a small controlled expansion before land clipping");
