@@ -1,4 +1,4 @@
-import hydrography from "./../src/map/data/generated/anatolia-hydrography-10m.json" with { type: "json" };
+import hydrography from "../../src/map/data/generated/anatolia-hydrography-10m.json" with { type: "json" };
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 
