@@ -7,6 +7,8 @@
  * world, not only the 38 Anatolian gameplay provinces.
  */
 
+import { HISTORICAL_POLITICAL_COVERAGE_CONTRACT } from "./HistoricalPoliticalCoverageContract.js";
+
 function pointOnSegment(point, a, b, epsilon = 1e-9) {
   const [px, py] = point;
   const [ax, ay] = a;
@@ -76,19 +78,19 @@ function isCovered(point, polygons) {
 }
 
 /**
- * Audits source geometry and the explicit renderer contracts.
+ * Audits source geometry and the explicit renderer contract.
  *
  * Historical 1300 source data does not assign a historical polity to every
  * modern landmass, so the renderer supplies a neutral land presentation
  * underneath the political polygons. Source political polygons may also
  * extend beyond the physical coast; the world-land clip is the authoritative
- * sea exclusion at render time.
+ * sea exclusion at render time. Those presentation guarantees are accepted
+ * only through the named global contract, never through per-call booleans.
  */
 export function auditHistoricalPoliticalCoverage({
   landPolygons = [],
   politicalEntries = [],
-  neutralLandFallback = false,
-  exactLandClip = false,
+  presentationContract = HISTORICAL_POLITICAL_COVERAGE_CONTRACT,
 } = {}) {
   const politicalPolygons = flattenPolygons(politicalEntries);
   const landSamples = collectSamples(landPolygons);
@@ -98,8 +100,8 @@ export function auditHistoricalPoliticalCoverage({
   const politicalSamplesOutsideLand = politicalSamples.filter((point) => !isCovered(point, landPolygons));
   const sourceLandCoveragePass = uncoveredLandSamples.length === 0;
   const sourceSeaLeakPass = politicalSamplesOutsideLand.length === 0;
-  const landCoveragePass = sourceLandCoveragePass || neutralLandFallback;
-  const seaLeakPass = sourceSeaLeakPass || exactLandClip;
+  const landCoveragePass = sourceLandCoveragePass || presentationContract.neutralLandFallback === true;
+  const seaLeakPass = sourceSeaLeakPass || presentationContract.landClip === "world-land-mask";
 
   return Object.freeze({
     landSampleCount: landSamples.length,
@@ -110,6 +112,7 @@ export function auditHistoricalPoliticalCoverage({
     sourceSeaLeakPass,
     landCoveragePass,
     seaLeakPass,
+    presentationContract,
     pass: landCoveragePass && seaLeakPass,
   });
 }
