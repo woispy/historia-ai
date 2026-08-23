@@ -2,6 +2,10 @@ import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtla
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 import { ANATOLIA_CITY_ATLAS } from "../../src/map/data/AnatoliaCityAtlas.js";
+import {
+  isPhysicalLandPoint,
+  isUsablePhysicalLandPoint,
+} from "../../src/map/rendering/physical/PhysicalLandAuthority.js";
 
 const BBOX = [25.45, 35.72, 44.85, 42.35];
 const EPSILON = 1e-8;
@@ -18,34 +22,14 @@ function distanceSquared(a, b) {
   return dx * dx + dy * dy;
 }
 
-function pointInPolygon(point, polygon) {
-  let inside = false;
-  const [x, y] = point;
-  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index += 1) {
-    const [xi, yi] = polygon[index];
-    const [xj, yj] = polygon[previous];
-    const intersects = yi > y !== yj > y
-      && x < ((xj - xi) * (y - yi)) / (yj - yi || Number.EPSILON) + xi;
-    if (intersects) inside = !inside;
-  }
-  return inside;
-}
-
-function pointInLand(point) {
-  return ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon));
-}
-
-function pointInWater(point) {
-  return ANATOLIA_PHYSICAL_ATLAS.seas.some((sea) => pointInPolygon(point, sea.coordinates))
-    || ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => (
-      Array.isArray(lake.rings)
-        ? lake.rings.some((ring) => pointInPolygon(point, ring))
-        : pointInPolygon(point, lake.coordinates)
-    ));
-}
-
 function usableLandPoint(point) {
-  return pointInLand(point) && !pointInWater(point);
+  return isUsablePhysicalLandPoint(
+    point,
+    ANATOLIA_PHYSICAL_ATLAS.landPolygons,
+    ANATOLIA_PHYSICAL_ATLAS.seas.map((sea) => sea.coordinates),
+    ANATOLIA_PHYSICAL_ATLAS.channels.map((channel) => channel.coordinates),
+    ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes,
+  );
 }
 
 function nearestLinePoint(point, lines, maxDistance = Number.POSITIVE_INFINITY) {
@@ -451,4 +435,4 @@ export function isAnatoliaGeometryPoint(point) {
   return latitude <= 42.20;
 }
 
-export { usableLandPoint as isPhysicalLandPoint };
+export { isPhysicalLandPoint };
