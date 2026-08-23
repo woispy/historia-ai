@@ -80,6 +80,7 @@ function WorldMap({
         zoom={cameraState.zoom}
         camera={cameraState}
         renderFill={!isHistoricalPoliticalMap}
+        renderBoundaries={!isHistoricalPoliticalMap}
       />
     ),
     [
