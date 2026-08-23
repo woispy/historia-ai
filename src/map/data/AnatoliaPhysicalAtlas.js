@@ -43,11 +43,13 @@ const land = [
 // Kocaeli/Nicomedia is a narrow peninsula between the Gulf of Izmit and the
 // southern Marmara/Bosphorus system. Keep this as its own land component so
 // the historical city anchor remains land without filling the gulf with land.
-// The southern edge is deliberately south of the 40.7654 Nicomedia anchor.
+// The southern shoreline is explicitly stepped below the exact Nicomedia
+// anchor (29.9169, 40.7654). This is intentional: a coastline envelope must
+// contain the city point, not merely pass north of it.
 const nicomediaLand = [
   [29.84,40.85],[29.92,40.86],[30.08,40.91],[30.25,40.86],
-  [30.22,40.81],[30.12,40.79],[30.02,40.78],[29.94,40.77],
-  [29.88,40.77],[29.84,40.81],[29.84,40.85],
+  [30.22,40.81],[30.12,40.78],[30.02,40.75],[29.94,40.74],
+  [29.88,40.74],[29.84,40.79],[29.84,40.85],
 ];
 
 export const ANATOLIA_PHYSICAL_ATLAS = Object.freeze({
