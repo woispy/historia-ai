@@ -10,22 +10,24 @@ const countries = Object.fromEntries([
   ["esref", "#7B6840"], ["germiyan", "#8C5A2B"], ["inanc", "#5E8C61"],
   ["hamid", "#4F8065"], ["sahibata", "#806A4A"], ["karaman", "#A33F3F"],
   ["pervane", "#6B7280"], ["cobanid", "#8A7358"], ["candar", "#7A6A3A"],
-  ["trebizond", "#4A7896"], ["cilicia", "#8B4A62"],
+  ["trebizond", "#4A7896"], ["cilicia", "#8B4A62"], ["ilkhanate", "#3D73B9"],
 ].map(([id, color]) => [id, { id, color, timeModel: "historical", sourceType: "historical-runtime" }]));
 
 const repository = { byId: countries };
 const sourceProvinces = ANATOLIA_PROVINCE_METADATA.map(({ id, countryId }) => ({ id, owner: countryId }));
 const model = createHistoricalPoliticalMapModel({ date: "1300-01-01", provinces: sourceProvinces, countryRepository: repository });
 
-assert.equal(model.length, 38);
+assert.equal(model.length, ANATOLIA_PROVINCE_METADATA.length);
+assert.ok(model.length >= 44);
 
 const expected = {
   "bithynia-nicomedia": "byzantium", "phrygia-sogut": "ottomans", "mysia-balikesir": "karasi",
   "lydia-magnesia": "saruhan", "caria-mylasa": "mentese", "pisidia-beysehir": "esref",
   "phrygia-kutahya": "germiyan", "phrygia-denizli": "inanc", "phrygia-uluborlu": "hamid",
-  "phrygia-afyon": "sahibata", "lycaonia-konya": "karaman", "pontus-sinop": "pervane",
-  "pontus-kastamon": "cobanid", "pontus-trebizond": "trebizond", "cilicia-sis": "cilicia",
-  "ionia-ayasuluk": "byzantium", "lydia-birgi": "byzantium",
+  "pisidia-egirdir": "hamid", "phrygia-afyon": "sahibata", "lycaonia-konya": "karaman",
+  "cappadocia-nigde": "karaman", "pontus-sinop": "pervane", "pontus-kastamon": "cobanid",
+  "pontus-trebizond": "trebizond", "cilicia-sis": "cilicia", "cilicia-adana": "cilicia",
+  "ionia-ayasuluk": "byzantium", "lydia-birgi": "byzantium", "euphrates-malatya": "ilkhanate",
 };
 for (const [provinceId, polityId] of Object.entries(expected)) {
   assert.equal(model.find((entry) => entry.province.id === provinceId)?.country.id, polityId, provinceId);
@@ -47,14 +49,14 @@ assert.deepEqual(ANATOLIA_CITY_ATLAS.eskisehir.mapProvinceIds, ["bithynia-sangar
 assert.equal(ANATOLIA_CITY_ATLAS.eskisehir.mapProvinceId, "phrygia-eskisehir");
 
 // Only genuinely unresolved 1300 provinces receive neutral presentation.
-// Ankara and Kayseri are intentionally excluded: both are Ilkhanid-suzerainty cases.
-for (const provinceId of ["phrygia-eskisehir", "lydia-smyrna", "pontus-amasya"]) {
+// Ankara, Kayseri, Sivas and Malatya are layered Ilkhanid-suzerainty cases.
+for (const provinceId of ["phrygia-eskisehir", "lydia-smyrna", "pontus-amasya", "pamphylia-attaleia", "lycia-myra", "pisidia-antiochia", "cilicia-alaiye"]) {
   const entry = model.find((item) => item.province.id === provinceId);
   assert.equal(entry.country.id, "local_polities", provinceId);
   assert.equal(entry.historicalProvince.polityId, null, provinceId);
 }
 
-for (const provinceId of ["galatia-ankara", "cappadocia-kayseri", "cappadocia-sivas"]) {
+for (const provinceId of ["galatia-ankara", "cappadocia-kayseri", "cappadocia-sivas", "euphrates-malatya", "eastern-anatolia-erzincan", "eastern-anatolia-erzurum"]) {
   const entry = model.find((item) => item.province.id === provinceId);
   assert.equal(entry.country.id, "ilkhanate", provinceId);
   assert.equal(entry.historicalProvince.polityId, null, provinceId);
