@@ -2,12 +2,41 @@ import { useMemo } from "react";
 import { getProvinces } from "../../provinces";
 import { getCities } from "../../cities";
 import { getGeometry } from "../../world/map/geometry";
+import { ANATOLIA_PROVINCE_METADATA } from "../data/AnatoliaProvinceMetadata.js";
 import { createHistoricalPoliticalMapModel } from "../../world/map/historical/HistoricalPoliticalMapModel";
 
 function getScenarioStartDate(gameSession) {
   return gameSession?.scenario?.startDate
     ?? gameSession?.world?.scenario?.startDate
     ?? null;
+}
+
+const HISTORICAL_1300_DATE = "1300-01-01";
+
+function createHistoricalAnatoliaProvinceFallbacks(sourceProvinces, date) {
+  if (date !== HISTORICAL_1300_DATE) return sourceProvinces;
+
+  const sourceIds = new Set(sourceProvinces.map((province) => province.id));
+  const missingAnatoliaProvinces = ANATOLIA_PROVINCE_METADATA
+    .filter((metadata) => !sourceIds.has(metadata.id))
+    .map((metadata) => ({
+      id: metadata.id,
+      name: metadata.name,
+      geometryId: metadata.id,
+      owner: metadata.countryId ?? null,
+      controller: metadata.historicalControl?.controllerAt1300 ?? null,
+      historical: Object.freeze({
+        classification: "curated-regional-gameplay-overlay",
+        sourceType: "historical-runtime",
+        historicalDate: HISTORICAL_1300_DATE,
+      }),
+      historicalDate: HISTORICAL_1300_DATE,
+      historicalSource: "historia-ai-curated-cartography",
+    }));
+
+  return missingAnatoliaProvinces.length
+    ? [...sourceProvinces, ...missingAnatoliaProvinces]
+    : sourceProvinces;
 }
 
 export function useWorldMap(gameSession) {
@@ -18,10 +47,15 @@ export function useWorldMap(gameSession) {
     const cityRepository = gameSession.world.repositories.cities;
     const countryRepository = gameSession.world.repositories.countries;
     const geometryRepository = gameSession.world.map.geometry;
+    const date = getScenarioStartDate(gameSession);
     const sourceProvinces = getProvinces(provinceRepository);
+    const historicalSourceProvinces = createHistoricalAnatoliaProvinceFallbacks(
+      sourceProvinces,
+      date,
+    );
     const historicalModel = createHistoricalPoliticalMapModel({
-      date: getScenarioStartDate(gameSession),
-      provinces: sourceProvinces,
+      date,
+      provinces: historicalSourceProvinces,
       countryRepository,
     });
 
@@ -29,7 +63,7 @@ export function useWorldMap(gameSession) {
       ? new Map(historicalModel.map((entry) => [entry.province.id, entry]))
       : null;
 
-    const provinces = sourceProvinces.map((province) => {
+    const provinces = historicalSourceProvinces.map((province) => {
       const historical = historicalById?.get(province.id) ?? null;
       return historical
         ? {
