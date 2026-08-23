@@ -7,6 +7,7 @@
  */
 
 const CARTOGRAPHIC_CENTROIDS = Object.freeze({
+  "bithynia-nicomedia": [29.9169, 40.7654],
   "bithynia-nicaea": [29.73, 40.48],
   "bithynia-prusa": [29.08, 40.20],
   "bithynia-sangarios": [30.62, 40.03],
