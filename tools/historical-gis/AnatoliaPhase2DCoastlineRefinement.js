@@ -106,6 +106,14 @@ function polygonArea(polygon) {
   return Math.abs(area) / 2;
 }
 
+function polygonVertexCentroid(polygon) {
+  const sum = polygon.reduce(
+    (total, [longitude, latitude]) => [total[0] + longitude, total[1] + latitude],
+    [0, 0],
+  );
+  return [sum[0] / polygon.length, sum[1] / polygon.length];
+}
+
 function polygonCentroid(polygon) {
   let areaTwice = 0;
   let longitude = 0;
@@ -118,26 +126,37 @@ function polygonCentroid(polygon) {
     longitude += (current[0] + next[0]) * cross;
     latitude += (current[1] + next[1]) * cross;
   }
-  if (Math.abs(areaTwice) < EPSILON) return polygon[0];
+  if (Math.abs(areaTwice) < EPSILON) return polygonVertexCentroid(polygon);
   return [longitude / (3 * areaTwice), latitude / (3 * areaTwice)];
 }
 
-function translatePolygonToLandAnchor(polygon, anchor) {
-  if (!Array.isArray(polygon) || polygon.length < 3 || !anchor) return polygon;
-  const centroid = polygonCentroid(polygon);
-  if (isUsableLandPoint(centroid) || !isUsableLandPoint(anchor)) return polygon;
-  const delta = [anchor[0] - centroid[0], anchor[1] - centroid[1]];
+function hasUsableCentroids(polygon) {
+  return isUsableLandPoint(polygonVertexCentroid(polygon)) && isUsableLandPoint(polygonCentroid(polygon));
+}
+
+function translatePolygonToLandAnchor(polygon, anchor, sourceCentroid) {
+  if (!Array.isArray(polygon) || polygon.length < 3 || !anchor || !sourceCentroid) return polygon;
+  const delta = [anchor[0] - sourceCentroid[0], anchor[1] - sourceCentroid[1]];
   const translated = polygon.map(([longitude, latitude]) => [longitude + delta[0], latitude + delta[1]]);
-  return isUsableLandPoint(polygonCentroid(translated)) ? translated : polygon;
+  return hasUsableCentroids(translated) ? translated : polygon;
 }
 
 function reconcilePolygonCentroid(polygon, metadata) {
   if (!Array.isArray(polygon) || polygon.length < 3) return polygon;
-  if (polygonArea(polygon) < 0.00005) return polygon;
-  const centroid = polygonCentroid(polygon);
-  if (isUsableLandPoint(centroid)) return polygon;
+  if (polygonArea(polygon) < 0.00005 || hasUsableCentroids(polygon)) return polygon;
+
   const representative = findUsableRepresentativePoint(metadata?.centroid ?? null);
-  return translatePolygonToLandAnchor(polygon, representative);
+  if (!representative) return polygon;
+
+  const vertexCentroid = polygonVertexCentroid(polygon);
+  const translatedFromVertex = translatePolygonToLandAnchor(polygon, representative, vertexCentroid);
+  if (translatedFromVertex !== polygon) return translatedFromVertex;
+
+  const areaCentroid = polygonCentroid(polygon);
+  const translatedFromArea = translatePolygonToLandAnchor(polygon, representative, areaCentroid);
+  if (translatedFromArea !== polygon) return translatedFromArea;
+
+  return polygon;
 }
 
 function roundPolygon(polygon) {
@@ -152,7 +171,7 @@ function createRepresentativePolygon(metadata) {
     const angle = (index / 8) * Math.PI * 2;
     return [point[0] + Math.cos(angle) * radius, point[1] + Math.sin(angle) * radius];
   });
-  return isUsableLandPoint(polygonCentroid(polygon)) ? roundPolygon(polygon) : null;
+  return hasUsableCentroids(polygon) ? roundPolygon(polygon) : null;
 }
 
 function createCoastalCoverageFragment(metadata) {
@@ -162,7 +181,7 @@ function createCoastalCoverageFragment(metadata) {
   if (!interior) return null;
   const polygon = roundPolygon([coast.start, coast.end, interior]);
   if (polygon.length < 3 || polygonArea(polygon) < EPSILON) return null;
-  return isUsableLandPoint(polygonCentroid(polygon)) ? polygon : null;
+  return hasUsableCentroids(polygon) ? polygon : null;
 }
 
 export function refineAnatoliaPhase2DCoastline(result) {
@@ -180,7 +199,7 @@ export function refineAnatoliaPhase2DCoastline(result) {
     if (!metadata) return geometry;
 
     let polygons = (geometry.polygons ?? []).map((polygon) => reconcilePolygonCentroid(polygon, metadata));
-    if (!polygons.length) {
+    if (!polygons.length || !polygons.some((polygon) => polygonArea(polygon) >= 0.00005 && hasUsableCentroids(polygon))) {
       const representative = createRepresentativePolygon(metadata);
       if (representative) polygons = [representative];
     }
@@ -213,6 +232,7 @@ export function refineAnatoliaPhase2DCoastline(result) {
       coastalProvinceCount: coastalIds.size,
       landCentroidReconciliation: true,
       sourceProvinceGeometryPreserved: true,
+      vertexCentroidLandInvariant: true,
     },
   };
 }
