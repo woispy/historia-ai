@@ -30,7 +30,6 @@ const SOURCE_POLITICAL_ALIASES = new Map([
   ["byzantium", "#6A1B9A"],
   ["ottomans", "#0F7A32"],
   ["osmanoğulları", "#0F7A32"],
-  ["osmanoğulları", "#0F7A32"],
   ["karasi", "#B87333"],
   ["karesi", "#B87333"],
   ["saruhan", "#786A9D"],
