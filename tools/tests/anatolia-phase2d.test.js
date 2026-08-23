@@ -6,7 +6,9 @@ import {
 } from "../historical-gis/AnatoliaPhase2DGeometryBuilder.js";
 import { refineAnatoliaPhase2DCoastline } from "../historical-gis/AnatoliaPhase2DCoastlineRefinement.js";
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
+import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
+import { isUsablePhysicalLandPoint } from "../../src/map/rendering/physical/PhysicalLandAuthority.js";
 
 const result = refineAnatoliaPhase2DCoastline(buildAnatoliaPhase2DAssets([
   { polygons: [[[29.9, 40.7], [30.1, 40.7], [30.1, 40.9], [29.9, 40.7]]] },
@@ -54,6 +56,11 @@ function polygonArea(polygon) {
   return Math.abs(area) / 2;
 }
 
+const land = ANATOLIA_PHYSICAL_ATLAS.landPolygons;
+const seas = ANATOLIA_PHYSICAL_ATLAS.seas.map((sea) => sea.coordinates);
+const channels = ANATOLIA_PHYSICAL_ATLAS.channels.map((channel) => channel.coordinates);
+const lakes = ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes;
+
 for (const geometry of result.geometries) {
   assert.ok(provinceIds.has(geometry.identity.provinceId));
   assert.ok(geometry.polygons.length > 0);
@@ -62,11 +69,15 @@ for (const geometry of result.geometries) {
     vertexCount += polygon.length;
     const centroid = polygonCentroid(polygon);
     // Tiny coastline reconciliation fragments may include exact coastline
-    // vertices; normal geometry must still satisfy the physical-land invariant.
+    // vertices; normal geometry must satisfy the complete usable-land invariant.
     if (polygonArea(polygon) >= 0.00005) {
       assert.ok(
         isPhysicalLandPoint(centroid),
         `Phase 2D polygon centroid must remain on physical land: ${centroid.join(",")}`,
+      );
+      assert.ok(
+        isUsablePhysicalLandPoint(centroid, land, seas, channels, lakes),
+        `Phase 2D polygon centroid must remain on usable physical land: ${centroid.join(",")}`,
       );
     }
     for (const [longitude, latitude] of polygon) {
