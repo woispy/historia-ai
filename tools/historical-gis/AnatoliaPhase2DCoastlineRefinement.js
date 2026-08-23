@@ -11,6 +11,7 @@ const REPRESENTATIVE_SEARCH_RADIUS = 0.5;
 const MIN_VALID_POLYGON_AREA = 0.00005;
 const EDGE_SAMPLE_FRACTIONS = [0.25, 0.5, 0.75];
 const COAST_FRAGMENT_HALF_LENGTH = 0.01;
+const INTERIOR_SAMPLE_FRACTIONS = [0.25, 0.5, 0.75];
 
 function distanceSquared(a, b) {
   const dx = a[0] - b[0];
@@ -114,8 +115,9 @@ function hasUsablePolygonSamples(polygon) {
   if (!Array.isArray(polygon) || polygon.length < 3) return false;
   if (polygonArea(polygon) < MIN_VALID_POLYGON_AREA) return false;
 
-  if (!isUsableLandPoint(polygonCentroid(polygon))) return false;
-  if (!isUsableLandPoint(polygonVertexCentroid(polygon))) return false;
+  const areaCentroid = polygonCentroid(polygon);
+  const vertexCentroid = polygonVertexCentroid(polygon);
+  if (!isUsableLandPoint(areaCentroid) || !isUsableLandPoint(vertexCentroid)) return false;
 
   for (let index = 0; index < polygon.length; index += 1) {
     const start = polygon[index];
@@ -125,6 +127,17 @@ function hasUsablePolygonSamples(polygon) {
       const sample = [
         start[0] + (end[0] - start[0]) * fraction,
         start[1] + (end[1] - start[1]) * fraction,
+      ];
+      if (!isUsableLandPoint(sample)) return false;
+    }
+
+    // Every edge-to-centroid segment is sampled as an interior witness. This
+    // prevents a polygon whose boundary happens to stay on land from spanning
+    // across a gulf/channel or a lake between otherwise valid vertices.
+    for (const fraction of INTERIOR_SAMPLE_FRACTIONS) {
+      const sample = [
+        areaCentroid[0] + (start[0] - areaCentroid[0]) * fraction,
+        areaCentroid[1] + (start[1] - areaCentroid[1]) * fraction,
       ];
       if (!isUsableLandPoint(sample)) return false;
     }
@@ -149,17 +162,23 @@ function reconcilePolygonCentroid(polygon, metadata) {
 
   const vertexCentroid = polygonVertexCentroid(polygon);
   const translatedFromVertex = translatePolygonToLandAnchor(polygon, representative, vertexCentroid);
-  if (translatedFromVertex !== polygon) return translatedFromVertex;
+  if (translatedFromVertex !== polygon && hasUsablePolygonSamples(translatedFromVertex)) return translatedFromVertex;
 
   const areaCentroid = polygonCentroid(polygon);
   const translatedFromArea = translatePolygonToLandAnchor(polygon, representative, areaCentroid);
-  if (translatedFromArea !== polygon) return translatedFromArea;
+  if (translatedFromArea !== polygon && hasUsablePolygonSamples(translatedFromArea)) return translatedFromArea;
 
   return null;
 }
 
 function roundPolygon(polygon) {
   return polygon.map(([x, y]) => [Number(x.toFixed(5)), Number(y.toFixed(5))]);
+}
+
+function finalizePolygon(polygon) {
+  if (!Array.isArray(polygon) || polygon.length < 3) return null;
+  const rounded = roundPolygon(polygon);
+  return hasUsablePolygonSamples(rounded) ? rounded : null;
 }
 
 function createRepresentativePolygon(metadata) {
@@ -171,8 +190,8 @@ function createRepresentativePolygon(metadata) {
       const angle = (index / 8) * Math.PI * 2;
       return [point[0] + Math.cos(angle) * radius, point[1] + Math.sin(angle) * radius];
     });
-    const rounded = roundPolygon(polygon);
-    if (hasUsablePolygonSamples(rounded)) return rounded;
+    const finalized = finalizePolygon(polygon);
+    if (finalized) return finalized;
   }
 
   return null;
@@ -200,8 +219,8 @@ function createCoastalCoverageFragment(metadata) {
         center[0] + normal[0] * direction * (coastOffset + COAST_INTERIOR_OFFSET),
         center[1] + normal[1] * direction * (coastOffset + COAST_INTERIOR_OFFSET),
       ];
-      const polygon = roundPolygon([coastA, coastB, interior]);
-      if (hasUsablePolygonSamples(polygon)) return polygon;
+      const polygon = finalizePolygon([coastA, coastB, interior]);
+      if (polygon) return polygon;
     }
   }
 
@@ -224,7 +243,8 @@ export function refineAnatoliaPhase2DCoastline(result) {
 
     let polygons = (geometry.polygons ?? [])
       .map((polygon) => reconcilePolygonCentroid(polygon, metadata))
-      .filter((polygon) => hasUsablePolygonSamples(polygon));
+      .map(finalizePolygon)
+      .filter(Boolean);
 
     if (!polygons.length) {
       const representative = createRepresentativePolygon(metadata);
@@ -235,6 +255,12 @@ export function refineAnatoliaPhase2DCoastline(result) {
       const fragment = createCoastalCoverageFragment(metadata);
       if (fragment) polygons = [...polygons, fragment];
     }
+
+    // Final postcondition: no geometry leaves this stage unless the exact
+    // rounded polygon satisfies the same physical-land authority used by the
+    // Phase 2D test contract. This is deliberately the last operation so no
+    // later transform can reintroduce a water centroid.
+    polygons = polygons.map(finalizePolygon).filter(Boolean);
 
     return { ...geometry, polygons };
   });
@@ -253,7 +279,7 @@ export function refineAnatoliaPhase2DCoastline(result) {
     provinces,
     geometries,
     coastlineRefinement: {
-      method: "strict physical-land polygon reconciliation with edge sampling and shared physical-land authority",
+      method: "strict physical-land polygon reconciliation with centroid, boundary, interior-edge sampling and shared physical-land authority",
       clippedByPhysicalLandMask: true,
       clippedByGeneratedHydrography: true,
       coastalProvinceCount: coastalIds.size,
@@ -262,6 +288,8 @@ export function refineAnatoliaPhase2DCoastline(result) {
       vertexCentroidLandInvariant: true,
       polygonBoundaryLandInvariant: true,
       waterExclusionInvariant: true,
+      interiorSampleInvariant: true,
+      finalPolygonValidation: true,
     },
   };
 }
