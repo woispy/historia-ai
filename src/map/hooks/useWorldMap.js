@@ -47,10 +47,39 @@ function buildHistoricalWorldSourceProvinces(sourceProvinces, geometryRepository
   return [...byId.values()];
 }
 
+function createHistoricalWorldProvince(province, geometry, historicalEntry) {
+  const historicalProvince = historicalEntry?.historicalProvince ?? null;
+  const geometryMetadata = geometry?.metadata ?? {};
+
+  return {
+    ...province,
+    name: historicalProvince?.name ?? geometryMetadata.name ?? province.name ?? province.id,
+    geometryId: province.geometryId ?? province.id,
+    controller: historicalProvince?.polityId ?? province.controller ?? null,
+    coastal: historicalProvince?.coastal === true || geometryMetadata.coastal === true,
+    port: historicalProvince?.port === true || geometryMetadata.port === true,
+    terrain: geometryMetadata.terrain ?? province.terrain ?? null,
+    strategic: geometryMetadata.strategic === true || province.strategic === true,
+    regionId: historicalProvince?.regionId ?? geometryMetadata.historicalRegion ?? province.regionId ?? null,
+    historical: historicalProvince,
+    historicalControl: historicalProvince
+      ? {
+        controllerAt1300: historicalProvince.polityId ?? null,
+        statusAt1300: historicalProvince.controlStatus ?? "unknown",
+        confidence: historicalProvince.controlConfidence ?? "low",
+        note: historicalProvince.controlNote ?? null,
+      }
+      : null,
+  };
+}
+
 function createHistoricalWorldEntry(province, geometry, historicalEntry) {
   if (historicalEntry?.historicalProvince) {
+    const hydratedProvince = createHistoricalWorldProvince(province, geometry, historicalEntry);
+
     return {
       ...historicalEntry,
+      province: hydratedProvince,
       geometry,
       // These are the curated Phase 2D 1300 Anatolia provinces. They use the
       // dedicated P0 physical atlas as their political coastline authority.
