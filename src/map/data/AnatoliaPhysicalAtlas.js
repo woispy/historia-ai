@@ -12,8 +12,8 @@ const p = (name, coordinates, options = {}) => ({ name, coordinates, ...options 
 // Western/northern Anatolian land is deliberately represented with a denser
 // coastline around the Marmara–Nicomedia corridor. The historical city anchor
 // for Nicomedia (29.9169, 40.7654) must remain land-safe without moving the city.
-// Keep the lake/sea envelopes separate; the land polygon is the sole land
-// authority used by political clipping and cartographic anchor validation.
+// Keep the lake/sea envelopes separate; the land polygon is the land authority
+// used by political clipping and cartographic anchor validation.
 const land = [
   [26.00,41.86],[26.55,41.75],[27.10,41.58],[27.70,41.38],[28.20,41.22],
   [28.65,41.08],[29.05,40.92],[29.42,40.88],[29.72,40.86],[29.84,40.85],
@@ -43,10 +43,11 @@ const land = [
 // Kocaeli/Nicomedia is a narrow peninsula between the Gulf of Izmit and the
 // southern Marmara/Bosphorus system. Keep this as its own land component so
 // the historical city anchor remains land without filling the gulf with land.
+// The southern edge is deliberately south of the 40.7654 Nicomedia anchor.
 const nicomediaLand = [
   [29.84,40.85],[29.92,40.86],[30.08,40.91],[30.25,40.86],
   [30.22,40.81],[30.12,40.79],[30.02,40.78],[29.94,40.77],
-  [29.88,40.78],[29.84,40.81],[29.84,40.85],
+  [29.88,40.77],[29.84,40.81],[29.84,40.85],
 ];
 
 export const ANATOLIA_PHYSICAL_ATLAS = Object.freeze({
@@ -55,9 +56,9 @@ export const ANATOLIA_PHYSICAL_ATLAS = Object.freeze({
   bbox: [24.0, 34.0, 45.2, 43.2],
   landPolygons: [land, nicomediaLand],
 
-  // Broad water envelopes are deliberately clipped to the physical land mask.
-  // This prevents political geometry from ever becoming a sea and lets the
-  // coastline remain the single physical authority.
+  // Broad water envelopes remain explicit physical context. Political layers
+  // must intersect land before they are rendered, so water can never inherit
+  // political color.
   seas: [
     p("Black Sea", [[25.0,41.15],[45.2,41.15],[45.2,43.2],[25.0,43.2]], {kind:"sea", priority:100}),
     p("Marmara Sea", [[26.45,40.35],[26.90,40.20],[27.45,40.18],[28.05,40.20],[28.62,40.30],[29.10,40.48],[29.50,40.66],[29.82,40.82],[29.48,40.88],[29.10,40.82],[28.70,40.72],[28.28,40.64],[27.84,40.57],[27.42,40.53],[27.00,40.50],[26.62,40.48],[26.45,40.35]], {kind:"sea", priority:100}),
