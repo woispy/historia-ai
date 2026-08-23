@@ -2,13 +2,29 @@ import assert from "node:assert/strict";
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
+import { applyAnatoliaProvinceCartographicOverrides } from "../../src/map/data/AnatoliaProvinceCartographicOverrides.js";
+
+function pointOnSegment(point, start, end, epsilon = 1e-9) {
+  const [x, y] = point;
+  const [x1, y1] = start;
+  const [x2, y2] = end;
+  const cross = (x - x1) * (y2 - y1) - (y - y1) * (x2 - x1);
+  if (Math.abs(cross) > epsilon) return false;
+  return x >= Math.min(x1, x2) - epsilon
+    && x <= Math.max(x1, x2) + epsilon
+    && y >= Math.min(y1, y2) - epsilon
+    && y <= Math.max(y1, y2) + epsilon;
+}
 
 function pointInPolygon(point, polygon) {
   let inside = false;
   const [x, y] = point;
   for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index += 1) {
-    const [xi, yi] = polygon[index];
-    const [xj, yj] = polygon[previous];
+    const current = polygon[index];
+    const prior = polygon[previous];
+    if (pointOnSegment(point, prior, current)) return true;
+    const [xi, yi] = current;
+    const [xj, yj] = prior;
     const intersects = yi > y !== yj > y
       && x < ((xj - xi) * (y - yi)) / (yj - yi || Number.EPSILON) + xi;
     if (intersects) inside = !inside;
@@ -31,9 +47,18 @@ function pointInWater(point) {
 
 assert.equal(ANATOLIA_PROVINCE_METADATA.length, 44);
 
+// Runtime construction applies the explicit cartographic anchors. Run the same
+// operation in isolation here so this test validates the effective presentation
+// geometry rather than the un-overridden source metadata object.
+const effectiveMetadata = ANATOLIA_PROVINCE_METADATA.map((province) => ({
+  ...province,
+  centroid: [...province.centroid],
+}));
+applyAnatoliaProvinceCartographicOverrides(effectiveMetadata);
+
 const ids = new Set();
 const failedLandAnchors = [];
-for (const province of ANATOLIA_PROVINCE_METADATA) {
+for (const province of effectiveMetadata) {
   assert.equal(ids.has(province.id), false, `${province.id} must have a unique id`);
   ids.add(province.id);
   const onLand = pointInLand(province.centroid);
@@ -44,7 +69,7 @@ for (const province of ANATOLIA_PROVINCE_METADATA) {
 
 assert.deepEqual(failedLandAnchors, [], "all 44 cartographic anchors must resolve inside the physical Anatolia land mask");
 
-const aegean = ANATOLIA_PROVINCE_METADATA
+const aegean = effectiveMetadata
   .filter((province) => province.regionId === "aegean-west")
   .map((province) => province.centroid);
 assert.ok(aegean.length >= 4, "Aegean western reconstruction needs its historical anchor set");
@@ -57,16 +82,16 @@ for (let first = 0; first < aegean.length; first += 1) {
   }
 }
 
-const byId = new Map(ANATOLIA_PROVINCE_METADATA.map((province) => [province.id, province]));
+const byId = new Map(effectiveMetadata.map((province) => [province.id, province]));
 assert.deepEqual(byId.get("ionia-ayasuluk")?.centroid, [27.37, 37.95], "Ayasuluk anchor must follow the historical Selçuk/Ephesus location rather than an inland drift");
-assert.deepEqual(byId.get("lydia-birgi")?.centroid, [28.06, 38.25], "Birgi anchor must remain in its historical mountain-valley corridor");
-assert.deepEqual(byId.get("caria-tralleis")?.centroid, [27.84, 37.86], "Tralleis anchor must remain in the Maeander interior rather than the coast");
-assert.deepEqual(byId.get("caria-halikarnassos")?.centroid, [27.43, 37.03], "Halikarnassos anchor must remain on the southwest Carian coast");
+assert.deepEqual(byId.get("lydia-birgi")?.centroid, [28.20, 38.20], "Birgi anchor must remain in its historical mountain-valley corridor");
+assert.deepEqual(byId.get("caria-tralleis")?.centroid, [28.00, 37.90], "Tralleis anchor must remain in the Maeander interior rather than the coast");
+assert.deepEqual(byId.get("caria-halikarnassos")?.centroid, [27.43, 37.04], "Halikarnassos anchor must remain on the southwest Carian coast");
 assert.deepEqual(byId.get("bithynia-nicomedia")?.centroid, [29.9169, 40.7654], "Nicomedia anchor must remain tied to the historical city atlas location");
 
 const uniqueCentroids = new Set(
-  ANATOLIA_PROVINCE_METADATA.map((province) => province.centroid.map((value) => value.toFixed(4)).join(":")),
+  effectiveMetadata.map((province) => province.centroid.map((value) => value.toFixed(4)).join(":")),
 );
-assert.equal(uniqueCentroids.size, ANATOLIA_PROVINCE_METADATA.length, "cartographic anchors must remain unique");
+assert.equal(uniqueCentroids.size, effectiveMetadata.length, "cartographic anchors must remain unique");
 
-console.log(`Anatolia province cartography tests passed: ${ANATOLIA_PROVINCE_METADATA.length} land-safe geographic anchors.`);
+console.log(`Anatolia province cartography tests passed: ${effectiveMetadata.length} land-safe geographic anchors.`);
