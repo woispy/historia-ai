@@ -30,7 +30,7 @@ function WorldMap({
   selectedCityId: controlledSelectedCityId = null,
   settings = {},
 }) {
-  const { provinces, cities } = useWorldMap(runtime);
+  const { provinces, cities, historicalRegions } = useWorldMap(runtime);
   const camera = useCamera();
   const cameraState = camera.camera;
   const [textureReady, setTextureReady] = useState(false);
@@ -79,9 +79,10 @@ function WorldMap({
       <HistoricalPoliticalRegionLayer
         date={scenarioDate}
         provinces={provinces}
+        regions={historicalRegions}
       />
     ),
-    [scenarioDate, provinces],
+    [scenarioDate, provinces, historicalRegions],
   );
 
   const provincesLayer = useMemo(
