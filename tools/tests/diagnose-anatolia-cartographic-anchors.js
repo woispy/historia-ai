@@ -17,7 +17,10 @@ function pointOnSegment(point, start, end, epsilon = 1e-9) {
 function pointInPolygon(point, polygon) {
   let inside = false;
   const [x, y] = point;
-  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index += 1) {
+
+  // Keep `previous` on the preceding vertex. This mirrors the production
+  // validation algorithm and avoids the old zero-length-edge bug.
+  for (let index = 0, previous = polygon.length - 1; index < polygon.length; index += 1) {
     const current = polygon[index];
     const prior = polygon[previous];
     if (pointOnSegment(point, prior, current)) return true;
@@ -26,6 +29,7 @@ function pointInPolygon(point, polygon) {
     const intersects = yi > y !== yj > y
       && x < ((xj - xi) * (y - yi)) / (yj - yi || Number.EPSILON) + xi;
     if (intersects) inside = !inside;
+    previous = index;
   }
   return inside;
 }
