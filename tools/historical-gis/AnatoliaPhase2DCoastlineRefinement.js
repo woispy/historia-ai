@@ -2,6 +2,7 @@ import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtla
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 
 const COAST_INTERIOR_OFFSET = 0.004;
+const COAST_INTERIOR_SEARCH = 0.08;
 const EPSILON = 1e-9;
 
 function distanceSquared(a, b) {
@@ -13,7 +14,6 @@ function distanceSquared(a, b) {
 function pointInPolygon(point, polygon) {
   let inside = false;
   const [x, y] = point;
-
   for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index += 1) {
     const [xi, yi] = polygon[index];
     const [xj, yj] = polygon[previous];
@@ -21,7 +21,6 @@ function pointInPolygon(point, polygon) {
       && x < ((xj - xi) * (y - yi)) / (yj - yi || Number.EPSILON) + xi;
     if (intersects) inside = !inside;
   }
-
   return inside;
 }
 
@@ -33,38 +32,23 @@ function pointToSegmentDistanceSquared(point, start, end) {
   const dx = end[0] - start[0];
   const dy = end[1] - start[1];
   if (dx === 0 && dy === 0) return distanceSquared(point, start);
-
   const t = Math.max(0, Math.min(1, (
     (point[0] - start[0]) * dx + (point[1] - start[1]) * dy
   ) / (dx * dx + dy * dy)));
-
-  return distanceSquared(point, [
-    start[0] + dx * t,
-    start[1] + dy * t,
-  ]);
+  return distanceSquared(point, [start[0] + dx * t, start[1] + dy * t]);
 }
 
 function findNearestCoastSegment(point) {
   let best = null;
-
   for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
     if (!Array.isArray(polygon) || polygon.length < 2) continue;
-
-    // Physical land rings are allowed to be either explicitly closed or
-    // implicitly closed. The previous implementation omitted the final→first
-    // edge for implicitly closed rings, which could select an inland segment
-    // for coastal provinces such as Pergamon. Political coastline coverage must
-    // use the exact same closed-ring edge set as the physical coastline tests.
     for (let index = 0; index < polygon.length; index += 1) {
       const start = polygon[index];
       const end = polygon[(index + 1) % polygon.length];
       const distance = pointToSegmentDistanceSquared(point, start, end);
-      if (!best || distance < best.distance) {
-        best = { start, end, distance };
-      }
+      if (!best || distance < best.distance) best = { start, end, distance };
     }
   }
-
   return best;
 }
 
@@ -77,18 +61,20 @@ function createInteriorPoint(start, end) {
   const dy = end[1] - start[1];
   const length = Math.sqrt(dx * dx + dy * dy) || 1;
   const normal = [-dy / length, dx / length];
-  const candidateA = [
-    midpoint[0] + normal[0] * COAST_INTERIOR_OFFSET,
-    midpoint[1] + normal[1] * COAST_INTERIOR_OFFSET,
-  ];
-  const candidateB = [
-    midpoint[0] - normal[0] * COAST_INTERIOR_OFFSET,
-    midpoint[1] - normal[1] * COAST_INTERIOR_OFFSET,
-  ];
 
-  if (pointInLand(candidateA)) return candidateA;
-  if (pointInLand(candidateB)) return candidateB;
-  return midpoint;
+  for (let offset = COAST_INTERIOR_OFFSET; offset <= COAST_INTERIOR_SEARCH; offset += COAST_INTERIOR_OFFSET) {
+    const candidateA = [
+      midpoint[0] + normal[0] * offset,
+      midpoint[1] + normal[1] * offset,
+    ];
+    const candidateB = [
+      midpoint[0] - normal[0] * offset,
+      midpoint[1] - normal[1] * offset,
+    ];
+    if (pointInLand(candidateA)) return candidateA;
+    if (pointInLand(candidateB)) return candidateB;
+  }
+  return null;
 }
 
 function polygonArea(polygon) {
@@ -101,6 +87,22 @@ function polygonArea(polygon) {
   return Math.abs(area) / 2;
 }
 
+function polygonCentroid(polygon) {
+  let areaTwice = 0;
+  let longitude = 0;
+  let latitude = 0;
+  for (let index = 0; index < polygon.length; index += 1) {
+    const current = polygon[index];
+    const next = polygon[(index + 1) % polygon.length];
+    const cross = current[0] * next[1] - next[0] * current[1];
+    areaTwice += cross;
+    longitude += (current[0] + next[0]) * cross;
+    latitude += (current[1] + next[1]) * cross;
+  }
+  if (Math.abs(areaTwice) < EPSILON) return polygon[0];
+  return [longitude / (3 * areaTwice), latitude / (3 * areaTwice)];
+}
+
 function roundPolygon(polygon) {
   return polygon.map(([x, y]) => [Number(x.toFixed(5)), Number(y.toFixed(5))]);
 }
@@ -108,10 +110,11 @@ function roundPolygon(polygon) {
 function createCoastalCoverageFragment(metadata) {
   const coast = findNearestCoastSegment(metadata.centroid);
   if (!coast) return null;
-
   const interior = createInteriorPoint(coast.start, coast.end);
+  if (!interior) return null;
   const polygon = roundPolygon([coast.start, coast.end, interior]);
   if (polygon.length < 3 || polygonArea(polygon) < EPSILON) return null;
+  if (!pointInLand(polygonCentroid(polygon))) return null;
   return polygon;
 }
 
@@ -132,11 +135,7 @@ export function refineAnatoliaPhase2DCoastline(result) {
     const metadata = metadataById.get(geometry.identity.provinceId);
     const fragment = metadata ? createCoastalCoverageFragment(metadata) : null;
     if (!fragment) return geometry;
-
-    return {
-      ...geometry,
-      polygons: [...geometry.polygons, fragment],
-    };
+    return { ...geometry, polygons: [...geometry.polygons, fragment] };
   });
 
   const polygonsById = new Map(
@@ -158,7 +157,7 @@ export function refineAnatoliaPhase2DCoastline(result) {
     provinces,
     geometries,
     coastlineRefinement: {
-      method: "coastal-province anchor fragments",
+      method: "coastal-province anchor fragments with bidirectional land validation",
       clippedByPhysicalLandMask: true,
       coastalProvinceCount: coastalIds.size,
     },
