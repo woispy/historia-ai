@@ -84,6 +84,27 @@ function findNearestCoastSegment(point) {
   return best;
 }
 
+function findNearestUsableCoastVertex(point) {
+  let best = null;
+  for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
+    if (!Array.isArray(polygon) || polygon.length < 2) continue;
+    for (let index = 0; index < polygon.length; index += 1) {
+      const vertex = polygon[index];
+      if (!isCanonicalPhysicalLandPoint(vertex)) continue;
+      const distance = distanceSquared(point, vertex);
+      if (!best || distance < best.distance) {
+        best = {
+          point: [...vertex],
+          polygon,
+          index,
+          distance,
+        };
+      }
+    }
+  }
+  return best;
+}
+
 function polygonArea(polygon) {
   let area = 0;
   for (let index = 0; index < polygon.length; index += 1) {
@@ -138,9 +159,6 @@ function hasUsablePolygonSamples(polygon) {
       if (!isCanonicalPhysicalLandPoint(sample)) return false;
     }
 
-    // Every edge-to-centroid segment is sampled as an interior witness. This
-    // prevents a polygon whose boundary happens to stay on land from spanning
-    // across a gulf/channel or a lake between otherwise valid vertices.
     for (const fraction of INTERIOR_SAMPLE_FRACTIONS) {
       const sample = [
         areaCentroid[0] + (start[0] - areaCentroid[0]) * fraction,
@@ -206,27 +224,50 @@ function createRepresentativePolygon(metadata) {
 
 function createCoastalCoverageFragment(metadata) {
   const coast = findNearestCoastSegment(metadata.centroid);
-  if (!coast) return null;
+  if (coast) {
+    const dx = coast.end[0] - coast.start[0];
+    const dy = coast.end[1] - coast.start[1];
+    const length = Math.sqrt(dx * dx + dy * dy) || 1;
+    const tangent = [dx / length, dy / length];
+    const normal = [-tangent[1], tangent[0]];
+    const center = coast.projection;
+    const halfLength = Math.min(COAST_FRAGMENT_HALF_LENGTH, length / 3);
+    const alongA = [center[0] - tangent[0] * halfLength, center[1] - tangent[1] * halfLength];
+    const alongB = [center[0] + tangent[0] * halfLength, center[1] + tangent[1] * halfLength];
 
-  const dx = coast.end[0] - coast.start[0];
-  const dy = coast.end[1] - coast.start[1];
-  const length = Math.sqrt(dx * dx + dy * dy) || 1;
-  const tangent = [dx / length, dy / length];
-  const normal = [-tangent[1], tangent[0]];
-  const center = coast.projection;
-  const halfLength = Math.min(COAST_FRAGMENT_HALF_LENGTH, length / 3);
-  const alongA = [center[0] - tangent[0] * halfLength, center[1] - tangent[1] * halfLength];
-  const alongB = [center[0] + tangent[0] * halfLength, center[1] + tangent[1] * halfLength];
+    for (const direction of [1, -1]) {
+      for (let coastOffset = COAST_INTERIOR_OFFSET; coastOffset <= COAST_INTERIOR_SEARCH; coastOffset += COAST_INTERIOR_OFFSET) {
+        const coastA = [alongA[0] + normal[0] * direction * coastOffset, alongA[1] + normal[1] * direction * coastOffset];
+        const coastB = [alongB[0] + normal[0] * direction * coastOffset, alongB[1] + normal[1] * direction * coastOffset];
+        const interior = [
+          center[0] + normal[0] * direction * (coastOffset + COAST_INTERIOR_OFFSET),
+          center[1] + normal[1] * direction * (coastOffset + COAST_INTERIOR_OFFSET),
+        ];
+        const polygon = finalizePolygon([coastA, coastB, interior]);
+        if (polygon) return polygon;
+      }
+    }
+  }
 
-  for (const direction of [1, -1]) {
-    for (let coastOffset = COAST_INTERIOR_OFFSET; coastOffset <= COAST_INTERIOR_SEARCH; coastOffset += COAST_INTERIOR_OFFSET) {
-      const coastA = [alongA[0] + normal[0] * direction * coastOffset, alongA[1] + normal[1] * direction * coastOffset];
-      const coastB = [alongB[0] + normal[0] * direction * coastOffset, alongB[1] + normal[1] * direction * coastOffset];
+  // Coarse source masks can place a historical port just offshore even when
+  // the curated coastline itself is valid. In that case, anchor the fragment
+  // directly to the nearest canonical land vertex rather than inventing a
+  // political shoreline or weakening the physical-land authority.
+  const vertex = findNearestUsableCoastVertex(metadata.centroid);
+  if (!vertex) return null;
+
+  const previous = vertex.polygon[(vertex.index - 1 + vertex.polygon.length) % vertex.polygon.length];
+  const next = vertex.polygon[(vertex.index + 1) % vertex.polygon.length];
+  const representative = findUsableRepresentativePoint(metadata.centroid) ?? vertex.point;
+  const neighbors = [previous, next].filter((candidate) => isCanonicalPhysicalLandPoint(candidate));
+
+  for (const neighbor of neighbors) {
+    for (const fraction of [0.05, 0.1, 0.2, 0.3, 0.5, 0.7]) {
       const interior = [
-        center[0] + normal[0] * direction * (coastOffset + COAST_INTERIOR_OFFSET),
-        center[1] + normal[1] * direction * (coastOffset + COAST_INTERIOR_OFFSET),
+        vertex.point[0] + (representative[0] - vertex.point[0]) * fraction,
+        vertex.point[1] + (representative[1] - vertex.point[1]) * fraction,
       ];
-      const polygon = finalizePolygon([coastA, coastB, interior]);
+      const polygon = finalizePolygon([vertex.point, neighbor, interior]);
       if (polygon) return polygon;
     }
   }
@@ -263,10 +304,6 @@ export function refineAnatoliaPhase2DCoastline(result) {
       if (fragment) polygons = [...polygons, fragment];
     }
 
-    // Final postcondition: no geometry leaves this stage unless the exact
-    // rounded polygon satisfies the same physical-land authority used by the
-    // Phase 2D test contract. This is deliberately the last operation so no
-    // later transform can reintroduce a water centroid.
     polygons = polygons.map(finalizePolygon).filter(Boolean);
 
     return { ...geometry, polygons };
@@ -297,6 +334,7 @@ export function refineAnatoliaPhase2DCoastline(result) {
       waterExclusionInvariant: true,
       interiorSampleInvariant: true,
       finalPolygonValidation: true,
+      coastVertexFallback: true,
     },
   };
 }
