@@ -8,8 +8,32 @@ import {
   auditHistoricalPoliticalCoverage,
   pointInPolygon,
 } from "../../src/world/map/historical/HistoricalPoliticalCoverageInvariants.js";
+import {
+  HISTORICAL_POLITICAL_COVERAGE_CONTRACT,
+  assertHistoricalPoliticalCoverageContract,
+} from "../../src/world/map/historical/HistoricalPoliticalCoverageContract.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+
+test("historical political coverage contract is globally explicit", () => {
+  assertHistoricalPoliticalCoverageContract(HISTORICAL_POLITICAL_COVERAGE_CONTRACT);
+  assert.equal(HISTORICAL_POLITICAL_COVERAGE_CONTRACT.neutralLandFallback, true);
+  assert.equal(HISTORICAL_POLITICAL_COVERAGE_CONTRACT.landClip, "world-land-mask");
+  assert.equal(HISTORICAL_POLITICAL_COVERAGE_CONTRACT.sourceOfTruth, "physical-world-land-mask");
+
+  assert.throws(
+    () => assertHistoricalPoliticalCoverageContract({ neutralLandFallback: false, landClip: "world-land-mask", sourceOfTruth: "physical-world-land-mask" }),
+    /neutral land fallback/,
+  );
+  assert.throws(
+    () => assertHistoricalPoliticalCoverageContract({ neutralLandFallback: true, landClip: "modern-country-mask", sourceOfTruth: "physical-world-land-mask" }),
+    /world-land-mask/,
+  );
+  assert.throws(
+    () => assertHistoricalPoliticalCoverageContract({ neutralLandFallback: true, landClip: "world-land-mask", sourceOfTruth: "modern-admin-0" }),
+    /physical world land mask/,
+  );
+});
 
 test("historical political coverage detects land gaps", () => {
   const landPolygons = [
@@ -19,7 +43,11 @@ test("historical political coverage detects land gaps", () => {
     { geometry: { polygons: [[[0, 0], [5, 0], [5, 10], [0, 10]]] } },
   ];
 
-  const audit = auditHistoricalPoliticalCoverage({ landPolygons, politicalEntries });
+  const audit = auditHistoricalPoliticalCoverage({
+    landPolygons,
+    politicalEntries,
+    presentationContract: { neutralLandFallback: false, landClip: "world-land-mask" },
+  });
   assert.equal(audit.landCoveragePass, false);
   assert.equal(audit.pass, false);
   assert.ok(audit.uncoveredLandSamples.length > 0);
@@ -33,7 +61,11 @@ test("historical political coverage detects sea leaks", () => {
     { geometry: { polygons: [[[-1, -1], [11, -1], [11, 11], [-1, 11]]] } },
   ];
 
-  const audit = auditHistoricalPoliticalCoverage({ landPolygons, politicalEntries });
+  const audit = auditHistoricalPoliticalCoverage({
+    landPolygons,
+    politicalEntries,
+    presentationContract: { neutralLandFallback: true, landClip: "none" },
+  });
   assert.equal(audit.seaLeakPass, false);
   assert.equal(audit.pass, false);
   assert.ok(audit.politicalSamplesOutsideLand.length > 0);
@@ -49,6 +81,7 @@ test("historical political coverage passes when land and political extents coinc
   assert.equal(audit.pass, true);
   assert.equal(audit.landCoveragePass, true);
   assert.equal(audit.seaLeakPass, true);
+  assert.equal(audit.presentationContract, HISTORICAL_POLITICAL_COVERAGE_CONTRACT);
 });
 
 test("point-in-polygon treats coastline points as covered", () => {
@@ -82,8 +115,6 @@ test("generated 1300 political geometry is presented across all physical land an
   const audit = auditHistoricalPoliticalCoverage({
     landPolygons,
     politicalEntries,
-    neutralLandFallback: true,
-    exactLandClip: true,
   });
 
   assert.equal(audit.pass, true, audit.pass
@@ -92,4 +123,8 @@ test("generated 1300 political geometry is presented across all physical land an
       + `${audit.politicalSamplesOutsideLand.length} political samples outside physical land.`);
   assert.equal(audit.landCoveragePass, true);
   assert.equal(audit.seaLeakPass, true);
+  assert.equal(audit.presentationContract.landClip, "world-land-mask");
+  assert.equal(audit.presentationContract.neutralLandFallback, true);
 });
+
+console.log("Historical political coverage invariant tests loaded with the global physical-land presentation contract.");
