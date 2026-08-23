@@ -9,6 +9,7 @@ const COAST_GUARD_STEP = 0.34;
 const MIN_CELL_AREA = 0.00008;
 const HISTORICAL_BLEND = 0.24;
 const RIVER_BLEND = 0.12;
+const FALLBACK_SEARCH_STEP = 0.025;
 
 function distanceSquared(a, b) {
   const dx = a[0] - b[0];
@@ -147,6 +148,19 @@ function averagedPoint(points) {
   return [sum[0] / points.length, sum[1] / points.length];
 }
 
+function findUsableLandPoint(point) {
+  if (usableLandPoint(point)) return [...point];
+  for (let radius = FALLBACK_SEARCH_STEP; radius <= 2; radius += FALLBACK_SEARCH_STEP) {
+    const samples = Math.max(8, Math.ceil((2 * Math.PI * radius) / FALLBACK_SEARCH_STEP));
+    for (let index = 0; index < samples; index += 1) {
+      const angle = (index / samples) * Math.PI * 2;
+      const candidate = [point[0] + Math.cos(angle) * radius, point[1] + Math.sin(angle) * radius];
+      if (usableLandPoint(candidate)) return candidate;
+    }
+  }
+  return null;
+}
+
 function buildProvinceAnchor(metadata, historicalAnchors) {
   let point = [...metadata.centroid];
   const historical = averagedPoint(historicalAnchors.get(metadata.id) ?? []);
@@ -159,7 +173,7 @@ function buildProvinceAnchor(metadata, historicalAnchors) {
       point = [point[0] * (1 - RIVER_BLEND) + riverPoint[0] * RIVER_BLEND, point[1] * (1 - RIVER_BLEND) + riverPoint[1] * RIVER_BLEND];
     }
   }
-  return usableLandPoint(point) ? point : metadata.centroid;
+  return findUsableLandPoint(point) ?? point;
 }
 
 function buildPoliticalSites(sites, seen, sourceRegions) {
@@ -218,6 +232,11 @@ function polygonArea(polygon) {
   return Math.abs(area) / 2;
 }
 
+function polygonVertexCentroid(polygon) {
+  const sum = polygon.reduce((total, [longitude, latitude]) => [total[0] + longitude, total[1] + latitude], [0, 0]);
+  return [sum[0] / polygon.length, sum[1] / polygon.length];
+}
+
 function polygonCentroid(polygon) {
   let areaTwice = 0;
   let longitude = 0;
@@ -230,8 +249,106 @@ function polygonCentroid(polygon) {
     longitude += (current[0] + next[0]) * cross;
     latitude += (current[1] + next[1]) * cross;
   }
-  if (Math.abs(areaTwice) < EPSILON) return polygon[0];
+  if (Math.abs(areaTwice) < EPSILON) return polygonVertexCentroid(polygon);
   return [longitude / (3 * areaTwice), latitude / (3 * areaTwice)];
+}
+
+function polygonOrientation(polygon) {
+  let area = 0;
+  for (let index = 0; index < polygon.length; index += 1) {
+    const current = polygon[index];
+    const next = polygon[(index + 1) % polygon.length];
+    area += current[0] * next[1] - next[0] * current[1];
+  }
+  return Math.sign(area) || 1;
+}
+
+function cross(a, b, point) {
+  return (b[0] - a[0]) * (point[1] - a[1]) - (b[1] - a[1]) * (point[0] - a[0]);
+}
+
+function triangulateSimplePolygon(polygon) {
+  const points = polygon.slice();
+  if (points.length > 1 && distanceSquared(points[0], points[points.length - 1]) < EPSILON) points.pop();
+  if (points.length < 3) return [];
+  const orientation = polygonOrientation(points);
+  const indices = points.map((_, index) => index);
+  const triangles = [];
+  const isConvex = (previous, current, next) => orientation * cross(previous, current, next) > EPSILON;
+  const containsOtherPoint = (a, b, c) => indices.some((index) => {
+    const point = points[index];
+    if (point === a || point === b || point === c) return false;
+    const ab = orientation * cross(a, b, point);
+    const bc = orientation * cross(b, c, point);
+    const ca = orientation * cross(c, a, point);
+    return ab >= -EPSILON && bc >= -EPSILON && ca >= -EPSILON;
+  });
+  let guard = points.length * points.length;
+  while (indices.length > 3 && guard-- > 0) {
+    let earFound = false;
+    for (let cursor = 0; cursor < indices.length; cursor += 1) {
+      const previous = points[indices[(cursor - 1 + indices.length) % indices.length]];
+      const current = points[indices[cursor]];
+      const next = points[indices[(cursor + 1) % indices.length]];
+      if (!isConvex(previous, current, next) || containsOtherPoint(previous, current, next)) continue;
+      triangles.push([previous, current, next]);
+      indices.splice(cursor, 1);
+      earFound = true;
+      break;
+    }
+    if (!earFound) break;
+  }
+  if (indices.length === 3) triangles.push(indices.map((index) => points[index]));
+  return triangles;
+}
+
+function clipConvexPolygonAgainstEdge(polygon, start, end, orientation) {
+  if (!polygon.length) return [];
+  const output = [];
+  const inside = (point) => orientation * cross(start, end, point) >= -EPSILON;
+  for (let index = 0; index < polygon.length; index += 1) {
+    const current = polygon[index];
+    const next = polygon[(index + 1) % polygon.length];
+    const currentInside = inside(current);
+    const nextInside = inside(next);
+    if (currentInside && nextInside) output.push(next);
+    if (currentInside !== nextInside) {
+      const dx = next[0] - current[0];
+      const dy = next[1] - current[1];
+      const ex = end[0] - start[0];
+      const ey = end[1] - start[1];
+      const denominator = ex * dy - ey * dx;
+      const numerator = ex * (start[1] - current[1]) - ey * (start[0] - current[0]);
+      const t = Math.abs(denominator) < EPSILON ? 0 : numerator / denominator;
+      output.push([current[0] + dx * t, current[1] + dy * t]);
+    }
+  }
+  return output;
+}
+
+function clipPolygonToTriangle(polygon, triangle) {
+  let clipped = polygon;
+  const orientation = polygonOrientation(triangle);
+  for (let index = 0; index < 3 && clipped.length >= 3; index += 1) {
+    clipped = clipConvexPolygonAgainstEdge(clipped, triangle[index], triangle[(index + 1) % 3], orientation);
+  }
+  return clipped;
+}
+
+function physicalLandFragments(polygon) {
+  const fragments = [];
+  for (const landPolygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
+    const triangles = triangulateSimplePolygon(landPolygon);
+    for (const triangle of triangles) {
+      const fragment = clipPolygonToTriangle(polygon, triangle);
+      if (fragment.length < 3 || polygonArea(fragment) < MIN_CELL_AREA) continue;
+      const areaCentroid = polygonCentroid(fragment);
+      const vertexCentroid = polygonVertexCentroid(fragment);
+      if (!usableLandPoint(areaCentroid) || !usableLandPoint(vertexCentroid)) continue;
+      fragments.push(fragment);
+    }
+  }
+  return fragments;
 }
 
 function roundPolygon(polygon) {
@@ -239,10 +356,11 @@ function roundPolygon(polygon) {
 }
 
 function createFallback(metadata) {
-  const radius = 0.05;
+  const center = findUsableLandPoint(metadata.centroid) ?? metadata.centroid;
+  const radius = 0.035;
   return roundPolygon(Array.from({ length: 8 }, (_, index) => {
     const angle = index / 8 * Math.PI * 2;
-    return [metadata.centroid[0] + Math.cos(angle) * radius, metadata.centroid[1] + Math.sin(angle) * radius];
+    return [center[0] + Math.cos(angle) * radius, center[1] + Math.sin(angle) * radius];
   }));
 }
 
@@ -280,9 +398,7 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     const site = geometrySites[siteIndex];
     const cell = buildVoronoiCell(siteIndex, geometrySites);
     if (cell.length < 3 || polygonArea(cell) < MIN_CELL_AREA) continue;
-    const centroid = polygonCentroid(cell);
-    if (!usableLandPoint(centroid)) continue;
-    polygonsByProvince[site.provinceId].push(roundPolygon(cell));
+    polygonsByProvince[site.provinceId].push(...physicalLandFragments(cell).map(roundPolygon));
   }
   let fallbackCount = 0;
   const provinces = [];
@@ -298,13 +414,13 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
   }
   return {
     schemaVersion: 1,
-    geometryVersion: 4,
+    geometryVersion: 5,
     historicalDate: "1300-01-01",
     provider: "historia-ai-curated-cartography",
     dataset: "anatolia-province-geometry-1300",
     projection: "EPSG:4326",
-    method: "weighted geographic-historical power diagram + physical land/coast rendering authority",
-    sourceBasis: { physical: "Natural Earth 10m land, lakes and rivers used by the physical atlas", historical: "aourednik/historical-basemaps world_1300 plus curated 1300 Anatolia province anchors", topographicIntent: "province seeds follow historical centres and major geographic corridors; small cartographic weights prevent dense coastal centres from becoming micro-cells" },
+    method: "weighted geographic-historical Voronoi cells clipped to physical land and water-aware anchors",
+    sourceBasis: { physical: "Natural Earth 10m land, lakes and rivers used by the physical atlas", historical: "aourednik/historical-basemaps world_1300 plus curated 1300 Anatolia province anchors", topographicIntent: "province seeds follow historical centres and major geographic corridors; physical land remains the geometry authority" },
     siteCount: sites.length,
     politicalSiteCount: geometrySites.length,
     barrierSiteCount: sites.filter((site) => site.provinceId === null).length,
