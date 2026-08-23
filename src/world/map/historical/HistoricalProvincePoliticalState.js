@@ -19,6 +19,10 @@ function normalizeDate(date) {
 }
 
 function deriveControlMode(province) {
+  if (province.polityId && province.controlStatus?.toLowerCase().includes("suzerainty")) {
+    return "layered-suzerainty";
+  }
+
   if (province.polityId) {
     return province.controlStatus?.includes("contested")
       ? "contested-sovereignty"
@@ -43,9 +47,7 @@ export function createHistoricalProvincePoliticalState({ date, province } = {}) 
   }
 
   const sovereignPolityId = province.polityId ?? null;
-  const suzeraintyPolityId = sovereignPolityId
-    ? null
-    : SUZERAINTY_BY_STATUS[province.controlStatus] ?? null;
+  const suzeraintyPolityId = SUZERAINTY_BY_STATUS[province.controlStatus] ?? null;
 
   return Object.freeze({
     date: normalizedDate,
