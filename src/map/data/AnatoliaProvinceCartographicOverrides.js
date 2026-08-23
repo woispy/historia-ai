@@ -39,6 +39,18 @@ const CARTOGRAPHIC_CENTROIDS = Object.freeze({
   "pontus-amisos": [36.38, 41.30],
   "pontus-amasya": [35.82, 40.66],
   "pontus-kastamon": [33.70, 41.40],
+  "pontus-trebizond": [39.72, 41.00],
+  "eastern-anatolia-erzincan": [39.72, 39.75],
+  "eastern-anatolia-erzurum": [41.28, 39.90],
+  "euphrates-malatya": [38.35, 38.35],
+  "cilicia-sis": [35.80, 37.45],
+  "cilicia-tarsos": [34.90, 36.92],
+  "cilicia-alaiye": [31.99, 36.55],
+  "pamphylia-attaleia": [30.72, 36.88],
+  "lycia-myra": [29.13, 36.26],
+  "pisidia-antiochia": [31.19, 38.30],
+  "cappadocia-nigde": [34.68, 37.97],
+  "cilicia-adana": [35.33, 37.00],
 });
 
 const CARTOGRAPHIC_WEIGHTS = Object.freeze({
