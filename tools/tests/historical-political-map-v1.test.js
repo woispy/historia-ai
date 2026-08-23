@@ -55,7 +55,7 @@ for (const provinceId of ["phrygia-eskisehir", "lydia-smyrna", "pontus-amasya", 
   assert.equal(entry.historicalProvince.polityId, null, provinceId);
 }
 
-// Ankara, Kayseri, Sivas, Malatya, Erzincan and Erzurum are layered Ilkhanid-suzerainty cases.
+// Layered Ilkhanid-suzerainty is a presentation state, not direct province ownership.
 for (const provinceId of ["galatia-ankara", "cappadocia-kayseri", "cappadocia-sivas", "euphrates-malatya", "eastern-anatolia-erzincan", "eastern-anatolia-erzurum"]) {
   const entry = model.find((item) => item.province.id === provinceId);
   assert.equal(entry.country.id, "ilkhanate", provinceId);
