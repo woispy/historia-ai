@@ -12,8 +12,6 @@ const p = (name, coordinates, options = {}) => ({ name, coordinates, ...options 
 // Western/northern Anatolian land is deliberately represented with a denser
 // coastline around the Marmara–Nicomedia corridor. The historical city anchor
 // for Nicomedia (29.9169, 40.7654) must remain land-safe without moving the city.
-// Keep the lake/sea envelopes separate; the land polygon is the land authority
-// used by political clipping and cartographic anchor validation.
 const land = [
   [26.00,41.86],[26.55,41.75],[27.10,41.58],[27.70,41.38],[28.20,41.22],
   [28.65,41.08],[29.05,40.92],[29.42,40.88],[29.72,40.86],[29.84,40.85],
@@ -41,15 +39,12 @@ const land = [
 ];
 
 // Kocaeli/Nicomedia is a narrow peninsula between the Gulf of Izmit and the
-// southern Marmara/Bosphorus system. Keep this as its own land component so
-// the historical city anchor remains land without filling the gulf with land.
-// The southern shoreline is explicitly stepped below the exact Nicomedia
-// anchor (29.9169, 40.7654). This is intentional: a coastline envelope must
-// contain the city point, not merely pass north of it.
+// southern Marmara/Bosphorus system. The component must contain the actual
+// historical city point while remaining wholly north of the Gulf-water patch.
 const nicomediaLand = [
   [29.84,40.85],[29.92,40.86],[30.08,40.91],[30.25,40.86],
-  [30.22,40.81],[30.12,40.78],[30.02,40.75],[29.94,40.74],
-  [29.88,40.74],[29.84,40.79],[29.84,40.85],
+  [30.22,40.81],[30.12,40.77],[30.02,40.73],[29.94,40.73],
+  [29.88,40.73],[29.84,40.79],[29.84,40.85],
 ];
 
 export const ANATOLIA_PHYSICAL_ATLAS = Object.freeze({
