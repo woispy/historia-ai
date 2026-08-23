@@ -18,7 +18,7 @@
 
 .province-inspector__header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
   padding-bottom: 12px;
@@ -43,12 +43,12 @@
 }
 
 .province-inspector__close {
-  display: inline-flex;
-  flex: 0 0 32px;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
+  display: grid;
+  flex: 0 0 34px;
+  place-items: center;
+  box-sizing: border-box;
+  width: 34px;
+  height: 34px;
   margin: 0;
   padding: 0;
   border: 1px solid rgba(214, 176, 77, 0.45);
@@ -57,11 +57,13 @@
   color: #f0c95f;
   cursor: pointer;
   font: inherit;
+  line-height: 1;
 }
 
 .province-inspector__close span {
   display: block;
-  transform: translateY(-1px);
+  margin: 0;
+  padding: 0;
   font-size: 1.35rem;
   line-height: 1;
 }
