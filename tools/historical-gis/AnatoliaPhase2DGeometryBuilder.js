@@ -367,13 +367,13 @@ function roundPolygon(polygon) {
 
 function createFallback(metadata) {
   const center = findUsableLandPoint(getHistoricalCityPoint(metadata) ?? metadata.centroid) ?? metadata.centroid;
+  const offsetCenter = [center[0] + 0.0125, center[1] + 0.0125];
+  const verifiedCenter = findUsableLandPoint(offsetCenter) ?? center;
   const radius = 0.035;
-  const polygon = Array.from({ length: 8 }, (_, index) => {
+  return roundPolygon(Array.from({ length: 8 }, (_, index) => {
     const angle = index / 8 * Math.PI * 2;
-    const shrink = index % 2 === 0 ? 0.88 : 1;
-    return [center[0] + Math.cos(angle) * radius * shrink, center[1] + Math.sin(angle) * radius * shrink];
-  });
-  return roundPolygon(polygon);
+    return [verifiedCenter[0] + Math.cos(angle) * radius, verifiedCenter[1] + Math.sin(angle) * radius];
+  }));
 }
 
 function createProvinceAsset(metadata, polygons) {
