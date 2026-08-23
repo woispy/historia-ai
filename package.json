@@ -23,6 +23,7 @@
     "test:historical-political-map-v1": "node tools/tests/historical-political-map-v1.test.js",
     "test:historical-political-region-layer": "node tools/tests/historical-political-region-layer.test.js",
     "test:historical-province-political-state": "node tools/tests/historical-province-political-state.test.js",
+    "test:historical-province-cartography": "node tools/tests/anatolia-province-cartography.test.js",
     "test:repository-cleanliness": "node tools/tests/repository-cleanliness.test.js",
     "test:city-label-scale": "node tools/tests/city-label-scale.test.js",
     "test:province-topology": "node tools/tests/province-topology.test.js",
