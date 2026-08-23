@@ -7,6 +7,7 @@ const read = (path) => readFileSync(resolve(root, path), "utf8").replace(/\r\n/g
 
 const svgRenderer = read("src/map/rendering/SvgRenderer.jsx");
 const worldMap = read("src/map/components/WorldMap.jsx");
+const useWorldMap = read("src/map/hooks/useWorldMap.js");
 const mapView = read("src/components/GameShell/MapView/MapView.jsx");
 const mapViewCss = read("src/components/GameShell/MapView/MapView.css");
 const provinceLayer = read("src/map/components/layers/ProvinceLayer.jsx");
@@ -64,6 +65,12 @@ assert.ok(historicalPoliticalLayer.includes("historical-world-political-land-cli
 assert.ok(historicalPoliticalLayer.includes("<path d={WORLD_LAND_PATH} fillRule=\"evenodd\" />"));
 assert.ok(historicalPoliticalLayer.includes("clipPath={`url(#${HISTORICAL_WORLD_POLITICAL_CLIP_ID})`}"));
 assert.ok(!historicalPoliticalLayer.includes('clipPath="url(#world-land-mask)"'));
+
+// A dated map must consume the dated GIS runtime geometry, not whatever
+// modern/previous geometry repository happens to be attached to the session.
+assert.ok(useWorldMap.includes("loadHistoricalGeometryRepository"));
+assert.ok(useWorldMap.includes("loadHistoricalGeometryRepository(date) ?? sourceRepository"));
+assert.ok(useWorldMap.includes("geometry: province.geometryId"));
 
 // Province paths are explicit interaction surfaces. This remains true when
 // GPU compositing hides the CPU fill; transparent pixels must still be clickable.
@@ -132,4 +139,4 @@ assert.ok(!cityLayer.includes("fortified &&"));
 assert.ok(!worldMap.includes('phase="base"'));
 assert.ok(!worldMap.includes('phase="water"'));
 
-console.log("Map rendering contract tests passed: one synchronized world, explicit province interaction, one physical coastline authority, historical political compositor handoff, and no legacy overlay layers.");
+console.log("Map rendering contract tests passed: one synchronized world, explicit province interaction, one physical coastline authority, historical political compositor handoff, dated GIS geometry handoff, and no legacy overlay layers.");
