@@ -30,14 +30,6 @@ function isUsableLandPoint(point) {
   );
 }
 
-function pointInHydrographyWater(point) {
-  return hydrography.lakes.some((lake) => (
-    Array.isArray(lake.rings)
-      ? lake.rings.some((ring) => isUsablePhysicalLandPoint(point, [], [], [], [{ rings: [ring] }]) === false)
-      : false
-  ));
-}
-
 function findUsableRepresentativePoint(center) {
   if (isUsableLandPoint(center)) return [...center];
   for (let radius = REPRESENTATIVE_SEARCH_STEP; radius <= REPRESENTATIVE_SEARCH_RADIUS; radius += REPRESENTATIVE_SEARCH_STEP) {
