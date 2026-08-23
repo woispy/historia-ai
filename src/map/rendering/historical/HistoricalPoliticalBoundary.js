@@ -25,13 +25,14 @@ function deterministicBoundaryBow(key) {
  * Build shared province borders as subtle, deterministic cartographic curves.
  *
  * The geometry endpoints remain untouched so adjacent provinces stay topologically
- * aligned. Only internal shared edges are curved; coastlines remain authoritative
- * physical geometry and are never stylised by this helper.
+ * aligned. Only edges shared by two different provinces are stylised; coastlines
+ * and internal polygon seams remain under the physical/geometry authorities.
  */
 export function buildCartographicInternalBoundaryPath(provinces) {
   const edges = new Map();
 
   for (const entry of provinces) {
+    const provinceId = entry?.province?.id ?? entry?.historicalProvince?.id ?? entry?.id ?? null;
     for (const polygon of entry?.geometry?.polygons ?? []) {
       if (!Array.isArray(polygon) || polygon.length < 3) continue;
       for (let index = 0; index < polygon.length; index += 1) {
@@ -42,15 +43,25 @@ export function buildCartographicInternalBoundaryPath(provinces) {
         const current = edges.get(key);
         if (current) {
           current.count += 1;
+          if (provinceId && current.provinceId && provinceId !== current.provinceId) {
+            current.provinceIds.add(provinceId);
+          }
         } else {
-          edges.set(key, { key, start, end, count: 1 });
+          edges.set(key, {
+            key,
+            start,
+            end,
+            count: 1,
+            provinceId,
+            provinceIds: new Set(provinceId ? [provinceId] : []),
+          });
         }
       }
     }
   }
 
   return [...edges.values()]
-    .filter((edge) => edge.count >= 2)
+    .filter((edge) => edge.count >= 2 && edge.provinceIds.size >= 2)
     .map(({ key, start, end }) => {
       const dx = end[0] - start[0];
       const dy = end[1] - start[1];
