@@ -1,5 +1,12 @@
 import hydrography from "./generated/anatolia-hydrography-10m.json" with { type: "json" };
 import { ANATOLIA_PHYSICAL_ATLAS } from "./AnatoliaPhysicalAtlas.js";
+import { ANATOLIA_PROVINCE_METADATA } from "./AnatoliaProvinceMetadata.js";
+import { applyAnatoliaProvinceCartographicOverrides } from "./AnatoliaProvinceCartographicOverrides.js";
+
+// Cartographic centroid corrections are applied before the historical Phase 2D
+// geometry builder consumes province metadata. These are presentation anchors,
+// not political ownership or cadastral boundary mutations.
+applyAnatoliaProvinceCartographicOverrides(ANATOLIA_PROVINCE_METADATA);
 
 function normalizeLake(feature) {
   return {
