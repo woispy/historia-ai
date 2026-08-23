@@ -21,6 +21,10 @@ const SEA_POLYGONS = ANATOLIA_PHYSICAL_ATLAS.seas.map((sea) => sea.coordinates);
 const CHANNEL_POLYGONS = ANATOLIA_PHYSICAL_ATLAS.channels.map((channel) => channel.coordinates);
 const LAKES = ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes;
 
+function isPhysicalLandPoint(point, landPolygons = ANATOLIA_PHYSICAL_ATLAS.landPolygons, lakes = LAKES) {
+  return isPhysicalLandPointAuthority(point, landPolygons, lakes);
+}
+
 function distanceSquared(a, b) {
   const dx = a[0] - b[0];
   const dy = a[1] - b[1];
