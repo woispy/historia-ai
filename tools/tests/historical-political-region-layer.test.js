@@ -6,6 +6,7 @@ import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceM
 import { createHistoricalPoliticalMapModel } from "../../src/world/map/historical/HistoricalPoliticalMapModel.js";
 import { getHistoricalPolity } from "../../src/world/map/historical/HistoricalPoliticalRuntime.js";
 import { getHistoricalPoliticalOverlayMode } from "../../src/map/components/layers/HistoricalPoliticalOverlayModel.js";
+import { buildCartographicInternalBoundaryPath } from "../../src/map/components/layers/HistoricalPoliticalRegionLayer.jsx";
 
 const layerSource = readFileSync(
   resolve("src/map/components/layers/HistoricalPoliticalRegionLayer.jsx"),
@@ -40,6 +41,26 @@ assert.match(
   layerSource,
   /stroke=\{color\}/,
   "coastal political expansion must use the owning historical polity colour",
+);
+assert.match(
+  layerSource,
+  /HISTORICAL_POLITICAL_CARTOGRAPHIC_FILTER_ID/,
+  "historical province borders must use the dedicated cartographic presentation filter",
+);
+assert.match(
+  layerSource,
+  /feTurbulence[\s\S]*baseFrequency="0\.035 0\.09"/,
+  "cartographic province borders must have controlled organic variation rather than perfectly mechanical straight strokes",
+);
+assert.match(
+  layerSource,
+  /C \$\{oneThird\[0\]\}/,
+  "cartographic province borders must be rendered as curved shared boundaries",
+);
+assert.match(
+  layerSource,
+  /edge\.count >= 2/,
+  "cartographic boundary construction must render shared province edges rather than coastlines",
 );
 assert.match(
   worldMapSource,
@@ -113,6 +134,15 @@ assert.equal(
   getHistoricalPoliticalOverlayMode(byProvince.get("ionia-ayasuluk")),
   "sovereign",
 );
+
+const sampleProvinceGeometry = [
+  { geometry: { polygons: [[[0, 0], [1, 0], [1, 1], [0, 1]]] } },
+  { geometry: { polygons: [[[1, 0], [2, 0], [2, 1], [1, 1]]] } },
+];
+const cartographicBoundaryPath = buildCartographicInternalBoundaryPath(sampleProvinceGeometry);
+assert.match(cartographicBoundaryPath, /^M 1 0 C /);
+assert.ok(!cartographicBoundaryPath.includes("M 0 0"), "coast edges must not be promoted to internal province borders");
+assert.ok(cartographicBoundaryPath.includes(" 1 1"), "shared province border must retain its geographic endpoints");
 
 assert.equal(
   historicalAtlas.regions.some((region) => region.id === "anatolia_aydin_pre1308" && region.countryId === "byzantium"),
