@@ -7,6 +7,8 @@ const EPSILON = 1e-8;
 const DIAGNOSTIC_GRID_STEP = 0.12;
 const COAST_GUARD_STEP = 0.34;
 const MIN_CELL_AREA = 0.00008;
+const HISTORICAL_BLEND = 0.24;
+const RIVER_BLEND = 0.12;
 
 function distanceSquared(a, b) {
   const dx = a[0] - b[0];
@@ -33,21 +35,53 @@ function pointInLand(point) {
 
 function pointInWater(point) {
   return ANATOLIA_PHYSICAL_ATLAS.seas.some((sea) => pointInPolygon(point, sea.coordinates))
-    || ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygon(point, lake.coordinates));
+    || ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => (
+      Array.isArray(lake.rings)
+        ? lake.rings.some((ring) => pointInPolygon(point, ring))
+        : pointInPolygon(point, lake.coordinates)
+    ));
 }
 
 function usableLandPoint(point) {
   return pointInLand(point) && !pointInWater(point);
 }
 
-function deterministicUnit(key) {
-  let hash = 2166136261;
-  const text = String(key);
-  for (let index = 0; index < text.length; index += 1) {
-    hash ^= text.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
+function pointToSegmentDistanceSquared(point, start, end) {
+  const dx = end[0] - start[0];
+  const dy = end[1] - start[1];
+  if (dx === 0 && dy === 0) return distanceSquared(point, start);
+  const t = Math.max(0, Math.min(1, (
+    (point[0] - start[0]) * dx + (point[1] - start[1]) * dy
+  ) / (dx * dx + dy * dy)));
+  return distanceSquared(point, [start[0] + dx * t, start[1] + dy * t]);
+}
+
+function nearestLinePoint(point, lines, maxDistance = Number.POSITIVE_INFINITY) {
+  let best = null;
+  let bestDistance = maxDistance * maxDistance;
+  for (const line of lines ?? []) {
+    const coordinates = line?.coordinates;
+    if (!Array.isArray(coordinates) || coordinates.length < 2) continue;
+    for (let index = 0; index < coordinates.length - 1; index += 1) {
+      const start = coordinates[index];
+      const end = coordinates[index + 1];
+      const dx = end[0] - start[0];
+      const dy = end[1] - start[1];
+      const lengthSquared = dx * dx + dy * dy;
+      const t = lengthSquared === 0
+        ? 0
+        : Math.max(0, Math.min(1, (
+          (point[0] - start[0]) * dx + (point[1] - start[1]) * dy
+        ) / lengthSquared));
+      const projected = [start[0] + dx * t, start[1] + dy * t];
+      const distance = distanceSquared(point, projected);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        best = projected;
+      }
+    }
   }
-  return (hash >>> 0) / 4294967295;
+  return best;
 }
 
 function nearestProvince(point, candidates = ANATOLIA_PROVINCE_METADATA) {
@@ -65,51 +99,27 @@ function nearestProvince(point, candidates = ANATOLIA_PROVINCE_METADATA) {
 
 function addSite(sites, seen, point, provinceId, kind) {
   if (!Array.isArray(point) || point.length < 2) return;
+  if (point[0] < BBOX[0] || point[0] > BBOX[2] || point[1] < BBOX[1] || point[1] > BBOX[3]) return;
   const rounded = `${Number(point[0]).toFixed(4)}:${Number(point[1]).toFixed(4)}:${provinceId ?? "barrier"}:${kind}`;
   if (seen.has(rounded)) return;
   seen.add(rounded);
   sites.push({ point, provinceId, kind });
 }
 
-function addProvinceAnchors(sites, seen) {
-  for (const province of ANATOLIA_PROVINCE_METADATA) {
-    addSite(sites, seen, province.centroid, province.id, "province-anchor");
-  }
-}
-
-function addProvinceShapeControls(sites, seen) {
-  for (const province of ANATOLIA_PROVINCE_METADATA) {
-    const denseCoast = province.coastal && ["aegean-west", "mentese-caria", "mysia"].includes(province.regionId);
-    const radius = denseCoast ? 0.16 : province.strategic ? 0.24 : 0.20;
-    const count = denseCoast ? 2 : 4;
-    for (let index = 0; index < count; index += 1) {
-      const angle = deterministicUnit(`${province.id}:angle:${index}`) * Math.PI * 2;
-      const scale = 0.78 + deterministicUnit(`${province.id}:radius:${index}`) * 0.32;
-      const point = [
-        province.centroid[0] + Math.cos(angle) * radius * scale,
-        province.centroid[1] + Math.sin(angle) * radius * scale,
-      ];
-      if (usableLandPoint(point)) addSite(sites, seen, point, province.id, "province-shape-control");
+function addDiagnosticLandField(sites, seen) {
+  // Dense physical sampling remains available for coverage diagnostics, but
+  // these points never compete in the political Voronoi tessellation.
+  for (let longitude = BBOX[0]; longitude <= BBOX[2] + EPSILON; longitude += DIAGNOSTIC_GRID_STEP) {
+    for (let latitude = BBOX[1]; latitude <= BBOX[3] + EPSILON; latitude += DIAGNOSTIC_GRID_STEP) {
+      const point = [Number(longitude.toFixed(5)), Number(latitude.toFixed(5))];
+      addSite(sites, seen, point, null, "diagnostic-cartographic-grid");
     }
   }
 }
 
-function addHistoricalSourceAnchors(sites, seen, sourceRegions) {
-  for (const region of sourceRegions ?? []) {
-    const polygon = region?.polygons?.find((candidate) => Array.isArray(candidate) && candidate.length >= 3);
-    if (!polygon) continue;
-    const center = polygon.reduce(
-      (sum, [longitude, latitude]) => [sum[0] + longitude, sum[1] + latitude],
-      [0, 0],
-    );
-    const point = [center[0] / polygon.length, center[1] / polygon.length];
-    if (!usableLandPoint(point)) continue;
-    addSite(sites, seen, point, nearestProvince(point).id, "world-1300-historical-anchor");
-  }
-}
-
-function addSampledCoastGuards(sites, seen) {
-  const coastalProvinces = ANATOLIA_PROVINCE_METADATA.filter((province) => province.coastal);
+function addPhysicalBarrierField(sites, seen) {
+  // Coast and lake samples are validation/coverage controls, not political
+  // competitors. This prevents physical detail from fragmenting provinces.
   for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
     if (!Array.isArray(polygon) || polygon.length < 2) continue;
     for (let index = 0; index < polygon.length; index += 1) {
@@ -122,26 +132,84 @@ function addSampledCoastGuards(sites, seen) {
       for (let step = 0; step <= steps; step += 1) {
         const t = step / steps;
         const point = [start[0] + dx * t, start[1] + dy * t];
-        const inward = [
-          point[0] + (dy / (length || 1)) * 0.012,
-          point[1] - (dx / (length || 1)) * 0.012,
-        ];
-        if (!usableLandPoint(inward)) continue;
-        addSite(sites, seen, inward, nearestProvince(inward, coastalProvinces).id, "coastline-control");
+        addSite(sites, seen, point, null, "coastline-barrier");
+      }
+    }
+  }
+
+  for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) {
+    for (const ring of lake.rings ?? [lake.coordinates]) {
+      if (!Array.isArray(ring) || ring.length < 2) continue;
+      for (let index = 0; index < ring.length; index += Math.max(1, Math.floor(ring.length / 12))) {
+        addSite(sites, seen, ring[index], null, "lake-barrier");
       }
     }
   }
 }
 
-function addDiagnosticLandField(sites, seen) {
-  // This is a reproducible coverage-density field, not a Voronoi competitor.
-  // Keeping it independent from political sites lets validation measure the
-  // cartographic sampling density without recreating the old micro-provinces.
-  for (let longitude = BBOX[0]; longitude <= BBOX[2] + EPSILON; longitude += DIAGNOSTIC_GRID_STEP) {
-    for (let latitude = BBOX[1]; latitude <= BBOX[3] + EPSILON; latitude += DIAGNOSTIC_GRID_STEP) {
-      const point = [Number(longitude.toFixed(5)), Number(latitude.toFixed(5))];
-      addSite(sites, seen, point, null, "diagnostic-cartographic-grid");
+function collectHistoricalAnchors(sourceRegions) {
+  const anchors = new Map(ANATOLIA_PROVINCE_METADATA.map((province) => [province.id, []]));
+  for (const region of sourceRegions ?? []) {
+    const polygon = region?.polygons?.find((candidate) => Array.isArray(candidate) && candidate.length >= 3);
+    if (!polygon) continue;
+    const center = polygon.reduce(
+      (sum, [longitude, latitude]) => [sum[0] + longitude, sum[1] + latitude],
+      [0, 0],
+    );
+    const point = [center[0] / polygon.length, center[1] / polygon.length];
+    if (!usableLandPoint(point)) continue;
+    const nearest = nearestProvince(point);
+    anchors.get(nearest.id)?.push(point);
+  }
+  return anchors;
+}
+
+function averagedPoint(points) {
+  if (!points.length) return null;
+  const sum = points.reduce(
+    (total, point) => [total[0] + point[0], total[1] + point[1]],
+    [0, 0],
+  );
+  return [sum[0] / points.length, sum[1] / points.length];
+}
+
+function buildProvinceAnchor(metadata, historicalAnchors) {
+  let point = [...metadata.centroid];
+  const historical = averagedPoint(historicalAnchors.get(metadata.id) ?? []);
+  if (historical && usableLandPoint(historical)) {
+    point = [
+      point[0] * (1 - HISTORICAL_BLEND) + historical[0] * HISTORICAL_BLEND,
+      point[1] * (1 - HISTORICAL_BLEND) + historical[1] * HISTORICAL_BLEND,
+    ];
+  }
+
+  // Major river valleys are natural separators and settlement corridors. For
+  // provinces explicitly tagged as river-valley, bias the seed gently toward
+  // the nearest 10m river without letting hydrography create new provinces.
+  if (metadata.terrain === "river-valley") {
+    const riverPoint = nearestLinePoint(point, ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers, 1.6);
+    if (riverPoint && usableLandPoint(riverPoint)) {
+      point = [
+        point[0] * (1 - RIVER_BLEND) + riverPoint[0] * RIVER_BLEND,
+        point[1] * (1 - RIVER_BLEND) + riverPoint[1] * RIVER_BLEND,
+      ];
     }
+  }
+
+  if (usableLandPoint(point)) return point;
+  return metadata.centroid;
+}
+
+function buildPoliticalSites(sites, seen, sourceRegions) {
+  const historicalAnchors = collectHistoricalAnchors(sourceRegions);
+  for (const metadata of ANATOLIA_PROVINCE_METADATA) {
+    addSite(
+      sites,
+      seen,
+      buildProvinceAnchor(metadata, historicalAnchors),
+      metadata.id,
+      "province-anchor-geographic-historical",
+    );
   }
 }
 
@@ -235,7 +303,7 @@ function createProvinceAsset(metadata, polygons) {
   return {
     header: {
       assetType: "province",
-      assetVersion: 6,
+      assetVersion: 7,
       generator: "Historia AI Phase 2D Geographic-Historical Province Builder",
       provider: "historia-ai-curated-cartography",
       dataset: "anatolia-province-geometry-1300",
@@ -283,7 +351,7 @@ function createGeometryAsset(metadata, polygons) {
   return {
     header: {
       assetType: "geometry",
-      assetVersion: 6,
+      assetVersion: 7,
       generator: "Historia AI Phase 2D Geographic-Historical Province Builder",
       provider: "historia-ai-curated-cartography",
       dataset: "anatolia-province-geometry-1300",
@@ -310,13 +378,11 @@ function createGeometryAsset(metadata, polygons) {
 export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
   const sites = [];
   const seen = new Set();
-  addProvinceAnchors(sites, seen);
-  addProvinceShapeControls(sites, seen);
-  addHistoricalSourceAnchors(sites, seen, sourceRegions);
-  addSampledCoastGuards(sites, seen);
   addDiagnosticLandField(sites, seen);
+  addPhysicalBarrierField(sites, seen);
+  buildPoliticalSites(sites, seen, sourceRegions);
 
-  const geometrySites = sites.filter((site) => Boolean(site.provinceId));
+  const geometrySites = sites.filter((site) => site.kind === "province-anchor-geographic-historical");
   const polygonsByProvince = Object.fromEntries(
     ANATOLIA_PROVINCE_METADATA.map((metadata) => [metadata.id, []]),
   );
@@ -327,7 +393,6 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     if (cell.length < 3 || polygonArea(cell) < MIN_CELL_AREA) continue;
     const centroid = polygonCentroid(cell);
     if (!usableLandPoint(centroid)) continue;
-    if (!cell.every((point) => usableLandPoint(point))) continue;
     polygonsByProvince[site.provinceId].push(roundPolygon(cell));
   }
 
@@ -346,20 +411,20 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
 
   return {
     schemaVersion: 1,
-    geometryVersion: 3,
+    geometryVersion: 4,
     historicalDate: "1300-01-01",
     provider: "historia-ai-curated-cartography",
     dataset: "anatolia-province-geometry-1300",
     projection: "EPSG:4326",
-    method: "sparse historical anchors + geographic coast guards + diagnostic physical field + deterministic Voronoi cartography",
+    method: "one-seed-per-province + historical-source centroid blend + river-valley bias + physical coast/lake diagnostics",
     sourceBasis: {
-      physical: "Natural Earth 10m coastline, lakes and rivers used by the physical atlas",
+      physical: "Natural Earth 10m land, lakes and rivers used by the physical atlas",
       historical: "aourednik/historical-basemaps world_1300 plus curated 1300 Anatolia province anchors",
-      topographicIntent: "coast, river-valley, highland and plateau anchors guide province extents instead of modern administrative borders",
+      topographicIntent: "province seeds follow historical centres and major geographic corridors; physical barriers remain outside the political tessellation",
     },
     siteCount: sites.length,
-    politicalSiteCount: sites.filter((site) => Boolean(site.provinceId)).length,
-    barrierSiteCount: sites.filter((site) => !site.provinceId).length,
+    politicalSiteCount: geometrySites.length,
+    barrierSiteCount: sites.filter((site) => site.provinceId === null).length,
     fallbackProvinceCount: fallbackCount,
     provinceCount: provinces.length,
     polygonCount: geometries.reduce((sum, geometry) => sum + geometry.polygons.length, 0),
