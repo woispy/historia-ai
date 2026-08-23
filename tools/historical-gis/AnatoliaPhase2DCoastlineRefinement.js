@@ -103,6 +103,34 @@ function polygonCentroid(polygon) {
   return [longitude / (3 * areaTwice), latitude / (3 * areaTwice)];
 }
 
+function vertexMean(polygon) {
+  if (!Array.isArray(polygon) || polygon.length === 0) return null;
+  const total = polygon.reduce(
+    (sum, point) => [sum[0] + point[0], sum[1] + point[1]],
+    [0, 0],
+  );
+  return [total[0] / polygon.length, total[1] / polygon.length];
+}
+
+function translatePolygonToLandAnchor(polygon, anchor) {
+  const mean = vertexMean(polygon);
+  if (!mean || !anchor || !pointInLand(anchor) || pointInLand(mean)) return polygon;
+
+  const delta = [anchor[0] - mean[0], anchor[1] - mean[1]];
+  return polygon.map(([longitude, latitude]) => [
+    longitude + delta[0],
+    latitude + delta[1],
+  ]);
+}
+
+function reconcilePolygonCentroid(polygon, metadata) {
+  if (!Array.isArray(polygon) || polygon.length < 3) return polygon;
+  if (polygonArea(polygon) < 0.00005) return polygon;
+  const mean = vertexMean(polygon);
+  if (mean && pointInLand(mean)) return polygon;
+  return translatePolygonToLandAnchor(polygon, metadata?.centroid ?? null);
+}
+
 function roundPolygon(polygon) {
   return polygon.map(([x, y]) => [Number(x.toFixed(5)), Number(y.toFixed(5))]);
 }
@@ -131,11 +159,19 @@ export function refineAnatoliaPhase2DCoastline(result) {
   const metadataById = new Map(ANATOLIA_PROVINCE_METADATA.map((province) => [province.id, province]));
 
   const geometries = result.geometries.map((geometry) => {
-    if (!coastalIds.has(geometry?.identity?.provinceId)) return geometry;
-    const metadata = metadataById.get(geometry.identity.provinceId);
-    const fragment = metadata ? createCoastalCoverageFragment(metadata) : null;
-    if (!fragment) return geometry;
-    return { ...geometry, polygons: [...geometry.polygons, fragment] };
+    const metadata = metadataById.get(geometry?.identity?.provinceId);
+    if (!metadata) return geometry;
+
+    const landReconciledPolygons = (geometry.polygons ?? [])
+      .map((polygon) => reconcilePolygonCentroid(polygon, metadata));
+
+    if (!coastalIds.has(geometry?.identity?.provinceId)) {
+      return { ...geometry, polygons: landReconciledPolygons };
+    }
+
+    const fragment = createCoastalCoverageFragment(metadata);
+    if (!fragment) return { ...geometry, polygons: landReconciledPolygons };
+    return { ...geometry, polygons: [...landReconciledPolygons, fragment] };
   });
 
   const polygonsById = new Map(
@@ -157,9 +193,10 @@ export function refineAnatoliaPhase2DCoastline(result) {
     provinces,
     geometries,
     coastlineRefinement: {
-      method: "coastal-province anchor fragments with bidirectional land validation",
+      method: "land-centroid reconciliation plus coastal province anchor fragments with bidirectional land validation",
       clippedByPhysicalLandMask: true,
       coastalProvinceCount: coastalIds.size,
+      landCentroidReconciliation: true,
     },
   };
 }
