@@ -14,6 +14,7 @@
     "test:physical-geography": "node tools/tests/physical-geography-1300.test.js && node tools/tests/physical-land-topology.test.js && node tools/tests/physical-land-authority.test.js",
     "test:physical-land-topology": "node tools/tests/physical-land-topology.test.js",
     "test:physical-land-authority": "node tools/tests/physical-land-authority.test.js",
+    "test:physical-land-diagnostic-points": "node tools/tests/physical-land-diagnostic-points.test.js",
     "test:hydrography-10m": "node tools/tests/hydrography-10m.test.js",
     "test:hydrography-visibility": "node tools/tests/hydrography-visibility.test.js",
     "test:world-map": "node tools/tests/world-land-mask.test.js",
