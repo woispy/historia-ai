@@ -21,10 +21,12 @@ function pointInLand(point) {
 }
 
 function pointInWater(point) {
-  return ANATOLIA_PHYSICAL_ATLAS.seas.some((sea) => pointInPolygon(point, sea.coordinates))
-    || ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => (
-      (lake.rings ?? [lake.coordinates]).some((ring) => pointInPolygon(point, ring))
-    ));
+  const seaWater = ANATOLIA_PHYSICAL_ATLAS.seas.some((sea) => pointInPolygon(point, sea.coordinates))
+    && !pointInLand(point);
+  const lakeWater = ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => (
+    (lake.rings ?? [lake.coordinates]).some((ring) => pointInPolygon(point, ring))
+  ));
+  return seaWater || lakeWater;
 }
 
 assert.equal(ANATOLIA_PROVINCE_METADATA.length, 44);
