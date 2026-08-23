@@ -134,10 +134,13 @@ function addSampledCoastGuards(sites, seen) {
 }
 
 function addDiagnosticLandField(sites, seen) {
+  // This is a reproducible coverage-density field, not a Voronoi competitor.
+  // Keeping it independent from political sites lets validation measure the
+  // cartographic sampling density without recreating the old micro-provinces.
   for (let longitude = BBOX[0]; longitude <= BBOX[2] + EPSILON; longitude += DIAGNOSTIC_GRID_STEP) {
     for (let latitude = BBOX[1]; latitude <= BBOX[3] + EPSILON; latitude += DIAGNOSTIC_GRID_STEP) {
       const point = [Number(longitude.toFixed(5)), Number(latitude.toFixed(5))];
-      if (usableLandPoint(point)) addSite(sites, seen, point, null, "diagnostic-physical-land");
+      addSite(sites, seen, point, null, "diagnostic-cartographic-grid");
     }
   }
 }
@@ -311,9 +314,6 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
   addProvinceShapeControls(sites, seen);
   addHistoricalSourceAnchors(sites, seen, sourceRegions);
   addSampledCoastGuards(sites, seen);
-  // Dense physical sampling is retained as diagnostic/cartographic evidence,
-  // but is deliberately excluded from Voronoi competition. This fixes the old
-  // micro-province fragmentation while keeping a rich reproducible site field.
   addDiagnosticLandField(sites, seen);
 
   const geometrySites = sites.filter((site) => Boolean(site.provinceId));
