@@ -17,6 +17,7 @@ function ProvinceLayer({
   zoom = 1,
   camera = {},
   renderFill = true,
+  renderBoundaries = true,
 }) {
   const runtimeProvinces = useMemo(
     () => provinces.filter(({ province }) => !isCuratedCountryOverlay(province)),
@@ -58,7 +59,7 @@ function ProvinceLayer({
             renderFill={renderFill}
           />
         ))}
-        <ProvinceBoundaryLayer provinces={runtimeProvinces} camera={camera} zoom={zoom} />
+        {renderBoundaries && <ProvinceBoundaryLayer provinces={runtimeProvinces} camera={camera} zoom={zoom} />}
       </g>
     </ProvinceSvg>
   );

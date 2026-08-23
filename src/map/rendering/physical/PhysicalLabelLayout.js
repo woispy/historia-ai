@@ -35,6 +35,26 @@ function insideBounds(box, bounds) {
   return box.minX >= minX && box.maxX <= maxX && box.minY >= minY && box.maxY <= maxY;
 }
 
+function getOffsetCandidates(label) {
+  const explicit = label.offsets ?? [[0, 0]];
+  if (label.kind !== "region" || !Array.isArray(label.bounds) || label.bounds.length !== 4) {
+    return explicit;
+  }
+
+  // Regional labels are secondary cartography. Their explicit offsets remain
+  // authoritative, but a bounded deterministic search prevents a nearby
+  // higher-priority physical label from making an otherwise valid region label
+  // disappear entirely at closer zoom levels.
+  const fallback = [
+    [0, 0.30], [0, -0.30], [0.30, 0], [-0.30, 0],
+    [0.60, 0], [-0.60, 0], [0, 0.60], [0, -0.60],
+    [0.30, 0.30], [-0.30, 0.30], [0.30, -0.30], [-0.30, -0.30],
+    [0.60, 0.30], [-0.60, 0.30], [0.60, -0.30], [-0.60, -0.30],
+  ];
+
+  return [...explicit, ...fallback];
+}
+
 /**
  * Place physical labels in priority order.
  *
@@ -51,7 +71,7 @@ export function layoutPhysicalLabels(labels, zoom = 1) {
   const occupied = [];
 
   for (const label of visible) {
-    const offsetCandidates = label.offsets ?? [[0, 0]];
+    const offsetCandidates = getOffsetCandidates(label);
     const padding = Number(label.padding ?? 0.08);
     let chosen = null;
 

@@ -37,6 +37,7 @@ const anchor = (x, y, terrainClass, settlementDensity) => ({
   geometryMode: "source-derived-with-anchor-refinement",
   borderConfidence: "medium",
   coastConstrained: terrainClass.startsWith("coastal"),
+  terrain: ANATOLIA_TERRAIN_PROFILES[terrainClass],
 });
 
 export const ANATOLIA_PROVINCE_REFINEMENTS = Object.freeze({
@@ -78,6 +79,12 @@ export const ANATOLIA_PROVINCE_REFINEMENTS = Object.freeze({
   "cilicia-sis": anchor(35.80, 37.45, "mountain-pass", "low"),
   "cilicia-tarsos": anchor(34.90, 36.92, "coastal-plain", "high"),
   "cilicia-alaiye": anchor(31.99, 36.55, "coastal-mountain", "low"),
+  "pamphylia-attaleia": anchor(30.71, 36.89, "coastal-lowland", "high"),
+  "lycia-myra": anchor(29.13, 36.26, "coastal-mountain", "medium"),
+  "pisidia-antiochia": anchor(31.19, 38.30, "highland", "low"),
+  "cappadocia-nigde": anchor(34.68, 37.97, "highland", "medium"),
+  "euphrates-malatya": anchor(38.35, 38.35, "river-valley", "medium"),
+  "cilicia-adana": anchor(35.33, 37.00, "lowland", "high"),
 });
 
 export const ANATOLIA_ADJACENCY_HINTS = Object.freeze({
@@ -144,10 +151,7 @@ export const ANATOLIA_RIVER_CROSSINGS = Object.freeze([
 ]);
 
 export function getAnatoliaProvinceRefinement(id) {
-  const item = ANATOLIA_PROVINCE_REFINEMENTS[id];
-  if (!item) return null;
-  const terrain = ANATOLIA_TERRAIN_PROFILES[item.terrainClass];
-  return terrain ? Object.freeze({ ...item, terrain }) : item;
+  return ANATOLIA_PROVINCE_REFINEMENTS[id] ?? null;
 }
 
 export function getAnatoliaProvinceNeighbors(id) {

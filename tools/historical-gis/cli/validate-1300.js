@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { importHistoricalGeoJson } from "../HistoricalGeometryImporter.js";
+import { ANATOLIA_PROVINCE_METADATA } from "../../../src/map/data/AnatoliaProvinceMetadata.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const sourcePath = path.join(root, "data/gis/1300/source/world_1300.geojson");
@@ -25,6 +26,7 @@ function validatePolygonRing(polygon, label) {
 const sourceRaw = JSON.parse(await fs.readFile(sourcePath, "utf8"));
 const normalizedRegions = await importHistoricalGeoJson(sourcePath, 1300);
 const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
+const curatedAnatoliaProvinceCount = ANATOLIA_PROVINCE_METADATA.length;
 
 assert(Array.isArray(sourceRaw.features), "Historical GIS source must contain a features array.");
 assert(sourceRaw.features.length === normalizedRegions.length, `Source/normalized feature count mismatch: ${sourceRaw.features.length} vs ${normalizedRegions.length}.`);
@@ -35,7 +37,8 @@ assert(Array.isArray(manifest.regions) && manifest.regions.length >= 2, "Histori
 assert(manifest.source?.sourceFeatureCount === normalizedRegions.length, "Runtime source feature count mismatch.");
 assert(manifest.source?.regionalOverlay?.status === "research-only", "Runtime regional overlay policy must be research-only.");
 assert(manifest.source?.phase2D?.status === "runtime", "Phase 2D runtime geometry is missing.");
-assert(manifest.source?.phase2D?.provinceCount === 38, "Phase 2D must provide exactly 38 Anatolia provinces.");
+assert(manifest.source?.phase2D?.provinceCount === curatedAnatoliaProvinceCount, `Phase 2D province count must match curated Anatolia metadata (${curatedAnatoliaProvinceCount}).`);
+assert(curatedAnatoliaProvinceCount >= 40, "Curated Anatolia mesh must remain materially finer than the original 38-province pass.");
 
 const regionAssets = [];
 for (const region of manifest.regions) {

@@ -6,7 +6,9 @@ import {
 } from "../historical-gis/AnatoliaPhase2DGeometryBuilder.js";
 import { refineAnatoliaPhase2DCoastline } from "../historical-gis/AnatoliaPhase2DCoastlineRefinement.js";
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
+import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
+import { isUsablePhysicalLandPoint } from "../../src/map/rendering/physical/PhysicalLandAuthority.js";
 
 const result = refineAnatoliaPhase2DCoastline(buildAnatoliaPhase2DAssets([
   { polygons: [[[29.9, 40.7], [30.1, 40.7], [30.1, 40.9], [29.9, 40.7]]] },
@@ -15,7 +17,7 @@ const result = refineAnatoliaPhase2DCoastline(buildAnatoliaPhase2DAssets([
 
 assert.equal(result.historicalDate, "1300-01-01");
 assert.equal(result.provinceCount, ANATOLIA_PROVINCE_METADATA.length);
-assert.equal(result.provinceCount, 38);
+assert.equal(result.provinceCount, 44);
 console.log(`Phase 2D cartographic site count: ${result.siteCount}`);
 assert.ok(result.siteCount >= 1000, "Phase 2D must use a dense physical/cartographic site field");
 assert.ok(result.barrierSiteCount >= 300, "Phase 2D must include a substantial physical water/coast barrier field");
@@ -26,6 +28,8 @@ assert.ok(
 assert.ok(result.polygonCount >= result.provinceCount, "Every province must contain at least one polygon");
 assert.equal(result.provinces.length, result.geometries.length);
 assert.equal(result.coastlineRefinement?.coastalProvinceCount, ANATOLIA_PROVINCE_METADATA.filter((province) => province.coastal).length);
+assert.equal(result.coastlineRefinement?.polygonBoundaryLandInvariant, true);
+assert.equal(result.coastlineRefinement?.waterExclusionInvariant, true);
 
 const provinceIds = new Set();
 let vertexCount = 0;
@@ -54,6 +58,33 @@ function polygonArea(polygon) {
   return Math.abs(area) / 2;
 }
 
+const land = ANATOLIA_PHYSICAL_ATLAS.landPolygons;
+const seas = ANATOLIA_PHYSICAL_ATLAS.seas.map((sea) => sea.coordinates);
+const channels = ANATOLIA_PHYSICAL_ATLAS.channels.map((channel) => channel.coordinates);
+const lakes = ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes;
+
+function assertUsablePolygonBoundary(polygon, provinceId) {
+  assert.ok(isUsablePhysicalLandPoint(polygonCentroid(polygon), land, seas, channels, lakes));
+  for (let index = 0; index < polygon.length; index += 1) {
+    const start = polygon[index];
+    const end = polygon[(index + 1) % polygon.length];
+    assert.ok(
+      isUsablePhysicalLandPoint(start, land, seas, channels, lakes),
+      `${provinceId} polygon vertex must remain on usable physical land: ${start.join(",")}`,
+    );
+    for (const fraction of [0.25, 0.5, 0.75]) {
+      const sample = [
+        start[0] + (end[0] - start[0]) * fraction,
+        start[1] + (end[1] - start[1]) * fraction,
+      ];
+      assert.ok(
+        isUsablePhysicalLandPoint(sample, land, seas, channels, lakes),
+        `${provinceId} polygon boundary must remain on usable physical land: ${sample.join(",")}`,
+      );
+    }
+  }
+}
+
 for (const geometry of result.geometries) {
   assert.ok(provinceIds.has(geometry.identity.provinceId));
   assert.ok(geometry.polygons.length > 0);
@@ -61,13 +92,16 @@ for (const geometry of result.geometries) {
     assert.ok(polygon.length >= 3);
     vertexCount += polygon.length;
     const centroid = polygonCentroid(polygon);
-    // Tiny coastline reconciliation fragments may include exact coastline
-    // vertices; normal geometry must still satisfy the physical-land invariant.
     if (polygonArea(polygon) >= 0.00005) {
       assert.ok(
         isPhysicalLandPoint(centroid),
         `Phase 2D polygon centroid must remain on physical land: ${centroid.join(",")}`,
       );
+      assert.ok(
+        isUsablePhysicalLandPoint(centroid, land, seas, channels, lakes),
+        `Phase 2D polygon centroid must remain on usable physical land: ${centroid.join(",")}`,
+      );
+      assertUsablePolygonBoundary(polygon, geometry.identity.provinceId);
     }
     for (const [longitude, latitude] of polygon) {
       assert.ok(longitude >= 25 && longitude <= 46, `Longitude out of Phase 2D envelope: ${longitude}`);

@@ -22,8 +22,8 @@ const expectedEstablishedControllers = Object.freeze({
 
 const metadataById = new Map(ANATOLIA_PROVINCE_METADATA.map((province) => [province.id, province]));
 
-assert.equal(ANATOLIA_PROVINCE_METADATA.length, 38, "1300 Anatolia must retain the curated 38-province presentation layer");
-assert.equal(metadataById.size, 38, "1300 Anatolia province IDs must be unique");
+assert.equal(ANATOLIA_PROVINCE_METADATA.length, 44, "1300 Anatolia must retain the curated 44-province presentation layer");
+assert.equal(metadataById.size, 44, "1300 Anatolia province IDs must be unique");
 
 for (const province of ANATOLIA_PROVINCE_METADATA) {
   assert.ok(province.id, "Every historical province needs a stable identity");
