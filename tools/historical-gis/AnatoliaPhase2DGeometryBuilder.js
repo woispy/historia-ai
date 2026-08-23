@@ -162,10 +162,16 @@ function findUsableLandPoint(point) {
   return null;
 }
 
+function getHistoricalCityPoint(metadata) {
+  const city = ANATOLIA_CITY_ATLAS[metadata.cityId];
+  if (!city || !Number.isFinite(Number(city.x)) || !Number.isFinite(Number(city.y))) return null;
+  return [Number(city.x), Number(city.y)];
+}
+
 function buildProvinceAnchor(metadata, historicalAnchors) {
-  const historicalCity = ANATOLIA_CITY_ATLAS[metadata.cityId];
-  let point = Array.isArray(historicalCity) ? [...historicalCity] : [...metadata.centroid];
-  if (!Array.isArray(historicalCity)) {
+  const historicalCity = getHistoricalCityPoint(metadata);
+  let point = historicalCity ?? [...metadata.centroid];
+  if (!historicalCity) {
     const historical = averagedPoint(historicalAnchors.get(metadata.id) ?? []);
     if (historical && usableLandPoint(historical)) {
       point = [point[0] * (1 - HISTORICAL_BLEND) + historical[0] * HISTORICAL_BLEND, point[1] * (1 - HISTORICAL_BLEND) + historical[1] * HISTORICAL_BLEND];
@@ -360,20 +366,14 @@ function roundPolygon(polygon) {
 }
 
 function createFallback(metadata) {
-  const city = ANATOLIA_CITY_ATLAS[metadata.cityId];
-  const anchor = city && Array.isArray(city.x) ? city.x : [city?.x, city?.y];
-  const center = findUsableLandPoint(anchor) ?? findUsableLandPoint(metadata.centroid) ?? metadata.centroid;
+  const center = findUsableLandPoint(getHistoricalCityPoint(metadata) ?? metadata.centroid) ?? metadata.centroid;
   const radius = 0.035;
   const polygon = Array.from({ length: 8 }, (_, index) => {
     const angle = index / 8 * Math.PI * 2;
-    return [center[0] + Math.cos(angle) * radius, center[1] + Math.sin(angle) * radius];
+    const shrink = index % 2 === 0 ? 0.88 : 1;
+    return [center[0] + Math.cos(angle) * radius * shrink, center[1] + Math.sin(angle) * radius * shrink];
   });
-  const centroid = polygonVertexCentroid(polygon);
-  if (usableLandPoint(centroid)) return roundPolygon(polygon);
-  const repaired = findUsableLandPoint(center);
-  if (!repaired) return roundPolygon(polygon);
-  const delta = [repaired[0] - centroid[0], repaired[1] - centroid[1]];
-  return roundPolygon(polygon.map(([longitude, latitude]) => [longitude + delta[0], latitude + delta[1]]));
+  return roundPolygon(polygon);
 }
 
 function createProvinceAsset(metadata, polygons) {
