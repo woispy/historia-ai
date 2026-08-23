@@ -141,7 +141,11 @@ const politicalModel = createHistoricalPoliticalMapModel({
   countryRepository: { byId: {} },
 });
 
-assert.equal(politicalModel.length, 38, "the 1300 political presentation must cover all 38 provinces");
+assert.equal(
+  politicalModel.length,
+  ANATOLIA_PROVINCE_METADATA.length,
+  "the 1300 political presentation must cover every curated Anatolia province",
+);
 assert.equal(
   politicalModel.every((entry) => entry.historicalPolitical?.id),
   true,
@@ -163,6 +167,10 @@ assert.equal(byProvince.get("phrygia-uluborlu").historicalPolitical.id, "hamid")
 assert.equal(byProvince.get("phrygia-afyon").historicalPolitical.id, "sahibata");
 assert.equal(byProvince.get("bithynia-nicomedia").historicalProvince.coastal, true);
 assert.equal(byProvince.get("pontus-sinop").historicalProvince.port, true);
+assert.equal(byProvince.get("pamphylia-attaleia").historicalPolitical.id, "local_polities");
+assert.equal(byProvince.get("cappadocia-nigde").historicalPolitical.id, "karaman");
+assert.equal(byProvince.get("euphrates-malatya").historicalPolitical.id, "ilkhanate");
+assert.equal(byProvince.get("cilicia-adana").historicalPolitical.id, "cilicia");
 
 assert.equal(
   getHistoricalPoliticalOverlayMode(byProvince.get("cappadocia-kayseri")),
