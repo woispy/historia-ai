@@ -57,6 +57,7 @@ assert.deepEqual(byId.get("ionia-ayasuluk")?.centroid, [27.37, 37.95], "Ayasuluk
 assert.deepEqual(byId.get("lydia-birgi")?.centroid, [28.06, 38.25], "Birgi anchor must remain in its historical mountain-valley corridor");
 assert.deepEqual(byId.get("caria-tralleis")?.centroid, [27.84, 37.86], "Tralleis anchor must remain in the Maeander interior rather than the coast");
 assert.deepEqual(byId.get("caria-halikarnassos")?.centroid, [27.43, 37.03], "Halikarnassos anchor must remain on the southwest Carian coast");
+assert.deepEqual(byId.get("bithynia-nicomedia")?.centroid, [29.9169, 40.7654], "Nicomedia anchor must remain tied to the historical city atlas location");
 
 const uniqueCentroids = new Set(
   ANATOLIA_PROVINCE_METADATA.map((province) => province.centroid.map((value) => value.toFixed(4)).join(":")),
