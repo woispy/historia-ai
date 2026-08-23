@@ -6,10 +6,14 @@ import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceM
 import { createHistoricalPoliticalMapModel } from "../../src/world/map/historical/HistoricalPoliticalMapModel.js";
 import { getHistoricalPolity } from "../../src/world/map/historical/HistoricalPoliticalRuntime.js";
 import { getHistoricalPoliticalOverlayMode } from "../../src/map/components/layers/HistoricalPoliticalOverlayModel.js";
-import { buildCartographicInternalBoundaryPath } from "../../src/map/components/layers/HistoricalPoliticalRegionLayer.jsx";
+import { buildCartographicInternalBoundaryPath } from "../../src/map/rendering/historical/HistoricalPoliticalBoundary.js";
 
 const layerSource = readFileSync(
   resolve("src/map/components/layers/HistoricalPoliticalRegionLayer.jsx"),
+  "utf8",
+);
+const boundarySource = readFileSync(
+  resolve("src/map/rendering/historical/HistoricalPoliticalBoundary.js"),
   "utf8",
 );
 const worldMapSource = readFileSync(
@@ -54,11 +58,16 @@ assert.match(
 );
 assert.match(
   layerSource,
+  /buildCartographicInternalBoundaryPath\(provinces\)/,
+  "historical political layer must render the shared cartographic boundary geometry",
+);
+assert.match(
+  boundarySource,
   /C \$\{oneThird\[0\]\}/,
   "cartographic province borders must be rendered as curved shared boundaries",
 );
 assert.match(
-  layerSource,
+  boundarySource,
   /edge\.count >= 2/,
   "cartographic boundary construction must render shared province edges rather than coastlines",
 );
