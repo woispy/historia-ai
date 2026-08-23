@@ -1,4 +1,3 @@
-import hydrography from "../../src/map/data/generated/anatolia-hydrography-10m.json" with { type: "json" };
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
@@ -213,7 +212,7 @@ export function refineAnatoliaPhase2DCoastline(result) {
     provinces,
     geometries,
     coastlineRefinement: {
-      method: "land-centroid reconciliation plus generated 10m hydrography-safe coastal fragments",
+      method: "land-centroid reconciliation plus shared physical-land authority for coastal fragments",
       clippedByPhysicalLandMask: true,
       clippedByGeneratedHydrography: true,
       coastalProvinceCount: coastalIds.size,
