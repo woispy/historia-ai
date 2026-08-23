@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useWorldMap } from "../hooks";
 import {
   ProvinceLayer,
+  HistoricalPoliticalRegionLayer,
   CityLayer,
   PhysicalGeographyLayer,
   WorldPhysicalLayer,
@@ -12,6 +13,14 @@ import { RenderRoot, RenderLayer, SvgRenderer } from "../rendering";
 import ProvinceTextureLayer from "../rendering/gpu/ProvinceTextureLayer";
 import { getCameraCullingKey, getCameraCullingSnapshot } from "../rendering/MapViewportCulling";
 import { shouldUseGpuProvinceFill } from "../rendering/CartographyModel";
+
+const HISTORICAL_1300_DATE = "1300-01-01";
+
+function getScenarioStartDate(runtime) {
+  return runtime?.scenario?.startDate
+    ?? runtime?.world?.scenario?.startDate
+    ?? null;
+}
 
 function WorldMap({
   runtime,
@@ -27,6 +36,8 @@ function WorldMap({
   const [textureReady, setTextureReady] = useState(false);
   const [internalSelectedCityId, setInternalSelectedCityId] = useState(null);
   const selectedCityId = controlledSelectedCityId ?? internalSelectedCityId;
+  const scenarioDate = getScenarioStartDate(runtime);
+  const isHistoricalPoliticalMap = scenarioDate === HISTORICAL_1300_DATE;
 
   const cameraInput = useCameraController({
     zoom: camera.zoom,
@@ -41,7 +52,10 @@ function WorldMap({
     onCityClick?.(cityId);
   }, [onCityClick]);
 
-  const useGpuProvinceFill = shouldUseGpuProvinceFill(cameraState.zoom);
+  // The GPU province compositor remains the default performance path, but it
+  // must not compete with the authoritative dated political renderer.
+  const useGpuProvinceFill = !isHistoricalPoliticalMap
+    && shouldUseGpuProvinceFill(cameraState.zoom);
   const gpuProvinceActive = useGpuProvinceFill && textureReady;
 
   // Camera transform remains continuous. Expensive geometry visibility/layout
@@ -58,6 +72,16 @@ function WorldMap({
     [],
   );
 
+  const politicalRegions = useMemo(
+    () => (
+      <HistoricalPoliticalRegionLayer
+        date={scenarioDate}
+        provinces={provinces}
+      />
+    ),
+    [scenarioDate, provinces],
+  );
+
   const provincesLayer = useMemo(
     () => (
       <ProvinceLayer
@@ -68,7 +92,7 @@ function WorldMap({
         mapShadows={settings.mapShadows !== false}
         zoom={cameraState.zoom}
         camera={cullingCamera}
-        renderFill={!gpuProvinceActive}
+        renderFill={!isHistoricalPoliticalMap && !gpuProvinceActive}
       />
     ),
     [
@@ -80,6 +104,7 @@ function WorldMap({
       cameraState.zoom,
       cullingCamera,
       gpuProvinceActive,
+      isHistoricalPoliticalMap,
     ],
   );
 
@@ -108,12 +133,13 @@ function WorldMap({
       <RenderLayer>
         {world}
         {provincesLayer}
+        {politicalRegions}
         {cartography}
         {detail}
         {citiesLayer}
       </RenderLayer>
     ),
-    [world, provincesLayer, cartography, detail, citiesLayer],
+    [world, provincesLayer, politicalRegions, cartography, detail, citiesLayer],
   );
 
   return (
