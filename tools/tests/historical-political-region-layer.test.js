@@ -20,6 +20,10 @@ const worldMapSource = readFileSync(
   resolve("src/map/components/WorldMap.jsx"),
   "utf8",
 );
+const provinceLayerSource = readFileSync(
+  resolve("src/map/components/layers/ProvinceLayer.jsx"),
+  "utf8",
+);
 
 assert.match(
   layerSource,
@@ -48,18 +52,13 @@ assert.match(
 );
 assert.match(
   layerSource,
-  /HISTORICAL_POLITICAL_CARTOGRAPHIC_FILTER_ID/,
-  "historical province borders must use the dedicated cartographic presentation filter",
-);
-assert.match(
-  layerSource,
-  /feTurbulence[\s\S]*baseFrequency="0\.035 0\.09"/,
-  "cartographic province borders must have controlled organic variation rather than perfectly mechanical straight strokes",
-);
-assert.match(
-  layerSource,
   /buildCartographicInternalBoundaryPath\(provinces\)/,
   "historical political layer must render the shared cartographic boundary geometry",
+);
+assert.doesNotMatch(
+  layerSource,
+  /HISTORICAL_POLITICAL_CARTOGRAPHIC_FILTER_ID/,
+  "historical province borders must not rely on noisy SVG displacement filters",
 );
 assert.match(
   boundarySource,
@@ -80,6 +79,21 @@ assert.match(
   worldMapSource,
   /renderFill=\{!isHistoricalPoliticalMap\}/,
   "modern province fills must be disabled for the 1300 historical political layer",
+);
+assert.match(
+  worldMapSource,
+  /renderBoundaries=\{!isHistoricalPoliticalMap\}/,
+  "modern straight province topology must be disabled when the historical cartographic boundary layer is active",
+);
+assert.match(
+  provinceLayerSource,
+  /renderBoundaries = true/,
+  "ProvinceLayer must expose an explicit boundary-rendering switch",
+);
+assert.match(
+  provinceLayerSource,
+  /renderBoundaries && <ProvinceBoundaryLayer/,
+  "ProvinceLayer must conditionally render the legacy straight topology",
 );
 
 assert.equal(historicalAtlas.historicalDate, "1300-01-01");
