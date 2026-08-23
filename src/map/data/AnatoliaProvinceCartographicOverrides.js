@@ -7,7 +7,7 @@
  */
 
 const CARTOGRAPHIC_CENTROIDS = Object.freeze({
-  "bithynia-nicomedia": [29.90, 40.78],
+  "bithynia-nicomedia": [29.91, 40.77],
   "bithynia-nicaea": [29.73, 40.48],
   "bithynia-prusa": [29.08, 40.20],
   "bithynia-sangarios": [30.62, 40.03],
@@ -41,8 +41,6 @@ const CARTOGRAPHIC_CENTROIDS = Object.freeze({
   "pontus-kastamon": [33.70, 41.40],
 });
 
-// Power-diagram weights are deliberately small. Higher weight gives the seed
-// a little more cartographic influence without moving its historical centre.
 const CARTOGRAPHIC_WEIGHTS = Object.freeze({
   "lydia-smyrna": 0.055,
   "ionia-ayasuluk": 0.060,
