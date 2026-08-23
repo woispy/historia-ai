@@ -335,7 +335,7 @@ function clipPolygonToTriangle(polygon, triangle) {
   return clipped;
 }
 
-function physicalLandFragments(polygon) {
+function physicalLandFragments(polygon, preferredPoint) {
   const fragments = [];
   for (const landPolygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
     const triangles = triangulateSimplePolygon(landPolygon);
@@ -344,11 +344,11 @@ function physicalLandFragments(polygon) {
       if (fragment.length < 3 || polygonArea(fragment) < MIN_CELL_AREA) continue;
       const areaCentroid = polygonCentroid(fragment);
       const vertexCentroid = polygonVertexCentroid(fragment);
-      if (!usableLandPoint(areaCentroid) || !usableLandPoint(vertexCentroid)) continue;
-      fragments.push(fragment);
+      if (!usableLandPoint(areaCentroid) && !usableLandPoint(vertexCentroid)) continue;
+      fragments.push({ polygon: fragment, distance: distanceSquared(areaCentroid, preferredPoint) });
     }
   }
-  return fragments;
+  return fragments.sort((a, b) => a.distance - b.distance).map(({ polygon }) => polygon);
 }
 
 function roundPolygon(polygon) {
@@ -398,7 +398,7 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     const site = geometrySites[siteIndex];
     const cell = buildVoronoiCell(siteIndex, geometrySites);
     if (cell.length < 3 || polygonArea(cell) < MIN_CELL_AREA) continue;
-    polygonsByProvince[site.provinceId].push(...physicalLandFragments(cell).map(roundPolygon));
+    polygonsByProvince[site.provinceId].push(...physicalLandFragments(cell, site.point).map(roundPolygon));
   }
   let fallbackCount = 0;
   const provinces = [];
