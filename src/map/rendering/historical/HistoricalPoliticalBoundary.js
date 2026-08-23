@@ -1,7 +1,7 @@
 const BORDER_KEY_PRECISION = 5;
-const CARTOGRAPHIC_BOW = 0.032;
-const MAX_BOW_RATIO = 0.12;
-const MIN_CURVE_LENGTH = 0.16;
+const CARTOGRAPHIC_BOW = 0.055;
+const MAX_BOW_RATIO = 0.18;
+const MIN_CURVE_LENGTH = 0.08;
 
 function pointKey(point) {
   return `${Number(point[0]).toFixed(BORDER_KEY_PRECISION)}:${Number(point[1]).toFixed(BORDER_KEY_PRECISION)}`;
@@ -22,13 +22,22 @@ function deterministicBoundaryBow(key) {
   return ((hash >>> 0) / 4294967295 - 0.5) * 2;
 }
 
+function deterministicBoundaryShape(key) {
+  let hash = 0;
+  for (let index = 0; index < key.length; index += 1) {
+    hash = (Math.imul(hash ^ key.charCodeAt(index), 31) + index) | 0;
+  }
+  return ((hash >>> 0) / 4294967295 - 0.5) * 0.22;
+}
+
 /**
  * Draw shared historical province borders as restrained cartographic curves.
  *
- * The generated province topology is left untouched. Only the presentation
- * stroke is curved, using the same deterministic edge key for both neighbours.
- * The bow is deliberately larger than the first pass, but remains capped as a
- * small fraction of edge length so coast-adjacent corners do not become waves.
+ * Province topology remains authoritative. Only the presentation stroke is
+ * curved, and both neighbouring provinces resolve the exact same deterministic
+ * edge key, so no visual gap can be introduced between them. The slightly
+ * stronger bow and tiny asymmetric control-point offset make the mesh read as
+ * a historical cartographic boundary rather than a mathematical Voronoi grid.
  */
 export function buildCartographicInternalBoundaryPath(provinces) {
   const edges = new Map();
@@ -71,13 +80,14 @@ export function buildCartographicInternalBoundaryPath(provinces) {
       const normal = [-dy / length, dx / length];
       const bowLimit = Math.min(CARTOGRAPHIC_BOW, length * MAX_BOW_RATIO);
       const bow = length < MIN_CURVE_LENGTH ? 0 : deterministicBoundaryBow(key) * bowLimit;
+      const shape = deterministicBoundaryShape(key);
       const oneThird = [
-        start[0] + dx / 3 + normal[0] * bow,
-        start[1] + dy / 3 + normal[1] * bow,
+        start[0] + dx / 3 + normal[0] * bow * (1 - shape),
+        start[1] + dy / 3 + normal[1] * bow * (1 - shape),
       ];
       const twoThirds = [
-        start[0] + (dx * 2) / 3 + normal[0] * bow,
-        start[1] + (dy * 2) / 3 + normal[1] * bow,
+        start[0] + (dx * 2) / 3 + normal[0] * bow * (1 + shape),
+        start[1] + (dy * 2) / 3 + normal[1] * bow * (1 + shape),
       ];
       return `M ${start[0]} ${start[1]} C ${oneThird[0]} ${oneThird[1]} ${twoThirds[0]} ${twoThirds[1]} ${end[0]} ${end[1]}`;
     })
