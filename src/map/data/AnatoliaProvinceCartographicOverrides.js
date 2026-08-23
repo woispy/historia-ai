@@ -20,9 +20,9 @@ const CARTOGRAPHIC_CENTROIDS = Object.freeze({
   "mysia-balikesir": [27.91, 39.64],
   "mysia-pergamon": [27.22, 39.18],
 
-  "lydia-magnesia": [27.48, 38.66],
+  "lydia-magnesia": [27.54, 38.62],
   "lydia-smyrna": [27.17, 38.46],
-  "ionia-ayasuluk": [27.62, 38.02],
+  "ionia-ayasuluk": [27.37, 37.95],
   "lydia-birgi": [28.20, 38.20],
   "caria-tralleis": [28.00, 37.90],
 
