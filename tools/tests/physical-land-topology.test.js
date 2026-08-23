@@ -1,17 +1,10 @@
 import assert from "node:assert/strict";
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
-
-function pointInPolygon([x, y], polygon) {
-  let inside = false;
-  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index += 1) {
-    const [xi, yi] = polygon[index];
-    const [xj, yj] = polygon[previous];
-    if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi || Number.EPSILON) + xi) {
-      inside = !inside;
-    }
-  }
-  return inside;
-}
+import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
+import {
+  isPhysicalLandPoint,
+  isUsablePhysicalLandPoint,
+} from "../../src/map/rendering/physical/PhysicalLandAuthority.js";
 
 function orientation(a, b, c) {
   const value = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
@@ -43,19 +36,37 @@ assert.equal(polygons.length, 2, "Physical land authority must remain a MultiPol
 assert.ok(polygons.every((polygon) => polygon.length >= 4), "Every physical land ring must be valid");
 assert.ok(polygons.every((polygon) => !hasSelfIntersection(polygon)), "Physical land rings must not self-intersect");
 
+const land = polygons;
+const seas = ANATOLIA_PHYSICAL_ATLAS.seas.map((sea) => sea.coordinates);
+const channels = ANATOLIA_PHYSICAL_ATLAS.channels.map((channel) => channel.coordinates);
+const lakes = ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes;
+
 const nicomedia = [29.9169, 40.7654];
 const constantinople = [28.9784, 41.0082];
 const nicaea = [29.7183, 40.4286];
 const prusa = [29.0611, 40.1917];
-
-assert.ok(polygons.some((polygon) => pointInPolygon(nicomedia, polygon)), "Nicomedia must remain on Anatolian physical land");
-assert.ok(polygons.some((polygon) => pointInPolygon(constantinople, polygon)), "Constantinople must remain on physical land");
-assert.ok(polygons.some((polygon) => pointInPolygon(nicaea, polygon)), "Nicaea must remain on Anatolian physical land");
-assert.ok(polygons.some((polygon) => pointInPolygon(prusa, polygon)), "Prusa must remain on Anatolian physical land");
-
 const izmitGulfWater = [29.60, 40.70];
 const bosporusWater = [29.06, 41.05];
-assert.ok(!polygons.some((polygon) => pointInPolygon(izmitGulfWater, polygon)), "İzmit Gulf water must not become physical land");
-assert.ok(!polygons.some((polygon) => pointInPolygon(bosporusWater, polygon)), "Bosporus water must not become physical land");
 
-console.log("Physical land topology tests passed: 2 simple land polygons, Bosporus split, Nicomedia/Constantinople/Nicaea/Prusa anchors, and water exclusions.");
+assert.equal(isPhysicalLandPoint(nicomedia, land, lakes), true, "Nicomedia must remain on physical land");
+assert.equal(isPhysicalLandPoint(constantinople, land, lakes), true, "Constantinople must remain on physical land");
+assert.equal(isPhysicalLandPoint(nicaea, land, lakes), true, "Nicaea must remain on physical land");
+assert.equal(isPhysicalLandPoint(prusa, land, lakes), true, "Prusa must remain on physical land");
+
+assert.equal(
+  isUsablePhysicalLandPoint(izmitGulfWater, land, seas, channels, lakes),
+  false,
+  "İzmit Gulf water must not become usable physical land.",
+);
+assert.equal(
+  isUsablePhysicalLandPoint(bosporusWater, land, seas, channels, lakes),
+  false,
+  "Bosporus water must not become usable physical land.",
+);
+assert.equal(
+  isUsablePhysicalLandPoint(nicomedia, land, seas, channels, lakes),
+  true,
+  "Nicomedia must remain a usable physical-land anchor.",
+);
+
+console.log("Physical land topology tests passed: 2 simple land polygons, Bosporus split, direct land anchors, and subtractive water exclusions.");
