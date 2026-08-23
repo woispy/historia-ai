@@ -10,6 +10,7 @@ const REPRESENTATIVE_SEARCH_STEP = 0.01;
 const REPRESENTATIVE_SEARCH_RADIUS = 0.5;
 const MIN_VALID_POLYGON_AREA = 0.00005;
 const EDGE_SAMPLE_FRACTIONS = [0.25, 0.5, 0.75];
+const COAST_FRAGMENT_HALF_LENGTH = 0.01;
 
 function distanceSquared(a, b) {
   const dx = a[0] - b[0];
@@ -52,7 +53,21 @@ function pointToSegmentDistanceSquared(point, start, end) {
   const t = Math.max(0, Math.min(1, (
     (point[0] - start[0]) * dx + (point[1] - start[1]) * dy
   ) / (dx * dx + dy * dy)));
-  return distanceSquared(point, [start[0] + dx * t, start[1] + dy * t]);
+  const projected = [start[0] + dx * t, start[1] + dy * t];
+  return distanceSquared(point, projected);
+}
+
+function projectPointToSegment(point, start, end) {
+  const dx = end[0] - start[0];
+  const dy = end[1] - start[1];
+  if (dx === 0 && dy === 0) return { point: [...start], t: 0 };
+  const t = Math.max(0, Math.min(1, (
+    (point[0] - start[0]) * dx + (point[1] - start[1]) * dy
+  ) / (dx * dx + dy * dy)));
+  return {
+    point: [start[0] + dx * t, start[1] + dy * t],
+    t,
+  };
 }
 
 function findNearestCoastSegment(point) {
@@ -62,8 +77,11 @@ function findNearestCoastSegment(point) {
     for (let index = 0; index < polygon.length; index += 1) {
       const start = polygon[index];
       const end = polygon[(index + 1) % polygon.length];
-      const distance = pointToSegmentDistanceSquared(point, start, end);
-      if (!best || distance < best.distance) best = { start, end, distance };
+      const projection = projectPointToSegment(point, start, end);
+      const distance = distanceSquared(point, projection.point);
+      if (!best || distance < best.distance) {
+        best = { start, end, distance, projection: projection.point, t: projection.t };
+      }
     }
   }
   return best;
@@ -190,11 +208,36 @@ function createRepresentativePolygon(metadata) {
 function createCoastalCoverageFragment(metadata) {
   const coast = findNearestCoastSegment(metadata.centroid);
   if (!coast) return null;
-  const interior = createInteriorPoint(coast.start, coast.end);
-  if (!interior) return null;
-  const polygon = roundPolygon([coast.start, coast.end, interior]);
-  if (!hasUsablePolygonSamples(polygon)) return null;
-  return polygon;
+
+  const dx = coast.end[0] - coast.start[0];
+  const dy = coast.end[1] - coast.start[1];
+  const length = Math.sqrt(dx * dx + dy * dy) || 1;
+  const tangent = [dx / length, dy / length];
+  const normal = [-tangent[1], tangent[0]];
+  const center = coast.projection;
+
+  // Use a short land-side strip around the nearest physical-coast projection.
+  // The fragment stays within a few thousandths of the authoritative coast,
+  // but its vertices remain strictly inside usable land so the land invariant
+  // never needs an exception for exact boundary points.
+  const halfLength = Math.min(COAST_FRAGMENT_HALF_LENGTH, length / 3);
+  const alongA = [center[0] - tangent[0] * halfLength, center[1] - tangent[1] * halfLength];
+  const alongB = [center[0] + tangent[0] * halfLength, center[1] + tangent[1] * halfLength];
+
+  for (const direction of [1, -1]) {
+    for (let coastOffset = COAST_INTERIOR_OFFSET; coastOffset <= COAST_INTERIOR_SEARCH; coastOffset += COAST_INTERIOR_OFFSET) {
+      const coastA = [alongA[0] + normal[0] * direction * coastOffset, alongA[1] + normal[1] * direction * coastOffset];
+      const coastB = [alongB[0] + normal[0] * direction * coastOffset, alongB[1] + normal[1] * direction * coastOffset];
+      const interior = [
+        center[0] + normal[0] * direction * (coastOffset + COAST_INTERIOR_OFFSET),
+        center[1] + normal[1] * direction * (coastOffset + COAST_INTERIOR_OFFSET),
+      ];
+      const polygon = roundPolygon([coastA, coastB, interior]);
+      if (hasUsablePolygonSamples(polygon)) return polygon;
+    }
+  }
+
+  return null;
 }
 
 export function refineAnatoliaPhase2DCoastline(result) {
