@@ -1,5 +1,6 @@
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../data/AnatoliaPhysicalAtlasRuntime.js";
 import { polygonPath } from "../../rendering/physical/PhysicalGeometryPath.js";
+import { buildCartographicInternalBoundaryPath } from "../../rendering/historical/HistoricalPoliticalBoundary.js";
 import { getHistoricalPoliticalOverlayMode } from "./HistoricalPoliticalOverlayModel";
 
 const HISTORICAL_1300_DATE = "1300-01-01";
@@ -7,8 +8,6 @@ const DEFAULT_POLITICAL_COLOR = "#6f765f";
 const HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID = "historical-anatolia-political-land-clip";
 const HISTORICAL_POLITICAL_CARTOGRAPHIC_FILTER_ID = "historical-political-cartographic-border";
 const COASTAL_POLITICAL_EXPANSION = 0.08;
-const BORDER_KEY_PRECISION = 5;
-const CARTOGRAPHIC_BOW = 0.008;
 
 function buildPathData(polygons) {
   if (!Array.isArray(polygons)) return "";
@@ -24,68 +23,6 @@ function buildPathData(polygons) {
       ].join(" ");
     })
     .filter(Boolean)
-    .join(" ");
-}
-
-function pointKey(point) {
-  return `${Number(point[0]).toFixed(BORDER_KEY_PRECISION)}:${Number(point[1]).toFixed(BORDER_KEY_PRECISION)}`;
-}
-
-function edgeKey(start, end) {
-  const a = pointKey(start);
-  const b = pointKey(end);
-  return a < b ? `${a}|${b}` : `${b}|${a}`;
-}
-
-function deterministicBoundaryBow(key) {
-  let hash = 2166136261;
-  for (let index = 0; index < key.length; index += 1) {
-    hash ^= key.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
-  }
-  const normalized = (hash >>> 0) / 4294967295;
-  return (normalized - 0.5) * 2;
-}
-
-function buildCartographicInternalBoundaryPath(provinces) {
-  const edges = new Map();
-
-  for (const entry of provinces) {
-    for (const polygon of entry?.geometry?.polygons ?? []) {
-      if (!Array.isArray(polygon) || polygon.length < 3) continue;
-      for (let index = 0; index < polygon.length; index += 1) {
-        const start = polygon[index];
-        const end = polygon[(index + 1) % polygon.length];
-        if (!Array.isArray(start) || !Array.isArray(end)) continue;
-        const key = edgeKey(start, end);
-        const current = edges.get(key);
-        if (current) {
-          current.count += 1;
-        } else {
-          edges.set(key, { key, start, end, count: 1 });
-        }
-      }
-    }
-  }
-
-  return [...edges.values()]
-    .filter((edge) => edge.count >= 2)
-    .map(({ key, start, end }) => {
-      const dx = end[0] - start[0];
-      const dy = end[1] - start[1];
-      const length = Math.sqrt(dx * dx + dy * dy) || 1;
-      const normal = [-dy / length, dx / length];
-      const bow = deterministicBoundaryBow(key) * CARTOGRAPHIC_BOW;
-      const oneThird = [
-        start[0] + dx / 3 + normal[0] * bow,
-        start[1] + dy / 3 + normal[1] * bow,
-      ];
-      const twoThirds = [
-        start[0] + (dx * 2) / 3 + normal[0] * bow,
-        start[1] + (dy * 2) / 3 + normal[1] * bow,
-      ];
-      return `M ${start[0]} ${start[1]} C ${oneThird[0]} ${oneThird[1]} ${twoThirds[0]} ${twoThirds[1]} ${end[0]} ${end[1]}`;
-    })
     .join(" ");
 }
 
@@ -245,5 +182,4 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
   );
 }
 
-export { buildCartographicInternalBoundaryPath };
 export default HistoricalPoliticalRegionLayer;
