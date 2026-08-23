@@ -40,11 +40,19 @@ const land = [
   [26.70,41.82],[26.35,41.86],[26.00,41.86],
 ];
 
+// The coarse Anatolia envelope above intentionally stops at the Marmara coast.
+// Keep the Kocaeli/Nicomedia landmass as a separate, coastline-safe polygon so
+// the city remains on land without filling the Marmara Sea or İzmit Gulf.
+const nicomediaLand = [
+  [29.84,40.85],[29.92,40.86],[30.08,40.91],[30.25,40.86],
+  [30.18,40.80],[30.05,40.78],[29.93,40.77],[29.85,40.79],[29.84,40.85],
+];
+
 export const ANATOLIA_PHYSICAL_ATLAS = Object.freeze({
   version: 2,
   projection: "EPSG:4326",
   bbox: [24.0, 34.0, 45.2, 43.2],
-  landPolygons: [land],
+  landPolygons: [land, nicomediaLand],
 
   // Broad water envelopes are deliberately clipped to the physical land mask.
   // This prevents political geometry from ever becoming a sea and lets the
