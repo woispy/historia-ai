@@ -64,6 +64,7 @@ assert.equal(byProvince.get("phrygia-afyon").historicalPolitical.id, "sahibata")
 assert.equal(byProvince.get("bithynia-nicomedia").historicalProvince.coastal, true);
 assert.equal(byProvince.get("pontus-sinop").historicalProvince.port, true);
 assert.equal(byProvince.get("pamphylia-attaleia").historicalPolitical.id, "local_polities");
+assert.equal(byProvince.get("pamphylia-attaleia").historicalProvince.controlStatus, "contested-southern-frontier");
 assert.equal(byProvince.get("cappadocia-nigde").historicalPolitical.id, "karaman");
 assert.equal(byProvince.get("euphrates-malatya").historicalPolitical.id, "ilkhanate");
 assert.equal(byProvince.get("cilicia-adana").historicalPolitical.id, "cilicia");
