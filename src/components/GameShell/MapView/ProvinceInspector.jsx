@@ -1,6 +1,7 @@
 import "./ProvinceInspector.css";
 
 import { createProvincePanelViewModel } from "../../../provinces/presentation/ProvincePanelViewModel.js";
+import { getHistoricalPolity } from "../../../world/map/historical/HistoricalPoliticalRuntime.js";
 
 function valueOrDash(value) {
   if (value === null || value === undefined || value === "") return "—";
@@ -18,9 +19,13 @@ function historicalStatusLabel(value) {
     established: "Yerleşik kontrol",
     "established-emirate": "Yerleşik beylik",
     "established-frontier": "Yerleşik sınır",
+    "established-kingdom": "Yerleşik krallık",
+    "established-empire": "Yerleşik imparatorluk",
+    "established-local-emirate": "Yerleşik yerel emirlik",
     frontier: "Sınır bölgesi",
     "contested-frontier": "Çekişmeli sınır",
     "contested-coast": "Çekişmeli kıyı",
+    "contested-southern-frontier": "Çekişmeli güney sınırı",
     "frontier-emirate": "Sınır emirliği",
     "frontier-conquest": "Fetih sınırı",
     "emerging-emirate": "Yükselen beylik",
@@ -45,6 +50,26 @@ function historicalConfidenceLabel(value) {
   return labels[value] ?? valueOrDash(value);
 }
 
+function terrainLabel(value) {
+  const labels = {
+    coast: "Kıyı",
+    lowland: "Ova",
+    plains: "Ova",
+    valley: "Vadi",
+    "river-valley": "Nehir vadisi",
+    highland: "Yüksek arazi",
+    mountain: "Dağlık",
+    plateau: "Plato",
+    lake: "Göl havzası",
+  };
+  return labels[value] ?? valueOrDash(value);
+}
+
+function polityLabel(id) {
+  if (!id) return "—";
+  return getHistoricalPolity(id)?.name ?? id;
+}
+
 function ProvinceInspector({ province, country, onClose }) {
   const viewModel = createProvincePanelViewModel(province);
   if (!viewModel) return null;
@@ -59,6 +84,7 @@ function ProvinceInspector({ province, country, onClose }) {
   const coastal = province?.coastal ?? province?.geometry?.coastal;
   const port = province?.port ?? province?.geometry?.port;
   const strategic = province?.strategic ?? province?.geometry?.strategic;
+  const terrain = province?.terrain ?? province?.geometry?.terrain ?? viewModel.terrain;
 
   return (
     <aside className="province-inspector" aria-label="Bölge bilgileri">
@@ -85,7 +111,7 @@ function ProvinceInspector({ province, country, onClose }) {
       <dl className="province-inspector__grid">
         <div><dt>Nüfus</dt><dd>{valueOrDash(viewModel.population)}</dd></div>
         <div><dt>Gelişim</dt><dd>{valueOrDash(viewModel.development)}</dd></div>
-        <div><dt>Arazi</dt><dd>{valueOrDash(viewModel.terrain)}</dd></div>
+        <div><dt>Arazi</dt><dd>{terrainLabel(terrain)}</dd></div>
         <div><dt>Vali</dt><dd>{valueOrDash(viewModel.governor)}</dd></div>
         <div><dt>Kale Seviyesi</dt><dd>{valueOrDash(viewModel.fortLevel)}</dd></div>
         <div><dt>Liman</dt><dd>{booleanLabel(port ?? viewModel.hasPort)}</dd></div>
@@ -94,7 +120,7 @@ function ProvinceInspector({ province, country, onClose }) {
         <div><dt>Kültür</dt><dd>{valueOrDash(viewModel.culture)}</dd></div>
         <div><dt>Din</dt><dd>{valueOrDash(viewModel.religion)}</dd></div>
         <div><dt>Stratejik</dt><dd>{booleanLabel(strategic)}</dd></div>
-        <div><dt>Kontrol</dt><dd>{valueOrDash(controller)}</dd></div>
+        <div><dt>1300 Kontrolü</dt><dd>{polityLabel(controller)}</dd></div>
         <div><dt>1300 Durumu</dt><dd>{historicalStatusLabel(historical?.statusAt1300)}</dd></div>
         <div><dt>Tarihsel Güven</dt><dd>{historicalConfidenceLabel(historical?.confidence)}</dd></div>
         <div><dt>Tarihsel Bölge</dt><dd>{valueOrDash(region)}</dd></div>
