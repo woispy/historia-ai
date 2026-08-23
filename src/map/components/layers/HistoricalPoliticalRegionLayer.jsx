@@ -6,6 +6,7 @@ import { getHistoricalPoliticalOverlayMode } from "./HistoricalPoliticalOverlayM
 const HISTORICAL_1300_DATE = "1300-01-01";
 const DEFAULT_POLITICAL_COLOR = "#6f765f";
 const HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID = "historical-anatolia-political-land-clip";
+const HISTORICAL_POLITICAL_CARTOGRAPHIC_FILTER_ID = "historical-political-cartographic-border";
 const COASTAL_POLITICAL_EXPANSION = 0.08;
 
 function buildPathData(polygons) {
@@ -33,6 +34,29 @@ function PoliticalOverlayDefs() {
       <clipPath id={HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID} clipPathUnits="userSpaceOnUse">
         <path d={anatoliaLandPath} fillRule="evenodd" />
       </clipPath>
+      <filter
+        id={HISTORICAL_POLITICAL_CARTOGRAPHIC_FILTER_ID}
+        x="-8%"
+        y="-8%"
+        width="116%"
+        height="116%"
+        colorInterpolationFilters="sRGB"
+      >
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.035 0.09"
+          numOctaves="1"
+          seed="1300"
+          result="cartographicNoise"
+        />
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="cartographicNoise"
+          scale="0.004"
+          xChannelSelector="R"
+          yChannelSelector="G"
+        />
+      </filter>
       <pattern id="historical-suzerainty-hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
         <line x1="0" y1="0" x2="0" y2="10" stroke="rgba(255,255,255,0.30)" strokeWidth="2.5" />
       </pattern>
@@ -149,6 +173,7 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
           vectorEffect="non-scaling-stroke"
           strokeLinejoin="round"
           strokeLinecap="round"
+          filter={`url(#${HISTORICAL_POLITICAL_CARTOGRAPHIC_FILTER_ID})`}
           pointerEvents="none"
           aria-label="Cartographic historical province boundaries"
         />
