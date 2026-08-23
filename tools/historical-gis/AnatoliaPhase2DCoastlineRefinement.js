@@ -122,28 +122,22 @@ function polygonCentroid(polygon) {
   return [longitude / (3 * areaTwice), latitude / (3 * areaTwice)];
 }
 
-function vertexMean(polygon) {
-  if (!Array.isArray(polygon) || polygon.length === 0) return null;
-  const total = polygon.reduce((sum, point) => [sum[0] + point[0], sum[1] + point[1]], [0, 0]);
-  return [total[0] / polygon.length, total[1] / polygon.length];
-}
-
 function translatePolygonToLandAnchor(polygon, anchor) {
-  const mean = vertexMean(polygon);
-  if (!mean || !anchor || !isUsableLandPoint(anchor) || isUsableLandPoint(mean)) return polygon;
-
-  const delta = [anchor[0] - mean[0], anchor[1] - mean[1]];
+  if (!Array.isArray(polygon) || polygon.length < 3 || !anchor) return polygon;
+  const centroid = polygonCentroid(polygon);
+  if (isUsableLandPoint(centroid) || !isUsableLandPoint(anchor)) return polygon;
+  const delta = [anchor[0] - centroid[0], anchor[1] - centroid[1]];
   const translated = polygon.map(([longitude, latitude]) => [longitude + delta[0], latitude + delta[1]]);
-  const translatedCentroid = polygonCentroid(translated);
-  return isUsableLandPoint(translatedCentroid) ? translated : polygon;
+  return isUsableLandPoint(polygonCentroid(translated)) ? translated : polygon;
 }
 
 function reconcilePolygonCentroid(polygon, metadata) {
   if (!Array.isArray(polygon) || polygon.length < 3) return polygon;
   if (polygonArea(polygon) < 0.00005) return polygon;
   const centroid = polygonCentroid(polygon);
-  if (centroid && isUsableLandPoint(centroid)) return polygon;
-  return translatePolygonToLandAnchor(polygon, findUsableRepresentativePoint(metadata?.centroid ?? null));
+  if (isUsableLandPoint(centroid)) return polygon;
+  const representative = findUsableRepresentativePoint(metadata?.centroid ?? null);
+  return translatePolygonToLandAnchor(polygon, representative);
 }
 
 function roundPolygon(polygon) {
@@ -158,8 +152,7 @@ function createRepresentativePolygon(metadata) {
     const angle = (index / 8) * Math.PI * 2;
     return [point[0] + Math.cos(angle) * radius, point[1] + Math.sin(angle) * radius];
   });
-  const centroid = polygonCentroid(polygon);
-  return isUsableLandPoint(centroid) ? roundPolygon(polygon) : null;
+  return isUsableLandPoint(polygonCentroid(polygon)) ? roundPolygon(polygon) : null;
 }
 
 function createCoastalCoverageFragment(metadata) {
@@ -169,9 +162,7 @@ function createCoastalCoverageFragment(metadata) {
   if (!interior) return null;
   const polygon = roundPolygon([coast.start, coast.end, interior]);
   if (polygon.length < 3 || polygonArea(polygon) < EPSILON) return null;
-  const centroid = polygonCentroid(polygon);
-  if (!isUsableLandPoint(centroid)) return null;
-  return polygon;
+  return isUsableLandPoint(polygonCentroid(polygon)) ? polygon : null;
 }
 
 export function refineAnatoliaPhase2DCoastline(result) {
@@ -188,10 +179,7 @@ export function refineAnatoliaPhase2DCoastline(result) {
     const metadata = metadataById.get(geometry?.identity?.provinceId);
     if (!metadata) return geometry;
 
-    let polygons = (geometry.polygons ?? [])
-      .map((polygon) => reconcilePolygonCentroid(polygon, metadata))
-      .filter((polygon) => polygonArea(polygon) < 0.00005 || isUsableLandPoint(polygonCentroid(polygon)));
-
+    let polygons = (geometry.polygons ?? []).map((polygon) => reconcilePolygonCentroid(polygon, metadata));
     if (!polygons.length) {
       const representative = createRepresentativePolygon(metadata);
       if (representative) polygons = [representative];
@@ -219,13 +207,12 @@ export function refineAnatoliaPhase2DCoastline(result) {
     provinces,
     geometries,
     coastlineRefinement: {
-      method: "land-centroid reconciliation plus generated 10m hydrography-safe coastal fragments and representative land fallbacks",
+      method: "land-centroid reconciliation plus generated 10m hydrography-safe coastal fragments",
       clippedByPhysicalLandMask: true,
       clippedByGeneratedHydrography: true,
       coastalProvinceCount: coastalIds.size,
       landCentroidReconciliation: true,
-      landSafePolygonFiltering: true,
-      representativeLandFallbacks: true,
+      sourceProvinceGeometryPreserved: true,
     },
   };
 }
