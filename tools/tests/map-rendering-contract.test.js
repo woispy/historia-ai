@@ -92,10 +92,12 @@ assert.match(gpuLayer, /\}, \[camera, gpuEnabled\]\);/);
 assert.ok(gpuLayer.includes("renderFrame(state, camera, rect.width, rect.height)"));
 assert.ok(gpuLayer.includes("useMemo(") && gpuLayer.includes("[gpuEnabled, provinces, mapStyle]"));
 
-// CPU and GPU political fills have an explicit handoff: only one visible
-// compositor is active after the first GPU frame has rendered.
+// CPU and GPU political fills have an explicit handoff. The dated 1300
+// historical renderer is authoritative and therefore also disables the CPU
+// province fill, while the GPU compositor remains available for other maps.
 assert.ok(worldMap.includes("const gpuProvinceActive = useGpuProvinceFill && textureReady;"));
-assert.ok(worldMap.includes("renderFill={!gpuProvinceActive}"));
+assert.ok(worldMap.includes("renderFill={!isHistoricalPoliticalMap && !gpuProvinceActive}"));
+assert.ok(worldMap.includes("{politicalRegions}"));
 assert.ok(gpuLayer.includes("Handoff happens only after the first GPU frame has been rendered"));
 
 // Strategic corridors/passes/crossings remain data anchors, not base-map
@@ -115,4 +117,4 @@ assert.ok(!cityLayer.includes("fortified &&"));
 assert.ok(!worldMap.includes('phase="base"'));
 assert.ok(!worldMap.includes('phase="water"'));
 
-console.log("Map rendering contract tests passed: one synchronized world, explicit province interaction, one physical coastline authority, and no legacy overlay layers.");
+console.log("Map rendering contract tests passed: one synchronized world, explicit province interaction, one physical coastline authority, historical political compositor handoff, and no legacy overlay layers.");
