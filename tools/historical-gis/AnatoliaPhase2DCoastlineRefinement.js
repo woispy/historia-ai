@@ -1,6 +1,8 @@
 import hydrography from "../../src/map/data/generated/anatolia-hydrography-10m.json" with { type: "json" };
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
+import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
+import { isUsablePhysicalLandPoint } from "../../src/map/rendering/physical/PhysicalLandAuthority.js";
 
 const COAST_INTERIOR_OFFSET = 0.004;
 const COAST_INTERIOR_SEARCH = 0.08;
@@ -14,33 +16,26 @@ function distanceSquared(a, b) {
   return dx * dx + dy * dy;
 }
 
-function pointInPolygon(point, polygon) {
-  let inside = false;
-  const [x, y] = point;
-  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index += 1) {
-    const [xi, yi] = polygon[index];
-    const [xj, yj] = polygon[previous];
-    const intersects = yi > y !== yj > y
-      && x < ((xj - xi) * (y - yi)) / (yj - yi || Number.EPSILON) + xi;
-    if (intersects) inside = !inside;
-  }
-  return inside;
-}
+const SEA_POLYGONS = ANATOLIA_PHYSICAL_ATLAS.seas.map((sea) => sea.coordinates);
+const CHANNEL_POLYGONS = ANATOLIA_PHYSICAL_ATLAS.channels.map((channel) => channel.coordinates);
+const LAKES = ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes;
 
-function pointInLand(point) {
-  return ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon));
+function isUsableLandPoint(point) {
+  return isUsablePhysicalLandPoint(
+    point,
+    ANATOLIA_PHYSICAL_ATLAS.landPolygons,
+    SEA_POLYGONS,
+    CHANNEL_POLYGONS,
+    LAKES,
+  );
 }
 
 function pointInHydrographyWater(point) {
   return hydrography.lakes.some((lake) => (
     Array.isArray(lake.rings)
-      ? lake.rings.some((ring) => pointInPolygon(point, ring))
-      : pointInPolygon(point, lake.coordinates)
+      ? lake.rings.some((ring) => isUsablePhysicalLandPoint(point, [], [], [], [{ rings: [ring] }]) === false)
+      : false
   ));
-}
-
-function isUsableLandPoint(point) {
-  return pointInLand(point) && !pointInHydrographyWater(point);
 }
 
 function findUsableRepresentativePoint(center) {
