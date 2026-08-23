@@ -49,7 +49,7 @@ assert.deepEqual(ANATOLIA_CITY_ATLAS.eskisehir.mapProvinceIds, ["bithynia-sangar
 assert.equal(ANATOLIA_CITY_ATLAS.eskisehir.mapProvinceId, "phrygia-eskisehir");
 
 // Only genuinely unresolved 1300 provinces receive neutral presentation.
-// Ankara, Kayseri, Sivas and Malatya are layered Ilkhanid-suzerainty cases.
+// Ankara, Kayseri, Sivas, Malatya, Erzincan and Erzurum are layered Ilkhanid-suzerainty cases.
 for (const provinceId of ["phrygia-eskisehir", "lydia-smyrna", "pontus-amasya", "pamphylia-attaleia", "lycia-myra", "pisidia-antiochia", "cilicia-alaiye"]) {
   const entry = model.find((item) => item.province.id === provinceId);
   assert.equal(entry.country.id, "local_polities", provinceId);
