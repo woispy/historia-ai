@@ -91,7 +91,8 @@ function addSite(sites, seen, point, provinceId, kind) {
   const rounded = `${Number(point[0]).toFixed(4)}:${Number(point[1]).toFixed(4)}:${provinceId ?? "barrier"}:${kind}`;
   if (seen.has(rounded)) return;
   seen.add(rounded);
-  sites.push({ point, provinceId, kind, weight: provinceId ? (ANATOLIA_PROVINCE_METADATA.find((province) => province.id === provinceId)?.cartographicWeight ?? 0) : 0 });
+  const metadata = provinceId ? ANATOLIA_PROVINCE_METADATA.find((province) => province.id === provinceId) : null;
+  sites.push({ point, provinceId, kind, weight: metadata?.cartographicWeight ?? 0 });
 }
 
 function addDiagnosticLandField(sites, seen) {
@@ -150,10 +151,7 @@ function buildProvinceAnchor(metadata, historicalAnchors) {
   let point = [...metadata.centroid];
   const historical = averagedPoint(historicalAnchors.get(metadata.id) ?? []);
   if (historical && usableLandPoint(historical)) {
-    point = [
-      point[0] * (1 - HISTORICAL_BLEND) + historical[0] * HISTORICAL_BLEND,
-      point[1] * (1 - HISTORICAL_BLEND) + historical[1] * HISTORICAL_BLEND,
-    ];
+    point = [point[0] * (1 - HISTORICAL_BLEND) + historical[0] * HISTORICAL_BLEND, point[1] * (1 - HISTORICAL_BLEND) + historical[1] * HISTORICAL_BLEND];
   }
   if (metadata.terrain === "river-valley") {
     const riverPoint = nearestLinePoint(point, ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers, 1.6);
@@ -215,7 +213,7 @@ function polygonArea(polygon) {
   for (let index = 0; index < polygon.length; index += 1) {
     const current = polygon[index];
     const next = polygon[(index + 1) % polygon.length];
-    area += current[0] * next[1] - next[0] * next[1] + next[0] * current[1] - current[0] * next[1];
+    area += current[0] * next[1] - next[0] * current[1];
   }
   return Math.abs(area) / 2;
 }
@@ -276,10 +274,8 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
   addDiagnosticLandField(sites, seen);
   addPhysicalBarrierField(sites, seen);
   buildPoliticalSites(sites, seen, sourceRegions);
-
   const geometrySites = sites.filter((site) => site.kind === "province-anchor-geographic-historical");
   const polygonsByProvince = Object.fromEntries(ANATOLIA_PROVINCE_METADATA.map((metadata) => [metadata.id, []]));
-
   for (let siteIndex = 0; siteIndex < geometrySites.length; siteIndex += 1) {
     const site = geometrySites[siteIndex];
     const cell = buildVoronoiCell(siteIndex, geometrySites);
@@ -288,7 +284,6 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     if (!usableLandPoint(centroid)) continue;
     polygonsByProvince[site.provinceId].push(roundPolygon(cell));
   }
-
   let fallbackCount = 0;
   const provinces = [];
   const geometries = [];
@@ -301,7 +296,6 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     provinces.push(createProvinceAsset(metadata, polygons));
     geometries.push(createGeometryAsset(metadata, polygons));
   }
-
   return {
     schemaVersion: 1,
     geometryVersion: 4,
