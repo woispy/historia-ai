@@ -74,7 +74,12 @@ function toHistoricalProvince(metadata, date) {
   const controllerId = controllerForDate(metadata, date);
   const isSuzerainty = control?.statusAt1300?.toLowerCase() === "ilkhanid-suzerainty";
   const polityId = isSuzerainty ? null : controllerId;
-  const suzerainPolityId = isSuzerainty ? controllerId : null;
+  // Suzerainty is intentionally layered rather than direct province ownership.
+  // Historical metadata leaves controllerAt1300 null for these records because
+  // no direct local sovereign is being asserted; the presentation layer still
+  // needs the dated suzerain identity so the land receives the correct polity
+  // fill instead of falling back to the neutral local-polities presentation.
+  const suzerainPolityId = isSuzerainty ? (controllerId ?? "ilkhanate") : null;
 
   return {
     id: metadata.id,
