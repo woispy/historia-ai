@@ -40,10 +40,6 @@ function isCanonicalPhysicalLandPoint(point) {
   );
 }
 
-function isUsableLandPoint(point) {
-  return isCanonicalPhysicalLandPoint(point);
-}
-
 function findUsableRepresentativePoint(center) {
   if (!Array.isArray(center)) return null;
   if (isCanonicalPhysicalLandPoint(center)) return [...center];
