@@ -19,7 +19,12 @@ function pointOnSegment(point, start, end, epsilon = 1e-9) {
 function pointInPolygon(point, polygon) {
   let inside = false;
   const [x, y] = point;
-  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index += 1) {
+
+  // IMPORTANT: keep `previous` on the preceding vertex. The former
+  // `previous = index += 1` update advanced both variables to the same index,
+  // turning every tested edge into a zero-length segment and making every
+  // valid anchor appear to be outside the land mask.
+  for (let index = 0, previous = polygon.length - 1; index < polygon.length; index += 1) {
     const current = polygon[index];
     const prior = polygon[previous];
     if (pointOnSegment(point, prior, current)) return true;
@@ -28,6 +33,7 @@ function pointInPolygon(point, polygon) {
     const intersects = yi > y !== yj > y
       && x < ((xj - xi) * (y - yi)) / (yj - yi || Number.EPSILON) + xi;
     if (intersects) inside = !inside;
+    previous = index;
   }
   return inside;
 }
