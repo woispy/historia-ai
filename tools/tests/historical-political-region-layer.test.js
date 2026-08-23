@@ -68,8 +68,8 @@ assert.match(
 );
 assert.match(
   boundarySource,
-  /edge\.count >= 2/,
-  "cartographic boundary construction must render shared province edges rather than coastlines",
+  /edge\.provinceIds\.size >= 2/,
+  "cartographic boundary construction must render only edges shared by different provinces",
 );
 assert.match(
   worldMapSource,
@@ -145,13 +145,23 @@ assert.equal(
 );
 
 const sampleProvinceGeometry = [
-  { geometry: { polygons: [[[0, 0], [1, 0], [1, 1], [0, 1]]] } },
-  { geometry: { polygons: [[[1, 0], [2, 0], [2, 1], [1, 1]]] } },
+  { province: { id: "province-a" }, geometry: { polygons: [[[0, 0], [1, 0], [1, 1], [0, 1]]] } },
+  { province: { id: "province-b" }, geometry: { polygons: [[[1, 0], [2, 0], [2, 1], [1, 1]]] } },
 ];
 const cartographicBoundaryPath = buildCartographicInternalBoundaryPath(sampleProvinceGeometry);
 assert.match(cartographicBoundaryPath, /^M 1 0 C /);
 assert.ok(!cartographicBoundaryPath.includes("M 0 0"), "coast edges must not be promoted to internal province borders");
 assert.ok(cartographicBoundaryPath.includes(" 1 1"), "shared province border must retain its geographic endpoints");
+
+const sameProvinceGeometry = [
+  { province: { id: "province-a" }, geometry: { polygons: [[[0, 0], [1, 0], [1, 1], [0, 1]]] } },
+  { province: { id: "province-a" }, geometry: { polygons: [[[1, 0], [2, 0], [2, 1], [1, 1]]] } },
+];
+assert.equal(
+  buildCartographicInternalBoundaryPath(sameProvinceGeometry),
+  "",
+  "seams between polygons belonging to the same province must remain invisible",
+);
 
 assert.equal(
   historicalAtlas.regions.some((region) => region.id === "anatolia_aydin_pre1308" && region.countryId === "byzantium"),
