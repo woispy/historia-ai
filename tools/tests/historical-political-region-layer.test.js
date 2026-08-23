@@ -20,6 +20,10 @@ const worldMapSource = readFileSync(
   resolve("src/map/components/WorldMap.jsx"),
   "utf8",
 );
+const worldMapHookSource = readFileSync(
+  resolve("src/map/hooks/useWorldMap.js"),
+  "utf8",
+);
 const provinceLayerSource = readFileSync(
   resolve("src/map/components/layers/ProvinceLayer.jsx"),
   "utf8",
@@ -57,7 +61,7 @@ assert.match(
 );
 assert.doesNotMatch(
   layerSource,
-  /HISTORICAL_POLITICAL_CARTOGRAPHIC_FILTER_ID/,
+  /HISTORICAL_POLITICAL_CARTOGRAPHIC_FILTER_ID|feTurbulence|feDisplacementMap/,
   "historical province borders must not rely on noisy SVG displacement filters",
 );
 assert.match(
@@ -84,6 +88,21 @@ assert.match(
   worldMapSource,
   /renderBoundaries=\{!isHistoricalPoliticalMap\}/,
   "modern straight province topology must be disabled when the historical cartographic boundary layer is active",
+);
+assert.match(
+  worldMapHookSource,
+  /historicalControl: historicalProvince\n\s*\? \{/,
+  "historical map entries must expose their 1300 control metadata to the province inspector",
+);
+assert.match(
+  worldMapHookSource,
+  /terrain: geometryMetadata\.terrain/,
+  "historical map entries must hydrate terrain from curated geometry metadata",
+);
+assert.match(
+  worldMapHookSource,
+  /regionId: historicalProvince\?\.regionId/,
+  "historical map entries must hydrate the historical region identifier",
 );
 assert.match(
   provinceLayerSource,
