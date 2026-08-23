@@ -12,8 +12,9 @@ const runtime = createHistoricalPoliticalRuntime({
 });
 
 assert.equal(runtime.date, "1300-01-01");
-assert.equal(runtime.provinces.length, 38);
+assert.equal(runtime.provinces.length, ANATOLIA_PROVINCE_METADATA.length);
 assert.equal(runtime.provincePoliticalStates.length, runtime.provinces.length);
+assert.ok(runtime.provinces.length >= 44, "the historical Anatolia mesh should be materially finer than the original 38-province pass");
 assert.equal(
   runtime.polities.every((polity) => getHistoricalPolityIds().includes(polity.id)),
   true,
@@ -49,17 +50,22 @@ assert.equal(provinceById.get("phrygia-uluborlu").polityId, "hamid");
 assert.equal(provinceById.get("pisidia-egirdir").polityId, "hamid");
 assert.equal(provinceById.get("phrygia-afyon").polityId, "sahibata");
 assert.equal(provinceById.get("lycaonia-konya").polityId, "karaman");
+assert.equal(provinceById.get("cappadocia-nigde").polityId, "karaman");
 assert.equal(provinceById.get("pontus-sinop").polityId, "pervane");
 assert.equal(provinceById.get("pontus-kastamon").polityId, "cobanid");
 assert.equal(provinceById.get("pontus-trebizond").polityId, "trebizond");
 assert.equal(provinceById.get("cilicia-sis").polityId, "cilicia");
+assert.equal(provinceById.get("cilicia-adana").polityId, "cilicia");
 assert.equal(provinceById.get("ionia-ayasuluk").polityId, "byzantium");
 assert.equal(provinceById.get("lydia-birgi").polityId, "byzantium");
+assert.equal(provinceById.get("euphrates-malatya").polityId, "ilkhanate");
 
 assert.equal(provinceById.get("bithynia-nicomedia").coastal, true);
 assert.equal(provinceById.get("pontus-sinop").coastal, true);
 assert.equal(provinceById.get("lydia-magnesia").coastal, false);
 assert.equal(provinceById.get("bithynia-nicomedia").port, true);
+assert.equal(provinceById.get("pamphylia-attaleia").coastal, true);
+assert.equal(provinceById.get("pamphylia-attaleia").port, true);
 
 assert.equal(politicalStateByProvinceId.get("ionia-ayasuluk").controlStatus, "Byzantine-coastal-before-1304");
 assert.equal(politicalStateByProvinceId.get("phrygia-denizli").controlConfidence, "high");
@@ -67,6 +73,7 @@ assert.equal(politicalStateByProvinceId.get("phrygia-afyon").controlStatus, "est
 assert.equal(politicalStateByProvinceId.get("pontus-kastamon").controlStatus, "Cobanoid-local-rule");
 assert.equal(politicalStateByProvinceId.get("phrygia-eskisehir").sovereignPolityId, null);
 assert.equal(politicalStateByProvinceId.get("cappadocia-kayseri").suzeraintyPolityId, "ilkhanate");
+assert.equal(politicalStateByProvinceId.get("euphrates-malatya").suzeraintyPolityId, "ilkhanate");
 
 assert.equal(getHistoricalPolity("inanc").type, "polity");
 assert.equal(getHistoricalPolity("hamid").type, "polity");
