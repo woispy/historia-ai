@@ -32,12 +32,17 @@ function pointInWater(point) {
 assert.equal(ANATOLIA_PROVINCE_METADATA.length, 44);
 
 const ids = new Set();
+const failedLandAnchors = [];
 for (const province of ANATOLIA_PROVINCE_METADATA) {
   assert.equal(ids.has(province.id), false, `${province.id} must have a unique id`);
   ids.add(province.id);
-  assert.equal(pointInLand(province.centroid), true, `${province.id} cartographic centroid must remain on land`);
+  const onLand = pointInLand(province.centroid);
+  if (!onLand) failedLandAnchors.push({ id: province.id, centroid: province.centroid });
+  assert.equal(onLand, true, `${province.id} cartographic centroid must remain on land`);
   assert.equal(pointInWater(province.centroid), false, `${province.id} cartographic centroid must not fall in water`);
 }
+
+assert.deepEqual(failedLandAnchors, [], "all 44 cartographic anchors must resolve inside the physical Anatolia land mask");
 
 const aegean = ANATOLIA_PROVINCE_METADATA
   .filter((province) => province.regionId === "aegean-west")
