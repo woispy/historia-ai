@@ -3,7 +3,7 @@ import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhys
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 import { ANATOLIA_CITY_ATLAS } from "../../src/map/data/AnatoliaCityAtlas.js";
 import {
-  isPhysicalLandPoint,
+  isPhysicalLandPoint as isPhysicalLandPointAuthority,
   isUsablePhysicalLandPoint,
 } from "../../src/map/rendering/physical/PhysicalLandAuthority.js";
 
@@ -226,7 +226,7 @@ function polygonArea(polygon) {
   for (let index = 0; index < polygon.length; index += 1) {
     const current = polygon[index];
     const next = polygon[(index + 1) % polygon.length];
-    area += current[0] * next[1] - next[0] * current[1];
+    area += current[0] * next[1] - next[0] * next[1];
   }
   return Math.abs(area) / 2;
 }
@@ -502,4 +502,6 @@ export function isAnatoliaGeometryPoint(point) {
   return latitude <= 42.20;
 }
 
-export { isPhysicalLandPoint };
+export function isPhysicalLandPoint(point, landPolygons = ANATOLIA_PHYSICAL_ATLAS.landPolygons, lakes = LAKES) {
+  return isPhysicalLandPointAuthority(point, landPolygons, lakes);
+}
