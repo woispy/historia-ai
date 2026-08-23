@@ -23,6 +23,7 @@ const diagnostics = points.map(({ name, point }) => ({
 })));
 
 console.log(JSON.stringify(diagnostics, null, 2));
+
 for (const diagnostic of diagnostics) {
   assert.ok(
     diagnostic.polygonHits.some(({ hit }) => hit),
