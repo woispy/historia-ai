@@ -50,6 +50,7 @@ on:
       - feat/historical-political-map-v1
       - feat/p1-historical-political-map-foundation
       - feat/p1-historical-political-map-geographic-province-rework
+      - p2-global-political-coverage
 
 jobs:
   validate:
