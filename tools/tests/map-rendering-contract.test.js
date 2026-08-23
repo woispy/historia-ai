@@ -100,6 +100,11 @@ assert.ok(worldMap.includes("renderFill={!isHistoricalPoliticalMap && !gpuProvin
 assert.ok(worldMap.includes("{politicalRegions}"));
 assert.ok(gpuLayer.includes("Handoff happens only after the first GPU frame has been rendered"));
 
+// Historical political presentation is explicitly connected at the render root.
+assert.ok(worldMap.includes("HistoricalPoliticalRegionLayer"));
+assert.ok(worldMap.includes("const isHistoricalPoliticalMap = scenarioDate === HISTORICAL_1300_DATE;"));
+assert.ok(worldMap.includes("const useGpuProvinceFill = !isHistoricalPoliticalMap"));
+
 // Strategic corridors/passes/crossings remain data anchors, not base-map
 // decorations. Their old coloured line/dot renderer must stay disabled.
 assert.ok(!cartographyLayer.includes("ANATOLIA_STRATEGIC_CORRIDORS"));
