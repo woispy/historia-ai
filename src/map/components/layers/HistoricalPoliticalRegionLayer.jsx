@@ -2,11 +2,14 @@ import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../data/AnatoliaPhysicalAtla
 import { polygonPath } from "../../rendering/physical/PhysicalGeometryPath.js";
 import { buildCartographicInternalBoundaryPath } from "../../rendering/historical/HistoricalPoliticalBoundary.js";
 import { getHistoricalPoliticalOverlayMode } from "./HistoricalPoliticalOverlayModel";
+import { HISTORICAL_POLITICAL_COVERAGE_CONTRACT, assertHistoricalPoliticalCoverageContract } from "../../../world/map/historical/HistoricalPoliticalCoverageContract.js";
 
 const HISTORICAL_1300_DATE = "1300-01-01";
 const DEFAULT_POLITICAL_COLOR = "#6f765f";
-const HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID = "historical-anatolia-political-land-clip";
+const HISTORICAL_POLITICAL_WORLD_LAND_CLIP_ID = HISTORICAL_POLITICAL_COVERAGE_CONTRACT.landClip;
 const COASTAL_POLITICAL_EXPANSION = 0.08;
+
+assertHistoricalPoliticalCoverageContract(HISTORICAL_POLITICAL_COVERAGE_CONTRACT);
 
 function buildPathData(polygons) {
   if (!Array.isArray(polygons)) return "";
@@ -30,7 +33,7 @@ function PoliticalOverlayDefs() {
 
   return (
     <defs>
-      <clipPath id={HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID} clipPathUnits="userSpaceOnUse">
+      <clipPath id={HISTORICAL_POLITICAL_WORLD_LAND_CLIP_ID} clipPathUnits="userSpaceOnUse">
         <path d={anatoliaLandPath} fillRule="evenodd" />
       </clipPath>
       <pattern id="historical-suzerainty-hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
@@ -61,9 +64,9 @@ function getPoliticalFillOpacity(mode) {
 
 function getPoliticalClipPath(entry) {
   if (entry?.historicalProvince?.geometryAuthority === "anatolia-curated") {
-    return `url(#${HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID})`;
+    return `url(#${HISTORICAL_POLITICAL_WORLD_LAND_CLIP_ID})`;
   }
-  return "url(#world-land-mask)";
+  return `url(#${HISTORICAL_POLITICAL_WORLD_LAND_CLIP_ID})`;
 }
 
 function isCoastalCuratedProvince(entry) {
@@ -79,7 +82,7 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
   return (
     <g pointerEvents="none">
       <PoliticalOverlayDefs />
-      <g clipPath="url(#world-land-mask)">
+      <g clipPath={`url(#${HISTORICAL_POLITICAL_WORLD_LAND_CLIP_ID})`}>
         <rect
           x="-180"
           y="-90"
@@ -150,7 +153,7 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
           strokeLinejoin="round"
           strokeLinecap="round"
           pointerEvents="none"
-          clipPath="url(#world-land-mask)"
+          clipPath={`url(#${HISTORICAL_POLITICAL_WORLD_LAND_CLIP_ID})`}
           aria-label="Cartographic historical province boundaries"
         />
       )}
