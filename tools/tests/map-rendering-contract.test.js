@@ -18,6 +18,7 @@ const cameraController = read("src/map/camera/CameraController.jsx");
 const cartographyLayer = read("src/map/components/layers/CartographyLayer.jsx");
 const cityLayer = read("src/map/components/layers/CityLayer.jsx");
 const physicalLayer = read("src/map/components/layers/WorldPhysicalLayer.jsx");
+const historicalPoliticalLayer = read("src/map/components/layers/HistoricalPoliticalRegionLayer.jsx");
 
 // One physical coastline authority and one map viewport. The game viewport
 // must not mount a second legacy/far-zoom map or empty overlay map layers.
@@ -54,6 +55,15 @@ assert.match(svgRenderer, /WORLD_LAND_PATH/);
 assert.match(provinceLayer, /clipPath="url\(#world-land-mask\)"/);
 assert.match(physicalLayer, /WORLD_LAND_PATH/);
 assert.match(physicalLayer, /WORLD_PHYSICAL_ATLAS\.water\.fill/);
+
+// The historical political compositor must own its own global land clip.
+// It cannot depend on a sibling renderer's clipPath definition or disappear
+// when SVG definition ordering changes.
+assert.ok(historicalPoliticalLayer.includes("import { WORLD_LAND_PATH } from \"../../physical/WorldPhysicalAtlas.js\";"));
+assert.ok(historicalPoliticalLayer.includes("historical-world-political-land-clip"));
+assert.ok(historicalPoliticalLayer.includes("<path d={WORLD_LAND_PATH} fillRule=\"evenodd\" />"));
+assert.ok(historicalPoliticalLayer.includes("clipPath={`url(#${HISTORICAL_WORLD_POLITICAL_CLIP_ID})`}"));
+assert.ok(!historicalPoliticalLayer.includes('clipPath="url(#world-land-mask)"'));
 
 // Province paths are explicit interaction surfaces. This remains true when
 // GPU compositing hides the CPU fill; transparent pixels must still be clickable.
