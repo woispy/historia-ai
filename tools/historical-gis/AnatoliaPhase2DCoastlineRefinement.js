@@ -141,8 +141,8 @@ function translatePolygonToLandAnchor(polygon, anchor) {
 function reconcilePolygonCentroid(polygon, metadata) {
   if (!Array.isArray(polygon) || polygon.length < 3) return polygon;
   if (polygonArea(polygon) < 0.00005) return polygon;
-  const mean = vertexMean(polygon);
-  if (mean && isUsableLandPoint(mean)) return polygon;
+  const centroid = polygonCentroid(polygon);
+  if (centroid && isUsableLandPoint(centroid)) return polygon;
   return translatePolygonToLandAnchor(polygon, metadata?.centroid ?? null);
 }
 
@@ -178,16 +178,21 @@ export function refineAnatoliaPhase2DCoastline(result) {
     const metadata = metadataById.get(geometry?.identity?.provinceId);
     if (!metadata) return geometry;
 
-    const landReconciledPolygons = (geometry.polygons ?? [])
+    const reconciledPolygons = (geometry.polygons ?? [])
       .map((polygon) => reconcilePolygonCentroid(polygon, metadata));
 
+    const landSafePolygons = reconciledPolygons.filter((polygon) => {
+      if (polygonArea(polygon) < 0.00005) return true;
+      return isUsableLandPoint(polygonCentroid(polygon));
+    });
+
     if (!coastalIds.has(geometry?.identity?.provinceId)) {
-      return { ...geometry, polygons: landReconciledPolygons };
+      return { ...geometry, polygons: landSafePolygons };
     }
 
     const fragment = createCoastalCoverageFragment(metadata);
-    if (!fragment) return { ...geometry, polygons: landReconciledPolygons };
-    return { ...geometry, polygons: [...landReconciledPolygons, fragment] };
+    if (!fragment) return { ...geometry, polygons: landSafePolygons };
+    return { ...geometry, polygons: [...landSafePolygons, fragment] };
   });
 
   const polygonsById = new Map(
@@ -209,11 +214,12 @@ export function refineAnatoliaPhase2DCoastline(result) {
     provinces,
     geometries,
     coastlineRefinement: {
-      method: "land-centroid reconciliation plus coastal province anchor fragments with generated 10m hydrography exclusion",
+      method: "land-centroid reconciliation plus generated 10m hydrography-safe coastal fragments",
       clippedByPhysicalLandMask: true,
       clippedByGeneratedHydrography: true,
       coastalProvinceCount: coastalIds.size,
       landCentroidReconciliation: true,
+      landSafePolygonFiltering: true,
     },
   };
 }
