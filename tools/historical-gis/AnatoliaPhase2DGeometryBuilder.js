@@ -46,16 +46,6 @@ function usableLandPoint(point) {
   return pointInLand(point) && !pointInWater(point);
 }
 
-function pointToSegmentDistanceSquared(point, start, end) {
-  const dx = end[0] - start[0];
-  const dy = end[1] - start[1];
-  if (dx === 0 && dy === 0) return distanceSquared(point, start);
-  const t = Math.max(0, Math.min(1, (
-    (point[0] - start[0]) * dx + (point[1] - start[1]) * dy
-  ) / (dx * dx + dy * dy)));
-  return distanceSquared(point, [start[0] + dx * t, start[1] + dy * t]);
-}
-
 function nearestLinePoint(point, lines, maxDistance = Number.POSITIVE_INFINITY) {
   let best = null;
   let bestDistance = maxDistance * maxDistance;
@@ -107,8 +97,6 @@ function addSite(sites, seen, point, provinceId, kind) {
 }
 
 function addDiagnosticLandField(sites, seen) {
-  // Dense physical sampling remains available for coverage diagnostics, but
-  // these points never compete in the political Voronoi tessellation.
   for (let longitude = BBOX[0]; longitude <= BBOX[2] + EPSILON; longitude += DIAGNOSTIC_GRID_STEP) {
     for (let latitude = BBOX[1]; latitude <= BBOX[3] + EPSILON; latitude += DIAGNOSTIC_GRID_STEP) {
       const point = [Number(longitude.toFixed(5)), Number(latitude.toFixed(5))];
@@ -118,8 +106,6 @@ function addDiagnosticLandField(sites, seen) {
 }
 
 function addPhysicalBarrierField(sites, seen) {
-  // Coast and lake samples are validation/coverage controls, not political
-  // competitors. This prevents physical detail from fragmenting provinces.
   for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
     if (!Array.isArray(polygon) || polygon.length < 2) continue;
     for (let index = 0; index < polygon.length; index += 1) {
@@ -131,8 +117,7 @@ function addPhysicalBarrierField(sites, seen) {
       const steps = Math.max(1, Math.ceil(length / COAST_GUARD_STEP));
       for (let step = 0; step <= steps; step += 1) {
         const t = step / steps;
-        const point = [start[0] + dx * t, start[1] + dy * t];
-        addSite(sites, seen, point, null, "coastline-barrier");
+        addSite(sites, seen, [start[0] + dx * t, start[1] + dy * t], null, "coastline-barrier");
       }
     }
   }
@@ -140,7 +125,8 @@ function addPhysicalBarrierField(sites, seen) {
   for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) {
     for (const ring of lake.rings ?? [lake.coordinates]) {
       if (!Array.isArray(ring) || ring.length < 2) continue;
-      for (let index = 0; index < ring.length; index += Math.max(1, Math.floor(ring.length / 12))) {
+      const stride = Math.max(1, Math.floor(ring.length / 12));
+      for (let index = 0; index < ring.length; index += stride) {
         addSite(sites, seen, ring[index], null, "lake-barrier");
       }
     }
@@ -183,9 +169,6 @@ function buildProvinceAnchor(metadata, historicalAnchors) {
     ];
   }
 
-  // Major river valleys are natural separators and settlement corridors. For
-  // provinces explicitly tagged as river-valley, bias the seed gently toward
-  // the nearest 10m river without letting hydrography create new provinces.
   if (metadata.terrain === "river-valley") {
     const riverPoint = nearestLinePoint(point, ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers, 1.6);
     if (riverPoint && usableLandPoint(riverPoint)) {
@@ -196,8 +179,7 @@ function buildProvinceAnchor(metadata, historicalAnchors) {
     }
   }
 
-  if (usableLandPoint(point)) return point;
-  return metadata.centroid;
+  return usableLandPoint(point) ? point : metadata.centroid;
 }
 
 function buildPoliticalSites(sites, seen, sourceRegions) {
