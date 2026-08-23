@@ -1,12 +1,9 @@
-import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../data/AnatoliaPhysicalAtlasRuntime.js";
 import { WORLD_LAND_PATH } from "../../physical/WorldPhysicalAtlas.js";
-import { polygonPath } from "../../rendering/physical/PhysicalGeometryPath.js";
 import { getHistoricalPoliticalOverlayMode } from "./HistoricalPoliticalOverlayModel";
 
 const HISTORICAL_1300_DATE = "1300-01-01";
 const DEFAULT_POLITICAL_COLOR = "#6f765f";
 const HISTORICAL_WORLD_POLITICAL_CLIP_ID = "historical-world-political-land-clip";
-const HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID = "historical-anatolia-political-land-clip";
 const COASTAL_POLITICAL_EXPANSION = 0.08;
 
 function buildPathData(polygons) {
@@ -27,15 +24,10 @@ function buildPathData(polygons) {
 }
 
 function PoliticalOverlayDefs() {
-  const anatoliaLandPath = polygonPath(ANATOLIA_PHYSICAL_ATLAS_RUNTIME.landPolygons);
-
   return (
     <defs>
       <clipPath id={HISTORICAL_WORLD_POLITICAL_CLIP_ID} clipPathUnits="userSpaceOnUse">
         <path d={WORLD_LAND_PATH} fillRule="evenodd" />
-      </clipPath>
-      <clipPath id={HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID} clipPathUnits="userSpaceOnUse">
-        <path d={anatoliaLandPath} fillRule="evenodd" />
       </clipPath>
       <pattern id="historical-suzerainty-hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
         <line x1="0" y1="0" x2="0" y2="10" stroke="rgba(255,255,255,0.30)" strokeWidth="2.5" />
@@ -57,32 +49,22 @@ function getPoliticalColor(entry) {
 }
 
 function getPoliticalFillOpacity(mode) {
-  if (mode === "neutral") return 0.72;
-  if (mode === "contested") return 0.82;
-  if (mode === "suzerainty") return 0.88;
-  return 0.90;
+  if (mode === "neutral") return 0.78;
+  if (mode === "contested") return 0.86;
+  if (mode === "suzerainty") return 0.90;
+  return 0.94;
 }
 
-function getPoliticalClipPath(entry) {
-  // Only the curated Phase 2D Anatolia provinces use the dedicated physical
-  // atlas. Source-derived historical GIS regions use the same global land
-  // authority as the physical map.
-  if (entry?.historicalProvince?.geometryAuthority === "anatolia-curated") {
-    return `url(#${HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID})`;
-  }
-  return `url(#${HISTORICAL_WORLD_POLITICAL_CLIP_ID})`;
-}
-
-function isCoastalCuratedProvince(entry) {
-  return entry?.historicalProvince?.geometryAuthority === "anatolia-curated"
-    && (entry?.historicalProvince?.coastal === true || entry?.historicalProvince?.port === true);
+function isCoastalProvince(entry) {
+  return entry?.historicalProvince?.coastal === true
+    || entry?.historicalProvince?.port === true;
 }
 
 function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces = [] }) {
   if (date !== HISTORICAL_1300_DATE) return null;
 
   return (
-    <g pointerEvents="none">
+    <g pointerEvents="none" aria-label="1300 historical political map">
       <PoliticalOverlayDefs />
       <g clipPath={`url(#${HISTORICAL_WORLD_POLITICAL_CLIP_ID})`}>
         <rect
@@ -91,60 +73,59 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
           width="360"
           height="180"
           fill={DEFAULT_POLITICAL_COLOR}
-          fillOpacity="0.24"
+          fillOpacity="0.18"
           aria-label="Historical unassigned land presentation"
         />
-      </g>
-      {provinces.map((entry) => {
-        const d = buildPathData(entry?.geometry?.polygons);
-        if (!d) return null;
+        {provinces.map((entry) => {
+          const d = buildPathData(entry?.geometry?.polygons);
+          if (!d) return null;
 
-        const mode = getHistoricalPoliticalOverlayMode(entry);
-        const color = getPoliticalColor(entry);
-        const pattern = mode === "suzerainty"
-          ? "url(#historical-suzerainty-hatch)"
-          : mode === "contested"
-            ? "url(#historical-contested-hatch)"
-            : mode === "neutral"
-              ? "url(#historical-neutral-hatch)"
-              : null;
-        const clipPath = getPoliticalClipPath(entry);
-        const coastal = isCoastalCuratedProvince(entry);
+          const mode = getHistoricalPoliticalOverlayMode(entry);
+          const color = getPoliticalColor(entry);
+          const pattern = mode === "suzerainty"
+            ? "url(#historical-suzerainty-hatch)"
+            : mode === "contested"
+              ? "url(#historical-contested-hatch)"
+              : mode === "neutral"
+                ? "url(#historical-neutral-hatch)"
+                : null;
+          const coastal = isCoastalProvince(entry);
 
-        return (
-          <g key={entry?.province?.id ?? entry?.historicalProvince?.id} clipPath={clipPath}>
-            {coastal && (
+          return (
+            <g key={entry?.province?.id ?? entry?.historicalProvince?.id}>
+              {coastal && (
+                <path
+                  d={d}
+                  fill={color}
+                  fillOpacity={getPoliticalFillOpacity(mode)}
+                  stroke={color}
+                  strokeWidth={COASTAL_POLITICAL_EXPANSION}
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                  aria-hidden="true"
+                />
+              )}
               <path
                 d={d}
                 fill={color}
                 fillOpacity={getPoliticalFillOpacity(mode)}
-                stroke={color}
-                strokeWidth={COASTAL_POLITICAL_EXPANSION}
+                stroke="rgba(24,30,24,0.55)"
+                strokeWidth="0.52"
+                vectorEffect="non-scaling-stroke"
                 strokeLinejoin="round"
-                strokeLinecap="round"
-                aria-hidden="true"
               />
-            )}
-            <path
-              d={d}
-              fill={color}
-              fillOpacity={getPoliticalFillOpacity(mode)}
-              stroke="rgba(24,30,24,0.48)"
-              strokeWidth="0.52"
-              vectorEffect="non-scaling-stroke"
-              strokeLinejoin="round"
-            />
-            {pattern && (
-              <path
-                d={d}
-                fill={pattern}
-                fillOpacity={mode === "neutral" ? 0.42 : 0.55}
-                stroke="none"
-              />
-            )}
-          </g>
-        );
-      })}
+              {pattern && (
+                <path
+                  d={d}
+                  fill={pattern}
+                  fillOpacity={mode === "neutral" ? 0.48 : 0.58}
+                  stroke="none"
+                />
+              )}
+            </g>
+          );
+        })}
+      </g>
     </g>
   );
 }
