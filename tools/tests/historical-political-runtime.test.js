@@ -58,7 +58,11 @@ assert.equal(provinceById.get("cilicia-sis").polityId, "cilicia");
 assert.equal(provinceById.get("cilicia-adana").polityId, "cilicia");
 assert.equal(provinceById.get("ionia-ayasuluk").polityId, "byzantium");
 assert.equal(provinceById.get("lydia-birgi").polityId, "byzantium");
-assert.equal(provinceById.get("euphrates-malatya").polityId, "ilkhanate");
+
+// Ilkhanid suzerainty is layered above local/direct political control;
+// it must not be encoded as direct province ownership.
+assert.equal(provinceById.get("euphrates-malatya").polityId, null);
+assert.equal(provinceById.get("euphrates-malatya").suzerainPolityId, "ilkhanate");
 
 assert.equal(provinceById.get("bithynia-nicomedia").coastal, true);
 assert.equal(provinceById.get("pontus-sinop").coastal, true);
