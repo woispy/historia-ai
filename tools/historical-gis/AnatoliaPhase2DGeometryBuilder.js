@@ -1,6 +1,7 @@
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
+import { ANATOLIA_CITY_ATLAS } from "../../src/map/data/AnatoliaCityAtlas.js";
 
 const BBOX = [25.45, 35.72, 44.85, 42.35];
 const EPSILON = 1e-8;
@@ -162,10 +163,13 @@ function findUsableLandPoint(point) {
 }
 
 function buildProvinceAnchor(metadata, historicalAnchors) {
-  let point = [...metadata.centroid];
-  const historical = averagedPoint(historicalAnchors.get(metadata.id) ?? []);
-  if (historical && usableLandPoint(historical)) {
-    point = [point[0] * (1 - HISTORICAL_BLEND) + historical[0] * HISTORICAL_BLEND, point[1] * (1 - HISTORICAL_BLEND) + historical[1] * HISTORICAL_BLEND];
+  const historicalCity = ANATOLIA_CITY_ATLAS[metadata.cityId];
+  let point = Array.isArray(historicalCity) ? [...historicalCity] : [...metadata.centroid];
+  if (!Array.isArray(historicalCity)) {
+    const historical = averagedPoint(historicalAnchors.get(metadata.id) ?? []);
+    if (historical && usableLandPoint(historical)) {
+      point = [point[0] * (1 - HISTORICAL_BLEND) + historical[0] * HISTORICAL_BLEND, point[1] * (1 - HISTORICAL_BLEND) + historical[1] * HISTORICAL_BLEND];
+    }
   }
   if (metadata.terrain === "river-valley") {
     const riverPoint = nearestLinePoint(point, ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers, 1.6);
@@ -356,12 +360,20 @@ function roundPolygon(polygon) {
 }
 
 function createFallback(metadata) {
-  const center = findUsableLandPoint(metadata.centroid) ?? metadata.centroid;
+  const city = ANATOLIA_CITY_ATLAS[metadata.cityId];
+  const anchor = city && Array.isArray(city.x) ? city.x : [city?.x, city?.y];
+  const center = findUsableLandPoint(anchor) ?? findUsableLandPoint(metadata.centroid) ?? metadata.centroid;
   const radius = 0.035;
-  return roundPolygon(Array.from({ length: 8 }, (_, index) => {
+  const polygon = Array.from({ length: 8 }, (_, index) => {
     const angle = index / 8 * Math.PI * 2;
     return [center[0] + Math.cos(angle) * radius, center[1] + Math.sin(angle) * radius];
-  }));
+  });
+  const centroid = polygonVertexCentroid(polygon);
+  if (usableLandPoint(centroid)) return roundPolygon(polygon);
+  const repaired = findUsableLandPoint(center);
+  if (!repaired) return roundPolygon(polygon);
+  const delta = [repaired[0] - centroid[0], repaired[1] - centroid[1]];
+  return roundPolygon(polygon.map(([longitude, latitude]) => [longitude + delta[0], latitude + delta[1]]));
 }
 
 function createProvinceAsset(metadata, polygons) {
