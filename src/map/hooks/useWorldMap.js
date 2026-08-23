@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { getProvinces } from "../../provinces";
 import { getCities } from "../../cities";
-import { getGeometry } from "../../world/map/geometry";
+import { getGeometries, getGeometry } from "../../world/map/geometry";
 import { loadHistoricalGeometryRepository } from "../../world/map/geometry/loader/index.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../data/AnatoliaProvinceMetadata.js";
 import { createHistoricalPoliticalMapModel } from "../../world/map/historical/HistoricalPoliticalMapModel";
@@ -51,15 +51,29 @@ function resolveGeometryRepository(gameSession, date) {
   return loadHistoricalGeometryRepository(date) ?? sourceRepository;
 }
 
+function createHistoricalWorldRegions(geometryRepository, date) {
+  if (date !== HISTORICAL_1300_DATE || !geometryRepository) return [];
+
+  return getGeometries(geometryRepository)
+    .filter((geometry) => Array.isArray(geometry?.polygons) && geometry.polygons.length > 0)
+    .map((geometry) => ({
+      id: geometry.id ?? geometry.identity?.id ?? null,
+      geometry,
+      subject: geometry.metadata?.subject ?? null,
+      sourceName: geometry.metadata?.name ?? geometry.identity?.name ?? null,
+      borderPrecision: geometry.metadata?.borderPrecision ?? 1,
+    }));
+}
+
 export function useWorldMap(gameSession) {
   return useMemo(() => {
-    if (!gameSession) return { provinces: [], cities: [] };
+    if (!gameSession) return { provinces: [], cities: [], historicalRegions: [] };
 
     const provinceRepository = gameSession.world.repositories.provinces;
     const cityRepository = gameSession.world.repositories.cities;
     const countryRepository = gameSession.world.repositories.countries;
-    const geometryRepository = resolveGeometryRepository(gameSession, getScenarioStartDate(gameSession));
     const date = getScenarioStartDate(gameSession);
+    const geometryRepository = resolveGeometryRepository(gameSession, date);
     const sourceProvinces = getProvinces(provinceRepository);
     const historicalSourceProvinces = createHistoricalAnatoliaProvinceFallbacks(
       sourceProvinces,
@@ -99,8 +113,9 @@ export function useWorldMap(gameSession) {
         };
     });
 
+    const historicalRegions = createHistoricalWorldRegions(geometryRepository, date);
     const cities = getCities(cityRepository);
 
-    return { provinces, cities };
+    return { provinces, cities, historicalRegions };
   }, [gameSession]);
 }
