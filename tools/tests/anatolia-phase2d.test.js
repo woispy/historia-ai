@@ -15,7 +15,7 @@ const result = refineAnatoliaPhase2DCoastline(buildAnatoliaPhase2DAssets([
 
 assert.equal(result.historicalDate, "1300-01-01");
 assert.equal(result.provinceCount, ANATOLIA_PROVINCE_METADATA.length);
-assert.equal(result.provinceCount, 38);
+assert.equal(result.provinceCount, 44);
 console.log(`Phase 2D cartographic site count: ${result.siteCount}`);
 assert.ok(result.siteCount >= 1000, "Phase 2D must use a dense physical/cartographic site field");
 assert.ok(result.barrierSiteCount >= 300, "Phase 2D must include a substantial physical water/coast barrier field");
