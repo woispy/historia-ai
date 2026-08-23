@@ -1,0 +1,81 @@
+/**
+ * 1300 Anatolia cartographic centroid corrections.
+ *
+ * These are presentation-geography anchors, not claims of cadastral borders.
+ * They deliberately separate the province's historical identity from the point
+ * used by the cartographic tessellation. The goal is to keep neighbouring
+ * provinces legible at game-map scale while respecting the real terrain,
+ * coastlines, lakes and historically meaningful regional centres.
+ */
+
+const CARTOGRAPHIC_CENTROIDS = Object.freeze({
+  "bithynia-nicomedia": [29.98, 40.72],
+  "bithynia-nicaea": [29.73, 40.48],
+  "bithynia-prusa": [29.08, 40.20],
+  "bithynia-sangarios": [30.62, 40.03],
+  "phrygia-sogut": [30.00, 40.06],
+  "phrygia-bilecik": [30.20, 40.24],
+  "phrygia-eskisehir": [30.66, 39.78],
+
+  "mysia-balikesir": [27.91, 39.64],
+  "mysia-pergamon": [27.22, 39.18],
+
+  "lydia-magnesia": [27.48, 38.66],
+  "lydia-smyrna": [27.17, 38.46],
+  "ionia-ayasuluk": [27.62, 38.02],
+  "lydia-birgi": [28.20, 38.20],
+  "caria-tralleis": [28.00, 37.90],
+
+  "caria-mylasa": [27.78, 37.33],
+  "caria-pecin": [27.58, 37.26],
+  "caria-halikarnassos": [27.43, 37.04],
+
+  "phrygia-denizli": [29.16, 37.76],
+  "phrygia-uluborlu": [30.38, 38.10],
+  "pisidia-egirdir": [30.86, 37.96],
+  "phrygia-afyon": [30.63, 38.76],
+  "pisidia-beysehir": [31.72, 37.62],
+  "phrygia-kutahya": [29.92, 39.40],
+
+  "galatia-ankara": [32.92, 39.92],
+  "cappadocia-kayseri": [35.55, 38.73],
+  "cappadocia-sivas": [37.20, 39.72],
+  "lycaonia-konya": [32.48, 37.92],
+  "lycaonia-larende": [33.28, 37.18],
+
+  "pontus-sinop": [35.18, 41.98],
+  "pontus-amisos": [36.38, 41.30],
+  "pontus-amasya": [35.82, 40.66],
+  "pontus-kastamon": [33.70, 41.40],
+});
+
+function isTekeOrAntalya(id) {
+  const value = String(id ?? "").toLowerCase();
+  return value.includes("teke") || value.includes("antalya") || value.includes("attaleia");
+}
+
+function isLikelyCappadocianEast(id) {
+  const value = String(id ?? "").toLowerCase();
+  return value.includes("malatya") || value.includes("erzincan") || value.includes("divrigi");
+}
+
+export function applyAnatoliaProvinceCartographicOverrides(metadata) {
+  for (const province of metadata ?? []) {
+    const explicit = CARTOGRAPHIC_CENTROIDS[province.id];
+    if (explicit) {
+      province.centroid = [...explicit];
+      continue;
+    }
+
+    if (isTekeOrAntalya(province.id)) {
+      province.centroid = [30.72, 36.88];
+      continue;
+    }
+
+    if (isLikelyCappadocianEast(province.id)) {
+      province.centroid = [38.15, 38.35];
+    }
+  }
+
+  return metadata;
+}
