@@ -150,6 +150,7 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
           strokeLinejoin="round"
           strokeLinecap="round"
           pointerEvents="none"
+          clipPath="url(#world-land-mask)"
           aria-label="Cartographic historical province boundaries"
         />
       )}
