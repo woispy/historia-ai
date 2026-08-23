@@ -1,10 +1,10 @@
 /**
  * Historia AI — physical land authority.
  *
- * Land is the primary physical topology. Sea/gulf presentation geometry may be
- * intentionally coarse, so it must never override an authoritative land hit.
- * Lakes are the exception because they are interior water bodies and therefore
- * explicitly subtract from usable land.
+ * Land is the primary physical topology for ownership and placement. Water is
+ * a second, subtractive layer for usable-land queries: a coarse sea/gulf shape
+ * may overlap a coarse land envelope, but that overlap must never become a
+ * province or city placement surface.
  */
 
 import {
@@ -17,9 +17,8 @@ export function isPhysicalLandPoint(point, landPolygons = [], lakes = []) {
     && !isPointInLakeInterior(point, lakes);
 }
 
-export function isPhysicalSeaPoint(point, seaPolygons = [], landPolygons = []) {
-  return pointInAnyPolygon(point, seaPolygons)
-    && !pointInAnyPolygon(point, landPolygons);
+export function isPhysicalSeaPoint(point, seaPolygons = []) {
+  return pointInAnyPolygon(point, seaPolygons);
 }
 
 export function isPhysicalChannelPoint(point, channelPolygons = []) {
@@ -34,7 +33,7 @@ export function isUsablePhysicalLandPoint(
   lakes = [],
 ) {
   if (!isPhysicalLandPoint(point, landPolygons, lakes)) return false;
-  if (isPhysicalSeaPoint(point, seaPolygons, landPolygons)) return false;
+  if (isPhysicalSeaPoint(point, seaPolygons)) return false;
   if (isPhysicalChannelPoint(point, channelPolygons)) return false;
   return true;
 }
