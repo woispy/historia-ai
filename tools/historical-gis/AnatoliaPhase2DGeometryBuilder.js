@@ -329,20 +329,54 @@ function clipPolygonToTriangle(polygon, triangle) {
   return clipped;
 }
 
+function pointOnSegment(point, start, end) {
+  const crossValue = cross(start, end, point);
+  if (Math.abs(crossValue) > 1e-6) return false;
+  const minX = Math.min(start[0], end[0]) - 1e-6;
+  const maxX = Math.max(start[0], end[0]) + 1e-6;
+  const minY = Math.min(start[1], end[1]) - 1e-6;
+  const maxY = Math.max(start[1], end[1]) + 1e-6;
+  return point[0] >= minX && point[0] <= maxX && point[1] >= minY && point[1] <= maxY;
+}
+
+function polygonBoundaryIsUsable(polygon) {
+  for (let index = 0; index < polygon.length; index += 1) {
+    const current = polygon[index];
+    const next = polygon[(index + 1) % polygon.length];
+    for (const fraction of [0.25, 0.5, 0.75]) {
+      const sample = [current[0] + (next[0] - current[0]) * fraction, current[1] + (next[1] - current[1]) * fraction];
+      if (!usableLandPoint(sample)) return false;
+    }
+  }
+  return true;
+}
+
+function fragmentIsUsable(polygon) {
+  if (polygon.length < 3 || polygonArea(polygon) < MIN_CELL_AREA) return false;
+  if (!usableLandPoint(polygonCentroid(polygon))) return false;
+  if (!usableLandPoint(polygonVertexCentroid(polygon))) return false;
+  if (!polygonBoundaryIsUsable(polygon)) return false;
+  return true;
+}
+
 function physicalLandFragments(polygon, preferredPoint) {
   const fragments = [];
   for (const landPolygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
     const triangles = triangulateSimplePolygon(landPolygon);
     for (const triangle of triangles) {
       const fragment = clipPolygonToTriangle(polygon, triangle);
-      if (fragment.length < 3 || polygonArea(fragment) < MIN_CELL_AREA) continue;
+      if (!fragmentIsUsable(fragment)) continue;
       const areaCentroid = polygonCentroid(fragment);
-      const vertexCentroid = polygonVertexCentroid(fragment);
-      if (!usableLandPoint(areaCentroid) && !usableLandPoint(vertexCentroid)) continue;
-      fragments.push({ polygon: fragment, distance: distanceSquared(areaCentroid, preferredPoint) });
+      fragments.push({
+        polygon: fragment,
+        anchorDistance: distanceSquared(areaCentroid, preferredPoint),
+        preferredPointInside: fragment.some((point, index) => pointOnSegment(preferredPoint, point, fragment[(index + 1) % fragment.length])),
+      });
     }
   }
-  return fragments.sort((a, b) => a.distance - b.distance).map(({ polygon }) => polygon);
+  return fragments
+    .sort((a, b) => Number(b.preferredPointInside) - Number(a.preferredPointInside) || a.anchorDistance - b.anchorDistance)
+    .map(({ polygon }) => polygon);
 }
 
 function roundPolygon(polygon) {
@@ -351,13 +385,19 @@ function roundPolygon(polygon) {
 
 function createFallback(metadata) {
   const center = findUsableLandPoint(getHistoricalCityPoint(metadata) ?? metadata.centroid) ?? metadata.centroid;
-  const offsetCenter = [center[0] + 0.0125, center[1] + 0.0125];
-  const verifiedCenter = findUsableLandPoint(offsetCenter) ?? center;
-  const radius = 0.035;
-  return roundPolygon(Array.from({ length: 8 }, (_, index) => {
-    const angle = index / 8 * Math.PI * 2;
-    return [verifiedCenter[0] + Math.cos(angle) * radius, verifiedCenter[1] + Math.sin(angle) * radius];
-  }));
+  for (const radius of [0.02, 0.03, 0.04, 0.05]) {
+    for (let index = 0; index < 16; index += 1) {
+      const angle = (index / 16) * Math.PI * 2;
+      const verifiedCenter = findUsableLandPoint([center[0] + Math.cos(angle) * radius, center[1] + Math.sin(angle) * radius]);
+      if (!verifiedCenter) continue;
+      const polygon = Array.from({ length: 8 }, (_, vertex) => {
+        const theta = vertex / 8 * Math.PI * 2;
+        return [verifiedCenter[0] + Math.cos(theta) * radius * 0.65, verifiedCenter[1] + Math.sin(theta) * radius * 0.65];
+      });
+      if (fragmentIsUsable(polygon)) return roundPolygon(polygon);
+    }
+  }
+  throw new Error(`Unable to construct a physical-land-safe fallback for province ${metadata.id}`);
 }
 
 function createProvinceAsset(metadata, polygons) {
@@ -415,7 +455,7 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     provider: "historia-ai-curated-cartography",
     dataset: "anatolia-province-geometry-1300",
     projection: "EPSG:4326",
-    method: "weighted geographic-historical Voronoi cells clipped to physical land and water-aware anchors",
+    method: "weighted geographic-historical Voronoi cells clipped to physical land and validated by a single physical land authority",
     sourceBasis: { physical: "Natural Earth 10m land, lakes and rivers used by the physical atlas", historical: "aourednik/historical-basemaps world_1300 plus curated 1300 Anatolia province anchors", topographicIntent: "province seeds follow historical centres and major geographic corridors; physical land remains the geometry authority" },
     siteCount: sites.length,
     politicalSiteCount: geometrySites.length,
