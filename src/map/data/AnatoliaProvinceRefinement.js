@@ -37,6 +37,7 @@ const anchor = (x, y, terrainClass, settlementDensity) => ({
   geometryMode: "source-derived-with-anchor-refinement",
   borderConfidence: "medium",
   coastConstrained: terrainClass.startsWith("coastal"),
+  terrain: ANATOLIA_TERRAIN_PROFILES[terrainClass],
 });
 
 export const ANATOLIA_PROVINCE_REFINEMENTS = Object.freeze({
