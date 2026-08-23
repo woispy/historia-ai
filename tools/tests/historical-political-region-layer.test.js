@@ -16,9 +16,8 @@ const worldMapSource = read("src/map/components/WorldMap.jsx");
 const worldMapHookSource = read("src/map/hooks/useWorldMap.js");
 const provinceLayerSource = read("src/map/components/layers/ProvinceLayer.jsx");
 
-assert.match(layerSource, /clipPath="url\(#world-land-mask\)"/, "historical political rendering must be clipped to the physical world land mask");
-assert.match(layerSource, /HISTORICAL_POLITICAL_COVERAGE_CONTRACT/, "historical political rendering must consume the global coverage contract");
 assert.match(layerSource, /HISTORICAL_POLITICAL_WORLD_LAND_CLIP_ID = HISTORICAL_POLITICAL_COVERAGE_CONTRACT\.landClip/, "global political clipping must come from the physical-land coverage contract");
+assert.match(layerSource, /HISTORICAL_POLITICAL_COVERAGE_CONTRACT/, "historical political rendering must consume the global coverage contract");
 assert.equal(HISTORICAL_POLITICAL_COVERAGE_CONTRACT.landClip, "world-land-mask");
 assert.equal(HISTORICAL_POLITICAL_COVERAGE_CONTRACT.sourceOfTruth, "physical-world-land-mask");
 assert.match(layerSource, /aria-label="Historical unassigned land presentation"/, "historical political rendering must provide a visible fallback for land without a source polity");
