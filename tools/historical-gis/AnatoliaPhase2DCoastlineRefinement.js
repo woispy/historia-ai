@@ -8,6 +8,8 @@ const COAST_INTERIOR_SEARCH = 0.08;
 const EPSILON = 1e-9;
 const REPRESENTATIVE_SEARCH_STEP = 0.01;
 const REPRESENTATIVE_SEARCH_RADIUS = 0.5;
+const MIN_VALID_POLYGON_AREA = 0.00005;
+const EDGE_SAMPLE_FRACTIONS = [0.25, 0.5, 0.75];
 
 function distanceSquared(a, b) {
   const dx = a[0] - b[0];
@@ -30,6 +32,7 @@ function isUsableLandPoint(point) {
 }
 
 function findUsableRepresentativePoint(center) {
+  if (!Array.isArray(center)) return null;
   if (isUsableLandPoint(center)) return [...center];
   for (let radius = REPRESENTATIVE_SEARCH_STEP; radius <= REPRESENTATIVE_SEARCH_RADIUS; radius += REPRESENTATIVE_SEARCH_STEP) {
     const samples = Math.max(16, Math.ceil((2 * Math.PI * radius) / REPRESENTATIVE_SEARCH_STEP));
@@ -116,23 +119,42 @@ function polygonCentroid(polygon) {
   return [longitude / (3 * areaTwice), latitude / (3 * areaTwice)];
 }
 
-function hasUsableCentroids(polygon) {
-  return isUsableLandPoint(polygonVertexCentroid(polygon)) && isUsableLandPoint(polygonCentroid(polygon));
+function hasUsablePolygonSamples(polygon) {
+  if (!Array.isArray(polygon) || polygon.length < 3) return false;
+  if (polygonArea(polygon) < MIN_VALID_POLYGON_AREA) return false;
+
+  if (!isUsableLandPoint(polygonCentroid(polygon))) return false;
+  if (!isUsableLandPoint(polygonVertexCentroid(polygon))) return false;
+
+  for (let index = 0; index < polygon.length; index += 1) {
+    const start = polygon[index];
+    const end = polygon[(index + 1) % polygon.length];
+    if (!isUsableLandPoint(start)) return false;
+    for (const fraction of EDGE_SAMPLE_FRACTIONS) {
+      const sample = [
+        start[0] + (end[0] - start[0]) * fraction,
+        start[1] + (end[1] - start[1]) * fraction,
+      ];
+      if (!isUsableLandPoint(sample)) return false;
+    }
+  }
+
+  return true;
 }
 
 function translatePolygonToLandAnchor(polygon, anchor, sourceCentroid) {
   if (!Array.isArray(polygon) || polygon.length < 3 || !anchor || !sourceCentroid) return polygon;
   const delta = [anchor[0] - sourceCentroid[0], anchor[1] - sourceCentroid[1]];
   const translated = polygon.map(([longitude, latitude]) => [longitude + delta[0], latitude + delta[1]]);
-  return hasUsableCentroids(translated) ? translated : polygon;
+  return hasUsablePolygonSamples(translated) ? translated : polygon;
 }
 
 function reconcilePolygonCentroid(polygon, metadata) {
   if (!Array.isArray(polygon) || polygon.length < 3) return polygon;
-  if (polygonArea(polygon) < 0.00005 || hasUsableCentroids(polygon)) return polygon;
+  if (hasUsablePolygonSamples(polygon)) return polygon;
 
   const representative = findUsableRepresentativePoint(metadata?.centroid ?? null);
-  if (!representative) return polygon;
+  if (!representative) return null;
 
   const vertexCentroid = polygonVertexCentroid(polygon);
   const translatedFromVertex = translatePolygonToLandAnchor(polygon, representative, vertexCentroid);
@@ -142,7 +164,7 @@ function reconcilePolygonCentroid(polygon, metadata) {
   const translatedFromArea = translatePolygonToLandAnchor(polygon, representative, areaCentroid);
   if (translatedFromArea !== polygon) return translatedFromArea;
 
-  return polygon;
+  return null;
 }
 
 function roundPolygon(polygon) {
@@ -152,12 +174,16 @@ function roundPolygon(polygon) {
 function createRepresentativePolygon(metadata) {
   const point = findUsableRepresentativePoint(metadata?.centroid ?? null);
   if (!point) return null;
-  const radius = 0.035;
-  const polygon = Array.from({ length: 8 }, (_, index) => {
-    const angle = (index / 8) * Math.PI * 2;
-    return [point[0] + Math.cos(angle) * radius, point[1] + Math.sin(angle) * radius];
-  });
-  return hasUsableCentroids(polygon) ? roundPolygon(polygon) : null;
+
+  for (let radius = 0.035; radius >= 0.005; radius -= 0.005) {
+    const polygon = Array.from({ length: 8 }, (_, index) => {
+      const angle = (index / 8) * Math.PI * 2;
+      return [point[0] + Math.cos(angle) * radius, point[1] + Math.sin(angle) * radius];
+    });
+    if (hasUsablePolygonSamples(polygon)) return roundPolygon(polygon);
+  }
+
+  return null;
 }
 
 function createCoastalCoverageFragment(metadata) {
@@ -166,8 +192,8 @@ function createCoastalCoverageFragment(metadata) {
   const interior = createInteriorPoint(coast.start, coast.end);
   if (!interior) return null;
   const polygon = roundPolygon([coast.start, coast.end, interior]);
-  if (polygon.length < 3 || polygonArea(polygon) < EPSILON) return null;
-  return hasUsableCentroids(polygon) ? polygon : null;
+  if (!hasUsablePolygonSamples(polygon)) return null;
+  return polygon;
 }
 
 export function refineAnatoliaPhase2DCoastline(result) {
@@ -184,8 +210,11 @@ export function refineAnatoliaPhase2DCoastline(result) {
     const metadata = metadataById.get(geometry?.identity?.provinceId);
     if (!metadata) return geometry;
 
-    let polygons = (geometry.polygons ?? []).map((polygon) => reconcilePolygonCentroid(polygon, metadata));
-    if (!polygons.length || !polygons.some((polygon) => polygonArea(polygon) >= 0.00005 && hasUsableCentroids(polygon))) {
+    let polygons = (geometry.polygons ?? [])
+      .map((polygon) => reconcilePolygonCentroid(polygon, metadata))
+      .filter((polygon) => hasUsablePolygonSamples(polygon));
+
+    if (!polygons.length) {
       const representative = createRepresentativePolygon(metadata);
       if (representative) polygons = [representative];
     }
@@ -212,13 +241,15 @@ export function refineAnatoliaPhase2DCoastline(result) {
     provinces,
     geometries,
     coastlineRefinement: {
-      method: "land-centroid reconciliation plus shared physical-land authority for coastal fragments",
+      method: "strict physical-land polygon reconciliation with edge sampling and shared physical-land authority",
       clippedByPhysicalLandMask: true,
       clippedByGeneratedHydrography: true,
       coastalProvinceCount: coastalIds.size,
       landCentroidReconciliation: true,
       sourceProvinceGeometryPreserved: true,
       vertexCentroidLandInvariant: true,
+      polygonBoundaryLandInvariant: true,
+      waterExclusionInvariant: true,
     },
   };
 }
