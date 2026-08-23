@@ -50,6 +50,12 @@ for (let first = 0; first < aegean.length; first += 1) {
   }
 }
 
+const byId = new Map(ANATOLIA_PROVINCE_METADATA.map((province) => [province.id, province]));
+assert.deepEqual(byId.get("ionia-ayasuluk")?.centroid, [27.37, 37.95], "Ayasuluk anchor must follow the historical Selçuk/Ephesus location rather than an inland drift");
+assert.deepEqual(byId.get("lydia-birgi")?.centroid, [28.20, 38.20], "Birgi anchor must remain in its historical mountain-valley corridor");
+assert.deepEqual(byId.get("caria-tralleis")?.centroid, [28.00, 37.90], "Tralleis anchor must remain in the Maeander interior rather than the coast");
+assert.deepEqual(byId.get("caria-halikarnassos")?.centroid, [27.43, 37.04], "Halikarnassos anchor must remain on the southwest Carian coast");
+
 const uniqueCentroids = new Set(
   ANATOLIA_PROVINCE_METADATA.map((province) => province.centroid.map((value) => value.toFixed(4)).join(":")),
 );
