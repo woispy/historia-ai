@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { getProvinces } from "../../provinces";
 import { getCities } from "../../cities";
 import { getGeometry } from "../../world/map/geometry";
+import { loadHistoricalGeometryRepository } from "../../world/map/geometry/loader/index.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../data/AnatoliaProvinceMetadata.js";
 import { createHistoricalPoliticalMapModel } from "../../world/map/historical/HistoricalPoliticalMapModel";
 
@@ -39,6 +40,17 @@ function createHistoricalAnatoliaProvinceFallbacks(sourceProvinces, date) {
     : sourceProvinces;
 }
 
+function resolveGeometryRepository(gameSession, date) {
+  const sourceRepository = gameSession?.world?.map?.geometry ?? null;
+  if (date !== HISTORICAL_1300_DATE) return sourceRepository;
+
+  // The dated political compositor must read the dated GIS runtime asset
+  // directly. The map factory already bootstraps this repository, but resolving
+  // it here as well prevents a stale/modern geometry repository from silently
+  // becoming the visual source for the 1300 historical layer.
+  return loadHistoricalGeometryRepository(date) ?? sourceRepository;
+}
+
 export function useWorldMap(gameSession) {
   return useMemo(() => {
     if (!gameSession) return { provinces: [], cities: [] };
@@ -46,7 +58,7 @@ export function useWorldMap(gameSession) {
     const provinceRepository = gameSession.world.repositories.provinces;
     const cityRepository = gameSession.world.repositories.cities;
     const countryRepository = gameSession.world.repositories.countries;
-    const geometryRepository = gameSession.world.map.geometry;
+    const geometryRepository = resolveGeometryRepository(gameSession, getScenarioStartDate(gameSession));
     const date = getScenarioStartDate(gameSession);
     const sourceProvinces = getProvinces(provinceRepository);
     const historicalSourceProvinces = createHistoricalAnatoliaProvinceFallbacks(
