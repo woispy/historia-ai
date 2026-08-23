@@ -46,17 +46,6 @@ function findUsableRepresentativePoint(center) {
   return null;
 }
 
-function pointToSegmentDistanceSquared(point, start, end) {
-  const dx = end[0] - start[0];
-  const dy = end[1] - start[1];
-  if (dx === 0 && dy === 0) return distanceSquared(point, start);
-  const t = Math.max(0, Math.min(1, (
-    (point[0] - start[0]) * dx + (point[1] - start[1]) * dy
-  ) / (dx * dx + dy * dy)));
-  const projected = [start[0] + dx * t, start[1] + dy * t];
-  return distanceSquared(point, projected);
-}
-
 function projectPointToSegment(point, start, end) {
   const dx = end[0] - start[0];
   const dy = end[1] - start[1];
@@ -85,22 +74,6 @@ function findNearestCoastSegment(point) {
     }
   }
   return best;
-}
-
-function createInteriorPoint(start, end) {
-  const midpoint = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
-  const dx = end[0] - start[0];
-  const dy = end[1] - start[1];
-  const length = Math.sqrt(dx * dx + dy * dy) || 1;
-  const normal = [-dy / length, dx / length];
-
-  for (let offset = COAST_INTERIOR_OFFSET; offset <= COAST_INTERIOR_SEARCH; offset += COAST_INTERIOR_OFFSET) {
-    const candidateA = [midpoint[0] + normal[0] * offset, midpoint[1] + normal[1] * offset];
-    const candidateB = [midpoint[0] - normal[0] * offset, midpoint[1] - normal[1] * offset];
-    if (isUsableLandPoint(candidateA)) return candidateA;
-    if (isUsableLandPoint(candidateB)) return candidateB;
-  }
-  return null;
 }
 
 function polygonArea(polygon) {
@@ -215,11 +188,6 @@ function createCoastalCoverageFragment(metadata) {
   const tangent = [dx / length, dy / length];
   const normal = [-tangent[1], tangent[0]];
   const center = coast.projection;
-
-  // Use a short land-side strip around the nearest physical-coast projection.
-  // The fragment stays within a few thousandths of the authoritative coast,
-  // but its vertices remain strictly inside usable land so the land invariant
-  // never needs an exception for exact boundary points.
   const halfLength = Math.min(COAST_FRAGMENT_HALF_LENGTH, length / 3);
   const alongA = [center[0] - tangent[0] * halfLength, center[1] - tangent[1] * halfLength];
   const alongB = [center[0] + tangent[0] * halfLength, center[1] + tangent[1] * halfLength];
