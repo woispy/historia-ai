@@ -21,10 +21,6 @@ function deterministicBoundaryBow(key) {
   return ((hash >>> 0) / 4294967295 - 0.5) * 2;
 }
 
-function edgeLength(start, end) {
-  return Math.hypot(end[0] - start[0], end[1] - start[1]);
-}
-
 /**
  * Draw shared historical province borders as restrained cartographic curves.
  *
