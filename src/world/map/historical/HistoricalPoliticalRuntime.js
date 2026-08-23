@@ -71,7 +71,11 @@ function controllerForDate(metadata, date) {
 function toHistoricalProvince(metadata, date) {
   const override = date === "1300-01-01" ? getVerified1300Control(metadata.id) : null;
   const control = override ?? metadata.historicalControl;
-  const polityId = controllerForDate(metadata, date);
+  const controllerId = controllerForDate(metadata, date);
+  const isSuzerainty = control?.statusAt1300?.toLowerCase() === "ilkhanid-suzerainty";
+  const polityId = isSuzerainty ? null : controllerId;
+  const suzerainPolityId = isSuzerainty ? controllerId : null;
+
   return {
     id: metadata.id,
     type: "province",
@@ -82,6 +86,7 @@ function toHistoricalProvince(metadata, date) {
     coastal: metadata.coastal === true,
     port: metadata.port === true,
     polityId,
+    suzerainPolityId,
     controlStatus: control?.statusAt1300 ?? "unknown",
     controlConfidence: control?.confidence ?? "low",
     controlNote: control?.note ?? null,
@@ -98,7 +103,9 @@ export function createHistoricalPoliticalRuntime({ date, provinceMetadata = [] }
 
   provinceMetadata.forEach(assertHistoricalProvinceRecord);
   const provinces = provinceMetadata.map((metadata) => toHistoricalProvince(metadata, normalizedDate));
-  const polityIds = new Set(provinces.map((province) => province.polityId).filter(Boolean));
+  const polityIds = new Set(
+    provinces.flatMap((province) => [province.polityId, province.suzerainPolityId]).filter(Boolean),
+  );
   const polities = [...polityIds].map(clonePolity);
 
   const unknownPolityIds = [...polityIds].filter((id) => !POLITY_BY_ID.has(id));
