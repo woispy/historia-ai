@@ -180,7 +180,8 @@ function createRepresentativePolygon(metadata) {
       const angle = (index / 8) * Math.PI * 2;
       return [point[0] + Math.cos(angle) * radius, point[1] + Math.sin(angle) * radius];
     });
-    if (hasUsablePolygonSamples(polygon)) return roundPolygon(polygon);
+    const rounded = roundPolygon(polygon);
+    if (hasUsablePolygonSamples(rounded)) return rounded;
   }
 
   return null;
