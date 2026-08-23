@@ -28,6 +28,8 @@ assert.ok(
 assert.ok(result.polygonCount >= result.provinceCount, "Every province must contain at least one polygon");
 assert.equal(result.provinces.length, result.geometries.length);
 assert.equal(result.coastlineRefinement?.coastalProvinceCount, ANATOLIA_PROVINCE_METADATA.filter((province) => province.coastal).length);
+assert.equal(result.coastlineRefinement?.polygonBoundaryLandInvariant, true);
+assert.equal(result.coastlineRefinement?.waterExclusionInvariant, true);
 
 const provinceIds = new Set();
 let vertexCount = 0;
@@ -61,6 +63,28 @@ const seas = ANATOLIA_PHYSICAL_ATLAS.seas.map((sea) => sea.coordinates);
 const channels = ANATOLIA_PHYSICAL_ATLAS.channels.map((channel) => channel.coordinates);
 const lakes = ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes;
 
+function assertUsablePolygonBoundary(polygon, provinceId) {
+  assert.ok(isUsablePhysicalLandPoint(polygonCentroid(polygon), land, seas, channels, lakes));
+  for (let index = 0; index < polygon.length; index += 1) {
+    const start = polygon[index];
+    const end = polygon[(index + 1) % polygon.length];
+    assert.ok(
+      isUsablePhysicalLandPoint(start, land, seas, channels, lakes),
+      `${provinceId} polygon vertex must remain on usable physical land: ${start.join(",")}`,
+    );
+    for (const fraction of [0.25, 0.5, 0.75]) {
+      const sample = [
+        start[0] + (end[0] - start[0]) * fraction,
+        start[1] + (end[1] - start[1]) * fraction,
+      ];
+      assert.ok(
+        isUsablePhysicalLandPoint(sample, land, seas, channels, lakes),
+        `${provinceId} polygon boundary must remain on usable physical land: ${sample.join(",")}`,
+      );
+    }
+  }
+}
+
 for (const geometry of result.geometries) {
   assert.ok(provinceIds.has(geometry.identity.provinceId));
   assert.ok(geometry.polygons.length > 0);
@@ -68,8 +92,6 @@ for (const geometry of result.geometries) {
     assert.ok(polygon.length >= 3);
     vertexCount += polygon.length;
     const centroid = polygonCentroid(polygon);
-    // Tiny coastline reconciliation fragments may include exact coastline
-    // vertices; normal geometry must satisfy the complete usable-land invariant.
     if (polygonArea(polygon) >= 0.00005) {
       assert.ok(
         isPhysicalLandPoint(centroid),
@@ -79,6 +101,7 @@ for (const geometry of result.geometries) {
         isUsablePhysicalLandPoint(centroid, land, seas, channels, lakes),
         `Phase 2D polygon centroid must remain on usable physical land: ${centroid.join(",")}`,
       );
+      assertUsablePolygonBoundary(polygon, geometry.identity.provinceId);
     }
     for (const [longitude, latitude] of polygon) {
       assert.ok(longitude >= 25 && longitude <= 46, `Longitude out of Phase 2D envelope: ${longitude}`);
