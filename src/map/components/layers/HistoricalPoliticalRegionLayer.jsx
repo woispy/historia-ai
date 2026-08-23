@@ -6,6 +6,47 @@ const DEFAULT_POLITICAL_COLOR = "#6f765f";
 const HISTORICAL_WORLD_POLITICAL_CLIP_ID = "historical-world-political-land-clip";
 const COASTAL_POLITICAL_EXPANSION = 0.08;
 
+const SOURCE_POLITICAL_PALETTE = [
+  "#6A1B9A",
+  "#0F7A32",
+  "#B87333",
+  "#786A9D",
+  "#3E7C59",
+  "#7B6840",
+  "#8C5A2B",
+  "#A33F3F",
+  "#4A7896",
+  "#8B4A62",
+  "#8A6F3D",
+  "#477A68",
+  "#7C5C8F",
+  "#9A5A42",
+  "#5E7891",
+  "#6F7B45",
+];
+
+const SOURCE_POLITICAL_ALIASES = new Map([
+  ["byzantine empire", "#6A1B9A"],
+  ["byzantium", "#6A1B9A"],
+  ["ottomans", "#0F7A32"],
+  ["osmanoğulları", "#0F7A32"],
+  ["osmanoğulları", "#0F7A32"],
+  ["karasi", "#B87333"],
+  ["karesi", "#B87333"],
+  ["saruhan", "#786A9D"],
+  ["menteşe", "#3E7C59"],
+  ["mentese", "#3E7C59"],
+  ["eşref", "#7B6840"],
+  ["esref", "#7B6840"],
+  ["germiyan", "#8C5A2B"],
+  ["karaman", "#A33F3F"],
+  ["pervâneoğlu", "#6B7280"],
+  ["pervane", "#6B7280"],
+  ["candar", "#7A6A3A"],
+  ["trebizond", "#4A7896"],
+  ["cilicia", "#8B4A62"],
+]);
+
 function buildPathData(polygons) {
   if (!Array.isArray(polygons)) return "";
 
@@ -60,13 +101,63 @@ function isCoastalProvince(entry) {
     || entry?.historicalProvince?.port === true;
 }
 
-function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces = [] }) {
+function normalizeSourceSubject(subject) {
+  return String(subject ?? "")
+    .trim()
+    .toLocaleLowerCase("tr-TR")
+    .replace(/[’']/g, "'")
+    .replace(/\s+/g, " ");
+}
+
+function getStableSourceColor(subject) {
+  const normalized = normalizeSourceSubject(subject);
+  if (!normalized) return DEFAULT_POLITICAL_COLOR;
+
+  const alias = SOURCE_POLITICAL_ALIASES.get(normalized);
+  if (alias) return alias;
+
+  let hash = 2166136261;
+  for (let index = 0; index < normalized.length; index += 1) {
+    hash ^= normalized.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return SOURCE_POLITICAL_PALETTE[(hash >>> 0) % SOURCE_POLITICAL_PALETTE.length];
+}
+
+function HistoricalWorldRegionPaths({ regions = [] }) {
+  return regions.map((region) => {
+    const d = buildPathData(region?.geometry?.polygons);
+    if (!d) return null;
+
+    return (
+      <path
+        key={`historical-world-${region.id ?? region.sourceName}`}
+        d={d}
+        fill={getStableSourceColor(region.subject)}
+        fillOpacity={region.borderPrecision >= 3 ? 0.96 : 0.88}
+        stroke="rgba(24,30,24,0.48)"
+        strokeWidth="0.42"
+        vectorEffect="non-scaling-stroke"
+        strokeLinejoin="round"
+      />
+    );
+  });
+}
+
+function HistoricalPoliticalRegionLayer({
+  date = HISTORICAL_1300_DATE,
+  provinces = [],
+  regions = [],
+}) {
   if (date !== HISTORICAL_1300_DATE) return null;
 
   return (
     <g pointerEvents="none" aria-label="1300 historical political map">
       <PoliticalOverlayDefs />
       <g clipPath={`url(#${HISTORICAL_WORLD_POLITICAL_CLIP_ID})`}>
+        {/* The historical GIS runtime covers the complete dated world layer.
+            Keep a land-colored fallback underneath it so missing source
+            polygons never expose a visually blank land surface. */}
         <rect
           x="-180"
           y="-90"
@@ -76,6 +167,8 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
           fillOpacity="0.18"
           aria-label="Historical unassigned land presentation"
         />
+        <HistoricalWorldRegionPaths regions={regions} />
+
         {provinces.map((entry) => {
           const d = buildPathData(entry?.geometry?.polygons);
           if (!d) return null;
