@@ -1,7 +1,7 @@
 const BORDER_KEY_PRECISION = 5;
-const CARTOGRAPHIC_BOW = 0.018;
-const MAX_BOW_RATIO = 0.09;
-const MIN_CURVE_LENGTH = 0.18;
+const CARTOGRAPHIC_BOW = 0.032;
+const MAX_BOW_RATIO = 0.12;
+const MIN_CURVE_LENGTH = 0.16;
 
 function pointKey(point) {
   return `${Number(point[0]).toFixed(BORDER_KEY_PRECISION)}:${Number(point[1]).toFixed(BORDER_KEY_PRECISION)}`;
@@ -27,8 +27,8 @@ function deterministicBoundaryBow(key) {
  *
  * The generated province topology is left untouched. Only the presentation
  * stroke is curved, using the same deterministic edge key for both neighbours.
- * Very short edges remain straight so small coastal fragments and narrow
- * province corners do not acquire artificial spikes.
+ * The bow is deliberately larger than the first pass, but remains capped as a
+ * small fraction of edge length so coast-adjacent corners do not become waves.
  */
 export function buildCartographicInternalBoundaryPath(provinces) {
   const edges = new Map();
