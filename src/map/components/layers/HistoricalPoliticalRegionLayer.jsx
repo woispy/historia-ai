@@ -1,9 +1,11 @@
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../data/AnatoliaPhysicalAtlasRuntime.js";
+import { WORLD_LAND_PATH } from "../../physical/WorldPhysicalAtlas.js";
 import { polygonPath } from "../../rendering/physical/PhysicalGeometryPath.js";
 import { getHistoricalPoliticalOverlayMode } from "./HistoricalPoliticalOverlayModel";
 
 const HISTORICAL_1300_DATE = "1300-01-01";
 const DEFAULT_POLITICAL_COLOR = "#6f765f";
+const HISTORICAL_WORLD_POLITICAL_CLIP_ID = "historical-world-political-land-clip";
 const HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID = "historical-anatolia-political-land-clip";
 const COASTAL_POLITICAL_EXPANSION = 0.08;
 
@@ -29,6 +31,9 @@ function PoliticalOverlayDefs() {
 
   return (
     <defs>
+      <clipPath id={HISTORICAL_WORLD_POLITICAL_CLIP_ID} clipPathUnits="userSpaceOnUse">
+        <path d={WORLD_LAND_PATH} fillRule="evenodd" />
+      </clipPath>
       <clipPath id={HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID} clipPathUnits="userSpaceOnUse">
         <path d={anatoliaLandPath} fillRule="evenodd" />
       </clipPath>
@@ -60,11 +65,12 @@ function getPoliticalFillOpacity(mode) {
 
 function getPoliticalClipPath(entry) {
   // Only the curated Phase 2D Anatolia provinces use the dedicated physical
-  // atlas. Source-derived historical GIS regions use the global land mask.
+  // atlas. Source-derived historical GIS regions use the same global land
+  // authority as the physical map.
   if (entry?.historicalProvince?.geometryAuthority === "anatolia-curated") {
     return `url(#${HISTORICAL_ANATOLIA_POLITICAL_CLIP_ID})`;
   }
-  return "url(#world-land-mask)";
+  return `url(#${HISTORICAL_WORLD_POLITICAL_CLIP_ID})`;
 }
 
 function isCoastalCuratedProvince(entry) {
@@ -78,7 +84,7 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
   return (
     <g pointerEvents="none">
       <PoliticalOverlayDefs />
-      <g clipPath="url(#world-land-mask)">
+      <g clipPath={`url(#${HISTORICAL_WORLD_POLITICAL_CLIP_ID})`}>
         <rect
           x="-180"
           y="-90"
@@ -123,8 +129,8 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
               d={d}
               fill={color}
               fillOpacity={getPoliticalFillOpacity(mode)}
-              stroke="rgba(24,30,24,0.34)"
-              strokeWidth="0.42"
+              stroke="rgba(24,30,24,0.48)"
+              strokeWidth="0.52"
               vectorEffect="non-scaling-stroke"
               strokeLinejoin="round"
             />
