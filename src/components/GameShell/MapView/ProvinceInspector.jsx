@@ -17,13 +17,30 @@ function historicalStatusLabel(value) {
   const labels = {
     established: "Yerleşik kontrol",
     "established-emirate": "Yerleşik beylik",
+    "established-frontier": "Yerleşik sınır",
     frontier: "Sınır bölgesi",
     "contested-frontier": "Çekişmeli sınır",
     "contested-coast": "Çekişmeli kıyı",
     "frontier-emirate": "Sınır emirliği",
+    "frontier-conquest": "Fetih sınırı",
     "emerging-emirate": "Yükselen beylik",
+    "emerging-independent": "Bağımsızlaşan beylik",
+    "Hamidid-emerging": "Hamidid oluşum dönemi",
+    "Menteshe-influence": "Menteşe nüfuzu",
+    "Pervaneoğulları-sphere": "Pervâneoğulları nüfuzu",
+    "Candarid-emerging": "Candarid oluşumu",
+    "legacy-frontier": "Tarihsel sınır mirası",
     "Ilkhanid-suzerainty": "İlhanlı üst egemenliği",
-    "Candarid-emerging": "Candarid yükselişi",
+    "pre-Aydinid": "Aydınoğulları öncesi",
+  };
+  return labels[value] ?? valueOrDash(value);
+}
+
+function historicalConfidenceLabel(value) {
+  const labels = {
+    high: "Yüksek",
+    medium: "Orta",
+    low: "Düşük",
   };
   return labels[value] ?? valueOrDash(value);
 }
@@ -79,7 +96,9 @@ function ProvinceInspector({ province, country, onClose }) {
         <div><dt>Stratejik</dt><dd>{booleanLabel(strategic)}</dd></div>
         <div><dt>Kontrol</dt><dd>{valueOrDash(controller)}</dd></div>
         <div><dt>1300 Durumu</dt><dd>{historicalStatusLabel(historical?.statusAt1300)}</dd></div>
+        <div><dt>Tarihsel Güven</dt><dd>{historicalConfidenceLabel(historical?.confidence)}</dd></div>
         <div><dt>Tarihsel Bölge</dt><dd>{valueOrDash(region)}</dd></div>
+        <div><dt>Başlangıç</dt><dd>{valueOrDash(historical?.startYear)}</dd></div>
       </dl>
 
       {historical?.note && (
