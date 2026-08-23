@@ -1,7 +1,10 @@
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
-import { isUsablePhysicalLandPoint } from "../../src/map/rendering/physical/PhysicalLandAuthority.js";
+import {
+  isPhysicalLandPoint as isPhysicalLandPointAuthority,
+  isUsablePhysicalLandPoint,
+} from "../../src/map/rendering/physical/PhysicalLandAuthority.js";
 
 const COAST_INTERIOR_OFFSET = 0.004;
 const COAST_INTERIOR_SEARCH = 0.08;
@@ -23,8 +26,12 @@ const SEA_POLYGONS = ANATOLIA_PHYSICAL_ATLAS.seas.map((sea) => sea.coordinates);
 const CHANNEL_POLYGONS = ANATOLIA_PHYSICAL_ATLAS.channels.map((channel) => channel.coordinates);
 const LAKES = ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes;
 
-function isUsableLandPoint(point) {
-  return isUsablePhysicalLandPoint(
+function isCanonicalPhysicalLandPoint(point) {
+  return isPhysicalLandPointAuthority(
+    point,
+    ANATOLIA_PHYSICAL_ATLAS.landPolygons,
+    LAKES,
+  ) && isUsablePhysicalLandPoint(
     point,
     ANATOLIA_PHYSICAL_ATLAS.landPolygons,
     SEA_POLYGONS,
@@ -33,15 +40,19 @@ function isUsableLandPoint(point) {
   );
 }
 
+function isUsableLandPoint(point) {
+  return isCanonicalPhysicalLandPoint(point);
+}
+
 function findUsableRepresentativePoint(center) {
   if (!Array.isArray(center)) return null;
-  if (isUsableLandPoint(center)) return [...center];
+  if (isCanonicalPhysicalLandPoint(center)) return [...center];
   for (let radius = REPRESENTATIVE_SEARCH_STEP; radius <= REPRESENTATIVE_SEARCH_RADIUS; radius += REPRESENTATIVE_SEARCH_STEP) {
     const samples = Math.max(16, Math.ceil((2 * Math.PI * radius) / REPRESENTATIVE_SEARCH_STEP));
     for (let index = 0; index < samples; index += 1) {
       const angle = (index / samples) * Math.PI * 2;
       const candidate = [center[0] + Math.cos(angle) * radius, center[1] + Math.sin(angle) * radius];
-      if (isUsableLandPoint(candidate)) return candidate;
+      if (isCanonicalPhysicalLandPoint(candidate)) return candidate;
     }
   }
   return null;
@@ -117,18 +128,18 @@ function hasUsablePolygonSamples(polygon) {
 
   const areaCentroid = polygonCentroid(polygon);
   const vertexCentroid = polygonVertexCentroid(polygon);
-  if (!isUsableLandPoint(areaCentroid) || !isUsableLandPoint(vertexCentroid)) return false;
+  if (!isCanonicalPhysicalLandPoint(areaCentroid) || !isCanonicalPhysicalLandPoint(vertexCentroid)) return false;
 
   for (let index = 0; index < polygon.length; index += 1) {
     const start = polygon[index];
     const end = polygon[(index + 1) % polygon.length];
-    if (!isUsableLandPoint(start)) return false;
+    if (!isCanonicalPhysicalLandPoint(start)) return false;
     for (const fraction of EDGE_SAMPLE_FRACTIONS) {
       const sample = [
         start[0] + (end[0] - start[0]) * fraction,
         start[1] + (end[1] - start[1]) * fraction,
       ];
-      if (!isUsableLandPoint(sample)) return false;
+      if (!isCanonicalPhysicalLandPoint(sample)) return false;
     }
 
     // Every edge-to-centroid segment is sampled as an interior witness. This
@@ -139,7 +150,7 @@ function hasUsablePolygonSamples(polygon) {
         areaCentroid[0] + (start[0] - areaCentroid[0]) * fraction,
         areaCentroid[1] + (start[1] - areaCentroid[1]) * fraction,
       ];
-      if (!isUsableLandPoint(sample)) return false;
+      if (!isCanonicalPhysicalLandPoint(sample)) return false;
     }
   }
 
@@ -279,7 +290,7 @@ export function refineAnatoliaPhase2DCoastline(result) {
     provinces,
     geometries,
     coastlineRefinement: {
-      method: "strict physical-land polygon reconciliation with centroid, boundary, interior-edge sampling and shared physical-land authority",
+      method: "strict physical-land polygon reconciliation with canonical land authority, centroid, boundary, interior-edge sampling and shared physical-land authority",
       clippedByPhysicalLandMask: true,
       clippedByGeneratedHydrography: true,
       coastalProvinceCount: coastalIds.size,
