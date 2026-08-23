@@ -9,8 +9,6 @@
 
 const p = (name, coordinates, options = {}) => ({ name, coordinates, ...options });
 
-// Western/northern Anatolian land is represented with a coastline that follows
-// the Marmara/Kocaeli corridor closely enough for historical city anchors.
 // The land polygon is the single physical land authority used by political
 // clipping and cartographic validation; city anchors are never moved to suit it.
 const land = [
@@ -39,30 +37,11 @@ const land = [
   [26.70,41.82],[26.35,41.86],[26.00,41.86],
 ];
 
-// Kocaeli/Nicomedia is connected to the mainland through the same land ring.
-// These points close the southern Marmara shoreline around the historical city
-// so the anchor [29.9169, 40.7654] is physically on land without introducing a
-// second overlapping polygon that can create ambiguous clipping behavior.
-const nicomediaCorridor = [
-  [29.84,40.85],[29.92,40.86],[30.08,40.91],[30.25,40.86],
-  [30.22,40.81],[30.12,40.78],[30.02,40.74],[29.94,40.73],
-  [29.88,40.73],[29.84,40.79],
-];
-
-// Insert the corridor into the land ring at the Marmara closure point. The
-// resulting polygon remains a single land component, preventing overlap and
-// guaranteeing a stable point-in-polygon result for coastal anchors.
-const landWithNicomedia = [
-  ...land.slice(0, 10),
-  ...nicomediaCorridor.slice(1, -1),
-  ...land.slice(10),
-];
-
 export const ANATOLIA_PHYSICAL_ATLAS = Object.freeze({
-  version: 3,
+  version: 2,
   projection: "EPSG:4326",
   bbox: [24.0, 34.0, 45.2, 43.2],
-  landPolygons: [landWithNicomedia],
+  landPolygons: [land],
 
   seas: [
     p("Black Sea", [[25.0,41.15],[45.2,41.15],[45.2,43.2],[25.0,43.2]], {kind:"sea", priority:100}),
