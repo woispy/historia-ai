@@ -7,13 +7,11 @@ import {
 } from "../../src/map/rendering/physical/PhysicalLandAuthority.js";
 
 const COAST_INTERIOR_OFFSET = 0.004;
-const COAST_INTERIOR_SEARCH = 0.08;
 const EPSILON = 1e-9;
 const REPRESENTATIVE_SEARCH_STEP = 0.01;
 const REPRESENTATIVE_SEARCH_RADIUS = 0.5;
 const MIN_VALID_POLYGON_AREA = 0.00005;
 const EDGE_SAMPLE_FRACTIONS = [0.25, 0.5, 0.75];
-const COAST_FRAGMENT_HALF_LENGTH = 0.01;
 const INTERIOR_SAMPLE_FRACTIONS = [0.25, 0.5, 0.75];
 
 function distanceSquared(a, b) {
