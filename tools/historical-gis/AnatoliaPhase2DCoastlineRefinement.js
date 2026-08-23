@@ -1,3 +1,4 @@
+import hydrography from "./../src/map/data/generated/anatolia-hydrography-10m.json" with { type: "json" };
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 
@@ -26,6 +27,18 @@ function pointInPolygon(point, polygon) {
 
 function pointInLand(point) {
   return ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon));
+}
+
+function pointInHydrographyWater(point) {
+  return hydrography.lakes.some((lake) => (
+    Array.isArray(lake.rings)
+      ? lake.rings.some((ring) => pointInPolygon(point, ring))
+      : pointInPolygon(point, lake.coordinates)
+  ));
+}
+
+function isUsableLandPoint(point) {
+  return pointInLand(point) && !pointInHydrographyWater(point);
 }
 
 function pointToSegmentDistanceSquared(point, start, end) {
@@ -71,8 +84,8 @@ function createInteriorPoint(start, end) {
       midpoint[0] - normal[0] * offset,
       midpoint[1] - normal[1] * offset,
     ];
-    if (pointInLand(candidateA)) return candidateA;
-    if (pointInLand(candidateB)) return candidateB;
+    if (isUsableLandPoint(candidateA)) return candidateA;
+    if (isUsableLandPoint(candidateB)) return candidateB;
   }
   return null;
 }
@@ -114,20 +127,22 @@ function vertexMean(polygon) {
 
 function translatePolygonToLandAnchor(polygon, anchor) {
   const mean = vertexMean(polygon);
-  if (!mean || !anchor || !pointInLand(anchor) || pointInLand(mean)) return polygon;
+  if (!mean || !anchor || !isUsableLandPoint(anchor) || isUsableLandPoint(mean)) return polygon;
 
   const delta = [anchor[0] - mean[0], anchor[1] - mean[1]];
-  return polygon.map(([longitude, latitude]) => [
+  const translated = polygon.map(([longitude, latitude]) => [
     longitude + delta[0],
     latitude + delta[1],
   ]);
+  const translatedCentroid = polygonCentroid(translated);
+  return isUsableLandPoint(translatedCentroid) ? translated : polygon;
 }
 
 function reconcilePolygonCentroid(polygon, metadata) {
   if (!Array.isArray(polygon) || polygon.length < 3) return polygon;
   if (polygonArea(polygon) < 0.00005) return polygon;
   const mean = vertexMean(polygon);
-  if (mean && pointInLand(mean)) return polygon;
+  if (mean && isUsableLandPoint(mean)) return polygon;
   return translatePolygonToLandAnchor(polygon, metadata?.centroid ?? null);
 }
 
@@ -142,7 +157,8 @@ function createCoastalCoverageFragment(metadata) {
   if (!interior) return null;
   const polygon = roundPolygon([coast.start, coast.end, interior]);
   if (polygon.length < 3 || polygonArea(polygon) < EPSILON) return null;
-  if (!pointInLand(polygonCentroid(polygon))) return null;
+  const centroid = polygonCentroid(polygon);
+  if (!isUsableLandPoint(centroid)) return null;
   return polygon;
 }
 
@@ -193,8 +209,9 @@ export function refineAnatoliaPhase2DCoastline(result) {
     provinces,
     geometries,
     coastlineRefinement: {
-      method: "land-centroid reconciliation plus coastal province anchor fragments with bidirectional land validation",
+      method: "land-centroid reconciliation plus coastal province anchor fragments with generated 10m hydrography exclusion",
       clippedByPhysicalLandMask: true,
+      clippedByGeneratedHydrography: true,
       coastalProvinceCount: coastalIds.size,
       landCentroidReconciliation: true,
     },
