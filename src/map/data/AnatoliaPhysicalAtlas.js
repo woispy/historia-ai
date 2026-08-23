@@ -14,7 +14,7 @@ const p = (name, coordinates, options = {}) => ({ name, coordinates, ...options 
 const land = [
   [26.00,41.86],[26.55,41.75],[27.10,41.58],[27.70,41.38],[28.20,41.22],
   [28.65,41.08],[29.05,40.92],[29.42,40.88],[29.72,40.86],[29.84,40.85],
-  [29.92,40.86],[30.08,40.91],[30.25,40.86],[30.72,40.91],[31.20,41.00],
+  [29.90,40.84],[29.92,40.86],[30.08,40.91],[30.25,40.86],[30.72,40.91],[31.20,41.00],
   [31.68,41.12],[32.15,41.24],[32.65,41.38],[33.15,41.47],[33.65,41.52],
   [34.15,41.58],[34.65,41.78],[35.15,42.18],[35.65,41.75],[36.15,41.48],
   [36.62,41.40],[37.08,41.30],[37.55,41.22],[38.02,40.82],[38.50,40.89],
@@ -92,6 +92,9 @@ export const ANATOLIA_PHYSICAL_ATLAS = Object.freeze({
     {id:"sea-marmara", name:"MARMARA DENİZİ", kind:"sea", x:28.15, y:40.55, minZoom:1, maxZoom:4, priority:100, fontSize:0.29, offsets:[[0,0],[0,0.16],[0,-0.16]], bounds:[26.7,40.0,29.4,41.0]},
     {id:"sea-black", name:"KARADENİZ", kind:"sea", x:34.55, y:42.18, minZoom:1, maxZoom:3.4, priority:100, fontSize:0.30, offsets:[[0,0],[0.3,0],[-0.3,0]], bounds:[28.0,41.45,42.5,43.05]},
     {id:"sea-mediterranean", name:"AKDENİZ", kind:"sea", x:32.90, y:35.05, minZoom:1, maxZoom:3.2, priority:100, fontSize:0.30, offsets:[[0,0],[0.3,0],[-0.3,0]], bounds:[27.0,34.6,39.0,36.3]},
+    {id:"region-aegean", name:"BATI EGE", kind:"region", x:28.35, y:38.65, minZoom:3, maxZoom:10, priority:80, fontSize:0.20, offsets:[[0,0],[0.18,0],[-0.18,0],[0,0.16],[0,-0.16]], bounds:[26.8,37.4,29.8,39.8]},
+    {id:"region-central", name:"MERKEZ ANADOLU", kind:"region", x:33.35, y:39.05, minZoom:3, maxZoom:10, priority:82, fontSize:0.20, offsets:[[0,0],[0.18,0],[-0.18,0],[0,0.16],[0,-0.16]], bounds:[30.5,37.8,36.2,40.1]},
+    {id:"region-eastern", name:"DOĞU ANADOLU", kind:"region", x:40.60, y:39.25, minZoom:3, maxZoom:10, priority:78, fontSize:0.20, offsets:[[0,0],[0.18,0],[-0.18,0],[0,0.16],[0,-0.16]], bounds:[37.0,36.8,44.4,40.8]},
     {id:"city-constantinople", name:"KONSTANTİNOPOLİS", kind:"city", x:28.9784, y:41.0082, minZoom:4, maxZoom:10, priority:120, fontSize:0.24},
     {id:"city-nicomedia", name:"NİKOMEDİA", kind:"city", x:29.9169, y:40.7654, minZoom:5, maxZoom:10, priority:115, fontSize:0.22},
     {id:"city-nicaea", name:"NİKAİA", kind:"city", x:29.7183, y:40.4286, minZoom:5, maxZoom:10, priority:110, fontSize:0.22},
