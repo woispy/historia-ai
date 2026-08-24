@@ -101,6 +101,37 @@ function normalizeOuterRing(ring) {
   });
 }
 
+function pointInPolygon(point, polygon) {
+  if (!Array.isArray(polygon) || polygon.length < 3) return false;
+  let inside = false;
+  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index++) {
+    const current = polygon[index];
+    const before = polygon[previous];
+    if ((current[1] > point[1]) !== (before[1] > point[1])
+      && point[0] < ((before[0] - current[0]) * (point[1] - current[1])) / ((before[1] - current[1]) || 1e-12) + current[0]) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
+function polygonCentroid(polygon) {
+  return polygon.reduce(
+    (sum, [x, y]) => [sum[0] + x, sum[1] + y],
+    [0, 0],
+  ).map((value) => value / polygon.length);
+}
+
+function lakeHolesForOuterRing(outerRing) {
+  return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes
+    .filter((lake) => Array.isArray(lake.coordinates) && lake.coordinates.length >= 3)
+    .filter((lake) => pointInPolygon(polygonCentroid(lake.coordinates), outerRing))
+    .map((lake) => lake.coordinates.map(([longitude, latitude]) => [
+      Number(longitude.toFixed(7)),
+      Number(latitude.toFixed(7)),
+    ]));
+}
+
 function normalizeGeometryPhysicalBoundary(geometry) {
   const coordinates = geometry.geometry?.coordinates;
   if (!Array.isArray(coordinates) || coordinates.length === 0 || !Array.isArray(coordinates[0])) {
@@ -108,6 +139,11 @@ function normalizeGeometryPhysicalBoundary(geometry) {
   }
 
   const normalizedOuterRing = normalizeOuterRing(coordinates[0]);
+  const existingHoles = Array.isArray(geometry.holes) ? geometry.holes : [];
+  const holes = existingHoles.length > 0
+    ? existingHoles
+    : lakeHolesForOuterRing(normalizedOuterRing);
+
   return {
     ...geometry,
     geometry: {
@@ -115,6 +151,7 @@ function normalizeGeometryPhysicalBoundary(geometry) {
       coordinates: [normalizedOuterRing, ...coordinates.slice(1)],
     },
     polygons: [normalizedOuterRing],
+    holes,
   };
 }
 
