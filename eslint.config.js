@@ -5,7 +5,14 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
-  globalIgnores(["dist"]),
+  globalIgnores([
+    "dist",
+    // Historical Phase 2D builder snapshots are retained for auditability;
+    // V9 is the active geometry authority and the only builder under test.
+    "tools/historical-gis/AnatoliaPhase2DGeometryBuilderV6.js",
+    "tools/historical-gis/AnatoliaPhase2DGeometryBuilderV7.js",
+    "tools/historical-gis/AnatoliaPhase2DGeometryBuilderV8.js",
+  ]),
   {
     files: ["**/*.{js,jsx}"],
     extends: [
