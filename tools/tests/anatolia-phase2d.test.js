@@ -16,7 +16,26 @@ assert.equal(result.historicalDate, "1300-01-01");
 assert.equal(result.provinceCount, ANATOLIA_PROVINCE_METADATA.length);
 assert.equal(result.provinceCount, ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST.length);
 assert.equal(result.provinceCount, 38, "Phase 2D must match the current authoritative 1300 province dataset");
-assert.equal(result.fallbackProvinceCount, 0, "Phase 2D must not silently replace historical province geometry with anchor fallbacks");
+
+function polygonArea(polygon) {
+  let area = 0;
+  for (let index = 0; index < polygon.length; index += 1) {
+    const current = polygon[index];
+    const next = polygon[(index + 1) % polygon.length];
+    area += current[0] * next[1] - next[0] * current[1];
+  }
+  return Math.abs(area) / 2;
+}
+
+const fallbackLikeProvinceIds = result.geometries
+  .filter((geometry) => geometry.polygons.some((polygon) => polygonArea(polygon) < 0.00005))
+  .map((geometry) => geometry.identity.provinceId);
+
+assert.equal(
+  result.fallbackProvinceCount,
+  0,
+  `Phase 2D must not silently replace historical province geometry with anchor fallbacks; builder reported ${result.fallbackProvinceCount}, fallback-like IDs: ${fallbackLikeProvinceIds.join(", ")}`,
+);
 console.log(`Phase 2D cartographic site count: ${result.siteCount}`);
 assert.ok(result.siteCount >= 1000, "Phase 2D must use a dense physical/cartographic site field");
 assert.ok(result.barrierSiteCount >= 300, "Phase 2D must include a substantial physical water/coast barrier field");
