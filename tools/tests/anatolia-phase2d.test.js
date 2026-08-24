@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import {
   buildAnatoliaPhase2DAssets,
-  isAnatoliaGeometryPoint,
   isPhysicalLandPoint,
 } from "../historical-gis/AnatoliaPhase2DGeometryBuilder.js";
+import { isAnatoliaGeometryPoint } from "../historical-gis/AnatoliaGeometryOverride.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 import { ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST } from "../../src/map/data/Anatolia1300ProvinceGeometryManifest.js";
 
@@ -97,6 +97,8 @@ assert.ok(vertexCount >= 150, "Phase 2D geometry must contain a sufficiently det
 
 assert.equal(isAnatoliaGeometryPoint([28.9784, 41.0082]), false, "Constantinople must remain outside the Anatolia geometry override");
 assert.equal(isAnatoliaGeometryPoint([26.5556, 41.6772]), false, "Adrianopolis must remain outside the Anatolia geometry override");
+assert.equal(isAnatoliaGeometryPoint([26.557, 40.155]), true, "Canakkale must remain inside the Anatolia geometry override");
+assert.equal(isAnatoliaGeometryPoint([29.93, 40.77]), true, "Nicomedia must remain inside the Anatolia geometry override");
 
 console.log(
   `Phase 2D Anatolia geometry tests passed: ${result.provinceCount} provinces, `
