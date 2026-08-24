@@ -9,9 +9,13 @@
 
 const p = (name, coordinates, options = {}) => ({ name, coordinates, ...options });
 
+// Anatolia-only physical mainland. The former western/northwestern tail was a
+// non-Anatolian Thrace loop which crossed the Marmara/Black Sea coastline and
+// made the authoritative land ring self-intersecting. Keeping the polygon
+// anchored at the Anatolian side of the Bosporus preserves the intended
+// Anadolu physical domain without introducing a second political authority.
 const land = [
-  [26.00,41.86],[26.55,41.75],[27.10,41.58],[27.70,41.38],[28.20,41.22],
-  [28.65,41.08],[29.05,40.92],[29.42,40.78],[29.82,40.72],[30.25,40.68],
+  [28.44,40.92],[28.65,41.08],[29.05,40.92],[29.42,40.78],[29.82,40.72],[30.25,40.68],
   [30.72,40.68],[31.20,40.73],[31.68,40.80],[32.15,40.90],[32.65,41.02],
   [33.15,41.12],[33.65,41.20],[34.15,41.26],[34.65,41.30],[35.15,41.28],
   [35.65,41.20],[36.15,41.10],[36.62,40.98],[37.08,40.86],[37.55,40.80],
@@ -30,7 +34,6 @@ const land = [
   [26.66,38.42],[26.55,38.68],[26.47,38.94],[26.42,39.20],[26.41,39.46],
   [26.46,39.70],[26.58,39.92],[26.74,40.10],[26.92,40.25],[27.12,40.38],
   [27.38,40.48],[27.65,40.56],[27.92,40.66],[28.20,40.78],[28.44,40.92],
-  [26.00,41.86],
 ];
 
 export const ANATOLIA_PHYSICAL_ATLAS = Object.freeze({
