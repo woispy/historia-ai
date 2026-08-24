@@ -78,7 +78,7 @@ await fs.writeFile(runtimePath, `${JSON.stringify({
     regionalOverlay: {
       status: "research-only",
       id: "anatolia-byzantium-1300",
-      note: "The former broad political overlay is retained as research metadata. Phase 2D replaces the coarse Anatolia source-province presentation with a deterministic 38-province cartographic geometry layer; the rest of the world remains source-derived.",
+      note: "The former broad political overlay is retained as research metadata. Phase 2D replaces the coarse Anatolia source-province presentation with a deterministic 44-province cartographic geometry layer; the rest of the world remains source-derived.",
     },
     phase2D: {
       status: "runtime",
