@@ -19,6 +19,11 @@ function riverLabel(hasRiver, riverName) {
   return riverName ? `Var — ${riverName}` : "Var";
 }
 
+function lakeLabel(hasLake, lakeName) {
+  if (hasLake !== true) return hasLake === false ? "Yok" : "—";
+  return lakeName ? `Var — ${lakeName}` : "Var";
+}
+
 function historicalStatusLabel(value) {
   const labels = {
     established: "Yerleşik kontrol",
@@ -131,6 +136,9 @@ function ProvinceInspector({ province, country, historicalMetadata = null, histo
   const hasRiver = province?.river ?? viewModel.hasRiver;
   const riverName = province?.riverName ?? null;
   const riverDetail = province?.riverDetail ?? null;
+  const hasLake = province?.lake ?? null;
+  const lakeName = province?.lakeName ?? null;
+  const lakeDetail = province?.lakeDetail ?? null;
   const displayOwner = historicalMetadata
     ? polityLabel(controller, historicalPolity)
     : (country?.name ?? country?.displayName ?? viewModel.owner);
@@ -172,6 +180,7 @@ function ProvinceInspector({ province, country, historicalMetadata = null, histo
         <div><dt>Kale Seviyesi</dt><dd>{valueOrDash(viewModel.fortLevel)}</dd></div>
         <div><dt>Liman</dt><dd>{booleanLabel(port)}</dd></div>
         <div><dt>Nehir</dt><dd>{riverLabel(hasRiver, riverName)}</dd></div>
+        <div><dt>Göl</dt><dd>{lakeLabel(hasLake, lakeName)}</dd></div>
         <div><dt>Kıyı</dt><dd>{booleanLabel(coastal)}</dd></div>
         <div><dt>Kültür</dt><dd>{valueOrDash(viewModel.culture)}</dd></div>
         <div><dt>Din</dt><dd>{valueOrDash(viewModel.religion)}</dd></div>
@@ -189,6 +198,10 @@ function ProvinceInspector({ province, country, historicalMetadata = null, histo
 
       {riverDetail && (
         <p className="province-inspector__note">{riverName}: {riverDetail}.</p>
+      )}
+
+      {lakeDetail && (
+        <p className="province-inspector__note">{lakeName}: {lakeDetail}.</p>
       )}
 
       {historicalNote && (
