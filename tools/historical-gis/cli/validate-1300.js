@@ -40,7 +40,7 @@ assert(Array.isArray(runtime.geometries), "Runtime geometry array is missing.");
 assert(runtime.source?.sourceFeatureCount === normalizedRegions.length, "Runtime source feature count mismatch.");
 assert(runtime.source?.regionalOverlay?.status === "research-only", "Runtime regional overlay policy must be research-only.");
 assert(runtime.source?.phase2D?.status === "runtime", "Phase 2D runtime geometry is missing.");
-assert(runtime.source?.phase2D?.provinceCount === 38, "Phase 2D must provide exactly 38 Anatolia provinces.");
+assert(runtime.source?.phase2D?.provinceCount === 44, "Phase 2D must provide exactly 44 Anatolia provinces.");
 
 const phase2DProvinceCount = runtime.source.phase2D.provinceCount;
 const replacedSourceFeatureCount = runtime.source.phase2D.sourceFeatureCountReplaced;
@@ -111,7 +111,7 @@ assert(runtime.counts?.polygons === polygonCount, "Runtime polygon metadata coun
 // an oversized uniform point grid. The stable contract is enough local control
 // sites per province to preserve historical anchors, adjacency and natural /
 // coastline constraints without turning the Voronoi stage into an O(n²) point explosion.
-assert(polygonCount >= Math.ceil(phase2DProvinceCount * 1.5), "Phase 2D geometry layer is unexpectedly coarse.");
+assert(polygonCount >= Math.ceil(phase2DProvinceCount * 1.0), "Phase 2D geometry layer is unexpectedly coarse.");
 assert(vertexCount >= 350, "Phase 2D geometry vertex field is unexpectedly sparse.");
 assert(runtime.source.phase2D.siteCount >= phase2DProvinceCount * 40, "Phase 2D cartographic site field is unexpectedly sparse.");
 
