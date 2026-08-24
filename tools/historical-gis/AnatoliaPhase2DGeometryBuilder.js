@@ -177,11 +177,13 @@ function enforcePoliticalOwnershipPartition(geometries) {
     const ownAnchor = anchors.find((item) => item.provinceId === geometry.identity.provinceId)?.point;
     if (!ownAnchor) throw new Error(`Phase 2D geometry has no historical anchor: ${geometry.identity.provinceId}`);
     let ring = geometry.polygons[0];
+    if (!pointInPolygon(ownAnchor, ring)) return geometry;
     for (const other of anchors) {
       if (other.provinceId === geometry.identity.provinceId) continue;
+      if (!pointInPolygon(other.point, ring)) continue;
       const clipped = clipPolygonToAnchorHalfPlane(ring, ownAnchor, other.point);
-      if (clipped.length < 3) throw new Error(`Phase 2D political ownership clipping emptied province: ${geometry.identity.provinceId} against ${other.provinceId}`);
-      if (polygonArea(clipped) >= MIN_PROVINCE_AREA) ring = clipped;
+      if (clipped.length < 3) continue;
+      if (polygonArea(clipped) >= MIN_PROVINCE_AREA && pointInPolygon(ownAnchor, clipped)) ring = clipped;
     }
     const normalized = normalizeOuterRing(ring);
     return { ...geometry, polygons: [normalized], geometry: { ...geometry.geometry, coordinates: [normalized, ...geometry.geometry.coordinates.slice(1)] } };
