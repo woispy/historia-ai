@@ -6,6 +6,7 @@ import {
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PHYSICAL_COAST_CORRECTIONS } from "../../src/map/data/AnatoliaPhysicalCoastCorrections.js";
+import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 
 const HISTORICAL_DATE = "1300-01-01";
 const BOUNDARY_SAMPLE_STEP = 0.06;
@@ -36,11 +37,58 @@ function expectedV16SiteCount() {
     (total, lake) => total + boundarySiteCount(lake.coordinates),
     0,
   );
-  return ANATOLIA_PHYSICAL_ATLAS.landPolygons.length * 0
-    + 38
-    + physicalLand
-    + coastCorrections
-    + lakes;
+  return 38 + physicalLand + coastCorrections + lakes;
+}
+
+function buildProvinceAssets(geometries) {
+  const metadataById = new Map(ANATOLIA_PROVINCE_METADATA.map((item) => [item.id, item]));
+  return geometries.map((geometry) => {
+    const provinceId = geometry.identity?.provinceId ?? geometry.identity?.id;
+    const metadata = metadataById.get(provinceId);
+    if (!metadata) throw new Error(`Phase 2D geometry has no matching province metadata: ${provinceId}`);
+    return {
+      header: {
+        assetType: "province",
+        assetVersion: 4,
+        generator: "Historia AI Phase 2D Geometry Builder V16",
+        provider: "historia-ai-curated-cartography",
+        dataset: "anatolia-province-geometry-1300",
+        historicalDate: HISTORICAL_DATE,
+        provinceId,
+        historicalAnchor: geometry.identity?.historicalAnchor ?? metadata.centroid,
+      },
+      identity: {
+        id: provinceId,
+        name: metadata.name,
+      },
+      references: {
+        geometryId: provinceId,
+        countryId: metadata.countryId,
+        capitalCityId: metadata.cityId,
+      },
+      ownership: {
+        countryId: metadata.historicalControl?.controllerAt1300 ?? metadata.countryId ?? null,
+        ownerId: metadata.historicalControl?.controllerAt1300 ?? metadata.countryId ?? null,
+      },
+      historical: {
+        sourceFeatureId: provinceId,
+        sourceName: metadata.name,
+        subject: metadata.countryId,
+        partOf: metadata.regionId,
+        borderPrecision: metadata.borderConfidence,
+        classification: "phase2d-anatolia-province-geometry",
+        precision: metadata.borderConfidence,
+        anchor: geometry.identity?.historicalAnchor ?? metadata.centroid,
+        inferenceNotice: metadata.historicalControl?.note ?? null,
+      },
+      administration: { governorId: null },
+      population: { total: 0 },
+      economy: { development: 0, wealth: 0 },
+      military: { supplyLimit: 0 },
+      culture: { primaryCulture: null },
+      religion: { primaryReligion: null },
+    };
+  });
 }
 
 export function buildAnatoliaPhase2DAssets(regions) {
@@ -52,8 +100,20 @@ export function buildAnatoliaPhase2DAssets(regions) {
     throw new Error(`Phase 2D cartographic site count is invalid: ${siteCount}; expected at least ${expectedSiteCount}.`);
   }
 
+  const geometries = assets.geometries.map((geometry) => ({
+    ...geometry,
+    identity: {
+      ...(geometry.identity ?? {}),
+      id: geometry.identity?.provinceId ?? geometry.identity?.id,
+      provinceId: geometry.identity?.provinceId ?? geometry.identity?.id,
+    },
+  }));
+  const provinces = buildProvinceAssets(geometries);
+
   return {
     ...assets,
+    geometries,
+    provinces,
     historicalDate: assets.historicalDate ?? HISTORICAL_DATE,
     siteCount,
     barrierSiteCount: 0,
