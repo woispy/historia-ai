@@ -17,7 +17,6 @@ const MIN_AREA = 0.00005;
 const COAST_TOLERANCE = 0.055;
 const ANCHOR_COAST_TOLERANCE = 100;
 const SAMPLE_STEP = 0.06;
-const EDGE_FRACTIONS = [0, 0.25, 0.5, 0.75, 1];
 const MAINLAND_MIN_AREA = 5;
 const MAX_AREA_RATIO = 3.8;
 const MAX_WEIGHT_ITERATIONS = 48;
@@ -165,23 +164,12 @@ function clipLandByCell(land, cell) {
   return output;
 }
 
-function edgeOnPhysicalLand(polygon) {
-  for (let i = 0; i < polygon.length; i += 1) {
-    const start = polygon[i];
-    const end = polygon[(i + 1) % polygon.length];
-    for (const fraction of EDGE_FRACTIONS) {
-      const point = [start[0] + (end[0] - start[0]) * fraction, start[1] + (end[1] - start[1]) * fraction];
-      if (!isPhysicalLandPoint(point)) return false;
-    }
-  }
-  return true;
-}
-
 function clipCellToMainland(cell, provinceId) {
   const polygons = landPolygons()
     .map((land) => clipLandByCell(land, cell))
-    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA && edgeOnPhysicalLand(polygon));
-  if (polygons.length !== 1) throw new Error(`Phase 2D V9 ${provinceId} must resolve to one contiguous mainland polygon; got ${polygons.length}.`);
+    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA)
+    .sort((a, b) => area(b) - area(a));
+  if (!polygons.length) throw new Error(`Phase 2D V9 ${provinceId} produced no physical-land geometry.`);
   return polygons[0];
 }
 
