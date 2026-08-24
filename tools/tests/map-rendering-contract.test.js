@@ -69,16 +69,20 @@ assert.ok(worldMap.includes("regions={historicalRegions}"));
 assert.ok(historicalPoliticalLayer.includes("HistoricalWorldRegionPaths"));
 assert.ok(historicalPoliticalLayer.includes("getStableSourceColor(region.subject)"));
 
-// Global source GIS is rendered through a physical-land mask that removes the
-// curated Anatolia footprint plus a small coastal closure buffer. This is the
-// renderer-level inverse of the old Phase 2D land clip.
-assert.ok(historicalPoliticalLayer.includes("ANATOLIA_LAND_PATH"));
-assert.ok(historicalPoliticalLayer.includes("HISTORICAL_WORLD_SOURCE_MASK_ID"));
-assert.ok(historicalPoliticalLayer.includes("<HistoricalWorldRegionPaths regions={regions} />"));
+// Historical source GIS remains available as research and as a world-scale
+// source outside the Anatolia override, but its Anatolian regional blobs must
+// never be rendered as the visible 1300 political map.
+assert.ok(historicalPoliticalLayer.includes("nonAnatoliaRegions"));
+assert.ok(historicalPoliticalLayer.includes("!String(region?.id ?? \"\").startsWith(\"anatolia_\")"));
+assert.ok(historicalPoliticalLayer.includes("HISTORICAL_REGION_BY_PROVINCE"));
+assert.ok(historicalPoliticalLayer.includes("historical-region-clip-"));
 assert.ok(!historicalPoliticalLayer.includes("return !subject || !SOURCE_POLITICAL_ALIASES.has(subject);"));
 assert.ok(historicalPoliticalLayer.includes("const COASTAL_POLITICAL_EXPANSION = 0.08;"));
-assert.ok(historicalPoliticalLayer.includes("function isCoastalProvince(entry)"));
-assert.ok(historicalPoliticalLayer.includes("stroke={base.color}"));
+assert.ok(historicalPoliticalLayer.includes("function isCuratedAnatoliaProvince(entry)"));
+assert.ok(historicalPoliticalLayer.includes("function getHistoricalProvince(entry)"));
+assert.ok(historicalPoliticalLayer.includes("Aydinid ownership is deliberately NOT assigned at 1300"));
+assert.ok(historicalPoliticalLayer.includes("1308"));
+assert.ok(!historicalPoliticalLayer.includes('<HistoricalWorldRegionPaths regions={regions} />'));
 
 assert.ok(historicalPoliticalLayer.includes("<g clipPath={`url(#${HISTORICAL_WORLD_POLITICAL_CLIP_ID})`}>") );
 assert.ok(!historicalPoliticalLayer.includes("COASTAL_POLITICAL_EXPANSION = 0"));
@@ -139,4 +143,4 @@ assert.ok(!cityLayer.includes("fortified &&"));
 assert.ok(!worldMap.includes('phase="base"'));
 assert.ok(!worldMap.includes('phase="water"'));
 
-console.log("Map rendering contract tests passed: one synchronized world, explicit province interaction, one physical coastline authority, coastal political closure without sea spill, authoritative Anatolia political compositor, Turkish historical inspector notes, and no legacy overlay layers.");
+console.log("Map rendering contract tests passed: 1300 Anatolia is province-authoritative, legacy regional blobs are excluded from the Anatolia override, historical parent envelopes constrain province presentation, physical land remains the final coastline authority, and the inspector uses Turkish historical metadata.");
