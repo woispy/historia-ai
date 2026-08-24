@@ -168,7 +168,7 @@ function powerCell(index, sites, weights) {
   const ownWeight = weights[sites[index].provinceId] ?? 0;
   let polygon = [[BBOX[0], BBOX[1]], [BBOX[2], BBOX[1]], [BBOX[2], BBOX[3]], [BBOX[0], BBOX[3]]];
   for (let other = 0; other < sites.length; other += 1) {
-    if (other === index) continue;
+    if (other === index || !sites[other].provinceId) continue;
     const p = sites[other].point;
     const otherWeight = weights[sites[other].provinceId] ?? 0;
     polygon = halfPlane(polygon, 2 * (p[0] - site[0]), 2 * (p[1] - site[1]), p[0] ** 2 + p[1] ** 2 - site[0] ** 2 - site[1] ** 2 + ownWeight - otherWeight);
