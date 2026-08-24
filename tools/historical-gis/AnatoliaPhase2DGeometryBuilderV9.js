@@ -22,6 +22,8 @@ const MAINLAND_MIN_AREA = 5;
 const MAX_AREA_RATIO = 4.2;
 const MAX_WEIGHT_ITERATIONS = 48;
 const MAX_WEIGHT_STEP = 1.5;
+const CENTROID_MAX_ITERATIONS = 32;
+const CENTROID_WEIGHT_STEP = 0.45;
 const RECOVERY_MAX_RADIUS = 2.5;
 const RECOVERY_RAYS = 144;
 const RECOVERY_BISECTIONS = 18;
@@ -122,7 +124,7 @@ function isStaticLandPoint(point) {
     || distanceToLand(point) <= COAST_TOLERANCE;
 }
 
-function isPhysicalLandPoint(point) {
+export function isPhysicalLandPoint(point) {
   return isStaticLandPoint(point) && !inLake(point);
 }
 
@@ -199,7 +201,7 @@ function clipLandByCell(land, cell) {
 }
 
 function recoverLandConstrainedCell(cell, anchor) {
-  let center = isRecoverableLandPoint(anchor) ? anchor : nearestLandPoint(anchor);
+  const center = isRecoverableLandPoint(anchor) ? anchor : nearestLandPoint(anchor);
   if (!center || !pointInPolygon(center, cell) || !isRecoverableLandPoint(center)) return [];
   const points = [];
   for (let index = 0; index < RECOVERY_RAYS; index += 1) {
@@ -269,6 +271,12 @@ function median(values) {
   return sorted[Math.floor(sorted.length / 2)];
 }
 
+function centroidFailures(partition) {
+  return [...partition.entries()]
+    .filter(([, polygon]) => !isPhysicalLandPoint(polygonCentroid(polygon)))
+    .map(([id]) => id);
+}
+
 function solveWeights(sites) {
   const weights = Object.fromEntries(sites.map((site) => [site.provinceId, 0]));
   let partition = buildPartition(sites, weights);
@@ -276,7 +284,7 @@ function solveWeights(sites) {
     const summary = areaSummary(partition);
     const medianArea = median(summary.map((item) => item.area));
     const oversized = summary.filter((item) => item.area > medianArea * MAX_AREA_RATIO);
-    if (!oversized.length) return { weights, partition, iterations: iteration };
+    if (!oversized.length) break;
     for (const item of oversized) {
       const ratio = item.area / medianArea;
       const step = Math.min(MAX_WEIGHT_STEP, Math.max(0.15, (ratio - MAX_AREA_RATIO) * 1.5));
@@ -284,6 +292,17 @@ function solveWeights(sites) {
     }
     partition = buildPartition(sites, weights);
   }
+
+  for (let iteration = 0; iteration < CENTROID_MAX_ITERATIONS; iteration += 1) {
+    const failures = centroidFailures(partition);
+    if (!failures.length) break;
+    for (const provinceId of failures) weights[provinceId] -= CENTROID_WEIGHT_STEP;
+    partition = buildPartition(sites, weights);
+  }
+
+  const failures = centroidFailures(partition);
+  if (failures.length) throw new Error(`Phase 2D V9 could not place polygon centroids on physical land: ${failures.join(", ")}`);
+
   const summary = areaSummary(partition);
   const medianArea = median(summary.map((item) => item.area));
   const maxArea = Math.max(...summary.map((item) => item.area));
@@ -396,11 +415,3 @@ export function buildAnatoliaPhase2DAssets() {
     geometries,
   };
 }
-
-export function isAnatoliaGeometryPoint([longitude, latitude]) {
-  if (longitude < 26.5 || longitude > 44.8 || latitude < 35.7 || latitude > 42.2) return false;
-  const exclusion = [[26.5, 42.2], [29.5, 42.2], [29.5, 41.25], [29.05, 40.72], [28.45, 40.48], [27.55, 40.45], [26.5, 40.65]];
-  return !pointInPolygon([longitude, latitude], exclusion);
-}
-
-export { isPhysicalLandPoint, polygonCentroid };
