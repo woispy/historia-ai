@@ -10,6 +10,7 @@ import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceM
 
 const HISTORICAL_DATE = "1300-01-01";
 const BOUNDARY_SAMPLE_STEP = 0.06;
+const MAX_BOUNDARY_NUMERICAL_DRIFT = 0.0001;
 
 function boundarySiteCount(polygon) {
   if (!Array.isArray(polygon) || polygon.length < 2) return 0;
@@ -38,6 +39,59 @@ function expectedV16SiteCount() {
     0,
   );
   return 38 + physicalLand + coastCorrections + lakes;
+}
+
+function pointOnSegmentProjection(point, start, end) {
+  const dx = end[0] - start[0];
+  const dy = end[1] - start[1];
+  const denominator = dx * dx + dy * dy;
+  const t = denominator === 0
+    ? 0
+    : Math.max(0, Math.min(1, ((point[0] - start[0]) * dx + (point[1] - start[1]) * dy) / denominator));
+  return [start[0] + dx * t, start[1] + dy * t];
+}
+
+function physicalLandBoundaryCandidates() {
+  return [
+    ...ANATOLIA_PHYSICAL_COAST_CORRECTIONS.map((item) => item.coordinates),
+    ...ANATOLIA_PHYSICAL_ATLAS.landPolygons,
+  ].filter((polygon) => Array.isArray(polygon) && polygon.length >= 2);
+}
+
+const PHYSICAL_LAND_BOUNDARIES = physicalLandBoundaryCandidates();
+
+function recoverNumericalBoundaryDrift(point) {
+  if (isPhysicalLandPoint(point)) return point;
+
+  let best = null;
+  let bestDistance = Infinity;
+  for (const polygon of PHYSICAL_LAND_BOUNDARIES) {
+    for (let index = 0; index < polygon.length - 1; index += 1) {
+      const candidate = pointOnSegmentProjection(point, polygon[index], polygon[index + 1]);
+      const distance = Math.hypot(point[0] - candidate[0], point[1] - candidate[1]);
+      if (distance >= bestDistance) continue;
+      if (!isPhysicalLandPoint(candidate)) continue;
+      best = candidate;
+      bestDistance = distance;
+    }
+  }
+
+  if (best && bestDistance <= MAX_BOUNDARY_NUMERICAL_DRIFT) return best;
+  return null;
+}
+
+function normalizeGeometryPhysicalBoundary(geometry) {
+  return {
+    ...geometry,
+    polygons: geometry.polygons.map((polygon) => polygon.map((point) => {
+      const recovered = recoverNumericalBoundaryDrift(point);
+      if (recovered) return recovered.map((value) => Number(value.toFixed(7)));
+      if (!isPhysicalLandPoint(point)) {
+        throw new Error(`Phase 2D geometry vertex is outside physical land beyond numerical drift: ${point.join(",")}`);
+      }
+      return point;
+    })),
+  };
 }
 
 function buildProvinceAssets(geometries) {
@@ -100,14 +154,16 @@ export function buildAnatoliaPhase2DAssets(regions) {
     throw new Error(`Phase 2D cartographic site count is invalid: ${siteCount}; expected at least ${expectedSiteCount}.`);
   }
 
-  const geometries = assets.geometries.map((geometry) => ({
-    ...geometry,
-    identity: {
-      ...(geometry.identity ?? {}),
-      id: geometry.identity?.provinceId ?? geometry.identity?.id,
-      provinceId: geometry.identity?.provinceId ?? geometry.identity?.id,
-    },
-  }));
+  const geometries = assets.geometries
+    .map((geometry) => ({
+      ...geometry,
+      identity: {
+        ...(geometry.identity ?? {}),
+        id: geometry.identity?.provinceId ?? geometry.identity?.id,
+        provinceId: geometry.identity?.provinceId ?? geometry.identity?.id,
+      },
+    }))
+    .map(normalizeGeometryPhysicalBoundary);
   const provinces = buildProvinceAssets(geometries);
 
   return {
