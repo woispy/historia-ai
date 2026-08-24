@@ -69,16 +69,13 @@ assert.ok(worldMap.includes("regions={historicalRegions}"));
 assert.ok(historicalPoliticalLayer.includes("HistoricalWorldRegionPaths"));
 assert.ok(historicalPoliticalLayer.includes("getStableSourceColor(region.subject)"));
 
-// Critical regression guard: global source GIS is rendered outside the
-// curated Anatolia physical land polygon. This prevents the source-derived
-// world polygons from repainting Anatolia while preserving world coverage.
+// Global source GIS is rendered outside the curated Anatolia physical land
+// polygon. This is the renderer-level inverse of the old Phase 2D land clip.
 assert.ok(historicalPoliticalLayer.includes("ANATOLIA_LAND_PATH"));
 assert.ok(historicalPoliticalLayer.includes("HISTORICAL_WORLD_SOURCE_CLIP_ID"));
 assert.ok(historicalPoliticalLayer.includes("<HistoricalWorldRegionPaths regions={regions} />"));
 assert.ok(!historicalPoliticalLayer.includes("return !subject || !SOURCE_POLITICAL_ALIASES.has(subject);"));
 
-// Historical political fills are always clipped by the physical land path and
-// no coastal stroke is allowed to define a second coastline.
 assert.ok(historicalPoliticalLayer.includes("<g clipPath={`url(#${HISTORICAL_WORLD_POLITICAL_CLIP_ID})`}>") );
 assert.ok(!historicalPoliticalLayer.includes("COASTAL_POLITICAL_EXPANSION"));
 assert.ok(historicalPoliticalLayer.includes("Historical unassigned land presentation"));
@@ -115,9 +112,12 @@ assert.ok(worldMap.includes("const isHistoricalPoliticalMap = scenarioDate === H
 assert.ok(worldMap.includes("const useGpuProvinceFill = !isHistoricalPoliticalMap"));
 
 // The inspector must use dated historical ownership for the 1300 scenario,
-// never the modern Admin-0 owner stored on the gameplay province.
+// never the modern Admin-0 owner stored on the gameplay province. It must also
+// work for curated provinces that exist only in the historical geometry repo.
 assert.ok(mapView.includes("getProvinceMetadata"));
 assert.ok(mapView.includes("getHistoricalPolity"));
+assert.ok(mapView.includes("createHistoricalInspectorProvince"));
+assert.ok(mapView.includes("repositoryProvince ?? createHistoricalInspectorProvince(historicalMetadata)"));
 assert.ok(mapView.includes("historicalMetadata={historicalMetadata}"));
 assert.ok(inspector.includes("historicalMetadata?.historicalControl"));
 assert.ok(inspector.includes("const displayOwner = historicalMetadata"));
