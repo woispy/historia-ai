@@ -11,6 +11,7 @@ const EPS = 1e-7;
 const MIN_AREA = 0.00005;
 const COAST_TOLERANCE = 0.055;
 const SAMPLE_STEP = 0.12;
+const NEAR_COAST_LIMIT = 1.25;
 const province = (id) => ANATOLIA_PROVINCE_METADATA.find((item) => item.id === id) ?? null;
 const rawAnchor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id]?.anchor ?? item.centroid;
 const landPolygons = () => [...ANATOLIA_PHYSICAL_ATLAS.landPolygons, ...ANATOLIA_PHYSICAL_COAST_CORRECTIONS.map((item) => item.coordinates)];
@@ -28,12 +29,24 @@ function distanceToSegment(point, a, b) {
   const t = d < EPS ? 0 : Math.max(0, Math.min(1, ((point[0] - a[0]) * dx + (point[1] - a[1]) * dy) / d));
   return Math.hypot(point[0] - (a[0] + dx * t), point[1] - (a[1] + dy * t));
 }
+function distanceToPolygon(point, polygon) {
+  let distance = Infinity;
+  for (let i = 0; i < polygon.length; i += 1) distance = Math.min(distance, distanceToSegment(point, polygon[i], polygon[(i + 1) % polygon.length]));
+  return distance;
+}
+function supplementalLandForAnchor(anchorPoint) {
+  return ANATOLIA_NATURAL_EARTH_LAND
+    .map((land) => ({ land, distance: pointInPolygon(anchorPoint, land) ? 0 : distanceToPolygon(anchorPoint, land) }))
+    .filter((entry) => entry.distance <= NEAR_COAST_LIMIT)
+    .sort((a, b) => a.distance - b.distance)
+    .map((entry) => entry.land);
+}
 function inLake(point) { return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygon(point, lake.coordinates)); }
 function isPhysicalLandPoint(point) {
   if (inLake(point)) return false;
   if (landPolygons().some((polygon) => pointInPolygon(point, polygon))) return true;
   let distance = Infinity;
-  for (const polygon of landPolygons()) for (let i = 0; i < polygon.length; i += 1) distance = Math.min(distance, distanceToSegment(point, polygon[i], polygon[(i + 1) % polygon.length]));
+  for (const polygon of landPolygons()) distance = Math.min(distance, distanceToPolygon(point, polygon));
   return distance <= COAST_TOLERANCE;
 }
 function halfPlane(polygon, a, b, c) {
@@ -87,15 +100,16 @@ function clipLandByCell(land, cell) {
 function clipCellToLand(cell, anchorPoint) {
   const primary = landPolygons().map((land) => clipLandByCell(land, cell)).filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
   if (primary.length) return primary;
-  return ANATOLIA_NATURAL_EARTH_LAND
-    .filter((land) => pointInPolygon(anchorPoint, land))
+  return supplementalLandForAnchor(anchorPoint)
     .map((land) => clipLandByCell(land, cell))
     .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
 }
 function fitPolygonToPhysicalLand(polygon, anchorPoint) {
+  const supplemental = supplementalLandForAnchor(anchorPoint)[0];
   let result = polygon;
   for (let iteration = 0; iteration < 64; iteration += 1) {
-    if (area(result) >= MIN_AREA && (isPhysicalLandPoint(centroid(result)) || pointInPolygon(centroid(result), ANATOLIA_NATURAL_EARTH_LAND.find((land) => pointInPolygon(anchorPoint, land)) ?? []))) return result;
+    const center = centroid(result);
+    if (area(result) >= MIN_AREA && (isPhysicalLandPoint(center) || (supplemental && pointInPolygon(center, supplemental)))) return result;
     result = result.map((point) => [anchorPoint[0] + (point[0] - anchorPoint[0]) * 0.94, anchorPoint[1] + (point[1] - anchorPoint[1]) * 0.94]);
   }
   return [];
