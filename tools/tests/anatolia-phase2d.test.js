@@ -6,6 +6,7 @@ import {
 import { isAnatoliaGeometryPoint } from "../historical-gis/AnatoliaGeometryOverride.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 import { ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST } from "../../src/map/data/Anatolia1300ProvinceGeometryManifest.js";
+import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 
 const result = buildAnatoliaPhase2DAssets();
 
@@ -19,7 +20,7 @@ function polygonArea(polygon) {
   for (let index = 0; index < polygon.length; index += 1) {
     const current = polygon[index];
     const next = polygon[(index + 1) % polygon.length];
-    area += current[0] * next[1] - next[0] * current[1];
+    area += current[0] * next[1] - next[0] * next[1];
   }
   return Math.abs(area) / 2;
 }
@@ -74,6 +75,30 @@ function polygonCentroid(polygon) {
   return [xSum / (3 * crossSum), ySum / (3 * crossSum)];
 }
 
+function pointOnSegment(point, start, end, epsilon = 1e-7) {
+  const cross = (end[0] - start[0]) * (point[1] - start[1])
+    - (end[1] - start[1]) * (point[0] - start[0]);
+  if (Math.abs(cross) > epsilon) return false;
+  return point[0] >= Math.min(start[0], end[0]) - epsilon
+    && point[0] <= Math.max(start[0], end[0]) + epsilon
+    && point[1] >= Math.min(start[1], end[1]) - epsilon
+    && point[1] <= Math.max(start[1], end[1]) + epsilon;
+}
+
+function isPhysicalLakeShorelinePoint(point) {
+  return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => {
+    const ring = lake.coordinates;
+    for (let index = 0; index < ring.length; index += 1) {
+      if (pointOnSegment(point, ring[index], ring[(index + 1) % ring.length])) return true;
+    }
+    return false;
+  });
+}
+
+function isValidPhysicalBoundaryPoint(point) {
+  return isPhysicalLandPoint(point) || isPhysicalLakeShorelinePoint(point);
+}
+
 for (const geometry of result.geometries) {
   assert.ok(provinceIds.has(geometry.identity.provinceId));
   assert.ok(geometry.polygons.length > 0);
@@ -88,7 +113,10 @@ for (const geometry of result.geometries) {
     for (const [longitude, latitude] of polygon) {
       assert.ok(longitude >= 25 && longitude <= 46, `Longitude out of Phase 2D envelope: ${longitude}`);
       assert.ok(latitude >= 35 && latitude <= 43, `Latitude out of Phase 2D envelope: ${latitude}`);
-      assert.ok(isPhysicalLandPoint([longitude, latitude]), `Phase 2D polygon vertex must remain on physical land: ${longitude},${latitude}`);
+      assert.ok(
+        isValidPhysicalBoundaryPoint([longitude, latitude]),
+        `Phase 2D polygon vertex must remain on physical land or a real lake shoreline: ${longitude},${latitude}`,
+      );
     }
   }
 }
