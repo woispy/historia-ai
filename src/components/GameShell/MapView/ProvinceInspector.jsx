@@ -140,6 +140,8 @@ function ProvinceInspector({ province, country, historicalMetadata = null, histo
   const mountainsDetail = province?.mountainsDetail ?? null;
   const passesName = province?.passesName ?? null;
   const passesDetail = province?.passesDetail ?? null;
+  const naturalBoundarySummary = province?.naturalBoundarySummary ?? null;
+  const naturalBoundaryFeatures = province?.naturalBoundaryFeatures ?? [];
   const displayOwner = historicalMetadata
     ? polityLabel(controller, historicalPolity)
     : (country?.name ?? country?.displayName ?? viewModel.owner);
@@ -195,10 +197,16 @@ function ProvinceInspector({ province, country, historicalMetadata = null, histo
             <div><dt>Tarihsel Güven</dt><dd>{historicalConfidenceLabel(historical?.confidence)}</dd></div>
             <div><dt>Tarihsel Bölge</dt><dd>{historicalRegionLabel(historicalMetadata.regionId)}</dd></div>
             <div><dt>Başlangıç</dt><dd>{valueOrDash(historical?.startYear)}</dd></div>
+            {naturalBoundarySummary && <div><dt>Doğal Sınır</dt><dd>{naturalBoundarySummary}</dd></div>}
           </>
         )}
       </dl>
 
+      {naturalBoundaryFeatures.length > 0 && (
+        <p className="province-inspector__note">
+          <strong>Doğal referanslar:</strong> {naturalBoundaryFeatures.join(" · ")}.
+        </p>
+      )}
       {mountainsDetail && <p className="province-inspector__note">{mountainsName}: {mountainsDetail}.</p>}
       {passesDetail && <p className="province-inspector__note">{passesName}: {passesDetail}.</p>}
       {riverDetail && <p className="province-inspector__note">{riverName}: {riverDetail}.</p>}
