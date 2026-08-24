@@ -12,6 +12,7 @@ import { ANATOLIA_STRATEGIC_PASSES, ANATOLIA_RIVER_CROSSINGS } from "../../src/m
 const HISTORICAL_DATE = "1300-01-01";
 const BOUNDARY_SAMPLE_STEP = 0.06;
 const MAX_BOUNDARY_NUMERICAL_DRIFT = 0.0001;
+const DETERMINISTIC_WEIGHT_ITERATIONS = 24;
 
 function boundarySiteCount(polygon) {
   if (!Array.isArray(polygon) || polygon.length < 2) return 0;
@@ -221,6 +222,7 @@ export function buildAnatoliaPhase2DAssets(regions) {
     supportSiteCount: assets.supportSiteCount ?? 0,
     naturalFeatureSiteCount: assets.naturalFeatureSiteCount ?? naturalFeatureSiteCount(),
     barrierSiteCount: assets.barrierSiteCount ?? physicalBoundarySiteCount(),
+    weightIterations: assets.weightIterations ?? DETERMINISTIC_WEIGHT_ITERATIONS,
   };
 }
 
