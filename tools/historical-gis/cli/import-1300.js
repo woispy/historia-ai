@@ -49,6 +49,13 @@ for (const geometry of phase2D.geometries) {
   if (!metadata) throw new Error(`Phase 2D geometry has no matching province metadata: ${provinceId}`);
   if (assetIds.has(provinceId)) throw new Error(`Duplicate Phase 2D province id: ${provinceId}`);
 
+  const coordinates = geometry.geometry?.coordinates;
+  if (!Array.isArray(coordinates) || coordinates.length === 0) {
+    throw new Error(`Phase 2D geometry has no polygon coordinates: ${provinceId}`);
+  }
+  const polygons = coordinates.filter((ring) => Array.isArray(ring) && ring.length >= 3);
+  if (!polygons.length) throw new Error(`Phase 2D geometry has no usable polygon rings: ${provinceId}`);
+
   const controllerAt1300 = metadata.historicalControl?.controllerAt1300 ?? metadata.countryId ?? null;
   const province = {
     header: {
@@ -97,6 +104,7 @@ for (const geometry of phase2D.geometries) {
   provinces.push(province);
   geometries.push({
     ...geometry,
+    polygons,
     identity: {
       ...(geometry.identity ?? {}),
       id: provinceId,
@@ -126,7 +134,7 @@ for (const region of sourceRegionsOutsidePhase2D) {
   });
 }
 
-const polygonCount = geometries.reduce((total, geometry) => total + geometry.polygons.length, 0);
+const polygonCount = geometries.reduce((total, geometry) => total + (geometry.polygons?.length ?? 0), 0);
 await fs.writeFile(runtimePath, `${JSON.stringify({
 schemaVersion: 3,
 assetType: "historical-runtime",
