@@ -98,7 +98,8 @@ for (const geometry of phase2D.geometries) {
   provinces.push(province);
 }
 for (const geometry of phase2D.geometries) {
-  if (assetIds.has(geometry.identity.id) === false) throw new Error(`Phase 2D geometry has no matching province asset: ${geometry.identity.id}`);
+  const provinceId = geometry.identity.provinceId ?? geometry.identity.id;
+  if (assetIds.has(provinceId) === false) throw new Error(`Phase 2D geometry has no matching province asset: ${provinceId}`);
   geometries.push(geometry);
 }
 
