@@ -23,17 +23,34 @@ function polygonArea(polygon) {
   return Math.abs(result) / 2;
 }
 
+function pointOnSegment(point, start, end, tolerance = 1e-9) {
+  const dx = end[0] - start[0];
+  const dy = end[1] - start[1];
+  const cross = dx * (point[1] - start[1]) - dy * (point[0] - start[0]);
+  if (Math.abs(cross) > tolerance) return false;
+  return point[0] >= Math.min(start[0], end[0]) - tolerance
+    && point[0] <= Math.max(start[0], end[0]) + tolerance
+    && point[1] >= Math.min(start[1], end[1]) - tolerance
+    && point[1] <= Math.max(start[1], end[1]) + tolerance;
+}
+
 function pointInPolygon(point, polygon) {
   let inside = false;
   for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index += 1) {
     const current = polygon[index];
     const before = polygon[previous];
+    if (pointOnSegment(point, before, current)) return true;
     if (
       (current[1] > point[1]) !== (before[1] > point[1])
       && point[0] < ((before[0] - current[0]) * (point[1] - current[1])) / ((before[1] - current[1]) || 1e-12) + current[0]
     ) inside = !inside;
   }
   return inside;
+}
+
+function pointInStrictPolygon(point, polygon) {
+  if (polygon.some((vertex, index) => pointOnSegment(point, vertex, polygon[(index + 1) % polygon.length]))) return false;
+  return pointInPolygon(point, polygon);
 }
 
 function pointToSegmentDistance(point, start, end) {
@@ -72,8 +89,8 @@ function polygonCentroid(polygon) {
 
 function ownedByGeometry(point, geometry) {
   const outer = geometry.polygons[0];
-  if (!pointInPolygon(point, outer)) return false;
-  return !(geometry.holes ?? []).some((hole) => pointInPolygon(point, hole));
+  if (!pointInStrictPolygon(point, outer)) return false;
+  return !(geometry.holes ?? []).some((hole) => pointInStrictPolygon(point, hole));
 }
 
 function isAtlasLandPoint(point) {
