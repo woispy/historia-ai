@@ -48,6 +48,30 @@ function distanceToSegment(point, a, b) {
   return Math.hypot(point[0] - (a[0] + dx * t), point[1] - (a[1] + dy * t));
 }
 
+function nearestLandPoint(point) {
+  let best = null;
+  let bestDistance = Infinity;
+  for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
+    for (let i = 0; i < polygon.length; i += 1) {
+      const a = polygon[i];
+      const b = polygon[(i + 1) % polygon.length];
+      const dx = b[0] - a[0];
+      const dy = b[1] - a[1];
+      const lengthSquared = dx * dx + dy * dy;
+      const t = lengthSquared < EPS
+        ? 0
+        : Math.max(0, Math.min(1, ((point[0] - a[0]) * dx + (point[1] - a[1]) * dy) / lengthSquared));
+      const candidate = [a[0] + dx * t, a[1] + dy * t];
+      const candidateDistance = Math.hypot(point[0] - candidate[0], point[1] - candidate[1]);
+      if (candidateDistance < bestDistance) {
+        bestDistance = candidateDistance;
+        best = candidate;
+      }
+    }
+  }
+  return best;
+}
+
 function signedArea(polygon) {
   let sum = 0;
   for (let i = 0; i < polygon.length; i += 1) {
@@ -175,7 +199,8 @@ function clipLandByCell(land, cell) {
 }
 
 function recoverLandConstrainedCell(cell, anchor) {
-  if (!pointInPolygon(anchor, cell) || !isRecoverableLandPoint(anchor)) return [];
+  let center = isRecoverableLandPoint(anchor) ? anchor : nearestLandPoint(anchor);
+  if (!center || !pointInPolygon(center, cell) || !isRecoverableLandPoint(center)) return [];
   const points = [];
   for (let index = 0; index < RECOVERY_RAYS; index += 1) {
     const angle = (index / RECOVERY_RAYS) * Math.PI * 2;
@@ -184,11 +209,11 @@ function recoverLandConstrainedCell(cell, anchor) {
     let high = RECOVERY_MAX_RADIUS;
     for (let iteration = 0; iteration < RECOVERY_BISECTIONS; iteration += 1) {
       const radius = (low + high) / 2;
-      const sample = [anchor[0] + direction[0] * radius, anchor[1] + direction[1] * radius];
+      const sample = [center[0] + direction[0] * radius, center[1] + direction[1] * radius];
       if (pointInPolygon(sample, cell) && isRecoverableLandPoint(sample)) low = radius;
       else high = radius;
     }
-    points.push([anchor[0] + direction[0] * low, anchor[1] + direction[1] * low]);
+    points.push([center[0] + direction[0] * low, center[1] + direction[1] * low]);
   }
   return points;
 }
