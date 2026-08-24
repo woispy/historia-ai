@@ -20,8 +20,20 @@ const MAX_ANCHOR_SNAP_DISTANCE = 1.2;
 
 const rawAnchor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id]?.anchor ?? item.centroid;
 
+function pointOnSegment(point, start, end) {
+  const crossValue = (end[0] - start[0]) * (point[1] - start[1]) - (end[1] - start[1]) * (point[0] - start[0]);
+  if (Math.abs(crossValue) > EPS) return false;
+  return point[0] >= Math.min(start[0], end[0]) - EPS
+    && point[0] <= Math.max(start[0], end[0]) + EPS
+    && point[1] >= Math.min(start[1], end[1]) - EPS
+    && point[1] <= Math.max(start[1], end[1]) + EPS;
+}
+
 function pointInPolygon(point, polygon) {
   if (!polygon?.length) return false;
+  for (let index = 0; index < polygon.length; index += 1) {
+    if (pointOnSegment(point, polygon[index], polygon[(index + 1) % polygon.length])) return true;
+  }
   let inside = false;
   for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
     const a = polygon[i];
