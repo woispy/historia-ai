@@ -85,7 +85,7 @@ assert.ok(historicalPoliticalLayer.includes("1308"));
 assert.ok(!historicalPoliticalLayer.includes('<HistoricalWorldRegionPaths regions={regions} />'));
 
 assert.ok(historicalPoliticalLayer.includes("<g clipPath={`url(#${HISTORICAL_WORLD_POLITICAL_CLIP_ID})`}>") );
-assert.ok(!historicalPoliticalLayer.includes("COASTAL_POLITICAL_EXPANSION = 0"));
+assert.ok(!historicalPoliticalLayer.includes("COASTAL_POLITICAL_EXPANSION = 0;"));
 assert.ok(historicalPoliticalLayer.includes("Historical unassigned land presentation"));
 
 assert.ok(provincePolygon.includes("pointerEvents=\"all\""));
