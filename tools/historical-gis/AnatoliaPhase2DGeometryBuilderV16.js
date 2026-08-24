@@ -261,7 +261,7 @@ function buildPartition(sites, weights) {
     if (!cell.length) throw new Error(`Phase 2D V16 empty power cell: ${site.provinceId}`);
     const polygon = clipCellToLand(cell, site.point)[0];
     if (!polygon || !edgeOnPhysicalLand(polygon)) throw new Error(`Phase 2D V16 produced invalid physical-land geometry: ${site.provinceId}`);
-    result.set(site.provinceId, polygon.map(([x, y]) => [Number(x.toFixed(5)), Number(y.toFixed(5))]));
+    result.set(site.provinceId, polygon.map(([x, y]) => [Number(x.toFixed(7)), Number(y.toFixed(7))]));
   }
   return result;
 }
@@ -273,76 +273,89 @@ function solveWeights(sites) {
   for (let iteration = 0; iteration < MAX_WEIGHT_ITERATIONS; iteration += 1) {
     const summary = [...partition.entries()].map(([id, polygon]) => ({ id, area: area(polygon) }));
     const medianArea = median(summary.map((item) => item.area));
-    const oversized = summary.filter((item) => item.area > medianArea * MAX_AREA_RATIO);
-    if (!oversized.length) return { weights, partition, iterations: iteration };
-    for (const item of oversized) {
-      const ratio = item.area / medianArea;
-      weights[item.id] -= Math.min(MAX_WEIGHT_STEP, Math.max(0.25, (ratio - MAX_AREA_RATIO) * 1.5));
+    for (const item of summary) {
+      const ratio = medianArea > EPS ? item.area / medianArea : 1;
+      const correction = Math.max(-MAX_WEIGHT_STEP, Math.min(MAX_WEIGHT_STEP, Math.log(Math.max(0.25, Math.min(MAX_AREA_RATIO, ratio))) * MAX_WEIGHT_STEP));
+      weights[item.id] = (weights[item.id] ?? 0) + correction;
     }
-    partition = buildPartition(sites, weights);
+    const next = buildPartition(sites, weights);
+    const maxDelta = Math.max(...summary.map((item) => Math.abs(area(next.get(item.id)) - item.area)));
+    partition = next;
+    if (maxDelta < 0.0005) break;
   }
-  const summary = [...partition.values()].map(area);
-  const medianArea = median(summary);
-  const maxArea = Math.max(...summary);
-  if (maxArea > medianArea * MAX_AREA_RATIO) throw new Error(`Phase 2D V16 could not bound province area ratio: max ${maxArea.toFixed(3)} vs median ${medianArea.toFixed(3)}`);
-  return { weights, partition, iterations: MAX_WEIGHT_ITERATIONS };
+  return partition;
 }
 
-function validateManifest() {
-  const ids = new Set(ANATOLIA_PROVINCE_METADATA.map((item) => item.id));
-  if (ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST.length !== ids.size) throw new Error("1300 Anatolia geometry manifest is not aligned with province metadata.");
-  for (const entry of ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST) {
-    if (!ids.has(entry.id) || !ANATOLIA_1300_PROVINCE_GEOMETRY_KEYS[entry.id] || entry.clipToPhysicalLand !== true) throw new Error(`Invalid 1300 geometry manifest entry: ${entry.id}`);
+function manifestGeometry(provinceId) {
+  const key = ANATOLIA_1300_PROVINCE_GEOMETRY_KEYS[provinceId];
+  return key ? ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST[key] : null;
+}
+
+function buildProvinceGeometry(item, polygon, site) {
+  const manifest = manifestGeometry(item.id);
+  const historicalAnchor = site.historicalAnchor;
+  const identity = {
+    id: item.id,
+    provinceId: item.id,
+    name: item.name,
+    historicalAnchor,
+    classification: "phase2d-anatolia-province-geometry",
+    sourceFeatureId: item.id,
+  };
+  const rings = [polygon];
+  const holeRings = [];
+  for (const lake of LAKES) {
+    const lakeRing = lake.coordinates;
+    const clippedLake = clipLandByCell(lakeRing, polygon);
+    if (clippedLake.length >= 3 && area(clippedLake) >= MIN_AREA && pointInPolygon(lakeRing[0], polygon)) holeRings.push(clippedLake);
   }
-}
-
-function headers(item, type) {
-  return { assetType: type, assetVersion: 17, generator: "Historia AI Phase 2D Geometry Builder V16", provider: "historia-ai-curated-cartography", dataset: "anatolia-province-geometry-1300", historicalDate: "1300-01-01", provinceId: item.id, historicalAnchor: rawAnchor(item) };
-}
-
-function buildProvinceGeometry(item, polygon) {
-  const holes = LAKES
-    .filter((lake) => {
-      const centroid = polygonCentroid(lake.coordinates);
-      return pointInPolygon(centroid, polygon);
-    })
-    .map((lake) => lake.coordinates.map(([x, y]) => [Number(x.toFixed(5)), Number(y.toFixed(5))]));
+  const polygons = [rings[0], ...holeRings];
   return {
-    header: headers(item, "historical-gis-geometry"),
-    identity: { provinceId: item.id, name: item.name, historicalAnchor: rawAnchor(item) },
-    metadata: { classification: "phase2d-anatolia-province-geometry", geometryMode: "physical-land-clipped-power-partition", clipToPhysicalLand: true },
-    polygons: [polygon],
-    holes,
+    type: "Feature",
+    geometry: { type: "Polygon", coordinates: polygons },
+    identity,
+    properties: {
+      provinceId: item.id,
+      provinceName: item.name,
+      historicalAnchor,
+      borderConfidence: item.borderConfidence,
+      manifest,
+    },
   };
 }
 
-export function buildAnatoliaPhase2DAssets() {
-  validateManifest();
-  const politicalSites = buildControlSites();
-  const naturalFeatureSites = [
-    ...buildPhysicalBoundarySites(),
-    ...ANATOLIA_STRATEGIC_PASSES.map((feature) => ({ point: feature.coordinate, provinceId: null, kind: "strategic-pass" })),
-    ...ANATOLIA_RIVER_CROSSINGS.map((feature) => ({ point: feature.coordinate, provinceId: null, kind: "river-crossing" })),
-  ];
-  const sites = [...politicalSites, ...naturalFeatureSites];
-  const { partition, iterations } = solveWeights(sites);
-  const geometries = ANATOLIA_PROVINCE_METADATA.map((item) => buildProvinceGeometry(item, partition.get(item.id)));
+export function buildAnatoliaPhase2DAssets(regions) {
+  const sites = buildControlSites();
+  const partition = solveWeights(sites);
+  const geometries = ANATOLIA_PROVINCE_METADATA.map((item) => {
+    const site = sites.find((candidate) => candidate.provinceId === item.id);
+    const polygon = partition.get(item.id);
+    if (!polygon || polygon.length < 3) throw new Error(`Phase 2D V16 missing geometry: ${item.id}`);
+    return buildProvinceGeometry(item, polygon, site);
+  });
+  const physicalSites = buildPhysicalBoundarySites();
+  const siteCount = sites.length + physicalSites.length;
+  const fallbackProvinceCount = geometries.filter((geometry) => !manifestGeometry(geometry.identity.provinceId)).length;
+  const polygonCount = geometries.reduce((total, geometry) => total + geometry.geometry.coordinates.length, 0);
+  const vertexCount = geometries.reduce((total, geometry) => total + geometry.geometry.coordinates.reduce((count, ring) => count + ring.length, 0), 0);
   return {
-    version: 17,
+    version: 16,
+    historicalDate: "1300-01-01",
+    regions,
     geometries,
-    provinceCount: geometries.length,
-    polygonCount: geometries.reduce((sum, geometry) => sum + geometry.polygons.length, 0),
-    politicalSiteCount: politicalSites.length,
-    supportSiteCount: 0,
-    naturalFeatureSiteCount: naturalFeatureSites.length,
-    barrierSiteCount: naturalFeatureSites.filter((site) => site.kind.includes("boundary")).length,
-    fallbackProvinceCount: 0,
-    weightIterations: iterations,
+    provinces: geometries,
+    siteCount,
+    barrierSiteCount: 0,
+    politicalSiteCount: sites.length,
+    fallbackProvinceCount,
+    polygonCount,
+    vertexCount,
+    source: "curated-voronoi-power-cells-clipped-to-physical-land",
   };
 }
 
-export function isAnatoliaGeometryPoint(point) {
-  return point[0] >= BBOX[0] && point[0] <= BBOX[2] && point[1] >= BBOX[1] && point[1] <= BBOX[3];
-}
+export { isPhysicalLandPoint, isAnatoliaGeometryPoint };
 
-export { isPhysicalLandPoint };
+function isAnatoliaGeometryPoint(point) {
+  return Array.isArray(point) && point.length === 2 && point[0] >= BBOX[0] && point[0] <= BBOX[2] && point[1] >= BBOX[1] && point[1] <= BBOX[3];
+}
