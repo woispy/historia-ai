@@ -11,19 +11,16 @@
 
 import { memo, useMemo } from "react";
 
-function buildPathData(polygons) {
-  if (!Array.isArray(polygons)) return "";
+function ringPath(ring) {
+  if (!Array.isArray(ring) || ring.length < 3) return "";
+  const [first, ...rest] = ring;
+  return [`M ${first[0]} ${first[1]}`, ...rest.map(([x, y]) => `L ${x} ${y}`), "Z"].join(" ");
+}
 
-  return polygons
-    .map((polygon) => {
-      if (!Array.isArray(polygon) || polygon.length < 3) return "";
-      const [first, ...rest] = polygon;
-      return [
-        `M ${first[0]} ${first[1]}`,
-        ...rest.map(([x, y]) => `L ${x} ${y}`),
-        "Z",
-      ].join(" ");
-    })
+function buildPathData(polygons, holes = []) {
+  if (!Array.isArray(polygons)) return "";
+  return [...polygons, ...(Array.isArray(holes) ? holes : [])]
+    .map(ringPath)
     .filter(Boolean)
     .join(" ");
 }
@@ -39,8 +36,8 @@ function ProvincePolygon({
   renderFill = true,
 }) {
   const d = useMemo(
-    () => buildPathData(geometry?.polygons),
-    [geometry?.polygons],
+    () => buildPathData(geometry?.polygons, geometry?.holes),
+    [geometry?.polygons, geometry?.holes],
   );
 
   if (!d) return null;
@@ -60,6 +57,7 @@ function ProvincePolygon({
     <path
       d={d}
       fill={visualFill}
+      fillRule="evenodd"
       fillOpacity={visualOpacity}
       stroke="none"
       pointerEvents="all"
