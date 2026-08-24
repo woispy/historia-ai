@@ -53,11 +53,25 @@ for (const province of result.provinces) {
 }
 
 function polygonCentroid(polygon) {
-  const sum = polygon.reduce(
-    (total, [longitude, latitude]) => [total[0] + longitude, total[1] + latitude],
-    [0, 0],
-  );
-  return [sum[0] / polygon.length, sum[1] / polygon.length];
+  let crossSum = 0;
+  let xSum = 0;
+  let ySum = 0;
+  for (let index = 0; index < polygon.length; index += 1) {
+    const [x1, y1] = polygon[index];
+    const [x2, y2] = polygon[(index + 1) % polygon.length];
+    const cross = x1 * y2 - x2 * y1;
+    crossSum += cross;
+    xSum += (x1 + x2) * cross;
+    ySum += (y1 + y2) * cross;
+  }
+  if (Math.abs(crossSum) < 1e-12) {
+    const sum = polygon.reduce(
+      (total, [longitude, latitude]) => [total[0] + longitude, total[1] + latitude],
+      [0, 0],
+    );
+    return [sum[0] / polygon.length, sum[1] / polygon.length];
+  }
+  return [xSum / (3 * crossSum), ySum / (3 * crossSum)];
 }
 
 for (const geometry of result.geometries) {
