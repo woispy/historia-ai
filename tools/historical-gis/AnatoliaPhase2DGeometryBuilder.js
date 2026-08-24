@@ -7,6 +7,7 @@ import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtla
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PHYSICAL_COAST_CORRECTIONS } from "../../src/map/data/AnatoliaPhysicalCoastCorrections.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
+import { ANATOLIA_STRATEGIC_PASSES, ANATOLIA_RIVER_CROSSINGS } from "../../src/map/data/AnatoliaProvinceRefinement.js";
 
 const HISTORICAL_DATE = "1300-01-01";
 const BOUNDARY_SAMPLE_STEP = 0.06;
@@ -39,6 +40,14 @@ function expectedV16SiteCount() {
     0,
   );
   return 38 + physicalLand + coastCorrections + lakes;
+}
+
+function physicalBoundarySiteCount() {
+  return expectedV16SiteCount() - ANATOLIA_PROVINCE_METADATA.length;
+}
+
+function naturalFeatureSiteCount() {
+  return ANATOLIA_STRATEGIC_PASSES.length + ANATOLIA_RIVER_CROSSINGS.length;
 }
 
 function pointOnSegmentProjection(point, start, end) {
@@ -208,7 +217,10 @@ export function buildAnatoliaPhase2DAssets(regions) {
     siteCount,
     polygonCount,
     fallbackProvinceCount,
-    barrierSiteCount: 0,
+    politicalSiteCount: assets.politicalSiteCount ?? ANATOLIA_PROVINCE_METADATA.length,
+    supportSiteCount: assets.supportSiteCount ?? 0,
+    naturalFeatureSiteCount: assets.naturalFeatureSiteCount ?? naturalFeatureSiteCount(),
+    barrierSiteCount: assets.barrierSiteCount ?? physicalBoundarySiteCount(),
   };
 }
 
