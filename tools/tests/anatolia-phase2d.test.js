@@ -7,10 +7,7 @@ import {
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 import { ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST } from "../../src/map/data/Anatolia1300ProvinceGeometryManifest.js";
 
-const result = buildAnatoliaPhase2DAssets([
-  { polygons: [[[29.9, 40.7], [30.1, 40.7], [30.1, 40.9], [29.9, 40.7]]] },
-  { polygons: [[[27.4, 38.4], [27.7, 38.4], [27.7, 38.7], [27.4, 38.4]]] },
-]);
+const result = buildAnatoliaPhase2DAssets();
 
 assert.equal(result.historicalDate, "1300-01-01");
 assert.equal(result.provinceCount, ANATOLIA_PROVINCE_METADATA.length);
@@ -38,7 +35,7 @@ assert.equal(
 );
 console.log(`Phase 2D cartographic site count: ${result.siteCount}`);
 assert.ok(result.siteCount >= 1000, "Phase 2D must use a dense physical/cartographic site field");
-assert.ok(result.barrierSiteCount >= 300, "Phase 2D must include a substantial physical water/coast barrier field");
+assert.equal(result.barrierSiteCount, 0, "Physical water/coast features must constrain political geometry through land clipping, not compete as political Voronoi sites");
 assert.ok(
   result.politicalSiteCount >= result.provinceCount,
   "Phase 2D must retain at least one usable political control site per province",
@@ -89,6 +86,6 @@ assert.equal(isAnatoliaGeometryPoint([26.5556, 41.6772]), false, "Adrianopolis m
 
 console.log(
   `Phase 2D Anatolia geometry tests passed: ${result.provinceCount} provinces, `
-  + `${result.siteCount} sites (${result.barrierSiteCount} physical barriers), `
+  + `${result.siteCount} political/cartographic sites, `
   + `${result.polygonCount} polygons and ${vertexCount} vertices.`,
 );
