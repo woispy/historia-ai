@@ -5,6 +5,7 @@ import { getProvince } from "../../../provinces";
 import { getProvinceMetadata } from "../../../map/data/AnatoliaProvinceMetadata.js";
 import { getAnatolia1300Hydrography } from "../../../map/data/Anatolia1300Hydrography.js";
 import { getAnatolia1300Lake } from "../../../map/data/Anatolia1300Lakes.js";
+import { getAnatolia1300NaturalBoundary } from "../../../map/data/Anatolia1300NaturalBoundaries.js";
 import { getAnatolia1300PhysicalFeatures } from "../../../map/data/Anatolia1300PhysicalFeatures.js";
 import { getHistoricalPolity } from "../../../world/map/historical/HistoricalPoliticalRuntime.js";
 import { WorldMap } from "../../../map";
@@ -18,12 +19,17 @@ function getScenarioStartDate(gameSession) {
     ?? null;
 }
 
+function getHistoricalNaturalBoundary(provinceId) {
+  return getAnatolia1300NaturalBoundary(provinceId);
+}
+
 function createHistoricalInspectorProvince(metadata) {
   if (!metadata) return null;
 
   const hydrography = getAnatolia1300Hydrography(metadata.id);
   const lake = getAnatolia1300Lake(metadata.id);
   const physicalFeatures = getAnatolia1300PhysicalFeatures(metadata.id);
+  const naturalBoundary = getHistoricalNaturalBoundary(metadata.id);
 
   return {
     id: metadata.id,
@@ -49,6 +55,8 @@ function createHistoricalInspectorProvince(metadata) {
     mountainsDetail: physicalFeatures?.mountains?.detail ?? null,
     passesName: physicalFeatures?.passes?.name ?? null,
     passesDetail: physicalFeatures?.passes?.detail ?? null,
+    naturalBoundarySummary: naturalBoundary?.summary ?? null,
+    naturalBoundaryFeatures: naturalBoundary?.features ?? [],
     historicalControl: metadata.historicalControl ?? null,
   };
 }
@@ -59,6 +67,7 @@ function mergeHistoricalPhysicalFeatures(province, historicalMetadata) {
   const hydrography = getAnatolia1300Hydrography(historicalMetadata.id);
   const lake = getAnatolia1300Lake(historicalMetadata.id);
   const physicalFeatures = getAnatolia1300PhysicalFeatures(historicalMetadata.id);
+  const naturalBoundary = getHistoricalNaturalBoundary(historicalMetadata.id);
 
   return {
     ...province,
@@ -72,6 +81,8 @@ function mergeHistoricalPhysicalFeatures(province, historicalMetadata) {
     mountainsDetail: physicalFeatures?.mountains?.detail ?? null,
     passesName: physicalFeatures?.passes?.name ?? null,
     passesDetail: physicalFeatures?.passes?.detail ?? null,
+    naturalBoundarySummary: naturalBoundary?.summary ?? null,
+    naturalBoundaryFeatures: naturalBoundary?.features ?? [],
   };
 }
 
