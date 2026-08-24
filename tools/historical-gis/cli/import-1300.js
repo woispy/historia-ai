@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { downloadHistorical1300GeoJson, importHistoricalGeoJson } from "../HistoricalGeometryImporter.js";
 import { buildHistoricalGeometryAsset, buildHistoricalProvinceAsset } from "../HistoricalProvinceAssetBuilder.js";
 import { buildAnatoliaPhase2DAssets, isAnatoliaGeometryPoint } from "../AnatoliaPhase2DGeometryBuilder.js";
+import { ANATOLIA_PROVINCE_METADATA } from "../../../src/map/data/AnatoliaProvinceMetadata.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const inputArgument = process.argv[2] ?? "--download";
@@ -29,6 +30,7 @@ const provinces = [];
 const geometries = [];
 const assetIds = new Set();
 const sourceRegionsOutsidePhase2D = [];
+const phase2DMetadataById = new Map(ANATOLIA_PROVINCE_METADATA.map((item) => [item.id, item]));
 
 for (const region of regions) {
   const polygon = region.polygons?.find((candidate) => Array.isArray(candidate) && candidate.length >= 3);
@@ -41,9 +43,58 @@ for (const region of regions) {
 }
 
 const phase2D = buildAnatoliaPhase2DAssets(regions);
-for (const province of phase2D.provinces) {
-  if (assetIds.has(province.identity.id)) throw new Error(`Duplicate Phase 2D province id: ${province.identity.id}`);
-  assetIds.add(province.identity.id);
+for (const geometry of phase2D.geometries) {
+  const provinceId = geometry.identity.provinceId ?? geometry.identity.id;
+  const metadata = phase2DMetadataById.get(provinceId);
+  if (!metadata) throw new Error(`Phase 2D geometry has no matching province metadata: ${provinceId}`);
+  if (assetIds.has(provinceId)) throw new Error(`Duplicate Phase 2D province id: ${provinceId}`);
+
+  const controllerAt1300 = metadata.historicalControl?.controllerAt1300 ?? metadata.countryId ?? null;
+  const province = {
+    header: {
+      assetType: "province",
+      assetVersion: 4,
+      generator: "Historia AI Phase 2D Geometry Builder V16",
+      provider: "historia-ai-curated-cartography",
+      dataset: "anatolia-province-geometry-1300",
+      historicalDate: "1300-01-01",
+      provinceId,
+      historicalAnchor: geometry.identity.historicalAnchor ?? metadata.centroid,
+    },
+    identity: {
+      id: provinceId,
+      name: metadata.name,
+    },
+    references: {
+      geometryId: provinceId,
+      countryId: metadata.countryId,
+      capitalCityId: metadata.cityId,
+    },
+    ownership: {
+      countryId: controllerAt1300,
+      ownerId: controllerAt1300,
+    },
+    historical: {
+      sourceFeatureId: provinceId,
+      sourceFeatureIndex: ANATOLIA_PROVINCE_METADATA.indexOf(metadata),
+      sourceName: metadata.name,
+      subject: metadata.countryId,
+      partOf: metadata.regionId,
+      borderPrecision: metadata.borderConfidence,
+      classification: "phase2d-anatolia-province-geometry",
+      precision: metadata.borderConfidence,
+      anchor: geometry.identity.historicalAnchor ?? metadata.centroid,
+      inferenceNotice: metadata.historicalControl?.note ?? null,
+    },
+    administration: { governorId: null },
+    population: { total: 0 },
+    economy: { development: 0, wealth: 0 },
+    military: { supplyLimit: 0 },
+    culture: { primaryCulture: null },
+    religion: { primaryReligion: null },
+  };
+
+  assetIds.add(provinceId);
   provinces.push(province);
 }
 for (const geometry of phase2D.geometries) {
