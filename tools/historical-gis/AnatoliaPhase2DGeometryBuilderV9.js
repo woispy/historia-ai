@@ -21,6 +21,9 @@ const MAINLAND_MIN_AREA = 5;
 const MAX_AREA_RATIO = 4.2;
 const MAX_WEIGHT_ITERATIONS = 24;
 const MAX_WEIGHT_STEP = 1.0;
+const RECOVERY_MAX_RADIUS = 2.5;
+const RECOVERY_RAYS = 144;
+const RECOVERY_BISECTIONS = 18;
 
 const rawAnchor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id]?.anchor ?? item.centroid;
 
@@ -164,13 +167,35 @@ function clipLandByCell(land, cell) {
   return output;
 }
 
-function clipCellToMainland(cell, provinceId) {
+function recoverLandConstrainedCell(cell, anchor) {
+  if (!pointInPolygon(anchor, cell) || !isPhysicalLandPoint(anchor)) return [];
+  const points = [];
+  for (let index = 0; index < RECOVERY_RAYS; index += 1) {
+    const angle = (index / RECOVERY_RAYS) * Math.PI * 2;
+    const direction = [Math.cos(angle), Math.sin(angle)];
+    let low = 0;
+    let high = RECOVERY_MAX_RADIUS;
+    for (let iteration = 0; iteration < RECOVERY_BISECTIONS; iteration += 1) {
+      const radius = (low + high) / 2;
+      const sample = [anchor[0] + direction[0] * radius, anchor[1] + direction[1] * radius];
+      if (pointInPolygon(sample, cell) && isPhysicalLandPoint(sample)) low = radius;
+      else high = radius;
+    }
+    points.push([anchor[0] + direction[0] * low, anchor[1] + direction[1] * low]);
+  }
+  return points;
+}
+
+function clipCellToMainland(cell, provinceId, anchor) {
   const polygons = landPolygons()
     .map((land) => clipLandByCell(land, cell))
     .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA)
     .sort((a, b) => area(b) - area(a));
-  if (!polygons.length) throw new Error(`Phase 2D V9 ${provinceId} produced no physical-land geometry.`);
-  return polygons[0];
+  if (polygons.length) return polygons[0];
+
+  const recovered = recoverLandConstrainedCell(cell, anchor);
+  if (recovered.length >= 3 && area(recovered) >= MIN_AREA) return recovered;
+  throw new Error(`Phase 2D V9 ${provinceId} produced no physical-land geometry.`);
 }
 
 function buildControlSites() {
@@ -199,7 +224,7 @@ function buildPartition(sites, weights) {
     const site = sites[index];
     const cell = powerCell(index, sites, weights);
     if (!cell.length) throw new Error(`Phase 2D V9 empty power cell: ${site.provinceId}`);
-    partition.set(site.provinceId, clipCellToMainland(cell, site.provinceId));
+    partition.set(site.provinceId, clipCellToMainland(cell, site.provinceId, site.point));
   }
   return partition;
 }
