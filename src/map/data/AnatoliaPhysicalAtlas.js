@@ -34,11 +34,21 @@ const land = [
   [27.48,41.68],[27.10,41.76],[26.70,41.82],[26.35,41.86],[26.00,41.86],
 ];
 
+// The lightweight mainland outline intentionally omits several small
+// peninsulas. Bodrum/Halikarnassos is a genuine Anatolian landform, not an
+// island, so keep its resolved peninsula as a physical-land supplement.
+const cariaBodrumPeninsula = [
+  [27.45,37.53],[27.62,37.45],[27.78,37.31],[27.84,37.15],
+  [27.78,37.02],[27.68,36.92],[27.56,36.86],[27.43,36.82],
+  [27.29,36.83],[27.18,36.91],[27.14,37.02],[27.18,37.13],
+  [27.25,37.24],[27.31,37.34],[27.38,37.44],[27.45,37.53],
+];
+
 export const ANATOLIA_PHYSICAL_ATLAS = Object.freeze({
   version: 2,
   projection: "EPSG:4326",
   bbox: [24.0, 34.0, 45.2, 43.2],
-  landPolygons: [land],
+  landPolygons: [land, cariaBodrumPeninsula],
 
   // Broad water envelopes are deliberately clipped to the physical land mask.
   // This prevents political geometry from ever becoming a sea and lets the
