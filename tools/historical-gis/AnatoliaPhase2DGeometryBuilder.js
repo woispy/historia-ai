@@ -116,21 +116,20 @@ function pointInPolygon(point, polygon) {
   return inside;
 }
 
-function pointOnAnyLakeBoundary(point) {
-  return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => {
-    const ring = lake.coordinates;
-    for (let index = 0; index < ring.length; index += 1) {
-      const start = ring[index];
-      const end = ring[(index + 1) % ring.length];
-      const projected = pointOnSegmentProjection(point, start, end);
-      if (Math.hypot(projected[0] - point[0], projected[1] - point[1]) <= GEOMETRY_EPS) return true;
-    }
-    return false;
-  });
+function pointOnLakeBoundary(lake, point) {
+  const ring = lake.coordinates;
+  if (!Array.isArray(ring) || ring.length < 2) return false;
+  for (let index = 0; index < ring.length; index += 1) {
+    const start = ring[index];
+    const end = ring[(index + 1) % ring.length];
+    const projected = pointOnSegmentProjection(point, start, end);
+    if (Math.hypot(projected[0] - point[0], projected[1] - point[1]) <= GEOMETRY_EPS) return true;
+  }
+  return false;
 }
 
 function lakeContainsPoint(lake, point) {
-  return pointInPolygon(point, lake.coordinates) || pointOnAnyLakeBoundary(point);
+  return pointInPolygon(point, lake.coordinates) || pointOnLakeBoundary(lake, point);
 }
 
 function polygonCentroid(polygon) {
@@ -143,7 +142,7 @@ function polygonCentroid(polygon) {
 function lakeFullyContainedByOuterRing(lake, outerRing) {
   const coordinates = lake.coordinates;
   if (!coordinates.length) return false;
-  return coordinates.every((point) => pointInPolygon(point, outerRing) || pointOnAnyLakeBoundary(point));
+  return coordinates.every((point) => pointInPolygon(point, outerRing) || pointOnLakeBoundary(lake, point));
 }
 
 function lakeHolesForOuterRing(outerRing) {
@@ -183,10 +182,10 @@ function segmentLakeIntersections(start, end, lakeRing) {
   return intersections.filter((item, index, all) => index === 0 || Math.abs(item.t - all[index - 1].t) > GEOMETRY_EPS);
 }
 
-function pathStaysInsideOuterRing(path, outerRing) {
+function pathStaysInsideOuterRing(path, outerRing, lake) {
   if (!path.length) return false;
   for (let index = 0; index < path.length; index += 1) {
-    if (!pointInPolygon(path[index], outerRing) && !pointOnAnyLakeBoundary(path[index])) return false;
+    if (!pointInPolygon(path[index], outerRing) && !pointOnLakeBoundary(lake, path[index])) return false;
     if (index === 0) continue;
     const start = path[index - 1];
     const end = path[index];
@@ -195,13 +194,14 @@ function pathStaysInsideOuterRing(path, outerRing) {
         start[0] + (end[0] - start[0]) * fraction,
         start[1] + (end[1] - start[1]) * fraction,
       ];
-      if (!pointInPolygon(sample, outerRing) && !pointOnAnyLakeBoundary(sample)) return false;
+      if (!pointInPolygon(sample, outerRing) && !pointOnLakeBoundary(lake, sample)) return false;
     }
   }
   return true;
 }
 
-function lakeBoundaryPath(lakeRing, fromPoint, toPoint, outerRing) {
+function lakeBoundaryPath(lake, fromPoint, toPoint, outerRing) {
+  const lakeRing = lake.coordinates;
   let fromIndex = 0;
   let toIndex = 0;
   let fromDistance = Infinity;
@@ -228,9 +228,9 @@ function lakeBoundaryPath(lakeRing, fromPoint, toPoint, outerRing) {
   };
 
   const candidates = [buildPath(1), buildPath(-1)];
-  const valid = candidates.filter((path) => pathStaysInsideOuterRing(path, outerRing));
+  const valid = candidates.filter((path) => pathStaysInsideOuterRing(path, outerRing, lake));
   if (!valid.length) {
-    throw new Error("Phase 2D lake boundary detour leaves its source province outer ring.");
+    throw new Error(`Phase 2D lake boundary detour leaves its source province outer ring: ${lake.name ?? "unnamed lake"}.`);
   }
   return valid.sort((left, right) => {
     const length = (path) => path.slice(1).reduce((sum, point, index) => {
@@ -259,7 +259,7 @@ function waterSafeOuterRing(outerRing) {
         next.push(start);
         const first = intersects[0];
         const last = intersects[intersects.length - 1];
-        const detour = lakeBoundaryPath(lake.coordinates, first.point, last.point, outerRing);
+        const detour = lakeBoundaryPath(lake, first.point, last.point, outerRing);
         next.push(...detour.slice(0, -1));
         next.push(last.point);
       } else {
