@@ -5,6 +5,7 @@ import { getProvince } from "../../../provinces";
 import { getProvinceMetadata } from "../../../map/data/AnatoliaProvinceMetadata.js";
 import { getAnatolia1300Hydrography } from "../../../map/data/Anatolia1300Hydrography.js";
 import { getAnatolia1300Lake } from "../../../map/data/Anatolia1300Lakes.js";
+import { getAnatolia1300PhysicalFeatures } from "../../../map/data/Anatolia1300PhysicalFeatures.js";
 import { getHistoricalPolity } from "../../../world/map/historical/HistoricalPoliticalRuntime.js";
 import { WorldMap } from "../../../map";
 import ProvinceInspector from "./ProvinceInspector";
@@ -22,6 +23,7 @@ function createHistoricalInspectorProvince(metadata) {
 
   const hydrography = getAnatolia1300Hydrography(metadata.id);
   const lake = getAnatolia1300Lake(metadata.id);
+  const physicalFeatures = getAnatolia1300PhysicalFeatures(metadata.id);
 
   return {
     id: metadata.id,
@@ -43,15 +45,20 @@ function createHistoricalInspectorProvince(metadata) {
     lake: Boolean(lake),
     lakeName: lake?.name ?? null,
     lakeDetail: lake?.detail ?? null,
+    mountainsName: physicalFeatures?.mountains?.name ?? null,
+    mountainsDetail: physicalFeatures?.mountains?.detail ?? null,
+    passesName: physicalFeatures?.passes?.name ?? null,
+    passesDetail: physicalFeatures?.passes?.detail ?? null,
     historicalControl: metadata.historicalControl ?? null,
   };
 }
 
-function mergeHistoricalHydrography(province, historicalMetadata) {
+function mergeHistoricalPhysicalFeatures(province, historicalMetadata) {
   if (!province || !historicalMetadata) return province;
 
   const hydrography = getAnatolia1300Hydrography(historicalMetadata.id);
   const lake = getAnatolia1300Lake(historicalMetadata.id);
+  const physicalFeatures = getAnatolia1300PhysicalFeatures(historicalMetadata.id);
 
   return {
     ...province,
@@ -61,6 +68,10 @@ function mergeHistoricalHydrography(province, historicalMetadata) {
     lake: Boolean(lake),
     lakeName: lake?.name ?? null,
     lakeDetail: lake?.detail ?? null,
+    mountainsName: physicalFeatures?.mountains?.name ?? null,
+    mountainsDetail: physicalFeatures?.mountains?.detail ?? null,
+    passesName: physicalFeatures?.passes?.name ?? null,
+    passesDetail: physicalFeatures?.passes?.detail ?? null,
   };
 }
 
@@ -80,7 +91,7 @@ function MapView({
   const repositoryProvince = provinceRepository && selectedProvinceId
     ? getProvince(provinceRepository, selectedProvinceId)
     : null;
-  const selectedProvince = mergeHistoricalHydrography(
+  const selectedProvince = mergeHistoricalPhysicalFeatures(
     repositoryProvince ?? createHistoricalInspectorProvince(historicalMetadata),
     historicalMetadata,
   );
