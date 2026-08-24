@@ -197,7 +197,7 @@ function pathStaysInsideOuterRing(path, outerRing, lake, protectedRings = []) {
     if (index === 0) continue;
     const start = path[index - 1];
     const end = path[index];
-    for (const fraction of [0.25, 0.5, 0.75]) {
+    for (const fraction of [0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875]) {
       const sample = [
         start[0] + (end[0] - start[0]) * fraction,
         start[1] + (end[1] - start[1]) * fraction,
@@ -265,11 +265,13 @@ function waterSafeOuterRing(outerRing, protectedRings = []) {
       }
       if (intersects.length >= 2) {
         next.push(start);
-        const first = intersects[0];
-        const last = intersects[intersects.length - 1];
-        const detour = lakeBoundaryPath(lake, first.point, last.point, outerRing, protectedRings);
-        next.push(...detour.slice(0, -1));
-        next.push(last.point);
+        for (let intersectionIndex = 0; intersectionIndex + 1 < intersects.length; intersectionIndex += 2) {
+          const first = intersects[intersectionIndex];
+          const last = intersects[intersectionIndex + 1];
+          const detour = lakeBoundaryPath(lake, first.point, last.point, outerRing, protectedRings);
+          next.push(...detour.slice(0, -1));
+          next.push(last.point);
+        }
       } else {
         next.push(start);
       }
