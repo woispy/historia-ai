@@ -80,17 +80,29 @@ function recoverNumericalBoundaryDrift(point) {
   return null;
 }
 
+function normalizeOuterRing(ring) {
+  return ring.map((point) => {
+    const recovered = recoverNumericalBoundaryDrift(point);
+    if (recovered) return recovered.map((value) => Number(value.toFixed(7)));
+    if (!isPhysicalLandPoint(point)) {
+      throw new Error(`Phase 2D geometry vertex is outside physical land beyond numerical drift: ${point.join(",")}`);
+    }
+    return point;
+  });
+}
+
 function normalizeGeometryPhysicalBoundary(geometry) {
+  const coordinates = geometry.geometry?.coordinates;
+  if (!Array.isArray(coordinates) || coordinates.length === 0 || !Array.isArray(coordinates[0])) {
+    throw new Error(`Phase 2D geometry has invalid polygon coordinates: ${geometry.identity?.provinceId ?? "unknown"}`);
+  }
+
   return {
     ...geometry,
-    polygons: geometry.polygons.map((polygon) => polygon.map((point) => {
-      const recovered = recoverNumericalBoundaryDrift(point);
-      if (recovered) return recovered.map((value) => Number(value.toFixed(7)));
-      if (!isPhysicalLandPoint(point)) {
-        throw new Error(`Phase 2D geometry vertex is outside physical land beyond numerical drift: ${point.join(",")}`);
-      }
-      return point;
-    })),
+    geometry: {
+      ...geometry.geometry,
+      coordinates: [normalizeOuterRing(coordinates[0]), ...coordinates.slice(1)],
+    },
   };
 }
 
