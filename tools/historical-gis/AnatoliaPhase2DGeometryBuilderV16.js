@@ -268,7 +268,7 @@ function solveWeights(sites) {
     const medianArea = median(summary.map((item) => item.area));
     for (const item of summary) {
       const ratio = medianArea > EPS ? item.area / medianArea : 1;
-      const correction = Math.max(-MAX_WEIGHT_STEP, Math.min(MAX_WEIGHT_STEP, Math.log(Math.max(0.25, Math.min(MAX_AREA_RATIO, ratio))) * MAX_WEIGHT_STEP));
+      const correction = Math.max(-MAX_WEIGHT_STEP, Math.min(MAX_WEIGHT_STEP, -Math.log(Math.max(0.25, Math.min(MAX_AREA_RATIO, ratio))) * MAX_WEIGHT_STEP));
       weights[item.id] = (weights[item.id] ?? 0) + correction;
     }
     const next = buildPartition(sites, weights);
