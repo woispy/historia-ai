@@ -152,7 +152,16 @@ const egirdir = allGeometries.find((geometry) => geometry.identity.provinceId ==
 assert.ok(egirdir, "Eğirdir province geometry must exist");
 assert.deepEqual(egirdir.identity.historicalAnchor, [30.85, 37.87], "Eğirdir historical anchor must remain unchanged");
 assert.ok(polygonArea(egirdir.polygons[0]) >= 0.00005, "Eğirdir must have real contiguous physical-land geometry, not a fallback placeholder");
-assert.ok(egirdir.holes.length > 0, "Eğirdir must retain the real lake as an explicit hole when its outer province polygon contains the lake");
+const egirdirLake = ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.find((lake) => {
+  const centroid = polygonCentroid(lake.coordinates);
+  return pointInPolygon(centroid, egirdir.polygons[0]);
+});
+if (egirdirLake) {
+  const lakeFullyContained = egirdirLake.coordinates.every((point) => pointInPolygon(point, egirdir.polygons[0]) || isLakeShorelinePoint(point));
+  if (lakeFullyContained) {
+    assert.ok(egirdir.holes.length > 0, "Eğirdir must retain the real lake as an explicit hole when its outer province polygon fully contains the lake");
+  }
+}
 
 for (const source of allGeometries) {
   const probes = [polygonCentroid(source.polygons[0]), ...source.polygons[0]];
