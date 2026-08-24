@@ -1,12 +1,16 @@
 const ANATOLIA_BBOX = [25.45, 35.72, 44.85, 42.35];
 
-// European Thrace is inside the broad Anatolia envelope but must never be
-// classified as part of the Anatolia geometry override. The southern edge
-// follows the Gallipoli/Marmara transition so Çanakkale remains in scope.
+// European Thrace, including the Constantinople/Istanbul area, is inside the
+// broad Anatolia envelope but must never be classified as Anatolia geometry.
+// The southern transition is kept west of Nicomedia and south of Gallipoli so
+// the authoritative Anatolian anchors at Canakkale and Nicomedia remain in
+// scope while Constantinople and Adrianopolis remain outside.
 const EUROPEAN_THRACE_EXCLUSION = [
   [25.45, 42.35],
   [28.65, 42.35],
   [29.15, 41.35],
+  [29.30, 41.12],
+  [29.30, 40.90],
   [28.70, 40.72],
   [27.75, 40.48],
   [26.85, 40.38],
