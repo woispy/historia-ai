@@ -4,63 +4,32 @@ import { getHistoricalPoliticalOverlayMode } from "./HistoricalPoliticalOverlayM
 const HISTORICAL_1300_DATE = "1300-01-01";
 const DEFAULT_POLITICAL_COLOR = "#6f765f";
 const HISTORICAL_WORLD_POLITICAL_CLIP_ID = "historical-world-political-land-clip";
-const COASTAL_POLITICAL_EXPANSION = 0.08;
+const COASTAL_POLITICAL_EXPANSION = 0.02;
 
 const SOURCE_POLITICAL_PALETTE = [
-  "#6A1B9A",
-  "#0F7A32",
-  "#B87333",
-  "#786A9D",
-  "#3E7C59",
-  "#7B6840",
-  "#8C5A2B",
-  "#A33F3F",
-  "#4A7896",
-  "#8B4A62",
-  "#8A6F3D",
-  "#477A68",
-  "#7C5C8F",
-  "#9A5A42",
-  "#5E7891",
-  "#6F7B45",
+  "#6A1B9A", "#0F7A32", "#B87333", "#786A9D",
+  "#3E7C59", "#7B6840", "#8C5A2B", "#A33F3F",
+  "#4A7896", "#8B4A62", "#8A6F3D", "#477A68",
+  "#7C5C8F", "#9A5A42", "#5E7891", "#6F7B45",
 ];
 
 const SOURCE_POLITICAL_ALIASES = new Map([
-  ["byzantine empire", "#6A1B9A"],
-  ["byzantium", "#6A1B9A"],
-  ["ottomans", "#0F7A32"],
-  ["osmanoğulları", "#0F7A32"],
-  ["karasi", "#B87333"],
-  ["karesi", "#B87333"],
-  ["saruhan", "#786A9D"],
-  ["menteşe", "#3E7C59"],
-  ["mentese", "#3E7C59"],
-  ["eşref", "#7B6840"],
-  ["esref", "#7B6840"],
-  ["germiyan", "#8C5A2B"],
-  ["karaman", "#A33F3F"],
-  ["pervâneoğlu", "#6B7280"],
-  ["pervane", "#6B7280"],
-  ["candar", "#7A6A3A"],
-  ["trebizond", "#4A7896"],
-  ["cilicia", "#8B4A62"],
+  ["byzantine empire", "#6A1B9A"], ["byzantium", "#6A1B9A"],
+  ["ottomans", "#0F7A32"], ["osmanoğulları", "#0F7A32"],
+  ["karasi", "#B87333"], ["karesi", "#B87333"],
+  ["saruhan", "#786A9D"], ["menteşe", "#3E7C59"], ["mentese", "#3E7C59"],
+  ["eşref", "#7B6840"], ["esref", "#7B6840"], ["germiyan", "#8C5A2B"],
+  ["karaman", "#A33F3F"], ["pervâneoğlu", "#6B7280"], ["pervane", "#6B7280"],
+  ["candar", "#7A6A3A"], ["trebizond", "#4A7896"], ["cilicia", "#8B4A62"],
 ]);
 
 function buildPathData(polygons) {
   if (!Array.isArray(polygons)) return "";
-
-  return polygons
-    .map((polygon) => {
-      if (!Array.isArray(polygon) || polygon.length < 3) return "";
-      const [first, ...rest] = polygon;
-      return [
-        `M ${first[0]} ${first[1]}`,
-        ...rest.map(([x, y]) => `L ${x} ${y}`),
-        "Z",
-      ].join(" ");
-    })
-    .filter(Boolean)
-    .join(" ");
+  return polygons.map((polygon) => {
+    if (!Array.isArray(polygon) || polygon.length < 3) return "";
+    const [first, ...rest] = polygon;
+    return [`M ${first[0]} ${first[1]}`, ...rest.map(([x, y]) => `L ${x} ${y}`), "Z"].join(" ");
+  }).filter(Boolean).join(" ");
 }
 
 function PoliticalOverlayDefs() {
@@ -83,9 +52,7 @@ function PoliticalOverlayDefs() {
 }
 
 function getPoliticalColor(entry) {
-  return entry?.historicalPolitical?.color
-    ?? entry?.country?.color
-    ?? DEFAULT_POLITICAL_COLOR;
+  return entry?.historicalPolitical?.color ?? entry?.country?.color ?? DEFAULT_POLITICAL_COLOR;
 }
 
 function getPoliticalFillOpacity(mode) {
@@ -96,38 +63,24 @@ function getPoliticalFillOpacity(mode) {
 }
 
 function isCoastalProvince(entry) {
-  return entry?.historicalProvince?.coastal === true
-    || entry?.historicalProvince?.port === true;
+  return entry?.historicalProvince?.coastal === true || entry?.historicalProvince?.port === true;
 }
 
 function normalizeSourceSubject(subject) {
-  return String(subject ?? "")
-    .trim()
-    .toLocaleLowerCase("tr-TR")
-    .replace(/[’']/g, "'")
-    .replace(/\s+/g, " ");
+  return String(subject ?? "").trim().toLocaleLowerCase("tr-TR").replace(/[’']/g, "'").replace(/\s+/g, " ");
 }
 
 function getStableSourceColor(subject) {
   const normalized = normalizeSourceSubject(subject);
   if (!normalized) return DEFAULT_POLITICAL_COLOR;
-
-  const alias = SOURCE_POLITICAL_ALIASES.get(normalized);
-  if (alias) return alias;
-
-  let hash = 2166136261;
-  for (let index = 0; index < normalized.length; index += 1) {
-    hash ^= normalized.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
-  }
-  return SOURCE_POLITICAL_PALETTE[(hash >>> 0) % SOURCE_POLITICAL_PALETTE.length];
+  return SOURCE_POLITICAL_ALIASES.get(normalized)
+    ?? SOURCE_POLITICAL_PALETTE[Math.abs([...normalized].reduce((hash, character) => ((hash * 31) + character.charCodeAt(0)) | 0, 7)) % SOURCE_POLITICAL_PALETTE.length];
 }
 
 function HistoricalWorldRegionPaths({ regions = [] }) {
   return regions.map((region) => {
     const d = buildPathData(region?.geometry?.polygons);
     if (!d) return null;
-
     return (
       <path
         key={`historical-world-${region.id ?? region.sourceName}`}
@@ -143,32 +96,23 @@ function HistoricalWorldRegionPaths({ regions = [] }) {
   });
 }
 
-function HistoricalPoliticalRegionLayer({
-  date = HISTORICAL_1300_DATE,
-  provinces = [],
-  regions = [],
-}) {
+function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces = [], regions = [] }) {
   if (date !== HISTORICAL_1300_DATE) return null;
+
+  const curatedProvinces = provinces.filter((entry) => entry?.historicalProvince?.classification === "phase2d-anatolia-province-geometry");
+  const sourceRegions = regions.filter((region) => {
+    const subject = normalizeSourceSubject(region.subject);
+    return !subject || !SOURCE_POLITICAL_ALIASES.has(subject);
+  });
 
   return (
     <g pointerEvents="none" aria-label="1300 historical political map">
       <PoliticalOverlayDefs />
       <g clipPath={`url(#${HISTORICAL_WORLD_POLITICAL_CLIP_ID})`}>
-        {/* The historical GIS runtime covers the complete dated world layer.
-            Keep a land-colored fallback underneath it so missing source
-            polygons never expose a visually blank land surface. */}
-        <rect
-          x="-180"
-          y="-90"
-          width="360"
-          height="180"
-          fill={DEFAULT_POLITICAL_COLOR}
-          fillOpacity="0.18"
-          aria-label="Historical unassigned land presentation"
-        />
-        <HistoricalWorldRegionPaths regions={regions} />
+        <rect x="-180" y="-90" width="360" height="180" fill={DEFAULT_POLITICAL_COLOR} fillOpacity="0.12" aria-label="Historical unassigned land presentation" />
+        <HistoricalWorldRegionPaths regions={sourceRegions} />
 
-        {provinces.map((entry) => {
+        {curatedProvinces.map((entry) => {
           const d = buildPathData(entry?.geometry?.polygons);
           if (!d) return null;
 
@@ -201,19 +145,12 @@ function HistoricalPoliticalRegionLayer({
                 d={d}
                 fill={color}
                 fillOpacity={getPoliticalFillOpacity(mode)}
-                stroke="rgba(24,30,24,0.55)"
-                strokeWidth="0.52"
+                stroke="rgba(24,30,24,0.72)"
+                strokeWidth="0.72"
                 vectorEffect="non-scaling-stroke"
                 strokeLinejoin="round"
               />
-              {pattern && (
-                <path
-                  d={d}
-                  fill={pattern}
-                  fillOpacity={mode === "neutral" ? 0.48 : 0.58}
-                  stroke="none"
-                />
-              )}
+              {pattern && <path d={d} fill={pattern} fillOpacity={mode === "neutral" ? 0.30 : 0.46} stroke="none" />}
             </g>
           );
         })}
