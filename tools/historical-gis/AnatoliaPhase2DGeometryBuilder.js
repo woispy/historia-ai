@@ -1,8 +1,8 @@
 import {
   buildAnatoliaPhase2DAssets as buildAnatoliaPhase2DAssetsV16,
-  isAnatoliaGeometryPoint,
   isPhysicalLandPoint,
 } from "./AnatoliaPhase2DGeometryBuilderV16.js";
+import { isAnatoliaGeometryPoint } from "./AnatoliaGeometryAuthority.js";
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PHYSICAL_COAST_CORRECTIONS } from "../../src/map/data/AnatoliaPhysicalCoastCorrections.js";
