@@ -239,7 +239,7 @@ function median(values) {
 
 function featureWeightBias() {
   const bias = Object.fromEntries(ANATOLIA_PROVINCE_METADATA.map((item) => [item.id, 0]));
-  for (const feature of [...ANATOLIA_STRATEGIC_PASSES, ...ANATOLIA_RIVER_CROSSINGS) {
+  for (const feature of [...ANATOLIA_STRATEGIC_PASSES, ...ANATOLIA_RIVER_CROSSINGS]) {
     for (const provinceId of feature.provinces ?? []) if (provinceId in bias) bias[provinceId] += FEATURE_WEIGHT_STEP;
   }
   return bias;
