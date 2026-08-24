@@ -6,6 +6,7 @@ import {
   ANATOLIA_1300_PROVINCE_GEOMETRY_KEYS_44,
 } from "../../src/map/data/Anatolia1300ProvinceGeometryManifest44.js";
 import {
+  ANATOLIA_PROVINCE_REFINEMENTS,
   ANATOLIA_STRATEGIC_PASSES,
   ANATOLIA_RIVER_CROSSINGS,
 } from "../../src/map/data/AnatoliaProvinceRefinement.js";
@@ -22,7 +23,7 @@ const MAX_AREA_RATIO = 3.8;
 const MAX_WEIGHT_ITERATIONS = 48;
 const MAX_WEIGHT_STEP = 3.0;
 
-const rawAnchor = (item) => item.centroid;
+const rawAnchor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id]?.anchor ?? item.centroid;
 
 function pointInPolygon(point, polygon) {
   if (!polygon?.length) return false;
