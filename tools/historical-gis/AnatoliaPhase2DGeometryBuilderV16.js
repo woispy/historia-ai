@@ -12,8 +12,9 @@ const EDGE_FRACTIONS = [0, 0.25, 0.5, 0.75, 1];
 const BOUNDARY_SAMPLE_STEP = 0.06;
 const MAX_AREA_RATIO = 4.2;
 const MAX_WEIGHT_ITERATIONS = 24;
-const MAX_WEIGHT_STEP = 4;
+const MAX_WEIGHT_STEP = 0.5;
 const FEATURE_WEIGHT_STEP = 0.01;
+const WEIGHT_BACKOFF_ATTEMPTS = 8;
 const ANCHOR_GRID_STEP = 0.005;
 const ANCHOR_GRID_RADIUS = 0.35;
 const MAX_ANCHOR_SNAP_DISTANCE = 1.2;
@@ -266,13 +267,33 @@ function solveWeights(sites) {
   for (let iteration = 0; iteration < MAX_WEIGHT_ITERATIONS; iteration += 1) {
     const summary = [...partition.entries()].map(([id, polygon]) => ({ id, area: area(polygon) }));
     const medianArea = median(summary.map((item) => item.area));
+    const proposedWeights = { ...weights };
     for (const item of summary) {
       const ratio = medianArea > EPS ? item.area / medianArea : 1;
       const correction = Math.max(-MAX_WEIGHT_STEP, Math.min(MAX_WEIGHT_STEP, -Math.log(Math.max(0.25, Math.min(MAX_AREA_RATIO, ratio))) * MAX_WEIGHT_STEP));
-      weights[item.id] = (weights[item.id] ?? 0) + correction;
+      proposedWeights[item.id] = (proposedWeights[item.id] ?? 0) + correction;
     }
-    const next = buildPartition(sites, weights);
+    let next = null;
+    let acceptedWeights = null;
+    let scale = 1;
+    for (let attempt = 0; attempt < WEIGHT_BACKOFF_ATTEMPTS; attempt += 1) {
+      const candidateWeights = { ...weights };
+      for (const item of summary) {
+        candidateWeights[item.id] = (weights[item.id] ?? 0) + ((proposedWeights[item.id] ?? weights[item.id] ?? 0) - (weights[item.id] ?? 0)) * scale;
+      }
+      try {
+        next = buildPartition(sites, candidateWeights);
+        acceptedWeights = candidateWeights;
+        break;
+      } catch (error) {
+        if (!String(error?.message ?? error).includes("empty power cell")
+          && !String(error?.message ?? error).includes("invalid physical-land geometry")) throw error;
+        scale *= 0.5;
+      }
+    }
+    if (!next || !acceptedWeights) break;
     const maxDelta = Math.max(...summary.map((item) => Math.abs(area(next.get(item.id)) - item.area)));
+    Object.assign(weights, acceptedWeights);
     partition = next;
     if (maxDelta < 0.0005) break;
   }
