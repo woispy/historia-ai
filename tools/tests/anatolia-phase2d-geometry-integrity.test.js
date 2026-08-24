@@ -8,6 +8,8 @@ import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhys
 const assets = buildAnatoliaPhase2DAssets();
 assert.equal(assets.provinceCount, ANATOLIA_PROVINCE_METADATA.length, "Phase 2D province count must match metadata");
 assert.equal(assets.provinceCount, 38, "Phase 2D must match the current authoritative 1300 province dataset");
+assert.equal(assets.politicalSiteCount, 38, "Phase 2D V8 must use exactly one political anchor per province");
+assert.equal(assets.supportSiteCount, 0, "Phase 2D V8 must not create detached support-control province fragments");
 
 function polygonArea(polygon) {
   let area = 0;
@@ -32,6 +34,13 @@ function pointInPolygon(point, polygon) {
   return inside;
 }
 
+function polygonCentroid(polygon) {
+  return polygon.reduce(
+    (sum, [x, y]) => [sum[0] + x, sum[1] + y],
+    [0, 0],
+  ).map((value) => value / polygon.length);
+}
+
 function isAtlasLandPoint(point) {
   return ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon))
     && !ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygon(point, lake.coordinates));
@@ -44,7 +53,6 @@ const fallbackLikeProvinceIds = assets.geometries
 assert.equal(assets.fallbackProvinceCount, 0, `Phase 2D must not silently create fallback polygons: ${fallbackLikeProvinceIds.join(", ")}`);
 assert.equal(fallbackLikeProvinceIds.length, 0, `Phase 2D contains fallback-sized province geometry: ${fallbackLikeProvinceIds.join(", ")}`);
 assert.ok(assets.naturalFeatureSiteCount > 0, "Natural-feature control sites must participate in geometry generation");
-assert.ok(assets.politicalSiteCount >= 38, "Phase 2D must retain at least one political control site per province");
 
 const provinceIds = new Set();
 const allPolygons = [];
@@ -74,6 +82,7 @@ for (const province of assets.provinces) {
   assert.equal(province.header.dataset, "anatolia-province-geometry-1300");
   assert.equal(province.header.generator, "Historia AI Phase 2D Geometry Builder");
   assert.equal(province.historical.classification, "phase2d-anatolia-province-geometry");
+  assert.equal(province.polygons.length, 1, `${province.identity.id}: province must be one contiguous mainland polygon, not detached fragments`);
 
   const totalArea = province.polygons.reduce((sum, polygon) => sum + polygonArea(polygon), 0);
   provinceAreas.push({ id: province.identity.id, area: totalArea });
@@ -84,27 +93,36 @@ for (const province of assets.provinces) {
 }
 
 assert.equal(provinceIds.size, ANATOLIA_PROVINCE_METADATA.length, "Every authoritative 1300 province must have a unique geometry identity");
+assert.equal(allPolygons.length, 38, "The 1300 Anatolia mainland partition must contain exactly 38 province polygons");
 
-// A province fragment must never be nested inside another province.  Test
-// polygon centroids rather than edges so shared borders are not false positives.
+// A province fragment must never be nested inside another province. Test both
+// polygon centroids and vertices so partial containment is also caught.
 for (const source of allPolygons) {
-  const centroid = source.polygon.reduce(
-    (sum, [x, y]) => [sum[0] + x, sum[1] + y],
-    [0, 0],
-  ).map((value) => value / source.polygon.length);
+  const probes = [polygonCentroid(source.polygon), ...source.polygon];
   for (const target of allPolygons) {
     if (source.provinceId === target.provinceId) continue;
-    assert.equal(
-      pointInPolygon(centroid, target.polygon),
-      false,
-      `Province nesting/overlap detected: ${source.provinceId} fragment is inside ${target.provinceId}`,
-    );
+    for (const probe of probes) {
+      assert.equal(
+        pointInPolygon(probe, target.polygon),
+        false,
+        `Province nesting/overlap detected: ${source.provinceId} geometry enters ${target.provinceId}`,
+      );
+    }
   }
 }
 
+// Lakes are excluded from province geometry. Checking lake centroids catches
+// the previous failure mode where every polygon edge remained on land while a
+// complete lake island was still enclosed by a province polygon.
+for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) {
+  const centroid = polygonCentroid(lake.coordinates);
+  const owners = allPolygons.filter(({ polygon }) => pointInPolygon(centroid, polygon));
+  assert.equal(owners.length, 0, `Lake centroid must not be owned by a province: ${lake.name ?? "unnamed lake"}`);
+}
+
 // Sample the physical land mask and require exactly one owning province at
-// every interior sample. This catches both gaps created by shrink operations
-// and overlapping fragments introduced by duplicated coastal polygons.
+// every interior sample. This catches gaps and overlaps in the shared land
+// partition.
 for (let longitude = 26.55; longitude <= 44.75; longitude += 0.07) {
   for (let latitude = 35.78; latitude <= 42.18; latitude += 0.07) {
     const sample = [longitude, latitude];
@@ -114,12 +132,11 @@ for (let longitude = 26.55; longitude <= 44.75; longitude += 0.07) {
   }
 }
 
-// The support-control partition is specifically intended to eliminate the
-// oversized eastern cells. Keep a hard upper bound relative to the median so
-// a future regression cannot silently recreate a giant eastern province.
+// Weighted power cells are intentionally bounded so eastern provinces cannot
+// silently regress into giant empty territories.
 const sortedAreas = provinceAreas.map((item) => item.area).sort((a, b) => a - b);
 const medianArea = sortedAreas[Math.floor(sortedAreas.length / 2)];
 const maxArea = sortedAreas[sortedAreas.length - 1];
-assert.ok(maxArea <= medianArea * 5, `Phase 2D contains an oversized province cell: max ${maxArea.toFixed(3)} vs median ${medianArea.toFixed(3)}`);
+assert.ok(maxArea <= medianArea * 4.2, `Phase 2D contains an oversized province cell: max ${maxArea.toFixed(3)} vs median ${medianArea.toFixed(3)}`);
 
-console.log(`Phase 2D geometry integrity passed: ${provinceIds.size} provinces, ${assets.polygonCount} polygons, ${assets.politicalSiteCount} political controls, ${assets.naturalFeatureSiteCount} natural-feature sites.`);
+console.log(`Phase 2D V8 geometry integrity passed: ${provinceIds.size} contiguous provinces, ${assets.polygonCount} polygons, ${assets.politicalSiteCount} political anchors, ${assets.weightIterations} weight iterations.`);
