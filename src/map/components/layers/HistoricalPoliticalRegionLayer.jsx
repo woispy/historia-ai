@@ -233,9 +233,21 @@ function renderProvinceBase(entry) {
   return { d, mode, color, fillOpacity, pattern };
 }
 
-function getRegionClipId(provinceId) {
+function getRegionClipId(provinceId, regions) {
   const regionId = HISTORICAL_REGION_BY_PROVINCE[provinceId];
-  return regionId ? `url(#historical-region-clip-${regionId})` : null;
+  if (!regionId) return null;
+
+  // A parent envelope is a historical constraint only when the corresponding
+  // source geometry is actually present in the runtime repository. Earlier
+  // versions assumed these IDs always existed; when the generated GIS asset
+  // used a different identity the SVG clipPath silently clipped the province
+  // to nothing. The curated province geometry must remain visible and
+  // authoritative when no matching envelope is available.
+  const hasRegionGeometry = (regions ?? []).some(
+    (region) => String(region?.id ?? "") === regionId,
+  );
+
+  return hasRegionGeometry ? `url(#historical-region-clip-${regionId})` : null;
 }
 
 function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces = [], regions = [] }) {
@@ -273,7 +285,7 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
             const base = renderProvinceBase(entry);
             if (!base) return null;
             const provinceId = getProvinceId(entry);
-            const regionClip = getRegionClipId(provinceId);
+            const regionClip = getRegionClipId(provinceId, regions);
             return (
               <path
                 key={`coastal-closure-${provinceId}`}
@@ -296,7 +308,7 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
             if (!base) return null;
 
             const provinceId = getProvinceId(entry);
-            const regionClip = getRegionClipId(provinceId);
+            const regionClip = getRegionClipId(provinceId, regions);
 
             return (
               <g key={provinceId} clipPath={regionClip ?? undefined}>
