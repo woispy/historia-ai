@@ -7,7 +7,31 @@ const assets = buildAnatoliaPhase2DAssets();
 
 assert.equal(assets.provinceCount, ANATOLIA_PROVINCE_METADATA.length, "Phase 2D province count must match metadata");
 assert.equal(assets.provinceCount, 38, "Phase 2D must match the current authoritative 1300 province dataset");
-assert.equal(assets.fallbackProvinceCount, 0, "Phase 2D must never silently create fallback polygons");
+
+function polygonArea(polygon) {
+  let area = 0;
+  for (let index = 0; index < polygon.length; index += 1) {
+    const current = polygon[index];
+    const next = polygon[(index + 1) % polygon.length];
+    area += current[0] * next[1] - next[0] * current[1];
+  }
+  return Math.abs(area) / 2;
+}
+
+const fallbackLikeProvinceIds = assets.geometries
+  .filter((geometry) => geometry.polygons.some((polygon) => polygonArea(polygon) < 0.00005))
+  .map((geometry) => geometry.identity.provinceId);
+
+assert.equal(
+  assets.fallbackProvinceCount,
+  0,
+  `Phase 2D must not silently create fallback polygons; builder reported ${assets.fallbackProvinceCount}, fallback-like IDs: ${fallbackLikeProvinceIds.join(", ")}`,
+);
+assert.equal(
+  fallbackLikeProvinceIds.length,
+  0,
+  `Phase 2D contains fallback-sized province geometry: ${fallbackLikeProvinceIds.join(", ")}`,
+);
 assert.ok(assets.naturalFeatureSiteCount > 0, "Natural-feature control sites must participate in geometry generation");
 
 const provinceIds = new Set();
