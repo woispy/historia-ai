@@ -183,6 +183,24 @@ function segmentLakeIntersections(start, end, lakeRing) {
   return intersections.filter((item, index, all) => index === 0 || Math.abs(item.t - all[index - 1].t) > GEOMETRY_EPS);
 }
 
+function pathStaysInsideOuterRing(path, outerRing) {
+  if (!path.length) return false;
+  for (let index = 0; index < path.length; index += 1) {
+    if (!pointInPolygon(path[index], outerRing) && !pointOnAnyLakeBoundary(path[index])) return false;
+    if (index === 0) continue;
+    const start = path[index - 1];
+    const end = path[index];
+    for (const fraction of [0.25, 0.5, 0.75]) {
+      const sample = [
+        start[0] + (end[0] - start[0]) * fraction,
+        start[1] + (end[1] - start[1]) * fraction,
+      ];
+      if (!pointInPolygon(sample, outerRing) && !pointOnAnyLakeBoundary(sample)) return false;
+    }
+  }
+  return true;
+}
+
 function lakeBoundaryPath(lakeRing, fromPoint, toPoint, outerRing) {
   let fromIndex = 0;
   let toIndex = 0;
@@ -210,12 +228,11 @@ function lakeBoundaryPath(lakeRing, fromPoint, toPoint, outerRing) {
   };
 
   const candidates = [buildPath(1), buildPath(-1)];
-  const valid = candidates.filter((path) => {
-    const middle = path[Math.floor(path.length / 2)];
-    return pointInPolygon(middle, outerRing);
-  });
-  const paths = valid.length ? valid : candidates;
-  return paths.sort((left, right) => {
+  const valid = candidates.filter((path) => pathStaysInsideOuterRing(path, outerRing));
+  if (!valid.length) {
+    throw new Error("Phase 2D lake boundary detour leaves its source province outer ring.");
+  }
+  return valid.sort((left, right) => {
     const length = (path) => path.slice(1).reduce((sum, point, index) => {
       const previous = path[index];
       return sum + Math.hypot(point[0] - previous[0], point[1] - previous[1]);
