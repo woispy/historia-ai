@@ -25,6 +25,64 @@ const SOURCE_POLITICAL_ALIASES = new Map([
   ["candar", "#7A6A3A"], ["trebizond", "#4A7896"], ["cilicia", "#8B4A62"],
 ]);
 
+// Historical GIS regions are used only as coarse parent envelopes for the
+// province tessellation. They are never allowed to paint directly inside the
+// Anatolia override; that responsibility belongs exclusively to the curated
+// province layer below. This prevents the old large legacy colour blocks from
+// returning while still preserving the historical source as a boundary hint.
+const HISTORICAL_REGION_BY_PROVINCE = Object.freeze({
+  "bithynia-nicomedia": "anatolia_byzantium_bithynia",
+  "bithynia-nicaea": "anatolia_byzantium_bithynia",
+  "bithynia-prusa": "anatolia_byzantium_bithynia",
+
+  "bithynia-sangarios": "anatolia_ottomans",
+  "phrygia-sogut": "anatolia_ottomans",
+  "phrygia-bilecik": "anatolia_ottomans",
+  "phrygia-eskisehir": "anatolia_ottomans",
+
+  "mysia-balikesir": "anatolia_karasi",
+  "mysia-pergamon": "anatolia_karasi",
+
+  "lydia-magnesia": "anatolia_saruhan",
+  "lydia-smyrna": "anatolia_saruhan",
+
+  // Aydinid ownership is deliberately NOT assigned at 1300. The TDV entry
+  // dates the foundation/control expansion to 1308, so these two provinces
+  // remain historical-neutral rather than receiving an anachronistic fill.
+  "ionia-ayasuluk": null,
+  "lydia-birgi": null,
+
+  "caria-tralleis": "anatolia_mentese",
+  "caria-mylasa": "anatolia_mentese",
+  "caria-pecin": "anatolia_mentese",
+  "caria-halikarnassos": "anatolia_mentese",
+
+  "phrygia-denizli": "anatolia_germiyan",
+  "phrygia-kutahya": "anatolia_germiyan",
+  "phrygia-afyon": "anatolia_sahibata",
+  "phrygia-uluborlu": "anatolia_hamid",
+  "pisidia-egirdir": "anatolia_hamid",
+  "pisidia-beysehir": "anatolia_esref",
+
+  "galatia-ankara": "anatolia_ilkhanate",
+  "cappadocia-kayseri": "anatolia_ilkhanate",
+  "cappadocia-sivas": "anatolia_ilkhanate",
+  "lycaonia-konya": "anatolia_karaman",
+  "lycaonia-larende": "anatolia_karaman",
+
+  "pontus-sinop": null,
+  "pontus-amisos": null,
+  "pontus-amasya": "anatolia_ilkhanate",
+  "pontus-kastamon": "anatolia_candar",
+  "pontus-trebizond": "anatolia_trebizond",
+  "eastern-anatolia-erzincan": "anatolia_ilkhanate",
+  "eastern-anatolia-erzurum": "anatolia_ilkhanate",
+
+  "cilicia-sis": "anatolia_cilicia",
+  "cilicia-tarsos": "anatolia_cilicia",
+  "cilicia-alaiye": "anatolia_cilicia",
+});
+
 function buildPathData(polygons) {
   if (!Array.isArray(polygons)) return "";
   return polygons.map((polygon) => {
@@ -36,20 +94,13 @@ function buildPathData(polygons) {
 
 const ANATOLIA_LAND_PATH = buildPathData(ANATOLIA_PHYSICAL_ATLAS.landPolygons);
 
-function PoliticalOverlayDefs() {
+function PoliticalOverlayDefs({ regions }) {
   return (
     <defs>
       <clipPath id={HISTORICAL_WORLD_POLITICAL_CLIP_ID} clipPathUnits="userSpaceOnUse">
         <path d={WORLD_LAND_PATH} fillRule="evenodd" />
       </clipPath>
 
-      {/*
-       * The source-GIS exclusion is deliberately a mask, not a compound
-       * clipPath. The physical world land remains white/authoritative while
-       * the Anatolia land footprint is painted black. A small black coastal
-       * stroke removes the old ring of source-GIS colour that sat between the
-       * coarse curated Anatolia coastline and the detailed world coastline.
-       */}
       <mask
         id={HISTORICAL_WORLD_SOURCE_MASK_ID}
         maskUnits="userSpaceOnUse"
@@ -69,6 +120,20 @@ function PoliticalOverlayDefs() {
           strokeLinejoin="round"
         />
       </mask>
+
+      {(regions ?? []).map((region) => {
+        const d = buildPathData(region?.geometry?.polygons);
+        if (!d || !region?.id) return null;
+        return (
+          <clipPath
+            key={`historical-region-clip-${region.id}`}
+            id={`historical-region-clip-${region.id}`}
+            clipPathUnits="userSpaceOnUse"
+          >
+            <path d={d} fillRule="evenodd" />
+          </clipPath>
+        );
+      })}
 
       <pattern id="historical-suzerainty-hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
         <line x1="0" y1="0" x2="0" y2="10" stroke="rgba(255,255,255,0.30)" strokeWidth="2.5" />
@@ -124,10 +189,30 @@ function HistoricalWorldRegionPaths({ regions = [] }) {
   });
 }
 
+function getProvinceId(entry) {
+  return entry?.province?.id
+    ?? entry?.historicalProvince?.id
+    ?? entry?.id
+    ?? null;
+}
+
+function getHistoricalProvince(entry) {
+  return entry?.historicalProvince
+    ?? entry?.province?.historicalProvince
+    ?? entry?.province?.historical
+    ?? null;
+}
+
+function isCuratedAnatoliaProvince(entry) {
+  const historical = getHistoricalProvince(entry);
+  return historical?.classification === "phase2d-anatolia-province-geometry";
+}
+
 function isCoastalProvince(entry) {
-  return entry?.historicalProvince?.coastal === true
-    || entry?.historicalProvince?.port === true
-    || entry?.historicalProvince?.terrain === "coast";
+  const historical = getHistoricalProvince(entry);
+  return historical?.coastal === true
+    || historical?.port === true
+    || historical?.terrain === "coast";
 }
 
 function renderProvinceBase(entry) {
@@ -148,36 +233,52 @@ function renderProvinceBase(entry) {
   return { d, mode, color, fillOpacity, pattern };
 }
 
+function getRegionClipId(provinceId) {
+  const regionId = HISTORICAL_REGION_BY_PROVINCE[provinceId];
+  return regionId ? `url(#historical-region-clip-${regionId})` : null;
+}
+
 function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces = [], regions = [] }) {
   if (date !== HISTORICAL_1300_DATE) return null;
 
-  const curatedProvinces = provinces.filter((entry) => entry?.historicalProvince?.classification === "phase2d-anatolia-province-geometry");
+  const curatedProvinces = provinces.filter(isCuratedAnatoliaProvince);
+  const nonAnatoliaRegions = regions.filter(
+    (region) => !String(region?.id ?? "").startsWith("anatolia_")
+  );
 
   return (
     <g pointerEvents="none" aria-label="1300 historical political map">
-      <PoliticalOverlayDefs />
+      <PoliticalOverlayDefs regions={regions} />
       <g clipPath={`url(#${HISTORICAL_WORLD_POLITICAL_CLIP_ID})`}>
         <rect x="-180" y="-90" width="360" height="180" fill={DEFAULT_POLITICAL_COLOR} fillOpacity="0.12" aria-label="Historical unassigned land presentation" />
 
+        {/*
+         * Legacy Anatolia regional polygons are intentionally excluded here.
+         * The historical GIS remains a research/boundary source, but the
+         * visible Anatolian political map is now province-authoritative.
+         */}
         <g mask={`url(#${HISTORICAL_WORLD_SOURCE_MASK_ID})`}>
-          <HistoricalWorldRegionPaths regions={regions} />
+          <HistoricalWorldRegionPaths regions={nonAnatoliaRegions} />
         </g>
 
         {/*
-         * Coastal closure pass. We intentionally expand only provinces that
-         * touch the coast/ports, then redraw every normal province on top.
-         * The world land clip is the final authority, so the expansion can
-         * never become political colour in the sea.
+         * First pass closes coastal coverage. The expansion is deliberately
+         * tiny and only applied to coastal/port provinces. The enclosing
+         * world-land clip is the final authority, so political colour cannot
+         * enter the sea.
          */}
         <g>
           {curatedProvinces.map((entry) => {
             if (!isCoastalProvince(entry)) return null;
             const base = renderProvinceBase(entry);
             if (!base) return null;
+            const provinceId = getProvinceId(entry);
+            const regionClip = getRegionClipId(provinceId);
             return (
               <path
-                key={`coastal-closure-${entry?.province?.id ?? entry?.historicalProvince?.id}`}
+                key={`coastal-closure-${provinceId}`}
                 d={base.d}
+                clipPath={regionClip ?? undefined}
                 fill={base.color}
                 fillOpacity={base.fillOpacity}
                 stroke={base.color}
@@ -194,8 +295,11 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
             const base = renderProvinceBase(entry);
             if (!base) return null;
 
+            const provinceId = getProvinceId(entry);
+            const regionClip = getRegionClipId(provinceId);
+
             return (
-              <g key={entry?.province?.id ?? entry?.historicalProvince?.id}>
+              <g key={provinceId} clipPath={regionClip ?? undefined}>
                 <path
                   d={base.d}
                   fill={base.color}
