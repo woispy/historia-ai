@@ -61,6 +61,7 @@ assert.equal(assets.fallbackProvinceCount, 0, `Phase 2D must not silently create
 assert.equal(fallbackLikeProvinceIds.length, 0, `Phase 2D contains fallback-sized province geometry: ${fallbackLikeProvinceIds.join(", ")}`);
 assert.ok(assets.naturalFeatureSiteCount > 0, "Natural-feature control sites must participate in geometry generation");
 assert.equal(assets.polygonCount, 38, "The authoritative mainland partition must contain exactly one outer polygon per province");
+assert.ok(assets.barrierSiteCount > 0, "Physical coastline and lake boundaries must participate as non-political geometry barriers");
 
 const provinceIds = new Set();
 const allGeometries = [];
@@ -89,7 +90,7 @@ for (const geometry of assets.geometries) {
   assert.equal(provinceIds.has(provinceId), false, `Duplicate province geometry: ${provinceId}`);
   provinceIds.add(provinceId);
   assert.equal(geometry.header.dataset, "anatolia-province-geometry-1300");
-  assert.match(geometry.header.generator, /Phase 2D Geometry Builder V9/);
+  assert.match(geometry.header.generator, /Phase 2D Geometry Builder V14/);
   assert.equal(geometry.metadata.classification, "phase2d-anatolia-province-geometry");
   assert.equal(geometry.polygons.length, 1, `${provinceId}: province must be one contiguous mainland polygon, not detached fragments`);
   assert.ok(Array.isArray(geometry.holes), `${provinceId}: lake holes must be explicit geometry metadata`);
@@ -104,6 +105,12 @@ for (const geometry of assets.geometries) {
 
 assert.equal(provinceIds.size, ANATOLIA_PROVINCE_METADATA.length, "Every authoritative 1300 province must have a unique geometry identity");
 assert.equal(allGeometries.length, 38, "The 1300 Anatolia mainland partition must contain exactly 38 province geometries");
+
+const egirdir = allGeometries.find((geometry) => geometry.identity.provinceId === "pisidia-egirdir");
+assert.ok(egirdir, "Eğirdir province geometry must exist");
+assert.deepEqual(egirdir.metadata.historicalAnchor, [30.85, 37.87], "Eğirdir historical anchor must remain unchanged");
+assert.ok(polygonArea(egirdir.polygons[0]) >= 0.00005, "Eğirdir must have real contiguous physical-land geometry, not a fallback placeholder");
+assert.ok(egirdir.holes.length > 0, "Eğirdir must retain the real lake as an explicit hole when its outer province polygon contains the lake");
 
 for (const source of allGeometries) {
   const probes = [polygonCentroid(source.polygons[0]), ...source.polygons[0]];
@@ -135,4 +142,4 @@ const medianArea = sortedAreas[Math.floor(sortedAreas.length / 2)];
 const maxArea = sortedAreas[sortedAreas.length - 1];
 assert.ok(maxArea <= medianArea * 4.2, `Phase 2D contains an oversized province cell: max ${maxArea.toFixed(3)} vs median ${medianArea.toFixed(3)}`);
 
-console.log(`Phase 2D V9 geometry integrity passed: ${provinceIds.size} contiguous provinces, ${assets.polygonCount} outer polygons, ${assets.politicalSiteCount} political anchors, ${assets.weightIterations} weight iterations, ${assets.geometries.reduce((sum, geometry) => sum + geometry.holes.length, 0)} lake holes.`);
+console.log(`Phase 2D V14 geometry integrity passed: ${provinceIds.size} contiguous provinces, ${assets.polygonCount} outer polygons, ${assets.politicalSiteCount} political anchors, ${assets.barrierSiteCount} physical boundary barriers, ${assets.weightIterations} weight iterations, ${assets.geometries.reduce((sum, geometry) => sum + geometry.holes.length, 0)} lake holes.`);
