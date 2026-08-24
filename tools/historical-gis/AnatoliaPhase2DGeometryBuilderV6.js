@@ -12,11 +12,13 @@ const MIN_AREA = 0.00005;
 const COAST_TOLERANCE = 0.055;
 const SAMPLE_STEP = 0.12;
 const NEAR_COAST_LIMIT = 1.25;
+const ANCHOR_CENTROID_TOLERANCE = 0.22;
 const province = (id) => ANATOLIA_PROVINCE_METADATA.find((item) => item.id === id) ?? null;
 const rawAnchor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id]?.anchor ?? item.centroid;
 const landPolygons = () => [...ANATOLIA_PHYSICAL_ATLAS.landPolygons, ...ANATOLIA_PHYSICAL_COAST_CORRECTIONS.map((item) => item.coordinates)];
 
 function pointInPolygon(point, polygon) {
+  if (!polygon?.length) return false;
   let inside = false;
   for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i += 1) {
     const a = polygon[i]; const b = polygon[j];
@@ -109,7 +111,8 @@ function fitPolygonToPhysicalLand(polygon, anchorPoint) {
   let result = polygon;
   for (let iteration = 0; iteration < 64; iteration += 1) {
     const center = centroid(result);
-    if (area(result) >= MIN_AREA && (isPhysicalLandPoint(center) || (supplemental && pointInPolygon(center, supplemental)))) return result;
+    const nearHistoricalAnchor = !inLake(center) && Math.hypot(center[0] - anchorPoint[0], center[1] - anchorPoint[1]) <= ANCHOR_CENTROID_TOLERANCE;
+    if (area(result) >= MIN_AREA && (isPhysicalLandPoint(center) || (supplemental && pointInPolygon(center, supplemental)) || nearHistoricalAnchor)) return result;
     result = result.map((point) => [anchorPoint[0] + (point[0] - anchorPoint[0]) * 0.94, anchorPoint[1] + (point[1] - anchorPoint[1]) * 0.94]);
   }
   return [];
