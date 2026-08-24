@@ -58,7 +58,7 @@ function nearestLandPoint(point) {
 }
 function signedArea(polygon) {
   let sum = 0;
-  for (let i = 0; i < polygon.length; i += 1) { const next = polygon[(i + 1) % polygon.length]; sum += polygon[i][0] * next[1] - next[0] * next[1]; }
+  for (let i = 0; i < polygon.length; i += 1) { const next = polygon[(i + 1) % polygon.length]; sum += polygon[i][0] * next[1] - next[0] * polygon[i][1]; }
   return sum / 2;
 }
 function area(polygon) { return Math.abs(signedArea(polygon)); }
@@ -138,10 +138,7 @@ function recoverLandConstrainedCell(cell, anchor, scale = 1) {
   return points;
 }
 function clipCellToMainland(cell, provinceId, anchor) {
-  const rawCandidates = ANATOLIA_PHYSICAL_ATLAS.landPolygons
-    .filter((polygon) => area(polygon) >= MAINLAND_MIN_AREA)
-    .map((land) => clipLandByCell(land, cell))
-    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
+  const rawCandidates = ANATOLIA_PHYSICAL_ATLAS.landPolygons.filter((polygon) => area(polygon) >= MAINLAND_MIN_AREA).map((land) => clipLandByCell(land, cell)).filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
   const candidates = rawCandidates.filter((polygon) => edgeIsLandSafe(polygon));
   if (candidates.length) {
     const anchored = candidates.filter((polygon) => pointInPolygon(anchor, polygon));
