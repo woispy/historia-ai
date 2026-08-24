@@ -81,6 +81,12 @@ function localLandRecovery(point) {
 }
 
 function nearestLandPoint(point) {
+  // A historical anchor that already lies inside an explicit physical-coast
+  // correction is authoritative land and must never be sent through the
+  // generic nearest-boundary recovery path. This keeps correction geometry a
+  // first-class physical authority rather than an incidental fallback.
+  if (PHYSICAL_CORRECTION_POLYGONS.some((polygon) => pointInPolygon(point, polygon))) return point;
+
   const recovered = localLandRecovery(point);
   if (recovered) return recovered;
   let best = null;
