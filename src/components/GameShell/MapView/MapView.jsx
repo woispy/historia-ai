@@ -4,6 +4,7 @@ import { getCountry } from "../../../countries";
 import { getProvince } from "../../../provinces";
 import { getProvinceMetadata } from "../../../map/data/AnatoliaProvinceMetadata.js";
 import { getAnatolia1300Hydrography } from "../../../map/data/Anatolia1300Hydrography.js";
+import { getAnatolia1300Lake } from "../../../map/data/Anatolia1300Lakes.js";
 import { getHistoricalPolity } from "../../../world/map/historical/HistoricalPoliticalRuntime.js";
 import { WorldMap } from "../../../map";
 import ProvinceInspector from "./ProvinceInspector";
@@ -20,6 +21,7 @@ function createHistoricalInspectorProvince(metadata) {
   if (!metadata) return null;
 
   const hydrography = getAnatolia1300Hydrography(metadata.id);
+  const lake = getAnatolia1300Lake(metadata.id);
 
   return {
     id: metadata.id,
@@ -38,6 +40,9 @@ function createHistoricalInspectorProvince(metadata) {
     river: Boolean(hydrography),
     riverName: hydrography?.name ?? null,
     riverDetail: hydrography?.detail ?? null,
+    lake: Boolean(lake),
+    lakeName: lake?.name ?? null,
+    lakeDetail: lake?.detail ?? null,
     historicalControl: metadata.historicalControl ?? null,
   };
 }
@@ -46,13 +51,16 @@ function mergeHistoricalHydrography(province, historicalMetadata) {
   if (!province || !historicalMetadata) return province;
 
   const hydrography = getAnatolia1300Hydrography(historicalMetadata.id);
-  if (!hydrography) return province;
+  const lake = getAnatolia1300Lake(historicalMetadata.id);
 
   return {
     ...province,
-    river: true,
-    riverName: hydrography.name,
-    riverDetail: hydrography.detail,
+    river: Boolean(hydrography),
+    riverName: hydrography?.name ?? null,
+    riverDetail: hydrography?.detail ?? null,
+    lake: Boolean(lake),
+    lakeName: lake?.name ?? null,
+    lakeDetail: lake?.detail ?? null,
   };
 }
 
