@@ -14,14 +14,29 @@ const EUROPEAN_THRACE_EXCLUSION = [
   [25.45, 42.35],
 ];
 
+function pointOnSegment(point, start, end) {
+  const cross = (end[0] - start[0]) * (point[1] - start[1])
+    - (end[1] - start[1]) * (point[0] - start[0]);
+  if (Math.abs(cross) > 1e-9) return false;
+  return point[0] >= Math.min(start[0], end[0]) - 1e-9
+    && point[0] <= Math.max(start[0], end[0]) + 1e-9
+    && point[1] >= Math.min(start[1], end[1]) - 1e-9
+    && point[1] <= Math.max(start[1], end[1]) + 1e-9;
+}
+
 function pointInPolygon(point, polygon) {
-  if (!Array.isArray(point) || point.length !== 2) return false;
+  if (!Array.isArray(point) || point.length !== 2 || polygon.length < 3) return false;
+  for (let index = 0; index < polygon.length; index += 1) {
+    if (pointOnSegment(point, polygon[index], polygon[(index + 1) % polygon.length])) return true;
+  }
+
   let inside = false;
-  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index += 1) {
-    const [x, y] = polygon[index];
-    const [previousX, previousY] = polygon[previous];
-    if ((y > point[1]) !== (previousY > point[1])
-      && point[0] < ((previousX - x) * (point[1] - y)) / ((previousY - y) || Number.EPSILON) + x) {
+  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index++) {
+    const current = polygon[index];
+    const prior = polygon[previous];
+    if ((current[1] > point[1]) !== (prior[1] > point[1])
+      && point[0] < ((prior[0] - current[0]) * (point[1] - current[1]))
+        / ((prior[1] - current[1]) || Number.EPSILON) + current[0]) {
       inside = !inside;
     }
   }
