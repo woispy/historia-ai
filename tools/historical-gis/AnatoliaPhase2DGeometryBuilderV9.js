@@ -14,6 +14,7 @@ const BBOX = [25.45, 35.72, 44.85, 42.35];
 const EPS = 1e-7;
 const MIN_AREA = 0.00005;
 const COAST_TOLERANCE = 0.055;
+const ANCHOR_COAST_TOLERANCE = 0.35;
 const SAMPLE_STEP = 0.06;
 const EDGE_FRACTIONS = [0, 0.25, 0.5, 0.75, 1];
 const MAINLAND_MIN_AREA = 5;
@@ -196,7 +197,11 @@ function validateManifest() {
 }
 
 function validateAnchors(sites) {
-  for (const site of sites) if (!isAnatoliaGeometryPoint(site.point) || !isPhysicalLandPoint(site.point)) throw new Error(`Invalid 1300 province anchor: ${site.provinceId} ${site.point.join(",")}`);
+  for (const site of sites) {
+    if (!isAnatoliaGeometryPoint(site.point) || inLake(site.point) || distanceToLand(site.point) > ANCHOR_COAST_TOLERANCE) {
+      throw new Error(`Invalid 1300 province anchor: ${site.provinceId} ${site.point.join(",")}`);
+    }
+  }
 }
 
 function buildPartition(sites, weights) {
