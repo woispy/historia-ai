@@ -94,9 +94,11 @@ for (const geometry of assets.geometries) {
   const provinceId = geometry.identity.provinceId;
   assert.equal(provinceIds.has(provinceId), false, `Duplicate province geometry: ${provinceId}`);
   provinceIds.add(provinceId);
-  assert.equal(geometry.header.dataset, "anatolia-province-geometry-1300");
-  assert.match(geometry.header.generator, /Phase 2D Geometry Builder V16/);
-  assert.equal(geometry.metadata.classification, "phase2d-anatolia-province-geometry");
+  const province = assets.provinces.find((item) => item.identity.id === provinceId);
+  assert.ok(province, `${provinceId}: province asset must exist for geometry metadata contract`);
+  assert.equal(province.header.dataset, "anatolia-province-geometry-1300");
+  assert.match(province.header.generator, /Phase 2D Geometry Builder V16/);
+  assert.equal(province.historical.classification, "phase2d-anatolia-province-geometry");
   assert.equal(geometry.polygons.length, 1, `${provinceId}: province must be one contiguous mainland polygon, not detached fragments`);
   assert.ok(Array.isArray(geometry.holes), `${provinceId}: lake holes must be explicit geometry metadata`);
   assertRingIntegrity(provinceId, geometry.polygons[0], "outer ring");
@@ -113,7 +115,7 @@ assert.equal(allGeometries.length, 38, "The 1300 Anatolia mainland partition mus
 
 const egirdir = allGeometries.find((geometry) => geometry.identity.provinceId === "pisidia-egirdir");
 assert.ok(egirdir, "Eğirdir province geometry must exist");
-assert.deepEqual(egirdir.metadata.historicalAnchor, [30.85, 37.87], "Eğirdir historical anchor must remain unchanged");
+assert.deepEqual(egirdir.identity.historicalAnchor, [30.85, 37.87], "Eğirdir historical anchor must remain unchanged");
 assert.ok(polygonArea(egirdir.polygons[0]) >= 0.00005, "Eğirdir must have real contiguous physical-land geometry, not a fallback placeholder");
 assert.ok(egirdir.holes.length > 0, "Eğirdir must retain the real lake as an explicit hole when its outer province polygon contains the lake");
 
