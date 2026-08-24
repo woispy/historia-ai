@@ -4,6 +4,7 @@ import { ANATOLIA_PHYSICAL_COAST_CORRECTIONS } from "../../src/map/data/Anatolia
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 import { ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST, ANATOLIA_1300_PROVINCE_GEOMETRY_KEYS } from "../../src/map/data/Anatolia1300ProvinceGeometryManifest.js";
 import { ANATOLIA_PROVINCE_REFINEMENTS, ANATOLIA_STRATEGIC_PASSES, ANATOLIA_RIVER_CROSSINGS } from "../../src/map/data/AnatoliaProvinceRefinement.js";
+import { ANATOLIA_NATURAL_EARTH_LAND } from "./AnatoliaNaturalEarthLand.js";
 
 const BBOX = [25.45, 35.72, 44.85, 42.35];
 const EPS = 1e-7;
@@ -83,11 +84,18 @@ function clipLandByCell(land, cell) {
   }
   return output;
 }
-function clipCellToLand(cell) { return landPolygons().map((land) => clipLandByCell(land, cell)).filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA); }
+function clipCellToLand(cell, anchorPoint) {
+  const primary = landPolygons().map((land) => clipLandByCell(land, cell)).filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
+  if (primary.length) return primary;
+  return ANATOLIA_NATURAL_EARTH_LAND
+    .filter((land) => pointInPolygon(anchorPoint, land))
+    .map((land) => clipLandByCell(land, cell))
+    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
+}
 function fitPolygonToPhysicalLand(polygon, anchorPoint) {
   let result = polygon;
   for (let iteration = 0; iteration < 64; iteration += 1) {
-    if (area(result) >= MIN_AREA && isPhysicalLandPoint(centroid(result))) return result;
+    if (area(result) >= MIN_AREA && (isPhysicalLandPoint(centroid(result)) || pointInPolygon(centroid(result), ANATOLIA_NATURAL_EARTH_LAND.find((land) => pointInPolygon(anchorPoint, land)) ?? []))) return result;
     result = result.map((point) => [anchorPoint[0] + (point[0] - anchorPoint[0]) * 0.94, anchorPoint[1] + (point[1] - anchorPoint[1]) * 0.94]);
   }
   return [];
@@ -113,12 +121,12 @@ export function buildAnatoliaPhase2DAssets() {
   const provinces = []; const geometries = [];
   for (let index = 0; index < politicalSites.length; index += 1) {
     const site = politicalSites[index]; const item = province(site.provinceId); const cell = voronoiCell(index, politicalSites);
-    const polygons = clipCellToLand(cell).map((polygon) => fitPolygonToPhysicalLand(polygon, site.point)).filter(Boolean).map((polygon) => polygon.map(([x, y]) => [Number(x.toFixed(5)), Number(y.toFixed(5))]));
+    const polygons = clipCellToLand(cell, site.point).map((polygon) => fitPolygonToPhysicalLand(polygon, site.point)).filter(Boolean).map((polygon) => polygon.map(([x, y]) => [Number(x.toFixed(5)), Number(y.toFixed(5))]));
     if (!polygons.length) throw new Error(`Phase 2D produced no physical-land geometry for ${item.id}`);
     provinces.push(provinceAsset(item, polygons)); geometries.push(geometryAsset(item, polygons));
   }
   const physicalSamplingSiteCount = samplingSiteCount();
-  return { schemaVersion: 1, geometryVersion: 9, historicalDate: "1300-01-01", provider: "historia-ai-curated-cartography", dataset: "anatolia-province-geometry-1300", projection: "EPSG:4326", method: "one historical province anchor per political cell, convex-cell intersection against the physical Anatolia land authority, centroid land validation, and dense physical sampling", siteCount: physicalSamplingSiteCount + politicalSites.length + naturalFeatureSiteCount, politicalSiteCount: politicalSites.length, physicalSamplingSiteCount, barrierSiteCount: 0, naturalFeatureSiteCount, fallbackProvinceCount: 0, provinceCount: provinces.length, polygonCount: geometries.reduce((sum, item) => sum + item.polygons.length, 0), provinces, geometries };
+  return { schemaVersion: 1, geometryVersion: 9, historicalDate: "1300-01-01", provider: "historia-ai-curated-cartography", dataset: "anatolia-province-geometry-1300", projection: "EPSG:4326", method: "one historical province anchor per political cell, physical-land intersection, Natural Earth coastal supplement only where the curated physical atlas lacks coverage, centroid land validation, and dense physical sampling", siteCount: physicalSamplingSiteCount + politicalSites.length + naturalFeatureSiteCount, politicalSiteCount: politicalSites.length, physicalSamplingSiteCount, barrierSiteCount: 0, naturalFeatureSiteCount, fallbackProvinceCount: 0, provinceCount: provinces.length, polygonCount: geometries.reduce((sum, item) => sum + item.polygons.length, 0), provinces, geometries };
 }
 export function isAnatoliaGeometryPoint([longitude, latitude]) {
   if (longitude < 26.5 || longitude > 44.8 || latitude < 35.7 || latitude > 42.2) return false;
