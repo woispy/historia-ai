@@ -10,7 +10,7 @@ const BBOX = [25.45, 35.72, 44.85, 42.35];
 const EPS = 1e-7;
 const MIN_AREA = 0.00005;
 const COAST_TOLERANCE = 0.055;
-const SAMPLE_STEP = 0.12;
+const SAMPLE_STEP = 0.06;
 const NEAR_COAST_LIMIT = 1.25;
 const ANCHOR_CENTROID_TOLERANCE = 0.22;
 const province = (id) => ANATOLIA_PROVINCE_METADATA.find((item) => item.id === id) ?? null;
