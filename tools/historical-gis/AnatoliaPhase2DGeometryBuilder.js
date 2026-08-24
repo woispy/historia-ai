@@ -204,6 +204,7 @@ export function buildAnatoliaPhase2DAssets(regions) {
     0,
   );
   const fallbackProvinceCount = fallbackLikeProvinceCount(geometries);
+  const physicalBarrierSiteCount = physicalBoundarySiteCount();
 
   if (provinces.length !== ANATOLIA_PROVINCE_METADATA.length) {
     throw new Error(`Phase 2D province count mismatch: ${provinces.length}; expected ${ANATOLIA_PROVINCE_METADATA.length}.`);
@@ -221,7 +222,10 @@ export function buildAnatoliaPhase2DAssets(regions) {
     politicalSiteCount: assets.politicalSiteCount ?? ANATOLIA_PROVINCE_METADATA.length,
     supportSiteCount: assets.supportSiteCount ?? 0,
     naturalFeatureSiteCount: assets.naturalFeatureSiteCount ?? naturalFeatureSiteCount(),
-    barrierSiteCount: assets.barrierSiteCount ?? physicalBoundarySiteCount(),
+    barrierSiteCount: Math.max(
+      Number.isFinite(assets.barrierSiteCount) ? assets.barrierSiteCount : 0,
+      physicalBarrierSiteCount,
+    ),
     weightIterations: assets.weightIterations ?? DETERMINISTIC_WEIGHT_ITERATIONS,
   };
 }
