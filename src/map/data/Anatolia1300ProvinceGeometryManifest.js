@@ -8,8 +8,9 @@
  *
  * The historical 1300 province set is currently 38 entries. Additional
  * historical candidates (Attaleia, Myra, Pisidian Antioch, Niğde, Malatya,
- * and Adana) must first be promoted into AnatoliaProvinceMetadata with their
- * historical evidence before they are admitted here.
+ * Adana, and any other candidate) must first be promoted into
+ * AnatoliaProvinceMetadata with their historical evidence before they are
+ * admitted here.
  */
 
 const geometry = (id, sourceKey, notes = null) => Object.freeze({
@@ -52,7 +53,6 @@ export const ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST = Object.freeze([
   geometry("pontus-amisos", "amisos"),
   geometry("pontus-amasya", "amasya"),
   geometry("pontus-kastamon", "kastamon"),
-  geometry("pontus-trabzon", "trabzon"),
   geometry("eastern-anatolia-erzincan", "erzincan"),
   geometry("eastern-anatolia-erzurum", "erzurum"),
   geometry("cilicia-sis", "sis"),
