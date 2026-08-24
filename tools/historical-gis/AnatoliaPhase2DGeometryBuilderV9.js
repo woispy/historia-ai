@@ -16,6 +16,7 @@ const EPS = 1e-7;
 const MIN_AREA = 0.00005;
 const COAST_TOLERANCE = 0.055;
 const ANCHOR_COAST_TOLERANCE = 100;
+const RECOVERY_COAST_TOLERANCE = 0.02;
 const SAMPLE_STEP = 0.06;
 const MAINLAND_MIN_AREA = 5;
 const MAX_AREA_RATIO = 4.2;
@@ -101,6 +102,12 @@ function isPhysicalLandPoint(point) {
   return isStaticLandPoint(point) && !inLake(point);
 }
 
+function isRecoverableLandPoint(point) {
+  return !inLake(point)
+    && (ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon))
+      || distanceToLand(point) <= RECOVERY_COAST_TOLERANCE);
+}
+
 function halfPlane(polygon, a, b, c) {
   const output = [];
   const inside = (point) => a * point[0] + b * point[1] <= c + EPS;
@@ -168,7 +175,7 @@ function clipLandByCell(land, cell) {
 }
 
 function recoverLandConstrainedCell(cell, anchor) {
-  if (!pointInPolygon(anchor, cell) || !isPhysicalLandPoint(anchor)) return [];
+  if (!pointInPolygon(anchor, cell) || !isRecoverableLandPoint(anchor)) return [];
   const points = [];
   for (let index = 0; index < RECOVERY_RAYS; index += 1) {
     const angle = (index / RECOVERY_RAYS) * Math.PI * 2;
@@ -178,7 +185,7 @@ function recoverLandConstrainedCell(cell, anchor) {
     for (let iteration = 0; iteration < RECOVERY_BISECTIONS; iteration += 1) {
       const radius = (low + high) / 2;
       const sample = [anchor[0] + direction[0] * radius, anchor[1] + direction[1] * radius];
-      if (pointInPolygon(sample, cell) && isPhysicalLandPoint(sample)) low = radius;
+      if (pointInPolygon(sample, cell) && isRecoverableLandPoint(sample)) low = radius;
       else high = radius;
     }
     points.push([anchor[0] + direction[0] * low, anchor[1] + direction[1] * low]);
@@ -192,7 +199,6 @@ function clipCellToMainland(cell, provinceId, anchor) {
     .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA)
     .sort((a, b) => area(b) - area(a));
   if (polygons.length) return polygons[0];
-
   const recovered = recoverLandConstrainedCell(cell, anchor);
   if (recovered.length >= 3 && area(recovered) >= MIN_AREA) return recovered;
   throw new Error(`Phase 2D V9 ${provinceId} produced no physical-land geometry.`);
