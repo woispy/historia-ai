@@ -2,4 +2,4 @@ export {
   buildAnatoliaPhase2DAssets,
   isAnatoliaGeometryPoint,
   isPhysicalLandPoint,
-} from "./AnatoliaPhase2DGeometryBuilderV5.js";
+} from "./AnatoliaPhase2DGeometryBuilderV6.js";
