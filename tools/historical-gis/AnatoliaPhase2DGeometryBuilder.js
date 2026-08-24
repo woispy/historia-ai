@@ -1,6 +1,7 @@
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
+import { ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST } from "../../src/map/data/Anatolia1300ProvinceGeometryManifest.js";
 
 const BBOX = [25.45, 35.72, 44.85, 42.35];
 const SITE_EPSILON = 1e-6;
@@ -59,12 +60,6 @@ function isWithinAnatoliaEnvelope(point) {
   if (longitude < 28.5) return latitude <= 40.78;
   if (longitude < 29.2) return latitude <= 40.88;
   return latitude <= 42.20;
-}
-
-function isUsableCartographicPoint(point) {
-  return isWithinAnatoliaEnvelope(point)
-    && pointInAnatoliaLand(point)
-    && !pointInWaterEnvelope(point);
 }
 
 function isPoliticalCartographicPoint(point) {
@@ -204,16 +199,18 @@ function addCoastInteriorSites(sites, seen) {
   }
 }
 
-function addSourceShapeSites(sites, seen, sourceRegions) {
-  for (const region of sourceRegions ?? []) {
-    const polygon = region?.polygons?.find((candidate) => Array.isArray(candidate) && candidate.length >= 3);
-    if (!polygon) continue;
-    const center = polygon.reduce(
-      (sum, [x, y]) => [sum[0] + x, sum[1] + y],
-      [0, 0],
+function validateGeometryManifest() {
+  if (ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST.length !== ANATOLIA_PROVINCE_METADATA.length) {
+    throw new Error(
+      `Anatolia 1300 geometry manifest mismatch: ${ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST.length} manifest entries for ${ANATOLIA_PROVINCE_METADATA.length} province metadata entries.`,
     );
-    const point = [center[0] / polygon.length, center[1] / polygon.length];
-    if (isUsableCartographicPoint(point)) addSite(sites, seen, point, nearestProvinceId(point), "historical-source-anchor");
+  }
+
+  const metadataIds = new Set(ANATOLIA_PROVINCE_METADATA.map(({ id }) => id));
+  for (const entry of ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST) {
+    if (!metadataIds.has(entry.id)) {
+      throw new Error(`Anatolia 1300 geometry manifest references unknown province: ${entry.id}`);
+    }
   }
 }
 
@@ -371,7 +368,9 @@ function createGeometryAsset(metadata, polygons) {
   };
 }
 
-export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
+export function buildAnatoliaPhase2DAssets() {
+  validateGeometryManifest();
+
   const sites = [];
   const seen = new Set();
   addAnchorSites(sites, seen);
@@ -379,7 +378,6 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
   addProvinceShapeSites(sites, seen);
   addPhysicalBarrierSites(sites, seen);
   addCoastInteriorSites(sites, seen);
-  addSourceShapeSites(sites, seen, sourceRegions);
 
   const polygonsByProvince = Object.fromEntries(
     ANATOLIA_PROVINCE_METADATA.map((metadata) => [metadata.id, []]),
