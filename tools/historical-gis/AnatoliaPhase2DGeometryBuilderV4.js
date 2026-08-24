@@ -1,5 +1,6 @@
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
+import { ANATOLIA_PHYSICAL_COAST_CORRECTIONS } from "../../src/map/data/AnatoliaPhysicalCoastCorrections.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 import { ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST, ANATOLIA_1300_PROVINCE_GEOMETRY_KEYS } from "../../src/map/data/Anatolia1300ProvinceGeometryManifest.js";
 import { ANATOLIA_PROVINCE_REFINEMENTS, ANATOLIA_ADJACENCY_HINTS, ANATOLIA_STRATEGIC_PASSES, ANATOLIA_RIVER_CROSSINGS } from "../../src/map/data/AnatoliaProvinceRefinement.js";
@@ -15,6 +16,7 @@ const DIRECTIONS = 12;
 const province = (id) => ANATOLIA_PROVINCE_METADATA.find((item) => item.id === id) ?? null;
 const rawAnchor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id]?.anchor ?? item.centroid;
 const sq = (a, b) => (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2;
+const physicalLandPolygons = () => [...ANATOLIA_PHYSICAL_ATLAS.landPolygons, ...ANATOLIA_PHYSICAL_COAST_CORRECTIONS.map((item) => item.coordinates)];
 
 function pointInPolygon(point, polygon) {
   let inside = false;
@@ -33,13 +35,13 @@ function distanceToSegment(point, a, b) {
 
 function distanceToCoast(point) {
   let best = Infinity;
-  for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
+  for (const polygon of physicalLandPolygons()) {
     for (let i = 0; i < polygon.length; i += 1) best = Math.min(best, distanceToSegment(point, polygon[i], polygon[(i + 1) % polygon.length]));
   }
   return best;
 }
 
-function inLand(point) { return ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon)); }
+function inLand(point) { return physicalLandPolygons().some((polygon) => pointInPolygon(point, polygon)); }
 function inLake(point) { return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygon(point, lake.coordinates)); }
 function isPhysicalLandPoint(point) { return !inLake(point) && (inLand(point) || distanceToCoast(point) <= COAST_TOLERANCE); }
 
@@ -111,7 +113,7 @@ function nearestProvince(point) {
 }
 
 function addCoastSites(sites, seen) {
-  for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) for (let i = 0; i < polygon.length - 1; i += 1) {
+  for (const polygon of physicalLandPolygons()) for (let i = 0; i < polygon.length - 1; i += 1) {
     const a = polygon[i]; const b = polygon[i + 1]; const dx = b[0] - a[0]; const dy = b[1] - a[1]; const length = Math.hypot(dx, dy) || 1;
     const steps = Math.max(1, Math.ceil(length / COAST_STEP)); const normal = [-dy / length, dx / length];
     for (let step = 0; step < steps; step += 1) {
