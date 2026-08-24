@@ -1,9 +1,11 @@
+import { ANATOLIA_PHYSICAL_ATLAS } from "../../data/AnatoliaPhysicalAtlas.js";
 import { WORLD_LAND_PATH } from "../../physical/WorldPhysicalAtlas.js";
 import { getHistoricalPoliticalOverlayMode } from "./HistoricalPoliticalOverlayModel";
 
 const HISTORICAL_1300_DATE = "1300-01-01";
 const DEFAULT_POLITICAL_COLOR = "#6f765f";
 const HISTORICAL_WORLD_POLITICAL_CLIP_ID = "historical-world-political-land-clip";
+const HISTORICAL_WORLD_SOURCE_CLIP_ID = "historical-world-source-outside-anatolia-clip";
 
 const SOURCE_POLITICAL_PALETTE = [
   "#6A1B9A", "#0F7A32", "#B87333", "#786A9D",
@@ -31,11 +33,16 @@ function buildPathData(polygons) {
   }).filter(Boolean).join(" ");
 }
 
+const ANATOLIA_LAND_PATH = buildPathData(ANATOLIA_PHYSICAL_ATLAS.landPolygons);
+
 function PoliticalOverlayDefs() {
   return (
     <defs>
       <clipPath id={HISTORICAL_WORLD_POLITICAL_CLIP_ID} clipPathUnits="userSpaceOnUse">
         <path d={WORLD_LAND_PATH} fillRule="evenodd" />
+      </clipPath>
+      <clipPath id={HISTORICAL_WORLD_SOURCE_CLIP_ID} clipPathUnits="userSpaceOnUse">
+        <path d={`${WORLD_LAND_PATH} ${ANATOLIA_LAND_PATH}`} fillRule="evenodd" />
       </clipPath>
       <pattern id="historical-suzerainty-hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
         <line x1="0" y1="0" x2="0" y2="10" stroke="rgba(255,255,255,0.30)" strokeWidth="2.5" />
@@ -72,31 +79,6 @@ function getStableSourceColor(subject) {
     ?? SOURCE_POLITICAL_PALETTE[Math.abs([...normalized].reduce((hash, character) => ((hash * 31) + character.charCodeAt(0)) | 0, 7)) % SOURCE_POLITICAL_PALETTE.length];
 }
 
-// The old Phase 2D builder deliberately kept the Anatolia envelope separate
-// from the global source GIS. Reuse that same envelope here so a world-scale
-// historical source polygon cannot repaint the curated Anatolia surface.
-function isWithinAnatoliaEnvelope(point) {
-  const [longitude, latitude] = point ?? [];
-  if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) return false;
-  if (longitude < 28.5) return latitude <= 40.78;
-  if (longitude < 29.2) return latitude <= 40.88;
-  return latitude <= 42.20;
-}
-
-function isAnatoliaSourceRegion(region) {
-  const polygons = region?.geometry?.polygons;
-  if (!Array.isArray(polygons)) return false;
-
-  // Source polygons are closed rings with enough vertices that a region which
-  // actually covers Anatolia will expose at least one vertex in the historical
-  // override envelope. This deliberately removes source-derived coverage only
-  // where the curated province compositor is authoritative.
-  return polygons.some((polygon) => (
-    Array.isArray(polygon)
-    && polygon.some((point) => isWithinAnatoliaEnvelope(point))
-  ));
-}
-
 function HistoricalWorldRegionPaths({ regions = [] }) {
   return regions.map((region) => {
     const d = buildPathData(region?.geometry?.polygons);
@@ -120,14 +102,15 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
   if (date !== HISTORICAL_1300_DATE) return null;
 
   const curatedProvinces = provinces.filter((entry) => entry?.historicalProvince?.classification === "phase2d-anatolia-province-geometry");
-  const sourceRegions = regions.filter((region) => !isAnatoliaSourceRegion(region));
 
   return (
     <g pointerEvents="none" aria-label="1300 historical political map">
       <PoliticalOverlayDefs />
       <g clipPath={`url(#${HISTORICAL_WORLD_POLITICAL_CLIP_ID})`}>
         <rect x="-180" y="-90" width="360" height="180" fill={DEFAULT_POLITICAL_COLOR} fillOpacity="0.12" aria-label="Historical unassigned land presentation" />
-        <HistoricalWorldRegionPaths regions={sourceRegions} />
+        <g clipPath={`url(#${HISTORICAL_WORLD_SOURCE_CLIP_ID})`}>
+          <HistoricalWorldRegionPaths regions={regions} />
+        </g>
 
         {curatedProvinces.map((entry) => {
           const d = buildPathData(entry?.geometry?.polygons);
