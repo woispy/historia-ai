@@ -2,8 +2,18 @@ import "./MapView.css";
 
 import { getCountry } from "../../../countries";
 import { getProvince } from "../../../provinces";
+import { getProvinceMetadata } from "../../../map/data/AnatoliaProvinceMetadata.js";
+import { getHistoricalPolity } from "../../../world/map/historical/HistoricalPoliticalRuntime.js";
 import { WorldMap } from "../../../map";
 import ProvinceInspector from "./ProvinceInspector";
+
+const HISTORICAL_1300_DATE = "1300-01-01";
+
+function getScenarioStartDate(gameSession) {
+  return gameSession?.scenario?.startDate
+    ?? gameSession?.world?.scenario?.startDate
+    ?? null;
+}
 
 function MapView({
   gameSession,
@@ -19,6 +29,14 @@ function MapView({
     : null;
   const selectedCountry = selectedProvince?.owner && countryRepository
     ? getCountry(countryRepository, selectedProvince.owner)
+    : null;
+  const scenarioDate = getScenarioStartDate(gameSession);
+  const historicalMetadata = scenarioDate === HISTORICAL_1300_DATE && selectedProvinceId
+    ? getProvinceMetadata(selectedProvinceId)
+    : null;
+  const historicalControllerId = historicalMetadata?.historicalControl?.controllerAt1300 ?? null;
+  const historicalPolity = historicalControllerId
+    ? getHistoricalPolity(historicalControllerId)
     : null;
 
   return (
@@ -37,6 +55,8 @@ function MapView({
         <ProvinceInspector
           province={selectedProvince}
           country={selectedCountry}
+          historicalMetadata={historicalMetadata}
+          historicalPolity={historicalPolity}
           onClose={onProvinceClose}
         />
       )}
