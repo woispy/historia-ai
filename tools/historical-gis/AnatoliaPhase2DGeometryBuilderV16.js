@@ -81,10 +81,6 @@ function localLandRecovery(point) {
 }
 
 function nearestLandPoint(point) {
-  // A historical anchor that already lies inside an explicit physical-coast
-  // correction is authoritative land and must never be sent through the
-  // generic nearest-boundary recovery path. This keeps correction geometry a
-  // first-class physical authority rather than an incidental fallback.
   if (PHYSICAL_CORRECTION_POLYGONS.some((polygon) => pointInPolygon(point, polygon))) return point;
 
   const recovered = localLandRecovery(point);
@@ -211,7 +207,10 @@ function edgeOnPhysicalLand(polygon) {
     const end = polygon[(index + 1) % polygon.length];
     for (const fraction of EDGE_FRACTIONS) {
       const point = [start[0] + (end[0] - start[0]) * fraction, start[1] + (end[1] - start[1]) * fraction];
-      if (!isPhysicalLandPoint(point)) return false;
+      // Lake interiors are intentionally allowed inside the outer land shell;
+      // buildProvinceGeometry emits the corresponding lake as an even-odd
+      // hole. Open water outside a known lake remains invalid here.
+      if (!isPhysicalLandPoint(point) && !inLake(point)) return false;
     }
   }
   return true;
