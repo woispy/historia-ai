@@ -18,6 +18,7 @@ const WEIGHT_BACKOFF_ATTEMPTS = 8;
 const ANCHOR_GRID_STEP = 0.005;
 const ANCHOR_GRID_RADIUS = 0.35;
 const MAX_ANCHOR_SNAP_DISTANCE = 1.2;
+const LAKE_SHORELINE_TOLERANCE = 0.003;
 
 const rawAnchor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id]?.anchor ?? item.centroid;
 
@@ -72,11 +73,22 @@ const PHYSICAL_CORRECTION_POLYGONS = ANATOLIA_PHYSICAL_COAST_CORRECTIONS
 
 function inLake(point) { return LAKES.some((lake) => pointInPolygon(point, lake.coordinates)); }
 
+function pointToSegmentDistance(point, start, end) {
+  const dx = end[0] - start[0];
+  const dy = end[1] - start[1];
+  const denominator = dx * dx + dy * dy;
+  const t = denominator <= EPS
+    ? 0
+    : Math.max(0, Math.min(1, ((point[0] - start[0]) * dx + (point[1] - start[1]) * dy) / denominator));
+  const projected = [start[0] + dx * t, start[1] + dy * t];
+  return Math.hypot(point[0] - projected[0], point[1] - projected[1]);
+}
+
 function isLakeShorelinePoint(point) {
   return LAKES.some((lake) => {
     const ring = lake.coordinates;
     for (let index = 0; index < ring.length; index += 1) {
-      if (pointOnSegment(point, ring[index], ring[(index + 1) % ring.length])) return true;
+      if (pointToSegmentDistance(point, ring[index], ring[(index + 1) % ring.length]) <= LAKE_SHORELINE_TOLERANCE) return true;
     }
     return false;
   });
@@ -226,7 +238,9 @@ function edgeOnPhysicalLand(polygon) {
     const end = polygon[(index + 1) % polygon.length];
     for (const fraction of EDGE_FRACTIONS) {
       const point = [start[0] + (end[0] - start[0]) * fraction, start[1] + (end[1] - start[1]) * fraction];
-      if (!isPhysicalLandPoint(point) && !isLakeShorelinePoint(point)) return false;
+      if (isPhysicalLandPoint(point)) continue;
+      if (isLakeShorelinePoint(point)) continue;
+      return false;
     }
   }
   return true;
