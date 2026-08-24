@@ -184,7 +184,6 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
                 strokeOpacity={base.fillOpacity}
                 strokeWidth={COASTAL_POLITICAL_EXPANSION}
                 strokeLinejoin="round"
-                vectorEffect="non-scaling-stroke"
               />
             );
           })}
