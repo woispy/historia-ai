@@ -14,6 +14,11 @@ function booleanLabel(value) {
   return "—";
 }
 
+function riverLabel(hasRiver, riverName) {
+  if (hasRiver !== true) return hasRiver === false ? "Yok" : "—";
+  return riverName ? `Var — ${riverName}` : "Var";
+}
+
 function historicalStatusLabel(value) {
   const labels = {
     established: "Yerleşik kontrol",
@@ -105,6 +110,9 @@ function ProvinceInspector({ province, country, historicalMetadata = null, histo
   const port = historicalMetadata?.port ?? province?.port ?? viewModel.hasPort;
   const strategic = historicalMetadata?.strategic ?? province?.strategic ?? null;
   const terrain = historicalMetadata?.terrain ?? province?.terrain ?? viewModel.terrain;
+  const hasRiver = province?.river ?? viewModel.hasRiver;
+  const riverName = province?.riverName ?? null;
+  const riverDetail = province?.riverDetail ?? null;
   const displayOwner = historicalMetadata
     ? polityLabel(controller, historicalPolity)
     : (country?.name ?? country?.displayName ?? viewModel.owner);
@@ -145,7 +153,7 @@ function ProvinceInspector({ province, country, historicalMetadata = null, histo
         <div><dt>Vali</dt><dd>{valueOrDash(viewModel.governor)}</dd></div>
         <div><dt>Kale Seviyesi</dt><dd>{valueOrDash(viewModel.fortLevel)}</dd></div>
         <div><dt>Liman</dt><dd>{booleanLabel(port)}</dd></div>
-        <div><dt>Nehir</dt><dd>{booleanLabel(viewModel.hasRiver)}</dd></div>
+        <div><dt>Nehir</dt><dd>{riverLabel(hasRiver, riverName)}</dd></div>
         <div><dt>Kıyı</dt><dd>{booleanLabel(coastal)}</dd></div>
         <div><dt>Kültür</dt><dd>{valueOrDash(viewModel.culture)}</dd></div>
         <div><dt>Din</dt><dd>{valueOrDash(viewModel.religion)}</dd></div>
@@ -160,6 +168,10 @@ function ProvinceInspector({ province, country, historicalMetadata = null, histo
           </>
         )}
       </dl>
+
+      {riverDetail && (
+        <p className="province-inspector__note">{riverName}: {riverDetail}.</p>
+      )}
 
       {historicalNote && (
         <p className="province-inspector__note">{historicalNote}</p>
