@@ -5,7 +5,8 @@ import { getHistoricalPoliticalOverlayMode } from "./HistoricalPoliticalOverlayM
 const HISTORICAL_1300_DATE = "1300-01-01";
 const DEFAULT_POLITICAL_COLOR = "#6f765f";
 const HISTORICAL_WORLD_POLITICAL_CLIP_ID = "historical-world-political-land-clip";
-const HISTORICAL_WORLD_SOURCE_CLIP_ID = "historical-world-source-outside-anatolia-clip";
+const HISTORICAL_WORLD_SOURCE_MASK_ID = "historical-world-source-outside-anatolia-mask";
+const COASTAL_POLITICAL_EXPANSION = 0.08;
 
 const SOURCE_POLITICAL_PALETTE = [
   "#6A1B9A", "#0F7A32", "#B87333", "#786A9D",
@@ -41,9 +42,34 @@ function PoliticalOverlayDefs() {
       <clipPath id={HISTORICAL_WORLD_POLITICAL_CLIP_ID} clipPathUnits="userSpaceOnUse">
         <path d={WORLD_LAND_PATH} fillRule="evenodd" />
       </clipPath>
-      <clipPath id={HISTORICAL_WORLD_SOURCE_CLIP_ID} clipPathUnits="userSpaceOnUse">
-        <path d={`${WORLD_LAND_PATH} ${ANATOLIA_LAND_PATH}`} fillRule="evenodd" />
-      </clipPath>
+
+      {/*
+       * The source-GIS exclusion is deliberately a mask, not a compound
+       * clipPath. The physical world land remains white/authoritative while
+       * the Anatolia land footprint is painted black. A small black coastal
+       * stroke removes the old ring of source-GIS colour that sat between the
+       * coarse curated Anatolia coastline and the detailed world coastline.
+       */}
+      <mask
+        id={HISTORICAL_WORLD_SOURCE_MASK_ID}
+        maskUnits="userSpaceOnUse"
+        x="-180"
+        y="-90"
+        width="360"
+        height="180"
+      >
+        <rect x="-180" y="-90" width="360" height="180" fill="black" />
+        <path d={WORLD_LAND_PATH} fill="white" fillRule="evenodd" />
+        <path
+          d={ANATOLIA_LAND_PATH}
+          fill="black"
+          fillRule="evenodd"
+          stroke="black"
+          strokeWidth={COASTAL_POLITICAL_EXPANSION}
+          strokeLinejoin="round"
+        />
+      </mask>
+
       <pattern id="historical-suzerainty-hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
         <line x1="0" y1="0" x2="0" y2="10" stroke="rgba(255,255,255,0.30)" strokeWidth="2.5" />
       </pattern>
@@ -98,6 +124,30 @@ function HistoricalWorldRegionPaths({ regions = [] }) {
   });
 }
 
+function isCoastalProvince(entry) {
+  return entry?.historicalProvince?.coastal === true
+    || entry?.historicalProvince?.port === true
+    || entry?.historicalProvince?.terrain === "coast";
+}
+
+function renderProvinceBase(entry) {
+  const d = buildPathData(entry?.geometry?.polygons);
+  if (!d) return null;
+
+  const mode = getHistoricalPoliticalOverlayMode(entry);
+  const color = getPoliticalColor(entry);
+  const fillOpacity = getPoliticalFillOpacity(mode);
+  const pattern = mode === "suzerainty"
+    ? "url(#historical-suzerainty-hatch)"
+    : mode === "contested"
+      ? "url(#historical-contested-hatch)"
+      : mode === "neutral"
+        ? "url(#historical-neutral-hatch)"
+        : null;
+
+  return { d, mode, color, fillOpacity, pattern };
+}
+
 function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces = [], regions = [] }) {
   if (date !== HISTORICAL_1300_DATE) return null;
 
@@ -108,39 +158,59 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
       <PoliticalOverlayDefs />
       <g clipPath={`url(#${HISTORICAL_WORLD_POLITICAL_CLIP_ID})`}>
         <rect x="-180" y="-90" width="360" height="180" fill={DEFAULT_POLITICAL_COLOR} fillOpacity="0.12" aria-label="Historical unassigned land presentation" />
-        <g clipPath={`url(#${HISTORICAL_WORLD_SOURCE_CLIP_ID})`}>
+
+        <g mask={`url(#${HISTORICAL_WORLD_SOURCE_MASK_ID})`}>
           <HistoricalWorldRegionPaths regions={regions} />
         </g>
 
-        {curatedProvinces.map((entry) => {
-          const d = buildPathData(entry?.geometry?.polygons);
-          if (!d) return null;
-
-          const mode = getHistoricalPoliticalOverlayMode(entry);
-          const color = getPoliticalColor(entry);
-          const pattern = mode === "suzerainty"
-            ? "url(#historical-suzerainty-hatch)"
-            : mode === "contested"
-              ? "url(#historical-contested-hatch)"
-              : mode === "neutral"
-                ? "url(#historical-neutral-hatch)"
-                : null;
-
-          return (
-            <g key={entry?.province?.id ?? entry?.historicalProvince?.id}>
+        {/*
+         * Coastal closure pass. We intentionally expand only provinces that
+         * touch the coast/ports, then redraw every normal province on top.
+         * The world land clip is the final authority, so the expansion can
+         * never become political colour in the sea.
+         */}
+        <g>
+          {curatedProvinces.map((entry) => {
+            if (!isCoastalProvince(entry)) return null;
+            const base = renderProvinceBase(entry);
+            if (!base) return null;
+            return (
               <path
-                d={d}
-                fill={color}
-                fillOpacity={getPoliticalFillOpacity(mode)}
-                stroke="rgba(24,30,24,0.78)"
-                strokeWidth="0.72"
-                vectorEffect="non-scaling-stroke"
+                key={`coastal-closure-${entry?.province?.id ?? entry?.historicalProvince?.id}`}
+                d={base.d}
+                fill={base.color}
+                fillOpacity={base.fillOpacity}
+                stroke={base.color}
+                strokeOpacity={base.fillOpacity}
+                strokeWidth={COASTAL_POLITICAL_EXPANSION}
                 strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
               />
-              {pattern && <path d={d} fill={pattern} fillOpacity={mode === "neutral" ? 0.30 : 0.46} stroke="none" />}
-            </g>
-          );
-        })}
+            );
+          })}
+        </g>
+
+        <g>
+          {curatedProvinces.map((entry) => {
+            const base = renderProvinceBase(entry);
+            if (!base) return null;
+
+            return (
+              <g key={entry?.province?.id ?? entry?.historicalProvince?.id}>
+                <path
+                  d={base.d}
+                  fill={base.color}
+                  fillOpacity={base.fillOpacity}
+                  stroke="rgba(24,30,24,0.78)"
+                  strokeWidth="0.72"
+                  vectorEffect="non-scaling-stroke"
+                  strokeLinejoin="round"
+                />
+                {base.pattern && <path d={base.d} fill={base.pattern} fillOpacity={base.mode === "neutral" ? 0.30 : 0.46} stroke="none" />}
+              </g>
+            );
+          })}
+        </g>
       </g>
     </g>
   );
