@@ -20,6 +20,7 @@ const cartographyLayer = read("src/map/components/layers/CartographyLayer.jsx");
 const cityLayer = read("src/map/components/layers/CityLayer.jsx");
 const physicalLayer = read("src/map/components/layers/WorldPhysicalLayer.jsx");
 const historicalPoliticalLayer = read("src/map/components/layers/HistoricalPoliticalRegionLayer.jsx");
+const hydrography = read("src/map/data/Anatolia1300Hydrography.js");
 const inspector = read("src/components/GameShell/MapView/ProvinceInspector.jsx");
 
 assert.equal((worldMap.match(/<SvgRenderer\b/g) ?? []).length, 1);
@@ -123,8 +124,11 @@ assert.ok(worldMap.includes("const useGpuProvinceFill = !isHistoricalPoliticalMa
 // never the modern Admin-0 owner stored on the gameplay province. It must also
 // work for curated provinces that exist only in the historical geometry repo.
 assert.ok(mapView.includes("getProvinceMetadata"));
-assert.ok(mapView.includes("getHistoricalPolity"));
+assert.ok(mapView.includes("getAnatolia1300Hydrography"));
 assert.ok(mapView.includes("createHistoricalInspectorProvince"));
+assert.ok(mapView.includes("mergeHistoricalHydrography"));
+assert.ok(mapView.includes("riverName: hydrography?.name ?? null"));
+assert.ok(mapView.includes("riverDetail: hydrography?.detail ?? null"));
 assert.ok(mapView.includes("repositoryProvince ?? createHistoricalInspectorProvince(historicalMetadata)"));
 assert.ok(mapView.includes("historicalMetadata={historicalMetadata}"));
 assert.ok(inspector.includes("historicalMetadata?.historicalControl"));
@@ -132,7 +136,20 @@ assert.ok(inspector.includes("const displayOwner = historicalMetadata"));
 assert.ok(inspector.includes("1300 Kontrolü"));
 assert.ok(inspector.includes("Tarihsel Güven"));
 assert.ok(inspector.includes("historicalNoteLabel"));
+assert.ok(inspector.includes("riverLabel"));
+assert.ok(inspector.includes("riverName"));
+assert.ok(inspector.includes("riverDetail"));
 assert.ok(inspector.includes("Kütahya, Yakub Bey'in bağımsızlık döneminin en güçlü coğrafi dayanağıdır."));
+
+// Named hydrography is explicit metadata, not a truthy fallback on modern
+// gameplay fields. Amasya/Eskişehir are protected regression anchors.
+assert.ok(hydrography.includes('"pontus-amasya": river("Yeşilırmak (Iris)"'));
+assert.ok(hydrography.includes('"phrygia-eskisehir": river("Porsuk Çayı"'));
+assert.ok(hydrography.includes('"phrygia-kutahya": river("Porsuk Çayı"'));
+assert.ok(hydrography.includes('"lydia-magnesia": river("Gediz (Hermos)"'));
+assert.ok(hydrography.includes('"caria-tralleis": river("Büyük Menderes (Maiandros)"'));
+assert.ok(hydrography.includes('"eastern-anatolia-erzincan": river("Karasu"'));
+assert.ok(hydrography.includes('"eastern-anatolia-erzurum": river("Aras"'));
 
 assert.ok(!cartographyLayer.includes("ANATOLIA_STRATEGIC_CORRIDORS"));
 assert.ok(!cartographyLayer.includes("ANATOLIA_STRATEGIC_PASSES"));
@@ -143,4 +160,4 @@ assert.ok(!cityLayer.includes("fortified &&"));
 assert.ok(!worldMap.includes('phase="base"'));
 assert.ok(!worldMap.includes('phase="water"'));
 
-console.log("Map rendering contract tests passed: 1300 Anatolia is province-authoritative, legacy regional blobs are excluded from the Anatolia override, historical parent envelopes constrain province presentation, physical land remains the final coastline authority, and the inspector uses Turkish historical metadata.");
+console.log("Map rendering contract tests passed: 1300 Anatolia is province-authoritative, legacy regional blobs are excluded from the Anatolia override, historical parent envelopes constrain province presentation, physical land remains the final coastline authority, historical ownership is used by the inspector, and named province hydrography is displayed from dated metadata.");
