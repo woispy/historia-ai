@@ -113,7 +113,7 @@ export function buildAnatoliaPhase2DAssets() {
   return { schemaVersion: 1, geometryVersion: 9, historicalDate: "1300-01-01", provider: "historia-ai-curated-cartography", dataset: "anatolia-province-geometry-1300", projection: "EPSG:4326", method: "one historical province anchor per political cell, convex-cell intersection against the physical Anatolia land authority, and dense physical sampling", siteCount: physicalSamplingSiteCount + politicalSites.length + naturalFeatureSiteCount, politicalSiteCount: politicalSites.length, physicalSamplingSiteCount, barrierSiteCount: 0, naturalFeatureSiteCount, fallbackProvinceCount: 0, provinceCount: provinces.length, polygonCount: geometries.reduce((sum, item) => sum + item.polygons.length, 0), provinces, geometries };
 }
 export function isAnatoliaGeometryPoint([longitude, latitude]) {
-  if (longitude < 26.5 || longitude > 44.8 || latitude < 35.7 || latitude > 41.6) return false;
+  if (longitude < 26.5 || longitude > 44.8 || latitude < 35.7 || latitude > 42.2) return false;
   const exclusion = [[26.5, 42.2], [29.5, 42.2], [29.5, 41.25], [29.05, 40.72], [28.45, 40.48], [27.55, 40.45], [26.5, 40.65]];
   return !pointInPolygon([longitude, latitude], exclusion);
 }
