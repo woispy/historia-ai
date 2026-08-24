@@ -35,7 +35,7 @@ function pointInPolygon(point, polygon) {
     const a = polygon[i];
     const b = polygon[j];
     if ((a[1] > point[1]) !== (b[1] > point[1])
-      && point[0] < ((b[0] - a[0]) * point[1] - (b[1] - a[1]) * a[1]) / ((b[1] - a[1]) || EPS) + a[0]) inside = !inside;
+      && point[0] < ((b[0] - a[0]) * (point[1] - a[1])) / ((b[1] - a[1]) || EPS) + a[0]) inside = !inside;
   }
   return inside;
 }
