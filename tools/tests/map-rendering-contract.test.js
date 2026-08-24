@@ -52,9 +52,13 @@ assert.match(provinceLayer, /clipPath="url\(#world-land-mask\)"/);
 assert.match(physicalLayer, /WORLD_LAND_PATH/);
 assert.match(physicalLayer, /WORLD_PHYSICAL_ATLAS\.water\.fill/);
 
+assert.ok(historicalPoliticalLayer.includes("import { ANATOLIA_PHYSICAL_ATLAS } from \"../../data/AnatoliaPhysicalAtlas.js\";"));
 assert.ok(historicalPoliticalLayer.includes("import { WORLD_LAND_PATH } from \"../../physical/WorldPhysicalAtlas.js\";"));
 assert.ok(historicalPoliticalLayer.includes("historical-world-political-land-clip"));
+assert.ok(historicalPoliticalLayer.includes("historical-world-source-outside-anatolia-clip"));
 assert.ok(historicalPoliticalLayer.includes("<path d={WORLD_LAND_PATH} fillRule=\"evenodd\" />"));
+assert.ok(historicalPoliticalLayer.includes("${WORLD_LAND_PATH} ${ANATOLIA_LAND_PATH}"));
+assert.ok(historicalPoliticalLayer.includes("clipPath={`url(#${HISTORICAL_WORLD_SOURCE_CLIP_ID})`}"));
 assert.ok(historicalPoliticalLayer.includes("clipPath={`url(#${HISTORICAL_WORLD_POLITICAL_CLIP_ID})`}"));
 assert.ok(!historicalPoliticalLayer.includes('clipPath="url(#world-land-mask)"'));
 
@@ -65,14 +69,12 @@ assert.ok(worldMap.includes("regions={historicalRegions}"));
 assert.ok(historicalPoliticalLayer.includes("HistoricalWorldRegionPaths"));
 assert.ok(historicalPoliticalLayer.includes("getStableSourceColor(region.subject)"));
 
-// Critical regression guard: the source-region filter must remove source GIS
-// that overlaps the curated Anatolia envelope. The previous implementation
-// inverted the polity-alias test and therefore rendered unrelated source
-// polygons across Anatolia as arbitrary colours.
-assert.ok(historicalPoliticalLayer.includes("isAnatoliaSourceRegion"));
-assert.ok(historicalPoliticalLayer.includes("regions.filter((region) => !isAnatoliaSourceRegion(region))"));
-assert.ok(historicalPoliticalLayer.includes("longitude < 28.5"));
-assert.ok(historicalPoliticalLayer.includes("latitude <= 42.20"));
+// Critical regression guard: global source GIS is rendered outside the
+// curated Anatolia physical land polygon. This prevents the source-derived
+// world polygons from repainting Anatolia while preserving world coverage.
+assert.ok(historicalPoliticalLayer.includes("ANATOLIA_LAND_PATH"));
+assert.ok(historicalPoliticalLayer.includes("HISTORICAL_WORLD_SOURCE_CLIP_ID"));
+assert.ok(historicalPoliticalLayer.includes("<HistoricalWorldRegionPaths regions={regions} />"));
 assert.ok(!historicalPoliticalLayer.includes("return !subject || !SOURCE_POLITICAL_ALIASES.has(subject);"));
 
 // Historical political fills are always clipped by the physical land path and
