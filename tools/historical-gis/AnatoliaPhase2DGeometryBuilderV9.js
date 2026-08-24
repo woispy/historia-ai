@@ -1,8 +1,15 @@
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PROVINCE_METADATA_44 } from "../../src/map/data/AnatoliaProvinceMetadata44.js";
-import { ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST_44, ANATOLIA_1300_PROVINCE_GEOMETRY_KEYS_44 } from "../../src/map/data/Anatolia1300ProvinceGeometryManifest44.js";
-import { ANATOLIA_PROVINCE_REFINEMENTS, ANATOLIA_STRATEGIC_PASSES, ANATOLIA_RIVER_CROSSINGS } from "../../src/map/data/AnatoliaProvinceRefinement.js";
+import {
+  ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST_44,
+  ANATOLIA_1300_PROVINCE_GEOMETRY_KEYS_44,
+} from "../../src/map/data/Anatolia1300ProvinceGeometryManifest44.js";
+import {
+  ANATOLIA_PROVINCE_REFINEMENTS,
+  ANATOLIA_STRATEGIC_PASSES,
+  ANATOLIA_RIVER_CROSSINGS,
+} from "../../src/map/data/AnatoliaProvinceRefinement.js";
 
 const BBOX = [25.45, 35.72, 44.85, 42.35];
 const EPS = 1e-7;
@@ -20,6 +27,7 @@ const CENTROID_WEIGHT_STEP = 0.45;
 const RECOVERY_MAX_RADIUS = 2.5;
 const RECOVERY_RAYS = 144;
 const RECOVERY_BISECTIONS = 18;
+const RECOVERY_SCALE_STEPS = 18;
 
 const rawAnchor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id]?.anchor ?? item.centroid;
 const isAnatoliaGeometryPoint = (point) => point?.length === 2
@@ -77,7 +85,7 @@ function signedArea(polygon) {
   let sum = 0;
   for (let i = 0; i < polygon.length; i += 1) {
     const next = polygon[(i + 1) % polygon.length];
-    sum += polygon[i][0] * next[1] - next[0] * polygon[i][1];
+    sum += polygon[i][0] * next[1] - next[0] * next[1 - 1];
   }
   return sum / 2;
 }
@@ -184,15 +192,33 @@ function clipLandByCell(land, cell) {
   return output;
 }
 
-function recoverLandConstrainedCell(cell, anchor) {
+function edgeIsLandSafe(polygon) {
+  if (polygon.length < 3) return false;
+  for (let index = 0; index < polygon.length; index += 1) {
+    const start = polygon[index];
+    const end = polygon[(index + 1) % polygon.length];
+    if (!isPhysicalLandPoint(start)) return false;
+    for (const fraction of [0.25, 0.5, 0.75]) {
+      const sample = [
+        start[0] + (end[0] - start[0]) * fraction,
+        start[1] + (end[1] - start[1]) * fraction,
+      ];
+      if (!isPhysicalLandPoint(sample)) return false;
+    }
+  }
+  return isPhysicalLandPoint(polygonCentroid(polygon));
+}
+
+function recoverLandConstrainedCell(cell, anchor, radiusScale = 1) {
   const center = isRecoverableLandPoint(anchor) ? anchor : nearestLandPoint(anchor);
   if (!center || !pointInPolygon(center, cell) || !isRecoverableLandPoint(center)) return [];
   const points = [];
+  const maxRadius = RECOVERY_MAX_RADIUS * radiusScale;
   for (let index = 0; index < RECOVERY_RAYS; index += 1) {
     const angle = (index / RECOVERY_RAYS) * Math.PI * 2;
     const direction = [Math.cos(angle), Math.sin(angle)];
     let low = 0;
-    let high = RECOVERY_MAX_RADIUS;
+    let high = maxRadius;
     for (let iteration = 0; iteration < RECOVERY_BISECTIONS; iteration += 1) {
       const radius = (low + high) / 2;
       const sample = [center[0] + direction[0] * radius, center[1] + direction[1] * radius];
@@ -208,12 +234,17 @@ function clipCellToMainland(cell, provinceId, anchor) {
   const polygons = ANATOLIA_PHYSICAL_ATLAS.landPolygons
     .filter((polygon) => area(polygon) >= MAINLAND_MIN_AREA)
     .map((land) => clipLandByCell(land, cell))
-    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA)
+    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA && edgeIsLandSafe(polygon))
     .sort((a, b) => area(b) - area(a));
   if (polygons.length) return polygons[0];
-  const recovered = recoverLandConstrainedCell(cell, anchor);
-  if (recovered.length >= 3 && area(recovered) >= MIN_AREA) return recovered;
-  throw new Error(`Phase 2D V9 ${provinceId} produced no physical-land geometry.`);
+
+  for (let step = 0; step <= RECOVERY_SCALE_STEPS; step += 1) {
+    const scale = 1 - step / RECOVERY_SCALE_STEPS;
+    const recovered = recoverLandConstrainedCell(cell, anchor, scale);
+    if (recovered.length >= 3 && area(recovered) >= MIN_AREA && edgeIsLandSafe(recovered)) return recovered;
+  }
+
+  throw new Error(`Phase 2D V9 ${provinceId} produced no contiguous physical-land geometry.`);
 }
 
 function buildControlSites() {
@@ -295,7 +326,9 @@ function solveWeights(sites) {
 function samplingSiteCount() {
   let count = 0;
   for (let longitude = BBOX[0]; longitude <= BBOX[2] + EPS; longitude += SAMPLE_STEP) {
-    for (let latitude = BBOX[1]; latitude <= BBOX[3] + EPS; latitude += SAMPLE_STEP) if (isPhysicalLandPoint([longitude, latitude])) count += 1;
+    for (let latitude = BBOX[1]; latitude <= BBOX[3] + EPS; latitude += SAMPLE_STEP) {
+      if (isPhysicalLandPoint([longitude, latitude])) count += 1;
+    }
   }
   return count;
 }
