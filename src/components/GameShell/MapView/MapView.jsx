@@ -3,6 +3,7 @@ import "./MapView.css";
 import { getCountry } from "../../../countries";
 import { getProvince } from "../../../provinces";
 import { getProvinceMetadata } from "../../../map/data/AnatoliaProvinceMetadata.js";
+import { getAnatolia1300Hydrography } from "../../../map/data/Anatolia1300Hydrography.js";
 import { getHistoricalPolity } from "../../../world/map/historical/HistoricalPoliticalRuntime.js";
 import { WorldMap } from "../../../map";
 import ProvinceInspector from "./ProvinceInspector";
@@ -17,6 +18,9 @@ function getScenarioStartDate(gameSession) {
 
 function createHistoricalInspectorProvince(metadata) {
   if (!metadata) return null;
+
+  const hydrography = getAnatolia1300Hydrography(metadata.id);
+
   return {
     id: metadata.id,
     name: metadata.name,
@@ -31,8 +35,24 @@ function createHistoricalInspectorProvince(metadata) {
     fortLevel: null,
     population: null,
     development: null,
-    river: null,
+    river: Boolean(hydrography),
+    riverName: hydrography?.name ?? null,
+    riverDetail: hydrography?.detail ?? null,
     historicalControl: metadata.historicalControl ?? null,
+  };
+}
+
+function mergeHistoricalHydrography(province, historicalMetadata) {
+  if (!province || !historicalMetadata) return province;
+
+  const hydrography = getAnatolia1300Hydrography(historicalMetadata.id);
+  if (!hydrography) return province;
+
+  return {
+    ...province,
+    river: true,
+    riverName: hydrography.name,
+    riverDetail: hydrography.detail,
   };
 }
 
@@ -52,7 +72,10 @@ function MapView({
   const repositoryProvince = provinceRepository && selectedProvinceId
     ? getProvince(provinceRepository, selectedProvinceId)
     : null;
-  const selectedProvince = repositoryProvince ?? createHistoricalInspectorProvince(historicalMetadata);
+  const selectedProvince = mergeHistoricalHydrography(
+    repositoryProvince ?? createHistoricalInspectorProvince(historicalMetadata),
+    historicalMetadata,
+  );
   const selectedCountry = repositoryProvince?.owner && countryRepository
     ? getCountry(countryRepository, repositoryProvince.owner)
     : null;
