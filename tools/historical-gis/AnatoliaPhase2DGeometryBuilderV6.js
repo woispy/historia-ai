@@ -135,7 +135,7 @@ export function buildAnatoliaPhase2DAssets() {
   const provinces = []; const geometries = [];
   for (let index = 0; index < politicalSites.length; index += 1) {
     const site = politicalSites[index]; const item = province(site.provinceId); const cell = voronoiCell(index, politicalSites);
-    const polygons = clipCellToLand(cell, site.point).map((polygon) => fitPolygonToPhysicalLand(polygon, site.point)).filter(Boolean).map((polygon) => polygon.map(([x, y]) => [Number(x.toFixed(5)), Number(y.toFixed(5))]));
+    const polygons = clipCellToLand(cell, site.point).map((polygon) => fitPolygonToPhysicalLand(polygon, site.point)).filter((polygon) => polygon.length >= 3).map((polygon) => polygon.map(([x, y]) => [Number(x.toFixed(5)), Number(y.toFixed(5))]));
     if (!polygons.length) throw new Error(`Phase 2D produced no physical-land geometry for ${item.id}`);
     provinces.push(provinceAsset(item, polygons)); geometries.push(geometryAsset(item, polygons));
   }
