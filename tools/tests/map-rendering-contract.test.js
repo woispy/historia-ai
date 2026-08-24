@@ -142,14 +142,18 @@ assert.ok(inspector.includes("riverDetail"));
 assert.ok(inspector.includes("Kütahya, Yakub Bey'in bağımsızlık döneminin en güçlü coğrafi dayanağıdır."));
 
 // Named hydrography is explicit metadata, not a truthy fallback on modern
-// gameplay fields. Amasya/Eskişehir are protected regression anchors.
+// gameplay fields. Basin-only entries are forbidden; province inspection must
+// name an actual river system. These are protected regression anchors.
 assert.ok(hydrography.includes('"pontus-amasya": river("Yeşilırmak (Iris)"'));
+assert.ok(hydrography.includes('"phrygia-bilecik": river("Karasu (Sakarya)"'));
 assert.ok(hydrography.includes('"phrygia-eskisehir": river("Porsuk Çayı"'));
 assert.ok(hydrography.includes('"phrygia-kutahya": river("Porsuk Çayı"'));
 assert.ok(hydrography.includes('"lydia-magnesia": river("Gediz (Hermos)"'));
 assert.ok(hydrography.includes('"caria-tralleis": river("Büyük Menderes (Maiandros)"'));
 assert.ok(hydrography.includes('"eastern-anatolia-erzincan": river("Karasu"'));
 assert.ok(hydrography.includes('"eastern-anatolia-erzurum": river("Aras"'));
+assert.ok(!hydrography.includes('"phrygia-sogut"'));
+assert.ok(!hydrography.includes("Sakarya havzası\", \"Söğüt"));
 
 assert.ok(!cartographyLayer.includes("ANATOLIA_STRATEGIC_CORRIDORS"));
 assert.ok(!cartographyLayer.includes("ANATOLIA_STRATEGIC_PASSES"));
