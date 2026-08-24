@@ -20,8 +20,8 @@ const RECOVERY_COAST_TOLERANCE = 0.02;
 const SAMPLE_STEP = 0.06;
 const MAINLAND_MIN_AREA = 5;
 const MAX_AREA_RATIO = 4.2;
-const MAX_WEIGHT_ITERATIONS = 24;
-const MAX_WEIGHT_STEP = 1.0;
+const MAX_WEIGHT_ITERATIONS = 48;
+const MAX_WEIGHT_STEP = 1.5;
 const RECOVERY_MAX_RADIUS = 2.5;
 const RECOVERY_RAYS = 144;
 const RECOVERY_BISECTIONS = 18;
@@ -35,7 +35,7 @@ function pointInPolygon(point, polygon) {
     const a = polygon[i];
     const b = polygon[j];
     if ((a[1] > point[1]) !== (b[1] > point[1])
-      && point[0] < ((b[0] - a[0]) * (point[1] - a[1])) / ((b[1] - a[1]) || EPS) + a[0]) inside = !inside;
+      && point[0] < ((b[0] - a[0]) * point[1] - (b[1] - a[1]) * a[1]) / ((b[1] - a[1]) || EPS) + a[0]) inside = !inside;
   }
   return inside;
 }
@@ -279,7 +279,7 @@ function solveWeights(sites) {
     if (!oversized.length) return { weights, partition, iterations: iteration };
     for (const item of oversized) {
       const ratio = item.area / medianArea;
-      const step = Math.min(MAX_WEIGHT_STEP, Math.max(0.15, (ratio - MAX_AREA_RATIO) * 1.0));
+      const step = Math.min(MAX_WEIGHT_STEP, Math.max(0.15, (ratio - MAX_AREA_RATIO) * 1.5));
       weights[item.id] -= step;
     }
     partition = buildPartition(sites, weights);
