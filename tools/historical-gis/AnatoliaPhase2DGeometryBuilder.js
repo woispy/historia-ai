@@ -56,6 +56,7 @@ export function buildAnatoliaPhase2DAssets(regions) {
     ...assets,
     historicalDate: assets.historicalDate ?? HISTORICAL_DATE,
     siteCount,
+    barrierSiteCount: 0,
   };
 }
 
