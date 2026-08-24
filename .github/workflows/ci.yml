@@ -106,6 +106,8 @@ jobs:
         run: npm run test:anatolia-phase2c
       - name: Run Phase 2D Anatolia geometry tests
         run: npm run test:anatolia-phase2d
+      - name: Run Phase 2D geometry integrity tests
+        run: npm run test:anatolia-phase2d-geometry-integrity
       - name: Run Phase 2E-2H cartography tests
         run: npm run test:cartography-2efgh
       - name: Run cartography foundation regression tests
