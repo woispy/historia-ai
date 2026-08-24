@@ -40,7 +40,9 @@ function historicalStatusLabel(value) {
     "Pervaneoğulları-sphere": "Pervâneoğulları nüfuzu",
     "Candarid-emerging": "Candarid oluşumu",
     "legacy-frontier": "Tarihsel sınır mirası",
+    "contested-legacy": "Çekişmeli tarihsel miras",
     "Ilkhanid-suzerainty": "İlhanlı üst egemenliği",
+    overlordship: "Üst egemenlik",
     "pre-Aydinid": "Aydınoğulları öncesi",
   };
   return labels[value] ?? valueOrDash(value);
@@ -66,6 +68,22 @@ function terrainLabel(value) {
     mountain: "Dağlık",
     plateau: "Plato",
     lake: "Göl havzası",
+  };
+  return labels[value] ?? valueOrDash(value);
+}
+
+function historicalRegionLabel(value) {
+  const labels = {
+    bithynia: "Bitinya",
+    "ottoman-frontier": "Sangarios Sınırı",
+    mysia: "Mysia",
+    "aegean-west": "Lidya ve İyonya",
+    "mentese-caria": "Karia / Menteşe",
+    "inner-west": "İç Batı Anadolu",
+    "central-anatolia": "İç Anadolu",
+    pontus: "Pontos",
+    "eastern-anatolia": "Doğu Anadolu",
+    cilicia: "Kilikya ve Toroslar",
   };
   return labels[value] ?? valueOrDash(value);
 }
@@ -163,7 +181,7 @@ function ProvinceInspector({ province, country, historicalMetadata = null, histo
             <div><dt>1300 Kontrolü</dt><dd>{polityLabel(controller, historicalPolity)}</dd></div>
             <div><dt>1300 Durumu</dt><dd>{historicalStatusLabel(historical?.statusAt1300)}</dd></div>
             <div><dt>Tarihsel Güven</dt><dd>{historicalConfidenceLabel(historical?.confidence)}</dd></div>
-            <div><dt>Tarihsel Bölge</dt><dd>{valueOrDash(historicalMetadata.regionId)}</dd></div>
+            <div><dt>Tarihsel Bölge</dt><dd>{historicalRegionLabel(historicalMetadata.regionId)}</dd></div>
             <div><dt>Başlangıç</dt><dd>{valueOrDash(historical?.startYear)}</dd></div>
           </>
         )}
