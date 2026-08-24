@@ -71,9 +71,11 @@ function recoverNumericalBoundaryDrift(point) {
 
 function normalizeOuterRing(ring) {
   return ring.map((point) => {
-    const recovered = recoverNumericalBoundaryDrift(point);
-    if (recovered) return recovered.map((value) => Number(value.toFixed(7)));
-    if (!isPhysicalLandPoint(point)) throw new Error(`Phase 2D geometry vertex is outside physical land beyond numerical drift: ${point.join(",")}`);
+    if (!isPhysicalLandPoint(point)) {
+      const recovered = recoverNumericalBoundaryDrift(point);
+      if (recovered) return recovered.map((value) => Number(value.toFixed(7)));
+      throw new Error(`Phase 2D geometry vertex is outside physical land beyond numerical drift: ${point.join(",")}`);
+    }
     return point;
   });
 }
