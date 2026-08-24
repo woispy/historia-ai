@@ -177,13 +177,23 @@ export function buildAnatoliaPhase2DAssets(regions) {
     }))
     .map(normalizeGeometryPhysicalBoundary);
   const provinces = buildProvinceAssets(geometries);
+  const polygonCount = geometries.reduce(
+    (total, geometry) => total + (geometry.geometry?.coordinates?.length ?? 0),
+    0,
+  );
+
+  if (provinces.length !== ANATOLIA_PROVINCE_METADATA.length) {
+    throw new Error(`Phase 2D province count mismatch: ${provinces.length}; expected ${ANATOLIA_PROVINCE_METADATA.length}.`);
+  }
 
   return {
     ...assets,
     geometries,
     provinces,
     historicalDate: assets.historicalDate ?? HISTORICAL_DATE,
+    provinceCount: provinces.length,
     siteCount,
+    polygonCount,
     barrierSiteCount: 0,
   };
 }
