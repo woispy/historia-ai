@@ -85,7 +85,7 @@ export const ANATOLIA_1300_PROVINCE_EXPANSION = Object.freeze([
     "pisidian-antioch",
     "pisidia",
     null,
-    [31.18, 38.30],
+    [30.56, 38.30],
     {
       terrain: "highland",
       strategic: true,
