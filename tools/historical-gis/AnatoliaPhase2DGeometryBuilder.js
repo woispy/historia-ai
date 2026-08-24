@@ -97,12 +97,17 @@ function normalizeGeometryPhysicalBoundary(geometry) {
     throw new Error(`Phase 2D geometry has invalid polygon coordinates: ${geometry.identity?.provinceId ?? "unknown"}`);
   }
 
+  const normalizedOuterRing = normalizeOuterRing(coordinates[0]);
   return {
     ...geometry,
     geometry: {
       ...geometry.geometry,
-      coordinates: [normalizeOuterRing(coordinates[0]), ...coordinates.slice(1)],
+      coordinates: [normalizedOuterRing, ...coordinates.slice(1)],
     },
+    // Legacy Phase 2D consumers use `polygons` for the province land shell.
+    // Lake holes remain exclusively in GeoJSON coordinates so water is never
+    // exposed as a land polygon to centroid/area validation.
+    polygons: [normalizedOuterRing],
   };
 }
 
@@ -178,7 +183,7 @@ export function buildAnatoliaPhase2DAssets(regions) {
     .map(normalizeGeometryPhysicalBoundary);
   const provinces = buildProvinceAssets(geometries);
   const polygonCount = geometries.reduce(
-    (total, geometry) => total + (geometry.geometry?.coordinates?.length ?? 0),
+    (total, geometry) => total + geometry.polygons.length,
     0,
   );
 
