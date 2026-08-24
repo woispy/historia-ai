@@ -1,12 +1,21 @@
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
-import { ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST } from "../../src/map/data/Anatolia1300ProvinceGeometryManifest.js";
+import {
+  ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST,
+  ANATOLIA_1300_PROVINCE_GEOMETRY_KEYS,
+} from "../../src/map/data/Anatolia1300ProvinceGeometryManifest.js";
+import {
+  ANATOLIA_PROVINCE_REFINEMENTS,
+  ANATOLIA_RIVER_CROSSINGS,
+  ANATOLIA_STRATEGIC_PASSES,
+} from "../../src/map/data/AnatoliaProvinceRefinement.js";
 
 const BBOX = [25.45, 35.72, 44.85, 42.35];
 const SITE_EPSILON = 1e-6;
 const COAST_SAMPLE_STEP = 0.12;
 const COASTAL_TOLERANCE = 0.06;
+const NATURAL_FEATURE_OFFSET = 0.045;
 
 function distanceSquared(a, b) {
   const dx = a[0] - b[0];
@@ -96,9 +105,17 @@ function addSite(sites, seen, point, provinceId, kind) {
   sites.push({ point, provinceId, kind });
 }
 
+function getCartographicAnchor(province) {
+  return ANATOLIA_PROVINCE_REFINEMENTS[province.id]?.anchor ?? province.centroid;
+}
+
+function getProvinceById(id) {
+  return ANATOLIA_PROVINCE_METADATA.find((province) => province.id === id) ?? null;
+}
+
 function addAnchorSites(sites, seen) {
   for (const province of ANATOLIA_PROVINCE_METADATA) {
-    addSite(sites, seen, province.centroid, province.id, "province-anchor");
+    addSite(sites, seen, getCartographicAnchor(province), province.id, "province-anchor");
   }
 }
 
@@ -108,13 +125,14 @@ function addProvinceMicroSites(sites, seen) {
   let sequence = 0;
 
   for (const province of ANATOLIA_PROVINCE_METADATA) {
+    const anchor = getCartographicAnchor(province);
     for (const radius of radii) {
       for (let direction = 0; direction < directions; direction += 1) {
         const angle = (direction / directions) * Math.PI * 2
-          + deterministicJitter(sequence, province.centroid[0] * 100);
+          + deterministicJitter(sequence, anchor[0] * 100);
         const point = [
-          province.centroid[0] + Math.cos(angle) * radius,
-          province.centroid[1] + Math.sin(angle) * radius,
+          anchor[0] + Math.cos(angle) * radius,
+          anchor[1] + Math.sin(angle) * radius,
         ];
         if (isPoliticalCartographicPoint(point)) addSite(sites, seen, point, province.id, "province-micro-control");
         sequence += 1;
@@ -129,17 +147,44 @@ function addProvinceShapeSites(sites, seen) {
   let sequence = 0;
 
   for (const province of ANATOLIA_PROVINCE_METADATA) {
+    const anchor = getCartographicAnchor(province);
     for (let ring = 0; ring < radii.length; ring += 1) {
       for (let direction = 0; direction < directions; direction += 1) {
         const angle = (direction / directions) * Math.PI * 2
-          + deterministicJitter(sequence, province.centroid[0] * 100);
-        const radius = radii[ring] * (1 + deterministicJitter(sequence + 11, province.centroid[1] * 100) * 0.18);
+          + deterministicJitter(sequence, anchor[0] * 100);
+        const radius = radii[ring] * (1 + deterministicJitter(sequence + 11, anchor[1] * 100) * 0.18);
         const point = [
-          province.centroid[0] + Math.cos(angle) * radius,
-          province.centroid[1] + Math.sin(angle) * radius,
+          anchor[0] + Math.cos(angle) * radius,
+          anchor[1] + Math.sin(angle) * radius,
         ];
         if (isPoliticalCartographicPoint(point)) addSite(sites, seen, point, province.id, "province-shape-control");
         sequence += 1;
+      }
+    }
+  }
+}
+
+function addNaturalFeatureControlSites(sites, seen) {
+  const features = [...ANATOLIA_STRATEGIC_PASSES, ...ANATOLIA_RIVER_CROSSINGS];
+
+  for (const feature of features) {
+    const provinces = feature.provinces.map(getProvinceById);
+    if (provinces.some((province) => !province)) continue;
+
+    for (const province of provinces) {
+      const anchor = getCartographicAnchor(province);
+      const dx = anchor[0] - feature.coordinate[0];
+      const dy = anchor[1] - feature.coordinate[1];
+      const length = Math.sqrt(dx * dx + dy * dy);
+      if (length < SITE_EPSILON) continue;
+
+      const point = [
+        feature.coordinate[0] + (dx / length) * NATURAL_FEATURE_OFFSET,
+        feature.coordinate[1] + (dy / length) * NATURAL_FEATURE_OFFSET,
+      ];
+
+      if (isPoliticalCartographicPoint(point)) {
+        addSite(sites, seen, point, province.id, `natural-feature:${feature.id}`);
       }
     }
   }
@@ -210,6 +255,12 @@ function validateGeometryManifest() {
   for (const entry of ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST) {
     if (!metadataIds.has(entry.id)) {
       throw new Error(`Anatolia 1300 geometry manifest references unknown province: ${entry.id}`);
+    }
+    if (!ANATOLIA_1300_PROVINCE_GEOMETRY_KEYS[entry.id]) {
+      throw new Error(`Anatolia 1300 geometry manifest has no stable source key: ${entry.id}`);
+    }
+    if (entry.clipToPhysicalLand !== true) {
+      throw new Error(`Anatolia 1300 geometry must be clipped to physical land: ${entry.id}`);
     }
   }
 }
@@ -326,7 +377,7 @@ function createProvinceAsset(metadata, polygons) {
       borderPrecision: metadata.borderConfidence === "high" ? 3 : 2,
       classification: "phase2d-anatolia-province-geometry",
       precision: "cartographic-refinement",
-      anchor: metadata.centroid,
+      anchor: getCartographicAnchor(metadata),
       historicalControl: metadata.historicalControl,
     },
     administration: { governorId: null },
@@ -363,6 +414,7 @@ function createGeometryAsset(metadata, polygons) {
       borderPrecision: metadata.borderConfidence === "high" ? 3 : 2,
       classification: "phase2d-anatolia-province-geometry",
       precision: "cartographic-refinement",
+      anchor: getCartographicAnchor(metadata),
     },
     polygons,
   };
@@ -376,6 +428,7 @@ export function buildAnatoliaPhase2DAssets() {
   addAnchorSites(sites, seen);
   addProvinceMicroSites(sites, seen);
   addProvinceShapeSites(sites, seen);
+  addNaturalFeatureControlSites(sites, seen);
   addPhysicalBarrierSites(sites, seen);
   addCoastInteriorSites(sites, seen);
 
@@ -399,7 +452,7 @@ export function buildAnatoliaPhase2DAssets() {
   for (const metadata of ANATOLIA_PROVINCE_METADATA) {
     let polygons = polygonsByProvince[metadata.id];
     if (!polygons.length) {
-      const fallback = createAnchorFallbackPolygon(metadata.centroid);
+      const fallback = createAnchorFallbackPolygon(getCartographicAnchor(metadata));
       if (fallback.length < 3) throw new Error(`Phase 2D produced no geometry for ${metadata.id}`);
       polygons = [roundPolygon(fallback)];
       fallbackCount += 1;
@@ -415,10 +468,11 @@ export function buildAnatoliaPhase2DAssets() {
     provider: "historia-ai-curated-cartography",
     dataset: "anatolia-province-geometry-1300",
     projection: "EPSG:4326",
-    method: "deterministic multi-site Voronoi cartography constrained by physical coastline and internal water barriers",
+    method: "deterministic multi-site Voronoi cartography constrained by physical coastline, internal water barriers, historical anchors and natural-feature control points",
     siteCount: sites.length,
     politicalSiteCount: sites.filter((site) => Boolean(site.provinceId)).length,
     barrierSiteCount: sites.filter((site) => !site.provinceId).length,
+    naturalFeatureSiteCount: sites.filter((site) => site.kind.startsWith("natural-feature:")).length,
     fallbackProvinceCount: fallbackCount,
     provinceCount: provinces.length,
     polygonCount: geometries.reduce((sum, geometry) => sum + geometry.polygons.length, 0),
