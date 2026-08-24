@@ -136,6 +136,8 @@ assert.ok(inspector.includes("const displayOwner = historicalMetadata"));
 assert.ok(inspector.includes("1300 Kontrolü"));
 assert.ok(inspector.includes("Tarihsel Güven"));
 assert.ok(inspector.includes("historicalNoteLabel"));
+assert.ok(inspector.includes("historicalRegionLabel"));
+assert.ok(inspector.includes('bithynia: "Bitinya"'));
 assert.ok(inspector.includes("riverLabel"));
 assert.ok(inspector.includes("riverName"));
 assert.ok(inspector.includes("riverDetail"));
@@ -164,4 +166,4 @@ assert.ok(!cityLayer.includes("fortified &&"));
 assert.ok(!worldMap.includes('phase="base"'));
 assert.ok(!worldMap.includes('phase="water"'));
 
-console.log("Map rendering contract tests passed: 1300 Anatolia is province-authoritative, legacy regional blobs are excluded from the Anatolia override, historical parent envelopes constrain province presentation, physical land remains the final coastline authority, historical ownership is used by the inspector, and named province hydrography is displayed from dated metadata.");
+console.log("Map rendering contract tests passed: 1300 Anatolia is province-authoritative, legacy regional blobs are excluded from the Anatolia override, historical parent envelopes constrain province presentation, physical land remains the final coastline authority, historical ownership is used by the inspector, and named province hydrography plus Turkish historical region labels are displayed from dated metadata.");
