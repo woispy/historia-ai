@@ -2,8 +2,8 @@ import "./MapView.css";
 
 import { getCountry } from "../../../countries";
 import { getProvince } from "../../../provinces";
-import { getProvinceMetadata } from "../../../map/data/AnatoliaProvinceMetadata.js";
-import { getAnatolia1300Hydrography } from "../../../map/data/Anatolia1300Hydrography.js";
+import { getProvinceMetadata44 } from "../../../map/data/AnatoliaProvinceMetadata44.js";
+import { getAnatolia1300Hydrography44 } from "../../../map/data/Anatolia1300Hydrography44.js";
 import { getAnatolia1300Lake } from "../../../map/data/Anatolia1300Lakes.js";
 import { getAnatolia1300NaturalBoundary } from "../../../map/data/Anatolia1300NaturalBoundaries.js";
 import { getAnatolia1300PhysicalFeatures } from "../../../map/data/Anatolia1300PhysicalFeatures.js";
@@ -26,7 +26,7 @@ function getHistoricalNaturalBoundary(provinceId) {
 function createHistoricalInspectorProvince(metadata) {
   if (!metadata) return null;
 
-  const hydrography = getAnatolia1300Hydrography(metadata.id);
+  const hydrography = getAnatolia1300Hydrography44(metadata.id);
   const lake = getAnatolia1300Lake(metadata.id);
   const physicalFeatures = getAnatolia1300PhysicalFeatures(metadata.id);
   const naturalBoundary = getHistoricalNaturalBoundary(metadata.id);
@@ -64,7 +64,7 @@ function createHistoricalInspectorProvince(metadata) {
 function mergeHistoricalPhysicalFeatures(province, historicalMetadata) {
   if (!province || !historicalMetadata) return province;
 
-  const hydrography = getAnatolia1300Hydrography(historicalMetadata.id);
+  const hydrography = getAnatolia1300Hydrography44(historicalMetadata.id);
   const lake = getAnatolia1300Lake(historicalMetadata.id);
   const physicalFeatures = getAnatolia1300PhysicalFeatures(historicalMetadata.id);
   const naturalBoundary = getHistoricalNaturalBoundary(historicalMetadata.id);
@@ -97,7 +97,7 @@ function MapView({
   const countryRepository = gameSession?.world?.repositories?.countries;
   const scenarioDate = getScenarioStartDate(gameSession);
   const historicalMetadata = scenarioDate === HISTORICAL_1300_DATE && selectedProvinceId
-    ? getProvinceMetadata(selectedProvinceId)
+    ? getProvinceMetadata44(selectedProvinceId)
     : null;
   const repositoryProvince = provinceRepository && selectedProvinceId
     ? getProvince(provinceRepository, selectedProvinceId)
