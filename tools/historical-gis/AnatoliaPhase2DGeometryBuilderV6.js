@@ -84,17 +84,10 @@ function clipLandByCell(land, cell) {
   return output;
 }
 function clipCellToLand(cell) { return landPolygons().map((land) => clipLandByCell(land, cell)).filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA); }
-function edgeSamplesOnLand(polygon) {
-  for (let i = 0; i < polygon.length; i += 1) {
-    const a = polygon[i]; const b = polygon[(i + 1) % polygon.length];
-    for (const fraction of [0, 0.25, 0.5, 0.75, 1]) if (!isPhysicalLandPoint([a[0] + (b[0] - a[0]) * fraction, a[1] + (b[1] - a[1]) * fraction])) return false;
-  }
-  return true;
-}
 function fitPolygonToPhysicalLand(polygon, anchorPoint) {
   let result = polygon;
   for (let iteration = 0; iteration < 64; iteration += 1) {
-    if (area(result) >= MIN_AREA && isPhysicalLandPoint(centroid(result)) && edgeSamplesOnLand(result)) return result;
+    if (area(result) >= MIN_AREA && isPhysicalLandPoint(centroid(result))) return result;
     result = result.map((point) => [anchorPoint[0] + (point[0] - anchorPoint[0]) * 0.94, anchorPoint[1] + (point[1] - anchorPoint[1]) * 0.94]);
   }
   return [];
@@ -125,7 +118,7 @@ export function buildAnatoliaPhase2DAssets() {
     provinces.push(provinceAsset(item, polygons)); geometries.push(geometryAsset(item, polygons));
   }
   const physicalSamplingSiteCount = samplingSiteCount();
-  return { schemaVersion: 1, geometryVersion: 9, historicalDate: "1300-01-01", provider: "historia-ai-curated-cartography", dataset: "anatolia-province-geometry-1300", projection: "EPSG:4326", method: "one historical province anchor per political cell, convex-cell intersection against the physical Anatolia land authority, centroid/edge land validation, and dense physical sampling", siteCount: physicalSamplingSiteCount + politicalSites.length + naturalFeatureSiteCount, politicalSiteCount: politicalSites.length, physicalSamplingSiteCount, barrierSiteCount: 0, naturalFeatureSiteCount, fallbackProvinceCount: 0, provinceCount: provinces.length, polygonCount: geometries.reduce((sum, item) => sum + item.polygons.length, 0), provinces, geometries };
+  return { schemaVersion: 1, geometryVersion: 9, historicalDate: "1300-01-01", provider: "historia-ai-curated-cartography", dataset: "anatolia-province-geometry-1300", projection: "EPSG:4326", method: "one historical province anchor per political cell, convex-cell intersection against the physical Anatolia land authority, centroid land validation, and dense physical sampling", siteCount: physicalSamplingSiteCount + politicalSites.length + naturalFeatureSiteCount, politicalSiteCount: politicalSites.length, physicalSamplingSiteCount, barrierSiteCount: 0, naturalFeatureSiteCount, fallbackProvinceCount: 0, provinceCount: provinces.length, polygonCount: geometries.reduce((sum, item) => sum + item.polygons.length, 0), provinces, geometries };
 }
 export function isAnatoliaGeometryPoint([longitude, latitude]) {
   if (longitude < 26.5 || longitude > 44.8 || latitude < 35.7 || latitude > 42.2) return false;
