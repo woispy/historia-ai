@@ -72,6 +72,16 @@ const PHYSICAL_CORRECTION_POLYGONS = ANATOLIA_PHYSICAL_COAST_CORRECTIONS
 
 function inLake(point) { return LAKES.some((lake) => pointInPolygon(point, lake.coordinates)); }
 
+function isLakeShorelinePoint(point) {
+  return LAKES.some((lake) => {
+    const ring = lake.coordinates;
+    for (let index = 0; index < ring.length; index += 1) {
+      if (pointOnSegment(point, ring[index], ring[(index + 1) % ring.length])) return true;
+    }
+    return false;
+  });
+}
+
 function isPhysicalLandPoint(point) {
   if (PHYSICAL_CORRECTION_POLYGONS.some((polygon) => pointInPolygon(point, polygon))) return true;
   return LAND_POLYGONS.some((polygon) => pointInPolygon(point, polygon)) && !inLake(point);
@@ -216,7 +226,7 @@ function edgeOnPhysicalLand(polygon) {
     const end = polygon[(index + 1) % polygon.length];
     for (const fraction of EDGE_FRACTIONS) {
       const point = [start[0] + (end[0] - start[0]) * fraction, start[1] + (end[1] - start[1]) * fraction];
-      if (!isPhysicalLandPoint(point) && !inLake(point)) return false;
+      if (!isPhysicalLandPoint(point) && !isLakeShorelinePoint(point)) return false;
     }
   }
   return true;
