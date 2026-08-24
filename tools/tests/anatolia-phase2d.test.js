@@ -44,16 +44,6 @@ function polygonCentroid(polygon) {
   return [sum[0] / polygon.length, sum[1] / polygon.length];
 }
 
-function polygonArea(polygon) {
-  let area = 0;
-  for (let index = 0; index < polygon.length; index += 1) {
-    const current = polygon[index];
-    const next = polygon[(index + 1) % polygon.length];
-    area += current[0] * next[1] - next[0] * current[1];
-  }
-  return Math.abs(area) / 2;
-}
-
 for (const geometry of result.geometries) {
   assert.ok(provinceIds.has(geometry.identity.provinceId));
   assert.ok(geometry.polygons.length > 0);
