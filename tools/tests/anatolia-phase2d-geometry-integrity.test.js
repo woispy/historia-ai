@@ -4,6 +4,7 @@ import { buildAnatoliaPhase2DAssets, isPhysicalLandPoint } from "../historical-g
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
+import { ANATOLIA_PHYSICAL_COAST_CORRECTIONS } from "../../src/map/data/AnatoliaPhysicalCoastCorrections.js";
 
 const assets = buildAnatoliaPhase2DAssets();
 assert.equal(assets.provinceCount, ANATOLIA_PROVINCE_METADATA.length, "Phase 2D province count must match metadata");
@@ -49,7 +50,11 @@ function ownedByGeometry(point, geometry) {
 }
 
 function isAtlasLandPoint(point) {
-  return ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon))
+  const landPolygons = [
+    ...ANATOLIA_PHYSICAL_ATLAS.landPolygons,
+    ...ANATOLIA_PHYSICAL_COAST_CORRECTIONS.map((correction) => correction.coordinates),
+  ];
+  return landPolygons.some((polygon) => pointInPolygon(point, polygon))
     && !ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygon(point, lake.coordinates));
 }
 
@@ -90,7 +95,7 @@ for (const geometry of assets.geometries) {
   assert.equal(provinceIds.has(provinceId), false, `Duplicate province geometry: ${provinceId}`);
   provinceIds.add(provinceId);
   assert.equal(geometry.header.dataset, "anatolia-province-geometry-1300");
-  assert.match(geometry.header.generator, /Phase 2D Geometry Builder V14/);
+  assert.match(geometry.header.generator, /Phase 2D Geometry Builder V16/);
   assert.equal(geometry.metadata.classification, "phase2d-anatolia-province-geometry");
   assert.equal(geometry.polygons.length, 1, `${provinceId}: province must be one contiguous mainland polygon, not detached fragments`);
   assert.ok(Array.isArray(geometry.holes), `${provinceId}: lake holes must be explicit geometry metadata`);
@@ -142,4 +147,4 @@ const medianArea = sortedAreas[Math.floor(sortedAreas.length / 2)];
 const maxArea = sortedAreas[sortedAreas.length - 1];
 assert.ok(maxArea <= medianArea * 4.2, `Phase 2D contains an oversized province cell: max ${maxArea.toFixed(3)} vs median ${medianArea.toFixed(3)}`);
 
-console.log(`Phase 2D V14 geometry integrity passed: ${provinceIds.size} contiguous provinces, ${assets.polygonCount} outer polygons, ${assets.politicalSiteCount} political anchors, ${assets.barrierSiteCount} physical boundary barriers, ${assets.weightIterations} weight iterations, ${assets.geometries.reduce((sum, geometry) => sum + geometry.holes.length, 0)} lake holes.`);
+console.log(`Phase 2D V16 geometry integrity passed: ${provinceIds.size} contiguous provinces, ${assets.polygonCount} outer polygons, ${assets.politicalSiteCount} political anchors, ${assets.barrierSiteCount} physical boundary barriers, ${assets.weightIterations} weight iterations, ${assets.geometries.reduce((sum, geometry) => sum + geometry.holes.length, 0)} lake holes.`);
