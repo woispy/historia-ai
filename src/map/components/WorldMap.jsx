@@ -60,13 +60,11 @@ function WorldMap({
 
   // Camera transform remains continuous. Expensive geometry visibility/layout
   // work uses a coarse snapshot so panning does not reconcile every SVG path
-  // on every animation frame. The key is the intentional memo boundary;
-  // cameraState is the source object consumed by the snapshot helper.
+  // on every animation frame. The key is the intentional memo boundary.
   const cullingKey = getCameraCullingKey(cameraState);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const cullingCamera = useMemo(
     () => getCameraCullingSnapshot(cameraState),
-    [cullingKey],
+    [cullingKey], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const world = useMemo(
