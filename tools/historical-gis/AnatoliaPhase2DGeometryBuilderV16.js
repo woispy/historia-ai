@@ -19,6 +19,7 @@ const ANCHOR_GRID_STEP = 0.005;
 const ANCHOR_GRID_RADIUS = 0.35;
 const MAX_ANCHOR_SNAP_DISTANCE = 1.2;
 const LAKE_SHORELINE_TOLERANCE = 0.003;
+const LAKE_TERRAIN_WEIGHT_BIAS = -0.05;
 
 const rawAnchor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id]?.anchor ?? item.centroid;
 
@@ -266,6 +267,12 @@ function featureWeightBias() {
   const bias = Object.fromEntries(ANATOLIA_PROVINCE_METADATA.map((item) => [item.id, 0]));
   for (const feature of [...ANATOLIA_STRATEGIC_PASSES, ...ANATOLIA_RIVER_CROSSINGS]) {
     for (const provinceId of feature.provinces ?? []) if (provinceId in bias) bias[provinceId] += FEATURE_WEIGHT_STEP;
+  }
+  for (const item of ANATOLIA_PROVINCE_METADATA) {
+    const terrainClass = ANATOLIA_PROVINCE_REFINEMENTS[item.id]?.terrainClass;
+    if (terrainClass === "lake-mountain" || terrainClass === "highland-lake" || terrainClass === "lake-basin") {
+      bias[item.id] += LAKE_TERRAIN_WEIGHT_BIAS;
+    }
   }
   return bias;
 }
