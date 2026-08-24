@@ -7,6 +7,7 @@ import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtla
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PHYSICAL_COAST_CORRECTIONS } from "../../src/map/data/AnatoliaPhysicalCoastCorrections.js";
 
+const HISTORICAL_DATE = "1300-01-01";
 const BOUNDARY_SAMPLE_STEP = 0.06;
 
 function boundarySiteCount(polygon) {
@@ -53,6 +54,7 @@ export function buildAnatoliaPhase2DAssets(regions) {
 
   return {
     ...assets,
+    historicalDate: assets.historicalDate ?? HISTORICAL_DATE,
     siteCount,
   };
 }
