@@ -1,11 +1,15 @@
 /**
  * 1300 Anatolia geometry authority manifest.
  *
- * This manifest deliberately contains no invented polygon coordinates. It
- * records the contract between historical province identities and the
- * geometry source that must render them. A province is not considered ready
- * for cartographic refinement until it has a stable geometry key and a
- * physical-land clipping requirement.
+ * The manifest is intentionally aligned with the currently authoritative
+ * 1300 province metadata. It contains no invented polygon coordinates. A
+ * province is not considered ready for cartographic refinement until it has
+ * a stable geometry key and a physical-land clipping requirement.
+ *
+ * The historical 1300 province set is currently 38 entries. Additional
+ * historical candidates (Attaleia, Myra, Pisidian Antioch, Niğde, Malatya,
+ * and Adana) must first be promoted into AnatoliaProvinceMetadata with their
+ * historical evidence before they are admitted here.
  */
 
 const geometry = (id, sourceKey, notes = null) => Object.freeze({
@@ -54,12 +58,6 @@ export const ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST = Object.freeze([
   geometry("cilicia-sis", "sis"),
   geometry("cilicia-tarsus", "tarsus"),
   geometry("cilicia-alaiye", "alaiye"),
-  geometry("lycia-antalya", "attaleia"),
-  geometry("lycia-myra", "myra"),
-  geometry("pisidia-antioch", "pisidian-antioch"),
-  geometry("cappadocia-nigde", "nigde"),
-  geometry("eastern-anatolia-malatya", "malatya"),
-  geometry("cilicia-adana", "adana"),
 ]);
 
 export const ANATOLIA_1300_PROVINCE_GEOMETRY_KEYS = Object.freeze(
