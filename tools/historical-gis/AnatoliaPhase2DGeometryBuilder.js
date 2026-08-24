@@ -13,6 +13,7 @@ const HISTORICAL_DATE = "1300-01-01";
 const BOUNDARY_SAMPLE_STEP = 0.06;
 const MAX_BOUNDARY_NUMERICAL_DRIFT = 0.0001;
 const DETERMINISTIC_WEIGHT_ITERATIONS = 24;
+const GEOMETRY_EPS = 1e-8;
 
 function boundarySiteCount(polygon) {
   if (!Array.isArray(polygon) || polygon.length < 2) return 0;
@@ -115,6 +116,23 @@ function pointInPolygon(point, polygon) {
   return inside;
 }
 
+function pointOnAnyLakeBoundary(point) {
+  return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => {
+    const ring = lake.coordinates;
+    for (let index = 0; index < ring.length; index += 1) {
+      const start = ring[index];
+      const end = ring[(index + 1) % ring.length];
+      const projected = pointOnSegmentProjection(point, start, end);
+      if (Math.hypot(projected[0] - point[0], projected[1] - point[1]) <= GEOMETRY_EPS) return true;
+    }
+    return false;
+  });
+}
+
+function lakeContainsPoint(lake, point) {
+  return pointInPolygon(point, lake.coordinates) || pointOnAnyLakeBoundary(point);
+}
+
 function polygonCentroid(polygon) {
   return polygon.reduce(
     (sum, [x, y]) => [sum[0] + x, sum[1] + y],
@@ -122,14 +140,118 @@ function polygonCentroid(polygon) {
   ).map((value) => value / polygon.length);
 }
 
+function lakeFullyContainedByOuterRing(lake, outerRing) {
+  const coordinates = lake.coordinates;
+  if (!coordinates.length) return false;
+  return coordinates.every((point) => pointInPolygon(point, outerRing) || pointOnAnyLakeBoundary(point));
+}
+
 function lakeHolesForOuterRing(outerRing) {
   return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes
     .filter((lake) => Array.isArray(lake.coordinates) && lake.coordinates.length >= 3)
+    .filter((lake) => lakeFullyContainedByOuterRing(lake, outerRing))
     .filter((lake) => pointInPolygon(polygonCentroid(lake.coordinates), outerRing))
     .map((lake) => lake.coordinates.map(([longitude, latitude]) => [
       Number(longitude.toFixed(7)),
       Number(latitude.toFixed(7)),
     ]));
+}
+
+function segmentLakeIntersections(start, end, lakeRing) {
+  const intersections = [];
+  const dx = end[0] - start[0];
+  const dy = end[1] - start[1];
+  for (let index = 0; index < lakeRing.length; index += 1) {
+    const a = lakeRing[index];
+    const b = lakeRing[(index + 1) % lakeRing.length];
+    const ex = b[0] - a[0];
+    const ey = b[1] - a[1];
+    const denominator = dx * ey - dy * ex;
+    if (Math.abs(denominator) <= GEOMETRY_EPS) continue;
+    const ax = a[0] - start[0];
+    const ay = a[1] - start[1];
+    const t = (ax * ey - ay * ex) / denominator;
+    const u = (ax * dy - ay * dx) / denominator;
+    if (t < -GEOMETRY_EPS || t > 1 + GEOMETRY_EPS || u < -GEOMETRY_EPS || u > 1 + GEOMETRY_EPS) continue;
+    intersections.push({
+      t: Math.max(0, Math.min(1, t)),
+      point: [start[0] + dx * t, start[1] + dy * t],
+      edgeIndex: index,
+    });
+  }
+  intersections.sort((left, right) => left.t - right.t);
+  return intersections.filter((item, index, all) => index === 0 || Math.abs(item.t - all[index - 1].t) > GEOMETRY_EPS);
+}
+
+function lakeBoundaryPath(lakeRing, fromPoint, toPoint, outerRing) {
+  let fromIndex = 0;
+  let toIndex = 0;
+  let fromDistance = Infinity;
+  let toDistance = Infinity;
+  for (let index = 0; index < lakeRing.length; index += 1) {
+    const fromCandidate = lakeRing[index];
+    const toCandidate = lakeRing[index];
+    const fromD = Math.hypot(fromCandidate[0] - fromPoint[0], fromCandidate[1] - fromPoint[1]);
+    const toD = Math.hypot(toCandidate[0] - toPoint[0], toCandidate[1] - toPoint[1]);
+    if (fromD < fromDistance) { fromDistance = fromD; fromIndex = index; }
+    if (toD < toDistance) { toDistance = toD; toIndex = index; }
+  }
+
+  const buildPath = (step) => {
+    const path = [fromPoint];
+    let index = fromIndex;
+    for (let guard = 0; guard <= lakeRing.length + 1; guard += 1) {
+      path.push(lakeRing[index]);
+      if (index === toIndex) break;
+      index = (index + step + lakeRing.length) % lakeRing.length;
+    }
+    path.push(toPoint);
+    return path;
+  };
+
+  const candidates = [buildPath(1), buildPath(-1)];
+  const valid = candidates.filter((path) => {
+    const middle = path[Math.floor(path.length / 2)];
+    return pointInPolygon(middle, outerRing);
+  });
+  const paths = valid.length ? valid : candidates;
+  return paths.sort((left, right) => {
+    const length = (path) => path.slice(1).reduce((sum, point, index) => {
+      const previous = path[index];
+      return sum + Math.hypot(point[0] - previous[0], point[1] - previous[1]);
+    }, 0);
+    return length(left) - length(right);
+  })[0];
+}
+
+function waterSafeOuterRing(outerRing) {
+  let ring = outerRing.slice();
+  for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) {
+    if (!Array.isArray(lake.coordinates) || lake.coordinates.length < 3) continue;
+    const next = [];
+    for (let index = 0; index < ring.length; index += 1) {
+      const start = ring[index];
+      const end = ring[(index + 1) % ring.length];
+      const midpoint = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
+      const intersects = segmentLakeIntersections(start, end, lake.coordinates);
+      if (!lakeContainsPoint(lake, midpoint) && intersects.length < 2) {
+        next.push(start);
+        continue;
+      }
+      if (intersects.length >= 2) {
+        next.push(start);
+        const first = intersects[0];
+        const last = intersects[intersects.length - 1];
+        const detour = lakeBoundaryPath(lake.coordinates, first.point, last.point, outerRing);
+        next.push(...detour.slice(0, -1));
+        next.push(last.point);
+      } else {
+        next.push(start);
+      }
+    }
+    ring = next;
+  }
+  return ring;
 }
 
 function normalizeGeometryPhysicalBoundary(geometry) {
@@ -139,18 +261,19 @@ function normalizeGeometryPhysicalBoundary(geometry) {
   }
 
   const normalizedOuterRing = normalizeOuterRing(coordinates[0]);
+  const waterSafeRing = waterSafeOuterRing(normalizedOuterRing);
   const existingHoles = Array.isArray(geometry.holes) ? geometry.holes : [];
   const holes = existingHoles.length > 0
     ? existingHoles
-    : lakeHolesForOuterRing(normalizedOuterRing);
+    : lakeHolesForOuterRing(waterSafeRing);
 
   return {
     ...geometry,
     geometry: {
       ...geometry.geometry,
-      coordinates: [normalizedOuterRing, ...coordinates.slice(1)],
+      coordinates: [waterSafeRing, ...coordinates.slice(1)],
     },
-    polygons: [normalizedOuterRing],
+    polygons: [waterSafeRing],
     holes,
   };
 }
@@ -258,7 +381,6 @@ export function buildAnatoliaPhase2DAssets(regions) {
     politicalSiteCount: assets.politicalSiteCount ?? ANATOLIA_PROVINCE_METADATA.length,
     supportSiteCount: assets.supportSiteCount ?? 0,
     naturalFeatureSiteCount: assets.naturalFeatureSiteCount ?? naturalFeatureSiteCount(),
-    // Physical coastline/lake boundaries are constraints, never political Voronoi sites.
     barrierSiteCount: 0,
     physicalBarrierSiteCount: Math.max(physicalBoundarySiteCount(), assets.barrierSiteCount ?? 0),
     weightIterations: assets.weightIterations ?? DETERMINISTIC_WEIGHT_ITERATIONS,
