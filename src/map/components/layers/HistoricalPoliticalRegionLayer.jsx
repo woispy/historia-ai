@@ -4,7 +4,6 @@ import { getHistoricalPoliticalOverlayMode } from "./HistoricalPoliticalOverlayM
 const HISTORICAL_1300_DATE = "1300-01-01";
 const DEFAULT_POLITICAL_COLOR = "#6f765f";
 const HISTORICAL_WORLD_POLITICAL_CLIP_ID = "historical-world-political-land-clip";
-const COASTAL_POLITICAL_EXPANSION = 0.02;
 
 const SOURCE_POLITICAL_PALETTE = [
   "#6A1B9A", "#0F7A32", "#B87333", "#786A9D",
@@ -62,10 +61,6 @@ function getPoliticalFillOpacity(mode) {
   return 0.94;
 }
 
-function isCoastalProvince(entry) {
-  return entry?.historicalProvince?.coastal === true || entry?.historicalProvince?.port === true;
-}
-
 function normalizeSourceSubject(subject) {
   return String(subject ?? "").trim().toLocaleLowerCase("tr-TR").replace(/[’']/g, "'").replace(/\s+/g, " ");
 }
@@ -75,6 +70,31 @@ function getStableSourceColor(subject) {
   if (!normalized) return DEFAULT_POLITICAL_COLOR;
   return SOURCE_POLITICAL_ALIASES.get(normalized)
     ?? SOURCE_POLITICAL_PALETTE[Math.abs([...normalized].reduce((hash, character) => ((hash * 31) + character.charCodeAt(0)) | 0, 7)) % SOURCE_POLITICAL_PALETTE.length];
+}
+
+// The old Phase 2D builder deliberately kept the Anatolia envelope separate
+// from the global source GIS. Reuse that same envelope here so a world-scale
+// historical source polygon cannot repaint the curated Anatolia surface.
+function isWithinAnatoliaEnvelope(point) {
+  const [longitude, latitude] = point ?? [];
+  if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) return false;
+  if (longitude < 28.5) return latitude <= 40.78;
+  if (longitude < 29.2) return latitude <= 40.88;
+  return latitude <= 42.20;
+}
+
+function isAnatoliaSourceRegion(region) {
+  const polygons = region?.geometry?.polygons;
+  if (!Array.isArray(polygons)) return false;
+
+  // Source polygons are closed rings with enough vertices that a region which
+  // actually covers Anatolia will expose at least one vertex in the historical
+  // override envelope. This deliberately removes source-derived coverage only
+  // where the curated province compositor is authoritative.
+  return polygons.some((polygon) => (
+    Array.isArray(polygon)
+    && polygon.some((point) => isWithinAnatoliaEnvelope(point))
+  ));
 }
 
 function HistoricalWorldRegionPaths({ regions = [] }) {
@@ -100,10 +120,7 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
   if (date !== HISTORICAL_1300_DATE) return null;
 
   const curatedProvinces = provinces.filter((entry) => entry?.historicalProvince?.classification === "phase2d-anatolia-province-geometry");
-  const sourceRegions = regions.filter((region) => {
-    const subject = normalizeSourceSubject(region.subject);
-    return !subject || !SOURCE_POLITICAL_ALIASES.has(subject);
-  });
+  const sourceRegions = regions.filter((region) => !isAnatoliaSourceRegion(region));
 
   return (
     <g pointerEvents="none" aria-label="1300 historical political map">
@@ -125,27 +142,14 @@ function HistoricalPoliticalRegionLayer({ date = HISTORICAL_1300_DATE, provinces
               : mode === "neutral"
                 ? "url(#historical-neutral-hatch)"
                 : null;
-          const coastal = isCoastalProvince(entry);
 
           return (
             <g key={entry?.province?.id ?? entry?.historicalProvince?.id}>
-              {coastal && (
-                <path
-                  d={d}
-                  fill={color}
-                  fillOpacity={getPoliticalFillOpacity(mode)}
-                  stroke={color}
-                  strokeWidth={COASTAL_POLITICAL_EXPANSION}
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                  aria-hidden="true"
-                />
-              )}
               <path
                 d={d}
                 fill={color}
                 fillOpacity={getPoliticalFillOpacity(mode)}
-                stroke="rgba(24,30,24,0.72)"
+                stroke="rgba(24,30,24,0.78)"
                 strokeWidth="0.72"
                 vectorEffect="non-scaling-stroke"
                 strokeLinejoin="round"
