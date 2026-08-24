@@ -177,7 +177,6 @@ function addNaturalFeatureControlSites(sites, seen) {
       const dy = anchor[1] - feature.coordinate[1];
       const length = Math.sqrt(dx * dx + dy * dy);
       if (length < SITE_EPSILON) continue;
-
       const point = [
         feature.coordinate[0] + (dx / length) * NATURAL_FEATURE_OFFSET,
         feature.coordinate[1] + (dy / length) * NATURAL_FEATURE_OFFSET,
@@ -187,40 +186,6 @@ function addNaturalFeatureControlSites(sites, seen) {
         addSite(sites, seen, point, province.id, `natural-feature:${feature.id}`);
       }
     }
-  }
-}
-
-function addBarrierSitesAlongPolygon(sites, seen, polygon, kind) {
-  if (!Array.isArray(polygon) || polygon.length < 3) return;
-
-  for (let index = 0; index < polygon.length - 1; index += 1) {
-    const start = polygon[index];
-    const end = polygon[index + 1];
-    const length = Math.sqrt(distanceSquared(start, end));
-    const steps = Math.max(1, Math.ceil(length / COAST_SAMPLE_STEP));
-
-    for (let step = 0; step <= steps; step += 1) {
-      const t = step / steps;
-      const point = [
-        start[0] + (end[0] - start[0]) * t,
-        start[1] + (end[1] - start[1]) * t,
-      ];
-      addSite(sites, seen, point, null, kind);
-    }
-  }
-}
-
-function addPhysicalBarrierSites(sites, seen) {
-  for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
-    addBarrierSitesAlongPolygon(sites, seen, polygon, "coastline-barrier");
-  }
-
-  for (const sea of ANATOLIA_PHYSICAL_ATLAS.seas) {
-    addBarrierSitesAlongPolygon(sites, seen, sea.coordinates, "water-barrier");
-  }
-
-  for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) {
-    addBarrierSitesAlongPolygon(sites, seen, lake.coordinates, "lake-barrier");
   }
 }
 
@@ -429,7 +394,6 @@ export function buildAnatoliaPhase2DAssets() {
   addProvinceMicroSites(sites, seen);
   addProvinceShapeSites(sites, seen);
   addNaturalFeatureControlSites(sites, seen);
-  addPhysicalBarrierSites(sites, seen);
   addCoastInteriorSites(sites, seen);
 
   const polygonsByProvince = Object.fromEntries(
@@ -437,25 +401,22 @@ export function buildAnatoliaPhase2DAssets() {
   );
 
   for (let siteIndex = 0; siteIndex < sites.length; siteIndex += 1) {
-    if (!sites[siteIndex].provinceId) continue;
+    const site = sites[siteIndex];
+    if (!site.provinceId) continue;
     const cell = buildVoronoiCell(siteIndex, sites);
     if (cell.length < 3 || polygonArea(cell) < 0.00005) continue;
     const centroid = polygonCentroid(cell);
     if (!isPhysicalLandPoint(centroid)) continue;
     if (!cell.every((point) => isPhysicalLandPoint(point))) continue;
-    polygonsByProvince[sites[siteIndex].provinceId].push(roundPolygon(cell));
+    polygonsByProvince[site.provinceId].push(roundPolygon(cell));
   }
 
-  let fallbackCount = 0;
   const provinces = [];
   const geometries = [];
   for (const metadata of ANATOLIA_PROVINCE_METADATA) {
-    let polygons = polygonsByProvince[metadata.id];
+    const polygons = polygonsByProvince[metadata.id];
     if (!polygons.length) {
-      const fallback = createAnchorFallbackPolygon(getCartographicAnchor(metadata));
-      if (fallback.length < 3) throw new Error(`Phase 2D produced no geometry for ${metadata.id}`);
-      polygons = [roundPolygon(fallback)];
-      fallbackCount += 1;
+      throw new Error(`Phase 2D produced no physical-land geometry for ${metadata.id}`);
     }
     provinces.push(createProvinceAsset(metadata, polygons));
     geometries.push(createGeometryAsset(metadata, polygons));
@@ -468,12 +429,12 @@ export function buildAnatoliaPhase2DAssets() {
     provider: "historia-ai-curated-cartography",
     dataset: "anatolia-province-geometry-1300",
     projection: "EPSG:4326",
-    method: "deterministic multi-site Voronoi cartography constrained by physical coastline, internal water barriers, historical anchors and natural-feature control points",
+    method: "deterministic multi-site Voronoi cartography constrained by physical coastline, internal water exclusion, historical anchors and natural-feature control points",
     siteCount: sites.length,
-    politicalSiteCount: sites.filter((site) => Boolean(site.provinceId)).length,
-    barrierSiteCount: sites.filter((site) => !site.provinceId).length,
+    politicalSiteCount: sites.length,
+    barrierSiteCount: 0,
     naturalFeatureSiteCount: sites.filter((site) => site.kind.startsWith("natural-feature:")).length,
-    fallbackProvinceCount: fallbackCount,
+    fallbackProvinceCount: 0,
     provinceCount: provinces.length,
     polygonCount: geometries.reduce((sum, geometry) => sum + geometry.polygons.length, 0),
     provinces,
