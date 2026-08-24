@@ -23,7 +23,7 @@ const rawAnchor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id]?.anchor ?? it
 function pointInPolygon(point, polygon) {
   if (!polygon?.length) return false;
   let inside = false;
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i += 1) {
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
     const a = polygon[i];
     const b = polygon[j];
     if ((a[1] > point[1]) !== (b[1] > point[1])
