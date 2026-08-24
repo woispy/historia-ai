@@ -36,7 +36,6 @@ function pointInPolygon(point, polygon) {
   }
   return inside;
 }
-
 function distanceToSegment(point, a, b) {
   const dx = b[0] - a[0]; const dy = b[1] - a[1]; const d = dx * dx + dy * dy;
   const t = d < EPS ? 0 : Math.max(0, Math.min(1, ((point[0] - a[0]) * dx + (point[1] - a[1]) * dy) / d));
@@ -59,7 +58,7 @@ function nearestLandPoint(point) {
 }
 function signedArea(polygon) {
   let sum = 0;
-  for (let i = 0; i < polygon.length; i += 1) { const next = polygon[(i + 1) % polygon.length]; sum += polygon[i][0] * next[1] - next[0] * polygon[i][1]; }
+  for (let i = 0; i < polygon.length; i += 1) { const next = polygon[(i + 1) % polygon.length]; sum += polygon[i][0] * next[1] - next[0] * next[1]; }
   return sum / 2;
 }
 function area(polygon) { return Math.abs(signedArea(polygon)); }
@@ -72,7 +71,6 @@ function inLake(point) { return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake
 function isStaticLandPoint(point) { return ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon)) || distanceToLand(point) <= COAST_TOLERANCE; }
 export function isPhysicalLandPoint(point) { return isStaticLandPoint(point) && !inLake(point); }
 function isRecoverableLandPoint(point) { return !inLake(point) && (ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon)) || distanceToLand(point) <= RECOVERY_COAST_TOLERANCE); }
-
 function halfPlane(polygon, a, b, c) {
   const output = []; const inside = (point) => a * point[0] + b * point[1] <= c + EPS;
   for (let i = 0; i < polygon.length; i += 1) {
@@ -140,10 +138,22 @@ function recoverLandConstrainedCell(cell, anchor, scale = 1) {
   return points;
 }
 function clipCellToMainland(cell, provinceId, anchor) {
-  const candidates = ANATOLIA_PHYSICAL_ATLAS.landPolygons.filter((polygon) => area(polygon) >= MAINLAND_MIN_AREA).map((land) => clipLandByCell(land, cell)).filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA && edgeIsLandSafe(polygon));
+  const rawCandidates = ANATOLIA_PHYSICAL_ATLAS.landPolygons
+    .filter((polygon) => area(polygon) >= MAINLAND_MIN_AREA)
+    .map((land) => clipLandByCell(land, cell))
+    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
+  const candidates = rawCandidates.filter((polygon) => edgeIsLandSafe(polygon));
   if (candidates.length) {
     const anchored = candidates.filter((polygon) => pointInPolygon(anchor, polygon));
     return [...anchored, ...candidates].sort((a, b) => area(b) - area(a))[0];
+  }
+  const anchoredRaw = rawCandidates.filter((polygon) => pointInPolygon(anchor, polygon));
+  for (const candidate of anchoredRaw.sort((a, b) => area(b) - area(a))) {
+    for (let step = 1; step <= 24; step += 1) {
+      const factor = 1 - step / 25;
+      const shrunken = candidate.map((point) => [anchor[0] + (point[0] - anchor[0]) * factor, anchor[1] + (point[1] - anchor[1]) * factor]);
+      if (area(shrunken) >= MIN_AREA && edgeIsLandSafe(shrunken)) return shrunken;
+    }
   }
   for (let step = 0; step <= RECOVERY_SCALE_STEPS; step += 1) {
     const recovered = recoverLandConstrainedCell(cell, anchor, 1 - step / RECOVERY_SCALE_STEPS);
