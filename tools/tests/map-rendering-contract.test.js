@@ -21,6 +21,7 @@ const cityLayer = read("src/map/components/layers/CityLayer.jsx");
 const physicalLayer = read("src/map/components/layers/WorldPhysicalLayer.jsx");
 const historicalPoliticalLayer = read("src/map/components/layers/HistoricalPoliticalRegionLayer.jsx");
 const hydrography = read("src/map/data/Anatolia1300Hydrography.js");
+const lakes = read("src/map/data/Anatolia1300Lakes.js");
 const inspector = read("src/components/GameShell/MapView/ProvinceInspector.jsx");
 
 assert.equal((worldMap.match(/<SvgRenderer\b/g) ?? []).length, 1);
@@ -70,9 +71,6 @@ assert.ok(worldMap.includes("regions={historicalRegions}"));
 assert.ok(historicalPoliticalLayer.includes("HistoricalWorldRegionPaths"));
 assert.ok(historicalPoliticalLayer.includes("getStableSourceColor(region.subject)"));
 
-// Historical source GIS remains available as research and as a world-scale
-// source outside the Anatolia override, but its Anatolian regional blobs must
-// never be rendered as the visible 1300 political map.
 assert.ok(historicalPoliticalLayer.includes("nonAnatoliaRegions"));
 assert.ok(historicalPoliticalLayer.includes("!String(region?.id ?? \"\").startsWith(\"anatolia_\")"));
 assert.ok(historicalPoliticalLayer.includes("HISTORICAL_REGION_BY_PROVINCE"));
@@ -84,7 +82,6 @@ assert.ok(historicalPoliticalLayer.includes("function getHistoricalProvince(entr
 assert.ok(historicalPoliticalLayer.includes("Aydinid ownership is deliberately NOT assigned at 1300"));
 assert.ok(historicalPoliticalLayer.includes("1308"));
 assert.ok(!historicalPoliticalLayer.includes('<HistoricalWorldRegionPaths regions={regions} />'));
-
 assert.ok(historicalPoliticalLayer.includes("<g clipPath={`url(#${HISTORICAL_WORLD_POLITICAL_CLIP_ID})`}>") );
 assert.ok(!historicalPoliticalLayer.includes("COASTAL_POLITICAL_EXPANSION = 0;"));
 assert.ok(historicalPoliticalLayer.includes("Historical unassigned land presentation"));
@@ -120,15 +117,15 @@ assert.ok(worldMap.includes("{politicalRegions}"));
 assert.ok(worldMap.includes("const isHistoricalPoliticalMap = scenarioDate === HISTORICAL_1300_DATE;"));
 assert.ok(worldMap.includes("const useGpuProvinceFill = !isHistoricalPoliticalMap"));
 
-// The inspector must use dated historical ownership for the 1300 scenario,
-// never the modern Admin-0 owner stored on the gameplay province. It must also
-// work for curated provinces that exist only in the historical geometry repo.
 assert.ok(mapView.includes("getProvinceMetadata"));
 assert.ok(mapView.includes("getAnatolia1300Hydrography"));
+assert.ok(mapView.includes("getAnatolia1300Lake"));
 assert.ok(mapView.includes("createHistoricalInspectorProvince"));
 assert.ok(mapView.includes("mergeHistoricalHydrography"));
 assert.ok(mapView.includes("riverName: hydrography?.name ?? null"));
 assert.ok(mapView.includes("riverDetail: hydrography?.detail ?? null"));
+assert.ok(mapView.includes("lakeName: lake?.name ?? null"));
+assert.ok(mapView.includes("lakeDetail: lake?.detail ?? null"));
 assert.ok(mapView.includes("repositoryProvince ?? createHistoricalInspectorProvince(historicalMetadata)"));
 assert.ok(mapView.includes("historicalMetadata={historicalMetadata}"));
 assert.ok(inspector.includes("historicalMetadata?.historicalControl"));
@@ -141,11 +138,11 @@ assert.ok(inspector.includes('bithynia: "Bitinya"'));
 assert.ok(inspector.includes("riverLabel"));
 assert.ok(inspector.includes("riverName"));
 assert.ok(inspector.includes("riverDetail"));
+assert.ok(inspector.includes("lakeLabel"));
+assert.ok(inspector.includes("lakeName"));
+assert.ok(inspector.includes("lakeDetail"));
 assert.ok(inspector.includes("Kütahya, Yakub Bey'in bağımsızlık döneminin en güçlü coğrafi dayanağıdır."));
 
-// Named hydrography is explicit metadata, not a truthy fallback on modern
-// gameplay fields. Basin-only entries are forbidden; province inspection must
-// name an actual river system. These are protected regression anchors.
 assert.ok(hydrography.includes('"pontus-amasya": river("Yeşilırmak (Iris)"'));
 assert.ok(hydrography.includes('"phrygia-bilecik": river("Karasu (Sakarya)"'));
 assert.ok(hydrography.includes('"phrygia-eskisehir": river("Porsuk Çayı"'));
@@ -157,6 +154,12 @@ assert.ok(hydrography.includes('"eastern-anatolia-erzurum": river("Aras"'));
 assert.ok(!hydrography.includes('"phrygia-sogut"'));
 assert.ok(!hydrography.includes("Sakarya havzası\", \"Söğüt"));
 
+assert.ok(lakes.includes('"bithynia-nicaea": lake("İznik Gölü"'));
+assert.ok(lakes.includes('"pisidia-egirdir": lake("Eğirdir Gölü"'));
+assert.ok(lakes.includes('"pisidia-beysehir": lake("Beyşehir Gölü"'));
+assert.ok(!lakes.includes("Tuz Gölü"));
+assert.ok(!lakes.includes("eastern-anatolia-van"));
+
 assert.ok(!cartographyLayer.includes("ANATOLIA_STRATEGIC_CORRIDORS"));
 assert.ok(!cartographyLayer.includes("ANATOLIA_STRATEGIC_PASSES"));
 assert.ok(!cartographyLayer.includes("ANATOLIA_STRATEGIC_CROSSINGS"));
@@ -166,4 +169,4 @@ assert.ok(!cityLayer.includes("fortified &&"));
 assert.ok(!worldMap.includes('phase="base"'));
 assert.ok(!worldMap.includes('phase="water"'));
 
-console.log("Map rendering contract tests passed: 1300 Anatolia is province-authoritative, legacy regional blobs are excluded from the Anatolia override, historical parent envelopes constrain province presentation, physical land remains the final coastline authority, historical ownership is used by the inspector, and named province hydrography plus Turkish historical region labels are displayed from dated metadata.");
+console.log("Map rendering contract tests passed: 1300 Anatolia is province-authoritative, legacy regional blobs are excluded from the Anatolia override, historical parent envelopes constrain province presentation, physical land remains the final coastline authority, and the inspector uses dated Turkish historical ownership, named rivers, and verified lake metadata.");
