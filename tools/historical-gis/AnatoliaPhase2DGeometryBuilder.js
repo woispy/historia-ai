@@ -104,9 +104,6 @@ function normalizeGeometryPhysicalBoundary(geometry) {
       ...geometry.geometry,
       coordinates: [normalizedOuterRing, ...coordinates.slice(1)],
     },
-    // Legacy Phase 2D consumers use `polygons` for the province land shell.
-    // Lake holes remain exclusively in GeoJSON coordinates so water is never
-    // exposed as a land polygon to centroid/area validation.
     polygons: [normalizedOuterRing],
   };
 }
@@ -128,15 +125,8 @@ function buildProvinceAssets(geometries) {
         provinceId,
         historicalAnchor: geometry.identity?.historicalAnchor ?? metadata.centroid,
       },
-      identity: {
-        id: provinceId,
-        name: metadata.name,
-      },
-      references: {
-        geometryId: provinceId,
-        countryId: metadata.countryId,
-        capitalCityId: metadata.cityId,
-      },
+      identity: { id: provinceId, name: metadata.name },
+      references: { geometryId: provinceId, countryId: metadata.countryId, capitalCityId: metadata.cityId },
       ownership: {
         countryId: metadata.historicalControl?.controllerAt1300 ?? metadata.countryId ?? null,
         ownerId: metadata.historicalControl?.controllerAt1300 ?? metadata.countryId ?? null,
@@ -160,6 +150,23 @@ function buildProvinceAssets(geometries) {
       religion: { primaryReligion: null },
     };
   });
+}
+
+function polygonArea(polygon) {
+  let area = 0;
+  for (let index = 0; index < polygon.length; index += 1) {
+    const current = polygon[index];
+    const next = polygon[(index + 1) % polygon.length];
+    area += current[0] * next[1] - next[0] * current[1];
+  }
+  return Math.abs(area) / 2;
+}
+
+function fallbackLikeProvinceCount(geometries) {
+  return geometries.filter((geometry) => (
+    Array.isArray(geometry.polygons)
+    && geometry.polygons.some((polygon) => polygonArea(polygon) < 0.00005)
+  )).length;
 }
 
 export function buildAnatoliaPhase2DAssets(regions) {
@@ -186,6 +193,7 @@ export function buildAnatoliaPhase2DAssets(regions) {
     (total, geometry) => total + geometry.polygons.length,
     0,
   );
+  const fallbackProvinceCount = fallbackLikeProvinceCount(geometries);
 
   if (provinces.length !== ANATOLIA_PROVINCE_METADATA.length) {
     throw new Error(`Phase 2D province count mismatch: ${provinces.length}; expected ${ANATOLIA_PROVINCE_METADATA.length}.`);
@@ -199,6 +207,7 @@ export function buildAnatoliaPhase2DAssets(regions) {
     provinceCount: provinces.length,
     siteCount,
     polygonCount,
+    fallbackProvinceCount,
     barrierSiteCount: 0,
   };
 }
