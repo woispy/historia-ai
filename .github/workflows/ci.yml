@@ -41,6 +41,7 @@ on:
       - feat/phase2b-anatolia-reconstruction
       - feat/phase2c-anatolia-geometry-refinement
       - feat/phase2d-anatolia-province-geometry
+      - feat/p2d-anatolia-final-cartography
       - feat/phase2efgh-cartography
       - feat/cartography-visual-refinement
       - feat/map-gpu-texture-architecture
