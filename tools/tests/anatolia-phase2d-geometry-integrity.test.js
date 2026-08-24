@@ -66,7 +66,7 @@ assert.equal(assets.fallbackProvinceCount, 0, `Phase 2D must not silently create
 assert.equal(fallbackLikeProvinceIds.length, 0, `Phase 2D contains fallback-sized province geometry: ${fallbackLikeProvinceIds.join(", ")}`);
 assert.ok(assets.naturalFeatureSiteCount > 0, "Natural-feature control sites must participate in geometry generation");
 assert.equal(assets.polygonCount, 38, "The authoritative mainland partition must contain exactly one outer polygon per province");
-assert.ok(assets.barrierSiteCount > 0, "Physical coastline and lake boundaries must participate as non-political geometry barriers");
+assert.ok(assets.physicalBarrierSiteCount > 0, "Physical coastline and lake boundaries must participate as non-political geometry barriers");
 
 const provinceIds = new Set();
 const allGeometries = [];
@@ -147,4 +147,4 @@ const medianArea = sortedAreas[Math.floor(sortedAreas.length / 2)];
 const maxArea = sortedAreas[sortedAreas.length - 1];
 assert.ok(maxArea <= medianArea * 4.2, `Phase 2D contains an oversized province cell: max ${maxArea.toFixed(3)} vs median ${medianArea.toFixed(3)}`);
 
-console.log(`Phase 2D V16 geometry integrity passed: ${provinceIds.size} contiguous provinces, ${assets.polygonCount} outer polygons, ${assets.politicalSiteCount} political anchors, ${assets.barrierSiteCount} physical boundary barriers, ${assets.weightIterations} weight iterations, ${assets.geometries.reduce((sum, geometry) => sum + geometry.holes.length, 0)} lake holes.`);
+console.log(`Phase 2D V16 geometry integrity passed: ${provinceIds.size} contiguous provinces, ${assets.polygonCount} outer polygons, ${assets.politicalSiteCount} political anchors, ${assets.physicalBarrierSiteCount} physical boundary barriers, ${assets.weightIterations} weight iterations, ${assets.geometries.reduce((sum, geometry) => sum + geometry.holes.length, 0)} lake holes.`);
