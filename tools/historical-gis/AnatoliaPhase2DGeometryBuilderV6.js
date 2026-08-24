@@ -13,6 +13,7 @@ const COAST_TOLERANCE = 0.055;
 const SAMPLE_STEP = 0.06;
 const NEAR_COAST_LIMIT = 1.25;
 const ANCHOR_CENTROID_TOLERANCE = 0.22;
+const LAKE_EDGE_NUDGE = 0.00008;
 const province = (id) => ANATOLIA_PROVINCE_METADATA.find((item) => item.id === id) ?? null;
 const rawAnchor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id]?.anchor ?? item.centroid;
 const landPolygons = () => [...ANATOLIA_PHYSICAL_ATLAS.landPolygons, ...ANATOLIA_PHYSICAL_COAST_CORRECTIONS.map((item) => item.coordinates)];
@@ -29,11 +30,11 @@ function pointInPolygon(point, polygon) {
 function distanceToSegment(point, a, b) {
   const dx = b[0] - a[0]; const dy = b[1] - a[1]; const d = dx * dx + dy * dy;
   const t = d < EPS ? 0 : Math.max(0, Math.min(1, ((point[0] - a[0]) * dx + (point[1] - a[1]) * dy) / d));
-  return Math.hypot(point[0] - (a[0] + dx * t), point[1] - (a[1] + dy * t));
+  return { distance: Math.hypot(point[0] - (a[0] + dx * t), point[1] - (a[1] + dy * t)), point: [a[0] + dx * t, a[1] + dy * t] };
 }
 function distanceToPolygon(point, polygon) {
   let distance = Infinity;
-  for (let i = 0; i < polygon.length; i += 1) distance = Math.min(distance, distanceToSegment(point, polygon[i], polygon[(i + 1) % polygon.length]));
+  for (let i = 0; i < polygon.length; i += 1) distance = Math.min(distance, distanceToSegment(point, polygon[i], polygon[(i + 1) % polygon.length]).distance);
   return distance;
 }
 function supplementalLandForAnchor(anchorPoint) {
@@ -44,13 +45,40 @@ function supplementalLandForAnchor(anchorPoint) {
     .map((entry) => entry.land);
 }
 function inLake(point) { return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygon(point, lake.coordinates)); }
-function isPhysicalLandPoint(point) {
-  if (inLake(point)) return false;
+function isStaticLandPoint(point) {
   if (landPolygons().some((polygon) => pointInPolygon(point, polygon))) return true;
   let distance = Infinity;
   for (const polygon of landPolygons()) distance = Math.min(distance, distanceToPolygon(point, polygon));
   return distance <= COAST_TOLERANCE;
 }
+function isPhysicalLandPoint(point) { return isStaticLandPoint(point) && !inLake(point); }
+function nearestLakeBoundaryPoint(point) {
+  let best = null;
+  for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) {
+    const ring = lake.coordinates;
+    if (!ring?.length) continue;
+    for (let i = 0; i < ring.length; i += 1) {
+      const candidate = distanceToSegment(point, ring[i], ring[(i + 1) % ring.length]);
+      if (!best || candidate.distance < best.distance) best = { distance: candidate.distance, boundary: candidate.point, lake };
+    }
+  }
+  return best;
+}
+function movePointOutsideLake(point) {
+  if (!inLake(point)) return point;
+  const nearest = nearestLakeBoundaryPoint(point);
+  if (!nearest) return point;
+  const lakeCenter = nearest.lake.coordinates.reduce((sum, value) => [sum[0] + value[0], sum[1] + value[1]], [0, 0]).map((value) => value / nearest.lake.coordinates.length);
+  let dx = nearest.boundary[0] - lakeCenter[0]; let dy = nearest.boundary[1] - lakeCenter[1];
+  const magnitude = Math.hypot(dx, dy) || 1;
+  dx /= magnitude; dy /= magnitude;
+  for (let step = 1; step <= 16; step += 1) {
+    const candidate = [nearest.boundary[0] + dx * LAKE_EDGE_NUDGE * step, nearest.boundary[1] + dy * LAKE_EDGE_NUDGE * step];
+    if (isStaticLandPoint(candidate) && !inLake(candidate)) return candidate;
+  }
+  return nearest.boundary;
+}
+function repairPolygonLakeVertices(polygon) { return polygon.map(movePointOutsideLake); }
 function halfPlane(polygon, a, b, c) {
   const out = []; const inside = (p) => a * p[0] + b * p[1] <= c + EPS;
   for (let i = 0; i < polygon.length; i += 1) {
@@ -100,20 +128,21 @@ function clipLandByCell(land, cell) {
   return output;
 }
 function clipCellToLand(cell, anchorPoint) {
-  const primary = landPolygons().map((land) => clipLandByCell(land, cell)).filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
+  const primary = landPolygons().map((land) => clipLandByCell(land, cell)).filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA).map(repairPolygonLakeVertices);
   if (primary.length) return primary;
   return supplementalLandForAnchor(anchorPoint)
     .map((land) => clipLandByCell(land, cell))
-    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
+    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA)
+    .map(repairPolygonLakeVertices);
 }
 function fitPolygonToPhysicalLand(polygon, anchorPoint) {
   const supplemental = supplementalLandForAnchor(anchorPoint)[0];
-  let result = polygon;
+  let result = repairPolygonLakeVertices(polygon);
   for (let iteration = 0; iteration < 64; iteration += 1) {
     const center = centroid(result);
     const nearHistoricalAnchor = !inLake(center) && Math.hypot(center[0] - anchorPoint[0], center[1] - anchorPoint[1]) <= ANCHOR_CENTROID_TOLERANCE;
-    if (area(result) >= MIN_AREA && (isPhysicalLandPoint(center) || (supplemental && pointInPolygon(center, supplemental)) || nearHistoricalAnchor)) return result;
-    result = result.map((point) => [anchorPoint[0] + (point[0] - anchorPoint[0]) * 0.94, anchorPoint[1] + (point[1] - anchorPoint[1]) * 0.94]);
+    if (area(result) >= MIN_AREA && (isPhysicalLandPoint(center) || (supplemental && pointInPolygon(center, supplemental)) || nearHistoricalAnchor) && result.every((point) => isPhysicalLandPoint(point))) return result;
+    result = repairPolygonLakeVertices(result.map((point) => [anchorPoint[0] + (point[0] - anchorPoint[0]) * 0.94, anchorPoint[1] + (point[1] - anchorPoint[1]) * 0.94]));
   }
   return [];
 }
@@ -143,7 +172,7 @@ export function buildAnatoliaPhase2DAssets() {
     provinces.push(provinceAsset(item, polygons)); geometries.push(geometryAsset(item, polygons));
   }
   const physicalSamplingSiteCount = samplingSiteCount();
-  return { schemaVersion: 1, geometryVersion: 9, historicalDate: "1300-01-01", provider: "historia-ai-curated-cartography", dataset: "anatolia-province-geometry-1300", projection: "EPSG:4326", method: "one historical province anchor per political cell, physical-land intersection, Natural Earth coastal supplement only where the curated physical atlas lacks coverage, centroid land validation, and dense physical sampling", siteCount: physicalSamplingSiteCount + politicalSites.length + naturalFeatureSiteCount, politicalSiteCount: politicalSites.length, physicalSamplingSiteCount, barrierSiteCount: 0, naturalFeatureSiteCount, fallbackProvinceCount: 0, provinceCount: provinces.length, polygonCount: geometries.reduce((sum, item) => sum + item.polygons.length, 0), provinces, geometries };
+  return { schemaVersion: 1, geometryVersion: 9, historicalDate: "1300-01-01", provider: "historia-ai-curated-cartography", dataset: "anatolia-province-geometry-1300", projection: "EPSG:4326", method: "one historical province anchor per political cell, physical-land intersection, Natural Earth coastal supplement only where the curated physical atlas lacks coverage, lake-edge vertex repair, centroid land validation, and dense physical sampling", siteCount: physicalSamplingSiteCount + politicalSites.length + naturalFeatureSiteCount, politicalSiteCount: politicalSites.length, physicalSamplingSiteCount, barrierSiteCount: 0, naturalFeatureSiteCount, fallbackProvinceCount: 0, provinceCount: provinces.length, polygonCount: geometries.reduce((sum, item) => sum + item.polygons.length, 0), provinces, geometries };
 }
 export function isAnatoliaGeometryPoint([longitude, latitude]) {
   if (longitude < 26.5 || longitude > 44.8 || latitude < 35.7 || latitude > 42.2) return false;
