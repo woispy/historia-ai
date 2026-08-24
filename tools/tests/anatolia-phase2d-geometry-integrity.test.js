@@ -59,6 +59,10 @@ function followsLakeShoreline(point, lake) {
     || pointOnPolygonBoundary(point, lake.coordinates);
 }
 
+function isLakeShorelinePoint(point) {
+  return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => followsLakeShoreline(point, lake));
+}
+
 function polygonCentroid(polygon) {
   return polygon.reduce(
     (sum, [x, y]) => [sum[0] + x, sum[1] + y],
@@ -98,7 +102,11 @@ const provinceAreas = [];
 function assertRingIntegrity(provinceId, ring, label) {
   assert.ok(ring.length >= 3, `${provinceId}: ${label} must contain at least three vertices`);
   for (const point of ring) {
-    assert.equal(isPhysicalLandPoint(point), true, `${provinceId}: ${label} vertex must remain on physical land`);
+    assert.equal(
+      isPhysicalLandPoint(point) || isLakeShorelinePoint(point),
+      true,
+      `${provinceId}: ${label} vertex must remain on physical land or a real lake shoreline`,
+    );
   }
   for (let index = 0; index < ring.length; index += 1) {
     const start = ring[index];
@@ -108,7 +116,11 @@ function assertRingIntegrity(provinceId, ring, label) {
         start[0] + (end[0] - start[0]) * fraction,
         start[1] + (end[1] - start[1]) * fraction,
       ];
-      assert.equal(isPhysicalLandPoint(sample), true, `${provinceId}: ${label} edge crosses physical water near ${fraction}`);
+      assert.equal(
+        isPhysicalLandPoint(sample) || isLakeShorelinePoint(sample),
+        true,
+        `${provinceId}: ${label} edge crosses physical water away from land/lake shoreline near ${fraction}`,
+      );
     }
   }
 }
