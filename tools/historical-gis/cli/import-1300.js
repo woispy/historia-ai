@@ -104,11 +104,27 @@ for (const geometry of phase2D.geometries) {
 
 for (const region of sourceRegionsOutsidePhase2D) {
   const provinceAsset = buildHistoricalProvinceAsset(region);
-  const geometryAsset = buildHistoricalGeometryAsset(region);
+  const rawGeometryAsset = buildHistoricalGeometryAsset(region);
   const provinceId = provinceAsset.identity.id;
-  const geometryId = geometryAsset.identity.id;
 
   if (assetIds.has(provinceId)) throw new Error(`Duplicate generated historical GIS asset id: ${provinceId}`);
+
+  // Province identity is canonical at the runtime boundary. Preserve the
+  // source-derived geometry payload, but repair a missing geometry identity
+  // from the already-created province asset instead of allowing an anonymous
+  // geometry into the consolidated runtime.
+  const geometryAsset = rawGeometryAsset.identity?.id
+    ? rawGeometryAsset
+    : {
+      ...rawGeometryAsset,
+      identity: {
+        id: provinceId,
+        provinceId,
+      },
+    };
+  const geometryId = geometryAsset.identity?.id;
+
+  if (!geometryId) throw new Error(`Source-derived geometry has no canonical identity: ${provinceId}`);
   if (geometryId !== provinceId) throw new Error(`Province/geometry asset identity mismatch: ${provinceId} vs ${geometryId}`);
 
   assetIds.add(provinceId);
