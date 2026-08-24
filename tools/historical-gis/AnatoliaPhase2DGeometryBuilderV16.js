@@ -71,9 +71,6 @@ const PHYSICAL_CORRECTION_POLYGONS = ANATOLIA_PHYSICAL_COAST_CORRECTIONS
 
 function inLake(point) { return LAKES.some((lake) => pointInPolygon(point, lake.coordinates)); }
 
-// Physical correction polygons are explicit land-authority geometry. They must
-// take precedence over a coarse hydrography polygon that overlaps their land
-// footprint; ordinary atlas land remains subject to lake exclusion.
 function isPhysicalLandPoint(point) {
   if (PHYSICAL_CORRECTION_POLYGONS.some((polygon) => pointInPolygon(point, polygon))) return true;
   return LAND_POLYGONS.some((polygon) => pointInPolygon(point, polygon)) && !inLake(point);
@@ -94,7 +91,6 @@ function localLandRecovery(point) {
 
 function nearestLandPoint(point) {
   if (PHYSICAL_CORRECTION_POLYGONS.some((polygon) => pointInPolygon(point, polygon))) return point;
-
   const recovered = localLandRecovery(point);
   if (recovered) return recovered;
   let best = null;
@@ -219,9 +215,6 @@ function edgeOnPhysicalLand(polygon) {
     const end = polygon[(index + 1) % polygon.length];
     for (const fraction of EDGE_FRACTIONS) {
       const point = [start[0] + (end[0] - start[0]) * fraction, start[1] + (end[1] - start[1]) * fraction];
-      // Lake interiors are intentionally allowed inside the outer land shell;
-      // buildProvinceGeometry emits the corresponding lake as an even-odd
-      // hole. Open water outside a known lake remains invalid here.
       if (!isPhysicalLandPoint(point) && !inLake(point)) return false;
     }
   }
@@ -246,7 +239,7 @@ function median(values) {
 
 function featureWeightBias() {
   const bias = Object.fromEntries(ANATOLIA_PROVINCE_METADATA.map((item) => [item.id, 0]));
-  for (const feature of [...ANATOLIA_STRATEGIC_PASSES, ...ANATOLIA_RIVER_CROSSINGS]) {
+  for (const feature of [...ANATOLIA_STRATEGIC_PASSES, ...ANATOLIA_RIVER_CROSSINGS) {
     for (const provinceId of feature.provinces ?? []) if (provinceId in bias) bias[provinceId] += FEATURE_WEIGHT_STEP;
   }
   return bias;
@@ -320,6 +313,7 @@ function buildProvinceGeometry(item, polygon, site) {
       historicalAnchor,
       borderConfidence: item.borderConfidence,
       manifest,
+      cartographicCentroid: polygonCentroid(polygon),
     },
   };
 }
