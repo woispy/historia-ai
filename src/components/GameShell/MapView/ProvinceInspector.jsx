@@ -70,6 +70,28 @@ function polityLabel(id, polity) {
   return polity?.name ?? getHistoricalPolity(id)?.name ?? id;
 }
 
+function historicalNoteLabel(note, displayName, controller, historicalPolity, confidence) {
+  if (!note) return null;
+
+  const translations = new Map([
+    [
+      "Kütahya is the strongest geographic anchor for Yakub Bey's independent phase.",
+      "Kütahya, Yakub Bey'in bağımsızlık döneminin en güçlü coğrafi dayanağıdır.",
+    ],
+  ]);
+
+  const translated = translations.get(note);
+  if (translated) return translated;
+
+  const owner = polityLabel(controller, historicalPolity);
+  const confidenceText = historicalConfidenceLabel(confidence).toLocaleLowerCase("tr-TR");
+  if (owner !== "—") {
+    return `${displayName}, 1300 başlangıç çerçevesinde ${owner} kontrolünde değerlendirilir. Tarihsel güven düzeyi ${confidenceText}tir.`;
+  }
+
+  return `${displayName}, 1300 başlangıç çerçevesinde çekişmeli veya katmanlı bir alan olarak değerlendirilir. Tarihsel güven düzeyi ${confidenceText}tir.`;
+}
+
 function ProvinceInspector({ province, country, historicalMetadata = null, historicalPolity = null, onClose }) {
   const viewModel = createProvincePanelViewModel(province);
   if (!viewModel) return null;
@@ -86,6 +108,13 @@ function ProvinceInspector({ province, country, historicalMetadata = null, histo
   const displayOwner = historicalMetadata
     ? polityLabel(controller, historicalPolity)
     : (country?.name ?? country?.displayName ?? viewModel.owner);
+  const historicalNote = historicalNoteLabel(
+    historical?.note,
+    viewModel.displayName,
+    controller,
+    historicalPolity,
+    historical?.confidence,
+  );
 
   return (
     <aside className="province-inspector" aria-label="Bölge bilgileri">
@@ -132,8 +161,8 @@ function ProvinceInspector({ province, country, historicalMetadata = null, histo
         )}
       </dl>
 
-      {historical?.note && (
-        <p className="province-inspector__note">{historical.note}</p>
+      {historicalNote && (
+        <p className="province-inspector__note">{historicalNote}</p>
       )}
     </aside>
   );
