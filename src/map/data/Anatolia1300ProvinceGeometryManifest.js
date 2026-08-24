@@ -53,10 +53,11 @@ export const ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST = Object.freeze([
   geometry("pontus-amisos", "amisos"),
   geometry("pontus-amasya", "amasya"),
   geometry("pontus-kastamon", "kastamon"),
+  geometry("pontus-trebizond", "trebizond", "Independent Trebizond polity; preserve its distinct eastern Black Sea political identity."),
   geometry("eastern-anatolia-erzincan", "erzincan"),
   geometry("eastern-anatolia-erzurum", "erzurum"),
   geometry("cilicia-sis", "sis"),
-  geometry("cilicia-tarsus", "tarsus"),
+  geometry("cilicia-tarsos", "tarsos"),
   geometry("cilicia-alaiye", "alaiye"),
 ]);
 
