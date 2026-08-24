@@ -76,7 +76,6 @@ for (const geometry of phase2D.geometries) {
     },
     historical: {
       sourceFeatureId: provinceId,
-      sourceFeatureIndex: ANATOLIA_PROVINCE_METADATA.indexOf(metadata),
       sourceName: metadata.name,
       subject: metadata.countryId,
       partOf: metadata.regionId,
