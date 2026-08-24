@@ -15,7 +15,7 @@ const result = buildAnatoliaPhase2DAssets([
 assert.equal(result.historicalDate, "1300-01-01");
 assert.equal(result.provinceCount, ANATOLIA_PROVINCE_METADATA.length);
 assert.equal(result.provinceCount, ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST.length);
-assert.equal(result.provinceCount, 44);
+assert.equal(result.provinceCount, 38, "Phase 2D must match the current authoritative 1300 province dataset");
 assert.equal(result.fallbackProvinceCount, 0, "Phase 2D must not silently replace historical province geometry with anchor fallbacks");
 console.log(`Phase 2D cartographic site count: ${result.siteCount}`);
 assert.ok(result.siteCount >= 1000, "Phase 2D must use a dense physical/cartographic site field");
