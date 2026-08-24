@@ -36,6 +36,29 @@ function pointInPolygon(point, polygon) {
   return inside;
 }
 
+function pointToSegmentDistance(point, start, end) {
+  const dx = end[0] - start[0];
+  const dy = end[1] - start[1];
+  const denominator = dx * dx + dy * dy;
+  const t = denominator === 0
+    ? 0
+    : Math.max(0, Math.min(1, ((point[0] - start[0]) * dx + (point[1] - start[1]) * dy) / denominator));
+  const projection = [start[0] + dx * t, start[1] + dy * t];
+  return Math.hypot(point[0] - projection[0], point[1] - projection[1]);
+}
+
+function pointOnPolygonBoundary(point, polygon, tolerance = 1e-7) {
+  for (let index = 0; index < polygon.length; index += 1) {
+    if (pointToSegmentDistance(point, polygon[index], polygon[(index + 1) % polygon.length]) <= tolerance) return true;
+  }
+  return false;
+}
+
+function followsLakeShoreline(point, lake) {
+  return lake.rings?.some((ring) => pointOnPolygonBoundary(point, ring))
+    || pointOnPolygonBoundary(point, lake.coordinates);
+}
+
 function polygonCentroid(polygon) {
   return polygon.reduce(
     (sum, [x, y]) => [sum[0] + x, sum[1] + y],
@@ -104,7 +127,7 @@ for (const geometry of assets.geometries) {
   assertRingIntegrity(provinceId, geometry.polygons[0], "outer ring");
   for (const hole of geometry.holes) {
     assert.ok(hole.length >= 3, `${provinceId}: lake hole must contain at least three vertices`);
-    assert.ok(hole.every((point) => ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygon(point, lake.coordinates))), `${provinceId}: lake hole must follow a real lake shoreline`);
+    assert.ok(hole.every((point) => ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => followsLakeShoreline(point, lake))), `${provinceId}: lake hole must follow a real lake shoreline`);
   }
   provinceAreas.push({ id: provinceId, area: polygonArea(geometry.polygons[0]) });
   allGeometries.push(geometry);
