@@ -55,10 +55,10 @@ assert.match(physicalLayer, /WORLD_PHYSICAL_ATLAS\.water\.fill/);
 assert.ok(historicalPoliticalLayer.includes("import { ANATOLIA_PHYSICAL_ATLAS } from \"../../data/AnatoliaPhysicalAtlas.js\";"));
 assert.ok(historicalPoliticalLayer.includes("import { WORLD_LAND_PATH } from \"../../physical/WorldPhysicalAtlas.js\";"));
 assert.ok(historicalPoliticalLayer.includes("historical-world-political-land-clip"));
-assert.ok(historicalPoliticalLayer.includes("historical-world-source-outside-anatolia-clip"));
-assert.ok(historicalPoliticalLayer.includes("<path d={WORLD_LAND_PATH} fillRule=\"evenodd\" />"));
-assert.ok(historicalPoliticalLayer.includes("${WORLD_LAND_PATH} ${ANATOLIA_LAND_PATH}"));
-assert.ok(historicalPoliticalLayer.includes("clipPath={`url(#${HISTORICAL_WORLD_SOURCE_CLIP_ID})`}"));
+assert.ok(historicalPoliticalLayer.includes("historical-world-source-outside-anatolia-mask"));
+assert.ok(historicalPoliticalLayer.includes("<path d={WORLD_LAND_PATH} fill=\"white\" fillRule=\"evenodd\" />"));
+assert.ok(historicalPoliticalLayer.includes("strokeWidth={COASTAL_POLITICAL_EXPANSION}"));
+assert.ok(historicalPoliticalLayer.includes("mask={`url(#${HISTORICAL_WORLD_SOURCE_MASK_ID})`}"));
 assert.ok(historicalPoliticalLayer.includes("clipPath={`url(#${HISTORICAL_WORLD_POLITICAL_CLIP_ID})`}"));
 assert.ok(!historicalPoliticalLayer.includes('clipPath="url(#world-land-mask)"'));
 
@@ -69,15 +69,19 @@ assert.ok(worldMap.includes("regions={historicalRegions}"));
 assert.ok(historicalPoliticalLayer.includes("HistoricalWorldRegionPaths"));
 assert.ok(historicalPoliticalLayer.includes("getStableSourceColor(region.subject)"));
 
-// Global source GIS is rendered outside the curated Anatolia physical land
-// polygon. This is the renderer-level inverse of the old Phase 2D land clip.
+// Global source GIS is rendered through a physical-land mask that removes the
+// curated Anatolia footprint plus a small coastal closure buffer. This is the
+// renderer-level inverse of the old Phase 2D land clip.
 assert.ok(historicalPoliticalLayer.includes("ANATOLIA_LAND_PATH"));
-assert.ok(historicalPoliticalLayer.includes("HISTORICAL_WORLD_SOURCE_CLIP_ID"));
+assert.ok(historicalPoliticalLayer.includes("HISTORICAL_WORLD_SOURCE_MASK_ID"));
 assert.ok(historicalPoliticalLayer.includes("<HistoricalWorldRegionPaths regions={regions} />"));
 assert.ok(!historicalPoliticalLayer.includes("return !subject || !SOURCE_POLITICAL_ALIASES.has(subject);"));
+assert.ok(historicalPoliticalLayer.includes("const COASTAL_POLITICAL_EXPANSION = 0.08;"));
+assert.ok(historicalPoliticalLayer.includes("function isCoastalProvince(entry)"));
+assert.ok(historicalPoliticalLayer.includes("stroke={base.color}"));
 
 assert.ok(historicalPoliticalLayer.includes("<g clipPath={`url(#${HISTORICAL_WORLD_POLITICAL_CLIP_ID})`}>") );
-assert.ok(!historicalPoliticalLayer.includes("COASTAL_POLITICAL_EXPANSION"));
+assert.ok(!historicalPoliticalLayer.includes("COASTAL_POLITICAL_EXPANSION = 0"));
 assert.ok(historicalPoliticalLayer.includes("Historical unassigned land presentation"));
 
 assert.ok(provincePolygon.includes("pointerEvents=\"all\""));
@@ -123,6 +127,8 @@ assert.ok(inspector.includes("historicalMetadata?.historicalControl"));
 assert.ok(inspector.includes("const displayOwner = historicalMetadata"));
 assert.ok(inspector.includes("1300 Kontrolü"));
 assert.ok(inspector.includes("Tarihsel Güven"));
+assert.ok(inspector.includes("historicalNoteLabel"));
+assert.ok(inspector.includes("Kütahya, Yakub Bey'in bağımsızlık döneminin en güçlü coğrafi dayanağıdır."));
 
 assert.ok(!cartographyLayer.includes("ANATOLIA_STRATEGIC_CORRIDORS"));
 assert.ok(!cartographyLayer.includes("ANATOLIA_STRATEGIC_PASSES"));
@@ -133,4 +139,4 @@ assert.ok(!cityLayer.includes("fortified &&"));
 assert.ok(!worldMap.includes('phase="base"'));
 assert.ok(!worldMap.includes('phase="water"'));
 
-console.log("Map rendering contract tests passed: one synchronized world, explicit province interaction, one physical coastline authority, authoritative Anatolia political compositor, historical inspector handoff, and no legacy overlay layers.");
+console.log("Map rendering contract tests passed: one synchronized world, explicit province interaction, one physical coastline authority, coastal political closure without sea spill, authoritative Anatolia political compositor, Turkish historical inspector notes, and no legacy overlay layers.");
