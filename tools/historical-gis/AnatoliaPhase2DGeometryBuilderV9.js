@@ -20,9 +20,9 @@ const CENTROID_WEIGHT_STEP = 0.45;
 const ANCHOR_REPAIR_ITERATIONS = 16;
 const ANCHOR_WEIGHT_STEP = 0.35;
 const RECOVERY_MAX_RADIUS = 2.5;
-const RECOVERY_RAYS = 144;
-const RECOVERY_BISECTIONS = 18;
-const RECOVERY_SCALE_STEPS = 18;
+const RECOVERY_RAYS = 720;
+const RECOVERY_BISECTIONS = 24;
+const RECOVERY_SCALE_STEPS = 24;
 
 const rawAnchor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id]?.anchor ?? item.centroid;
 const isAnatoliaGeometryPoint = (point) => point?.length === 2 && point[0] >= BBOX[0] && point[0] <= BBOX[2] && point[1] >= BBOX[1] && point[1] <= BBOX[3];
@@ -119,7 +119,7 @@ function edgeIsLandSafe(polygon) {
   for (let i = 0; i < polygon.length; i += 1) {
     const start = polygon[i]; const end = polygon[(i + 1) % polygon.length];
     if (!isPhysicalLandPoint(start)) return false;
-    for (const fraction of [0.25, 0.5, 0.75]) if (!isPhysicalLandPoint([start[0] + (end[0] - start[0]) * fraction, start[1] + (end[1] - start[1]) * fraction])) return false;
+    for (const fraction of [0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875]) if (!isPhysicalLandPoint([start[0] + (end[0] - start[0]) * fraction, start[1] + (end[1] - start[1]) * fraction])) return false;
   }
   return isPhysicalLandPoint(polygonCentroid(polygon));
 }
@@ -133,7 +133,8 @@ function recoverLandConstrainedCell(cell, anchor, scale = 1) {
       const radius = (low + high) / 2; const sample = [center[0] + dx * radius, center[1] + dy * radius];
       if (pointInPolygon(sample, cell) && isRecoverableLandPoint(sample)) low = radius; else high = radius;
     }
-    points.push([center[0] + dx * low, center[1] + dy * low]);
+    const radius = Math.max(0, low * 0.999);
+    points.push([center[0] + dx * radius, center[1] + dy * radius]);
   }
   return points;
 }
@@ -146,8 +147,8 @@ function clipCellToMainland(cell, provinceId, anchor) {
   }
   const anchoredRaw = rawCandidates.filter((polygon) => pointInPolygon(anchor, polygon));
   for (const candidate of anchoredRaw.sort((a, b) => area(b) - area(a))) {
-    for (let step = 1; step <= 24; step += 1) {
-      const factor = 1 - step / 25;
+    for (let step = 1; step <= 32; step += 1) {
+      const factor = 1 - step / 33;
       const shrunken = candidate.map((point) => [anchor[0] + (point[0] - anchor[0]) * factor, anchor[1] + (point[1] - anchor[1]) * factor]);
       if (area(shrunken) >= MIN_AREA && edgeIsLandSafe(shrunken)) return shrunken;
     }
