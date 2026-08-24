@@ -18,7 +18,7 @@ const sq = (a, b) => (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2;
 
 function pointInPolygon(point, polygon) {
   let inside = false;
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i += 1) {
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i, i += 1) {
     const a = polygon[i]; const b = polygon[j];
     if ((a[1] > point[1]) !== (b[1] > point[1]) && point[0] < ((b[0] - a[0]) * (point[1] - a[1])) / ((b[1] - a[1]) || EPS) + a[0]) inside = !inside;
   }
@@ -41,9 +41,6 @@ function distanceToCoast(point) {
 
 function inLand(point) { return ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon)); }
 function inLake(point) { return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygon(point, lake.coordinates)); }
-
-// Coastline tolerance only accepts points immediately adjacent to the authoritative land boundary.
-// Lakes remain hard exclusions. This is deliberately shared by all 38 provinces.
 function isPhysicalLandPoint(point) { return !inLake(point) && (inLand(point) || distanceToCoast(point) <= COAST_TOLERANCE); }
 
 function politicalPoint(point) {
@@ -183,7 +180,8 @@ export function buildAnatoliaPhase2DAssets() {
   const byProvince = Object.fromEntries(ANATOLIA_PROVINCE_METADATA.map((item) => [item.id, []]));
   for (let index = 0; index < sites.length; index += 1) {
     const cell = voronoiCell(index, sites); if (cell.length < 3 || area(cell) < MIN_AREA) continue;
-    const item = province(sites[index].provinceId); const clipped = shrinkToLand(cell, anchor(item));
+    const item = province(sites[index].provinceId); if (!item) continue;
+    const clipped = shrinkToLand(cell, anchor(item));
     if (clipped.length >= 3 && area(clipped) >= MIN_AREA) byProvince[item.id].push(clipped.map(([x, y]) => [Number(x.toFixed(5)), Number(y.toFixed(5))]));
   }
   const provinces = []; const geometries = [];
