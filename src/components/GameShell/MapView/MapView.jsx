@@ -15,6 +15,27 @@ function getScenarioStartDate(gameSession) {
     ?? null;
 }
 
+function createHistoricalInspectorProvince(metadata) {
+  if (!metadata) return null;
+  return {
+    id: metadata.id,
+    name: metadata.name,
+    owner: metadata.countryId ?? null,
+    controller: metadata.historicalControl?.controllerAt1300 ?? null,
+    terrain: metadata.terrain ?? null,
+    port: metadata.port === true,
+    strategic: metadata.strategic === true,
+    culture: null,
+    religion: null,
+    governor: null,
+    fortLevel: null,
+    population: null,
+    development: null,
+    river: null,
+    historicalControl: metadata.historicalControl ?? null,
+  };
+}
+
 function MapView({
   gameSession,
   settings,
@@ -24,15 +45,16 @@ function MapView({
 }) {
   const provinceRepository = gameSession?.world?.repositories?.provinces;
   const countryRepository = gameSession?.world?.repositories?.countries;
-  const selectedProvince = provinceRepository && selectedProvinceId
-    ? getProvince(provinceRepository, selectedProvinceId)
-    : null;
-  const selectedCountry = selectedProvince?.owner && countryRepository
-    ? getCountry(countryRepository, selectedProvince.owner)
-    : null;
   const scenarioDate = getScenarioStartDate(gameSession);
   const historicalMetadata = scenarioDate === HISTORICAL_1300_DATE && selectedProvinceId
     ? getProvinceMetadata(selectedProvinceId)
+    : null;
+  const repositoryProvince = provinceRepository && selectedProvinceId
+    ? getProvince(provinceRepository, selectedProvinceId)
+    : null;
+  const selectedProvince = repositoryProvince ?? createHistoricalInspectorProvince(historicalMetadata);
+  const selectedCountry = repositoryProvince?.owner && countryRepository
+    ? getCountry(countryRepository, repositoryProvince.owner)
     : null;
   const historicalControllerId = historicalMetadata?.historicalControl?.controllerAt1300 ?? null;
   const historicalPolity = historicalControllerId
