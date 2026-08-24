@@ -24,6 +24,10 @@ function lakeLabel(hasLake, lakeName) {
   return lakeName ? `Var — ${lakeName}` : "Var";
 }
 
+function featureLabel(name) {
+  return name ? `Var — ${name}` : "—";
+}
+
 function historicalStatusLabel(value) {
   const labels = {
     established: "Yerleşik kontrol",
@@ -54,11 +58,7 @@ function historicalStatusLabel(value) {
 }
 
 function historicalConfidenceLabel(value) {
-  const labels = {
-    high: "Yüksek",
-    medium: "Orta",
-    low: "Düşük",
-  };
+  const labels = { high: "Yüksek", medium: "Orta", low: "Düşük" };
   return labels[value] ?? valueOrDash(value);
 }
 
@@ -100,14 +100,12 @@ function polityLabel(id, polity) {
 
 function historicalNoteLabel(note, displayName, controller, historicalPolity, confidence) {
   if (!note) return null;
-
   const translations = new Map([
     [
       "Kütahya is the strongest geographic anchor for Yakub Bey's independent phase.",
       "Kütahya, Yakub Bey'in bağımsızlık döneminin en güçlü coğrafi dayanağıdır.",
     ],
   ]);
-
   const translated = translations.get(note);
   if (translated) return translated;
 
@@ -116,7 +114,6 @@ function historicalNoteLabel(note, displayName, controller, historicalPolity, co
   if (owner !== "—") {
     return `${displayName}, 1300 başlangıç çerçevesinde ${owner} kontrolünde değerlendirilir. Tarihsel güven düzeyi ${confidenceText}tir.`;
   }
-
   return `${displayName}, 1300 başlangıç çerçevesinde çekişmeli veya katmanlı bir alan olarak değerlendirilir. Tarihsel güven düzeyi ${confidenceText}tir.`;
 }
 
@@ -139,6 +136,10 @@ function ProvinceInspector({ province, country, historicalMetadata = null, histo
   const hasLake = province?.lake ?? null;
   const lakeName = province?.lakeName ?? null;
   const lakeDetail = province?.lakeDetail ?? null;
+  const mountainsName = province?.mountainsName ?? null;
+  const mountainsDetail = province?.mountainsDetail ?? null;
+  const passesName = province?.passesName ?? null;
+  const passesDetail = province?.passesDetail ?? null;
   const displayOwner = historicalMetadata
     ? polityLabel(controller, historicalPolity)
     : (country?.name ?? country?.displayName ?? viewModel.owner);
@@ -176,6 +177,8 @@ function ProvinceInspector({ province, country, historicalMetadata = null, histo
         <div><dt>Nüfus</dt><dd>{valueOrDash(viewModel.population)}</dd></div>
         <div><dt>Gelişim</dt><dd>{valueOrDash(viewModel.development)}</dd></div>
         <div><dt>Arazi</dt><dd>{terrainLabel(terrain)}</dd></div>
+        <div><dt>Dağlar</dt><dd>{featureLabel(mountainsName)}</dd></div>
+        <div><dt>Geçitler</dt><dd>{featureLabel(passesName)}</dd></div>
         <div><dt>Vali</dt><dd>{valueOrDash(viewModel.governor)}</dd></div>
         <div><dt>Kale Seviyesi</dt><dd>{valueOrDash(viewModel.fortLevel)}</dd></div>
         <div><dt>Liman</dt><dd>{booleanLabel(port)}</dd></div>
@@ -196,17 +199,11 @@ function ProvinceInspector({ province, country, historicalMetadata = null, histo
         )}
       </dl>
 
-      {riverDetail && (
-        <p className="province-inspector__note">{riverName}: {riverDetail}.</p>
-      )}
-
-      {lakeDetail && (
-        <p className="province-inspector__note">{lakeName}: {lakeDetail}.</p>
-      )}
-
-      {historicalNote && (
-        <p className="province-inspector__note">{historicalNote}</p>
-      )}
+      {mountainsDetail && <p className="province-inspector__note">{mountainsName}: {mountainsDetail}.</p>}
+      {passesDetail && <p className="province-inspector__note">{passesName}: {passesDetail}.</p>}
+      {riverDetail && <p className="province-inspector__note">{riverName}: {riverDetail}.</p>}
+      {lakeDetail && <p className="province-inspector__note">{lakeName}: {lakeDetail}.</p>}
+      {historicalNote && <p className="province-inspector__note">{historicalNote}</p>}
     </aside>
   );
 }
