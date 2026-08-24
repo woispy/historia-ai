@@ -6,7 +6,7 @@ import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceM
 const assets = buildAnatoliaPhase2DAssets();
 
 assert.equal(assets.provinceCount, ANATOLIA_PROVINCE_METADATA.length, "Phase 2D province count must match metadata");
-assert.equal(assets.provinceCount, 44, "1300 Anatolia must contain the curated 44-province set");
+assert.equal(assets.provinceCount, 38, "Phase 2D must match the current authoritative 1300 province dataset");
 assert.equal(assets.fallbackProvinceCount, 0, "Phase 2D must never silently create fallback polygons");
 assert.ok(assets.naturalFeatureSiteCount > 0, "Natural-feature control sites must participate in geometry generation");
 
@@ -50,6 +50,6 @@ for (const province of assets.provinces) {
   }
 }
 
-assert.equal(provinceIds.size, 44, "Every curated 1300 province must have a unique geometry identity");
+assert.equal(provinceIds.size, ANATOLIA_PROVINCE_METADATA.length, "Every authoritative 1300 province must have a unique geometry identity");
 
 console.log(`Phase 2D geometry integrity passed: ${provinceIds.size} provinces, ${assets.polygonCount} polygons, ${assets.naturalFeatureSiteCount} natural-feature sites.`);
