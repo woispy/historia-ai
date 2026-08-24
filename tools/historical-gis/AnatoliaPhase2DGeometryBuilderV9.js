@@ -18,9 +18,9 @@ const COAST_TOLERANCE = 0.055;
 const ANCHOR_COAST_TOLERANCE = 100;
 const SAMPLE_STEP = 0.06;
 const MAINLAND_MIN_AREA = 5;
-const MAX_AREA_RATIO = 3.8;
-const MAX_WEIGHT_ITERATIONS = 48;
-const MAX_WEIGHT_STEP = 3.0;
+const MAX_AREA_RATIO = 4.2;
+const MAX_WEIGHT_ITERATIONS = 24;
+const MAX_WEIGHT_STEP = 1.0;
 
 const rawAnchor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id]?.anchor ?? item.centroid;
 
@@ -223,7 +223,7 @@ function solveWeights(sites) {
     if (!oversized.length) return { weights, partition, iterations: iteration };
     for (const item of oversized) {
       const ratio = item.area / medianArea;
-      const step = Math.min(MAX_WEIGHT_STEP, Math.max(0.15, (ratio - MAX_AREA_RATIO) * 1.15));
+      const step = Math.min(MAX_WEIGHT_STEP, Math.max(0.15, (ratio - MAX_AREA_RATIO) * 1.0));
       weights[item.id] -= step;
     }
     partition = buildPartition(sites, weights);
