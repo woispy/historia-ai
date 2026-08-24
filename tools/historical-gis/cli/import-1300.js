@@ -95,75 +95,69 @@ for (const geometry of phase2D.geometries) {
 
   assetIds.add(provinceId);
   provinces.push(province);
-}
-for (const geometry of phase2D.geometries) {
-  const provinceId = geometry.identity.provinceId ?? geometry.identity.id;
-  if (assetIds.has(provinceId) === false) throw new Error(`Phase 2D geometry has no matching province asset: ${provinceId}`);
-  geometries.push(geometry);
+  geometries.push({
+    ...geometry,
+    identity: {
+      ...(geometry.identity ?? {}),
+      id: provinceId,
+      provinceId,
+    },
+  });
 }
 
 for (const region of sourceRegionsOutsidePhase2D) {
   const provinceAsset = buildHistoricalProvinceAsset(region);
   const rawGeometryAsset = buildHistoricalGeometryAsset(region);
   const provinceId = provinceAsset.identity.id;
+  const geometryId = rawGeometryAsset.identity?.id ?? provinceId;
 
   if (assetIds.has(provinceId)) throw new Error(`Duplicate generated historical GIS asset id: ${provinceId}`);
-
-  // Province identity is canonical at the runtime boundary. Preserve the
-  // source-derived geometry payload, but repair a missing geometry identity
-  // from the already-created province asset instead of allowing an anonymous
-  // geometry into the consolidated runtime.
-  const geometryAsset = rawGeometryAsset.identity?.id
-    ? rawGeometryAsset
-    : {
-      ...rawGeometryAsset,
-      identity: {
-        id: provinceId,
-        provinceId,
-      },
-    };
-  const geometryId = geometryAsset.identity?.id;
-
-  if (!geometryId) throw new Error(`Source-derived geometry has no canonical identity: ${provinceId}`);
   if (geometryId !== provinceId) throw new Error(`Province/geometry asset identity mismatch: ${provinceId} vs ${geometryId}`);
 
   assetIds.add(provinceId);
   provinces.push(provinceAsset);
-  geometries.push(geometryAsset);
+  geometries.push({
+    ...rawGeometryAsset,
+    identity: {
+      ...(rawGeometryAsset.identity ?? {}),
+      id: provinceId,
+      provinceId,
+    },
+  });
 }
 
 const polygonCount = geometries.reduce((total, geometry) => total + geometry.polygons.length, 0);
 await fs.writeFile(runtimePath, `${JSON.stringify({
-  schemaVersion: 3,
-  assetType: "historical-runtime",
-  historicalDate: "1300-01-01",
-  source: {
-    provider: "historical-basemaps",
-    dataset: "world_1300.geojson",
-    projection: "EPSG:4326",
-    sourceFeatureCount: regions.length,
-    regionalOverlay: {
-      status: "research-only",
-      id: "anatolia-byzantium-1300",
-      note: "The former broad political overlay is retained as research metadata. Phase 2D replaces the coarse Anatolia source-province presentation with a deterministic 38-province cartographic geometry layer; the rest of the world remains source-derived.",
-    },
-    phase2D: {
-      status: "runtime",
-      dataset: phase2D.dataset,
-      geometryVersion: phase2D.geometryVersion,
-      provinceCount: phase2D.provinceCount,
-      siteCount: phase2D.siteCount,
-      polygonCount: phase2D.polygonCount,
-      sourceFeatureCountReplaced: regions.length - sourceRegionsOutsidePhase2D.length,
-    },
-  },
-  counts: {
-    provinces: provinces.length,
-    geometries: geometries.length,
-    polygons: polygonCount,
-  },
-  provinces,
-  geometries,
+schemaVersion: 3,
+assetType: "historical-runtime",
+historicalDate: "1300-01-01",
+source: {
+provider: "historical-basemaps",
+dataset: "world_1300.geojson",
+projection: "EPSG:4326",
+sourceFeatureCount: regions.length,
+regionalOverlay: {
+status: "research-only",
+id: "anatolia-byzantium-1300",
+note: "The former broad political overlay is retained as research metadata. Phase 2D replaces the coarse Anatolia source-province presentation with a deterministic 38-province cartographic geometry layer; the rest of the world remains source-derived.",
+},
+phase2D: {
+status: "runtime",
+dataset: phase2D.dataset,
+geometryVersion: phase2D.geometryVersion,
+provinceCount: phase2D.provinceCount,
+siteCount: phase2D.siteCount,
+polygonCount: phase2D.polygonCount,
+sourceFeatureCountReplaced: regions.length - sourceRegionsOutsidePhase2D.length,
+},
+},
+counts: {
+provinces: provinces.length,
+geometries: geometries.length,
+polygons: polygonCount,
+},
+provinces,
+geometries,
 }, null, 2)}\n`, "utf8");
 
 console.log(`Imported ${regions.length} historical GIS features for 1300.`);
