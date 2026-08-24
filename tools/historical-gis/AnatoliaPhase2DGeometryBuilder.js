@@ -116,16 +116,17 @@ function pointInPolygon(point, polygon) {
   return inside;
 }
 
-function pointOnLakeBoundary(lake, point) {
-  const ring = lake.coordinates;
-  if (!Array.isArray(ring) || ring.length < 2) return false;
-  for (let index = 0; index < ring.length; index += 1) {
-    const start = ring[index];
-    const end = ring[(index + 1) % ring.length];
-    const projected = pointOnSegmentProjection(point, start, end);
-    if (Math.hypot(projected[0] - point[0], projected[1] - point[1]) <= GEOMETRY_EPS) return true;
+function pointOnPolygonBoundary(point, polygon, tolerance = GEOMETRY_EPS) {
+  if (!Array.isArray(polygon) || polygon.length < 2) return false;
+  for (let index = 0; index < polygon.length; index += 1) {
+    const projected = pointOnSegmentProjection(point, polygon[index], polygon[(index + 1) % polygon.length]);
+    if (Math.hypot(projected[0] - point[0], projected[1] - point[1]) <= tolerance) return true;
   }
   return false;
+}
+
+function pointOnLakeBoundary(lake, point) {
+  return pointOnPolygonBoundary(point, lake.coordinates);
 }
 
 function lakeContainsPoint(lake, point) {
@@ -182,10 +183,17 @@ function segmentLakeIntersections(start, end, lakeRing) {
   return intersections.filter((item, index, all) => index === 0 || Math.abs(item.t - all[index - 1].t) > GEOMETRY_EPS);
 }
 
-function pathStaysInsideOuterRing(path, outerRing, lake) {
+function pathStaysInsideOuterRing(path, outerRing, lake, protectedRings = []) {
   if (!path.length) return false;
+  const validInSource = (point) => pointInPolygon(point, outerRing) || pointOnLakeBoundary(lake, point);
+  const outsideNeighbors = (point) => protectedRings.every((ring) => (
+    ring === outerRing
+      || !pointInPolygon(point, ring)
+      || pointOnPolygonBoundary(point, ring)
+  ));
+
   for (let index = 0; index < path.length; index += 1) {
-    if (!pointInPolygon(path[index], outerRing) && !pointOnLakeBoundary(lake, path[index])) return false;
+    if (!validInSource(path[index]) || !outsideNeighbors(path[index])) return false;
     if (index === 0) continue;
     const start = path[index - 1];
     const end = path[index];
@@ -194,13 +202,13 @@ function pathStaysInsideOuterRing(path, outerRing, lake) {
         start[0] + (end[0] - start[0]) * fraction,
         start[1] + (end[1] - start[1]) * fraction,
       ];
-      if (!pointInPolygon(sample, outerRing) && !pointOnLakeBoundary(lake, sample)) return false;
+      if (!validInSource(sample) || !outsideNeighbors(sample)) return false;
     }
   }
   return true;
 }
 
-function lakeBoundaryPath(lake, fromPoint, toPoint, outerRing) {
+function lakeBoundaryPath(lake, fromPoint, toPoint, outerRing, protectedRings = []) {
   const lakeRing = lake.coordinates;
   let fromIndex = 0;
   let toIndex = 0;
@@ -228,9 +236,9 @@ function lakeBoundaryPath(lake, fromPoint, toPoint, outerRing) {
   };
 
   const candidates = [buildPath(1), buildPath(-1)];
-  const valid = candidates.filter((path) => pathStaysInsideOuterRing(path, outerRing, lake));
+  const valid = candidates.filter((path) => pathStaysInsideOuterRing(path, outerRing, lake, protectedRings));
   if (!valid.length) {
-    throw new Error(`Phase 2D lake boundary detour leaves its source province outer ring: ${lake.name ?? "unnamed lake"}.`);
+    throw new Error(`Phase 2D lake boundary detour leaves its source province outer ring or enters a neighboring province: ${lake.name ?? "unnamed lake"}.`);
   }
   return valid.sort((left, right) => {
     const length = (path) => path.slice(1).reduce((sum, point, index) => {
@@ -241,7 +249,7 @@ function lakeBoundaryPath(lake, fromPoint, toPoint, outerRing) {
   })[0];
 }
 
-function waterSafeOuterRing(outerRing) {
+function waterSafeOuterRing(outerRing, protectedRings = []) {
   let ring = outerRing.slice();
   for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) {
     if (!Array.isArray(lake.coordinates) || lake.coordinates.length < 3) continue;
@@ -259,7 +267,7 @@ function waterSafeOuterRing(outerRing) {
         next.push(start);
         const first = intersects[0];
         const last = intersects[intersects.length - 1];
-        const detour = lakeBoundaryPath(lake, first.point, last.point, outerRing);
+        const detour = lakeBoundaryPath(lake, first.point, last.point, outerRing, protectedRings);
         next.push(...detour.slice(0, -1));
         next.push(last.point);
       } else {
@@ -271,14 +279,14 @@ function waterSafeOuterRing(outerRing) {
   return ring;
 }
 
-function normalizeGeometryPhysicalBoundary(geometry) {
+function normalizeGeometryPhysicalBoundary(geometry, protectedRings = []) {
   const coordinates = geometry.geometry?.coordinates;
   if (!Array.isArray(coordinates) || coordinates.length === 0 || !Array.isArray(coordinates[0])) {
     throw new Error(`Phase 2D geometry has invalid polygon coordinates: ${geometry.identity?.provinceId ?? "unknown"}`);
   }
 
   const normalizedOuterRing = normalizeOuterRing(coordinates[0]);
-  const waterSafeRing = waterSafeOuterRing(normalizedOuterRing);
+  const waterSafeRing = waterSafeOuterRing(normalizedOuterRing, protectedRings);
   const existingHoles = Array.isArray(geometry.holes) ? geometry.holes : [];
   const holes = existingHoles.length > 0
     ? existingHoles
@@ -365,16 +373,18 @@ export function buildAnatoliaPhase2DAssets(regions) {
     throw new Error(`Phase 2D cartographic site count is invalid: ${siteCount}; expected at least ${expectedSiteCount}.`);
   }
 
-  const geometries = assets.geometries
-    .map((geometry) => ({
-      ...geometry,
-      identity: {
-        ...(geometry.identity ?? {}),
-        id: geometry.identity?.provinceId ?? geometry.identity?.id,
-        provinceId: geometry.identity?.provinceId ?? geometry.identity?.id,
-      },
-    }))
-    .map(normalizeGeometryPhysicalBoundary);
+  const baseGeometries = assets.geometries.map((geometry) => ({
+    ...geometry,
+    identity: {
+      ...(geometry.identity ?? {}),
+      id: geometry.identity?.provinceId ?? geometry.identity?.id,
+      provinceId: geometry.identity?.provinceId ?? geometry.identity?.id,
+    },
+  }));
+  const protectedRings = baseGeometries
+    .map((geometry) => geometry.geometry?.coordinates?.[0])
+    .filter((ring) => Array.isArray(ring) && ring.length >= 3);
+  const geometries = baseGeometries.map((geometry) => normalizeGeometryPhysicalBoundary(geometry, protectedRings));
   const provinces = buildProvinceAssets(geometries);
   const polygonCount = geometries.reduce(
     (total, geometry) => total + geometry.polygons.length,
