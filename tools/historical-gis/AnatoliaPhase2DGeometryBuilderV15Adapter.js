@@ -33,14 +33,7 @@ function isStrictlyPhysicalPath(polygon) {
   return true;
 }
 
-function signedArea(polygon) { let sum = 0; for (let index = 0; index < polygon.length; index += 1) { const current = polygon[index]; const next = polygon[(index + 1) % polygon.length]; sum += current[0] * next[1] - next[0] * current[1]; } return sum / 2; }
 function edgeCross(start, end, point) { return (end[0] - start[0]) * (point[1] - start[1]) - (end[1] - start[1]) * (point[0] - start[0]); }
-function intersectLines(a, b, c, d) {
-  const r = [b[0] - a[0], b[1] - a[1]]; const s = [d[0] - c[0], d[1] - c[1]];
-  const denominator = r[0] * s[1] - r[1] * s[0]; if (Math.abs(denominator) <= PARTITION_CLIP_EPS) return null;
-  const q = [c[0] - a[0], c[1] - a[1]]; const t = (q[0] * s[1] - q[1] * s[0]) / denominator;
-  return [a[0] + r[0] * t, a[1] + r[1] * t];
-}
 function pointInPolygon(point, polygon) {
   if (!Array.isArray(polygon) || polygon.length < 3) return false;
   let inside = false;
