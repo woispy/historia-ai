@@ -17,7 +17,7 @@ const MAX_BOUNDARY_NUMERICAL_DRIFT = 0.0001;
 const DETERMINISTIC_WEIGHT_ITERATIONS = 24;
 const GEOMETRY_EPS = 1e-8;
 const MIN_PROVINCE_AREA = 0.00005;
-const PHYSICAL_EDGE_SAMPLE_COUNT = 32;
+const PHYSICAL_EDGE_SAMPLE_COUNT = 256;
 
 function boundarySiteCount(polygon) {
   if (!Array.isArray(polygon) || polygon.length < 2) return 0;
