@@ -60,10 +60,6 @@ function cross(a, b, point) {
     - (b[1] - a[1]) * (point[0] - a[0]);
 }
 
-function inLake(point) {
-  return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygon(point, lake.coordinates));
-}
-
 function addBoundarySites(sites, polygon, kind) {
   for (let index = 0; index < polygon.length - 1; index += 1) {
     const start = polygon[index];
