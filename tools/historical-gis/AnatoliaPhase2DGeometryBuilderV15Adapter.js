@@ -38,8 +38,7 @@ function pointInPolygon(point, polygon) {
   if (!Array.isArray(polygon) || polygon.length < 3) return false;
   let inside = false;
   for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index++) {
-    const current = polygon[index]; const before = polygon[previous];
-    const cross = edgeCross(before, current, point);
+    const current = polygon[index]; const before = polygon[previous]; const cross = edgeCross(before, current, point);
     if (Math.abs(cross) <= PARTITION_CLIP_EPS
       && point[0] >= Math.min(before[0], current[0]) - PARTITION_CLIP_EPS
       && point[0] <= Math.max(before[0], current[0]) + PARTITION_CLIP_EPS
@@ -63,8 +62,35 @@ function dedupePolygon(polygon) {
   }
   return result;
 }
-function polygonSignature(polygon) {
-  return JSON.stringify(polygon.map(([longitude, latitude]) => [Number(longitude.toFixed(10)), Number(latitude.toFixed(10))]));
+function polygonSignature(polygon) { return JSON.stringify(polygon.map(([longitude, latitude]) => [Number(longitude.toFixed(10)), Number(latitude.toFixed(10))])); }
+function signedArea(polygon) {
+  let sum = 0;
+  for (let index = 0; index < polygon.length; index += 1) {
+    const current = polygon[index]; const next = polygon[(index + 1) % polygon.length];
+    sum += current[0] * next[1] - next[0] * current[1];
+  }
+  return sum / 2;
+}
+function clipConvexPolygon(polygon, cell) {
+  if (!cell) return polygon;
+  let output = dedupePolygon(polygon);
+  const clip = signedArea(cell) < 0 ? [...cell].reverse() : cell;
+  for (let edgeIndex = 0; edgeIndex < clip.length; edgeIndex += 1) {
+    if (output.length < 3) return [];
+    const start = clip[edgeIndex]; const end = clip[(edgeIndex + 1) % clip.length]; const input = output; output = [];
+    const inside = (point) => edgeCross(start, end, point) >= -PARTITION_CLIP_EPS;
+    for (let index = 0; index < input.length; index += 1) {
+      const current = input[index]; const next = input[(index + 1) % input.length]; const currentInside = inside(current); const nextInside = inside(next);
+      if (currentInside && nextInside) output.push(next);
+      else if (currentInside !== nextInside) {
+        const currentValue = edgeCross(start, end, current); const nextValue = edgeCross(start, end, next); const denominator = currentValue - nextValue;
+        const fraction = Math.abs(denominator) <= PARTITION_CLIP_EPS ? 0 : currentValue / denominator;
+        output.push([current[0] + (next[0] - current[0]) * fraction, current[1] + (next[1] - current[1]) * fraction]);
+        if (!currentInside && nextInside) output.push(next);
+      }
+    }
+  }
+  return dedupePolygon(output);
 }
 function repairPhysicalPolygonToFixedPoint(polygon, provinceId, containmentPolygon) {
   if (isStrictlyPhysicalPath(polygon) && polygonInsideCell(polygon, containmentPolygon)) return polygon;
@@ -74,22 +100,27 @@ function repairPhysicalPolygonToFixedPoint(polygon, provinceId, containmentPolyg
     if (currentSignature === previousSignature) break;
     previousSignature = currentSignature;
     try {
-      const repaired = pass === 1 || !containmentPolygon
-        ? repairPhysicalPolygon(current)
-        : repairPhysicalPolygon(current, { containmentPolygon });
+      const repaired = pass === 1 || !containmentPolygon ? repairPhysicalPolygon(current) : repairPhysicalPolygon(current, { containmentPolygon });
       const normalized = dedupePolygon(repaired);
       if (normalized.length < 3) throw new Error("physical repair returned fewer than three distinct vertices");
       if (isStrictlyPhysicalPath(normalized) && polygonInsideCell(normalized, containmentPolygon)) return normalized;
-      if (!isStrictlyPhysicalPath(normalized)) {
-        current = normalized;
+      if (containmentPolygon && isStrictlyPhysicalPath(normalized)) {
+        const clipped = clipConvexPolygon(normalized, containmentPolygon);
+        if (clipped.length >= 3 && isStrictlyPhysicalPath(clipped) && polygonInsideCell(clipped, containmentPolygon)) return clipped;
+        current = clipped.length >= 3 ? clipped : normalized;
         continue;
       }
-      if (containmentPolygon) {
-        current = normalized;
-        continue;
-      }
-      throw new Error("physical repair returned geometry outside the authoritative source partition");
-    } catch (error) { lastError = error; break; }
+      current = normalized;
+    } catch (error) {
+      lastError = error;
+      if (!containmentPolygon) break;
+      try {
+        const unconstrained = dedupePolygon(repairPhysicalPolygon(current));
+        const clipped = clipConvexPolygon(unconstrained, containmentPolygon);
+        if (clipped.length >= 3 && isStrictlyPhysicalPath(clipped) && polygonInsideCell(clipped, containmentPolygon)) return clipped;
+        if (clipped.length >= 3) current = clipped;
+      } catch (fallbackError) { lastError = fallbackError; break; }
+    }
   }
   const detail = Array.isArray(current) ? polygonSignature(current) : "unavailable";
   throw new Error(`Phase 2D physical repair failed for ${provinceId}: ${lastError?.message ?? "did not converge"}; polygon=${detail}`);
