@@ -7,7 +7,7 @@ import {
   resolvePhysicalGeometryBoundaryPoint,
   resolveGeometryAnchor,
 } from "./recovery/physical-land-authority.mjs";
-import { repairPhysicalPolygon } from "./recovery/physical-edge-repair.mjs";
+import { repairPhysicalPolygon } from "./recovery/physical-edge-repair-safe.mjs";
 import { ANATOLIA_PROVINCE_REFINEMENTS } from "../../src/map/data/AnatoliaProvinceRefinement.js";
 
 const STRICT_PHYSICAL_EDGE_SAMPLE_COUNT = 64;
