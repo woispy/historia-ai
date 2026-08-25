@@ -35,15 +35,55 @@ function pointInOrOnPolygon(point, polygon) { if (!Array.isArray(polygon) || pol
 function pathIsInsideSource(path, sourcePolygon, boundaryKind = "land") { if (!sourcePolygon) return true; if (boundaryKind === "lake") return path.every((point) => pointInOrOnPolygon(point, sourcePolygon) || sourcePolygon.some((start, index) => pointToSegmentDistance(point, start, sourcePolygon[(index + 1) % sourcePolygon.length]) <= SOURCE_CELL_BUFFER)); return path.every((point) => pointInOrOnPolygon(point, sourcePolygon)); }
 function pathIsPhysical(path) { if (!Array.isArray(path) || path.length < 2) return false; for (let index = 0; index < path.length - 1; index += 1) { const start = path[index]; const end = path[index + 1]; const segments = Math.max(16, Math.ceil(distance(start, end) / 0.005)); for (let sampleIndex = 1; sampleIndex < segments; sampleIndex += 1) if (!isPhysicalPoint(sample(start, end, sampleIndex / segments))) return false; } return true; }
 function pathRespectsSourceSide(path, sourceStart, sourceEnd, interiorSign) { return !interiorSign || path.every((point) => edgeCross(sourceStart, sourceEnd, point) * interiorSign >= -INTERIOR_SIDE_TOLERANCE); }
-function boundaryArcCandidates(from, to, sourceStart, sourceEnd, interiorSign, sourcePolygon) { if (!from || !to || from.boundary !== to.boundary) return []; const boundary = from.boundary; const count = boundary.length; const forward = [from.point]; let index = (from.segmentIndex + 1) % count; let guard = 0; while (index !== (to.segmentIndex + 1) % count && guard <= count && forward.length <= MAX_ARC_VERTICES) { forward.push(boundary[index]); index = (index + 1) % count; guard += 1; } forward.push(to.point); const backward = [from.point]; index = from.segmentIndex; guard = 0; while (index !== to.segmentIndex && guard <= count && backward.length <= MAX_ARC_VERTICES) { backward.push(boundary[index]); index = (index - 1 + count) % count; guard += 1; } backward.push(to.point); const sourceLength = Math.max(distance(sourceStart, sourceEnd), GEOMETRY_EPS); return [forward, backward].filter((path) => path.length <= MAX_ARC_VERTICES).filter(pathIsPhysical).filter((path) => pathIsInsideSource(path, sourcePolygon, from.kind)).filter((path) => from.kind === "lake" || pathLength(path) <= sourceLength * MAX_LAND_ARC_LENGTH_RATIO).filter((path) => from.kind === "lake" || pathRespectsSourceSide(path, sourceStart, sourceEnd, interiorSign)); }
+function boundaryArcCandidates(from, to, sourceStart, sourceEnd, interiorSign, sourcePolygon) {
+  if (!from || !to) return [];
+  const sourceLength = Math.max(distance(sourceStart, sourceEnd), GEOMETRY_EPS);
+  const direct = [from.point, to.point];
+  const directCandidates = from.kind === to.kind
+    && pathIsPhysical(direct)
+    && pathIsInsideSource(direct, sourcePolygon, from.kind)
+    && (from.kind === "lake" || pathLength(direct) <= sourceLength * MAX_LAND_ARC_LENGTH_RATIO)
+    && (from.kind === "lake" || pathRespectsSourceSide(direct, sourceStart, sourceEnd, interiorSign))
+    ? [direct] : [];
+  if (from.boundary !== to.boundary) return directCandidates;
+
+  const boundary = from.boundary;
+  const count = boundary.length;
+  const forward = [from.point];
+  let index = (from.segmentIndex + 1) % count;
+  let guard = 0;
+  while (index !== (to.segmentIndex + 1) % count && guard <= count && forward.length <= MAX_ARC_VERTICES) {
+    forward.push(boundary[index]);
+    index = (index + 1) % count;
+    guard += 1;
+  }
+  forward.push(to.point);
+
+  const backward = [from.point];
+  index = from.segmentIndex;
+  guard = 0;
+  while (index !== to.segmentIndex && guard <= count && backward.length <= MAX_ARC_VERTICES) {
+    backward.push(boundary[index]);
+    index = (index - 1 + count) % count;
+    guard += 1;
+  }
+  backward.push(to.point);
+
+  return [...directCandidates, forward, backward]
+    .filter((path) => path.length <= MAX_ARC_VERTICES)
+    .filter(pathIsPhysical)
+    .filter((path) => pathIsInsideSource(path, sourcePolygon, from.kind))
+    .filter((path) => from.kind === "lake" || pathLength(path) <= sourceLength * MAX_LAND_ARC_LENGTH_RATIO)
+    .filter((path) => from.kind === "lake" || pathRespectsSourceSide(path, sourceStart, sourceEnd, interiorSign));
+}
 function pathLength(path) { let total = 0; for (let index = 1; index < path.length; index += 1) total += distance(path[index - 1], path[index]); return total; }
 function pathDeviation(path, sourceStart, sourceEnd) { let total = 0; let maximum = 0; for (const point of path) { const value = pointToSegmentDistance(point, sourceStart, sourceEnd); total += value; maximum = Math.max(maximum, value); } return total / path.length + maximum * 0.25; }
 function rankedBoundaryArcs(from, to, sourceStart, sourceEnd, interiorSign, sourcePolygon) { return boundaryArcCandidates(from, to, sourceStart, sourceEnd, interiorSign, sourcePolygon).sort((a, b) => { const deviation = pathDeviation(a, sourceStart, sourceEnd) - pathDeviation(b, sourceStart, sourceEnd); return Math.abs(deviation) > GEOMETRY_EPS ? deviation : pathLength(a) - pathLength(b); }); }
 function refineTransition(start, end, leftFraction, rightFraction) { let left = leftFraction; let right = rightFraction; const leftValid = isPhysicalPoint(sample(start, end, left)); for (let iteration = 0; iteration < BINARY_ITERATIONS; iteration += 1) { const midpoint = (left + right) / 2; if (isPhysicalPoint(sample(start, end, midpoint)) === leftValid) left = midpoint; else right = midpoint; } return (left + right) / 2; }
 function traceTransitions(start, end) { const states = []; for (let index = 0; index <= EDGE_SAMPLES; index += 1) { const fraction = index / EDGE_SAMPLES; states.push({ fraction, valid: isPhysicalPoint(sample(start, end, fraction)) }); } const transitions = []; for (let index = 0; index < states.length - 1; index += 1) if (states[index].valid !== states[index + 1].valid) transitions.push({ fraction: refineTransition(start, end, states[index].fraction, states[index + 1].fraction), entersInvalid: states[index].valid && !states[index + 1].valid }); return transitions; }
 function appendUnique(target, points) { for (const point of points) { const previous = target[target.length - 1]; if (!previous || distance(previous, point) > GEOMETRY_EPS) target.push([...point]); } }
-function boundaryPairCandidates(crossings, entryFraction, exitFraction) { const candidates = []; for (const entry of crossings) { if (Math.abs(entry.fraction - entryFraction) > TRANSITION_MATCH_TOLERANCE) continue; for (const exit of crossings) { if (Math.abs(exit.fraction - exitFraction) > TRANSITION_MATCH_TOLERANCE) continue; if (entry.boundary !== exit.boundary || entry.kind !== exit.kind || entry.fraction >= exit.fraction) continue; candidates.push({ entry, exit }); } } return candidates.sort((a, b) => (Math.abs(a.entry.fraction - entryFraction) + Math.abs(a.exit.fraction - exitFraction)) - (Math.abs(b.entry.fraction - entryFraction) + Math.abs(b.exit.fraction - exitFraction))); }
-function fallbackBoundaryPair(start, end, entryFraction, exitFraction) { const entryPoint = sample(start, end, entryFraction); const exitPoint = sample(start, end, exitFraction); const entryCandidates = boundaryCandidates(entryPoint).slice(0, 32); const exitCandidates = boundaryCandidates(exitPoint).slice(0, 32); const pairs = []; for (const entry of entryCandidates) for (const exit of exitCandidates) if (entry.boundary === exit.boundary && entry.kind === exit.kind) pairs.push({ entry, exit }); return pairs.sort((a, b) => (a.entry.distance + a.exit.distance) - (b.entry.distance + b.exit.distance)); }
+function boundaryPairCandidates(crossings, entryFraction, exitFraction) { const candidates = []; for (const entry of crossings) { if (Math.abs(entry.fraction - entryFraction) > TRANSITION_MATCH_TOLERANCE) continue; for (const exit of crossings) { if (Math.abs(exit.fraction - exitFraction) > TRANSITION_MATCH_TOLERANCE) continue; if (entry.kind !== exit.kind || entry.fraction >= exit.fraction) continue; candidates.push({ entry, exit }); } } return candidates.sort((a, b) => (Math.abs(a.entry.fraction - entryFraction) + Math.abs(a.exit.fraction - exitFraction)) - (Math.abs(b.entry.fraction - entryFraction) + Math.abs(b.exit.fraction))); }
+function fallbackBoundaryPair(start, end, entryFraction, exitFraction) { const entryPoint = sample(start, end, entryFraction); const exitPoint = sample(start, end, exitFraction); const entryCandidates = boundaryCandidates(entryPoint).slice(0, 32); const exitCandidates = boundaryCandidates(exitPoint).slice(0, 32); const pairs = []; for (const entry of entryCandidates) for (const exit of exitCandidates) if (entry.kind === exit.kind) pairs.push({ entry, exit }); return pairs.sort((a, b) => (a.entry.distance + a.exit.distance) - (b.entry.distance + b.exit.distance)); }
 function repairInvalidIntervalsCandidates(start, end, interiorSign, sourcePolygon) { const transitions = traceTransitions(start, end); if (!transitions.length) return pathIsPhysical([start, end]) ? [[start, end]] : []; const crossings = boundaryCrossings(start, end); let partials = [{ path: [start], cursorFraction: 0 }]; for (let index = 0; index < transitions.length; index += 2) { const entry = transitions[index]; const exit = transitions[index + 1]; if (!entry?.entersInvalid || !exit || exit.entersInvalid) return []; const pairs = boundaryPairCandidates(crossings, entry.fraction, exit.fraction); const candidatePairs = pairs.length ? pairs : fallbackBoundaryPair(start, end, entry.fraction, exit.fraction); if (!candidatePairs.length) return []; const next = []; for (const partial of partials) { const cursor = sample(start, end, partial.cursorFraction); for (const pair of candidatePairs.slice(0, 16)) { if (!pathIsPhysical([cursor, pair.entry.point]) || !pathIsInsideSource([pair.entry.point], sourcePolygon, pair.entry.kind)) continue; const shorelines = rankedBoundaryArcs(pair.entry, pair.exit, start, end, interiorSign, sourcePolygon).slice(0, 4); for (const shoreline of shorelines) { const path = [...partial.path]; appendUnique(path, [pair.entry.point]); appendUnique(path, shoreline.slice(1)); next.push({ path, cursorFraction: pair.exit.fraction }); } } } partials = next.filter((candidate) => pathIsPhysical(candidate.path) && pathIsInsideSource(candidate.path, sourcePolygon)).sort((a, b) => pathDeviation(a.path, start, end) - pathDeviation(b.path, start, end)).slice(0, BEAM_WIDTH); if (!partials.length) return []; } return partials.map((partial) => { const path = [...partial.path]; const cursor = sample(start, end, partial.cursorFraction); if (!pathIsPhysical([cursor, end]) || !pathIsInsideSource([cursor, end], sourcePolygon)) return null; appendUnique(path, [cursor, end]); return pathIsPhysical(path) && pathIsInsideSource(path, sourcePolygon) ? path : null; }).filter(Boolean); }
 function normalizeEndpoint(point) { if (isPhysicalPoint(point)) return [...point]; const resolved = resolvePhysicalGeometryBoundaryPointStrict(point); if (resolved && isPhysicalPoint(resolved)) return [...resolved]; const candidate = boundaryCandidates(point)[0]; return candidate ? [...candidate.point] : null; }
 function signedArea(polygon) { let sum = 0; for (let index = 0; index < polygon.length; index += 1) { const current = polygon[index]; const next = polygon[(index + 1) % polygon.length]; sum += current[0] * next[1] - next[0] * current[1]; } return sum / 2; }
