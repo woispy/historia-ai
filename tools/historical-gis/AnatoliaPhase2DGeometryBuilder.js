@@ -108,12 +108,13 @@ function segmentIntersectionFraction(start, end, boundaryStart, boundaryEnd) {
 
 function boundaryIntersections(start, end, boundaries) {
   const intersections = [];
-  for (const polygon of boundaries) {
+  for (let polygonIndex = 0; polygonIndex < boundaries.length; polygonIndex += 1) {
+    const polygon = boundaries[polygonIndex];
     for (let index = 0; index < polygon.length - 1; index += 1) {
       const fraction = segmentIntersectionFraction(start, end, polygon[index], polygon[index + 1]);
       if (fraction === null) continue;
       if (intersections.every((existing) => Math.abs(existing.fraction - fraction) > SEGMENT_INTERSECTION_EPS)) {
-        intersections.push({ fraction, point: physicalEdgeSample(start, end, fraction) });
+        intersections.push({ fraction, point: physicalEdgeSample(start, end, fraction), polygon, polygonIndex, segmentIndex: index });
       }
     }
   }
@@ -185,14 +186,12 @@ function locatePhysicalTransition(start, end, validFraction, invalidFraction) {
   return (valid + invalid) / 2;
 }
 
-function shorelineArc(lake, fromCrossing, toCrossing) {
-  const ring = lake.coordinates;
+function shorelineArc(ring, fromCrossing, toCrossing) {
   const count = ring.length;
   const fromIndex = fromCrossing.segmentIndex;
   const toIndex = toCrossing.segmentIndex;
   const fromPoint = fromCrossing.point;
   const toPoint = toCrossing.point;
-
   const forward = [fromPoint];
   let index = (fromIndex + 1) % count;
   let guard = 0;
@@ -202,7 +201,6 @@ function shorelineArc(lake, fromCrossing, toCrossing) {
     guard += 1;
   }
   forward.push(toPoint);
-
   const backward = [fromPoint];
   index = fromIndex;
   guard = 0;
@@ -212,7 +210,6 @@ function shorelineArc(lake, fromCrossing, toCrossing) {
     guard += 1;
   }
   backward.push(toPoint);
-
   const length = (path) => path.reduce((total, point, pointIndex) => pointIndex === 0 ? total : total + Math.hypot(point[0] - path[pointIndex - 1][0], point[1] - path[pointIndex - 1][1]), 0);
   return length(forward) <= length(backward) ? forward : backward;
 }
@@ -226,7 +223,6 @@ function appendUniquePath(target, path) {
 
 function repairPhysicalEdge(start, end) {
   if (Math.hypot(end[0] - start[0], end[1] - start[1]) <= GEOMETRY_EPS) return [start, end];
-
   const samples = [{ fraction: 0, point: start, valid: isValidPhysicalEdgePoint(start) }];
   for (let index = 1; index < PHYSICAL_EDGE_SAMPLE_COUNT; index += 1) {
     const fraction = index / PHYSICAL_EDGE_SAMPLE_COUNT;
@@ -234,7 +230,6 @@ function repairPhysicalEdge(start, end) {
     samples.push({ fraction, point, valid: isValidPhysicalEdgePoint(point) });
   }
   samples.push({ fraction: 1, point: end, valid: isValidPhysicalEdgePoint(end) });
-
   if (samples.every((sample) => sample.valid)) return [start, end];
   if (!samples[0].valid || !samples[samples.length - 1].valid) {
     throw new Error(`Phase 2D geometry edge endpoint is not on physical land: ${start.join(",")} -> ${end.join(",")}`);
@@ -253,6 +248,8 @@ function repairPhysicalEdge(start, end) {
 
   const repaired = [start];
   const lakeCrossings = lakeBoundaryCrossings(start, end);
+  const landCrossings = boundaryIntersections(start, end, PHYSICAL_LAND_BOUNDARIES);
+
   for (let index = 0; index < transitions.length; index += 1) {
     const transition = transitions[index];
     const next = transitions[index + 1];
@@ -262,28 +259,29 @@ function repairPhysicalEdge(start, end) {
     }
     appendUniquePath(repaired, [boundary]);
 
-    if (transition.fromValid === false) continue;
-    if (!next || next.fromValid !== false) continue;
+    if (transition.fromValid === false || !next || next.fromValid !== false) continue;
 
-    const entry = lakeCrossings.reduce((best, crossing) => {
-      if (crossing.fraction <= transition.fraction + SEGMENT_INTERSECTION_EPS) return best;
-      if (crossing.fraction >= next.fraction - SEGMENT_INTERSECTION_EPS) return best;
-      if (!best || Math.abs(crossing.fraction - transition.fraction) < Math.abs(best.fraction - transition.fraction)) return crossing;
-      return best;
-    }, null);
-    const exit = lakeCrossings.reduce((best, crossing) => {
+    const findCrossing = (crossings, targetFraction) => crossings.reduce((best, crossing) => {
       if (crossing.fraction <= transition.fraction + SEGMENT_INTERSECTION_EPS || crossing.fraction >= next.fraction - SEGMENT_INTERSECTION_EPS) return best;
-      if (!best || Math.abs(crossing.fraction - next.fraction) < Math.abs(best.fraction - next.fraction)) return crossing;
+      if (!best || Math.abs(crossing.fraction - targetFraction) < Math.abs(best.fraction - targetFraction)) return crossing;
       return best;
     }, null);
 
-    if (entry && exit && entry.lake === exit.lake) {
-      appendUniquePath(repaired, shorelineArc(entry.lake, entry, exit));
+    const lakeEntry = findCrossing(lakeCrossings, transition.fraction);
+    const lakeExit = findCrossing(lakeCrossings, next.fraction);
+    if (lakeEntry && lakeExit && lakeEntry.lake === lakeExit.lake) {
+      appendUniquePath(repaired, shorelineArc(lakeEntry.lake.coordinates, lakeEntry, lakeExit));
+      continue;
+    }
+
+    const landEntry = findCrossing(landCrossings, transition.fraction);
+    const landExit = findCrossing(landCrossings, next.fraction);
+    if (landEntry && landExit && landEntry.polygon === landExit.polygon) {
+      appendUniquePath(repaired, shorelineArc(landEntry.polygon, landEntry, landExit));
     }
   }
 
   appendUniquePath(repaired, [end]);
-
   for (let index = 0; index < repaired.length - 1; index += 1) {
     const segmentStart = repaired[index];
     const segmentEnd = repaired[index + 1];
