@@ -178,14 +178,21 @@ function chooseBoundaryPath(fromPoint, toPoint, originalStart, originalEnd, inte
   const fromCandidates = projectToBoundaryCandidates(fromPoint, originalStart, originalEnd, interiorSign);
   const toCandidates = projectToBoundaryCandidates(toPoint, originalStart, originalEnd, interiorSign);
   if (fromCandidates.length === 0 || toCandidates.length === 0) return null;
-  const pathIsAllowed = (path) => isValidPhysicalPath(path)
-    && path.every((point) => edgeCross(originalStart, originalEnd, point) * interiorSign >= -INTERIOR_SIDE_TOLERANCE);
+  const pathIsAllowed = (path, boundaryDescriptor = null) => {
+    if (!isValidPhysicalPath(path)) return false;
+    // An authoritative lake shoreline is a physical hole boundary. It may
+    // legitimately bow outside the original straight power-edge half-plane;
+    // forcing every shoreline vertex back into that half-plane was the source
+    // of false topology-repair rejection for cells intersecting lakes.
+    if (boundaryDescriptor?.kind === "lake") return true;
+    return path.every((point) => edgeCross(originalStart, originalEnd, point) * interiorSign >= -INTERIOR_SIDE_TOLERANCE);
+  };
   const candidates = [];
   for (const from of fromCandidates) {
     for (const to of toCandidates) {
       if (sameBoundary(from, to)) {
         for (const path of arcCandidates(from.boundary, from, to)) {
-          if (pathIsAllowed(path)) candidates.push(path);
+          if (pathIsAllowed(path, from)) candidates.push(path);
         }
       } else {
         const direct = [from.point, to.point];
@@ -206,10 +213,6 @@ function appendUnique(target, points) {
 }
 
 function resolveTransitionBoundary(point) {
-  // Preserve an exact transition that is already on the authoritative physical
-  // boundary. Re-projecting such a point to the nearest lake segment can move it
-  // off the source partition edge by a small amount and unnecessarily force a
-  // topology-changing recovery.
   if (isFinalPhysicalGeometryBoundaryPoint(point)) return [...point];
   const lake = nearestLakeBoundaryPoint(point);
   if (lake.point && lake.distance <= LAKE_SHORELINE_TRANSITION_TOLERANCE) return [...lake.point];
