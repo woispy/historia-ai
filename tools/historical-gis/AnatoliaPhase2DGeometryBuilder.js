@@ -106,31 +106,50 @@ function segmentIntersectionFraction(start, end, boundaryStart, boundaryEnd) {
   return Math.max(0, Math.min(1, t));
 }
 
-function lakeBoundaryIntersections(start, end) {
+function boundaryIntersections(start, end, boundaries) {
   const intersections = [];
-  for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) {
-    const ring = lake.coordinates;
-    if (!Array.isArray(ring) || ring.length < 2) continue;
-    for (let index = 0; index < ring.length; index += 1) {
-      const fraction = segmentIntersectionFraction(start, end, ring[index], ring[(index + 1) % ring.length]);
+  for (const polygon of boundaries) {
+    for (let index = 0; index < polygon.length - 1; index += 1) {
+      const fraction = segmentIntersectionFraction(start, end, polygon[index], polygon[index + 1]);
       if (fraction === null) continue;
-      const point = physicalEdgeSample(start, end, fraction);
-      if (!isValidPhysicalEdgePoint(point)) continue;
-      if (intersections.every((existing) => Math.abs(existing.fraction - fraction) > SEGMENT_INTERSECTION_EPS)) intersections.push({ fraction, point });
+      if (intersections.every((existing) => Math.abs(existing.fraction - fraction) > SEGMENT_INTERSECTION_EPS)) {
+        intersections.push({ fraction, point: physicalEdgeSample(start, end, fraction) });
+      }
     }
   }
   intersections.sort((left, right) => left.fraction - right.fraction);
   return intersections;
 }
 
+function lakeBoundaryIntersections(start, end) {
+  const boundaries = [];
+  for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) {
+    const ring = lake.coordinates;
+    if (!Array.isArray(ring) || ring.length < 2) continue;
+    boundaries.push([...ring, ring[0]]);
+  }
+  return boundaryIntersections(start, end, boundaries).filter(({ point }) => isFinalPhysicalGeometryBoundaryPoint(point));
+}
+
+function landBoundaryIntersections(start, end) {
+  return boundaryIntersections(start, end, PHYSICAL_LAND_BOUNDARIES).filter(({ point }) => {
+    if (isPhysicalLandPoint(point) || isFinalPhysicalGeometryBoundaryPoint(point)) return true;
+    const recovered = recoverNumericalBoundaryDrift(point);
+    return Boolean(recovered);
+  });
+}
+
 function resolvePhysicalEdgeBoundary(start, end, transitionFraction) {
-  const intersections = lakeBoundaryIntersections(start, end);
-  const intersection = intersections.reduce((best, candidate) => {
+  const candidates = [
+    ...lakeBoundaryIntersections(start, end),
+    ...landBoundaryIntersections(start, end),
+  ];
+  const intersection = candidates.reduce((best, candidate) => {
     if (!best || Math.abs(candidate.fraction - transitionFraction) < Math.abs(best.fraction - transitionFraction)) return candidate;
     return best;
   }, null);
   if (intersection && Math.abs(intersection.fraction - transitionFraction) <= (1 / PHYSICAL_EDGE_SAMPLE_COUNT) + 1e-6) {
-    const boundary = intersection.point.map((value) => Number(value.toFixed(7)));
+    const boundary = resolveBoundaryPoint(intersection.point);
     if (isValidPhysicalEdgePoint(boundary)) return boundary;
   }
 
