@@ -103,4 +103,5 @@ export function buildAnatoliaPhase2DAssets(regions) {
   return withGeometryAnchors(() => buildAnatoliaPhase2DAssetsV15(regions));
 }
 
-export { isAuthoritativePhysicalLandPoint };
+// Keep the legacy adapter contract used by AnatoliaPhase2DGeometryBuilder.js.
+export { isAuthoritativePhysicalLandPoint, isAuthoritativePhysicalLandPoint as isPhysicalLandPoint };
