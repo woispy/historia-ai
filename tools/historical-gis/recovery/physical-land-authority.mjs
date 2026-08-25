@@ -7,6 +7,7 @@ const MIN_AREA = 0.00005;
 const MAX_RECOVERY_DISTANCE = 0.75;
 const RECOVERY_STEP = 0.001;
 const NUMERICAL_BOUNDARY_TOLERANCE = 0.0001;
+const BBOX_EPS = NUMERICAL_BOUNDARY_TOLERANCE;
 
 function signedArea(polygon) {
   let sum = 0;
@@ -16,6 +17,43 @@ function signedArea(polygon) {
     sum += current[0] * next[1] - next[0] * current[1];
   }
   return sum / 2;
+}
+
+function bounds(points) {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const point of points) {
+    minX = Math.min(minX, point[0]);
+    minY = Math.min(minY, point[1]);
+    maxX = Math.max(maxX, point[0]);
+    maxY = Math.max(maxY, point[1]);
+  }
+  return { minX, minY, maxX, maxY };
+}
+
+function bboxContains(point, bbox, padding = BBOX_EPS) {
+  return point[0] >= bbox.minX - padding
+    && point[0] <= bbox.maxX + padding
+    && point[1] >= bbox.minY - padding
+    && point[1] <= bbox.maxY + padding;
+}
+
+function segmentBounds(start, end) {
+  return {
+    minX: Math.min(start[0], end[0]),
+    minY: Math.min(start[1], end[1]),
+    maxX: Math.max(start[0], end[0]),
+    maxY: Math.max(start[1], end[1]),
+  };
+}
+
+function bboxesOverlap(a, b, padding = 0) {
+  return !(a.maxX + padding < b.minX
+    || a.minX - padding > b.maxX
+    || a.maxY + padding < b.minY
+    || a.minY - padding > b.maxY);
 }
 
 export function pointOnSegment(point, start, end) {
@@ -51,33 +89,56 @@ export const PHYSICAL_LAND_POLYGONS = Object.freeze([
   ...ANATOLIA_PHYSICAL_COAST_CORRECTIONS.map((item) => item.coordinates),
 ].filter((polygon) => polygon?.length >= 3 && Math.abs(signedArea(polygon)) >= MIN_AREA));
 
+const LAND_POLYGON_BOUNDS = Object.freeze(
+  PHYSICAL_LAND_POLYGONS.map((polygon) => ({ polygon, bbox: bounds(polygon) })),
+);
+
 function lakeRings(lake) {
   return lake.rings ?? [lake.coordinates];
+}
+
+function buildLakeBoundarySegments(lakes) {
+  const result = [];
+  for (const lake of lakes) {
+    for (const [ringIndex, ring] of lakeRings(lake).entries()) {
+      if (!Array.isArray(ring) || ring.length < 3) continue;
+      for (let segmentIndex = 0; segmentIndex < ring.length; segmentIndex += 1) {
+        const start = ring[segmentIndex];
+        const end = ring[(segmentIndex + 1) % ring.length];
+        result.push({ lake, ring, ringIndex, segmentIndex, start, end, bbox: segmentBounds(start, end) });
+      }
+    }
+  }
+  return Object.freeze(result);
 }
 
 function lakeOuterRingIsAuthoritative(lake) {
   const outerRing = lakeRings(lake)[0];
   if (!Array.isArray(outerRing) || outerRing.length < 4) return false;
-  // Generated hydrography is subordinate to the authoritative land mask.
-  // A water polygon whose entire outer shoreline is not contained by land is
-  // not an inland lake authority; this prevents offshore/seaward polygons from
-  // classifying the Black Sea or other coastal water as a lake interior.
-  return outerRing.every((point) => PHYSICAL_LAND_POLYGONS.some((polygon) => pointInPolygon(point, polygon)));
+  return outerRing.every((point) => LAND_POLYGON_BOUNDS.some(({ polygon, bbox }) => bboxContains(point, bbox) && pointInPolygon(point, polygon)));
 }
 
 export const AUTHORITATIVE_LAKES = Object.freeze(
   ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.filter(lakeOuterRingIsAuthoritative),
 );
 
+const LAKE_BOUNDARY_SEGMENTS = buildLakeBoundarySegments(AUTHORITATIVE_LAKES);
+
 function isLakeBoundaryPoint(point) {
-  return AUTHORITATIVE_LAKES.some((lake) => lakeRings(lake).some((ring) => ring?.some((vertex, index) => pointOnSegment(point, vertex, ring[(index + 1) % ring.length]))));
+  return LAKE_BOUNDARY_SEGMENTS.some((segment) => bboxContains(point, segment.bbox) && pointOnSegment(point, segment.start, segment.end));
 }
 
 export function isLakeInteriorPoint(point) {
   return AUTHORITATIVE_LAKES.some((lake) => {
     const rings = lakeRings(lake);
-    return rings.length > 0 && pointInPolygon(point, rings[0])
-      && !rings.slice(1).some((ring) => pointInPolygon(point, ring));
+    if (!rings.length) return false;
+    const outer = bounds(rings[0]);
+    if (!bboxContains(point, outer, 0)) return false;
+    return pointInPolygon(point, rings[0])
+      && !rings.slice(1).some((ring) => {
+        const ringBox = bounds(ring);
+        return bboxContains(point, ringBox, 0) && pointInPolygon(point, ring);
+      });
   });
 }
 
@@ -106,14 +167,13 @@ function nearestPointOnRing(point, ring) {
 export function nearestLakeBoundaryPoint(point) {
   let best = null;
   let bestDistance = Infinity;
-  for (const lake of AUTHORITATIVE_LAKES) {
-    for (const ring of lakeRings(lake)) {
-      if (!ring?.length) continue;
-      const candidate = nearestPointOnRing(point, ring);
-      if (candidate.distance < bestDistance) {
-        best = candidate.point;
-        bestDistance = candidate.distance;
-      }
+  for (const segment of LAKE_BOUNDARY_SEGMENTS) {
+    if (segment.bbox.maxX < point[0] - bestDistance || segment.bbox.minX > point[0] + bestDistance
+      || segment.bbox.maxY < point[1] - bestDistance || segment.bbox.minY > point[1] + bestDistance) continue;
+    const candidate = nearestPointOnRing(point, [segment.start, segment.end]);
+    if (candidate.distance < bestDistance) {
+      best = candidate.point;
+      bestDistance = candidate.distance;
     }
   }
   return { point: best, distance: bestDistance };
@@ -122,7 +182,10 @@ export function nearestLakeBoundaryPoint(point) {
 function nearestBoundaryLandPoint(point) {
   let best = null;
   let bestDistance = Infinity;
-  for (const polygon of PHYSICAL_LAND_POLYGONS) {
+  for (const { polygon, bbox } of LAND_POLYGON_BOUNDS) {
+    const dx = point[0] < bbox.minX ? bbox.minX - point[0] : point[0] > bbox.maxX ? point[0] - bbox.maxX : 0;
+    const dy = point[1] < bbox.minY ? bbox.minY - point[1] : point[1] > bbox.maxY ? point[1] - bbox.maxY : 0;
+    if (Math.hypot(dx, dy) > bestDistance) continue;
     const candidate = nearestPointOnRing(point, polygon);
     if (candidate.distance < bestDistance) {
       best = candidate.point;
@@ -133,9 +196,12 @@ function nearestBoundaryLandPoint(point) {
 }
 
 export function isPhysicalLandPoint(point) {
-  if (PHYSICAL_LAND_POLYGONS.some((polygon) => pointInPolygon(point, polygon))) {
-    if (isLakeBoundaryPoint(point)) return true;
-    if (!isLakeInteriorPoint(point)) return true;
+  for (const { polygon, bbox } of LAND_POLYGON_BOUNDS) {
+    if (!bboxContains(point, bbox, NUMERICAL_BOUNDARY_TOLERANCE)) continue;
+    if (pointInPolygon(point, polygon)) {
+      if (isLakeBoundaryPoint(point)) return true;
+      if (!isLakeInteriorPoint(point)) return true;
+    }
   }
   const boundary = nearestBoundaryLandPoint(point);
   return Boolean(boundary.point)
@@ -191,10 +257,6 @@ export function isPhysicalGeometryBoundaryPoint(point) {
   return isPhysicalLandPoint(point) || isLakeInteriorPoint(point);
 }
 
-/**
- * Final political-edge points may lie on authoritative lake shorelines. They
- * are physical boundaries, but lake interiors remain invalid support points.
- */
 export function isFinalPhysicalGeometryBoundaryPoint(point) {
   return isPhysicalLandPoint(point) || isLakeBoundaryPoint(point);
 }
