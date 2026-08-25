@@ -63,13 +63,14 @@ function boundaryDescriptors() {
 
 const BOUNDARIES = boundaryDescriptors();
 
-function projectToBoundary(point) {
+function projectToBoundary(point, originalStart, originalEnd, interiorSign) {
   let best = null;
   for (const descriptor of BOUNDARIES) {
     for (let segmentIndex = 0; segmentIndex < descriptor.boundary.length; segmentIndex += 1) {
       const start = descriptor.boundary[segmentIndex];
       const end = descriptor.boundary[(segmentIndex + 1) % descriptor.boundary.length];
       const projection = nearestPointOnSegment(point, start, end);
+      if (edgeCross(originalStart, originalEnd, projection.point) * interiorSign < -INTERIOR_SIDE_TOLERANCE) continue;
       if (!best || projection.distance < best.distance) best = { ...descriptor, segmentIndex, point: projection.point, distance: projection.distance };
     }
   }
@@ -143,8 +144,8 @@ function sameBoundary(a, b) {
 function pathLength(path) { return path.reduce((total, point, index) => index === 0 ? total : total + distance(path[index - 1], point), 0); }
 
 function chooseBoundaryPath(fromPoint, toPoint, originalStart, originalEnd, interiorSign) {
-  const from = projectToBoundary(fromPoint);
-  const to = projectToBoundary(toPoint);
+  const from = projectToBoundary(fromPoint, originalStart, originalEnd, interiorSign);
+  const to = projectToBoundary(toPoint, originalStart, originalEnd, interiorSign);
   if (!from || !to) return null;
   const pathIsAllowed = (path) => isValidPhysicalPath(path)
     && path.every((point) => edgeCross(originalStart, originalEnd, point) * interiorSign >= -INTERIOR_SIDE_TOLERANCE);
