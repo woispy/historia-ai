@@ -96,9 +96,12 @@ function repairPhysicalEdge(start, end, depth = 0) {
   if (depth > MAX_PHYSICAL_EDGE_REPAIR_DEPTH) {
     throw new Error(`Phase 2D geometry edge could not be resolved against physical water after ${MAX_PHYSICAL_EDGE_REPAIR_DEPTH} recursive repairs: ${start.join(",")} -> ${end.join(",")}`);
   }
-  const invalidSamples = [0.25, 0.5, 0.75]
-    .map((fraction) => ({ fraction, point: physicalEdgeSample(start, end, fraction) }))
-    .filter(({ point }) => !isValidPhysicalEdgePoint(point));
+  const invalidSamples = [];
+  for (let index = 1; index < PHYSICAL_EDGE_SAMPLE_COUNT; index += 1) {
+    const fraction = index / PHYSICAL_EDGE_SAMPLE_COUNT;
+    const point = physicalEdgeSample(start, end, fraction);
+    if (!isValidPhysicalEdgePoint(point)) invalidSamples.push({ fraction, point });
+  }
   if (invalidSamples.length === 0) return [start, end];
   const target = invalidSamples[Math.floor(invalidSamples.length / 2)];
   const resolved = resolvePhysicalGeometryBoundaryPoint(target.point) ?? recoverNumericalBoundaryDrift(target.point);
