@@ -175,8 +175,12 @@ export function isPhysicalGeometryBoundaryPoint(point) {
   return isPhysicalLandPoint(point) || isLakeInteriorPoint(point);
 }
 
+/**
+ * Final political-edge points may lie on authoritative lake shorelines. They
+ * are physical boundaries, but lake interiors remain invalid support points.
+ */
 export function isFinalPhysicalGeometryBoundaryPoint(point) {
-  return isPhysicalLandPoint(point);
+  return isPhysicalLandPoint(point) || isLakeBoundaryPoint(point);
 }
 
 export function resolveGeometryAnchor(provinceId, sourceAnchor) {
