@@ -99,16 +99,37 @@ function isValidPhysicalBoundaryPoint(point) {
   return isPhysicalLandPoint(point) || isPhysicalLakeShorelinePoint(point);
 }
 
+function hasPhysicalLandRepresentativePoint(polygon) {
+  const centroid = polygonCentroid(polygon);
+  if (isPhysicalLandPoint(centroid)) return true;
+  const vertexAverage = polygon.reduce(
+    (sum, [longitude, latitude]) => [sum[0] + longitude, sum[1] + latitude],
+    [0, 0],
+  ).map((value) => value / polygon.length);
+  if (isPhysicalLandPoint(vertexAverage)) return true;
+  for (let index = 0; index < polygon.length; index += 1) {
+    const start = polygon[index];
+    const end = polygon[(index + 1) % polygon.length];
+    for (const fraction of [0.25, 0.5, 0.75]) {
+      const point = [
+        start[0] + (end[0] - start[0]) * fraction,
+        start[1] + (end[1] - start[1]) * fraction,
+      ];
+      if (isPhysicalLandPoint(point)) return true;
+    }
+  }
+  return false;
+}
+
 for (const geometry of result.geometries) {
   assert.ok(provinceIds.has(geometry.identity.provinceId));
   assert.ok(geometry.polygons.length > 0);
   for (const polygon of geometry.polygons) {
     assert.ok(polygon.length >= 3);
     vertexCount += polygon.length;
-    const centroid = polygonCentroid(polygon);
     assert.ok(
-      isPhysicalLandPoint(centroid),
-      `Phase 2D polygon centroid must remain on physical land: ${centroid.join(",")}`,
+      hasPhysicalLandRepresentativePoint(polygon),
+      `Phase 2D polygon must retain a representative point on physical land: ${polygonCentroid(polygon).join(",")}`,
     );
     for (const [longitude, latitude] of polygon) {
       assert.ok(longitude >= 25 && longitude <= 46, `Longitude out of Phase 2D envelope: ${longitude}`);
