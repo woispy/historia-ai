@@ -73,6 +73,11 @@ function densifyPolygon(polygon) {
 }
 
 function repairPhysicalPolygonToFixedPoint(polygon, provinceId) {
+  // Preserve the V15 partition exactly when it already satisfies the strict
+  // physical contract. Repairing every polygon unconditionally can move shared
+  // Voronoi boundaries independently and create artificial province overlap.
+  if (isStrictlyPhysicalPath(polygon)) return polygon;
+
   let current = polygon;
   for (let pass = 1; pass <= MAX_PHYSICAL_REPAIR_PASSES; pass += 1) {
     const repaired = repairPhysicalPolygon(current);
