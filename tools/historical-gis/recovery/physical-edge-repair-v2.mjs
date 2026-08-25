@@ -206,7 +206,7 @@ function repairInvalidIntervals(start, end) {
     if (!entryBoundary || !exitBoundary) return null;
     const afterExit = sample(start, end, exit.fraction);
 
-    const lead = pathIsPhysical([cursor, entryBoundary.point]
+    const lead = pathIsPhysical([cursor, entryBoundary.point])
       ? [cursor, entryBoundary.point]
       : connectToBoundary(cursor, entryBoundary, start, end);
     if (!lead) return null;
