@@ -20,7 +20,7 @@ const GEOMETRY_EPS = 1e-8;
 const MIN_PROVINCE_AREA = 0.00005;
 const PHYSICAL_EDGE_SAMPLE_COUNT = 256;
 const MAX_PHYSICAL_EDGE_REPAIR_DEPTH = 12;
-const MIN_PHYSICAL_EDGE_REPAIR_LENGTH = 0.00001;
+const MIN_PHYSICAL_EDGE_REPAIR_LENGTH = 0.00002;
 
 function boundarySiteCount(polygon) {
   if (!Array.isArray(polygon) || polygon.length < 2) return 0;
@@ -97,6 +97,15 @@ function physicalEdgeSample(start, end, fraction) {
 function repairPhysicalEdge(start, end, depth = 0) {
   const segmentLength = Math.hypot(end[0] - start[0], end[1] - start[1]);
   if (segmentLength <= GEOMETRY_EPS) return [start, end];
+  if (segmentLength <= MIN_PHYSICAL_EDGE_REPAIR_LENGTH) {
+    const midpoint = physicalEdgeSample(start, end, 0.5);
+    const resolved = resolvePhysicalGeometryBoundaryPoint(midpoint) ?? recoverNumericalBoundaryDrift(midpoint);
+    if (resolved) {
+      const boundary = resolved.map((value) => Number(value.toFixed(7)));
+      if (isPhysicalLandPoint(boundary) || isFinalPhysicalGeometryBoundaryPoint(boundary)) return [start, boundary, end];
+    }
+    throw new Error(`Phase 2D geometry edge remains physically unresolved below deterministic repair length: ${start.join(",")} -> ${end.join(",")}`);
+  }
   if (depth > MAX_PHYSICAL_EDGE_REPAIR_DEPTH) {
     throw new Error(`Phase 2D geometry edge could not be resolved against physical water after ${MAX_PHYSICAL_EDGE_REPAIR_DEPTH} recursive repairs: ${start.join(",")} -> ${end.join(",")}`);
   }
@@ -107,15 +116,6 @@ function repairPhysicalEdge(start, end, depth = 0) {
     if (!isValidPhysicalEdgePoint(point)) invalidSamples.push({ fraction, point });
   }
   if (invalidSamples.length === 0) return [start, end];
-  if (segmentLength <= MIN_PHYSICAL_EDGE_REPAIR_LENGTH) {
-    const midpoint = physicalEdgeSample(start, end, 0.5);
-    const resolved = resolvePhysicalGeometryBoundaryPoint(midpoint) ?? recoverNumericalBoundaryDrift(midpoint);
-    if (resolved) {
-      const boundary = resolved.map((value) => Number(value.toFixed(7)));
-      if (isPhysicalLandPoint(boundary) || isFinalPhysicalGeometryBoundaryPoint(boundary)) return [start, boundary, end];
-    }
-    throw new Error(`Phase 2D geometry edge remains physically unresolved below deterministic repair length: ${start.join(",")} -> ${end.join(",")}`);
-  }
   const target = invalidSamples[Math.floor(invalidSamples.length / 2)];
   const resolved = resolvePhysicalGeometryBoundaryPoint(target.point) ?? recoverNumericalBoundaryDrift(target.point);
   if (!resolved) throw new Error(`Phase 2D geometry edge crosses physical water without an authoritative boundary solution: ${target.point.join(",")}`);
