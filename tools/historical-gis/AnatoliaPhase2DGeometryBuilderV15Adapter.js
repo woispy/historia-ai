@@ -28,8 +28,26 @@ function withGeometryAnchors(callback) {
   }
 }
 
+function normalizeGeometryContract(assets) {
+  return {
+    ...assets,
+    geometries: assets.geometries.map((geometry) => {
+      const polygon = geometry.polygons?.[0];
+      const holes = geometry.holes ?? [];
+      if (!Array.isArray(polygon) || polygon.length < 3) return geometry;
+      return {
+        ...geometry,
+        geometry: geometry.geometry ?? {
+          type: "Polygon",
+          coordinates: [polygon, ...holes],
+        },
+      };
+    }),
+  };
+}
+
 export function buildAnatoliaPhase2DAssets(regions) {
-  return withGeometryAnchors(() => buildAnatoliaPhase2DAssetsV15(regions));
+  return withGeometryAnchors(() => normalizeGeometryContract(buildAnatoliaPhase2DAssetsV15(regions)));
 }
 
 export { isPhysicalLandPoint, PHYSICAL_LAND_POLYGONS, resolveGeometryAnchor };
