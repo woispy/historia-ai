@@ -13,7 +13,6 @@ const BINARY_ITERATIONS = 32;
 const VALIDATION_SAMPLES = 12;
 const MAX_BOUNDARY_PROJECTION_DISTANCE = 0.02;
 const MAX_BOUNDARY_CANDIDATES = 8;
-const MAX_RECOVERY_CONNECTOR_DISTANCE = 0.02;
 
 function distance(a, b) {
   return Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -255,7 +254,7 @@ function withinInterval(crossing, interval) {
 }
 
 function connectorIsValid(from, to) {
-  return distance(from, to) <= MAX_RECOVERY_CONNECTOR_DISTANCE || isValidPhysicalPath([from, to]);
+  return isValidPhysicalPath([from, to]);
 }
 
 function recoveryCandidates(interval, start, end, lakeCrossings, landCrossings) {
