@@ -1,6 +1,7 @@
 import {
   buildAnatoliaPhase2DAssets as buildAnatoliaPhase2DAssetsV16,
   isPhysicalLandPoint,
+  isFinalPhysicalGeometryBoundaryPoint,
   isPhysicalGeometryBoundaryPoint,
   resolvePhysicalGeometryBoundaryPoint,
 } from "./AnatoliaPhase2DGeometryBuilderV15Adapter.js";
@@ -85,7 +86,7 @@ function resolveBoundaryPoint(point) {
 }
 
 function isValidPhysicalEdgePoint(point) {
-  return isPhysicalLandPoint(point) || isPhysicalGeometryBoundaryPoint(point);
+  return isPhysicalLandPoint(point) || isFinalPhysicalGeometryBoundaryPoint(point);
 }
 
 function physicalEdgeSample(start, end, fraction) {
