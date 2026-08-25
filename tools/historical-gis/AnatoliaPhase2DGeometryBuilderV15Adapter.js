@@ -23,8 +23,7 @@ function withGeometryAnchors(callback) {
 function isStrictlyPhysicalPath(polygon) {
   if (!Array.isArray(polygon) || polygon.length < 3) return false;
   for (let index = 0; index < polygon.length; index += 1) {
-    const start = polygon[index];
-    const end = polygon[(index + 1) % polygon.length];
+    const start = polygon[index]; const end = polygon[(index + 1) % polygon.length];
     if (!isPhysicalLandPoint(start) && !isFinalPhysicalGeometryBoundaryPoint(start)) return false;
     if (!isPhysicalLandPoint(end) && !isFinalPhysicalGeometryBoundaryPoint(end)) return false;
     for (let sampleIndex = 1; sampleIndex < STRICT_PHYSICAL_EDGE_SAMPLE_COUNT; sampleIndex += 1) {
@@ -39,9 +38,7 @@ function isStrictlyPhysicalPath(polygon) {
 function densifyPolygon(polygon) {
   const result = [];
   for (let index = 0; index < polygon.length; index += 1) {
-    const start = polygon[index];
-    const end = polygon[(index + 1) % polygon.length];
-    result.push(start);
+    const start = polygon[index]; const end = polygon[(index + 1) % polygon.length]; result.push(start);
     for (let sampleIndex = 1; sampleIndex < REPAIR_DENSIFICATION_SEGMENTS; sampleIndex += 1) {
       const fraction = sampleIndex / REPAIR_DENSIFICATION_SEGMENTS;
       result.push([start[0] + (end[0] - start[0]) * fraction, start[1] + (end[1] - start[1]) * fraction]);
@@ -52,21 +49,15 @@ function densifyPolygon(polygon) {
 
 function repairPhysicalPolygonToFixedPoint(polygon, provinceId) {
   if (isStrictlyPhysicalPath(polygon)) return polygon;
-  let current = polygon;
-  let lastError = null;
+  let current = polygon; let lastError = null;
   for (let pass = 1; pass <= MAX_PHYSICAL_REPAIR_PASSES; pass += 1) {
     try {
-      const repaired = repairPhysicalPolygon(current);
+      const repaired = repairPhysicalPolygon(current, { containmentPolygon: polygon });
       if (isStrictlyPhysicalPath(repaired)) return repaired;
       current = densifyPolygon(repaired);
-    } catch (error) {
-      lastError = error;
-      break;
-    }
+    } catch (error) { lastError = error; break; }
   }
-  const detail = Array.isArray(current)
-    ? JSON.stringify(current.map(([longitude, latitude]) => [Number(longitude.toFixed(10)), Number(latitude.toFixed(10))]))
-    : "unavailable";
+  const detail = Array.isArray(current) ? JSON.stringify(current.map(([longitude, latitude]) => [Number(longitude.toFixed(10)), Number(latitude.toFixed(10))])) : "unavailable";
   throw new Error(`Phase 2D physical repair failed for ${provinceId}: ${lastError?.message ?? "did not converge"}; polygon=${detail}`);
 }
 
@@ -75,8 +66,7 @@ function normalizeGeometryContract(assets) {
     ...assets,
     provinces: assets.provinces.map((province) => ({ ...province, header: { ...province.header, assetVersion: 16, generator: "Historia AI Phase 2D Geometry Builder V16" } })),
     geometries: assets.geometries.map((geometry) => {
-      const polygon = geometry.polygons?.[0];
-      const holes = geometry.holes ?? [];
+      const polygon = geometry.polygons?.[0]; const holes = geometry.holes ?? [];
       if (!Array.isArray(polygon) || polygon.length < 3) return geometry;
       const provinceId = geometry.identity?.provinceId ?? geometry.identity?.id;
       const historicalAnchor = provinceId ? ANATOLIA_PROVINCE_REFINEMENTS[provinceId]?.anchor : null;
