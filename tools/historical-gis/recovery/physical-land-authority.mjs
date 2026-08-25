@@ -6,6 +6,7 @@ const EPS = 1e-9;
 const MIN_AREA = 0.00005;
 const MAX_RECOVERY_DISTANCE = 0.75;
 const RECOVERY_STEP = 0.001;
+const NUMERICAL_BOUNDARY_TOLERANCE = 1e-6;
 
 function signedArea(polygon) {
   let sum = 0;
@@ -62,26 +63,6 @@ function isLakeInteriorPoint(point) {
   });
 }
 
-/**
- * Closed physical-land membership used by geometry construction. Coastline
- * and lake boundary points belong to the shared boundary of the physical
- * surface; only the strict lake interior is excluded.
- */
-export function isPhysicalLandPoint(point) {
-  if (!PHYSICAL_LAND_POLYGONS.some((polygon) => pointInPolygon(point, polygon))) return false;
-  if (isLakeBoundaryPoint(point)) return true;
-  return !isLakeInteriorPoint(point);
-}
-
-/**
- * Province construction may temporarily carry an explicit lake footprint in
- * its outer support cell. The final province asset removes that footprint as
- * a lake hole. Sea/outside points are never accepted here.
- */
-export function isPhysicalGeometryBoundaryPoint(point) {
-  return isPhysicalLandPoint(point) || isLakeInteriorPoint(point);
-}
-
 function nearestBoundaryLandPoint(point) {
   let best = null;
   let bestDistance = Infinity;
@@ -104,6 +85,33 @@ function nearestBoundaryLandPoint(point) {
     }
   }
   return { point: best, distance: bestDistance };
+}
+
+/**
+ * Closed physical-land membership used by geometry construction. Coastline
+ * and lake boundary points belong to the shared boundary of the physical
+ * surface; only the strict lake interior is excluded. A tiny numerical
+ * closure tolerance is allowed when clipping/intersection arithmetic places
+ * a vertex infinitesimally outside an authoritative coastline.
+ */
+export function isPhysicalLandPoint(point) {
+  if (PHYSICAL_LAND_POLYGONS.some((polygon) => pointInPolygon(point, polygon))) {
+    if (isLakeBoundaryPoint(point)) return true;
+    if (!isLakeInteriorPoint(point)) return true;
+  }
+  const boundary = nearestBoundaryLandPoint(point);
+  return Boolean(boundary.point)
+    && boundary.distance <= NUMERICAL_BOUNDARY_TOLERANCE
+    && !isLakeInteriorPoint(point);
+}
+
+/**
+ * Province construction may temporarily carry an explicit lake footprint in
+ * its outer support cell. The final province asset removes that footprint as
+ * a lake hole. Sea/outside points are never accepted here.
+ */
+export function isPhysicalGeometryBoundaryPoint(point) {
+  return isPhysicalLandPoint(point) || isLakeInteriorPoint(point);
 }
 
 export function resolveGeometryAnchor(provinceId, sourceAnchor) {
