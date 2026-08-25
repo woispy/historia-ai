@@ -6,6 +6,8 @@ import { ANATOLIA_PROVINCE_REFINEMENTS } from "../../src/map/data/AnatoliaProvin
 const STRICT_PHYSICAL_EDGE_SAMPLE_COUNT = 64;
 const MAX_PHYSICAL_REPAIR_PASSES = 8;
 const REPAIR_DENSIFICATION_SEGMENTS = 16;
+const PARTITION_RECONCILIATION_PASSES = 4;
+const PARTITION_EPS = 1e-10;
 
 function withGeometryAnchors(callback) {
   const originals = new Map();
@@ -33,6 +35,31 @@ function isStrictlyPhysicalPath(polygon) {
   return true;
 }
 
+function signedArea(polygon) { let sum = 0; for (let index = 0; index < polygon.length; index += 1) { const next = (index + 1) % polygon.length; sum += polygon[index][0] * polygon[next][1] - polygon[next][0] * polygon[index][1]; } return sum / 2; }
+function cross(a, b, point) { return (b[0] - a[0]) * (point[1] - a[1]) - (b[1] - a[1]) * (point[0] - a[0]); }
+
+function clipPolygonToPowerCell(polygon, cell) {
+  if (!Array.isArray(cell) || cell.length < 3) return polygon;
+  let output = polygon.map((point) => [...point]);
+  const clip = signedArea(cell) < 0 ? [...cell].reverse() : cell;
+  for (let edge = 0; edge < clip.length; edge += 1) {
+    if (!output.length) return [];
+    const start = clip[edge]; const end = clip[(edge + 1) % clip.length]; const input = output; output = [];
+    const inside = (point) => cross(start, end, point) >= -PARTITION_EPS;
+    for (let index = 0; index < input.length; index += 1) {
+      const current = input[index]; const next = input[(index + 1) % input.length]; const currentInside = inside(current); const nextInside = inside(next);
+      if (currentInside && nextInside) output.push(next);
+      else if (currentInside !== nextInside) {
+        const currentValue = cross(start, end, current); const nextValue = cross(start, end, next); const denominator = currentValue - nextValue;
+        const t = Math.abs(denominator) < PARTITION_EPS ? 0 : currentValue / denominator;
+        output.push([current[0] + (next[0] - current[0]) * t, current[1] + (next[1] - current[1]) * t]);
+        if (!currentInside && nextInside) output.push(next);
+      }
+    }
+  }
+  return output;
+}
+
 function densifyPolygon(polygon) {
   const result = [];
   for (let index = 0; index < polygon.length; index += 1) {
@@ -50,9 +77,10 @@ function repairPhysicalPolygonToFixedPoint(polygon, provinceId, sourcePartitionC
   let current = polygon; let lastError = null;
   for (let pass = 1; pass <= MAX_PHYSICAL_REPAIR_PASSES; pass += 1) {
     try {
-      const repaired = repairPhysicalPolygon(current, { containmentPolygon: sourcePartitionCell });
-      if (isStrictlyPhysicalPath(repaired)) return repaired;
-      current = densifyPolygon(repaired);
+      const repaired = repairPhysicalPolygon(current);
+      const reconciled = clipPolygonToPowerCell(repaired, sourcePartitionCell);
+      if (reconciled.length >= 3 && isStrictlyPhysicalPath(reconciled)) return reconciled;
+      current = densifyPolygon(reconciled.length >= 3 ? reconciled : repaired);
     } catch (error) { lastError = error; break; }
   }
   const detail = Array.isArray(current) ? JSON.stringify(current.map(([longitude, latitude]) => [Number(longitude.toFixed(10)), Number(latitude.toFixed(10))])) : "unavailable";
