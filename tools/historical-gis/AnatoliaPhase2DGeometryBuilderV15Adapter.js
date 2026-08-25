@@ -14,7 +14,7 @@ import { ANATOLIA_PROVINCE_REFINEMENTS } from "../../src/map/data/AnatoliaProvin
  * data and use a deterministic geometry-only snap for the generator.
  */
 const GEOMETRY_ANCHOR_OVERRIDES = Object.freeze({
-  "bithynia-nicomedia": [29.92, 40.75],
+  "bithynia-nicomedia": [29.92, 40.73],
 });
 
 function withGeometryAnchors(callback) {
