@@ -5,8 +5,10 @@ import { ANATOLIA_PHYSICAL_COAST_CORRECTIONS } from "../../../src/map/data/Anato
 const EPS = 1e-9;
 const MIN_AREA = 0.00005;
 const MAX_RECOVERY_DISTANCE = 0.75;
-// Partition vertices may be corrected only for the same numerical boundary error
-// tolerated by the physical-land validator. Wider recovery is reserved for anchors.
+// Political partition vertices must never be moved broadly toward ordinary land
+// boundaries. Lake-interior vertices are different: the physical atlas models
+// lakes as holes, so a cell vertex inherited from a mainland ring may legitimately
+// land inside a lake and must be projected back to that lake's authoritative shore.
 const STRICT_BOUNDARY_RECOVERY_DISTANCE = 0.0001;
 const RECOVERY_STEP = 0.001;
 const NUMERICAL_BOUNDARY_TOLERANCE = 0.0001;
@@ -262,9 +264,12 @@ export function resolvePhysicalGeometryBoundaryPointStrict(point) {
   const shoreline = nearestLakeBoundaryPoint(point);
   const landBoundary = nearestBoundaryLandPoint(point);
 
+  // A lake is a hole in the physical atlas. If a partition ring inherited a
+  // mainland vertex that falls inside that hole, preserving the authoritative
+  // lake shoreline is safer than moving the vertex toward an unrelated coast.
   if (isLakeInteriorPoint(point)
     && shoreline.point
-    && shoreline.distance <= STRICT_BOUNDARY_RECOVERY_DISTANCE) {
+    && shoreline.distance <= MAX_RECOVERY_DISTANCE) {
     return [...shoreline.point];
   }
 
