@@ -31,9 +31,7 @@ function nearestPointOnSegment(point, start, end) {
   return { point: candidate, fraction, distance: distance(point, candidate) };
 }
 
-function ringsForLake(lake) {
-  return lake?.rings ?? (lake?.coordinates ? [lake.coordinates] : []);
-}
+function ringsForLake(lake) { return lake?.rings ?? (lake?.coordinates ? [lake.coordinates] : []); }
 
 function boundaryDescriptors() {
   const result = [];
@@ -53,14 +51,11 @@ const BOUNDARIES = boundaryDescriptors();
 function projectToBoundary(point) {
   let best = null;
   for (const descriptor of BOUNDARIES) {
-    const boundary = descriptor.boundary;
-    for (let segmentIndex = 0; segmentIndex < boundary.length; segmentIndex += 1) {
-      const start = boundary[segmentIndex];
-      const end = boundary[(segmentIndex + 1) % boundary.length];
+    for (let segmentIndex = 0; segmentIndex < descriptor.boundary.length; segmentIndex += 1) {
+      const start = descriptor.boundary[segmentIndex];
+      const end = descriptor.boundary[(segmentIndex + 1) % descriptor.boundary.length];
       const projection = nearestPointOnSegment(point, start, end);
-      if (!best || projection.distance < best.distance) {
-        best = { ...descriptor, segmentIndex, point: projection.point, distance: projection.distance };
-      }
+      if (!best || projection.distance < best.distance) best = { ...descriptor, segmentIndex, point: projection.point, distance: projection.distance };
     }
   }
   return best && best.distance <= MAX_PROJECTION_DISTANCE ? best : null;
@@ -71,8 +66,7 @@ function isValidPhysicalPath(path) {
   for (let index = 0; index < path.length - 1; index += 1) {
     const start = path[index];
     const end = path[index + 1];
-    const length = distance(start, end);
-    const samples = Math.max(16, Math.ceil(length / 0.01));
+    const samples = Math.max(16, Math.ceil(distance(start, end) / 0.01));
     for (let sampleIndex = 1; sampleIndex < samples; sampleIndex += 1) {
       if (!isValidPhysicalPoint(sample(start, end, sampleIndex / samples))) return false;
     }
@@ -102,8 +96,11 @@ function waterTransitions(start, end) {
     const current = states[index];
     const next = states[index + 1];
     if (current.valid === next.valid) continue;
-    const fraction = refineTransition(start, end, current.valid ? current.fraction : next.fraction, current.valid ? next.fraction : current.fraction);
-    transitions.push({ fraction, point: sample(start, end, fraction), entersWater: current.valid && !next.valid });
+    transitions.push({
+      fraction: refineTransition(start, end, current.valid ? current.fraction : next.fraction, current.valid ? next.fraction : current.fraction),
+      point: sample(start, end, refineTransition(start, end, current.valid ? current.fraction : next.fraction, current.valid ? next.fraction : current.fraction)),
+      entersWater: current.valid && !next.valid,
+    });
   }
   return transitions;
 }
@@ -113,21 +110,12 @@ function arcCandidates(boundary, from, to) {
   const forward = [from.point];
   let index = (from.segmentIndex + 1) % count;
   let guard = 0;
-  while (index !== (to.segmentIndex + 1) % count && guard <= count && forward.length <= MAX_ARC_VERTICES) {
-    forward.push(boundary[index]);
-    index = (index + 1) % count;
-    guard += 1;
-  }
+  while (index !== (to.segmentIndex + 1) % count && guard <= count && forward.length <= MAX_ARC_VERTICES) { forward.push(boundary[index]); index = (index + 1) % count; guard += 1; }
   forward.push(to.point);
-
   const backward = [from.point];
   index = from.segmentIndex;
   guard = 0;
-  while (index !== to.segmentIndex && guard <= count && backward.length <= MAX_ARC_VERTICES) {
-    backward.push(boundary[index]);
-    index = (index - 1 + count) % count;
-    guard += 1;
-  }
+  while (index !== to.segmentIndex && guard <= count && backward.length <= MAX_ARC_VERTICES) { backward.push(boundary[index]); index = (index - 1 + count) % count; guard += 1; }
   backward.push(to.point);
   return [forward, backward];
 }
@@ -138,21 +126,13 @@ function sameBoundary(a, b) {
   return true;
 }
 
-function pathLength(path) {
-  let total = 0;
-  for (let index = 1; index < path.length; index += 1) total += distance(path[index - 1], path[index]);
-  return total;
-}
+function pathLength(path) { return path.reduce((total, point, index) => index === 0 ? total : total + distance(path[index - 1], point), 0); }
 
 function chooseBoundaryPath(fromPoint, toPoint) {
   const from = projectToBoundary(fromPoint);
   const to = projectToBoundary(toPoint);
   if (!from || !to) return null;
-  if (sameBoundary(from, to)) {
-    return arcCandidates(from.boundary, from, to)
-      .filter((path) => isValidPhysicalPath(path))
-      .sort((a, b) => pathLength(a) - pathLength(b))[0] ?? null;
-  }
+  if (sameBoundary(from, to)) return arcCandidates(from.boundary, from, to).filter(isValidPhysicalPath).sort((a, b) => pathLength(a) - pathLength(b))[0] ?? null;
   const direct = [from.point, to.point];
   return isValidPhysicalPath(direct) ? direct : null;
 }
@@ -168,35 +148,21 @@ function fallbackEdge(start, end) {
   if (isValidPhysicalPath([start, end])) return [start, end];
   const transitions = waterTransitions(start, end);
   if (transitions.length < 2 || transitions.length % 2 !== 0) return null;
-
   const repaired = [start];
   let cursor = start;
   for (let index = 0; index < transitions.length; index += 2) {
     const entry = transitions[index];
     const exit = transitions[index + 1];
     if (!entry.entersWater || exit.entersWater) return null;
-
     const entryBoundary = resolvePhysicalGeometryBoundaryPoint(entry.point);
     const exitBoundary = resolvePhysicalGeometryBoundaryPoint(exit.point);
-    if (!entryBoundary || !exitBoundary) return null;
-
-    if (!isValidPhysicalPath([cursor, entryBoundary])) return null;
+    if (!entryBoundary || !exitBoundary || !isValidPhysicalPath([cursor, entryBoundary])) return null;
     appendUnique(repaired, [entryBoundary]);
-
     const boundaryPath = chooseBoundaryPath(entryBoundary, exitBoundary);
     if (!boundaryPath) return null;
     appendUnique(repaired, boundaryPath.slice(1));
     cursor = exitBoundary;
-
-    const nextEntry = transitions[index + 2];
-    if (nextEntry) {
-      const nextEntryBoundary = resolvePhysicalGeometryBoundaryPoint(nextEntry.point);
-      if (!nextEntryBoundary || !isValidPhysicalPath([cursor, nextEntryBoundary])) return null;
-      appendUnique(repaired, [nextEntryBoundary]);
-      cursor = nextEntryBoundary;
-    }
   }
-
   if (!isValidPhysicalPath([cursor, end])) return null;
   appendUnique(repaired, [end]);
   return isValidPhysicalPath(repaired) ? repaired : null;
@@ -211,21 +177,28 @@ function normalizeVertices(polygon) {
   });
 }
 
+function repairEdgesWithoutMutatingValidEdges(polygon) {
+  const repaired = [];
+  for (let index = 0; index < polygon.length; index += 1) {
+    const start = polygon[index];
+    const end = polygon[(index + 1) % polygon.length];
+    const edge = fallbackEdge(start, end);
+    if (!edge) return null;
+    appendUnique(repaired, edge.slice(0, -1));
+  }
+  appendUnique(repaired, [polygon[0]]);
+  return isValidPhysicalPath(repaired) ? repaired : null;
+}
+
 export function repairPhysicalPolygon(polygon) {
+  const edgeWise = repairEdgesWithoutMutatingValidEdges(polygon);
+  if (edgeWise) return edgeWise;
   try {
     return repairLegacyPhysicalPolygon(polygon);
   } catch (error) {
     const normalized = normalizeVertices(polygon);
-    const repaired = [];
-    for (let index = 0; index < normalized.length; index += 1) {
-      const start = normalized[index];
-      const end = normalized[(index + 1) % normalized.length];
-      const edge = fallbackEdge(start, end);
-      if (!edge) throw error;
-      appendUnique(repaired, edge.slice(0, -1));
-    }
-    appendUnique(repaired, [normalized[0]]);
-    if (!isValidPhysicalPath(repaired)) throw error;
+    const repaired = repairEdgesWithoutMutatingValidEdges(normalized);
+    if (!repaired) throw error;
     return repaired;
   }
 }
