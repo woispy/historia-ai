@@ -73,7 +73,8 @@ function projectToBoundaryCandidates(point, originalStart, originalEnd, interior
       const end = descriptor.boundary[(segmentIndex + 1) % descriptor.boundary.length];
       const projection = nearestPointOnSegment(point, start, end);
       if (projection.distance > MAX_PROJECTION_DISTANCE) continue;
-      if (edgeCross(originalStart, originalEnd, projection.point) * interiorSign < -INTERIOR_SIDE_TOLERANCE) continue;
+      const side = edgeCross(originalStart, originalEnd, projection.point) * interiorSign;
+      if (side < -INTERIOR_SIDE_TOLERANCE && descriptor.kind !== "lake") continue;
       candidates.push({ ...descriptor, segmentIndex, point: projection.point, distance: projection.distance });
     }
   }
@@ -88,9 +89,7 @@ function exactBoundaryCandidates(point) {
       const end = descriptor.boundary[(segmentIndex + 1) % descriptor.boundary.length];
       const projection = nearestPointOnSegment(point, start, end);
       const tolerance = GEOMETRY_EPS * Math.max(1, distance(start, end));
-      if (projection.distance <= tolerance) {
-        candidates.push({ ...descriptor, segmentIndex, point: projection.point, distance: projection.distance });
-      }
+      if (projection.distance <= tolerance) candidates.push({ ...descriptor, segmentIndex, point: projection.point, distance: projection.distance });
     }
   }
   return candidates.sort((a, b) => a.distance - b.distance);
@@ -115,9 +114,7 @@ function isPointOnSourceEdge(point, start, end) {
   return projection.distance <= GEOMETRY_EPS * scale;
 }
 
-function sourceEdgeFraction(point, start, end) {
-  return nearestPointOnSegment(point, start, end).fraction;
-}
+function sourceEdgeFraction(point, start, end) { return nearestPointOnSegment(point, start, end).fraction; }
 
 function sourceEdgeSubpathIsValid(fromPoint, toPoint, start, end) {
   if (!isPointOnSourceEdge(fromPoint, start, end) || !isPointOnSourceEdge(toPoint, start, end)) return false;
@@ -198,10 +195,10 @@ function chooseBoundaryPath(fromPoint, toPoint, originalStart, originalEnd, inte
   if (fromCandidates.length === 0 || toCandidates.length === 0) return null;
   const pathIsAllowed = (path, boundaryDescriptor = null) => {
     if (!isValidPhysicalPath(path)) return false;
-    // Authoritative shoreline paths are physical boundaries. They are allowed
-    // to deviate from the straight power-edge half-plane because the shoreline
-    // itself is the physical partition boundary at a water transition.
-    if (boundaryDescriptor?.kind === "lake") return true;
+    // Every authoritative physical boundary is allowed to replace the invalid
+    // portion of a partition edge. The source edge is still preserved whenever
+    // it is already physically valid; only the invalid interval is redirected.
+    if (boundaryDescriptor?.kind === "lake" || boundaryDescriptor?.kind === "land") return true;
     return path.every((point) => edgeCross(originalStart, originalEnd, point) * interiorSign >= -INTERIOR_SIDE_TOLERANCE);
   };
   const candidates = [];
