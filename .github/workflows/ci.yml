@@ -79,6 +79,8 @@ jobs:
         run: npm run validate:historical-gis:1300
       - name: Run historical GIS identity tests
         run: npm run test:historical-gis
+      - name: Run physical edge repair contract tests
+        run: npm run test:physical-edge-repair
       - name: Run physical geography tests
         run: npm run test:physical-geography
       - name: Run Natural Earth 10m hydrography tests
