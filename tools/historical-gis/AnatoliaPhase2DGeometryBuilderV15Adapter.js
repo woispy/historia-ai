@@ -8,8 +8,8 @@ import { ANATOLIA_PROVINCE_REFINEMENTS } from "../../src/map/data/AnatoliaProvin
  * Phase 2D V15 compatibility adapter.
  *
  * Historical anchors remain research data. This adapter resolves only the
- * temporary geometry seed against the same physical atlas used by V15. It
- * deliberately does not maintain a second coastline/boundary implementation.
+ * temporary geometry seed against the same physical atlas used by V15.
+ * The original anchor array is restored after generation.
  */
 const GEOMETRY_ANCHOR_SEARCH = Object.freeze({
   "bithynia-nicomedia": Object.freeze({ maxDistance: 0.35, step: 0.001 }),
@@ -86,9 +86,6 @@ function resolveFromBoundary(sourceAnchor, search) {
   const length = Math.hypot(dx, dy) || 1;
   const normals = [[-dy / length, dx / length], [dy / length, -dx / length]];
 
-  // Probe both normals from the authoritative boundary. This avoids guessing
-  // which winding direction the source polygon uses and makes the recovery
-  // robust at coastal concavities.
   for (let distance = search.step; distance <= search.maxDistance + EPS; distance += search.step) {
     for (const [nx, ny] of normals) {
       const candidate = [boundary.point[0] + nx * distance, boundary.point[1] + ny * distance];
@@ -114,14 +111,21 @@ function withGeometryAnchors(callback) {
   for (const provinceId of Object.keys(GEOMETRY_ANCHOR_SEARCH)) {
     const refinement = ANATOLIA_PROVINCE_REFINEMENTS[provinceId];
     if (!refinement?.anchor) throw new Error(`Missing refinement anchor for geometry override: ${provinceId}`);
-    originals.set(provinceId, refinement.anchor);
-    refinement.anchor = resolveGeometryAnchor(provinceId, refinement.anchor);
+    const original = [...refinement.anchor];
+    const resolved = resolveGeometryAnchor(provinceId, original);
+    originals.set(provinceId, original);
+    // Mutate the shared anchor array rather than replacing the property. V15
+    // reads the same refinement object and therefore observes this working seed.
+    refinement.anchor[0] = resolved[0];
+    refinement.anchor[1] = resolved[1];
   }
   try {
     return callback();
   } finally {
     for (const [provinceId, point] of originals) {
-      ANATOLIA_PROVINCE_REFINEMENTS[provinceId].anchor = point;
+      const anchor = ANATOLIA_PROVINCE_REFINEMENTS[provinceId].anchor;
+      anchor[0] = point[0];
+      anchor[1] = point[1];
     }
   }
 }
