@@ -10,6 +10,9 @@ import {
 import { repairPhysicalPolygon } from "./recovery/physical-edge-repair.mjs";
 import { ANATOLIA_PROVINCE_REFINEMENTS } from "../../src/map/data/AnatoliaProvinceRefinement.js";
 
+const STRICT_PHYSICAL_EDGE_SAMPLE_COUNT = 64;
+const MAX_PHYSICAL_REPAIR_PASSES = 3;
+
 /**
  * Phase 2D V16 contract adapter over the retained V15 geometry engine.
  * Historical anchors remain immutable research data. Geometry recovery is
@@ -32,6 +35,35 @@ function withGeometryAnchors(callback) {
   }
 }
 
+function isStrictlyPhysicalPath(polygon) {
+  if (!Array.isArray(polygon) || polygon.length < 3) return false;
+  for (let index = 0; index < polygon.length; index += 1) {
+    const start = polygon[index];
+    const end = polygon[(index + 1) % polygon.length];
+    if (!isPhysicalLandPoint(start) && !isFinalPhysicalGeometryBoundaryPoint(start)) return false;
+    if (!isPhysicalLandPoint(end) && !isFinalPhysicalGeometryBoundaryPoint(end)) return false;
+    for (let sampleIndex = 1; sampleIndex < STRICT_PHYSICAL_EDGE_SAMPLE_COUNT; sampleIndex += 1) {
+      const fraction = sampleIndex / STRICT_PHYSICAL_EDGE_SAMPLE_COUNT;
+      const point = [
+        start[0] + (end[0] - start[0]) * fraction,
+        start[1] + (end[1] - start[1]) * fraction,
+      ];
+      if (!isPhysicalLandPoint(point) && !isFinalPhysicalGeometryBoundaryPoint(point)) return false;
+    }
+  }
+  return true;
+}
+
+function repairPhysicalPolygonToFixedPoint(polygon, provinceId) {
+  let current = polygon;
+  for (let pass = 1; pass <= MAX_PHYSICAL_REPAIR_PASSES; pass += 1) {
+    const repaired = repairPhysicalPolygon(current);
+    if (isStrictlyPhysicalPath(repaired)) return repaired;
+    current = repaired;
+  }
+  throw new Error(`Phase 2D physical repair did not converge to a land-safe polygon after ${MAX_PHYSICAL_REPAIR_PASSES} passes: ${provinceId}`);
+}
+
 function normalizeGeometryContract(assets) {
   return {
     ...assets,
@@ -50,7 +82,7 @@ function normalizeGeometryContract(assets) {
       const provinceId = geometry.identity?.provinceId ?? geometry.identity?.id;
       const historicalAnchor = provinceId ? ANATOLIA_PROVINCE_REFINEMENTS[provinceId]?.anchor : null;
       if (!historicalAnchor) throw new Error(`Missing historical anchor in V16 adapter contract: ${provinceId ?? "unknown"}`);
-      const repairedPolygon = repairPhysicalPolygon(polygon);
+      const repairedPolygon = repairPhysicalPolygonToFixedPoint(polygon, provinceId ?? "unknown");
       return {
         ...geometry,
         header: {
