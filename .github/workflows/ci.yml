@@ -19,8 +19,8 @@ on:
       - feat/phase2d-anatolia-province-geometry
       - feat/phase2efgh-cartography
       - feat/cartography-visual-refinement
-      - feat/cartography-foundation-v2
       - feat/map-gpu-texture-architecture
+      - feat/p1-historical-political-map-foundation
   push:
     branches:
       - main
@@ -48,20 +48,25 @@ on:
       - feat/runtime-province-selection
       - feat/historical-map-clean-foundation
       - feat/historical-political-map-v1
+      - feat/p1-historical-political-map-foundation
+      - feat/p1-historical-political-map-geographic-province-rework
+      - p2-global-political-coverage
 
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version: 22.22.0
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Audit production dependency tree
+        run: npm audit --omit=dev --audit-level=high
       - name: Lint
         run: npm run lint
       - name: Generate world physical geometry assets
@@ -76,6 +81,8 @@ jobs:
         run: npm run validate:historical-gis:1300
       - name: Run historical GIS identity tests
         run: npm run test:historical-gis
+      - name: Run historical runtime regionalization tests
+        run: npm run test:historical-runtime-regions
       - name: Run physical geography tests
         run: npm run test:physical-geography
       - name: Run Natural Earth 10m hydrography tests
@@ -90,6 +97,12 @@ jobs:
         run: npm run test:historical-map-contract
       - name: Run historical political runtime tests
         run: npm run test:historical-political-runtime
+      - name: Run historical province political state tests
+        run: npm run test:historical-province-political-state
+      - name: Run historical political region coverage tests
+        run: npm run test:historical-political-region-layer
+      - name: Run historical political world coverage invariant tests
+        run: npm run test:historical-political-coverage-invariants
       - name: Run historical political map v1 tests
         run: npm run test:historical-political-map-v1
       - name: Run historical Anatolia control tests

@@ -36,10 +36,10 @@ function assertRing(name, ring) {
   assert.deepEqual(ring[0], ring.at(-1), `${name} must be closed.`);
 }
 
-assert.equal(atlas.version, 2);
+assert.equal(atlas.version, 3);
 assert.equal(atlas.projection, "EPSG:4326");
-assert.equal(atlas.landPolygons.length, 1);
-assert.ok(atlas.landPolygons[0].length >= 100, "The regional land mask must retain detailed coastline sampling.");
+assert.equal(atlas.landPolygons.length, 2, "The regional land mask must remain a MultiPolygon at the Bosporus.");
+assert.ok(atlas.landPolygons.every((polygon) => polygon.length >= 4), "Every regional land component must retain valid coastline sampling.");
 assert.equal(geometryFiles.length, 242, "Natural Earth 50m geometry generation must produce the expected country asset set.");
 assert.ok(generatedWorldLandPolygons.length > 0, "Generated Natural Earth land assets must be available before physical tests.");
 assert.match(atlas.hydrography.source, /Natural Earth 10m/);

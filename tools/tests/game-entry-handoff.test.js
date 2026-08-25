@@ -13,8 +13,20 @@ const gamePage = readFileSync(
 
 assert.match(
   characterCreate,
+  /async function acceptCharacter\(\)/,
+  "CharacterCreate must treat game startup as an asynchronous handoff.",
+);
+
+assert.match(
+  characterCreate,
+  /const session = await initializeGame\(\);/,
+  "CharacterCreate must await the new game session before reading its id.",
+);
+
+assert.doesNotMatch(
+  characterCreate,
   /const session = initializeGame\(\);/,
-  "CharacterCreate must initialize the new game session.",
+  "CharacterCreate must not treat the async initializer as a synchronous session.",
 );
 
 assert.match(
@@ -54,5 +66,5 @@ assert.match(
 );
 
 console.log(
-  "game-entry-handoff.test.js: new-game session handoff contract passed",
+  "game-entry-handoff.test.js: awaited new-game session handoff contract passed",
 );

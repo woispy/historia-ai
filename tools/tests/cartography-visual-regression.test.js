@@ -2,15 +2,12 @@ import assert from "node:assert/strict";
 import { ANATOLIA_CITY_ATLAS } from "../../src/map/data/AnatoliaCityAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { getCityLabelBudget, getCityMarkerBudget, getCityVisualStyle, layoutCityLabels, boxesOverlap } from "../../src/map/rendering/city/CityLabelLayout.js";
-import { getMapLod, getPhysicalPresentation, getPhysicalStrokeProfile, shouldUseGpuProvinceFill } from "../../src/map/rendering/CartographyModel.js";
+import { getMapLod, getPhysicalPresentation, getPhysicalStrokeProfile } from "../../src/map/rendering/CartographyModel.js";
 
 const cities = Object.entries(ANATOLIA_CITY_ATLAS).map(([id, map]) => ({ id, map }));
 assert.equal(getMapLod(1), "world");
 assert.equal(getMapLod(2.8), "city");
 assert.equal(getMapLod(8), "detailed");
-assert.equal(shouldUseGpuProvinceFill(1), true);
-assert.equal(shouldUseGpuProvinceFill(1.75), true);
-assert.equal(shouldUseGpuProvinceFill(1.85), false);
 
 for (const zoom of [1, 1.5, 2, 3, 4, 8, 16]) {
   const labels = layoutCityLabels(cities, zoom);

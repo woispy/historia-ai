@@ -36,21 +36,29 @@ export function createHistoricalPoliticalMapModel({
     const historicalProvince = metadataByProvinceId.get(province.id) ?? null;
 
     // Historical control is authoritative for the historical political layer.
-    // A null controller is meaningful: it represents an intentionally neutral,
-    // contested, layered, or not-yet-resolved locality. Falling back to the
-    // simulation province owner here would leak a non-historical identity into
-    // the 1300 presentation and would erase the distinction between geography
-    // and dated political control.
+    // A null direct polity is meaningful: it represents intentionally neutral,
+    // contested, or layered authority. Never leak the simulation owner into
+    // the 1300 presentation layer.
     const polityId = historicalProvince
       ? historicalProvince.polityId
       : null;
+    const suzerainPolityId = historicalProvince
+      ? historicalProvince.suzerainPolityId
+      : null;
+
+    // Historical land must never become visually blank merely because the
+    // exact direct sovereign is unresolved. Suzerainty keeps its dedicated
+    // presentation polity; other unresolved land uses the neutral polity.
+    const presentationPolityId = polityId
+      ?? suzerainPolityId
+      ?? "local_polities";
 
     // Presentation comes from the historical runtime registry, never from the
     // modern country repository. The repository remains available only as the
     // source/simulation identity for diagnostics and compatibility.
-    const historicalPolity = polityId ? getHistoricalPolity(polityId) : null;
+    const historicalPolity = getHistoricalPolity(presentationPolityId);
     const historicalPolitical = createHistoricalPoliticalPresentation({
-      polityId,
+      polityId: presentationPolityId,
       country: historicalPolity,
     });
 

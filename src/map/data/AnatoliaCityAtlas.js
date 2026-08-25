@@ -39,6 +39,7 @@ export const ANATOLIA_CITY_ATLAS = Object.freeze({
   beysehir: { name: "Beyşehir", modernName: "Beyşehir", x: 31.7244, y: 37.6774, tier: "capital", port: false, fortified: true, mapProvinceId: "pisidia-beysehir", mapProvinceIds: ["pisidia-beysehir"] },
   konya: { name: "Konya / Iconium", modernName: "Konya", x: 32.4925, y: 37.8746, tier: "major", port: false, fortified: true, mapProvinceId: "lycaonia-konya", mapProvinceIds: ["lycaonia-konya"] },
   larende: { name: "Larende", modernName: "Karaman", x: 33.2150, y: 37.1811, tier: "capital", port: false, fortified: true, mapProvinceId: "lycaonia-larende", mapProvinceIds: ["lycaonia-larende"] },
+  nigde: { name: "Nigde", modernName: "Niğde", x: 34.6764, y: 37.9697, tier: "major", port: false, fortified: true, mapProvinceId: "cappadocia-nigde", mapProvinceIds: ["cappadocia-nigde"] },
   ankara: { name: "Ancyra", modernName: "Ankara", x: 32.8541, y: 39.9208, tier: "major", port: false, fortified: true, mapProvinceId: "galatia-ankara", mapProvinceIds: ["galatia-ankara"] },
   kayseri: { name: "Caesarea", modernName: "Kayseri", x: 35.4900, y: 38.7200, tier: "major", port: false, fortified: true, mapProvinceId: "cappadocia-kayseri", mapProvinceIds: ["cappadocia-kayseri"] },
   sivas: { name: "Sebasteia", modernName: "Sivas", x: 37.0167, y: 39.7500, tier: "major", port: false, fortified: true, mapProvinceId: "cappadocia-sivas", mapProvinceIds: ["cappadocia-sivas"] },
@@ -49,9 +50,14 @@ export const ANATOLIA_CITY_ATLAS = Object.freeze({
   trabzon: { name: "Trebizond", modernName: "Trabzon", x: 39.7167, y: 41.0010, tier: "capital", port: true, fortified: true, mapProvinceId: "pontus-trebizond", mapProvinceIds: ["pontus-trebizond"] },
   erzincan: { name: "Erzingan", modernName: "Erzincan", x: 39.4900, y: 39.7500, tier: "major", port: false, fortified: true, mapProvinceId: "eastern-anatolia-erzincan", mapProvinceIds: ["eastern-anatolia-erzincan"] },
   erzurum: { name: "Theodosiopolis", modernName: "Erzurum", x: 41.2769, y: 39.9043, tier: "major", port: false, fortified: true, mapProvinceId: "eastern-anatolia-erzurum", mapProvinceIds: ["eastern-anatolia-erzurum"] },
+  malatya: { name: "Melitene", modernName: "Malatya", x: 38.3550, y: 38.3550, tier: "major", port: false, fortified: true, mapProvinceId: "euphrates-malatya", mapProvinceIds: ["euphrates-malatya"] },
   sis: { name: "Sis", modernName: "Kozan", x: 35.8000, y: 37.4500, tier: "capital", port: false, fortified: true, mapProvinceId: "cilicia-sis", mapProvinceIds: ["cilicia-sis"] },
   tarsus: { name: "Tarsos", modernName: "Tarsus", x: 34.8950, y: 36.9167, tier: "major", port: false, fortified: true, mapProvinceId: "cilicia-tarsos", mapProvinceIds: ["cilicia-tarsos"] },
+  adana: { name: "Adana", modernName: "Adana", x: 35.3213, y: 37.0000, tier: "major", port: false, fortified: true, mapProvinceId: "cilicia-adana", mapProvinceIds: ["cilicia-adana"] },
   alaiye: { name: "Alaiye", modernName: "Alanya", x: 31.9980, y: 36.5440, tier: "major", port: true, fortified: true, mapProvinceId: "cilicia-alaiye", mapProvinceIds: ["cilicia-alaiye"] },
+  antalya: { name: "Attaleia", modernName: "Antalya", x: 30.7133, y: 36.8969, tier: "major", port: true, fortified: true, mapProvinceId: "pamphylia-attaleia", mapProvinceIds: ["pamphylia-attaleia"] },
+  myra: { name: "Myra", modernName: "Demre", x: 29.9847, y: 36.2575, tier: "major", port: true, fortified: true, mapProvinceId: "lycia-myra", mapProvinceIds: ["lycia-myra"] },
+  "antioch-pisidia": { name: "Pisidian Antioch", modernName: "Yalvaç", x: 31.1843, y: 38.3002, tier: "major", port: false, fortified: true, mapProvinceId: "pisidia-antiochia", mapProvinceIds: ["pisidia-antiochia"] },
 });
 
 export function getAnatoliaCityMapMetadata(cityId) {

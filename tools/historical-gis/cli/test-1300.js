@@ -52,8 +52,8 @@ assert.equal(regionalAssets.find(({ province: asset }) => asset.identity.id === 
 assert.equal(regionalAssets.find(({ province: asset }) => asset.identity.id === "anatolia_byzantium_bithynia").province.ownership.countryId, "byzantium");
 assert.ok(regionalAssets.every(({ province: asset }) => asset.historical.precision === "approximate"));
 assert.ok(regionalAssets.every(({ province: asset }) => asset.historical.borderPrecision <= 2));
-assert.equal(ANATOLIA_PHYSICAL_ATLAS.landPolygons.length, 1);
-assert.ok(ANATOLIA_PHYSICAL_ATLAS.landPolygons[0].length >= 100);
+assert.equal(ANATOLIA_PHYSICAL_ATLAS.landPolygons.length, 2);
+assert.ok(ANATOLIA_PHYSICAL_ATLAS.landPolygons.every((polygon) => polygon.length >= 4));
 assert.ok(ANATOLIA_CITY_ATLAS.konstantinopolis);
 assert.ok(ANATOLIA_CITY_ATLAS.bursa);
 assert.ok(ANATOLIA_CITY_ATLAS.trabzon);

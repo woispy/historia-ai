@@ -1,26 +1,33 @@
 import "./App.css";
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import MainMenu from "./pages/MainMenu";
-import NewGame from "./pages/NewGame";
-import ScenarioSelect from "./pages/ScenarioSelect";
-import Settings from "./pages/Settings";
-import Game from "./pages/Game";
-import CountrySelect from "./pages/CountrySelect";
-import CharacterCreate from "./pages/CharacterCreate";
+const MainMenu = lazy(() => import("./pages/MainMenu"));
+const NewGame = lazy(() => import("./pages/NewGame"));
+const ScenarioSelect = lazy(() => import("./pages/ScenarioSelect"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Game = lazy(() => import("./pages/Game"));
+const CountrySelect = lazy(() => import("./pages/CountrySelect"));
+const CharacterCreate = lazy(() => import("./pages/CharacterCreate"));
+
+function RouteFallback() {
+  return <div className="route-loading" role="status" aria-live="polite">Loading…</div>;
+}
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<MainMenu />} />
-        <Route path="/new-game" element={<NewGame />} />
-        <Route path="/scenario" element={<ScenarioSelect />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/game" element={<Game />} />
-        <Route path="/country" element={<CountrySelect />} />
-        <Route path="/character" element={<CharacterCreate />} />
-      </Routes>
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          <Route path="/" element={<MainMenu />} />
+          <Route path="/new-game" element={<NewGame />} />
+          <Route path="/scenario" element={<ScenarioSelect />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/game" element={<Game />} />
+          <Route path="/country" element={<CountrySelect />} />
+          <Route path="/character" element={<CharacterCreate />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

@@ -4,16 +4,20 @@ import {
   isAnatoliaGeometryPoint,
   isPhysicalLandPoint,
 } from "../historical-gis/AnatoliaPhase2DGeometryBuilder.js";
+import { refineAnatoliaPhase2DCoastline } from "../historical-gis/AnatoliaPhase2DCoastlineRefinement.js";
+import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
+import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
+import { isUsablePhysicalLandPoint } from "../../src/map/rendering/physical/PhysicalLandAuthority.js";
 
-const result = buildAnatoliaPhase2DAssets([
+const result = refineAnatoliaPhase2DCoastline(buildAnatoliaPhase2DAssets([
   { polygons: [[[29.9, 40.7], [30.1, 40.7], [30.1, 40.9], [29.9, 40.7]]] },
   { polygons: [[[27.4, 38.4], [27.7, 38.4], [27.7, 38.7], [27.4, 38.4]]] },
-]);
+]));
 
 assert.equal(result.historicalDate, "1300-01-01");
 assert.equal(result.provinceCount, ANATOLIA_PROVINCE_METADATA.length);
-assert.equal(result.provinceCount, 38);
+assert.equal(result.provinceCount, 44);
 console.log(`Phase 2D cartographic site count: ${result.siteCount}`);
 assert.ok(result.siteCount >= 1000, "Phase 2D must use a dense physical/cartographic site field");
 assert.ok(result.barrierSiteCount >= 300, "Phase 2D must include a substantial physical water/coast barrier field");
@@ -23,6 +27,9 @@ assert.ok(
 );
 assert.ok(result.polygonCount >= result.provinceCount, "Every province must contain at least one polygon");
 assert.equal(result.provinces.length, result.geometries.length);
+assert.equal(result.coastlineRefinement?.coastalProvinceCount, ANATOLIA_PROVINCE_METADATA.filter((province) => province.coastal).length);
+assert.equal(result.coastlineRefinement?.polygonBoundaryLandInvariant, true);
+assert.equal(result.coastlineRefinement?.waterExclusionInvariant, true);
 
 const provinceIds = new Set();
 let vertexCount = 0;
@@ -51,6 +58,33 @@ function polygonArea(polygon) {
   return Math.abs(area) / 2;
 }
 
+const land = ANATOLIA_PHYSICAL_ATLAS.landPolygons;
+const seas = ANATOLIA_PHYSICAL_ATLAS.seas.map((sea) => sea.coordinates);
+const channels = ANATOLIA_PHYSICAL_ATLAS.channels.map((channel) => channel.coordinates);
+const lakes = ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes;
+
+function assertUsablePolygonBoundary(polygon, provinceId) {
+  assert.ok(isUsablePhysicalLandPoint(polygonCentroid(polygon), land, seas, channels, lakes));
+  for (let index = 0; index < polygon.length; index += 1) {
+    const start = polygon[index];
+    const end = polygon[(index + 1) % polygon.length];
+    assert.ok(
+      isUsablePhysicalLandPoint(start, land, seas, channels, lakes),
+      `${provinceId} polygon vertex must remain on usable physical land: ${start.join(",")}`,
+    );
+    for (const fraction of [0.25, 0.5, 0.75]) {
+      const sample = [
+        start[0] + (end[0] - start[0]) * fraction,
+        start[1] + (end[1] - start[1]) * fraction,
+      ];
+      assert.ok(
+        isUsablePhysicalLandPoint(sample, land, seas, channels, lakes),
+        `${provinceId} polygon boundary must remain on usable physical land: ${sample.join(",")}`,
+      );
+    }
+  }
+}
+
 for (const geometry of result.geometries) {
   assert.ok(provinceIds.has(geometry.identity.provinceId));
   assert.ok(geometry.polygons.length > 0);
@@ -58,20 +92,62 @@ for (const geometry of result.geometries) {
     assert.ok(polygon.length >= 3);
     vertexCount += polygon.length;
     const centroid = polygonCentroid(polygon);
-    // Tiny anchor fallbacks are explicit reconciliation placeholders for
-    // coarse physical-atlas cells; normal geometry must satisfy the hard
-    // physical-land invariant.
     if (polygonArea(polygon) >= 0.00005) {
       assert.ok(
         isPhysicalLandPoint(centroid),
         `Phase 2D polygon centroid must remain on physical land: ${centroid.join(",")}`,
       );
+      assert.ok(
+        isUsablePhysicalLandPoint(centroid, land, seas, channels, lakes),
+        `Phase 2D polygon centroid must remain on usable physical land: ${centroid.join(",")}`,
+      );
+      assertUsablePolygonBoundary(polygon, geometry.identity.provinceId);
     }
     for (const [longitude, latitude] of polygon) {
       assert.ok(longitude >= 25 && longitude <= 46, `Longitude out of Phase 2D envelope: ${longitude}`);
       assert.ok(latitude >= 35 && latitude <= 43, `Latitude out of Phase 2D envelope: ${latitude}`);
     }
   }
+}
+
+function pointToSegmentDistanceSquared(point, start, end) {
+  const dx = end[0] - start[0];
+  const dy = end[1] - start[1];
+  if (dx === 0 && dy === 0) {
+    return (point[0] - start[0]) ** 2 + (point[1] - start[1]) ** 2;
+  }
+  const t = Math.max(0, Math.min(1, (
+    (point[0] - start[0]) * dx + (point[1] - start[1]) * dy
+  ) / (dx * dx + dy * dy)));
+  const projected = [start[0] + dx * t, start[1] + dy * t];
+  return (point[0] - projected[0]) ** 2 + (point[1] - projected[1]) ** 2;
+}
+
+function distanceToPhysicalCoast(point) {
+  let best = Number.POSITIVE_INFINITY;
+  for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
+    for (let index = 0; index < polygon.length; index += 1) {
+      best = Math.min(
+        best,
+        pointToSegmentDistanceSquared(point, polygon[index], polygon[(index + 1) % polygon.length]),
+      );
+    }
+  }
+  return Math.sqrt(best);
+}
+
+const coastalProvinceIds = new Set(
+  ANATOLIA_PROVINCE_METADATA.filter((province) => province.coastal).map((province) => province.id),
+);
+for (const geometry of result.geometries) {
+  if (!coastalProvinceIds.has(geometry.identity.provinceId)) continue;
+  const closestVertex = geometry.polygons
+    .flat()
+    .reduce((best, point) => Math.min(best, distanceToPhysicalCoast(point)), Number.POSITIVE_INFINITY);
+  assert.ok(
+    closestVertex <= 0.01,
+    `${geometry.identity.provinceId} must retain a political geometry vertex within 0.01 degrees of the physical coastline (got ${closestVertex})`,
+  );
 }
 
 assert.ok(vertexCount >= 150, "Phase 2D geometry must contain a sufficiently detailed vertex field");
