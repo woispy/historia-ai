@@ -197,7 +197,7 @@ function buildProvinceAssets(geometries) {
     const metadata = metadataById.get(provinceId);
     if (!metadata) throw new Error(`Phase 2D geometry has no matching province metadata: ${provinceId}`);
     return {
-      header: { assetType: "province", assetVersion: 4, generator: "Historia AI Phase 2D Geometry Builder V15 adapter", provider: "historia-ai-curated-cartography", dataset: "anatolia-province-geometry-1300", historicalDate: HISTORICAL_DATE, provinceId, historicalAnchor: geometry.identity?.historicalAnchor ?? metadata.centroid },
+      header: { assetType: "province", assetVersion: 4, generator: "Historia AI Phase 2D Geometry Builder V16", provider: "historia-ai-curated-cartography", dataset: "anatolia-province-geometry-1300", historicalDate: HISTORICAL_DATE, provinceId, historicalAnchor: geometry.identity?.historicalAnchor ?? metadata.centroid },
       identity: { id: provinceId, name: metadata.name },
       references: { geometryId: provinceId, countryId: metadata.countryId, capitalCityId: metadata.cityId },
       ownership: { countryId: metadata.historicalControl?.controllerAt1300 ?? metadata.countryId ?? null, ownerId: metadata.historicalControl?.controllerAt1300 ?? metadata.countryId ?? null },
