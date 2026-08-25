@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 
 import { repairPhysicalPolygon } from "../historical-gis/recovery/physical-edge-repair-v3.mjs";
-import { isPhysicalLandPoint, isFinalPhysicalGeometryBoundaryPoint } from "../historical-gis/recovery/physical-land-authority.mjs";
+import { isPhysicalLandPoint, isFinalPhysicalGeometryBoundaryPoint, pointInPolygon } from "../historical-gis/recovery/physical-land-authority.mjs";
 
 const knownPhrygiaEskisehir = [
   [30.4729109648, 39.2531915815],
@@ -74,17 +74,7 @@ for (const [label, polygon, options] of [
   const repaired = repairPhysicalPolygon(polygon, options);
   assertPhysicalPath(repaired, label, polygon);
   if (options?.containmentPolygon) {
-    assert.ok(repaired.every((point) => {
-      const source = options.containmentPolygon;
-      let inside = false;
-      for (let index = 0, previous = source.length - 1; index < source.length; previous = index++) {
-        const a = source[index];
-        const b = source[previous];
-        if ((a[1] > point[1]) !== (b[1] > point[1])
-          && point[0] < ((b[0] - a[0]) * (point[1] - a[1])) / ((b[1] - a[1]) || Number.EPSILON) + a[0]) inside = !inside;
-      }
-      return inside || source.some((sourcePoint) => Math.hypot(sourcePoint[0] - point[0], sourcePoint[1] - point[1]) < 1e-7);
-    }), `${label}: repaired vertices escaped source containment polygon`);
+    assert.ok(repaired.every((point) => pointInPolygon(point, options.containmentPolygon)), `${label}: repaired vertices escaped source containment polygon`);
   }
   console.log(`Physical edge repair contract passed: ${label} ${polygon.length}→${repaired.length} vertices.`);
 }
