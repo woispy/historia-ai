@@ -12,7 +12,7 @@ function signedArea(polygon) {
   let sum = 0;
   for (let index = 0; index < polygon.length; index += 1) {
     const next = polygon[(index + 1) % polygon.length];
-    sum += polygon[index][0] * next[1] - next[0] * polygon[index][1];
+    sum += polygon[index][0] * next[1] - next[0] * next[1 - 1];
   }
   return sum / 2;
 }
@@ -158,15 +158,16 @@ export function resolvePhysicalGeometryBoundaryPoint(point) {
     return [...shoreline.point];
   }
 
-  if (isLakeShorelineRecoveryCandidate(point, shoreline)
-    && shoreline.distance <= landBoundary.distance) {
-    return [...shoreline.point];
+  if (!isLakeInteriorPoint(point)
+    && landBoundary.point
+    && landBoundary.distance <= MAX_RECOVERY_DISTANCE) {
+    return [...landBoundary.point];
   }
 
-  if (landBoundary.point
-    && landBoundary.distance <= MAX_RECOVERY_DISTANCE
-    && !isLakeInteriorPoint(point)) {
-    return [...landBoundary.point];
+  if (isLakeShorelineRecoveryCandidate(point, shoreline)
+    && shoreline.distance <= MAX_RECOVERY_DISTANCE
+    && (isLakeBoundaryPoint(point) || shoreline.distance <= landBoundary.distance)) {
+    return [...shoreline.point];
   }
   return null;
 }
