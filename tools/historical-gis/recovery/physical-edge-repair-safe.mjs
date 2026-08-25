@@ -59,12 +59,7 @@ function projectToBoundary(point) {
       const end = boundary[(segmentIndex + 1) % boundary.length];
       const projection = nearestPointOnSegment(point, start, end);
       if (!best || projection.distance < best.distance) {
-        best = {
-          ...descriptor,
-          segmentIndex,
-          point: projection.point,
-          distance: projection.distance,
-        };
+        best = { ...descriptor, segmentIndex, point: projection.point, distance: projection.distance };
       }
     }
   }
@@ -93,7 +88,7 @@ function refineTransition(start, end, validFraction, invalidFraction) {
     if (isValidPhysicalPoint(sample(start, end, midpoint))) valid = midpoint;
     else invalid = midpoint;
   }
-  return sample(start, end, (valid + invalid) / 2);
+  return (valid + invalid) / 2;
 }
 
 function waterTransitions(start, end) {
@@ -107,7 +102,8 @@ function waterTransitions(start, end) {
     const current = states[index];
     const next = states[index + 1];
     if (current.valid === next.valid) continue;
-    transitions.push(refineTransition(start, end, current.valid ? current.fraction : next.fraction, current.valid ? next.fraction : current.fraction));
+    const fraction = refineTransition(start, end, current.valid ? current.fraction : next.fraction, current.valid ? next.fraction : current.fraction);
+    transitions.push({ fraction, point: sample(start, end, fraction), entersWater: current.valid && !next.valid });
   }
   return transitions;
 }
@@ -142,24 +138,23 @@ function sameBoundary(a, b) {
   return true;
 }
 
+function pathLength(path) {
+  let total = 0;
+  for (let index = 1; index < path.length; index += 1) total += distance(path[index - 1], path[index]);
+  return total;
+}
+
 function chooseBoundaryPath(fromPoint, toPoint) {
   const from = projectToBoundary(fromPoint);
   const to = projectToBoundary(toPoint);
   if (!from || !to) return null;
   if (sameBoundary(from, to)) {
-    const paths = arcCandidates(from.boundary, from, to)
+    return arcCandidates(from.boundary, from, to)
       .filter((path) => isValidPhysicalPath(path))
-      .sort((a, b) => pathLength(a) - pathLength(b));
-    return paths[0] ?? null;
+      .sort((a, b) => pathLength(a) - pathLength(b))[0] ?? null;
   }
   const direct = [from.point, to.point];
   return isValidPhysicalPath(direct) ? direct : null;
-}
-
-function pathLength(path) {
-  let total = 0;
-  for (let index = 1; index < path.length; index += 1) total += distance(path[index - 1], path[index]);
-  return total;
 }
 
 function appendUnique(target, points) {
@@ -179,26 +174,29 @@ function fallbackEdge(start, end) {
   for (let index = 0; index < transitions.length; index += 2) {
     const entry = transitions[index];
     const exit = transitions[index + 1];
-    const entryBoundary = resolvePhysicalGeometryBoundaryPoint(entry);
-    const exitBoundary = resolvePhysicalGeometryBoundaryPoint(exit);
+    if (!entry.entersWater || exit.entersWater) return null;
+
+    const entryBoundary = resolvePhysicalGeometryBoundaryPoint(entry.point);
+    const exitBoundary = resolvePhysicalGeometryBoundaryPoint(exit.point);
     if (!entryBoundary || !exitBoundary) return null;
 
-    const prefix = [cursor, entryBoundary];
-    if (!isValidPhysicalPath(prefix)) return null;
-    appendUnique(repaired, prefix.slice(1));
+    if (!isValidPhysicalPath([cursor, entryBoundary])) return null;
+    appendUnique(repaired, [entryBoundary]);
 
     const boundaryPath = chooseBoundaryPath(entryBoundary, exitBoundary);
     if (!boundaryPath) return null;
     appendUnique(repaired, boundaryPath.slice(1));
-    cursor = boundaryPath[boundaryPath.length - 1];
+    cursor = exitBoundary;
 
-    const suffix = [cursor, sample(start, end, (index + 2 < transitions.length) ? transitions[index + 2].__fraction ?? 0 : 1)];
-    if (index + 2 >= transitions.length) break;
-    if (!isValidPhysicalPath(suffix)) {
-      const nextBoundary = resolvePhysicalGeometryBoundaryPoint(transitions[index + 2]);
-      if (!nextBoundary || !isValidPhysicalPath([cursor, nextBoundary])) return null;
+    const nextEntry = transitions[index + 2];
+    if (nextEntry) {
+      const nextEntryBoundary = resolvePhysicalGeometryBoundaryPoint(nextEntry.point);
+      if (!nextEntryBoundary || !isValidPhysicalPath([cursor, nextEntryBoundary])) return null;
+      appendUnique(repaired, [nextEntryBoundary]);
+      cursor = nextEntryBoundary;
     }
   }
+
   if (!isValidPhysicalPath([cursor, end])) return null;
   appendUnique(repaired, [end]);
   return isValidPhysicalPath(repaired) ? repaired : null;
