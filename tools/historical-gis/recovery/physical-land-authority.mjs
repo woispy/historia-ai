@@ -11,8 +11,9 @@ const NUMERICAL_BOUNDARY_TOLERANCE = 0.0001;
 function signedArea(polygon) {
   let sum = 0;
   for (let index = 0; index < polygon.length; index += 1) {
+    const current = polygon[index];
     const next = polygon[(index + 1) % polygon.length];
-    sum += polygon[index][0] * next[1] - next[0] * next[1];
+    sum += current[0] * next[1] - next[0] * current[1];
   }
   return sum / 2;
 }
