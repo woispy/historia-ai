@@ -2,6 +2,7 @@ import {
   buildAnatoliaPhase2DAssets as buildAnatoliaPhase2DAssetsV16,
   isPhysicalLandPoint,
   isPhysicalGeometryBoundaryPoint,
+  resolvePhysicalGeometryBoundaryPoint,
 } from "./AnatoliaPhase2DGeometryBuilderV15Adapter.js";
 import { isAnatoliaGeometryPoint } from "./AnatoliaGeometryAuthority.js";
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
@@ -71,7 +72,12 @@ function recoverNumericalBoundaryDrift(point) {
 
 function normalizeOuterRing(ring) {
   return ring.map((point) => {
-    if (isPhysicalLandPoint(point) || isPhysicalGeometryBoundaryPoint(point)) return point;
+    if (isPhysicalLandPoint(point)) return point;
+    const resolved = resolvePhysicalGeometryBoundaryPoint(point);
+    if (resolved) return resolved.map((value) => Number(value.toFixed(7)));
+    if (isPhysicalGeometryBoundaryPoint(point)) {
+      throw new Error(`Phase 2D geometry vertex remains a non-land support point after physical boundary resolution: ${point.join(",")}`);
+    }
     const recovered = recoverNumericalBoundaryDrift(point);
     if (recovered) return recovered.map((value) => Number(value.toFixed(7)));
     throw new Error(`Phase 2D geometry vertex is outside physical land beyond numerical drift: ${point.join(",")}`);
