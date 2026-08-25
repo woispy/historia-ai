@@ -1,6 +1,7 @@
 import {
   buildAnatoliaPhase2DAssets as buildAnatoliaPhase2DAssetsV16,
   isPhysicalLandPoint,
+  isPhysicalGeometryBoundaryPoint,
 } from "./AnatoliaPhase2DGeometryBuilderV15Adapter.js";
 import { isAnatoliaGeometryPoint } from "./AnatoliaGeometryAuthority.js";
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
@@ -70,12 +71,10 @@ function recoverNumericalBoundaryDrift(point) {
 
 function normalizeOuterRing(ring) {
   return ring.map((point) => {
-    if (!isPhysicalLandPoint(point)) {
-      const recovered = recoverNumericalBoundaryDrift(point);
-      if (recovered) return recovered.map((value) => Number(value.toFixed(7)));
-      throw new Error(`Phase 2D geometry vertex is outside physical land beyond numerical drift: ${point.join(",")}`);
-    }
-    return point;
+    if (isPhysicalLandPoint(point) || isPhysicalGeometryBoundaryPoint(point)) return point;
+    const recovered = recoverNumericalBoundaryDrift(point);
+    if (recovered) return recovered.map((value) => Number(value.toFixed(7)));
+    throw new Error(`Phase 2D geometry vertex is outside physical land beyond numerical drift: ${point.join(",")}`);
   });
 }
 
@@ -136,7 +135,7 @@ function clipPolygonToAnchorHalfPlane(polygon, ownAnchor, otherAnchor) {
   const dx = otherAnchor[0] - ownAnchor[0];
   const dy = otherAnchor[1] - ownAnchor[1];
   if (Math.hypot(dx, dy) <= GEOMETRY_EPS) return polygon;
-  const c = (otherAnchor[0] ** 2 + otherAnchor[1] ** 2 - ownAnchor[0] ** 2 - ownAnchor[1] ** 2) / 2;
+  const c = (otherAnchor[0] ** 2 + otherAnchor[1] ** 2 - ownAnchor[0] ** 2 - ownAnchor[0] ** 2) / 2;
   const inside = (point) => dx * point[0] + dy * point[1] <= c + GEOMETRY_EPS;
   const output = [];
   for (let index = 0; index < polygon.length; index += 1) {
