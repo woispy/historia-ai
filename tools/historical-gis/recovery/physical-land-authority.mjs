@@ -5,6 +5,7 @@ import { ANATOLIA_PHYSICAL_COAST_CORRECTIONS } from "../../../src/map/data/Anato
 const EPS = 1e-9;
 const MIN_AREA = 0.00005;
 const MAX_RECOVERY_DISTANCE = 0.75;
+const STRICT_BOUNDARY_RECOVERY_DISTANCE = 0.00001;
 const RECOVERY_STEP = 0.001;
 const NUMERICAL_BOUNDARY_TOLERANCE = 0.0001;
 const BBOX_EPS = NUMERICAL_BOUNDARY_TOLERANCE;
@@ -247,6 +248,32 @@ export function resolvePhysicalGeometryBoundaryPoint(point) {
 
   if (isLakeShorelineRecoveryCandidate(point, shoreline)
     && shoreline.distance <= MAX_RECOVERY_DISTANCE
+    && (isLakeBoundaryPoint(point) || shoreline.distance <= landBoundary.distance)) {
+    return [...shoreline.point];
+  }
+  return null;
+}
+
+export function resolvePhysicalGeometryBoundaryPointStrict(point) {
+  if (isPhysicalLandPoint(point)) return [...point];
+
+  const shoreline = nearestLakeBoundaryPoint(point);
+  const landBoundary = nearestBoundaryLandPoint(point);
+
+  if (isLakeInteriorPoint(point)
+    && shoreline.point
+    && shoreline.distance <= STRICT_BOUNDARY_RECOVERY_DISTANCE) {
+    return [...shoreline.point];
+  }
+
+  if (!isLakeInteriorPoint(point)
+    && landBoundary.point
+    && landBoundary.distance <= STRICT_BOUNDARY_RECOVERY_DISTANCE) {
+    return [...landBoundary.point];
+  }
+
+  if (shoreline.point
+    && shoreline.distance <= STRICT_BOUNDARY_RECOVERY_DISTANCE
     && (isLakeBoundaryPoint(point) || shoreline.distance <= landBoundary.distance)) {
     return [...shoreline.point];
   }
