@@ -55,12 +55,26 @@ function lakeRings(lake) {
   return lake.rings ?? [lake.coordinates];
 }
 
+function lakeOuterRingIsAuthoritative(lake) {
+  const outerRing = lakeRings(lake)[0];
+  if (!Array.isArray(outerRing) || outerRing.length < 4) return false;
+  // Generated hydrography is subordinate to the authoritative land mask.
+  // A water polygon whose entire outer shoreline is not contained by land is
+  // not an inland lake authority; this prevents offshore/seaward polygons from
+  // classifying the Black Sea or other coastal water as a lake interior.
+  return outerRing.every((point) => PHYSICAL_LAND_POLYGONS.some((polygon) => pointInPolygon(point, polygon)));
+}
+
+export const AUTHORITATIVE_LAKES = Object.freeze(
+  ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.filter(lakeOuterRingIsAuthoritative),
+);
+
 function isLakeBoundaryPoint(point) {
-  return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => lakeRings(lake).some((ring) => ring?.some((vertex, index) => pointOnSegment(point, vertex, ring[(index + 1) % ring.length]))));
+  return AUTHORITATIVE_LAKES.some((lake) => lakeRings(lake).some((ring) => ring?.some((vertex, index) => pointOnSegment(point, vertex, ring[(index + 1) % ring.length]))));
 }
 
 export function isLakeInteriorPoint(point) {
-  return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => {
+  return AUTHORITATIVE_LAKES.some((lake) => {
     const rings = lakeRings(lake);
     return rings.length > 0 && pointInPolygon(point, rings[0])
       && !rings.slice(1).some((ring) => pointInPolygon(point, ring));
@@ -92,7 +106,7 @@ function nearestPointOnRing(point, ring) {
 export function nearestLakeBoundaryPoint(point) {
   let best = null;
   let bestDistance = Infinity;
-  for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) {
+  for (const lake of AUTHORITATIVE_LAKES) {
     for (const ring of lakeRings(lake)) {
       if (!ring?.length) continue;
       const candidate = nearestPointOnRing(point, ring);
