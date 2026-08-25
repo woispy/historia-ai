@@ -1,6 +1,4 @@
-import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
-import { ANATOLIA_PHYSICAL_COAST_CORRECTIONS } from "../../src/map/data/AnatoliaPhysicalCoastCorrections.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 import {
   ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST,
@@ -11,6 +9,11 @@ import {
   ANATOLIA_STRATEGIC_PASSES,
   ANATOLIA_RIVER_CROSSINGS,
 } from "../../src/map/data/AnatoliaProvinceRefinement.js";
+import {
+  PHYSICAL_LAND_POLYGONS,
+  isPhysicalLandPoint,
+  resolveGeometryAnchor,
+} from "./recovery/physical-land-authority.mjs";
 
 const BBOX = [25.45, 35.72, 44.85, 42.35];
 const EPS = 1e-7;
@@ -20,10 +23,6 @@ const EDGE_FRACTIONS = [0, 0.25, 0.5, 0.75, 1];
 const MAX_AREA_RATIO = 4.2;
 const MAX_WEIGHT_ITERATIONS = 24;
 const MAX_WEIGHT_STEP = 4;
-const MAX_ANCHOR_SNAP_DISTANCE = 1.2;
-const LOCAL_ANCHOR_SEARCH_MAX = 0.35;
-const LOCAL_ANCHOR_SEARCH_STEP = 0.01;
-const LOCAL_ANCHOR_DIRECTIONS = 24;
 const BOUNDARY_SAMPLE_STEP = 0.06;
 const FEATURE_WEIGHT_STEP = 0.01;
 
@@ -61,70 +60,8 @@ function cross(a, b, point) {
     - (b[1] - a[1]) * (point[0] - a[0]);
 }
 
-function coreLandPolygons() {
-  return [
-    ...ANATOLIA_PHYSICAL_ATLAS.landPolygons,
-    ...ANATOLIA_PHYSICAL_COAST_CORRECTIONS.map((item) => item.coordinates),
-  ].filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
-}
-
-const LAND_POLYGONS = coreLandPolygons();
-
 function inLake(point) {
   return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygon(point, lake.coordinates));
-}
-
-function isPhysicalLandPoint(point) {
-  return LAND_POLYGONS.some((polygon) => pointInPolygon(point, polygon)) && !inLake(point);
-}
-
-function findLocalLandPoint(point) {
-  if (isPhysicalLandPoint(point)) return point;
-  for (let radius = LOCAL_ANCHOR_SEARCH_STEP; radius <= LOCAL_ANCHOR_SEARCH_MAX + EPS; radius += LOCAL_ANCHOR_SEARCH_STEP) {
-    for (let direction = 0; direction < LOCAL_ANCHOR_DIRECTIONS; direction += 1) {
-      const angle = (direction / LOCAL_ANCHOR_DIRECTIONS) * Math.PI * 2;
-      const candidate = [
-        point[0] + Math.cos(angle) * radius,
-        point[1] + Math.sin(angle) * radius,
-      ];
-      if (isPhysicalLandPoint(candidate)) return candidate;
-    }
-  }
-  return null;
-}
-
-function nearestBoundaryLandPoint(point) {
-  let best = null;
-  let bestDistance = Infinity;
-  for (const polygon of LAND_POLYGONS) {
-    for (let index = 0; index < polygon.length; index += 1) {
-      const start = polygon[index];
-      const end = polygon[(index + 1) % polygon.length];
-      const dx = end[0] - start[0];
-      const dy = end[1] - start[1];
-      const denominator = dx * dx + dy * dy;
-      const t = denominator < EPS
-        ? 0
-        : Math.max(0, Math.min(1, ((point[0] - start[0]) * dx + (point[1] - start[1]) * dy) / denominator));
-      const candidate = [start[0] + dx * t, start[1] + dy * t];
-      const distance = Math.hypot(point[0] - candidate[0], point[1] - candidate[1]);
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        best = candidate;
-      }
-    }
-  }
-  return { point: best, distance: bestDistance };
-}
-
-function nearestLandPoint(point) {
-  const local = findLocalLandPoint(point);
-  if (local) return local;
-  const boundary = nearestBoundaryLandPoint(point);
-  if (!boundary.point || boundary.distance > MAX_ANCHOR_SNAP_DISTANCE) {
-    throw new Error(`Historical province anchor is too far from physical land: ${point.join(",")} (${boundary.distance.toFixed(3)}°)`);
-  }
-  throw new Error(`Historical province anchor has no local physical-land recovery: ${point.join(",")} (${boundary.distance.toFixed(3)}° to outer land)`);
 }
 
 function addBoundarySites(sites, polygon, kind) {
@@ -136,10 +73,7 @@ function addBoundarySites(sites, polygon, kind) {
     for (let step = 0; step <= steps; step += 1) {
       const t = step / steps;
       sites.push({
-        point: [
-          start[0] + (end[0] - start[0]) * t,
-          start[1] + (end[1] - start[1]) * t,
-        ],
+        point: [start[0] + (end[0] - start[0]) * t, start[1] + (end[1] - start[1]) * t],
         provinceId: null,
         kind,
       });
@@ -149,7 +83,7 @@ function addBoundarySites(sites, polygon, kind) {
 
 function buildPhysicalBoundarySites() {
   const sites = [];
-  for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) addBoundarySites(sites, polygon, "physical-land-boundary");
+  for (const polygon of PHYSICAL_LAND_POLYGONS) addBoundarySites(sites, polygon, "physical-land-boundary");
   for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) {
     if (lake.coordinates?.length >= 3) addBoundarySites(sites, lake.coordinates, "lake-boundary");
   }
@@ -164,19 +98,13 @@ function halfPlane(polygon, a, b, c) {
     const next = polygon[(index + 1) % polygon.length];
     const currentInside = inside(current);
     const nextInside = inside(next);
-    if (currentInside && nextInside) {
-      output.push(next);
-      continue;
-    }
-    if (currentInside !== nextInside) {
+    if (currentInside && nextInside) output.push(next);
+    else if (currentInside !== nextInside) {
       const currentValue = a * current[0] + b * current[1] - c;
       const nextValue = a * next[0] + b * next[1] - c;
       const denominator = currentValue - nextValue;
       const t = Math.abs(denominator) < EPS ? 0 : currentValue / denominator;
-      output.push([
-        current[0] + (next[0] - current[0]) * t,
-        current[1] + (next[1] - current[1]) * t,
-      ]);
+      output.push([current[0] + (next[0] - current[0]) * t, current[1] + (next[1] - current[1]) * t]);
       if (!currentInside && nextInside) output.push(next);
     }
   }
@@ -223,10 +151,7 @@ function clipLandByCell(land, cell) {
         const nextValue = cross(start, end, next);
         const denominator = currentValue - nextValue;
         const t = Math.abs(denominator) < EPS ? 0 : currentValue / denominator;
-        output.push([
-          current[0] + (next[0] - current[0]) * t,
-          current[1] + (next[1] - current[1]) * t,
-        ]);
+        output.push([current[0] + (next[0] - current[0]) * t, current[1] + (next[1] - current[1]) * t]);
         if (!currentInside && nextInside) output.push(next);
       }
     }
@@ -235,7 +160,7 @@ function clipLandByCell(land, cell) {
 }
 
 function clipCellToLand(cell, anchorPoint) {
-  const candidates = LAND_POLYGONS
+  const candidates = PHYSICAL_LAND_POLYGONS
     .map((land) => clipLandByCell(land, cell))
     .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
   const containing = candidates.filter((polygon) => pointInPolygon(anchorPoint, polygon));
@@ -248,10 +173,7 @@ function edgeOnPhysicalLand(polygon) {
     const start = polygon[index];
     const end = polygon[(index + 1) % polygon.length];
     for (const fraction of EDGE_FRACTIONS) {
-      const point = [
-        start[0] + (end[0] - start[0]) * fraction,
-        start[1] + (end[1] - start[1]) * fraction,
-      ];
+      const point = [start[0] + (end[0] - start[0]) * fraction, start[1] + (end[1] - start[1]) * fraction];
       if (!isPhysicalLandPoint(point)) return false;
     }
   }
@@ -262,7 +184,7 @@ function buildControlSites() {
   return ANATOLIA_PROVINCE_METADATA.map((item) => {
     const historicalAnchor = rawAnchor(item);
     return {
-      point: nearestLandPoint(historicalAnchor),
+      point: resolveGeometryAnchor(item.id, historicalAnchor),
       historicalAnchor,
       provinceId: item.id,
       kind: "province-anchor",
@@ -380,4 +302,4 @@ export function isAnatoliaGeometryPoint(point) {
   return longitude >= BBOX[0] && longitude <= BBOX[2] && latitude >= BBOX[1] && latitude <= BBOX[3];
 }
 
-export { isPhysicalLandPoint, nearestBoundaryLandPoint };
+export { isPhysicalLandPoint };
