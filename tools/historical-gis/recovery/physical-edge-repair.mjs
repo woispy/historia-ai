@@ -13,6 +13,7 @@ const BINARY_ITERATIONS = 32;
 const VALIDATION_SAMPLES = 12;
 const MAX_BOUNDARY_PROJECTION_DISTANCE = 0.02;
 const MAX_BOUNDARY_CANDIDATES = 8;
+const INDEX_CELL_SIZE = 0.05;
 
 function distance(a, b) {
   return Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -78,59 +79,141 @@ function lakeBoundaryDescriptors() {
 
 const LAKE_BOUNDARIES = lakeBoundaryDescriptors();
 
-function intersections(start, end, boundaries, kind) {
-  const result = [];
-  for (const descriptor of boundaries) {
-    const boundary = descriptor.ring ?? descriptor;
-    if (!Array.isArray(boundary) || boundary.length < 3) continue;
+function segmentBounds(start, end) {
+  return {
+    minX: Math.min(start[0], end[0]),
+    minY: Math.min(start[1], end[1]),
+    maxX: Math.max(start[0], end[0]),
+    maxY: Math.max(start[1], end[1]),
+  };
+}
+
+function cellCoordinate(value) {
+  return Math.floor(value / INDEX_CELL_SIZE);
+}
+
+function cellKey(x, y) {
+  return `${x}:${y}`;
+}
+
+function addToGrid(grid, segment) {
+  const minX = cellCoordinate(segment.bbox.minX - MAX_BOUNDARY_PROJECTION_DISTANCE);
+  const maxX = cellCoordinate(segment.bbox.maxX + MAX_BOUNDARY_PROJECTION_DISTANCE);
+  const minY = cellCoordinate(segment.bbox.minY - MAX_BOUNDARY_PROJECTION_DISTANCE);
+  const maxY = cellCoordinate(segment.bbox.maxY + MAX_BOUNDARY_PROJECTION_DISTANCE);
+  for (let x = minX; x <= maxX; x += 1) {
+    for (let y = minY; y <= maxY; y += 1) {
+      const key = cellKey(x, y);
+      const bucket = grid.get(key);
+      if (bucket) bucket.push(segment);
+      else grid.set(key, [segment]);
+    }
+  }
+}
+
+function buildBoundarySegments() {
+  const segments = [];
+  const grid = new Map();
+  const appendBoundary = (boundary, kind, metadata = {}) => {
+    if (!Array.isArray(boundary) || boundary.length < 3) return;
     for (let segmentIndex = 0; segmentIndex < boundary.length; segmentIndex += 1) {
-      const nextIndex = (segmentIndex + 1) % boundary.length;
-      const fraction = segmentIntersectionFraction(start, end, boundary[segmentIndex], boundary[nextIndex]);
-      if (fraction === null) continue;
-      const point = sample(start, end, fraction);
-      if (!isFinalPhysicalGeometryBoundaryPoint(point)) continue;
-      const duplicate = result.some((entry) => Math.abs(entry.fraction - fraction) <= EPS
-        && entry.boundary === boundary
-        && entry.segmentIndex === segmentIndex);
-      if (duplicate) continue;
-      result.push({
-        fraction,
-        point,
+      const start = boundary[segmentIndex];
+      const end = boundary[(segmentIndex + 1) % boundary.length];
+      const segment = {
         boundary,
-        boundaryIndex: descriptor.boundaryIndex,
         segmentIndex,
         kind,
-        distance: 0,
-        lake: descriptor.lake,
-        lakeIndex: descriptor.lakeIndex,
-        ringIndex: descriptor.ringIndex,
-      });
+        ...metadata,
+        start,
+        end,
+        bbox: segmentBounds(start, end),
+      };
+      segments.push(segment);
+      addToGrid(grid, segment);
     }
+  };
+  for (const descriptor of LAKE_BOUNDARIES) {
+    appendBoundary(descriptor.ring, "lake", descriptor);
+  }
+  for (const polygon of PHYSICAL_LAND_POLYGONS) {
+    appendBoundary(polygon, "land");
+  }
+  return { segments: Object.freeze(segments), grid };
+}
+
+const BOUNDARY_INDEX = buildBoundarySegments();
+
+function queryBoundarySegments(point) {
+  const x = cellCoordinate(point[0]);
+  const y = cellCoordinate(point[1]);
+  const result = new Set();
+  const radius = Math.ceil(MAX_BOUNDARY_PROJECTION_DISTANCE / INDEX_CELL_SIZE);
+  for (let dx = -radius; dx <= radius; dx += 1) {
+    for (let dy = -radius; dy <= radius; dy += 1) {
+      const bucket = BOUNDARY_INDEX.grid.get(cellKey(x + dx, y + dy));
+      if (!bucket) continue;
+      for (const segment of bucket) result.add(segment);
+    }
+  }
+  return [...result];
+}
+
+function intersectsSegmentBounds(a, b, bbox, padding = 0) {
+  const minX = Math.min(a[0], b[0]);
+  const maxX = Math.max(a[0], b[0]);
+  const minY = Math.min(a[1], b[1]);
+  const maxY = Math.max(a[1], b[1]);
+  return !(maxX + padding < bbox.minX || minX - padding > bbox.maxX
+    || maxY + padding < bbox.minY || minY - padding > bbox.maxY);
+}
+
+function intersections(start, end, boundaries, kind) {
+  const result = [];
+  const candidates = BOUNDARY_INDEX.segments.filter((segment) => segment.kind === kind
+    && intersectsSegmentBounds(start, end, segment.bbox));
+  for (const descriptor of candidates) {
+    const fraction = segmentIntersectionFraction(start, end, descriptor.start, descriptor.end);
+    if (fraction === null) continue;
+    const point = sample(start, end, fraction);
+    if (!isFinalPhysicalGeometryBoundaryPoint(point)) continue;
+    const duplicate = result.some((entry) => Math.abs(entry.fraction - fraction) <= EPS
+      && entry.boundary === descriptor.boundary
+      && entry.segmentIndex === descriptor.segmentIndex);
+    if (duplicate) continue;
+    result.push({
+      fraction,
+      point,
+      boundary: descriptor.boundary,
+      boundaryIndex: descriptor.boundaryIndex,
+      segmentIndex: descriptor.segmentIndex,
+      kind,
+      distance: 0,
+      lake: descriptor.lake,
+      lakeIndex: descriptor.lakeIndex,
+      ringIndex: descriptor.ringIndex,
+    });
   }
   return result.sort((a, b) => a.fraction - b.fraction);
 }
 
 function projectedBoundaryCandidates(point, boundaries, kind) {
   const result = [];
-  for (const descriptor of boundaries) {
-    const boundary = descriptor.ring ?? descriptor;
-    if (!Array.isArray(boundary) || boundary.length < 3) continue;
-    for (let segmentIndex = 0; segmentIndex < boundary.length; segmentIndex += 1) {
-      const nextIndex = (segmentIndex + 1) % boundary.length;
-      const projection = nearestPointOnSegment(point, boundary[segmentIndex], boundary[nextIndex]);
-      if (projection.distance > MAX_BOUNDARY_PROJECTION_DISTANCE) continue;
-      result.push({
-        point: projection.point,
-        boundary,
-        boundaryIndex: descriptor.boundaryIndex,
-        segmentIndex,
-        kind,
-        distance: projection.distance,
-        lake: descriptor.lake,
-        lakeIndex: descriptor.lakeIndex,
-        ringIndex: descriptor.ringIndex,
-      });
-    }
+  const boundarySet = new Set(boundaries);
+  for (const descriptor of queryBoundarySegments(point)) {
+    if (descriptor.kind !== kind || !boundarySet.has(descriptor.boundary)) continue;
+    const projection = nearestPointOnSegment(point, descriptor.start, descriptor.end);
+    if (projection.distance > MAX_BOUNDARY_PROJECTION_DISTANCE) continue;
+    result.push({
+      point: projection.point,
+      boundary: descriptor.boundary,
+      boundaryIndex: descriptor.boundaryIndex,
+      segmentIndex: descriptor.segmentIndex,
+      kind,
+      distance: projection.distance,
+      lake: descriptor.lake,
+      lakeIndex: descriptor.lakeIndex,
+      ringIndex: descriptor.ringIndex,
+    });
   }
   result.sort((a, b) => a.distance - b.distance);
   return result.slice(0, MAX_BOUNDARY_CANDIDATES);
