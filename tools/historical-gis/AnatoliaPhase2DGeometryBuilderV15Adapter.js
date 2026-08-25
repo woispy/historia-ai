@@ -2,7 +2,7 @@ import { buildAnatoliaPhase2DAssets as buildAnatoliaPhase2DAssetsV15 } from "./A
 import {
   PHYSICAL_LAND_POLYGONS,
   isPhysicalLandPoint,
-  isPhysicalGeometryBoundaryPoint,
+  isPhysicalGeometryBoundaryPoint as isPhysicalGeometrySupportPoint,
   resolvePhysicalGeometryBoundaryPoint,
   resolveGeometryAnchor,
 } from "./recovery/physical-land-authority.mjs";
@@ -72,6 +72,16 @@ function normalizeGeometryContract(assets) {
 
 export function buildAnatoliaPhase2DAssets(regions) {
   return withGeometryAnchors(() => normalizeGeometryContract(buildAnatoliaPhase2DAssetsV15(regions)));
+}
+
+/**
+ * Geometry construction treats only authoritative physical land as a valid
+ * edge sample. The recovery authority may expose lake-interior support points
+ * for temporary recovery, but those points must never satisfy the final
+ * political-edge physical-water invariant.
+ */
+function isPhysicalGeometryBoundaryPoint(point) {
+  return isPhysicalLandPoint(point) && !isPhysicalGeometrySupportPoint(point) ? false : isPhysicalLandPoint(point);
 }
 
 export {
