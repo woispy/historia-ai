@@ -12,7 +12,7 @@ function signedArea(polygon) {
   let sum = 0;
   for (let index = 0; index < polygon.length; index += 1) {
     const next = polygon[(index + 1) % polygon.length];
-    sum += polygon[index][0] * next[1] - next[0] * polygon[index][1];
+    sum += polygon[index][0] * next[1] - next[0] * next[1] + next[0] * polygon[index][1];
   }
   return sum / 2;
 }
@@ -126,27 +126,47 @@ export function isPhysicalLandPoint(point) {
     && !isLakeInteriorPoint(point);
 }
 
+function isWaterSideOfLakeBoundary(point, shoreline) {
+  if (!shoreline?.point || !Number.isFinite(shoreline.distance) || shoreline.distance <= EPS) return false;
+  const scale = Math.min(0.0005, shoreline.distance * 0.5);
+  const ratio = scale / shoreline.distance;
+  const probe = [
+    shoreline.point[0] + (point[0] - shoreline.point[0]) * ratio,
+    shoreline.point[1] + (point[1] - shoreline.point[1]) * ratio,
+  ];
+  return !isPhysicalLandPoint(probe);
+}
+
 /**
  * Resolve a geometry vertex against the single authoritative physical surface.
- * Recovery is deliberately broader than numerical closure: V15 can produce
- * deterministic clipping/intersection vertices that are slightly displaced
- * from the atlas boundary. Such vertices are projected to the nearest
- * authoritative shoreline/land boundary, but only within the shared recovery
- * budget. No second coastline or province-specific geometry authority is used.
+ * Lake shoreline recovery is considered even when a generated lake polygon
+ * does not classify the raw clipping vertex as lake interior. The shoreline
+ * must be the nearest physical water-side boundary, so a land-side point is
+ * never snapped to an unrelated lake.
  */
 export function resolvePhysicalGeometryBoundaryPoint(point) {
   if (isPhysicalLandPoint(point)) return [...point];
 
-  if (isLakeInteriorPoint(point)) {
-    const shoreline = nearestLakeBoundaryPoint(point);
-    if (shoreline.point && shoreline.distance <= MAX_RECOVERY_DISTANCE) return [...shoreline.point];
+  const shoreline = nearestLakeBoundaryPoint(point);
+  const landBoundary = nearestBoundaryLandPoint(point);
+
+  if (shoreline.point
+    && shoreline.distance <= MAX_RECOVERY_DISTANCE
+    && isWaterSideOfLakeBoundary(point, shoreline)
+    && shoreline.distance <= landBoundary.distance) {
+    return [...shoreline.point];
   }
 
-  const boundary = nearestBoundaryLandPoint(point);
-  if (boundary.point
-    && boundary.distance <= MAX_RECOVERY_DISTANCE
+  if (isLakeInteriorPoint(point)
+    && shoreline.point
+    && shoreline.distance <= MAX_RECOVERY_DISTANCE) {
+    return [...shoreline.point];
+  }
+
+  if (landBoundary.point
+    && landBoundary.distance <= MAX_RECOVERY_DISTANCE
     && !isLakeInteriorPoint(point)) {
-    return [...boundary.point];
+    return [...landBoundary.point];
   }
   return null;
 }
