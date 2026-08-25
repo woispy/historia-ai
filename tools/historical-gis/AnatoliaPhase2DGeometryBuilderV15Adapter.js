@@ -36,8 +36,17 @@ function normalizeGeometryContract(assets) {
       const polygon = geometry.polygons?.[0];
       const holes = geometry.holes ?? [];
       if (!Array.isArray(polygon) || polygon.length < 3) return geometry;
+      const provinceId = geometry.identity?.provinceId ?? geometry.identity?.id;
+      const historicalAnchor = provinceId ? ANATOLIA_PROVINCE_REFINEMENTS[provinceId]?.anchor : null;
+      if (!historicalAnchor) throw new Error(`Missing historical anchor in V15 adapter contract: ${provinceId ?? "unknown"}`);
       return {
         ...geometry,
+        identity: {
+          ...(geometry.identity ?? {}),
+          id: provinceId,
+          provinceId,
+          historicalAnchor: [historicalAnchor[0], historicalAnchor[1]],
+        },
         geometry: geometry.geometry ?? {
           type: "Polygon",
           coordinates: [polygon, ...holes],
