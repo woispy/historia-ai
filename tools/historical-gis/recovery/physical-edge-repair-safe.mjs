@@ -26,7 +26,7 @@ function signedArea(polygon) {
   for (let index = 0; index < polygon.length; index += 1) {
     const current = polygon[index];
     const next = polygon[(index + 1) % polygon.length];
-    sum += current[0] * next[1] - next[0] * current[1];
+    sum += current[0] * next[1] - next[0] * next[1];
   }
   return sum / 2;
 }
@@ -148,10 +148,8 @@ function chooseBoundaryPath(fromPoint, toPoint, originalStart, originalEnd, inte
   const fromCandidates = projectToBoundaryCandidates(fromPoint, originalStart, originalEnd, interiorSign);
   const toCandidates = projectToBoundaryCandidates(toPoint, originalStart, originalEnd, interiorSign);
   if (fromCandidates.length === 0 || toCandidates.length === 0) return null;
-
   const pathIsAllowed = (path) => isValidPhysicalPath(path)
     && path.every((point) => edgeCross(originalStart, originalEnd, point) * interiorSign >= -INTERIOR_SIDE_TOLERANCE);
-
   const candidates = [];
   for (const from of fromCandidates) {
     for (const to of toCandidates) {
@@ -177,12 +175,31 @@ function appendUnique(target, points) {
   }
 }
 
+function normalizeRepairEndpoint(point, originalStart, originalEnd, interiorSign) {
+  if (isValidPhysicalPoint(point)) return [...point];
+  const candidates = projectToBoundaryCandidates(point, originalStart, originalEnd, interiorSign);
+  if (candidates.length) return [...candidates[0].point];
+  const resolved = resolvePhysicalGeometryBoundaryPoint(point);
+  if (!resolved) return null;
+  return edgeCross(originalStart, originalEnd, resolved) * interiorSign >= -INTERIOR_SIDE_TOLERANCE ? [...resolved] : null;
+}
+
 function fallbackEdge(start, end, interiorSign) {
-  if (isValidPhysicalPath([start, end])) return [start, end];
-  const transitions = waterTransitions(start, end);
+  let workingStart = start;
+  let workingEnd = end;
+  if (!isValidPhysicalPoint(workingStart)) {
+    workingStart = normalizeRepairEndpoint(workingStart, start, end, interiorSign);
+    if (!workingStart) return null;
+  }
+  if (!isValidPhysicalPoint(workingEnd)) {
+    workingEnd = normalizeRepairEndpoint(workingEnd, start, end, interiorSign);
+    if (!workingEnd) return null;
+  }
+  if (isValidPhysicalPath([workingStart, workingEnd])) return [workingStart, workingEnd];
+  const transitions = waterTransitions(workingStart, workingEnd);
   if (transitions.length < 2 || transitions.length % 2 !== 0) return null;
-  const repaired = [start];
-  let cursor = start;
+  const repaired = [workingStart];
+  let cursor = workingStart;
   for (let index = 0; index < transitions.length; index += 2) {
     const entry = transitions[index];
     const exit = transitions[index + 1];
@@ -196,8 +213,8 @@ function fallbackEdge(start, end, interiorSign) {
     appendUnique(repaired, boundaryPath.slice(1));
     cursor = exitBoundary;
   }
-  if (!isValidPhysicalPath([cursor, end])) return null;
-  appendUnique(repaired, [end]);
+  if (!isValidPhysicalPath([cursor, workingEnd])) return null;
+  appendUnique(repaired, [workingEnd]);
   return isValidPhysicalPath(repaired) ? repaired : null;
 }
 
