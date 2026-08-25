@@ -153,11 +153,18 @@ export function resolvePhysicalGeometryBoundaryPoint(point) {
 }
 
 /**
- * Final political geometry boundary support is intentionally strict: only
- * authoritative land/coast/lake-shoreline points are valid. Lake interiors
- * remain temporary recovery input and must never satisfy a final edge check.
+ * Temporary V15 support surface. Lake interiors may be carried by the
+ * retained generator so its intermediate land partition can be constructed;
+ * they are never accepted as final political geometry by the V16 adapter.
  */
 export function isPhysicalGeometryBoundaryPoint(point) {
+  return isPhysicalLandPoint(point) || isLakeInteriorPoint(point);
+}
+
+/**
+ * Final political geometry boundary contract: land/coast/lake-shoreline only.
+ */
+export function isFinalPhysicalGeometryBoundaryPoint(point) {
   return isPhysicalLandPoint(point);
 }
 
