@@ -10,6 +10,7 @@
     "build:assets:debug": "node tools/asset-builder/cli/fetch-natural-earth-50m.js && node tools/asset-builder/cli/fetch-natural-earth-hydrography-10m.js && node --trace-uncaught tools/asset-builder/cli/build-assets.js && node tools/asset-builder/cli/build-anatolia-hydrography-10m.js",
     "build:historical-gis:1300": "node tools/historical-gis/cli/import-1300.js",
     "test:historical-gis": "node tools/historical-gis/cli/test-1300.js",
+    "test:historical-gis-recovery": "node tools/tests/historical-gis-recovery-contract.test.js",
     "test:physical-geography": "node tools/tests/physical-geography-1300.test.js",
     "test:hydrography-10m": "node tools/tests/hydrography-10m.test.js",
     "test:hydrography-visibility": "node tools/tests/hydrography-visibility.test.js",

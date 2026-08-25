@@ -41,6 +41,7 @@ on:
       - feat/phase2b-anatolia-reconstruction
       - feat/phase2c-anatolia-geometry-refinement
       - feat/phase2d-anatolia-province-geometry
+      - feat/p2d-anatolia-final-cartography
       - feat/phase2efgh-cartography
       - feat/cartography-visual-refinement
       - feat/map-gpu-texture-architecture
@@ -106,6 +107,8 @@ jobs:
         run: npm run test:anatolia-phase2c
       - name: Run Phase 2D Anatolia geometry tests
         run: npm run test:anatolia-phase2d
+      - name: Run Phase 2D geometry integrity tests
+        run: npm run test:anatolia-phase2d-geometry-integrity
       - name: Run Phase 2E-2H cartography tests
         run: npm run test:cartography-2efgh
       - name: Run cartography foundation regression tests

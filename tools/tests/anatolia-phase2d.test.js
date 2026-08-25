@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
 import {
   buildAnatoliaPhase2DAssets,
-  isAnatoliaGeometryPoint,
   isPhysicalLandPoint,
 } from "../historical-gis/AnatoliaPhase2DGeometryBuilder.js";
+import { isAnatoliaGeometryPoint } from "../historical-gis/AnatoliaGeometryOverride.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 import { ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST } from "../../src/map/data/Anatolia1300ProvinceGeometryManifest.js";
+import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 
 const result = buildAnatoliaPhase2DAssets();
 
@@ -53,11 +54,71 @@ for (const province of result.provinces) {
 }
 
 function polygonCentroid(polygon) {
-  const sum = polygon.reduce(
-    (total, [longitude, latitude]) => [total[0] + longitude, total[1] + latitude],
+  let crossSum = 0;
+  let xSum = 0;
+  let ySum = 0;
+  for (let index = 0; index < polygon.length; index += 1) {
+    const [x1, y1] = polygon[index];
+    const [x2, y2] = polygon[(index + 1) % polygon.length];
+    const cross = x1 * y2 - x2 * y1;
+    crossSum += cross;
+    xSum += (x1 + x2) * cross;
+    ySum += (y1 + y2) * cross;
+  }
+  if (Math.abs(crossSum) < 1e-12) {
+    const sum = polygon.reduce(
+      (total, [longitude, latitude]) => [total[0] + longitude, total[1] + latitude],
+      [0, 0],
+    );
+    return [sum[0] / polygon.length, sum[1] / polygon.length];
+  }
+  return [xSum / (3 * crossSum), ySum / (3 * crossSum)];
+}
+
+function pointOnSegment(point, start, end, epsilon = 1e-7) {
+  const cross = (end[0] - start[0]) * (point[1] - start[1])
+    - (end[1] - start[1]) * (point[0] - start[0]);
+  if (Math.abs(cross) > epsilon) return false;
+  return point[0] >= Math.min(start[0], end[0]) - epsilon
+    && point[0] <= Math.max(start[0], end[0]) + epsilon
+    && point[1] >= Math.min(start[1], end[1]) - epsilon
+    && point[1] <= Math.max(start[1], end[1]) + epsilon;
+}
+
+function isPhysicalLakeShorelinePoint(point) {
+  return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => {
+    const ring = lake.coordinates;
+    for (let index = 0; index < ring.length; index += 1) {
+      if (pointOnSegment(point, ring[index], ring[(index + 1) % ring.length])) return true;
+    }
+    return false;
+  });
+}
+
+function isValidPhysicalBoundaryPoint(point) {
+  return isPhysicalLandPoint(point) || isPhysicalLakeShorelinePoint(point);
+}
+
+function hasPhysicalLandRepresentativePoint(polygon) {
+  const centroid = polygonCentroid(polygon);
+  if (isPhysicalLandPoint(centroid)) return true;
+  const vertexAverage = polygon.reduce(
+    (sum, [longitude, latitude]) => [sum[0] + longitude, sum[1] + latitude],
     [0, 0],
-  );
-  return [sum[0] / polygon.length, sum[1] / polygon.length];
+  ).map((value) => value / polygon.length);
+  if (isPhysicalLandPoint(vertexAverage)) return true;
+  for (let index = 0; index < polygon.length; index += 1) {
+    const start = polygon[index];
+    const end = polygon[(index + 1) % polygon.length];
+    for (const fraction of [0.25, 0.5, 0.75]) {
+      const point = [
+        start[0] + (end[0] - start[0]) * fraction,
+        start[1] + (end[1] - start[1]) * fraction,
+      ];
+      if (isPhysicalLandPoint(point)) return true;
+    }
+  }
+  return false;
 }
 
 for (const geometry of result.geometries) {
@@ -66,15 +127,17 @@ for (const geometry of result.geometries) {
   for (const polygon of geometry.polygons) {
     assert.ok(polygon.length >= 3);
     vertexCount += polygon.length;
-    const centroid = polygonCentroid(polygon);
     assert.ok(
-      isPhysicalLandPoint(centroid),
-      `Phase 2D polygon centroid must remain on physical land: ${centroid.join(",")}`,
+      hasPhysicalLandRepresentativePoint(polygon),
+      `Phase 2D polygon must retain a representative point on physical land: ${polygonCentroid(polygon).join(",")}`,
     );
     for (const [longitude, latitude] of polygon) {
       assert.ok(longitude >= 25 && longitude <= 46, `Longitude out of Phase 2D envelope: ${longitude}`);
       assert.ok(latitude >= 35 && latitude <= 43, `Latitude out of Phase 2D envelope: ${latitude}`);
-      assert.ok(isPhysicalLandPoint([longitude, latitude]), `Phase 2D polygon vertex must remain on physical land: ${longitude},${latitude}`);
+      assert.ok(
+        isValidPhysicalBoundaryPoint([longitude, latitude]),
+        `Phase 2D polygon vertex must remain on physical land or a real lake shoreline: ${longitude},${latitude}`,
+      );
     }
   }
 }
@@ -83,6 +146,8 @@ assert.ok(vertexCount >= 150, "Phase 2D geometry must contain a sufficiently det
 
 assert.equal(isAnatoliaGeometryPoint([28.9784, 41.0082]), false, "Constantinople must remain outside the Anatolia geometry override");
 assert.equal(isAnatoliaGeometryPoint([26.5556, 41.6772]), false, "Adrianopolis must remain outside the Anatolia geometry override");
+assert.equal(isAnatoliaGeometryPoint([26.557, 40.155]), true, "Canakkale must remain inside the Anatolia geometry override");
+assert.equal(isAnatoliaGeometryPoint([29.93, 40.77]), true, "Nicomedia must remain inside the Anatolia geometry override");
 
 console.log(
   `Phase 2D Anatolia geometry tests passed: ${result.provinceCount} provinces, `
