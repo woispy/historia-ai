@@ -54,6 +54,14 @@ function isLakeBoundaryPoint(point) {
   });
 }
 
+function isLakeInteriorPoint(point) {
+  return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => {
+    const rings = lake.rings ?? [lake.coordinates];
+    return rings.length > 0 && pointInPolygon(point, rings[0])
+      && !rings.slice(1).some((ring) => pointInPolygon(point, ring));
+  });
+}
+
 /**
  * Closed physical-land membership used by geometry construction. Coastline
  * and lake boundary points belong to the shared boundary of the physical
@@ -62,11 +70,16 @@ function isLakeBoundaryPoint(point) {
 export function isPhysicalLandPoint(point) {
   if (!PHYSICAL_LAND_POLYGONS.some((polygon) => pointInPolygon(point, polygon))) return false;
   if (isLakeBoundaryPoint(point)) return true;
-  return !ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygon(point, lake.coordinates));
+  return !isLakeInteriorPoint(point);
 }
 
+/**
+ * Province construction may temporarily carry an explicit lake footprint in
+ * its outer support cell. The final province asset removes that footprint as
+ * a lake hole. Sea/outside points are never accepted here.
+ */
 export function isPhysicalGeometryBoundaryPoint(point) {
-  return isPhysicalLandPoint(point) || isLakeBoundaryPoint(point);
+  return isPhysicalLandPoint(point) || isLakeInteriorPoint(point);
 }
 
 function nearestBoundaryLandPoint(point) {
