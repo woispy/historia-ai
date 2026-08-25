@@ -41,6 +41,24 @@ function isStrictlyPhysicalPath(polygon) {
   return true;
 }
 
+function physicalFailureDetail(polygon) {
+  if (!Array.isArray(polygon)) return "polygon-unavailable";
+  for (let index = 0; index < polygon.length; index += 1) {
+    const start = polygon[index];
+    const end = polygon[(index + 1) % polygon.length];
+    for (let sampleIndex = 0; sampleIndex <= 128; sampleIndex += 1) {
+      const fraction = sampleIndex / 128;
+      const point = [start[0] + (end[0] - start[0]) * fraction, start[1] + (end[1] - start[1]) * fraction];
+      if ((!isPhysicalLandPoint(start) && !isFinalPhysicalGeometryBoundaryPoint(start))
+        || (!isPhysicalLandPoint(end) && !isFinalPhysicalGeometryBoundaryPoint(end))
+        || (!isPhysicalLandPoint(point) && !isFinalPhysicalGeometryBoundaryPoint(point))) {
+        return `edge=${index}; fraction=${fraction.toFixed(6)}; point=${point.map((value) => Number(value.toFixed(10))).join(",")}; start=${start.join(",")}; end=${end.join(",")}`;
+      }
+    }
+  }
+  return "no-failing-sample-found";
+}
+
 function isStrictlyPhysicalOpenPath(path) {
   if (!Array.isArray(path) || path.length < 2) return false;
   for (let index = 0; index < path.length - 1; index += 1) {
@@ -209,16 +227,13 @@ function repairPhysicalPolygonToFixedPoint(polygon, provinceId, containmentPolyg
     }
   }
   const detail = Array.isArray(current) ? polygonSignature(current) : "unavailable";
-  throw new Error(`Phase 2D physical repair failed for ${provinceId}: ${lastError?.message ?? "did not converge"}; polygon=${detail}`);
+  throw new Error(`Phase 2D physical repair failed for ${provinceId}: ${lastError?.message ?? "did not converge"}; physicalFailure=${physicalFailureDetail(current)}; polygon=${detail}`);
 }
 
 function normalizeGeometryContract(assets) {
   return {
     ...assets,
-    provinces: assets.provinces.map((province) => ({
-      ...province,
-      header: { ...province.header, assetVersion: 16, generator: "Historia AI Phase 2D Geometry Builder V16" },
-    })),
+    provinces: assets.provinces.map((province) => ({ ...province, header: { ...province.header, assetVersion: 16, generator: "Historia AI Phase 2D Geometry Builder V16" } })),
     geometries: assets.geometries.map((geometry) => {
       const polygon = geometry.polygons?.[0];
       const holes = geometry.holes ?? [];
@@ -228,24 +243,13 @@ function normalizeGeometryContract(assets) {
       if (!historicalAnchor) throw new Error(`Missing historical anchor in V16 adapter contract: ${provinceId ?? "unknown"}`);
       const sourcePartitionCell = geometry.sourcePartitionCell;
       const repairedPolygon = repairPhysicalPolygonToFixedPoint(polygon, provinceId ?? "unknown", sourcePartitionCell);
-      return {
-        ...geometry,
-        sourcePartitionCell: undefined,
-        header: { ...geometry.header, assetVersion: 16, generator: "Historia AI Phase 2D Geometry Builder V16" },
-        identity: { ...(geometry.identity ?? {}), id: provinceId, provinceId, historicalAnchor: [historicalAnchor[0], historicalAnchor[1]] },
-        polygons: [repairedPolygon],
-        geometry: { ...(geometry.geometry ?? {}), type: "Polygon", coordinates: [repairedPolygon, ...holes] },
-      };
+      return { ...geometry, sourcePartitionCell: undefined, header: { ...geometry.header, assetVersion: 16, generator: "Historia AI Phase 2D Geometry Builder V16" }, identity: { ...(geometry.identity ?? {}), id: provinceId, provinceId, historicalAnchor: [historicalAnchor[0], historicalAnchor[1]] }, polygons: [repairedPolygon], geometry: { ...(geometry.geometry ?? {}), type: "Polygon", coordinates: [repairedPolygon, ...holes] } };
     }),
   };
 }
 
-export function buildAnatoliaPhase2DAssets(regions) {
-  return withGeometryAnchors(() => normalizeGeometryContract(buildAnatoliaPhase2DAssetsV15(regions)));
-}
+export function buildAnatoliaPhase2DAssets(regions) { return withGeometryAnchors(() => normalizeGeometryContract(buildAnatoliaPhase2DAssetsV15(regions))); }
 
-function isPhysicalGeometryBoundaryPoint(point) {
-  return isPhysicalGeometrySupportPoint(point);
-}
+function isPhysicalGeometryBoundaryPoint(point) { return isPhysicalGeometrySupportPoint(point); }
 
 export { isPhysicalLandPoint, isPhysicalGeometryBoundaryPoint, isFinalPhysicalGeometryBoundaryPoint, resolvePhysicalGeometryBoundaryPoint, PHYSICAL_LAND_POLYGONS, resolveGeometryAnchor };
