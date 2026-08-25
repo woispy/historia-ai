@@ -7,6 +7,7 @@ import {
   resolvePhysicalGeometryBoundaryPoint,
   resolveGeometryAnchor,
 } from "./recovery/physical-land-authority.mjs";
+import { repairPhysicalPolygon } from "./recovery/physical-edge-repair.mjs";
 import { ANATOLIA_PROVINCE_REFINEMENTS } from "../../src/map/data/AnatoliaProvinceRefinement.js";
 
 /**
@@ -49,6 +50,7 @@ function normalizeGeometryContract(assets) {
       const provinceId = geometry.identity?.provinceId ?? geometry.identity?.id;
       const historicalAnchor = provinceId ? ANATOLIA_PROVINCE_REFINEMENTS[provinceId]?.anchor : null;
       if (!historicalAnchor) throw new Error(`Missing historical anchor in V16 adapter contract: ${provinceId ?? "unknown"}`);
+      const repairedPolygon = repairPhysicalPolygon(polygon);
       return {
         ...geometry,
         header: {
@@ -62,9 +64,11 @@ function normalizeGeometryContract(assets) {
           provinceId,
           historicalAnchor: [historicalAnchor[0], historicalAnchor[1]],
         },
-        geometry: geometry.geometry ?? {
+        polygons: [repairedPolygon],
+        geometry: {
+          ...(geometry.geometry ?? {}),
           type: "Polygon",
-          coordinates: [polygon, ...holes],
+          coordinates: [repairedPolygon, ...holes],
         },
       };
     }),
