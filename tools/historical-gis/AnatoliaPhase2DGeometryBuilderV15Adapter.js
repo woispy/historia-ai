@@ -60,7 +60,8 @@ function repairPhysicalPolygonToFixedPoint(polygon, provinceId) {
       current = densifyPolygon(repaired);
     } catch (error) {
       const details = error instanceof Error ? error.message : String(error);
-      throw new Error(`Phase 2D physical repair failed for ${provinceId} on pass ${pass} with ${current.length} vertices: ${details}`, { cause: error });
+      const coordinates = JSON.stringify(current);
+      throw new Error(`Phase 2D physical repair failed for ${provinceId} on pass ${pass} with ${current.length} vertices: ${details}; polygon=${coordinates}`, { cause: error });
     }
   }
   throw new Error(`Phase 2D physical repair did not converge to a land-safe polygon after ${MAX_PHYSICAL_REPAIR_PASSES} passes: ${provinceId}`);
