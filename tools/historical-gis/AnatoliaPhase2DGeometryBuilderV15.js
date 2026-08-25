@@ -274,11 +274,10 @@ export function buildAnatoliaPhase2DAssets() {
   validateManifest();
   const controlSites = buildControlSites();
   const boundarySites = buildPhysicalBoundarySites();
-  const sites = [...controlSites, ...boundarySites];
   for (const site of controlSites) {
     if (!isAnatoliaGeometryPoint(site.point) || !isPhysicalLandPoint(site.point)) throw new Error(`Invalid snapped 1300 province anchor: ${site.provinceId} ${site.point.join(",")}`);
   }
-  const solved = solveWeights(sites);
+  const solved = solveWeights(controlSites);
   const provinces = [];
   const geometries = [];
   for (const item of ANATOLIA_PROVINCE_METADATA) {
