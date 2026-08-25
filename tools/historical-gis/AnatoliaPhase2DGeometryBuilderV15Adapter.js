@@ -53,12 +53,21 @@ function densifyPolygon(polygon) {
 function repairPhysicalPolygonToFixedPoint(polygon, provinceId) {
   if (isStrictlyPhysicalPath(polygon)) return polygon;
   let current = polygon;
+  let lastError = null;
   for (let pass = 1; pass <= MAX_PHYSICAL_REPAIR_PASSES; pass += 1) {
-    const repaired = repairPhysicalPolygon(current);
-    if (isStrictlyPhysicalPath(repaired)) return repaired;
-    current = densifyPolygon(repaired);
+    try {
+      const repaired = repairPhysicalPolygon(current);
+      if (isStrictlyPhysicalPath(repaired)) return repaired;
+      current = densifyPolygon(repaired);
+    } catch (error) {
+      lastError = error;
+      break;
+    }
   }
-  throw new Error(`Phase 2D physical repair did not converge to a land-safe polygon after ${MAX_PHYSICAL_REPAIR_PASSES} passes: ${provinceId}`);
+  const detail = Array.isArray(current)
+    ? JSON.stringify(current.map(([longitude, latitude]) => [Number(longitude.toFixed(10)), Number(latitude.toFixed(10))]))
+    : "unavailable";
+  throw new Error(`Phase 2D physical repair failed for ${provinceId}: ${lastError?.message ?? "did not converge"}; polygon=${detail}`);
 }
 
 function normalizeGeometryContract(assets) {
