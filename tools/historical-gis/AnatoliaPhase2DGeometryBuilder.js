@@ -18,6 +18,7 @@ const DETERMINISTIC_WEIGHT_ITERATIONS = 24;
 const GEOMETRY_EPS = 1e-8;
 const MIN_PROVINCE_AREA = 0.00005;
 const PHYSICAL_EDGE_SAMPLE_COUNT = 256;
+const MAX_PHYSICAL_EDGE_REPAIR_DEPTH = 12;
 
 function boundarySiteCount(polygon) {
   if (!Array.isArray(polygon) || polygon.length < 2) return 0;
@@ -83,29 +84,43 @@ function resolveBoundaryPoint(point) {
   throw new Error(`Phase 2D geometry vertex is outside physical land beyond numerical drift: ${point.join(",")}`);
 }
 
+function isValidPhysicalEdgePoint(point) {
+  return isPhysicalLandPoint(point) || isPhysicalGeometryBoundaryPoint(point);
+}
+
+function physicalEdgeSample(start, end, fraction) {
+  return [start[0] + (end[0] - start[0]) * fraction, start[1] + (end[1] - start[1]) * fraction];
+}
+
+function repairPhysicalEdge(start, end, depth = 0) {
+  if (depth > MAX_PHYSICAL_EDGE_REPAIR_DEPTH) {
+    throw new Error(`Phase 2D geometry edge could not be resolved against physical water after ${MAX_PHYSICAL_EDGE_REPAIR_DEPTH} recursive repairs: ${start.join(",")} -> ${end.join(",")}`);
+  }
+  const invalidSamples = [0.25, 0.5, 0.75]
+    .map((fraction) => ({ fraction, point: physicalEdgeSample(start, end, fraction) }))
+    .filter(({ point }) => !isValidPhysicalEdgePoint(point));
+  if (invalidSamples.length === 0) return [start, end];
+  const target = invalidSamples[Math.floor(invalidSamples.length / 2)];
+  const resolved = resolvePhysicalGeometryBoundaryPoint(target.point) ?? recoverNumericalBoundaryDrift(target.point);
+  if (!resolved) throw new Error(`Phase 2D geometry edge crosses physical water without an authoritative boundary solution: ${target.point.join(",")}`);
+  const boundary = resolved.map((value) => Number(value.toFixed(7)));
+  if (Math.hypot(boundary[0] - start[0], boundary[1] - start[1]) <= GEOMETRY_EPS
+    || Math.hypot(boundary[0] - end[0], boundary[1] - end[1]) <= GEOMETRY_EPS) {
+    throw new Error(`Phase 2D geometry edge physical-boundary repair made no progress: ${start.join(",")} -> ${end.join(",")}`);
+  }
+  const left = repairPhysicalEdge(start, boundary, depth + 1);
+  const right = repairPhysicalEdge(boundary, end, depth + 1);
+  return [...left.slice(0, -1), ...right];
+}
+
 function normalizeOuterRing(ring) {
   if (!Array.isArray(ring) || ring.length < 3) throw new Error("Phase 2D geometry outer ring must contain at least three vertices");
   const normalized = [];
   for (let index = 0; index < ring.length; index += 1) {
     const start = resolveBoundaryPoint(ring[index]);
     const end = resolveBoundaryPoint(ring[(index + 1) % ring.length]);
-    normalized.push(start);
-    for (let sampleIndex = 1; sampleIndex < PHYSICAL_EDGE_SAMPLE_COUNT; sampleIndex += 1) {
-      const fraction = sampleIndex / PHYSICAL_EDGE_SAMPLE_COUNT;
-      const sample = [
-        start[0] + (end[0] - start[0]) * fraction,
-        start[1] + (end[1] - start[1]) * fraction,
-      ];
-      if (isPhysicalLandPoint(sample) || isPhysicalGeometryBoundaryPoint(sample)) continue;
-      const resolved = resolvePhysicalGeometryBoundaryPoint(sample);
-      if (!resolved) {
-        const recovered = recoverNumericalBoundaryDrift(sample);
-        if (!recovered) throw new Error(`Phase 2D geometry edge crosses physical water without an authoritative boundary solution: ${sample.join(",")}`);
-        normalized.push(recovered.map((value) => Number(value.toFixed(7))));
-      } else {
-        normalized.push(resolved.map((value) => Number(value.toFixed(7))));
-      }
-    }
+    const repaired = repairPhysicalEdge(start, end);
+    normalized.push(...repaired.slice(0, -1));
   }
   return normalized;
 }
