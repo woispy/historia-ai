@@ -1,6 +1,6 @@
 import { buildAnatoliaPhase2DAssets as buildAnatoliaPhase2DAssetsV15 } from "./AnatoliaPhase2DGeometryBuilderV15.js";
 import { PHYSICAL_LAND_POLYGONS, isPhysicalLandPoint, isFinalPhysicalGeometryBoundaryPoint, isPhysicalGeometryBoundaryPoint as isPhysicalGeometrySupportPoint, resolvePhysicalGeometryBoundaryPoint, resolveGeometryAnchor } from "./recovery/physical-land-authority.mjs";
-import { repairPhysicalPolygon } from "./recovery/physical-edge-repair-safe.mjs";
+import { repairPhysicalPolygon } from "./recovery/physical-edge-repair-v2.mjs";
 import { ANATOLIA_PROVINCE_REFINEMENTS } from "../../src/map/data/AnatoliaProvinceRefinement.js";
 
 const STRICT_PHYSICAL_EDGE_SAMPLE_COUNT = 64;
