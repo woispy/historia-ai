@@ -63,18 +63,19 @@ function boundaryDescriptors() {
 
 const BOUNDARIES = boundaryDescriptors();
 
-function projectToBoundary(point, originalStart, originalEnd, interiorSign) {
-  let best = null;
+function projectToBoundaryCandidates(point, originalStart, originalEnd, interiorSign) {
+  const candidates = [];
   for (const descriptor of BOUNDARIES) {
     for (let segmentIndex = 0; segmentIndex < descriptor.boundary.length; segmentIndex += 1) {
       const start = descriptor.boundary[segmentIndex];
       const end = descriptor.boundary[(segmentIndex + 1) % descriptor.boundary.length];
       const projection = nearestPointOnSegment(point, start, end);
+      if (projection.distance > MAX_PROJECTION_DISTANCE) continue;
       if (edgeCross(originalStart, originalEnd, projection.point) * interiorSign < -INTERIOR_SIDE_TOLERANCE) continue;
-      if (!best || projection.distance < best.distance) best = { ...descriptor, segmentIndex, point: projection.point, distance: projection.distance };
+      candidates.push({ ...descriptor, segmentIndex, point: projection.point, distance: projection.distance });
     }
   }
-  return best && best.distance <= MAX_PROJECTION_DISTANCE ? best : null;
+  return candidates.sort((a, b) => a.distance - b.distance);
 }
 
 function isValidPhysicalPath(path) {
@@ -144,18 +145,29 @@ function sameBoundary(a, b) {
 function pathLength(path) { return path.reduce((total, point, index) => index === 0 ? total : total + distance(path[index - 1], point), 0); }
 
 function chooseBoundaryPath(fromPoint, toPoint, originalStart, originalEnd, interiorSign) {
-  const from = projectToBoundary(fromPoint, originalStart, originalEnd, interiorSign);
-  const to = projectToBoundary(toPoint, originalStart, originalEnd, interiorSign);
-  if (!from || !to) return null;
+  const fromCandidates = projectToBoundaryCandidates(fromPoint, originalStart, originalEnd, interiorSign);
+  const toCandidates = projectToBoundaryCandidates(toPoint, originalStart, originalEnd, interiorSign);
+  if (fromCandidates.length === 0 || toCandidates.length === 0) return null;
+
   const pathIsAllowed = (path) => isValidPhysicalPath(path)
     && path.every((point) => edgeCross(originalStart, originalEnd, point) * interiorSign >= -INTERIOR_SIDE_TOLERANCE);
-  if (sameBoundary(from, to)) {
-    return arcCandidates(from.boundary, from, to)
-      .filter(pathIsAllowed)
-      .sort((a, b) => pathLength(a) - pathLength(b))[0] ?? null;
+
+  const candidates = [];
+  for (const from of fromCandidates) {
+    for (const to of toCandidates) {
+      if (sameBoundary(from, to)) {
+        for (const path of arcCandidates(from.boundary, from, to)) {
+          if (pathIsAllowed(path)) candidates.push(path);
+        }
+      } else {
+        const direct = [from.point, to.point];
+        if (pathIsAllowed(direct)) candidates.push(direct);
+      }
+      if (candidates.length >= 16) break;
+    }
+    if (candidates.length >= 16) break;
   }
-  const direct = [from.point, to.point];
-  return pathIsAllowed(direct) ? direct : null;
+  return candidates.sort((a, b) => pathLength(a) - pathLength(b))[0] ?? null;
 }
 
 function appendUnique(target, points) {
@@ -216,8 +228,8 @@ function repairEdgesWithoutMutatingValidEdges(polygon) {
 export function repairPhysicalPolygon(polygon) {
   // Phase 2D cells already form a topological partition. A shoreline repair may
   // curve away from a straight partition edge, but it is constrained to the
-  // source cell's original interior half-plane. This keeps repair edge-local and
-  // prevents a legacy whole-polygon mutation from moving an edge into a neighbor.
+  // source cell's original interior half-plane. Candidate physical boundaries
+  // are filtered by that half-plane before any shoreline arc is considered.
   const edgeWise = repairEdgesWithoutMutatingValidEdges(polygon);
   if (edgeWise) return edgeWise;
   try {
