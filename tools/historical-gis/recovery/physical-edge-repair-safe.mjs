@@ -26,7 +26,7 @@ function signedArea(polygon) {
   for (let index = 0; index < polygon.length; index += 1) {
     const current = polygon[index];
     const next = polygon[(index + 1) % polygon.length];
-    sum += current[0] * next[1] - next[0] * next[1];
+    sum += current[0] * next[1] - next[0] * current[1];
   }
   return sum / 2;
 }
