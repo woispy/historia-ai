@@ -13,7 +13,6 @@ const EDGE_SAMPLES = 2048;
 const BINARY_ITERATIONS = 36;
 const MAX_PROJECTION_DISTANCE = 0.75;
 const MAX_ARC_VERTICES = 4096;
-const MIN_ARC_PATH_LENGTH = 0;
 
 const distance = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const sample = (start, end, fraction) => [
@@ -61,23 +60,10 @@ function boundaryCandidates(point) {
       }
     }
   }
-  return candidates.sort((a, b) => {
-    if (Math.abs(a.distance - b.distance) > GEOMETRY_EPS) return a.distance - b.distance;
-    if (a.kind !== b.kind) return a.kind === "lake" ? -1 : 1;
-    return 0;
-  });
+  return candidates.sort((a, b) => a.distance - b.distance);
 }
 
 function transitionBoundary(point) {
-  if (isFinalPhysicalGeometryBoundaryPoint(point)) {
-    const lake = nearestLakeBoundaryPoint(point);
-    if (lake.point && lake.distance <= 1e-7) {
-      const candidate = boundaryCandidates(point).find((item) => item.kind === "lake" && item.distance <= 1e-7);
-      if (candidate) return candidate;
-    }
-    const candidate = boundaryCandidates(point)[0];
-    if (candidate) return candidate;
-  }
   const lake = nearestLakeBoundaryPoint(point);
   if (lake.point && lake.distance <= 0.0005) {
     const candidate = boundaryCandidates(lake.point).find((item) => item.kind === "lake");
@@ -131,26 +117,43 @@ function pathLength(path) {
   return total;
 }
 
-function connectBoundaryPoints(fromPoint, toPoint) {
-  const fromCandidates = boundaryCandidates(fromPoint).slice(0, 12);
-  const toCandidates = boundaryCandidates(toPoint).slice(0, 12);
-  const candidates = [];
-
-  for (const from of fromCandidates) {
-    for (const to of toCandidates) {
-      if (from.boundary === to.boundary) {
-        for (const arc of boundaryArcCandidates(from, to)) {
-          if (arc.length <= MAX_ARC_VERTICES && pathIsPhysical(arc)) candidates.push(arc);
-        }
-      } else {
-        const direct = [from.point, to.point];
-        if (pathIsPhysical(direct)) candidates.push(direct);
-      }
-    }
-  }
-  return candidates
-    .filter((candidate) => pathLength(candidate) >= MIN_ARC_PATH_LENGTH)
+function arcBetweenDescriptors(from, to) {
+  if (!from || !to || from.boundary !== to.boundary) return null;
+  return boundaryArcCandidates(from, to)
+    .filter(pathIsPhysical)
     .sort((a, b) => pathLength(a) - pathLength(b))[0] ?? null;
+}
+
+function connectToBoundary(point, target) {
+  if (!target) return null;
+  if (pathIsPhysical([point, target.point])) return [point, target.point];
+
+  const projections = boundaryCandidates(point)
+    .filter((candidate) => candidate.boundary === target.boundary)
+    .slice(0, 8);
+  for (const projection of projections) {
+    const bridge = pathIsPhysical([point, projection.point]) ? [point, projection.point] : null;
+    if (!bridge) continue;
+    const arc = arcBetweenDescriptors(projection, target);
+    if (arc) return [...bridge.slice(0, -1), ...arc];
+  }
+  return null;
+}
+
+function connectPhysicalPoints(from, to) {
+  if (pathIsPhysical([from, to])) return [from, to];
+  const fromBoundary = transitionBoundary(from);
+  const toBoundary = transitionBoundary(to);
+  if (!fromBoundary || !toBoundary) return null;
+  if (fromBoundary.boundary === toBoundary.boundary) {
+    const fromArc = connectToBoundary(from, fromBoundary);
+    if (!fromArc) return null;
+    const toArc = connectToBoundary(to, toBoundary);
+    if (!toArc) return null;
+    const joined = [...fromArc.slice(0, -1), ...[...toArc].reverse()];
+    return pathIsPhysical(joined) ? joined : null;
+  }
+  return null;
 }
 
 function refineTransition(start, end, leftFraction, rightFraction) {
@@ -178,11 +181,7 @@ function traceTransitions(start, end) {
     const next = states[index + 1];
     if (current.valid === next.valid) continue;
     const fraction = refineTransition(start, end, current.fraction, next.fraction);
-    transitions.push({
-      fraction,
-      point: sample(start, end, fraction),
-      entersInvalid: current.valid && !next.valid,
-    });
+    transitions.push({ fraction, point: sample(start, end, fraction), entersInvalid: current.valid && !next.valid });
   }
   return transitions;
 }
@@ -198,29 +197,14 @@ function repairInvalidIntervals(start, end) {
   const transitions = traceTransitions(start, end);
   if (transitions.length === 0) return pathIsPhysical([start, end]) ? [start, end] : null;
 
-  const repaired = [];
+  const repaired = [start];
   let cursor = start;
   let cursorFraction = 0;
-  let index = 0;
 
-  if (!isPhysicalPoint(start)) {
-    const boundary = transitionBoundary(start);
-    if (!boundary) return null;
-    cursor = boundary.point;
-    cursorFraction = 0;
-    appendUnique(repaired, [cursor]);
-  } else {
-    appendUnique(repaired, [start]);
-  }
-
-  while (index < transitions.length) {
+  for (let index = 0; index < transitions.length; index += 2) {
     const entry = transitions[index];
-    if (!entry.entersInvalid) {
-      index += 1;
-      continue;
-    }
     const exit = transitions[index + 1];
-    if (!exit || exit.entersInvalid) return null;
+    if (!entry?.entersInvalid || !exit || exit.entersInvalid) return null;
 
     const entryBoundary = transitionBoundary(entry.point);
     const exitBoundary = transitionBoundary(exit.point);
@@ -228,22 +212,27 @@ function repairInvalidIntervals(start, end) {
 
     const beforeEntry = sample(start, end, entry.fraction);
     const afterExit = sample(start, end, exit.fraction);
-    const lead = pathIsPhysical([cursor, beforeEntry]) ? [cursor, beforeEntry] : connectBoundaryPoints(cursor, entryBoundary.point);
+
+    const lead = pathIsPhysical([cursor, entryBoundary.point])
+      ? [cursor, entryBoundary.point]
+      : connectToBoundary(cursor, entryBoundary);
     if (!lead) return null;
     appendUnique(repaired, lead.slice(1));
-    appendUnique(repaired, [entryBoundary.point]);
 
-    const shoreline = connectBoundaryPoints(entryBoundary.point, exitBoundary.point);
+    let shoreline = null;
+    if (entryBoundary.boundary === exitBoundary.boundary) shoreline = arcBetweenDescriptors(entryBoundary, exitBoundary);
+    if (!shoreline && pathIsPhysical([entryBoundary.point, exitBoundary.point])) shoreline = [entryBoundary.point, exitBoundary.point];
     if (!shoreline) return null;
     appendUnique(repaired, shoreline.slice(1));
 
-    const tail = pathIsPhysical([exitBoundary.point, afterExit]) ? [exitBoundary.point, afterExit] : connectBoundaryPoints(exitBoundary.point, afterExit);
+    const tail = pathIsPhysical([exitBoundary.point, afterExit])
+      ? [exitBoundary.point, afterExit]
+      : connectToBoundary(afterExit, exitBoundary)?.reverse();
     if (!tail) return null;
     appendUnique(repaired, tail.slice(1));
 
     cursor = afterExit;
     cursorFraction = exit.fraction;
-    index += 2;
   }
 
   if (cursorFraction < 1 - EPS) {
@@ -283,9 +272,7 @@ export function repairPhysicalPolygon(polygon) {
     const start = normalized[index];
     const end = normalized[(index + 1) % normalized.length];
     const edge = pathIsPhysical([start, end]) ? [start, end] : repairInvalidIntervals(start, end);
-    if (!edge) {
-      throw new Error(`Physical edge recovery failed at edge ${index} (${start.join(",")} → ${end.join(",")}).`);
-    }
+    if (!edge) throw new Error(`Physical edge recovery failed at edge ${index} (${start.join(",")} → ${end.join(",")}).`);
     appendUnique(repaired, edge.slice(0, -1));
   }
   appendUnique(repaired, [normalized[0]]);
