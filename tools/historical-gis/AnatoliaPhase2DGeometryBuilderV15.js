@@ -24,7 +24,6 @@ const EDGE_FRACTIONS = [0, 0.25, 0.5, 0.75, 1];
 const MAX_AREA_RATIO = 4.2;
 const MAX_WEIGHT_ITERATIONS = 24;
 const MAX_WEIGHT_STEP = 4;
-const BOUNDARY_SAMPLE_STEP = 0.06;
 const FEATURE_WEIGHT_STEP = 0.01;
 
 const rawAnchor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id]?.anchor ?? item.centroid;
@@ -59,32 +58,6 @@ function area(polygon) {
 function cross(a, b, point) {
   return (b[0] - a[0]) * (point[1] - a[1])
     - (b[1] - a[1]) * (point[0] - a[0]);
-}
-
-function addBoundarySites(sites, polygon, kind) {
-  for (let index = 0; index < polygon.length - 1; index += 1) {
-    const start = polygon[index];
-    const end = polygon[index + 1];
-    const length = Math.hypot(end[0] - start[0], end[1] - start[1]);
-    const steps = Math.max(1, Math.ceil(length / BOUNDARY_SAMPLE_STEP));
-    for (let step = 0; step <= steps; step += 1) {
-      const t = step / steps;
-      sites.push({
-        point: [start[0] + (end[0] - start[0]) * t, start[1] + (end[1] - start[1]) * t],
-        provinceId: null,
-        kind,
-      });
-    }
-  }
-}
-
-function buildPhysicalBoundarySites() {
-  const sites = [];
-  for (const polygon of PHYSICAL_LAND_POLYGONS) addBoundarySites(sites, polygon, "physical-land-boundary");
-  for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) {
-    if (lake.coordinates?.length >= 3) addBoundarySites(sites, lake.coordinates, "lake-boundary");
-  }
-  return sites;
 }
 
 function halfPlane(polygon, a, b, c) {
@@ -255,11 +228,11 @@ function headers(item, type) {
 }
 
 function provinceAsset(item, polygon, holes, site) {
-  return { header: headers(item, "province"), identity: { id: item.id, name: item.name }, references: { geometryId: item.id, countryId: item.countryId, capitalCityId: item.cityId }, ownership: { countryId: item.countryId, ownerId: item.historicalControl.controllerAt1300 ?? item.countryId }, historical: { sourceFeatureId: item.id, sourceFeatureIndex: null, sourceName: item.name, subject: item.countryId, partOf: item.regionId, borderPrecision: headers(item, "province").borderPrecision, classification: "phase2d-anatolia-province-geometry", precision: "single-anchor-weighted-land-partition-with-physical-boundary-barriers-and-lake-holes", anchor: site.point, historicalAnchor: site.historicalAnchor, historicalControl: item.historicalControl }, geometry: { coastal: item.coastal, port: item.port, terrain: item.terrain, strategic: item.strategic }, polygons: [polygon], holes };
+  return { header: headers(item, "province"), identity: { id: item.id, name: item.name }, references: { geometryId: item.id, countryId: item.countryId, capitalCityId: item.cityId }, ownership: { countryId: item.countryId, ownerId: item.historicalControl.controllerAt1300 ?? item.countryId }, historical: { sourceFeatureId: item.id, sourceFeatureIndex: null, sourceName: item.name, subject: item.countryId, partOf: item.regionId, borderPrecision: headers(item, "province").borderPrecision, classification: "phase2d-anatolia-province-geometry", precision: "single-anchor-weighted-land-partition-with-physical-land-clipping-and-lake-holes", anchor: site.point, historicalAnchor: site.historicalAnchor, historicalControl: item.historicalControl }, geometry: { coastal: item.coastal, port: item.port, terrain: item.terrain, strategic: item.strategic }, polygons: [polygon], holes };
 }
 
 function geometryAsset(item, polygon, holes, site) {
-  return { header: headers(item, "geometry"), identity: { id: item.id, provinceId: item.id }, metadata: { sourceFeatureId: item.id, sourceFeatureIndex: null, name: item.name, subject: item.countryId, partOf: item.regionId, borderPrecision: headers(item, "geometry").borderPrecision, classification: "phase2d-anatolia-province-geometry", precision: "single-anchor-weighted-land-partition-with-physical-boundary-barriers-and-lake-holes", anchor: site.point, historicalAnchor: site.historicalAnchor }, polygons: [polygon], holes };
+  return { header: headers(item, "geometry"), identity: { id: item.id, provinceId: item.id }, metadata: { sourceFeatureId: item.id, sourceFeatureIndex: null, name: item.name, subject: item.countryId, partOf: item.regionId, borderPrecision: headers(item, "geometry").borderPrecision, classification: "phase2d-anatolia-province-geometry", precision: "single-anchor-weighted-land-partition-with-physical-land-clipping-and-lake-holes", anchor: site.point, historicalAnchor: site.historicalAnchor }, polygons: [polygon], holes };
 }
 
 function samplingSiteCount() {
@@ -273,7 +246,6 @@ function samplingSiteCount() {
 export function buildAnatoliaPhase2DAssets() {
   validateManifest();
   const controlSites = buildControlSites();
-  const boundarySites = buildPhysicalBoundarySites();
   for (const site of controlSites) {
     if (!isAnatoliaGeometryPoint(site.point) || !isPhysicalLandPoint(site.point)) throw new Error(`Invalid snapped 1300 province anchor: ${site.provinceId} ${site.point.join(",")}`);
   }
@@ -290,7 +262,7 @@ export function buildAnatoliaPhase2DAssets() {
   }
   const naturalFeatureSiteCount = [...ANATOLIA_STRATEGIC_PASSES, ...ANATOLIA_RIVER_CROSSINGS].reduce((count, feature) => count + (feature.provinces?.length ?? 0), 0);
   const physicalSamplingSiteCount = samplingSiteCount();
-  return { schemaVersion: 1, geometryVersion: 18, historicalDate: "1300-01-01", provider: "historia-ai-curated-cartography", dataset: "anatolia-province-geometry-1300", projection: "EPSG:4326", method: "38 historical province identities, preserved historical anchors, deterministic weighted power partition constrained by physical land and lake boundary sites, explicit lake holes, no political support fragments", siteCount: physicalSamplingSiteCount + controlSites.length + boundarySites.length + naturalFeatureSiteCount, politicalSiteCount: controlSites.length, physicalSamplingSiteCount, barrierSiteCount: boundarySites.length, naturalFeatureSiteCount, supportSiteCount: 0, fallbackProvinceCount: 0, provinceCount: provinces.length, polygonCount: geometries.reduce((sum, geometry) => sum + geometry.polygons.length, 0), provinces, geometries, weightIterations: solved.iterations };
+  return { schemaVersion: 1, geometryVersion: 18, historicalDate: "1300-01-01", provider: "historia-ai-curated-cartography", dataset: "anatolia-province-geometry-1300", projection: "EPSG:4326", method: "38 historical province identities, preserved historical anchors, deterministic weighted power partition constrained by physical land clipping and explicit lake holes, no political support fragments", siteCount: physicalSamplingSiteCount + controlSites.length + naturalFeatureSiteCount, politicalSiteCount: controlSites.length, physicalSamplingSiteCount, barrierSiteCount: 0, naturalFeatureSiteCount, supportSiteCount: 0, fallbackProvinceCount: 0, provinceCount: provinces.length, polygonCount: geometries.reduce((sum, geometry) => sum + geometry.polygons.length, 0), provinces, geometries, weightIterations: solved.iterations };
 }
 
 export function isAnatoliaGeometryPoint(point) {
