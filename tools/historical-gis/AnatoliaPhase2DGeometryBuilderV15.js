@@ -14,6 +14,7 @@ import {
   isPhysicalLandPoint,
   isPhysicalGeometryBoundaryPoint,
   resolveGeometryAnchor,
+  resolvePhysicalGeometryBoundaryPoint,
 } from "./recovery/physical-land-authority.mjs";
 
 const BBOX = [25.45, 35.72, 44.85, 42.35];
@@ -45,8 +46,8 @@ function pointInPolygon(point, polygon) {
 function signedArea(polygon) {
   let sum = 0;
   for (let index = 0; index < polygon.length; index += 1) {
-    sum += polygon[index][0] * polygon[(index + 1) % polygon.length][1]
-      - polygon[(index + 1) % polygon.length][0] * polygon[index][1];
+    const next = polygon[(index + 1) % polygon.length];
+    sum += polygon[index][0] * next[1] - next[0] * polygon[index][1];
   }
   return sum / 2;
 }
@@ -56,8 +57,7 @@ function area(polygon) {
 }
 
 function cross(a, b, point) {
-  return (b[0] - a[0]) * (point[1] - a[1])
-    - (b[1] - a[1]) * (point[0] - a[0]);
+  return (b[0] - a[0]) * (point[1] - a[1]) - (b[1] - a[1]) * (point[0] - a[0]);
 }
 
 function halfPlane(polygon, a, b, c) {
@@ -138,6 +138,22 @@ function clipCellToLand(cell, anchorPoint) {
   return selected ? [selected] : [];
 }
 
+function normalizePhysicalBoundary(polygon) {
+  const normalized = [];
+  for (const point of polygon) {
+    const resolved = resolvePhysicalGeometryBoundaryPoint(point);
+    if (!resolved) return null;
+    const last = normalized[normalized.length - 1];
+    if (!last || last[0] !== resolved[0] || last[1] !== resolved[1]) normalized.push(resolved);
+  }
+  if (normalized.length > 1) {
+    const first = normalized[0];
+    const last = normalized[normalized.length - 1];
+    if (first[0] === last[0] && first[1] === last[1]) normalized.pop();
+  }
+  return normalized.length >= 3 && area(normalized) >= MIN_AREA ? normalized : null;
+}
+
 function edgeOnPhysicalLand(polygon) {
   for (let index = 0; index < polygon.length; index += 1) {
     const start = polygon[index];
@@ -186,7 +202,8 @@ function buildPartition(sites, weights) {
     const site = sites[index];
     const cell = powerCell(index, sites, weights);
     if (!cell.length) throw new Error(`Phase 2D V15 empty power cell: ${site.provinceId}`);
-    const polygon = clipCellToLand(cell, site.point)[0];
+    const rawPolygon = clipCellToLand(cell, site.point)[0];
+    const polygon = rawPolygon ? normalizePhysicalBoundary(rawPolygon) : null;
     if (!polygon || !edgeOnPhysicalLand(polygon)) throw new Error(`Phase 2D V15 produced invalid physical-land geometry: ${site.provinceId}`);
     result.set(site.provinceId, polygon.map(([x, y]) => [Number(x.toFixed(5)), Number(y.toFixed(5))]));
   }
@@ -238,7 +255,9 @@ function geometryAsset(item, polygon, holes, site) {
 function samplingSiteCount() {
   let count = 0;
   for (let longitude = BBOX[0]; longitude <= BBOX[2] + EPS; longitude += SAMPLE_STEP) {
-    for (let latitude = BBOX[1]; latitude <= BBOX[3] + EPS; latitude += SAMPLE_STEP) if (isPhysicalLandPoint([longitude, latitude])) count += 1;
+    for (let latitude = BBOX[1]; latitude <= BBOX[3] + EPS; latitude += SAMPLE_STEP) {
+      if (isPhysicalLandPoint([longitude, latitude])) count += 1;
+    }
   }
   return count;
 }
@@ -256,13 +275,36 @@ export function buildAnatoliaPhase2DAssets() {
     const site = controlSites.find((candidate) => candidate.provinceId === item.id);
     const polygon = solved.partition.get(item.id);
     if (!polygon) throw new Error(`Phase 2D V15 produced no geometry for ${item.id}`);
-    const holes = ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.filter((lake) => pointInPolygon(polygonCentroid(lake.coordinates), polygon)).map((lake) => lake.coordinates);
+    const holes = ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes
+      .filter((lake) => pointInPolygon(polygonCentroid(lake.coordinates), polygon))
+      .map((lake) => lake.coordinates);
     provinces.push(provinceAsset(item, polygon, holes, site));
     geometries.push(geometryAsset(item, polygon, holes, site));
   }
-  const naturalFeatureSiteCount = [...ANATOLIA_STRATEGIC_PASSES, ...ANATOLIA_RIVER_CROSSINGS].reduce((count, feature) => count + (feature.provinces?.length ?? 0), 0);
+  const naturalFeatureSiteCount = [...ANATOLIA_STRATEGIC_PASSES, ...ANATOLIA_RIVER_CROSSINGS]
+    .reduce((count, feature) => count + (feature.provinces?.length ?? 0), 0);
   const physicalSamplingSiteCount = samplingSiteCount();
-  return { schemaVersion: 1, geometryVersion: 18, historicalDate: "1300-01-01", provider: "historia-ai-curated-cartography", dataset: "anatolia-province-geometry-1300", projection: "EPSG:4326", method: "38 historical province identities, preserved historical anchors, deterministic weighted power partition constrained by physical land clipping and explicit lake holes, no political support fragments", siteCount: physicalSamplingSiteCount + controlSites.length + naturalFeatureSiteCount, politicalSiteCount: controlSites.length, physicalSamplingSiteCount, barrierSiteCount: 0, naturalFeatureSiteCount, supportSiteCount: 0, fallbackProvinceCount: 0, provinceCount: provinces.length, polygonCount: geometries.reduce((sum, geometry) => sum + geometry.polygons.length, 0), provinces, geometries, weightIterations: solved.iterations };
+  return {
+    schemaVersion: 1,
+    geometryVersion: 18,
+    historicalDate: "1300-01-01",
+    provider: "historia-ai-curated-cartography",
+    dataset: "anatolia-province-geometry-1300",
+    projection: "EPSG:4326",
+    method: "38 historical province identities, preserved historical anchors, deterministic weighted power partition constrained by physical land clipping and explicit lake holes, no political support fragments",
+    siteCount: physicalSamplingSiteCount + controlSites.length + naturalFeatureSiteCount,
+    politicalSiteCount: controlSites.length,
+    physicalSamplingSiteCount,
+    barrierSiteCount: 0,
+    naturalFeatureSiteCount,
+    supportSiteCount: 0,
+    fallbackProvinceCount: 0,
+    provinceCount: provinces.length,
+    polygonCount: geometries.reduce((sum, geometry) => sum + geometry.polygons.length, 0),
+    provinces,
+    geometries,
+    weightIterations: solved.iterations,
+  };
 }
 
 export function isAnatoliaGeometryPoint(point) {
