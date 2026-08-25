@@ -8,8 +8,8 @@ import {
 
 const EPS = 1e-10;
 const MAX_PROJECTION_DISTANCE = 0.75;
-const EDGE_SAMPLES = 256;
-const MAX_CANDIDATES = 12;
+const EDGE_SAMPLES = 512;
+const MAX_CANDIDATES = 16;
 const MAX_ARC_VERTICES = 4096;
 const MIN_REPAIR_AREA_RATIO = 0.05;
 const GEOMETRY_EPS = 1e-8;
@@ -90,14 +90,38 @@ function pathIsPhysical(path) {
 }
 function pathLength(path) { let total = 0; for (let i = 1; i < path.length; i += 1) total += distance(path[i - 1], path[i]); return total; }
 function signedArea(polygon) { let sum = 0; for (let i = 0; i < polygon.length; i += 1) { const a = polygon[i]; const b = polygon[(i + 1) % polygon.length]; sum += a[0] * b[1] - b[0] * a[1]; } return sum / 2; }
-function normalizeEndpoint(point) {
-  if (isPhysicalPoint(point)) return [...point];
-  const strict = resolvePhysicalGeometryBoundaryPointStrict(point);
-  if (strict && isPhysicalPoint(strict)) return [...strict];
-  const candidate = boundaryCandidates(point)[0];
-  return candidate ? [...candidate.point] : null;
+
+function uniquePoints(points) {
+  const result = [];
+  for (const point of points) {
+    if (!point || !isPhysicalPoint(point)) continue;
+    if (!result.some((candidate) => distance(candidate.point ?? candidate, point) <= GEOMETRY_EPS)) result.push(point);
+  }
+  return result;
 }
-function appendUnique(target, points) { for (const point of points) { const previous = target[target.length - 1]; if (!previous || distance(previous, point) > GEOMETRY_EPS) target.push([...point]); } }
+
+function endpointCandidates(point, sourcePolygon) {
+  const result = [];
+  if (isPhysicalPoint(point) && pathInsideSource([point], sourcePolygon)) result.push({ point: [...point], displacement: 0, preferred: true });
+  const strict = resolvePhysicalGeometryBoundaryPointStrict(point);
+  if (strict && pathInsideSource([strict], sourcePolygon)) result.push({ point: [...strict], displacement: distance(point, strict), preferred: false });
+  for (const candidate of boundaryCandidates(point)) {
+    if (!pathInsideSource([candidate.point], sourcePolygon)) continue;
+    result.push({ point: [...candidate.point], displacement: candidate.distance, preferred: false, boundary: candidate });
+  }
+  const deduped = [];
+  for (const candidate of result) {
+    if (!deduped.some((existing) => distance(existing.point, candidate.point) <= GEOMETRY_EPS)) deduped.push(candidate);
+  }
+  return deduped.slice(0, MAX_CANDIDATES);
+}
+
+function appendUnique(target, points) {
+  for (const point of points) {
+    const previous = target[target.length - 1];
+    if (!previous || distance(previous[0] ?? previous, point[0] ?? point) > GEOMETRY_EPS) target.push(Array.isArray(point[0]) ? [...point] : [...point]);
+  }
+}
 
 function sameBoundaryArc(from, to) {
   if (!from || !to || from.boundary !== to.boundary) return [];
@@ -125,7 +149,6 @@ function boundaryChain(start, end, sourcePolygon) {
   const b = boundaryCandidates(end);
   const pairs = [];
   for (const left of a) for (const right of b) {
-    if (left.kind !== right.kind) continue;
     const direct = [left.point, right.point];
     if (pathIsPhysical(direct) && pathInsideSource(direct, sourcePolygon)) pairs.push(direct);
     for (const arc of sameBoundaryArc(left, right)) {
@@ -140,8 +163,8 @@ function sampledBoundaryPath(start, end, sourcePolygon) {
   for (let index = 0; index <= EDGE_SAMPLES; index += 1) {
     const fraction = index / EDGE_SAMPLES;
     const point = sample(start, end, fraction);
-    if (isPhysicalPoint(point)) {
-      samples.push([{ point, cost: 0, previous: -1 }]);
+    if (isPhysicalPoint(point) && pathInsideSource([point], sourcePolygon)) {
+      samples.push([{ point: [...point], cost: 0, previous: -1 }]);
     } else {
       const candidates = boundaryCandidates(point)
         .filter((candidate) => pathInsideSource([candidate.point], sourcePolygon))
@@ -184,29 +207,68 @@ function sampledBoundaryPath(start, end, sourcePolygon) {
   return path;
 }
 
-function repairEdge(start, end, sourcePolygon) {
+function routeBetween(start, end, sourcePolygon) {
   if (pathIsPhysical([start, end]) && pathInsideSource([start, end], sourcePolygon)) return [start, end];
   const chain = boundaryChain(start, end, sourcePolygon);
   if (chain.length) return chain[0];
-  const sampled = sampledBoundaryPath(start, end, sourcePolygon);
-  if (sampled) return sampled;
-  throw new Error(`Physical edge recovery failed (${start.join(",")} → ${end.join(",")}).`);
+  return sampledBoundaryPath(start, end, sourcePolygon);
+}
+
+function repairPolygonByCandidateCycle(polygon, sourcePolygon) {
+  const candidates = polygon.map((point) => endpointCandidates(point, sourcePolygon));
+  if (candidates.some((items) => !items.length)) return null;
+
+  const routeCache = new Map();
+  const getRoute = (edgeIndex, fromIndex, toIndex) => {
+    const key = `${edgeIndex}:${fromIndex}:${toIndex}`;
+    if (routeCache.has(key)) return routeCache.get(key);
+    const route = routeBetween(candidates[edgeIndex][fromIndex].point, candidates[(edgeIndex + 1) % candidates.length][toIndex].point, sourcePolygon);
+    routeCache.set(key, route ?? null);
+    return route;
+  };
+
+  let bestCycle = null;
+  for (let firstIndex = 0; firstIndex < candidates[0].length; firstIndex += 1) {
+    let states = new Map([[firstIndex, { cost: candidates[0][firstIndex].displacement * 0.25, paths: [] }]]);
+    for (let edgeIndex = 0; edgeIndex < polygon.length - 1; edgeIndex += 1) {
+      const nextStates = new Map();
+      for (const [fromIndex, state] of states.entries()) {
+        for (let toIndex = 0; toIndex < candidates[edgeIndex + 1].length; toIndex += 1) {
+          const route = getRoute(edgeIndex, fromIndex, toIndex);
+          if (!route) continue;
+          const candidate = candidates[edgeIndex + 1][toIndex];
+          const cost = state.cost + pathLength(route) + candidate.displacement * 0.25;
+          const previous = nextStates.get(toIndex);
+          if (!previous || cost < previous.cost) nextStates.set(toIndex, { cost, paths: [...state.paths, route] });
+        }
+      }
+      states = nextStates;
+      if (!states.size) break;
+    }
+    for (const [lastIndex, state] of states.entries()) {
+      const closingRoute = getRoute(polygon.length - 1, lastIndex, firstIndex);
+      if (!closingRoute) continue;
+      const cost = state.cost + pathLength(closingRoute);
+      if (!bestCycle || cost < bestCycle.cost) bestCycle = { cost, paths: [...state.paths, closingRoute] };
+    }
+  }
+
+  if (!bestCycle) return null;
+  const repaired = [];
+  for (const path of bestCycle.paths) appendUnique(repaired, path);
+  return repaired;
 }
 
 export function repairPhysicalPolygon(polygon, options = {}) {
   if (!Array.isArray(polygon) || polygon.length < 3) throw new Error("Physical polygon repair requires a polygon with at least three vertices.");
   const originalArea = Math.abs(signedArea(polygon));
   const sourcePolygon = options.containmentPolygon ?? null;
-  if (polygon.every(isPhysicalPoint) && polygon.every((point, index) => pathIsPhysical([point, polygon[(index + 1) % polygon.length]]))) return polygon;
-  const normalized = polygon.map(normalizeEndpoint);
-  if (normalized.some((point) => !point)) throw new Error("No authoritative physical boundary candidate exists for a polygon vertex.");
-  const repaired = [];
-  for (let index = 0; index < normalized.length; index += 1) {
-    const start = normalized[index];
-    const end = normalized[(index + 1) % normalized.length];
-    appendUnique(repaired, repairEdge(start, end, sourcePolygon));
+  if (polygon.every(isPhysicalPoint) && polygon.every((point, index) => pathIsPhysical([point, polygon[(index + 1) % polygon.length]]) && pathInsideSource([point, polygon[(index + 1) % polygon.length]], sourcePolygon))) return polygon;
+
+  const repaired = repairPolygonByCandidateCycle(polygon, sourcePolygon);
+  if (!repaired || repaired.length < 3 || repaired.some((point) => !isPhysicalPoint(point))) {
+    throw new Error("Physical polygon repair could not construct a physical candidate cycle.");
   }
-  if (repaired.length < 3 || repaired.some((point) => !isPhysicalPoint(point))) throw new Error("Physical polygon repair produced invalid geometry.");
   const area = Math.abs(signedArea(repaired));
   if (!area || (originalArea > 0 && area / originalArea < MIN_REPAIR_AREA_RATIO)) throw new Error("Physical polygon repair collapsed more than 95% of the source area.");
   if (sourcePolygon && !pathInsideSource(repaired, sourcePolygon)) throw new Error("Physical polygon repair escaped the source partition cell.");
