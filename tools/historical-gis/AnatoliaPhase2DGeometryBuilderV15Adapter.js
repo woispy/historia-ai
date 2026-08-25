@@ -9,10 +9,10 @@ import { ANATOLIA_PROVINCE_REFINEMENTS } from "../../src/map/data/AnatoliaProvin
  *
  * Historical anchors remain research data. This adapter resolves only the
  * temporary geometry seed against the same physical atlas used by V15.
- * The original anchor array is restored after generation.
+ * The original anchor property is restored after generation.
  */
 const GEOMETRY_ANCHOR_SEARCH = Object.freeze({
-  "bithynia-nicomedia": Object.freeze({ maxDistance: 0.35, step: 0.001 }),
+  "bithynia-nicomedia": Object.freeze({ maxDistance: 0.5, step: 0.002 }),
 });
 
 const EPS = 1e-9;
@@ -53,42 +53,18 @@ function isPhysicalLandPoint(point) {
   return LAND_POLYGONS.some((polygon) => pointInPolygon(point, polygon)) && !inLake(point);
 }
 
-function nearestBoundarySegment(point) {
-  let best = null;
-  let bestDistance = Infinity;
-  for (const polygon of LAND_POLYGONS) {
-    for (let index = 0; index < polygon.length; index += 1) {
-      const start = polygon[index];
-      const end = polygon[(index + 1) % polygon.length];
-      const dx = end[0] - start[0];
-      const dy = end[1] - start[1];
-      const denominator = dx * dx + dy * dy;
-      const t = denominator < EPS
-        ? 0
-        : Math.max(0, Math.min(1, ((point[0] - start[0]) * dx + (point[1] - start[1]) * dy) / denominator));
-      const boundary = [start[0] + dx * t, start[1] + dy * t];
-      const distance = Math.hypot(point[0] - boundary[0], point[1] - boundary[1]);
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        best = { start, end, point: boundary, distance };
-      }
-    }
-  }
-  return best;
-}
-
-function resolveFromBoundary(sourceAnchor, search) {
-  const boundary = nearestBoundarySegment(sourceAnchor);
-  if (!boundary || boundary.distance > search.maxDistance) return null;
-
-  const dx = boundary.end[0] - boundary.start[0];
-  const dy = boundary.end[1] - boundary.start[1];
-  const length = Math.hypot(dx, dy) || 1;
-  const normals = [[-dy / length, dx / length], [dy / length, -dx / length]];
-
-  for (let distance = search.step; distance <= search.maxDistance + EPS; distance += search.step) {
-    for (const [nx, ny] of normals) {
-      const candidate = [boundary.point[0] + nx * distance, boundary.point[1] + ny * distance];
+function resolveFromLocalGrid(sourceAnchor, search) {
+  if (isPhysicalLandPoint(sourceAnchor)) return [...sourceAnchor];
+  const rings = Math.ceil(search.maxDistance / search.step);
+  for (let ring = 1; ring <= rings; ring += 1) {
+    const distance = ring * search.step;
+    const samples = Math.max(72, Math.ceil((Math.PI * 2 * distance) / search.step));
+    for (let sample = 0; sample < samples; sample += 1) {
+      const angle = (sample / samples) * Math.PI * 2;
+      const candidate = [
+        sourceAnchor[0] + Math.cos(angle) * distance,
+        sourceAnchor[1] + Math.sin(angle) * distance,
+      ];
       if (isPhysicalLandPoint(candidate)) return candidate;
     }
   }
@@ -98,12 +74,9 @@ function resolveFromBoundary(sourceAnchor, search) {
 function resolveGeometryAnchor(provinceId, sourceAnchor) {
   const search = GEOMETRY_ANCHOR_SEARCH[provinceId];
   if (!search) return [...sourceAnchor];
-  if (isPhysicalLandPoint(sourceAnchor)) return [...sourceAnchor];
-
-  const recovered = resolveFromBoundary(sourceAnchor, search);
+  const recovered = resolveFromLocalGrid(sourceAnchor, search);
   if (recovered) return recovered;
-
-  throw new Error(`No physical-land geometry anchor candidate for ${provinceId}`);
+  throw new Error(`No physical-land geometry anchor candidate for ${provinceId} from ${sourceAnchor.join(",")}`);
 }
 
 function withGeometryAnchors(callback) {
@@ -111,21 +84,18 @@ function withGeometryAnchors(callback) {
   for (const provinceId of Object.keys(GEOMETRY_ANCHOR_SEARCH)) {
     const refinement = ANATOLIA_PROVINCE_REFINEMENTS[provinceId];
     if (!refinement?.anchor) throw new Error(`Missing refinement anchor for geometry override: ${provinceId}`);
-    const original = [...refinement.anchor];
+    const original = refinement.anchor;
     const resolved = resolveGeometryAnchor(provinceId, original);
     originals.set(provinceId, original);
-    // Mutate the shared anchor array rather than replacing the property. V15
-    // reads the same refinement object and therefore observes this working seed.
-    refinement.anchor[0] = resolved[0];
-    refinement.anchor[1] = resolved[1];
+    // Replace the property itself. The V15 builder reads the same shared
+    // refinement object and therefore observes the resolved geometry seed.
+    refinement.anchor = resolved;
   }
   try {
     return callback();
   } finally {
-    for (const [provinceId, point] of originals) {
-      const anchor = ANATOLIA_PROVINCE_REFINEMENTS[provinceId].anchor;
-      anchor[0] = point[0];
-      anchor[1] = point[1];
+    for (const [provinceId, original] of originals) {
+      ANATOLIA_PROVINCE_REFINEMENTS[provinceId].anchor = original;
     }
   }
 }
