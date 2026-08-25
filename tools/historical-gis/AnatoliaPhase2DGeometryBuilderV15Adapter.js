@@ -54,9 +54,14 @@ function repairPhysicalPolygonToFixedPoint(polygon, provinceId) {
   if (isStrictlyPhysicalPath(polygon)) return polygon;
   let current = polygon;
   for (let pass = 1; pass <= MAX_PHYSICAL_REPAIR_PASSES; pass += 1) {
-    const repaired = repairPhysicalPolygon(current);
-    if (isStrictlyPhysicalPath(repaired)) return repaired;
-    current = densifyPolygon(repaired);
+    try {
+      const repaired = repairPhysicalPolygon(current);
+      if (isStrictlyPhysicalPath(repaired)) return repaired;
+      current = densifyPolygon(repaired);
+    } catch (error) {
+      const details = error instanceof Error ? error.message : String(error);
+      throw new Error(`Phase 2D physical repair failed for ${provinceId} on pass ${pass} with ${current.length} vertices: ${details}`, { cause: error });
+    }
   }
   throw new Error(`Phase 2D physical repair did not converge to a land-safe polygon after ${MAX_PHYSICAL_REPAIR_PASSES} passes: ${provinceId}`);
 }
