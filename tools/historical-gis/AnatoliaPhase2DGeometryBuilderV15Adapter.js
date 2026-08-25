@@ -9,15 +9,14 @@ import { ANATOLIA_PROVINCE_REFINEMENTS } from "../../src/map/data/AnatoliaProvin
  *
  * Historical anchors remain authoritative research data. The geometry adapter
  * only supplies a deterministic, physical-land-safe working anchor when the
- * source point falls just outside the current Natural Earth-derived mainland
- * polygon. Candidate points are generated as concentric local rings rather
- * than as a short hand-picked list, so small coastline differences do not
- * require repeatedly changing historical coordinates in this adapter.
+ * source point falls outside the current Natural Earth-derived mainland
+ * polygon. Candidate points are generated as concentric local rings so small
+ * coastline differences do not require changing historical coordinates.
  */
 const GEOMETRY_ANCHOR_SEARCH = Object.freeze({
   "bithynia-nicomedia": Object.freeze({
-    maxRadius: 0.35,
-    step: 0.005,
+    maxRadius: 1.2,
+    step: 0.01,
     directions: 72,
   }),
 });
