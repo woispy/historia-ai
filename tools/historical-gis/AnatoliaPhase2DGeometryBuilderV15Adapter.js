@@ -45,12 +45,12 @@ function densifyPolygon(polygon) {
   return result;
 }
 
-function repairPhysicalPolygonToFixedPoint(polygon, provinceId) {
+function repairPhysicalPolygonToFixedPoint(polygon, provinceId, containmentPolygon) {
   if (isStrictlyPhysicalPath(polygon)) return polygon;
   let current = polygon; let lastError = null;
   for (let pass = 1; pass <= MAX_PHYSICAL_REPAIR_PASSES; pass += 1) {
     try {
-      const repaired = repairPhysicalPolygon(current);
+      const repaired = repairPhysicalPolygon(current, { containmentPolygon });
       if (repaired.length >= 3 && isStrictlyPhysicalPath(repaired)) return repaired;
       current = densifyPolygon(repaired);
     } catch (error) { lastError = error; break; }
@@ -69,7 +69,8 @@ function normalizeGeometryContract(assets) {
       const provinceId = geometry.identity?.provinceId ?? geometry.identity?.id;
       const historicalAnchor = provinceId ? ANATOLIA_PROVINCE_REFINEMENTS[provinceId]?.anchor : null;
       if (!historicalAnchor) throw new Error(`Missing historical anchor in V16 adapter contract: ${provinceId ?? "unknown"}`);
-      const repairedPolygon = repairPhysicalPolygonToFixedPoint(polygon, provinceId ?? "unknown");
+      const sourcePartitionCell = geometry.sourcePartitionCell;
+      const repairedPolygon = repairPhysicalPolygonToFixedPoint(polygon, provinceId ?? "unknown", sourcePartitionCell);
       return {
         ...geometry,
         sourcePartitionCell: undefined,
