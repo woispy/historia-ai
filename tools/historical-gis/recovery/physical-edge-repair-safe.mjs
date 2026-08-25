@@ -80,6 +80,22 @@ function projectToBoundaryCandidates(point, originalStart, originalEnd, interior
   return candidates.sort((a, b) => a.distance - b.distance);
 }
 
+function exactBoundaryCandidates(point) {
+  const candidates = [];
+  for (const descriptor of BOUNDARIES) {
+    for (let segmentIndex = 0; segmentIndex < descriptor.boundary.length; segmentIndex += 1) {
+      const start = descriptor.boundary[segmentIndex];
+      const end = descriptor.boundary[(segmentIndex + 1) % descriptor.boundary.length];
+      const projection = nearestPointOnSegment(point, start, end);
+      const tolerance = GEOMETRY_EPS * Math.max(1, distance(start, end));
+      if (projection.distance <= tolerance) {
+        candidates.push({ ...descriptor, segmentIndex, point: projection.point, distance: projection.distance });
+      }
+    }
+  }
+  return candidates.sort((a, b) => a.distance - b.distance);
+}
+
 function isValidPhysicalPath(path) {
   if (!Array.isArray(path) || path.length < 2) return false;
   for (let index = 0; index < path.length - 1; index += 1) {
@@ -175,15 +191,16 @@ function sameBoundary(a, b) {
 function pathLength(path) { return path.reduce((total, point, index) => index === 0 ? total : total + distance(path[index - 1], point), 0); }
 
 function chooseBoundaryPath(fromPoint, toPoint, originalStart, originalEnd, interiorSign) {
-  const fromCandidates = projectToBoundaryCandidates(fromPoint, originalStart, originalEnd, interiorSign);
-  const toCandidates = projectToBoundaryCandidates(toPoint, originalStart, originalEnd, interiorSign);
+  const exactFromCandidates = exactBoundaryCandidates(fromPoint);
+  const exactToCandidates = exactBoundaryCandidates(toPoint);
+  const fromCandidates = [...exactFromCandidates, ...projectToBoundaryCandidates(fromPoint, originalStart, originalEnd, interiorSign)];
+  const toCandidates = [...exactToCandidates, ...projectToBoundaryCandidates(toPoint, originalStart, originalEnd, interiorSign)];
   if (fromCandidates.length === 0 || toCandidates.length === 0) return null;
   const pathIsAllowed = (path, boundaryDescriptor = null) => {
     if (!isValidPhysicalPath(path)) return false;
-    // An authoritative lake shoreline is a physical hole boundary. It may
-    // legitimately bow outside the original straight power-edge half-plane;
-    // forcing every shoreline vertex back into that half-plane was the source
-    // of false topology-repair rejection for cells intersecting lakes.
+    // Authoritative shoreline paths are physical boundaries. They are allowed
+    // to deviate from the straight power-edge half-plane because the shoreline
+    // itself is the physical partition boundary at a water transition.
     if (boundaryDescriptor?.kind === "lake") return true;
     return path.every((point) => edgeCross(originalStart, originalEnd, point) * interiorSign >= -INTERIOR_SIDE_TOLERANCE);
   };
