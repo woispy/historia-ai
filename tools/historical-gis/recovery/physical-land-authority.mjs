@@ -5,7 +5,9 @@ import { ANATOLIA_PHYSICAL_COAST_CORRECTIONS } from "../../../src/map/data/Anato
 const EPS = 1e-9;
 const MIN_AREA = 0.00005;
 const MAX_RECOVERY_DISTANCE = 0.75;
-const STRICT_BOUNDARY_RECOVERY_DISTANCE = 0.00001;
+// Partition vertices may be corrected only for the same numerical boundary error
+// tolerated by the physical-land validator. Wider recovery is reserved for anchors.
+const STRICT_BOUNDARY_RECOVERY_DISTANCE = 0.0001;
 const RECOVERY_STEP = 0.001;
 const NUMERICAL_BOUNDARY_TOLERANCE = 0.0001;
 const BBOX_EPS = NUMERICAL_BOUNDARY_TOLERANCE;
