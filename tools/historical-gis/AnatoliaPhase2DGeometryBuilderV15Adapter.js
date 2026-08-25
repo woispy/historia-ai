@@ -11,7 +11,7 @@ import { repairPhysicalPolygon } from "./recovery/physical-edge-repair.mjs";
 import { ANATOLIA_PROVINCE_REFINEMENTS } from "../../src/map/data/AnatoliaProvinceRefinement.js";
 
 const STRICT_PHYSICAL_EDGE_SAMPLE_COUNT = 64;
-const MAX_PHYSICAL_REPAIR_PASSES = 3;
+const MAX_PHYSICAL_REPAIR_PASSES = 8;
 
 /**
  * Phase 2D V16 contract adapter over the retained V15 geometry engine.
