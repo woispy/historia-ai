@@ -4,8 +4,7 @@ import { repairPhysicalPolygon } from "./recovery/physical-edge-repair-v2.mjs";
 import { ANATOLIA_PROVINCE_REFINEMENTS } from "../../src/map/data/AnatoliaProvinceRefinement.js";
 
 const STRICT_PHYSICAL_EDGE_SAMPLE_COUNT = 64;
-const MAX_PHYSICAL_REPAIR_PASSES = 8;
-const REPAIR_DENSIFICATION_SEGMENTS = 16;
+const MAX_PHYSICAL_REPAIR_PASSES = 4;
 const PARTITION_CLIP_EPS = 1e-10;
 
 function withGeometryAnchors(callback) {
@@ -34,18 +33,6 @@ function isStrictlyPhysicalPath(polygon) {
   return true;
 }
 
-function densifyPolygon(polygon) {
-  const result = [];
-  for (let index = 0; index < polygon.length; index += 1) {
-    const start = polygon[index]; const end = polygon[(index + 1) % polygon.length]; result.push(start);
-    for (let sampleIndex = 1; sampleIndex < REPAIR_DENSIFICATION_SEGMENTS; sampleIndex += 1) {
-      const fraction = sampleIndex / REPAIR_DENSIFICATION_SEGMENTS;
-      result.push([start[0] + (end[0] - start[0]) * fraction, start[1] + (end[1] - start[1]) * fraction]);
-    }
-  }
-  return result;
-}
-
 function signedArea(polygon) { let sum = 0; for (let index = 0; index < polygon.length; index += 1) { const current = polygon[index]; const next = polygon[(index + 1) % polygon.length]; sum += current[0] * next[1] - next[0] * current[1]; } return sum / 2; }
 function edgeCross(start, end, point) { return (end[0] - start[0]) * (point[1] - start[1]) - (end[1] - start[1]) * (point[0] - start[0]); }
 function intersectLines(a, b, c, d) {
@@ -69,19 +56,26 @@ function clipPolygonToCell(polygon, cell) {
   }
   return output;
 }
+function polygonSignature(polygon) {
+  return JSON.stringify(polygon.map(([longitude, latitude]) => [Number(longitude.toFixed(10)), Number(latitude.toFixed(10))]));
+}
 function repairPhysicalPolygonToFixedPoint(polygon, provinceId, containmentPolygon) {
   if (isStrictlyPhysicalPath(polygon)) return polygon;
-  let current = polygon; let lastError = null;
+  let current = polygon; let lastError = null; let previousSignature = null;
   for (let pass = 1; pass <= MAX_PHYSICAL_REPAIR_PASSES; pass += 1) {
+    const currentSignature = polygonSignature(current);
+    if (currentSignature === previousSignature) break;
+    previousSignature = currentSignature;
     try {
       const repaired = repairPhysicalPolygon(current);
       if (repaired.length < 3) throw new Error("physical repair returned fewer than three vertices");
       const partitionClipped = containmentPolygon ? clipPolygonToCell(repaired, containmentPolygon) : repaired;
       if (partitionClipped.length >= 3 && isStrictlyPhysicalPath(partitionClipped)) return partitionClipped;
-      current = densifyPolygon(partitionClipped.length >= 3 ? partitionClipped : repaired);
+      if (partitionClipped.length < 3) throw new Error("partition reconciliation removed the physical polygon");
+      current = partitionClipped;
     } catch (error) { lastError = error; break; }
   }
-  const detail = Array.isArray(current) ? JSON.stringify(current.map(([longitude, latitude]) => [Number(longitude.toFixed(10)), Number(latitude.toFixed(10))])) : "unavailable";
+  const detail = Array.isArray(current) ? polygonSignature(current) : "unavailable";
   throw new Error(`Phase 2D physical repair failed for ${provinceId}: ${lastError?.message ?? "did not converge"}; polygon=${detail}`);
 }
 
