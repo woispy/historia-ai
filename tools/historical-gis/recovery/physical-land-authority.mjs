@@ -153,12 +153,12 @@ export function resolvePhysicalGeometryBoundaryPoint(point) {
 }
 
 /**
- * Province construction may temporarily carry an explicit lake footprint in
- * its outer support cell. The final province asset removes that footprint as
- * a lake hole. Sea/outside points are never accepted here.
+ * Final political geometry boundary support is intentionally strict: only
+ * authoritative land/coast/lake-shoreline points are valid. Lake interiors
+ * remain temporary recovery input and must never satisfy a final edge check.
  */
 export function isPhysicalGeometryBoundaryPoint(point) {
-  return isPhysicalLandPoint(point) || isLakeInteriorPoint(point);
+  return isPhysicalLandPoint(point);
 }
 
 export function resolveGeometryAnchor(provinceId, sourceAnchor) {
