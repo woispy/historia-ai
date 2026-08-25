@@ -1,7 +1,7 @@
 import {
   buildAnatoliaPhase2DAssets as buildAnatoliaPhase2DAssetsV16,
   isPhysicalLandPoint,
-} from "./AnatoliaPhase2DGeometryBuilderV16.js";
+} from "./AnatoliaPhase2DGeometryBuilderV15.js";
 import { isAnatoliaGeometryPoint } from "./AnatoliaGeometryAuthority.js";
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
@@ -33,7 +33,7 @@ function expectedV16SiteCount() {
   const physicalLand = ANATOLIA_PHYSICAL_ATLAS.landPolygons.reduce((total, polygon) => total + boundarySiteCount(polygon), 0);
   const coastCorrections = ANATOLIA_PHYSICAL_COAST_CORRECTIONS.reduce((total, item) => total + boundarySiteCount(item.coordinates), 0);
   const lakes = ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.reduce((total, lake) => total + boundarySiteCount(lake.coordinates), 0);
-  return 38 + physicalLand + coastCorrections + lakes;
+  return ANATOLIA_PROVINCE_METADATA.length + physicalLand + coastCorrections + lakes;
 }
 
 function physicalBoundarySiteCount() { return expectedV16SiteCount() - ANATOLIA_PROVINCE_METADATA.length; }
@@ -47,12 +47,10 @@ function pointOnSegmentProjection(point, start, end) {
   return [start[0] + dx * t, start[1] + dy * t];
 }
 
-function physicalLandBoundaryCandidates() {
-  return [...ANATOLIA_PHYSICAL_COAST_CORRECTIONS.map((item) => item.coordinates), ...ANATOLIA_PHYSICAL_ATLAS.landPolygons]
-    .filter((polygon) => Array.isArray(polygon) && polygon.length >= 2);
-}
-
-const PHYSICAL_LAND_BOUNDARIES = physicalLandBoundaryCandidates();
+const PHYSICAL_LAND_BOUNDARIES = [
+  ...ANATOLIA_PHYSICAL_COAST_CORRECTIONS.map((item) => item.coordinates),
+  ...ANATOLIA_PHYSICAL_ATLAS.landPolygons,
+].filter((polygon) => Array.isArray(polygon) && polygon.length >= 2);
 
 function recoverNumericalBoundaryDrift(point) {
   if (isPhysicalLandPoint(point)) return point;
@@ -125,12 +123,11 @@ function normalizeGeometryPhysicalBoundary(geometry) {
     throw new Error(`Phase 2D geometry has invalid polygon coordinates: ${geometry.identity?.provinceId ?? "unknown"}`);
   }
   const normalizedOuterRing = normalizeOuterRing(coordinates[0]);
-  const holes = lakeHolesForOuterRing(normalizedOuterRing);
   return {
     ...geometry,
     geometry: { ...geometry.geometry, coordinates: [normalizedOuterRing, ...coordinates.slice(1)] },
     polygons: [normalizedOuterRing],
-    holes,
+    holes: lakeHolesForOuterRing(normalizedOuterRing),
   };
 }
 
@@ -162,13 +159,13 @@ function clipPolygonToAnchorHalfPlane(polygon, ownAnchor, otherAnchor) {
 }
 
 function polygonArea(polygon) {
-  let area = 0;
+  let value = 0;
   for (let index = 0; index < polygon.length; index += 1) {
     const current = polygon[index];
     const next = polygon[(index + 1) % polygon.length];
-    area += current[0] * next[1] - next[0] * current[1];
+    value += current[0] * next[1] - next[0] * current[1];
   }
-  return Math.abs(area) / 2;
+  return Math.abs(value) / 2;
 }
 
 function enforcePoliticalOwnershipPartition(geometries) {
@@ -179,11 +176,9 @@ function enforcePoliticalOwnershipPartition(geometries) {
     let ring = geometry.polygons[0];
     if (!pointInPolygon(ownAnchor, ring)) return geometry;
     for (const other of anchors) {
-      if (other.provinceId === geometry.identity.provinceId) continue;
-      if (!pointInPolygon(other.point, ring)) continue;
+      if (other.provinceId === geometry.identity.provinceId || !pointInPolygon(other.point, ring)) continue;
       const clipped = clipPolygonToAnchorHalfPlane(ring, ownAnchor, other.point);
-      if (clipped.length < 3) continue;
-      if (polygonArea(clipped) >= MIN_PROVINCE_AREA && pointInPolygon(ownAnchor, clipped)) ring = clipped;
+      if (clipped.length >= 3 && polygonArea(clipped) >= MIN_PROVINCE_AREA && pointInPolygon(ownAnchor, clipped)) ring = clipped;
     }
     const normalized = normalizeOuterRing(ring);
     return { ...geometry, polygons: [normalized], geometry: { ...geometry.geometry, coordinates: [normalized, ...geometry.geometry.coordinates.slice(1)] } };
@@ -197,7 +192,7 @@ function buildProvinceAssets(geometries) {
     const metadata = metadataById.get(provinceId);
     if (!metadata) throw new Error(`Phase 2D geometry has no matching province metadata: ${provinceId}`);
     return {
-      header: { assetType: "province", assetVersion: 4, generator: "Historia AI Phase 2D Geometry Builder V16", provider: "historia-ai-curated-cartography", dataset: "anatolia-province-geometry-1300", historicalDate: HISTORICAL_DATE, provinceId, historicalAnchor: geometry.identity?.historicalAnchor ?? metadata.centroid },
+      header: { assetType: "province", assetVersion: 4, generator: "Historia AI Phase 2D Geometry Builder V15 adapter", provider: "historia-ai-curated-cartography", dataset: "anatolia-province-geometry-1300", historicalDate: HISTORICAL_DATE, provinceId, historicalAnchor: geometry.identity?.historicalAnchor ?? metadata.centroid },
       identity: { id: provinceId, name: metadata.name },
       references: { geometryId: provinceId, countryId: metadata.countryId, capitalCityId: metadata.cityId },
       ownership: { countryId: metadata.historicalControl?.controllerAt1300 ?? metadata.countryId ?? null, ownerId: metadata.historicalControl?.controllerAt1300 ?? metadata.countryId ?? null },
@@ -224,7 +219,7 @@ export function buildAnatoliaPhase2DAssets(regions) {
   const polygonCount = geometries.reduce((total, geometry) => total + geometry.polygons.length, 0);
   const fallbackProvinceCount = fallbackLikeProvinceCount(geometries);
   if (provinces.length !== ANATOLIA_PROVINCE_METADATA.length) throw new Error(`Phase 2D province count mismatch: ${provinces.length}; expected ${ANATOLIA_PROVINCE_METADATA.length}.`);
-  return { ...assets, geometries, provinces, historicalDate: assets.historicalDate ?? HISTORICAL_DATE, provinceCount: provinces.length, siteCount, polygonCount, fallbackProvinceCount, politicalSiteCount: assets.politicalSiteCount ?? ANATOLIA_PROVINCE_METADATA.length, supportSiteCount: assets.supportSiteCount ?? 0, naturalFeatureSiteCount: assets.naturalFeatureSiteCount ?? naturalFeatureSiteCount(), barrierSiteCount: 0, physicalBarrierSiteCount: Math.max(physicalBoundarySiteCount(), assets.barrierSiteCount ?? 0), weightIterations: assets.weightIterations ?? DETERMINISTIC_WEIGHT_ITERATIONS };
+  return { ...assets, geometries, provinces, historicalDate: assets.historicalDate ?? HISTORICAL_DATE, provinceCount: provinces.length, siteCount, polygonCount, fallbackProvinceCount, politicalSiteCount: assets.politicalSiteCount ?? ANATOLIA_PROVINCE_METADATA.length, supportSiteCount: assets.supportSiteCount ?? 0, naturalFeatureSiteCount: assets.naturalFeatureSiteCount ?? naturalFeatureSiteCount(), barrierSiteCount: assets.barrierSiteCount ?? 0, physicalBarrierSiteCount: Math.max(physicalBoundarySiteCount(), assets.barrierSiteCount ?? 0), weightIterations: assets.weightIterations ?? DETERMINISTIC_WEIGHT_ITERATIONS };
 }
 
 export { isAnatoliaGeometryPoint, isPhysicalLandPoint };
