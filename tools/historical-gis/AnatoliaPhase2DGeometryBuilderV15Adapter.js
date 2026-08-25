@@ -10,33 +10,44 @@ import { ANATOLIA_PROVINCE_REFINEMENTS } from "../../src/map/data/AnatoliaProvin
  * Historical anchors remain authoritative research data. The geometry adapter
  * only supplies a deterministic, physical-land-safe working anchor when the
  * source point falls just outside the current Natural Earth-derived mainland
- * polygon. Candidate points are ordered from least to most inland so the
- * geometry change stays as small as the physical atlas permits.
+ * polygon. Candidate points are generated as concentric local rings rather
+ * than as a short hand-picked list, so small coastline differences do not
+ * require repeatedly changing historical coordinates in this adapter.
  */
-const GEOMETRY_ANCHOR_CANDIDATES = Object.freeze({
-  "bithynia-nicomedia": [
-    [29.92, 40.73],
-    [29.92, 40.72],
-    [29.91, 40.71],
-    [29.90, 40.70],
-  ],
+const GEOMETRY_ANCHOR_SEARCH = Object.freeze({
+  "bithynia-nicomedia": Object.freeze({
+    maxRadius: 0.35,
+    step: 0.005,
+    directions: 72,
+  }),
 });
 
-function resolveGeometryAnchor(provinceId, candidates) {
-  const point = candidates.find((candidate) => isPhysicalLandPoint(candidate));
-  if (!point) {
-    throw new Error(`No physical-land geometry anchor candidate for ${provinceId}`);
+function resolveGeometryAnchor(provinceId, sourceAnchor) {
+  const search = GEOMETRY_ANCHOR_SEARCH[provinceId];
+  if (!search) return [...sourceAnchor];
+  if (isPhysicalLandPoint(sourceAnchor)) return [...sourceAnchor];
+
+  for (let radius = search.step; radius <= search.maxRadius + 1e-9; radius += search.step) {
+    for (let direction = 0; direction < search.directions; direction += 1) {
+      const angle = (direction / search.directions) * Math.PI * 2;
+      const candidate = [
+        sourceAnchor[0] + Math.cos(angle) * radius,
+        sourceAnchor[1] + Math.sin(angle) * radius,
+      ];
+      if (isPhysicalLandPoint(candidate)) return candidate;
+    }
   }
-  return point;
+
+  throw new Error(`No physical-land geometry anchor candidate for ${provinceId}`);
 }
 
 function withGeometryAnchors(callback) {
   const originals = new Map();
-  for (const [provinceId, candidates] of Object.entries(GEOMETRY_ANCHOR_CANDIDATES)) {
+  for (const provinceId of Object.keys(GEOMETRY_ANCHOR_SEARCH)) {
     const refinement = ANATOLIA_PROVINCE_REFINEMENTS[provinceId];
     if (!refinement?.anchor) throw new Error(`Missing refinement anchor for geometry override: ${provinceId}`);
     originals.set(provinceId, refinement.anchor);
-    refinement.anchor = [...resolveGeometryAnchor(provinceId, candidates)];
+    refinement.anchor = resolveGeometryAnchor(provinceId, refinement.anchor);
   }
   try {
     return callback();
