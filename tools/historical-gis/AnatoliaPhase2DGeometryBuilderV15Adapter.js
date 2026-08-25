@@ -6,7 +6,6 @@ import { ANATOLIA_PROVINCE_REFINEMENTS } from "../../src/map/data/AnatoliaProvin
 const STRICT_PHYSICAL_EDGE_SAMPLE_COUNT = 64;
 const MAX_PHYSICAL_REPAIR_PASSES = 8;
 const REPAIR_DENSIFICATION_SEGMENTS = 16;
-const PARTITION_RECONCILIATION_PASSES = 4;
 const PARTITION_EPS = 1e-10;
 
 function withGeometryAnchors(callback) {
