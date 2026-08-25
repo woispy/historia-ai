@@ -135,7 +135,7 @@ function clipPolygonToAnchorHalfPlane(polygon, ownAnchor, otherAnchor) {
   const dx = otherAnchor[0] - ownAnchor[0];
   const dy = otherAnchor[1] - ownAnchor[1];
   if (Math.hypot(dx, dy) <= GEOMETRY_EPS) return polygon;
-  const c = (otherAnchor[0] ** 2 + otherAnchor[1] ** 2 - ownAnchor[0] ** 2 - ownAnchor[0] ** 2) / 2;
+  const c = (otherAnchor[0] ** 2 + otherAnchor[1] ** 2 - ownAnchor[0] ** 2 - ownAnchor[1] ** 2) / 2;
   const inside = (point) => dx * point[0] + dy * point[1] <= c + GEOMETRY_EPS;
   const output = [];
   for (let index = 0; index < polygon.length; index += 1) {
