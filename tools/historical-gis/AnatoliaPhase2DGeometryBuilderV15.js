@@ -380,4 +380,4 @@ export function isAnatoliaGeometryPoint(point) {
   return longitude >= BBOX[0] && longitude <= BBOX[2] && latitude >= BBOX[1] && latitude <= BBOX[3];
 }
 
-export { isPhysicalLandPoint };
+export { isPhysicalLandPoint, nearestBoundaryLandPoint };
