@@ -107,8 +107,7 @@ function repairPhysicalEdge(start, end, depth = 0) {
   const resolved = resolvePhysicalGeometryBoundaryPoint(target.point) ?? recoverNumericalBoundaryDrift(target.point);
   if (!resolved) throw new Error(`Phase 2D geometry edge crosses physical water without an authoritative boundary solution: ${target.point.join(",")}`);
   const boundary = resolved.map((value) => Number(value.toFixed(7)));
-  if (Math.hypot(boundary[0] - start[0], boundary[1] - start[1]) <= GEOMETRY_EPS
-    || Math.hypot(boundary[0] - end[0], boundary[1] - end[1]) <= GEOMETRY_EPS) {
+  if (Math.hypot(boundary[0] - start[0], boundary[1] - start[1]) <= GEOMETRY_EPS || Math.hypot(boundary[0] - end[0], boundary[1] - end[1]) <= GEOMETRY_EPS) {
     throw new Error(`Phase 2D geometry edge physical-boundary repair made no progress: ${start.join(",")} -> ${end.join(",")}`);
   }
   const left = repairPhysicalEdge(start, boundary, depth + 1);
@@ -134,8 +133,7 @@ function pointInPolygon(point, polygon) {
   for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index++) {
     const current = polygon[index];
     const before = polygon[previous];
-    if ((current[1] > point[1]) !== (before[1] > point[1])
-      && point[0] < ((before[0] - current[0]) * (point[1] - current[1])) / ((before[1] - current[1]) || 1e-12) + current[0]) inside = !inside;
+    if ((current[1] > point[1]) !== (before[1] > point[1]) && point[0] < ((before[0] - current[0]) * (point[1] - current[1])) / ((before[1] - current[1]) || 1e-12) + current[0]) inside = !inside;
   }
   return inside;
 }
@@ -159,52 +157,14 @@ function polygonCentroid(polygon) {
 }
 
 function lakeHolesForOuterRing(outerRing) {
-  return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes
-    .filter((lake) => Array.isArray(lake.coordinates) && lake.coordinates.length >= 3)
-    .filter((lake) => lakeFullyContainedByOuterRing(lake, outerRing))
-    .filter((lake) => pointInPolygon(polygonCentroid(lake.coordinates), outerRing))
-    .map((lake) => lake.coordinates.map(([longitude, latitude]) => [Number(longitude.toFixed(7)), Number(latitude.toFixed(7))]));
+  return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.filter((lake) => Array.isArray(lake.coordinates) && lake.coordinates.length >= 3).filter((lake) => lakeFullyContainedByOuterRing(lake, outerRing)).filter((lake) => pointInPolygon(polygonCentroid(lake.coordinates), outerRing)).map((lake) => lake.coordinates.map(([longitude, latitude]) => [Number(longitude.toFixed(7)), Number(latitude.toFixed(7))]));
 }
 
 function normalizeGeometryPhysicalBoundary(geometry) {
   const coordinates = geometry.geometry?.coordinates;
-  if (!Array.isArray(coordinates) || coordinates.length === 0 || !Array.isArray(coordinates[0])) {
-    throw new Error(`Phase 2D geometry has invalid polygon coordinates: ${geometry.identity?.provinceId ?? "unknown"}`);
-  }
+  if (!Array.isArray(coordinates) || coordinates.length === 0 || !Array.isArray(coordinates[0])) throw new Error(`Phase 2D geometry has invalid polygon coordinates: ${geometry.identity?.provinceId ?? "unknown"}`);
   const normalizedOuterRing = normalizeOuterRing(coordinates[0]);
-  return {
-    ...geometry,
-    geometry: { ...geometry.geometry, coordinates: [normalizedOuterRing, ...coordinates.slice(1)] },
-    polygons: [normalizedOuterRing],
-    holes: lakeHolesForOuterRing(normalizedOuterRing),
-  };
-}
-
-function clipPolygonToAnchorHalfPlane(polygon, ownAnchor, otherAnchor) {
-  if (!Array.isArray(polygon) || polygon.length < 3) return [];
-  const dx = otherAnchor[0] - ownAnchor[0];
-  const dy = otherAnchor[1] - ownAnchor[1];
-  if (Math.hypot(dx, dy) <= GEOMETRY_EPS) return polygon;
-  const c = (otherAnchor[0] ** 2 + otherAnchor[1] ** 2 - ownAnchor[0] ** 2 - ownAnchor[1] ** 2) / 2;
-  const inside = (point) => dx * point[0] + dy * point[1] <= c + GEOMETRY_EPS;
-  const output = [];
-  for (let index = 0; index < polygon.length; index += 1) {
-    const current = polygon[index];
-    const next = polygon[(index + 1) % polygon.length];
-    const currentInside = inside(current);
-    const nextInside = inside(next);
-    if (currentInside && nextInside) output.push(next);
-    else if (currentInside !== nextInside) {
-      const currentValue = dx * current[0] + dy * current[1] - c;
-      const nextValue = dx * next[0] + dy * next[1] - c;
-      const denominator = currentValue - nextValue;
-      if (Math.abs(denominator) <= GEOMETRY_EPS) continue;
-      const t = currentValue / denominator;
-      output.push([current[0] + (next[0] - current[0]) * t, current[1] + (next[1] - current[1]) * t]);
-      if (!currentInside && nextInside) output.push(next);
-    }
-  }
-  return output;
+  return { ...geometry, geometry: { ...geometry.geometry, coordinates: [normalizedOuterRing, ...coordinates.slice(1)] }, polygons: [normalizedOuterRing], holes: lakeHolesForOuterRing(normalizedOuterRing) };
 }
 
 function polygonArea(polygon) {
@@ -215,23 +175,6 @@ function polygonArea(polygon) {
     value += current[0] * next[1] - next[0] * current[1];
   }
   return Math.abs(value) / 2;
-}
-
-function enforcePoliticalOwnershipPartition(geometries) {
-  const anchors = geometries.map((geometry) => ({ provinceId: geometry.identity.provinceId, point: geometry.identity.historicalAnchor }));
-  return geometries.map((geometry) => {
-    const ownAnchor = anchors.find((item) => item.provinceId === geometry.identity.provinceId)?.point;
-    if (!ownAnchor) throw new Error(`Phase 2D geometry has no historical anchor: ${geometry.identity.provinceId}`);
-    let ring = geometry.polygons[0];
-    if (!pointInPolygon(ownAnchor, ring)) return geometry;
-    for (const other of anchors) {
-      if (other.provinceId === geometry.identity.provinceId || !pointInPolygon(other.point, ring)) continue;
-      const clipped = clipPolygonToAnchorHalfPlane(ring, ownAnchor, other.point);
-      if (clipped.length >= 3 && polygonArea(clipped) >= MIN_PROVINCE_AREA && pointInPolygon(ownAnchor, clipped)) ring = clipped;
-    }
-    const normalized = normalizeOuterRing(ring);
-    return { ...geometry, polygons: [normalized], geometry: { ...geometry.geometry, coordinates: [normalized, ...geometry.geometry.coordinates.slice(1)] } };
-  });
 }
 
 function buildProvinceAssets(geometries) {
@@ -260,10 +203,7 @@ export function buildAnatoliaPhase2DAssets(regions) {
   const expectedSiteCount = expectedV16SiteCount();
   const siteCount = assets.siteCount ?? expectedSiteCount;
   if (!Number.isInteger(siteCount) || siteCount < expectedSiteCount) throw new Error(`Phase 2D cartographic site count is invalid: ${siteCount}; expected at least ${expectedSiteCount}.`);
-  let geometries = assets.geometries
-    .map((geometry) => ({ ...geometry, identity: { ...(geometry.identity ?? {}), id: geometry.identity?.provinceId ?? geometry.identity?.id, provinceId: geometry.identity?.provinceId ?? geometry.identity?.id } }))
-    .map(normalizeGeometryPhysicalBoundary);
-  geometries = enforcePoliticalOwnershipPartition(geometries);
+  const geometries = assets.geometries.map((geometry) => ({ ...geometry, identity: { ...(geometry.identity ?? {}), id: geometry.identity?.provinceId ?? geometry.identity?.id, provinceId: geometry.identity?.provinceId ?? geometry.identity?.id } })).map(normalizeGeometryPhysicalBoundary);
   const provinces = buildProvinceAssets(geometries);
   const polygonCount = geometries.reduce((total, geometry) => total + geometry.polygons.length, 0);
   const fallbackProvinceCount = fallbackLikeProvinceCount(geometries);
