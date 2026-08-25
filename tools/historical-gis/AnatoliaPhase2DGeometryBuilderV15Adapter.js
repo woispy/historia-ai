@@ -9,7 +9,7 @@ import {
 import { ANATOLIA_PROVINCE_REFINEMENTS } from "../../src/map/data/AnatoliaProvinceRefinement.js";
 
 /**
- * Phase 2D V15 compatibility adapter.
+ * Phase 2D V16 contract adapter over the retained V15 geometry engine.
  * Historical anchors remain immutable research data. Geometry recovery is
  * temporary and uses the single shared physical-land recovery contract.
  */
@@ -33,15 +33,28 @@ function withGeometryAnchors(callback) {
 function normalizeGeometryContract(assets) {
   return {
     ...assets,
+    provinces: assets.provinces.map((province) => ({
+      ...province,
+      header: {
+        ...province.header,
+        assetVersion: 16,
+        generator: "Historia AI Phase 2D Geometry Builder V16",
+      },
+    })),
     geometries: assets.geometries.map((geometry) => {
       const polygon = geometry.polygons?.[0];
       const holes = geometry.holes ?? [];
       if (!Array.isArray(polygon) || polygon.length < 3) return geometry;
       const provinceId = geometry.identity?.provinceId ?? geometry.identity?.id;
       const historicalAnchor = provinceId ? ANATOLIA_PROVINCE_REFINEMENTS[provinceId]?.anchor : null;
-      if (!historicalAnchor) throw new Error(`Missing historical anchor in V15 adapter contract: ${provinceId ?? "unknown"}`);
+      if (!historicalAnchor) throw new Error(`Missing historical anchor in V16 adapter contract: ${provinceId ?? "unknown"}`);
       return {
         ...geometry,
+        header: {
+          ...geometry.header,
+          assetVersion: 16,
+          generator: "Historia AI Phase 2D Geometry Builder V16",
+        },
         identity: {
           ...(geometry.identity ?? {}),
           id: provinceId,
