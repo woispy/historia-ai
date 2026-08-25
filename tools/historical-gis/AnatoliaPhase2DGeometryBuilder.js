@@ -5,6 +5,7 @@ import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceM
 const BBOX = [25.45, 35.72, 44.85, 42.35];
 const SITE_EPSILON = 1e-6;
 const COAST_SAMPLE_STEP = 0.12;
+const EDGE_SAMPLE_STEP = 0.03;
 const COASTAL_TOLERANCE = 0.06;
 
 function distanceSquared(a, b) {
@@ -74,6 +75,26 @@ function isPoliticalCartographicPoint(point) {
 function isPhysicalLandPoint(point) {
   return !pointInWaterEnvelope(point)
     && (pointInAnatoliaLand(point) || distanceToLandBoundary(point) <= COASTAL_TOLERANCE);
+}
+
+function isPhysicalLandPolygon(polygon) {
+  if (!Array.isArray(polygon) || polygon.length < 3) return false;
+  for (let index = 0; index < polygon.length; index += 1) {
+    const start = polygon[index];
+    const end = polygon[(index + 1) % polygon.length];
+    if (!isPhysicalLandPoint(start) || !isPhysicalLandPoint(end)) return false;
+    const length = Math.sqrt(distanceSquared(start, end));
+    const samples = Math.max(1, Math.ceil(length / EDGE_SAMPLE_STEP));
+    for (let sample = 1; sample < samples; sample += 1) {
+      const fraction = sample / samples;
+      const point = [
+        start[0] + (end[0] - start[0]) * fraction,
+        start[1] + (end[1] - start[1]) * fraction,
+      ];
+      if (!isPhysicalLandPoint(point)) return false;
+    }
+  }
+  return true;
 }
 
 function nearestProvinceId(point) {
@@ -392,7 +413,9 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     const centroid = polygonCentroid(cell);
     if (!isPhysicalLandPoint(centroid)) continue;
     if (!cell.every((point) => isPhysicalLandPoint(point))) continue;
-    polygonsByProvince[sites[siteIndex].provinceId].push(roundPolygon(cell));
+    const rounded = roundPolygon(cell);
+    if (!isPhysicalLandPolygon(rounded)) continue;
+    polygonsByProvince[sites[siteIndex].provinceId].push(rounded);
   }
 
   let fallbackCount = 0;
@@ -403,7 +426,11 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     if (!polygons.length) {
       const fallback = createAnchorFallbackPolygon(metadata.centroid);
       if (fallback.length < 3) throw new Error(`Phase 2D produced no geometry for ${metadata.id}`);
-      polygons = [roundPolygon(fallback)];
+      const roundedFallback = roundPolygon(fallback);
+      if (!isPhysicalLandPolygon(roundedFallback)) {
+        throw new Error(`Phase 2D fallback geometry is not physically valid for ${metadata.id}`);
+      }
+      polygons = [roundedFallback];
       fallbackCount += 1;
     }
     provinces.push(createProvinceAsset(metadata, polygons));
