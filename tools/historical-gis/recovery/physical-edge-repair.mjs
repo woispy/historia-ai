@@ -11,8 +11,9 @@ const GEOMETRY_EPS = 1e-8;
 const SAMPLE_COUNT = 256;
 const BINARY_ITERATIONS = 32;
 const VALIDATION_SAMPLES = 12;
-const MAX_BOUNDARY_PROJECTION_DISTANCE = 0.75;
+const MAX_BOUNDARY_PROJECTION_DISTANCE = 0.02;
 const MAX_BOUNDARY_CANDIDATES = 8;
+const MAX_RECOVERY_CONNECTOR_DISTANCE = 0.02;
 
 function distance(a, b) {
   return Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -50,9 +51,32 @@ function segmentIntersectionFraction(start, end, boundaryStart, boundaryEnd) {
   return Math.max(0, Math.min(1, t));
 }
 
+function normalizeRings(geometry) {
+  if (!Array.isArray(geometry) || !geometry.length) return [];
+  if (Array.isArray(geometry[0]) && Array.isArray(geometry[0][0])) return geometry.filter((ring) => Array.isArray(ring) && ring.length >= 3);
+  return geometry.length >= 3 ? [geometry] : [];
+}
+
+function lakeRings(lake) {
+  return normalizeRings(lake?.rings ?? lake?.coordinates);
+}
+
+function lakeBoundaryDescriptors() {
+  const result = [];
+  for (const [lakeIndex, lake] of AUTHORITATIVE_LAKES.entries()) {
+    for (const [ringIndex, ring] of lakeRings(lake).entries()) {
+      result.push({ lake, lakeIndex, ring, ringIndex });
+    }
+  }
+  return result;
+}
+
+const LAKE_BOUNDARIES = lakeBoundaryDescriptors();
+
 function intersections(start, end, boundaries, kind) {
   const result = [];
-  for (const [boundaryIndex, boundary] of boundaries.entries()) {
+  for (const descriptor of boundaries) {
+    const boundary = descriptor.ring ?? descriptor;
     if (!Array.isArray(boundary) || boundary.length < 3) continue;
     for (let segmentIndex = 0; segmentIndex < boundary.length; segmentIndex += 1) {
       const nextIndex = (segmentIndex + 1) % boundary.length;
@@ -60,8 +84,22 @@ function intersections(start, end, boundaries, kind) {
       if (fraction === null) continue;
       const point = sample(start, end, fraction);
       if (!isFinalPhysicalGeometryBoundaryPoint(point)) continue;
-      if (result.some((entry) => Math.abs(entry.fraction - fraction) <= EPS && entry.boundary === boundary)) continue;
-      result.push({ fraction, point, boundary, boundaryIndex, segmentIndex, kind, distance: 0 });
+      const duplicate = result.some((entry) => Math.abs(entry.fraction - fraction) <= EPS
+        && entry.boundary === boundary
+        && entry.segmentIndex === segmentIndex);
+      if (duplicate) continue;
+      result.push({
+        fraction,
+        point,
+        boundary,
+        boundaryIndex: descriptor.boundaryIndex,
+        segmentIndex,
+        kind,
+        distance: 0,
+        lake: descriptor.lake,
+        lakeIndex: descriptor.lakeIndex,
+        ringIndex: descriptor.ringIndex,
+      });
     }
   }
   return result.sort((a, b) => a.fraction - b.fraction);
@@ -69,7 +107,8 @@ function intersections(start, end, boundaries, kind) {
 
 function projectedBoundaryCandidates(point, boundaries, kind) {
   const result = [];
-  for (const [boundaryIndex, boundary] of boundaries.entries()) {
+  for (const descriptor of boundaries) {
+    const boundary = descriptor.ring ?? descriptor;
     if (!Array.isArray(boundary) || boundary.length < 3) continue;
     for (let segmentIndex = 0; segmentIndex < boundary.length; segmentIndex += 1) {
       const nextIndex = (segmentIndex + 1) % boundary.length;
@@ -78,10 +117,13 @@ function projectedBoundaryCandidates(point, boundaries, kind) {
       result.push({
         point: projection.point,
         boundary,
-        boundaryIndex,
+        boundaryIndex: descriptor.boundaryIndex,
         segmentIndex,
         kind,
         distance: projection.distance,
+        lake: descriptor.lake,
+        lakeIndex: descriptor.lakeIndex,
+        ringIndex: descriptor.ringIndex,
       });
     }
   }
@@ -90,8 +132,7 @@ function projectedBoundaryCandidates(point, boundaries, kind) {
 }
 
 function lakeIntersections(start, end) {
-  return intersections(start, end, AUTHORITATIVE_LAKES.map((lake) => lake.coordinates), "lake")
-    .map((entry) => ({ ...entry, lake: AUTHORITATIVE_LAKES[entry.boundaryIndex] }));
+  return intersections(start, end, LAKE_BOUNDARIES, "lake");
 }
 
 function landIntersections(start, end) {
@@ -99,8 +140,7 @@ function landIntersections(start, end) {
 }
 
 function projectedLakeCandidates(point) {
-  return projectedBoundaryCandidates(point, AUTHORITATIVE_LAKES.map((lake) => lake.coordinates), "lake")
-    .map((entry) => ({ ...entry, lake: AUTHORITATIVE_LAKES[entry.boundaryIndex] }));
+  return projectedBoundaryCandidates(point, LAKE_BOUNDARIES, "lake");
 }
 
 function projectedLandCandidates(point) {
@@ -147,7 +187,7 @@ function boundaryArcCandidates(boundary, from, to) {
   }
   backward.push(to.point);
 
-  return [forward, backward].sort((a, b) => pathLength(a) - pathLength(b));
+  return [forward, backward];
 }
 
 function isValidPhysicalPath(path) {
@@ -163,10 +203,10 @@ function isValidPhysicalPath(path) {
 }
 
 function chooseBoundaryArc(boundary, from, to) {
-  const candidates = boundaryArcCandidates(boundary, from, to);
-  const valid = candidates.filter(isValidPhysicalPath);
-  if (!valid.length) return null;
-  return valid[0];
+  const candidates = boundaryArcCandidates(boundary, from, to)
+    .filter(isValidPhysicalPath)
+    .sort((a, b) => pathLength(a) - pathLength(b));
+  return candidates[0] ?? null;
 }
 
 function appendUnique(target, points) {
@@ -210,44 +250,58 @@ function waterIntervals(start, end) {
   return intervals.filter((interval) => interval.exit !== null && interval.exit > interval.entry + EPS);
 }
 
+function withinInterval(crossing, interval) {
+  return crossing.fraction >= interval.entry - 0.02 && crossing.fraction <= interval.exit + 0.02;
+}
+
+function connectorIsValid(from, to) {
+  return distance(from, to) <= MAX_RECOVERY_CONNECTOR_DISTANCE || isValidPhysicalPath([from, to]);
+}
+
 function recoveryCandidates(interval, start, end, lakeCrossings, landCrossings) {
-  const entryPoint = sample(start, end, interval.entry);
-  const exitPoint = sample(start, end, interval.exit);
+  const entryTransition = sample(start, end, interval.entry);
+  const exitTransition = sample(start, end, interval.exit);
   const result = [];
 
   const lakeEntries = [
-    ...lakeCrossings.filter((crossing) => crossing.fraction >= interval.entry - 0.05 && crossing.fraction <= interval.exit + 0.05),
-    ...projectedLakeCandidates(entryPoint),
+    ...lakeCrossings.filter((crossing) => withinInterval(crossing, interval)),
+    ...projectedLakeCandidates(entryTransition),
   ];
   const lakeExits = [
-    ...lakeCrossings.filter((crossing) => crossing.fraction >= interval.entry - 0.05 && crossing.fraction <= interval.exit + 0.05),
-    ...projectedLakeCandidates(exitPoint),
+    ...lakeCrossings.filter((crossing) => withinInterval(crossing, interval)),
+    ...projectedLakeCandidates(exitTransition),
   ];
   for (const entry of lakeEntries) {
     for (const exit of lakeExits) {
-      if (entry.lake !== exit.lake) continue;
+      if (entry.lake !== exit.lake || entry.ringIndex !== exit.ringIndex) continue;
       if (distance(entry.point, exit.point) <= GEOMETRY_EPS) continue;
-      const arc = chooseBoundaryArc(entry.lake.coordinates, entry, exit);
+      if (!connectorIsValid(entryTransition, entry.point) || !connectorIsValid(exit.point, exitTransition)) continue;
+      const arc = chooseBoundaryArc(entry.boundary, entry, exit);
       if (!arc) continue;
-      result.push({ arc, score: pathLength(arc) + entry.distance + exit.distance });
+      const path = [entryTransition, ...arc, exitTransition];
+      if (!isValidPhysicalPath(path)) continue;
+      result.push({ path, score: pathLength(path) + entry.distance + exit.distance });
     }
   }
 
   const landEntries = [
-    ...landCrossings.filter((crossing) => crossing.fraction >= interval.entry - 0.05 && crossing.fraction <= interval.exit + 0.05),
-    ...projectedLandCandidates(entryPoint),
+    ...landCrossings.filter((crossing) => withinInterval(crossing, interval)),
+    ...projectedLandCandidates(entryTransition),
   ];
   const landExits = [
-    ...landCrossings.filter((crossing) => crossing.fraction >= interval.entry - 0.05 && crossing.fraction <= interval.exit + 0.05),
-    ...projectedLandCandidates(exitPoint),
+    ...landCrossings.filter((crossing) => withinInterval(crossing, interval)),
+    ...projectedLandCandidates(exitTransition),
   ];
   for (const entry of landEntries) {
     for (const exit of landExits) {
       if (entry.boundary !== exit.boundary) continue;
       if (distance(entry.point, exit.point) <= GEOMETRY_EPS) continue;
+      if (!connectorIsValid(entryTransition, entry.point) || !connectorIsValid(exit.point, exitTransition)) continue;
       const arc = chooseBoundaryArc(entry.boundary, entry, exit);
       if (!arc) continue;
-      result.push({ arc, score: pathLength(arc) + entry.distance + exit.distance });
+      const path = [entryTransition, ...arc, exitTransition];
+      if (!isValidPhysicalPath(path)) continue;
+      result.push({ path, score: pathLength(path) + entry.distance + exit.distance });
     }
   }
 
@@ -268,23 +322,38 @@ function repairPhysicalEdge(start, end) {
   if (!intervals.length) throw new Error(`Physical water crossing has no closed water interval: ${start.join(",")} -> ${end.join(",")}`);
 
   const repaired = [start];
+  let cursor = start;
   for (const interval of intervals) {
+    const entryTransition = sample(start, end, interval.entry);
+    const exitTransition = sample(start, end, interval.exit);
+
+    if (!isValidPhysicalPath([cursor, entryTransition])) {
+      throw new Error(`Physical water crossing has invalid valid-span before recovery: ${start.join(",")} -> ${end.join(",")}`);
+    }
+    appendUnique(repaired, [entryTransition]);
+
     const candidates = recoveryCandidates(interval, start, end, lakeCrossings, landCrossings);
     const selected = candidates[0];
     if (!selected) {
-      const entry = resolveBoundary(sample(start, end, interval.entry));
-      const exit = resolveBoundary(sample(start, end, interval.exit));
-      if (!entry || !exit) throw new Error(`Physical water crossing has no authoritative boundary pair: ${start.join(",")} -> ${end.join(",")}`);
-      const fallback = [entry, exit];
+      const entry = resolveBoundary(entryTransition);
+      const exit = resolveBoundary(exitTransition);
+      if (!entry || !exit || !connectorIsValid(entryTransition, entry) || !connectorIsValid(exit, exitTransition)) {
+        throw new Error(`Physical water crossing has no authoritative boundary pair: ${start.join(",")} -> ${end.join(",")}`);
+      }
+      const fallback = [entryTransition, entry, exit, exitTransition];
       if (!isValidPhysicalPath(fallback)) {
         throw new Error(`Physical water crossing has no valid boundary recovery path: ${start.join(",")} -> ${end.join(",")}`);
       }
-      appendUnique(repaired, fallback);
-      continue;
+      appendUnique(repaired, fallback.slice(1));
+    } else {
+      appendUnique(repaired, selected.path.slice(1));
     }
-    appendUnique(repaired, selected.arc);
+    cursor = exitTransition;
   }
 
+  if (!isValidPhysicalPath([cursor, end])) {
+    throw new Error(`Physical water crossing has invalid valid-span after recovery: ${start.join(",")} -> ${end.join(",")}`);
+  }
   appendUnique(repaired, [end]);
 
   if (!isValidPhysicalPath(repaired)) {
