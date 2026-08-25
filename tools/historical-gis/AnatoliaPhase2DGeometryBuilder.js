@@ -17,6 +17,7 @@ const MAX_BOUNDARY_NUMERICAL_DRIFT = 0.0001;
 const DETERMINISTIC_WEIGHT_ITERATIONS = 24;
 const GEOMETRY_EPS = 1e-8;
 const MIN_PROVINCE_AREA = 0.00005;
+const PHYSICAL_EDGE_SAMPLE_COUNT = 32;
 
 function boundarySiteCount(polygon) {
   if (!Array.isArray(polygon) || polygon.length < 2) return 0;
@@ -70,18 +71,43 @@ function recoverNumericalBoundaryDrift(point) {
   return best && bestDistance <= MAX_BOUNDARY_NUMERICAL_DRIFT ? best : null;
 }
 
+function resolveBoundaryPoint(point) {
+  if (isPhysicalLandPoint(point)) return point;
+  const resolved = resolvePhysicalGeometryBoundaryPoint(point);
+  if (resolved) return resolved.map((value) => Number(value.toFixed(7)));
+  if (isPhysicalGeometryBoundaryPoint(point)) {
+    throw new Error(`Phase 2D geometry vertex remains a non-land support point after physical boundary resolution: ${point.join(",")}`);
+  }
+  const recovered = recoverNumericalBoundaryDrift(point);
+  if (recovered) return recovered.map((value) => Number(value.toFixed(7)));
+  throw new Error(`Phase 2D geometry vertex is outside physical land beyond numerical drift: ${point.join(",")}`);
+}
+
 function normalizeOuterRing(ring) {
-  return ring.map((point) => {
-    if (isPhysicalLandPoint(point)) return point;
-    const resolved = resolvePhysicalGeometryBoundaryPoint(point);
-    if (resolved) return resolved.map((value) => Number(value.toFixed(7)));
-    if (isPhysicalGeometryBoundaryPoint(point)) {
-      throw new Error(`Phase 2D geometry vertex remains a non-land support point after physical boundary resolution: ${point.join(",")}`);
+  if (!Array.isArray(ring) || ring.length < 3) throw new Error("Phase 2D geometry outer ring must contain at least three vertices");
+  const normalized = [];
+  for (let index = 0; index < ring.length; index += 1) {
+    const start = resolveBoundaryPoint(ring[index]);
+    const end = resolveBoundaryPoint(ring[(index + 1) % ring.length]);
+    normalized.push(start);
+    for (let sampleIndex = 1; sampleIndex < PHYSICAL_EDGE_SAMPLE_COUNT; sampleIndex += 1) {
+      const fraction = sampleIndex / PHYSICAL_EDGE_SAMPLE_COUNT;
+      const sample = [
+        start[0] + (end[0] - start[0]) * fraction,
+        start[1] + (end[1] - start[1]) * fraction,
+      ];
+      if (isPhysicalLandPoint(sample) || isPhysicalGeometryBoundaryPoint(sample)) continue;
+      const resolved = resolvePhysicalGeometryBoundaryPoint(sample);
+      if (!resolved) {
+        const recovered = recoverNumericalBoundaryDrift(sample);
+        if (!recovered) throw new Error(`Phase 2D geometry edge crosses physical water without an authoritative boundary solution: ${sample.join(",")}`);
+        normalized.push(recovered.map((value) => Number(value.toFixed(7))));
+      } else {
+        normalized.push(resolved.map((value) => Number(value.toFixed(7))));
+      }
     }
-    const recovered = recoverNumericalBoundaryDrift(point);
-    if (recovered) return recovered.map((value) => Number(value.toFixed(7)));
-    throw new Error(`Phase 2D geometry vertex is outside physical land beyond numerical drift: ${point.join(",")}`);
-  });
+  }
+  return normalized;
 }
 
 function pointInPolygon(point, polygon) {
