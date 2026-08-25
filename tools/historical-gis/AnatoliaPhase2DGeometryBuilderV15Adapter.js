@@ -3,6 +3,7 @@ import {
   PHYSICAL_LAND_POLYGONS,
   isPhysicalLandPoint,
   isPhysicalGeometryBoundaryPoint,
+  resolvePhysicalGeometryBoundaryPoint,
   resolveGeometryAnchor,
 } from "./recovery/physical-land-authority.mjs";
 import { ANATOLIA_PROVINCE_REFINEMENTS } from "../../src/map/data/AnatoliaProvinceRefinement.js";
@@ -63,6 +64,7 @@ export function buildAnatoliaPhase2DAssets(regions) {
 export {
   isPhysicalLandPoint,
   isPhysicalGeometryBoundaryPoint,
+  resolvePhysicalGeometryBoundaryPoint,
   PHYSICAL_LAND_POLYGONS,
   resolveGeometryAnchor,
 };
