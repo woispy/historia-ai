@@ -41,27 +41,41 @@ function intersectLines(a, b, c, d) {
   const q = [c[0] - a[0], c[1] - a[1]]; const t = (q[0] * s[1] - q[1] * s[0]) / denominator;
   return [a[0] + r[0] * t, a[1] + r[1] * t];
 }
-function clipPolygonToCell(polygon, cell) {
-  if (!Array.isArray(cell) || cell.length < 3) return polygon;
-  let output = polygon.map((point) => [...point]); const clip = signedArea(cell) < 0 ? [...cell].reverse() : cell;
-  for (let edge = 0; edge < clip.length; edge += 1) {
-    if (!output.length) return [];
-    const start = clip[edge]; const end = clip[(edge + 1) % clip.length]; const input = output; output = [];
-    const inside = (point) => edgeCross(start, end, point) >= -PARTITION_CLIP_EPS;
-    for (let index = 0; index < input.length; index += 1) {
-      const current = input[index]; const next = input[(index + 1) % input.length]; const currentInside = inside(current); const nextInside = inside(next);
-      if (currentInside && nextInside) output.push(next);
-      else if (currentInside !== nextInside) { const intersection = intersectLines(current, next, start, end); if (intersection) output.push(intersection); if (!currentInside && nextInside) output.push(next); }
-    }
+function pointInPolygon(point, polygon) {
+  if (!Array.isArray(polygon) || polygon.length < 3) return false;
+  let inside = false;
+  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index++) {
+    const current = polygon[index]; const before = polygon[previous];
+    const cross = edgeCross(before, current, point);
+    if (Math.abs(cross) <= PARTITION_CLIP_EPS
+      && point[0] >= Math.min(before[0], current[0]) - PARTITION_CLIP_EPS
+      && point[0] <= Math.max(before[0], current[0]) + PARTITION_CLIP_EPS
+      && point[1] >= Math.min(before[1], current[1]) - PARTITION_CLIP_EPS
+      && point[1] <= Math.max(before[1], current[1]) + PARTITION_CLIP_EPS) return true;
+    if ((current[1] > point[1]) !== (before[1] > point[1])
+      && point[0] < ((before[0] - current[0]) * (point[1] - current[1])) / ((before[1] - current[1]) || Number.EPSILON) + current[0]) inside = !inside;
   }
-  return output;
+  return inside;
+}
+function polygonInsideCell(polygon, cell) { return !cell || polygon.every((point) => pointInPolygon(point, cell)); }
+function dedupePolygon(polygon) {
+  const result = [];
+  for (const point of polygon) {
+    const previous = result[result.length - 1];
+    if (!previous || Math.hypot(previous[0] - point[0], previous[1] - point[1]) > PARTITION_CLIP_EPS) result.push([...point]);
+  }
+  if (result.length > 1) {
+    const first = result[0]; const last = result[result.length - 1];
+    if (Math.hypot(first[0] - last[0], first[1] - last[1]) <= PARTITION_CLIP_EPS) result.pop();
+  }
+  return result;
 }
 function polygonSignature(polygon) {
   return JSON.stringify(polygon.map(([longitude, latitude]) => [Number(longitude.toFixed(10)), Number(latitude.toFixed(10))]));
 }
 function repairPhysicalPolygonToFixedPoint(polygon, provinceId, containmentPolygon) {
-  if (isStrictlyPhysicalPath(polygon)) return polygon;
-  let current = polygon; let lastError = null; let previousSignature = null;
+  if (isStrictlyPhysicalPath(polygon) && polygonInsideCell(polygon, containmentPolygon)) return polygon;
+  let current = dedupePolygon(polygon); let lastError = null; let previousSignature = null;
   for (let pass = 1; pass <= MAX_PHYSICAL_REPAIR_PASSES; pass += 1) {
     const currentSignature = polygonSignature(current);
     if (currentSignature === previousSignature) break;
@@ -70,11 +84,18 @@ function repairPhysicalPolygonToFixedPoint(polygon, provinceId, containmentPolyg
       const repaired = pass === 1 || !containmentPolygon
         ? repairPhysicalPolygon(current)
         : repairPhysicalPolygon(current, { containmentPolygon });
-      if (repaired.length < 3) throw new Error("physical repair returned fewer than three vertices");
-      const partitionClipped = containmentPolygon ? clipPolygonToCell(repaired, containmentPolygon) : repaired;
-      if (partitionClipped.length >= 3 && isStrictlyPhysicalPath(partitionClipped)) return partitionClipped;
-      if (partitionClipped.length < 3) throw new Error("partition reconciliation removed the physical polygon");
-      current = partitionClipped;
+      const normalized = dedupePolygon(repaired);
+      if (normalized.length < 3) throw new Error("physical repair returned fewer than three distinct vertices");
+      if (isStrictlyPhysicalPath(normalized) && polygonInsideCell(normalized, containmentPolygon)) return normalized;
+      if (!isStrictlyPhysicalPath(normalized)) {
+        current = normalized;
+        continue;
+      }
+      if (containmentPolygon) {
+        current = normalized;
+        continue;
+      }
+      throw new Error("physical repair returned geometry outside the authoritative source partition");
     } catch (error) { lastError = error; break; }
   }
   const detail = Array.isArray(current) ? polygonSignature(current) : "unavailable";
