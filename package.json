@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "npm run build:assets && node tools/historical-gis/cli/import-1300.js && vite",
-    "build": "npm run build:assets && node tools/historical-gis/cli/import-1300.js && vite build",
+    "build": "npm run build:assets && node tools/asset-builder/cli/fetch-natural-earth-50m.js && node tools/historical-gis/cli/import-1300.js && vite build",
     "build:assets": "node tools/asset-builder/cli/fetch-natural-earth-50m.js && node tools/asset-builder/cli/fetch-natural-earth-hydrography-10m.js && node tools/asset-builder/cli/build-assets.js && node tools/asset-builder/cli/build-anatolia-hydrography-10m.js",
     "build:assets:debug": "node tools/asset-builder/cli/fetch-natural-earth-50m.js && node tools/asset-builder/cli/fetch-natural-earth-hydrography-10m.js && node --trace-uncaught tools/asset-builder/cli/build-assets.js && node tools/asset-builder/cli/build-anatolia-hydrography-10m.js",
     "build:historical-gis:1300": "node tools/historical-gis/cli/import-1300.js",
@@ -24,6 +24,7 @@
     "test:anatolia-phase2b": "node tools/tests/anatolia-phase2b.test.js",
     "test:anatolia-phase2c": "node tools/tests/anatolia-phase2c.test.js",
     "test:anatolia-phase2d": "node tools/tests/anatolia-phase2d.test.js",
+    "test:physical-integrity": "node tools/tests/physical-integrity.test.js",
     "test:anatolia-historical-control": "node tools/tests/anatolia-historical-control.test.js",
     "test:cartography-2efgh": "node tools/tests/cartography-2efgh.test.js",
     "test:map-texture-atlas": "node tools/tests/map-texture-atlas.test.js",
@@ -56,7 +57,6 @@
     "eslint": "^10.6.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
-    "globals": "^17.7.0",
     "vite": "^8.1.1"
   }
 }
