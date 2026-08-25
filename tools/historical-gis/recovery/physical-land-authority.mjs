@@ -48,40 +48,68 @@ export const PHYSICAL_LAND_POLYGONS = Object.freeze([
   ...ANATOLIA_PHYSICAL_COAST_CORRECTIONS.map((item) => item.coordinates),
 ].filter((polygon) => polygon?.length >= 3 && Math.abs(signedArea(polygon)) >= MIN_AREA));
 
-function isLakeBoundaryPoint(point) {
-  return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => {
-    const rings = lake.rings ?? [lake.coordinates];
-    return rings.some((ring) => ring?.some((vertex, index) => pointOnSegment(point, vertex, ring[(index + 1) % ring.length])));
-  });
+function lakeRings(lake) {
+  return lake.rings ?? [lake.coordinates];
 }
 
-function isLakeInteriorPoint(point) {
+function isLakeBoundaryPoint(point) {
+  return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => lakeRings(lake).some((ring) => ring?.some((vertex, index) => pointOnSegment(point, vertex, ring[(index + 1) % ring.length]))));
+}
+
+export function isLakeInteriorPoint(point) {
   return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => {
-    const rings = lake.rings ?? [lake.coordinates];
+    const rings = lakeRings(lake);
     return rings.length > 0 && pointInPolygon(point, rings[0])
       && !rings.slice(1).some((ring) => pointInPolygon(point, ring));
   });
+}
+
+function nearestPointOnRing(point, ring) {
+  let best = null;
+  let bestDistance = Infinity;
+  for (let index = 0; index < ring.length; index += 1) {
+    const start = ring[index];
+    const end = ring[(index + 1) % ring.length];
+    const dx = end[0] - start[0];
+    const dy = end[1] - start[1];
+    const denominator = dx * dx + dy * dy;
+    const t = denominator < EPS
+      ? 0
+      : Math.max(0, Math.min(1, ((point[0] - start[0]) * dx + (point[1] - start[1]) * dy) / denominator));
+    const candidate = [start[0] + dx * t, start[1] + dy * t];
+    const distance = Math.hypot(point[0] - candidate[0], point[1] - candidate[1]);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      best = candidate;
+    }
+  }
+  return { point: best, distance: bestDistance };
+}
+
+export function nearestLakeBoundaryPoint(point) {
+  let best = null;
+  let bestDistance = Infinity;
+  for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) {
+    for (const ring of lakeRings(lake)) {
+      if (!ring?.length) continue;
+      const candidate = nearestPointOnRing(point, ring);
+      if (candidate.distance < bestDistance) {
+        best = candidate.point;
+        bestDistance = candidate.distance;
+      }
+    }
+  }
+  return { point: best, distance: bestDistance };
 }
 
 function nearestBoundaryLandPoint(point) {
   let best = null;
   let bestDistance = Infinity;
   for (const polygon of PHYSICAL_LAND_POLYGONS) {
-    for (let index = 0; index < polygon.length; index += 1) {
-      const start = polygon[index];
-      const end = polygon[(index + 1) % polygon.length];
-      const dx = end[0] - start[0];
-      const dy = end[1] - start[1];
-      const denominator = dx * dx + dy * dy;
-      const t = denominator < EPS
-        ? 0
-        : Math.max(0, Math.min(1, ((point[0] - start[0]) * dx + (point[1] - start[1]) * dy) / denominator));
-      const candidate = [start[0] + dx * t, start[1] + dy * t];
-      const distance = Math.hypot(point[0] - candidate[0], point[1] - candidate[1]);
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        best = candidate;
-      }
+    const candidate = nearestPointOnRing(point, polygon);
+    if (candidate.distance < bestDistance) {
+      best = candidate.point;
+      bestDistance = candidate.distance;
     }
   }
   return { point: best, distance: bestDistance };
@@ -103,6 +131,25 @@ export function isPhysicalLandPoint(point) {
   return Boolean(boundary.point)
     && boundary.distance <= NUMERICAL_BOUNDARY_TOLERANCE
     && !isLakeInteriorPoint(point);
+}
+
+/**
+ * Resolve a geometry vertex to the closed physical surface. Lake-interior
+ * vertices are snapped to the authoritative lake shoreline rather than being
+ * accepted as land. This preserves explicit lake holes without allowing a
+ * political polygon's outer ring to carry an inland-water vertex.
+ */
+export function resolvePhysicalGeometryBoundaryPoint(point) {
+  if (isPhysicalLandPoint(point)) return [...point];
+  if (isLakeInteriorPoint(point)) {
+    const shoreline = nearestLakeBoundaryPoint(point);
+    if (shoreline.point) return [...shoreline.point];
+  }
+  const boundary = nearestBoundaryLandPoint(point);
+  if (boundary.point && boundary.distance <= NUMERICAL_BOUNDARY_TOLERANCE && !isLakeInteriorPoint(point)) {
+    return [...boundary.point];
+  }
+  return null;
 }
 
 /**
