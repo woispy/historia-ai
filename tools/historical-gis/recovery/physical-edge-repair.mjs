@@ -216,6 +216,28 @@ function allSamplesInvalid(start, end) {
 
 function recoverDegenerateWaterEdge(start, end) {
   if (!allSamplesInvalid(start, end)) return null;
+
+  const boundarySets = [
+    { boundaries: LAKE_BOUNDARIES, kind: "lake" },
+    { boundaries: PHYSICAL_LAND_POLYGONS, kind: "land" },
+  ];
+  const startCandidates = boundarySets.flatMap(({ boundaries, kind }) => projectedBoundaryCandidates(start, boundaries, kind));
+  const endCandidates = boundarySets.flatMap(({ boundaries, kind }) => projectedBoundaryCandidates(end, boundaries, kind));
+
+  const candidates = [];
+  for (const from of startCandidates) {
+    for (const to of endCandidates) {
+      if (from.boundary !== to.boundary) continue;
+      if (from.kind === "lake" && (from.lake !== to.lake || from.ringIndex !== to.ringIndex)) continue;
+      if (!connectorIsValid(start, from.point) || !connectorIsValid(to.point, end)) continue;
+      const path = [from.point, to.point];
+      if (!isValidPhysicalPath(path)) continue;
+      candidates.push({ path, score: pathLength(path) + from.distance + to.distance });
+    }
+  }
+  candidates.sort((a, b) => a.score - b.score);
+  if (candidates.length) return candidates[0].path;
+
   const resolvedStart = resolveBoundary(start);
   const resolvedEnd = resolveBoundary(end);
   if (!resolvedStart || !resolvedEnd) return null;
