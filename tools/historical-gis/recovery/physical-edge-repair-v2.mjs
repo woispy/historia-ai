@@ -15,7 +15,7 @@ const MAX_PROJECTION_DISTANCE = 0.75;
 const MAX_ARC_VERTICES = 4096;
 const BEAM_WIDTH = 32;
 const MIN_REPAIR_AREA_RATIO = 0.05;
-const TRANSITION_MATCH_TOLERANCE = 2 / EDGE_SAMPLES + 1e-7;
+const TRANSITION_MATCH_TOLERANCE = 0.02;
 
 const distance = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const sample = (start, end, fraction) => [
@@ -46,15 +46,11 @@ function buildBoundaryDescriptors() {
   const result = [];
   for (const [lakeIndex, lake] of AUTHORITATIVE_LAKES.entries()) {
     for (const [ringIndex, ring] of ringsForLake(lake).entries()) {
-      if (Array.isArray(ring) && ring.length >= 3) {
-        result.push({ kind: "lake", boundary: ring, lake, lakeIndex, ringIndex });
-      }
+      if (Array.isArray(ring) && ring.length >= 3) result.push({ kind: "lake", boundary: ring, lake, lakeIndex, ringIndex });
     }
   }
   for (const [landIndex, boundary] of PHYSICAL_LAND_POLYGONS.entries()) {
-    if (Array.isArray(boundary) && boundary.length >= 3) {
-      result.push({ kind: "land", boundary, landIndex });
-    }
+    if (Array.isArray(boundary) && boundary.length >= 3) result.push({ kind: "land", boundary, landIndex });
   }
   return result;
 }
@@ -68,9 +64,7 @@ function boundaryCandidates(point) {
       const start = descriptor.boundary[segmentIndex];
       const end = descriptor.boundary[(segmentIndex + 1) % descriptor.boundary.length];
       const projection = nearestPointOnSegment(point, start, end);
-      if (projection.distance <= MAX_PROJECTION_DISTANCE) {
-        candidates.push({ ...descriptor, segmentIndex, point: projection.point, distance: projection.distance });
-      }
+      if (projection.distance <= MAX_PROJECTION_DISTANCE) candidates.push({ ...descriptor, segmentIndex, point: projection.point, distance: projection.distance });
     }
   }
   return candidates.sort((a, b) => a.distance - b.distance);
@@ -92,37 +86,11 @@ function boundaryCrossings(start, end) {
       if (fraction < -EPS || fraction > 1 + EPS || boundaryFraction < -EPS || boundaryFraction > 1 + EPS) continue;
       const clampedFraction = Math.max(0, Math.min(1, fraction));
       const point = sample(start, end, clampedFraction);
-      if (!isPhysicalPoint(point) && !isFinalPhysicalGeometryBoundaryPoint(point)) continue;
-      result.push({
-        ...descriptor,
-        segmentIndex,
-        fraction: clampedFraction,
-        point,
-      });
+      if (!isPhysicalPoint(point)) continue;
+      result.push({ ...descriptor, segmentIndex, fraction: clampedFraction, point });
     }
   }
-  result.sort((a, b) => a.fraction - b.fraction);
-  return result.filter((item, index) => index === 0 || Math.abs(item.fraction - result[index - 1].fraction) > EPS);
-}
-
-function nearestBoundaryCrossing(crossings, fraction, kind = null) {
-  const filtered = kind ? crossings.filter((item) => item.kind === kind) : crossings;
-  if (!filtered.length) return null;
-  return filtered.reduce((best, item) => {
-    if (!best) return item;
-    return Math.abs(item.fraction - fraction) < Math.abs(best.fraction - fraction) ? item : best;
-  }, null);
-}
-
-function transitionBoundary(point, crossings = []) {
-  const crossing = nearestBoundaryCrossing(crossings, 0.5);
-  if (crossing && Math.abs(crossing.fraction - 0.5) <= TRANSITION_MATCH_TOLERANCE) return crossing;
-  const lake = nearestLakeBoundaryPoint(point);
-  if (lake.point && lake.distance <= 0.0005) {
-    const candidate = boundaryCandidates(lake.point).find((item) => item.kind === "lake");
-    if (candidate) return candidate;
-  }
-  return boundaryCandidates(point)[0] ?? null;
+  return result.sort((a, b) => a.fraction - b.fraction);
 }
 
 function pathIsPhysical(path) {
@@ -151,7 +119,6 @@ function boundaryArcCandidates(from, to) {
     guard += 1;
   }
   forward.push(to.point);
-
   const backward = [from.point];
   index = from.segmentIndex;
   guard = 0;
@@ -161,10 +128,7 @@ function boundaryArcCandidates(from, to) {
     guard += 1;
   }
   backward.push(to.point);
-
-  return [forward, backward]
-    .filter((path) => path.length <= MAX_ARC_VERTICES)
-    .filter(pathIsPhysical);
+  return [forward, backward].filter((path) => path.length <= MAX_ARC_VERTICES).filter(pathIsPhysical);
 }
 
 function pathLength(path) {
@@ -212,10 +176,8 @@ function traceTransitions(start, end) {
   const transitions = [];
   for (let index = 0; index < states.length - 1; index += 1) {
     if (states[index].valid === states[index + 1].valid) continue;
-    const fraction = refineTransition(start, end, states[index].fraction, states[index + 1].fraction);
     transitions.push({
-      fraction,
-      point: sample(start, end, fraction),
+      fraction: refineTransition(start, end, states[index].fraction, states[index + 1].fraction),
       entersInvalid: states[index].valid && !states[index + 1].valid,
     });
   }
@@ -229,40 +191,42 @@ function appendUnique(target, points) {
   }
 }
 
-function pairBoundaryCrossings(crossings, entryFraction, exitFraction) {
-  const entryCandidates = crossings.filter((candidate) => Math.abs(candidate.fraction - entryFraction) <= TRANSITION_MATCH_TOLERANCE);
-  const exitCandidates = crossings.filter((candidate) => Math.abs(candidate.fraction - exitFraction) <= TRANSITION_MATCH_TOLERANCE);
-  const pairs = [];
-  for (const entry of entryCandidates) {
-    for (const exit of exitCandidates) {
-      if (entry.boundary !== exit.boundary) continue;
-      if (entry.kind !== exit.kind) continue;
-      pairs.push({ entry, exit });
+function boundaryPairCandidates(crossings, entryFraction, exitFraction) {
+  const candidates = [];
+  for (const entry of crossings) {
+    if (Math.abs(entry.fraction - entryFraction) > TRANSITION_MATCH_TOLERANCE) continue;
+    for (const exit of crossings) {
+      if (Math.abs(exit.fraction - exitFraction) > TRANSITION_MATCH_TOLERANCE) continue;
+      if (entry.boundary !== exit.boundary || entry.kind !== exit.kind) continue;
+      if (entry.fraction >= exit.fraction) continue;
+      candidates.push({ entry, exit });
     }
   }
-  return pairs;
+  return candidates.sort((a, b) => {
+    const aDistance = Math.abs(a.entry.fraction - entryFraction) + Math.abs(a.exit.fraction - exitFraction);
+    const bDistance = Math.abs(b.entry.fraction - entryFraction) + Math.abs(b.exit.fraction - exitFraction);
+    return aDistance - bDistance;
+  });
 }
 
 function fallbackBoundaryPair(start, end, entryFraction, exitFraction) {
   const entryPoint = sample(start, end, entryFraction);
   const exitPoint = sample(start, end, exitFraction);
-  const entryCandidates = boundaryCandidates(entryPoint).slice(0, 24);
-  const exitCandidates = boundaryCandidates(exitPoint).slice(0, 24);
+  const entryCandidates = boundaryCandidates(entryPoint).slice(0, 32);
+  const exitCandidates = boundaryCandidates(exitPoint).slice(0, 32);
   const pairs = [];
   for (const entry of entryCandidates) {
     for (const exit of exitCandidates) {
       if (entry.boundary !== exit.boundary || entry.kind !== exit.kind) continue;
-      if (Math.abs(entry.distance - exit.distance) > MAX_PROJECTION_DISTANCE) continue;
       pairs.push({ entry, exit });
     }
   }
-  return pairs;
+  return pairs.sort((a, b) => (a.entry.distance + a.exit.distance) - (b.entry.distance + b.exit.distance));
 }
 
 function repairInvalidIntervalsCandidates(start, end) {
   const transitions = traceTransitions(start, end);
   if (!transitions.length) return pathIsPhysical([start, end]) ? [[start, end]] : [];
-
   const crossings = boundaryCrossings(start, end);
   let partials = [{ path: [start], cursorFraction: 0 }];
 
@@ -271,27 +235,20 @@ function repairInvalidIntervalsCandidates(start, end) {
     const exit = transitions[index + 1];
     if (!entry?.entersInvalid || !exit || exit.entersInvalid) return [];
 
-    const pairs = pairBoundaryCrossings(crossings, entry.fraction, exit.fraction);
+    const pairs = boundaryPairCandidates(crossings, entry.fraction, exit.fraction);
     const candidatePairs = pairs.length ? pairs : fallbackBoundaryPair(start, end, entry.fraction, exit.fraction);
     if (!candidatePairs.length) return [];
 
     const next = [];
     for (const partial of partials) {
-      for (const pair of candidatePairs) {
-        const beforeEntry = pair.entry.point;
-        const afterExit = pair.exit.point;
-        const leading = sample(start, end, pair.entry.fraction);
-        const trailing = sample(start, end, pair.exit.fraction);
-        if (!pathIsPhysical([sample(start, end, partial.cursorFraction), leading])) continue;
-        if (!pathIsPhysical([trailing, sample(start, end, 1)])) {
-          // The remainder may contain a later invalid interval; defer its
-          // validation to the next transition pair rather than rejecting it here.
-        }
-
-        const shorelines = rankedBoundaryArcs(pair.entry, pair.exit, start, end);
-        for (const shoreline of shorelines.slice(0, 4)) {
+      const cursor = sample(start, end, partial.cursorFraction);
+      for (const pair of candidatePairs.slice(0, 16)) {
+        const lead = [cursor, pair.entry.point];
+        if (!pathIsPhysical(lead)) continue;
+        const shorelines = rankedBoundaryArcs(pair.entry, pair.exit, start, end).slice(0, 4);
+        for (const shoreline of shorelines) {
           const path = [...partial.path];
-          appendUnique(path, [beforeEntry]);
+          appendUnique(path, [pair.entry.point]);
           appendUnique(path, shoreline.slice(1));
           next.push({ path, cursorFraction: pair.exit.fraction });
         }
@@ -305,15 +262,13 @@ function repairInvalidIntervalsCandidates(start, end) {
     if (!partials.length) return [];
   }
 
-  const completed = [];
-  for (const partial of partials) {
+  return partials.map((partial) => {
     const path = [...partial.path];
     const cursor = sample(start, end, partial.cursorFraction);
-    appendUnique(path, [cursor]);
-    appendUnique(path, [end]);
-    if (pathIsPhysical(path)) completed.push(path);
-  }
-  return completed;
+    if (!pathIsPhysical([cursor, end])) return null;
+    appendUnique(path, [cursor, end]);
+    return pathIsPhysical(path) ? path : null;
+  }).filter(Boolean);
 }
 
 function normalizeEndpoint(point) {
@@ -341,30 +296,19 @@ function candidateScore(polygon, originalArea) {
 }
 
 export function repairPhysicalPolygon(polygon) {
-  if (!Array.isArray(polygon) || polygon.length < 3) {
-    throw new Error("Physical polygon repair requires a polygon with at least three vertices.");
-  }
+  if (!Array.isArray(polygon) || polygon.length < 3) throw new Error("Physical polygon repair requires a polygon with at least three vertices.");
   const originalArea = Math.abs(signedArea(polygon));
-  if (polygon.every(isPhysicalPoint)
-    && polygon.every((point, index) => pathIsPhysical([point, polygon[(index + 1) % polygon.length]]))) {
-    return polygon;
-  }
+  if (polygon.every(isPhysicalPoint) && polygon.every((point, index) => pathIsPhysical([point, polygon[(index + 1) % polygon.length]]))) return polygon;
 
   const normalized = polygon.map(normalizeEndpoint);
-  if (normalized.some((point) => !point)) {
-    throw new Error("No authoritative physical boundary candidate exists for a polygon vertex.");
-  }
+  if (normalized.some((point) => !point)) throw new Error("No authoritative physical boundary candidate exists for a polygon vertex.");
 
   let beam = [{ polygon: [], score: 0 }];
   for (let index = 0; index < normalized.length; index += 1) {
     const start = normalized[index];
     const end = normalized[(index + 1) % normalized.length];
-    const edgeCandidates = pathIsPhysical([start, end])
-      ? [[start, end]]
-      : repairInvalidIntervalsCandidates(start, end);
-    if (!edgeCandidates.length) {
-      throw new Error(`Physical edge recovery failed at edge ${index} (${start.join(",")} → ${end.join(",")}).`);
-    }
+    const edgeCandidates = pathIsPhysical([start, end]) ? [[start, end]] : repairInvalidIntervalsCandidates(start, end);
+    if (!edgeCandidates.length) throw new Error(`Physical edge recovery failed at edge ${index} (${start.join(",")} → ${end.join(",")}).`);
     const next = [];
     for (const state of beam) {
       for (const edge of edgeCandidates) {
@@ -376,21 +320,13 @@ export function repairPhysicalPolygon(polygon) {
     beam = next.sort((a, b) => a.score - b.score).slice(0, BEAM_WIDTH);
   }
 
-  const candidates = beam
-    .map((state) => {
-      const polygonCandidate = [...state.polygon];
-      appendUnique(polygonCandidate, [normalized[0]]);
-      return {
-        polygon: polygonCandidate,
-        score: candidateScore(polygonCandidate, originalArea),
-        area: Math.abs(signedArea(polygonCandidate)),
-      };
-    })
-    .filter((item) => Number.isFinite(item.score));
+  const candidates = beam.map((state) => {
+    const polygonCandidate = [...state.polygon];
+    appendUnique(polygonCandidate, [normalized[0]]);
+    return { polygon: polygonCandidate, score: candidateScore(polygonCandidate, originalArea), area: Math.abs(signedArea(polygonCandidate)) };
+  }).filter((item) => Number.isFinite(item.score));
 
-  const best = candidates
-    .filter((item) => originalArea === 0 || item.area >= originalArea * MIN_REPAIR_AREA_RATIO)
-    .sort((a, b) => a.score - b.score)[0];
+  const best = candidates.filter((item) => originalArea === 0 || item.area >= originalArea * MIN_REPAIR_AREA_RATIO).sort((a, b) => a.score - b.score)[0];
   if (!best) throw new Error("Physical polygon repair produced only degenerate or non-physical candidates.");
   return best.polygon;
 }
