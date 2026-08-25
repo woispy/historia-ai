@@ -81,3 +81,5 @@ export {
   PHYSICAL_LAND_POLYGONS,
   resolveGeometryAnchor,
 };
+
+// V16 contract marker: the adapter, not the retained V15 engine, owns the public generator identity.
