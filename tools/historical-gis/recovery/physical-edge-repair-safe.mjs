@@ -100,8 +100,7 @@ function isPointOnSourceEdge(point, start, end) {
 }
 
 function sourceEdgeFraction(point, start, end) {
-  const projection = nearestPointOnSegment(point, start, end);
-  return projection.fraction;
+  return nearestPointOnSegment(point, start, end).fraction;
 }
 
 function sourceEdgeSubpathIsValid(fromPoint, toPoint, start, end) {
@@ -207,6 +206,11 @@ function appendUnique(target, points) {
 }
 
 function resolveTransitionBoundary(point) {
+  // Preserve an exact transition that is already on the authoritative physical
+  // boundary. Re-projecting such a point to the nearest lake segment can move it
+  // off the source partition edge by a small amount and unnecessarily force a
+  // topology-changing recovery.
+  if (isFinalPhysicalGeometryBoundaryPoint(point)) return [...point];
   const lake = nearestLakeBoundaryPoint(point);
   if (lake.point && lake.distance <= LAKE_SHORELINE_TRANSITION_TOLERANCE) return [...lake.point];
   return resolvePhysicalGeometryBoundaryPoint(point);
@@ -222,9 +226,7 @@ function normalizeRepairEndpoint(point, originalStart, originalEnd, interiorSign
 }
 
 function connectPhysicalPoints(fromPoint, toPoint, originalStart, originalEnd, interiorSign) {
-  if (sourceEdgeSubpathIsValid(fromPoint, toPoint, originalStart, originalEnd)) {
-    return [fromPoint, toPoint];
-  }
+  if (sourceEdgeSubpathIsValid(fromPoint, toPoint, originalStart, originalEnd)) return [fromPoint, toPoint];
   if (isValidPhysicalPath([fromPoint, toPoint])) return [fromPoint, toPoint];
   return chooseBoundaryPath(fromPoint, toPoint, originalStart, originalEnd, interiorSign);
 }
@@ -252,11 +254,9 @@ function fallbackEdge(start, end, interiorSign) {
     const entryBoundary = resolveTransitionBoundary(entry.point);
     const exitBoundary = resolveTransitionBoundary(exit.point);
     if (!entryBoundary || !exitBoundary) return null;
-
     const entryPath = connectPhysicalPoints(cursor, entryBoundary, start, end, interiorSign);
     if (!entryPath) return null;
     appendUnique(repaired, entryPath.slice(1));
-
     const boundaryPath = chooseBoundaryPath(entryBoundary, exitBoundary, start, end, interiorSign);
     if (!boundaryPath) return null;
     appendUnique(repaired, boundaryPath.slice(1));
