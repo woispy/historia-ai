@@ -13,6 +13,7 @@ const EDGE_SAMPLES = 2048;
 const BINARY_ITERATIONS = 36;
 const MAX_PROJECTION_DISTANCE = 0.75;
 const MAX_ARC_VERTICES = 4096;
+const MIN_REPAIR_AREA_RATIO = 0.05;
 
 const distance = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const sample = (start, end, fraction) => [
@@ -31,6 +32,7 @@ function nearestPointOnSegment(point, start, end) {
   return { point: projected, fraction, distance: distance(point, projected) };
 }
 
+function pointToSegmentDistance(point, start, end) { return nearestPointOnSegment(point, start, end).distance; }
 function ringsForLake(lake) { return lake?.rings ?? (lake?.coordinates ? [lake.coordinates] : []); }
 
 function buildBoundaryDescriptors() {
@@ -55,9 +57,7 @@ function boundaryCandidates(point) {
       const start = descriptor.boundary[segmentIndex];
       const end = descriptor.boundary[(segmentIndex + 1) % descriptor.boundary.length];
       const projection = nearestPointOnSegment(point, start, end);
-      if (projection.distance <= MAX_PROJECTION_DISTANCE) {
-        candidates.push({ ...descriptor, segmentIndex, point: projection.point, distance: projection.distance });
-      }
+      if (projection.distance <= MAX_PROJECTION_DISTANCE) candidates.push({ ...descriptor, segmentIndex, point: projection.point, distance: projection.distance });
     }
   }
   return candidates.sort((a, b) => a.distance - b.distance);
@@ -117,41 +117,36 @@ function pathLength(path) {
   return total;
 }
 
-function arcBetweenDescriptors(from, to) {
+function pathDeviationFromSource(path, sourceStart, sourceEnd) {
+  let total = 0;
+  let maximum = 0;
+  for (const point of path) {
+    const deviation = pointToSegmentDistance(point, sourceStart, sourceEnd);
+    total += deviation;
+    maximum = Math.max(maximum, deviation);
+  }
+  return (total / path.length) + maximum * 0.25;
+}
+
+function arcBetweenDescriptors(from, to, sourceStart, sourceEnd) {
   if (!from || !to || from.boundary !== to.boundary) return null;
   return boundaryArcCandidates(from, to)
     .filter(pathIsPhysical)
-    .sort((a, b) => pathLength(a) - pathLength(b))[0] ?? null;
+    .sort((a, b) => {
+      const deviation = pathDeviationFromSource(a, sourceStart, sourceEnd) - pathDeviationFromSource(b, sourceStart, sourceEnd);
+      if (Math.abs(deviation) > GEOMETRY_EPS) return deviation;
+      return pathLength(a) - pathLength(b);
+    })[0] ?? null;
 }
 
-function connectToBoundary(point, target) {
+function connectToBoundary(point, target, sourceStart, sourceEnd) {
   if (!target) return null;
   if (pathIsPhysical([point, target.point])) return [point, target.point];
-
-  const projections = boundaryCandidates(point)
-    .filter((candidate) => candidate.boundary === target.boundary)
-    .slice(0, 8);
+  const projections = boundaryCandidates(point).filter((candidate) => candidate.boundary === target.boundary).slice(0, 8);
   for (const projection of projections) {
-    const bridge = pathIsPhysical([point, projection.point]) ? [point, projection.point] : null;
-    if (!bridge) continue;
-    const arc = arcBetweenDescriptors(projection, target);
-    if (arc) return [...bridge.slice(0, -1), ...arc];
-  }
-  return null;
-}
-
-function connectPhysicalPoints(from, to) {
-  if (pathIsPhysical([from, to])) return [from, to];
-  const fromBoundary = transitionBoundary(from);
-  const toBoundary = transitionBoundary(to);
-  if (!fromBoundary || !toBoundary) return null;
-  if (fromBoundary.boundary === toBoundary.boundary) {
-    const fromArc = connectToBoundary(from, fromBoundary);
-    if (!fromArc) return null;
-    const toArc = connectToBoundary(to, toBoundary);
-    if (!toArc) return null;
-    const joined = [...fromArc.slice(0, -1), ...[...toArc].reverse()];
-    return pathIsPhysical(joined) ? joined : null;
+    if (!pathIsPhysical([point, projection.point])) continue;
+    const arc = arcBetweenDescriptors(projection, target, sourceStart, sourceEnd);
+    if (arc) return [[...point], ...arc];
   }
   return null;
 }
@@ -209,25 +204,23 @@ function repairInvalidIntervals(start, end) {
     const entryBoundary = transitionBoundary(entry.point);
     const exitBoundary = transitionBoundary(exit.point);
     if (!entryBoundary || !exitBoundary) return null;
-
-    const beforeEntry = sample(start, end, entry.fraction);
     const afterExit = sample(start, end, exit.fraction);
 
-    const lead = pathIsPhysical([cursor, entryBoundary.point])
+    const lead = pathIsPhysical([cursor, entryBoundary.point]
       ? [cursor, entryBoundary.point]
-      : connectToBoundary(cursor, entryBoundary);
+      : connectToBoundary(cursor, entryBoundary, start, end);
     if (!lead) return null;
     appendUnique(repaired, lead.slice(1));
 
     let shoreline = null;
-    if (entryBoundary.boundary === exitBoundary.boundary) shoreline = arcBetweenDescriptors(entryBoundary, exitBoundary);
+    if (entryBoundary.boundary === exitBoundary.boundary) shoreline = arcBetweenDescriptors(entryBoundary, exitBoundary, start, end);
     if (!shoreline && pathIsPhysical([entryBoundary.point, exitBoundary.point])) shoreline = [entryBoundary.point, exitBoundary.point];
     if (!shoreline) return null;
     appendUnique(repaired, shoreline.slice(1));
 
     const tail = pathIsPhysical([exitBoundary.point, afterExit])
       ? [exitBoundary.point, afterExit]
-      : connectToBoundary(afterExit, exitBoundary)?.reverse();
+      : connectToBoundary(afterExit, exitBoundary, start, end)?.reverse();
     if (!tail) return null;
     appendUnique(repaired, tail.slice(1));
 
@@ -262,6 +255,7 @@ function signedArea(polygon) {
 
 export function repairPhysicalPolygon(polygon) {
   if (!Array.isArray(polygon) || polygon.length < 3) throw new Error("Physical polygon repair requires a polygon with at least three vertices.");
+  const originalArea = Math.abs(signedArea(polygon));
   if (polygon.every(isPhysicalPoint) && polygon.every((point, index) => pathIsPhysical([point, polygon[(index + 1) % polygon.length]]))) return polygon;
 
   const normalized = polygon.map(normalizeEndpoint);
@@ -276,8 +270,8 @@ export function repairPhysicalPolygon(polygon) {
     appendUnique(repaired, edge.slice(0, -1));
   }
   appendUnique(repaired, [normalized[0]]);
-  if (signedArea(repaired) === 0 || repaired.length < 3 || !repaired.every(isPhysicalPoint)) {
-    throw new Error("Physical polygon repair produced degenerate or non-physical geometry.");
-  }
+  const repairedArea = Math.abs(signedArea(repaired));
+  if (repairedArea === 0 || repaired.length < 3 || !repaired.every(isPhysicalPoint)) throw new Error("Physical polygon repair produced degenerate or non-physical geometry.");
+  if (originalArea > 0 && repairedArea < originalArea * MIN_REPAIR_AREA_RATIO) throw new Error(`Physical polygon repair collapsed geometry area from ${originalArea} to ${repairedArea}.`);
   return repaired;
 }
