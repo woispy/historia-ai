@@ -115,13 +115,6 @@ function nearestBoundaryLandPoint(point) {
   return { point: best, distance: bestDistance };
 }
 
-/**
- * Closed physical-land membership used by geometry construction. Coastline
- * and lake boundary points belong to the shared boundary of the physical
- * surface; only the strict lake interior is excluded. A small numerical
- * closure tolerance is allowed when clipping/intersection arithmetic places
- * a vertex infinitesimally outside an authoritative coastline.
- */
 export function isPhysicalLandPoint(point) {
   if (PHYSICAL_LAND_POLYGONS.some((polygon) => pointInPolygon(point, polygon))) {
     if (isLakeBoundaryPoint(point)) return true;
@@ -134,36 +127,34 @@ export function isPhysicalLandPoint(point) {
 }
 
 /**
- * Resolve a geometry vertex to the closed physical surface. Lake-interior
- * vertices are snapped to the authoritative lake shoreline rather than being
- * accepted as land. This preserves explicit lake holes without allowing a
- * political polygon's outer ring to carry an inland-water vertex.
+ * Resolve a geometry vertex against the single authoritative physical surface.
+ * Recovery is deliberately broader than numerical closure: V15 can produce
+ * deterministic clipping/intersection vertices that are slightly displaced
+ * from the atlas boundary. Such vertices are projected to the nearest
+ * authoritative shoreline/land boundary, but only within the shared recovery
+ * budget. No second coastline or province-specific geometry authority is used.
  */
 export function resolvePhysicalGeometryBoundaryPoint(point) {
   if (isPhysicalLandPoint(point)) return [...point];
+
   if (isLakeInteriorPoint(point)) {
     const shoreline = nearestLakeBoundaryPoint(point);
-    if (shoreline.point) return [...shoreline.point];
+    if (shoreline.point && shoreline.distance <= MAX_RECOVERY_DISTANCE) return [...shoreline.point];
   }
+
   const boundary = nearestBoundaryLandPoint(point);
-  if (boundary.point && boundary.distance <= NUMERICAL_BOUNDARY_TOLERANCE && !isLakeInteriorPoint(point)) {
+  if (boundary.point
+    && boundary.distance <= MAX_RECOVERY_DISTANCE
+    && !isLakeInteriorPoint(point)) {
     return [...boundary.point];
   }
   return null;
 }
 
-/**
- * Temporary V15 support surface. Lake interiors may be carried by the
- * retained generator so its intermediate land partition can be constructed;
- * they are never accepted as final political geometry by the V16 adapter.
- */
 export function isPhysicalGeometryBoundaryPoint(point) {
   return isPhysicalLandPoint(point) || isLakeInteriorPoint(point);
 }
 
-/**
- * Final political geometry boundary contract: land/coast/lake-shoreline only.
- */
 export function isFinalPhysicalGeometryBoundaryPoint(point) {
   return isPhysicalLandPoint(point);
 }
