@@ -192,6 +192,11 @@ function normalizeRepairEndpoint(point, originalStart, originalEnd, interiorSign
   return edgeCross(originalStart, originalEnd, resolved) * interiorSign >= -INTERIOR_SIDE_TOLERANCE ? [...resolved] : null;
 }
 
+function connectPhysicalPoints(fromPoint, toPoint, originalStart, originalEnd, interiorSign) {
+  if (isValidPhysicalPath([fromPoint, toPoint])) return [fromPoint, toPoint];
+  return chooseBoundaryPath(fromPoint, toPoint, originalStart, originalEnd, interiorSign);
+}
+
 function fallbackEdge(start, end, interiorSign) {
   let workingStart = start;
   let workingEnd = end;
@@ -214,15 +219,18 @@ function fallbackEdge(start, end, interiorSign) {
     if (!entry.entersWater || exit.entersWater) return null;
     const entryBoundary = resolveTransitionBoundary(entry.point);
     const exitBoundary = resolveTransitionBoundary(exit.point);
-    if (!entryBoundary || !exitBoundary || !isValidPhysicalPath([cursor, entryBoundary])) return null;
-    appendUnique(repaired, [entryBoundary]);
+    if (!entryBoundary || !exitBoundary) return null;
+    const entryPath = connectPhysicalPoints(cursor, entryBoundary, start, end, interiorSign);
+    if (!entryPath) return null;
+    appendUnique(repaired, entryPath.slice(1));
     const boundaryPath = chooseBoundaryPath(entryBoundary, exitBoundary, start, end, interiorSign);
     if (!boundaryPath) return null;
     appendUnique(repaired, boundaryPath.slice(1));
     cursor = exitBoundary;
   }
-  if (!isValidPhysicalPath([cursor, workingEnd])) return null;
-  appendUnique(repaired, [workingEnd]);
+  const finalPath = connectPhysicalPoints(cursor, workingEnd, start, end, interiorSign);
+  if (!finalPath) return null;
+  appendUnique(repaired, finalPath.slice(1));
   return isValidPhysicalPath(repaired) ? repaired : null;
 }
 
