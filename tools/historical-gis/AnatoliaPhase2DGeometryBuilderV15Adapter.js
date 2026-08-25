@@ -12,6 +12,7 @@ import { ANATOLIA_PROVINCE_REFINEMENTS } from "../../src/map/data/AnatoliaProvin
 
 const STRICT_PHYSICAL_EDGE_SAMPLE_COUNT = 64;
 const MAX_PHYSICAL_REPAIR_PASSES = 8;
+const REPAIR_DENSIFICATION_SEGMENTS = 16;
 
 /**
  * Phase 2D V16 contract adapter over the retained V15 geometry engine.
@@ -54,12 +55,29 @@ function isStrictlyPhysicalPath(polygon) {
   return true;
 }
 
+function densifyPolygon(polygon) {
+  const result = [];
+  for (let index = 0; index < polygon.length; index += 1) {
+    const start = polygon[index];
+    const end = polygon[(index + 1) % polygon.length];
+    result.push(start);
+    for (let sampleIndex = 1; sampleIndex < REPAIR_DENSIFICATION_SEGMENTS; sampleIndex += 1) {
+      const fraction = sampleIndex / REPAIR_DENSIFICATION_SEGMENTS;
+      result.push([
+        start[0] + (end[0] - start[0]) * fraction,
+        start[1] + (end[1] - start[1]) * fraction,
+      ]);
+    }
+  }
+  return result;
+}
+
 function repairPhysicalPolygonToFixedPoint(polygon, provinceId) {
   let current = polygon;
   for (let pass = 1; pass <= MAX_PHYSICAL_REPAIR_PASSES; pass += 1) {
     const repaired = repairPhysicalPolygon(current);
     if (isStrictlyPhysicalPath(repaired)) return repaired;
-    current = repaired;
+    current = densifyPolygon(repaired);
   }
   throw new Error(`Phase 2D physical repair did not converge to a land-safe polygon after ${MAX_PHYSICAL_REPAIR_PASSES} passes: ${provinceId}`);
 }
