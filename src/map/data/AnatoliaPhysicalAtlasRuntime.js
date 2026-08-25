@@ -2,19 +2,33 @@ import hydrography from "./generated/anatolia-hydrography-10m.json" with { type:
 import { ANATOLIA_PHYSICAL_ATLAS } from "./AnatoliaPhysicalAtlas.js";
 
 function normalizeLake(feature) {
-  return {
-    id: feature.id,
-    name: feature.name,
-    nameEn: feature.nameEn,
-    rank: feature.rank,
-    // Legacy callers expect a single polygon coordinate array. Preserve the
-    // outer ring there while exposing the complete polygon topology through
-    // `rings` for exact rendering and validation.
-    coordinates: feature.rings?.[0] ?? [],
-    rings: feature.rings,
-    bounds: feature.bounds,
-    geometrySource: "natural-earth-10m",
-  };
+  const rings = feature.rings;
+  if (!Array.isArray(rings) || rings.length === 0) return [];
+
+  // Natural Earth Polygon data is [ring, ...holes], while MultiPolygon data is
+  // [[ring, ...holes], ...]. Runtime consumers intentionally operate on one
+  // polygon component at a time so every caller receives a simple outer ring
+  // plus its holes. This avoids treating a nested MultiPolygon array as if it
+  // were a coordinate pair sequence during boundary and point-in-polygon
+  // operations.
+  const polygonComponents = Array.isArray(rings[0]?.[0]?.[0])
+    ? rings
+    : [rings];
+
+  return polygonComponents
+    .filter((component) => Array.isArray(component?.[0]) && component[0].length >= 3)
+    .map((component, componentIndex) => ({
+      id: polygonComponents.length === 1 ? feature.id : `${feature.id}-${componentIndex}`,
+      name: feature.name,
+      nameEn: feature.nameEn,
+      rank: feature.rank,
+      // Legacy callers expect a single outer polygon coordinate array.
+      coordinates: component[0],
+      // Keep the complete Polygon topology for exact rendering/validation.
+      rings: component,
+      bounds: feature.bounds,
+      geometrySource: "natural-earth-10m",
+    }));
 }
 
 function normalizeRiver(feature) {
@@ -30,7 +44,7 @@ function normalizeRiver(feature) {
   };
 }
 
-const generatedLakes = hydrography.lakes.map(normalizeLake);
+const generatedLakes = hydrography.lakes.flatMap(normalizeLake);
 const generatedRivers = hydrography.rivers.map(normalizeRiver);
 
 // The curated atlas still owns broad physical context (coastline, seas,

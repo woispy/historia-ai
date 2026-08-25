@@ -41,6 +41,7 @@ on:
       - feat/phase2b-anatolia-reconstruction
       - feat/phase2c-anatolia-geometry-refinement
       - feat/phase2d-anatolia-province-geometry
+      - feat/p2d-anatolia-final-cartography
       - feat/phase2efgh-cartography
       - feat/cartography-visual-refinement
       - feat/map-gpu-texture-architecture
@@ -78,6 +79,8 @@ jobs:
         run: npm run validate:historical-gis:1300
       - name: Run historical GIS identity tests
         run: npm run test:historical-gis
+      - name: Run physical edge repair contract tests
+        run: npm run test:physical-edge-repair
       - name: Run physical geography tests
         run: npm run test:physical-geography
       - name: Run Natural Earth 10m hydrography tests
@@ -106,6 +109,8 @@ jobs:
         run: npm run test:anatolia-phase2c
       - name: Run Phase 2D Anatolia geometry tests
         run: npm run test:anatolia-phase2d
+      - name: Run Phase 2D geometry integrity tests
+        run: npm run test:anatolia-phase2d-geometry-integrity
       - name: Run Phase 2E-2H cartography tests
         run: npm run test:cartography-2efgh
       - name: Run cartography foundation regression tests
