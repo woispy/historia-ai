@@ -2,6 +2,7 @@ import { buildAnatoliaPhase2DAssets as buildAnatoliaPhase2DAssetsV15 } from "./A
 import {
   PHYSICAL_LAND_POLYGONS,
   isPhysicalLandPoint,
+  isFinalPhysicalGeometryBoundaryPoint,
   isPhysicalGeometryBoundaryPoint as isPhysicalGeometrySupportPoint,
   resolvePhysicalGeometryBoundaryPoint,
   resolveGeometryAnchor,
@@ -75,18 +76,18 @@ export function buildAnatoliaPhase2DAssets(regions) {
 }
 
 /**
- * Geometry construction treats only authoritative physical land as a valid
- * edge sample. The recovery authority may expose lake-interior support points
- * for temporary recovery, but those points must never satisfy the final
- * political-edge physical-water invariant.
+ * V15 needs the temporary support surface while constructing its intermediate
+ * partition. V16 exposes the final contract separately: lake-interior support
+ * points are never valid final political-edge points.
  */
 function isPhysicalGeometryBoundaryPoint(point) {
-  return isPhysicalLandPoint(point) && !isPhysicalGeometrySupportPoint(point) ? false : isPhysicalLandPoint(point);
+  return isPhysicalGeometrySupportPoint(point);
 }
 
 export {
   isPhysicalLandPoint,
   isPhysicalGeometryBoundaryPoint,
+  isFinalPhysicalGeometryBoundaryPoint,
   resolvePhysicalGeometryBoundaryPoint,
   PHYSICAL_LAND_POLYGONS,
   resolveGeometryAnchor,
