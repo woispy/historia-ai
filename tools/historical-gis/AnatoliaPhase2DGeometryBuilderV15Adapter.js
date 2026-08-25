@@ -67,7 +67,9 @@ function repairPhysicalPolygonToFixedPoint(polygon, provinceId, containmentPolyg
     if (currentSignature === previousSignature) break;
     previousSignature = currentSignature;
     try {
-      const repaired = repairPhysicalPolygon(current);
+      const repaired = pass === 1 || !containmentPolygon
+        ? repairPhysicalPolygon(current)
+        : repairPhysicalPolygon(current, { containmentPolygon });
       if (repaired.length < 3) throw new Error("physical repair returned fewer than three vertices");
       const partitionClipped = containmentPolygon ? clipPolygonToCell(repaired, containmentPolygon) : repaired;
       if (partitionClipped.length >= 3 && isStrictlyPhysicalPath(partitionClipped)) return partitionClipped;
