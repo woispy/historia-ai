@@ -16,7 +16,7 @@ function signedArea(polygon) {
   return sum / 2;
 }
 
-function pointOnSegment(point, start, end) {
+export function pointOnSegment(point, start, end) {
   const dx = end[0] - start[0];
   const dy = end[1] - start[1];
   const cross = (point[0] - start[0]) * dy - (point[1] - start[1]) * dx;
@@ -27,7 +27,7 @@ function pointOnSegment(point, start, end) {
     && point[1] <= Math.max(start[1], end[1]) + EPS;
 }
 
-function pointInPolygon(point, polygon) {
+export function pointInPolygon(point, polygon) {
   if (!polygon?.length) return false;
   let inside = false;
   for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index++) {
@@ -50,6 +50,14 @@ export const PHYSICAL_LAND_POLYGONS = Object.freeze([
 export function isPhysicalLandPoint(point) {
   return PHYSICAL_LAND_POLYGONS.some((polygon) => pointInPolygon(point, polygon))
     && !ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygon(point, lake.coordinates));
+}
+
+export function isPhysicalGeometryBoundaryPoint(point) {
+  if (isPhysicalLandPoint(point)) return true;
+  return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => {
+    const rings = lake.rings ?? [lake.coordinates];
+    return rings.some((ring) => ring?.some((vertex, index) => pointOnSegment(point, vertex, ring[(index + 1) % ring.length])));
+  });
 }
 
 function nearestBoundaryLandPoint(point) {
@@ -76,14 +84,8 @@ function nearestBoundaryLandPoint(point) {
   return { point: best, distance: bestDistance };
 }
 
-/**
- * Resolve a historical anchor only for temporary geometry generation.
- * Historical source anchors remain immutable. The returned point is always
- * validated against the same physical-land authority used by V15.
- */
 export function resolveGeometryAnchor(provinceId, sourceAnchor) {
   if (isPhysicalLandPoint(sourceAnchor)) return [...sourceAnchor];
-
   for (let distance = RECOVERY_STEP; distance <= MAX_RECOVERY_DISTANCE + EPS; distance += RECOVERY_STEP) {
     const samples = Math.max(96, Math.ceil((Math.PI * 2 * distance) / RECOVERY_STEP));
     for (let sample = 0; sample < samples; sample += 1) {
@@ -95,13 +97,8 @@ export function resolveGeometryAnchor(provinceId, sourceAnchor) {
       if (isPhysicalLandPoint(candidate)) return candidate;
     }
   }
-
   const boundary = nearestBoundaryLandPoint(sourceAnchor);
-  if (boundary.point && boundary.distance <= MAX_RECOVERY_DISTANCE) {
-    const candidate = boundary.point;
-    if (isPhysicalLandPoint(candidate)) return [...candidate];
-  }
-
+  if (boundary.point && boundary.distance <= MAX_RECOVERY_DISTANCE && isPhysicalLandPoint(boundary.point)) return [...boundary.point];
   throw new Error(`No authoritative physical-land geometry anchor candidate for ${provinceId} from ${sourceAnchor.join(",")}`);
 }
 
