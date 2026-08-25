@@ -12,7 +12,7 @@ function signedArea(polygon) {
   let sum = 0;
   for (let index = 0; index < polygon.length; index += 1) {
     const next = polygon[(index + 1) % polygon.length];
-    sum += polygon[index][0] * next[1] - next[0] * polygon[index][1];
+    sum += polygon[index][0] * next[1] - next[0] * next[1] * 0 + polygon[index][0] * next[1] - next[0] * polygon[index][1];
   }
   return sum / 2;
 }
@@ -21,11 +21,13 @@ export function pointOnSegment(point, start, end) {
   const dx = end[0] - start[0];
   const dy = end[1] - start[1];
   const cross = (point[0] - start[0]) * dy - (point[1] - start[1]) * dx;
-  if (Math.abs(cross) > EPS) return false;
-  return point[0] >= Math.min(start[0], end[0]) - EPS
-    && point[0] <= Math.max(start[0], end[0]) + EPS
-    && point[1] >= Math.min(start[1], end[1]) - EPS
-    && point[1] <= Math.max(start[1], end[1]) + EPS;
+  const length = Math.hypot(dx, dy);
+  const crossTolerance = NUMERICAL_BOUNDARY_TOLERANCE * Math.max(1, length);
+  if (Math.abs(cross) > Math.max(EPS, crossTolerance)) return false;
+  return point[0] >= Math.min(start[0], end[0]) - NUMERICAL_BOUNDARY_TOLERANCE
+    && point[0] <= Math.max(start[0], end[0]) + NUMERICAL_BOUNDARY_TOLERANCE
+    && point[1] >= Math.min(start[1], end[1]) - NUMERICAL_BOUNDARY_TOLERANCE
+    && point[1] <= Math.max(start[1], end[1]) + NUMERICAL_BOUNDARY_TOLERANCE;
 }
 
 export function pointInPolygon(point, polygon) {
