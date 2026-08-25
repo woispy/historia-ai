@@ -137,29 +137,21 @@ function isWaterSideOfLakeBoundary(point, shoreline) {
   return !isPhysicalLandPoint(probe);
 }
 
-/**
- * Resolve a geometry vertex against the single authoritative physical surface.
- * Lake shoreline recovery is considered even when a generated lake polygon
- * does not classify the raw clipping vertex as lake interior. The shoreline
- * must be the nearest physical water-side boundary, so a land-side point is
- * never snapped to an unrelated lake.
- */
+function isLakeShorelineRecoveryCandidate(point, shoreline) {
+  if (!shoreline?.point || shoreline.distance > MAX_RECOVERY_DISTANCE) return false;
+  if (isLakeInteriorPoint(point)) return true;
+  if (isLakeBoundaryPoint(point)) return true;
+  return isWaterSideOfLakeBoundary(point, shoreline);
+}
+
 export function resolvePhysicalGeometryBoundaryPoint(point) {
   if (isPhysicalLandPoint(point)) return [...point];
 
   const shoreline = nearestLakeBoundaryPoint(point);
   const landBoundary = nearestBoundaryLandPoint(point);
 
-  if (shoreline.point
-    && shoreline.distance <= MAX_RECOVERY_DISTANCE
-    && isWaterSideOfLakeBoundary(point, shoreline)
+  if (isLakeShorelineRecoveryCandidate(point, shoreline)
     && shoreline.distance <= landBoundary.distance) {
-    return [...shoreline.point];
-  }
-
-  if (isLakeInteriorPoint(point)
-    && shoreline.point
-    && shoreline.distance <= MAX_RECOVERY_DISTANCE) {
     return [...shoreline.point];
   }
 
