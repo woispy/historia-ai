@@ -13,7 +13,6 @@ const BINARY_ITERATIONS = 32;
 const MAX_PROJECTION_DISTANCE = 0.02;
 const MAX_ARC_VERTICES = 2048;
 const INTERIOR_SIDE_TOLERANCE = 1e-8;
-const SOURCE_POLYGON_SAMPLE_COUNT = 32;
 
 const distance = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const sample = (start, end, fraction) => [
@@ -35,40 +34,6 @@ function signedArea(polygon) {
 function edgeCross(start, end, point) {
   return (end[0] - start[0]) * (point[1] - start[1])
     - (end[1] - start[1]) * (point[0] - start[0]);
-}
-
-function pointOnSegment(point, start, end, tolerance = INTERIOR_SIDE_TOLERANCE) {
-  if (Math.abs(edgeCross(start, end, point)) > tolerance) return false;
-  const minX = Math.min(start[0], end[0]) - tolerance;
-  const maxX = Math.max(start[0], end[0]) + tolerance;
-  const minY = Math.min(start[1], end[1]) - tolerance;
-  const maxY = Math.max(start[1], end[1]) + tolerance;
-  return point[0] >= minX && point[0] <= maxX && point[1] >= minY && point[1] <= maxY;
-}
-
-function pointInPolygonInclusive(point, polygon) {
-  let inside = false;
-  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index++) {
-    const current = polygon[index];
-    const prior = polygon[previous];
-    if (pointOnSegment(point, prior, current)) return true;
-    const intersects = ((current[1] > point[1]) !== (prior[1] > point[1]))
-      && point[0] < ((prior[0] - current[0]) * (point[1] - current[1])) / (prior[1] - current[1]) + current[0];
-    if (intersects) inside = !inside;
-  }
-  return inside;
-}
-
-function pathStaysInsideSourcePolygon(path, polygon) {
-  if (!Array.isArray(polygon) || polygon.length < 3) return false;
-  for (let index = 0; index < path.length - 1; index += 1) {
-    const start = path[index];
-    const end = path[index + 1];
-    for (let sampleIndex = 0; sampleIndex <= SOURCE_POLYGON_SAMPLE_COUNT; sampleIndex += 1) {
-      if (!pointInPolygonInclusive(sample(start, end, sampleIndex / SOURCE_POLYGON_SAMPLE_COUNT), polygon)) return false;
-    }
-  }
-  return true;
 }
 
 function nearestPointOnSegment(point, start, end) {
@@ -177,13 +142,12 @@ function sameBoundary(a, b) {
 
 function pathLength(path) { return path.reduce((total, point, index) => index === 0 ? total : total + distance(path[index - 1], point), 0); }
 
-function chooseBoundaryPath(fromPoint, toPoint, originalStart, originalEnd, interiorSign, sourcePolygon) {
+function chooseBoundaryPath(fromPoint, toPoint, originalStart, originalEnd, interiorSign) {
   const from = projectToBoundary(fromPoint);
   const to = projectToBoundary(toPoint);
   if (!from || !to) return null;
   const pathIsAllowed = (path) => isValidPhysicalPath(path)
-    && pathStaysInsideSourcePolygon(path, sourcePolygon)
-    && path.every((point) => edgeCross(originalStart, originalEnd, point) * interiorSign >= -INTERIOR_SIDE_TOLERANCE || pointInPolygonInclusive(point, sourcePolygon));
+    && path.every((point) => edgeCross(originalStart, originalEnd, point) * interiorSign >= -INTERIOR_SIDE_TOLERANCE);
   if (sameBoundary(from, to)) {
     return arcCandidates(from.boundary, from, to)
       .filter(pathIsAllowed)
@@ -200,7 +164,7 @@ function appendUnique(target, points) {
   }
 }
 
-function fallbackEdge(start, end, interiorSign, sourcePolygon) {
+function fallbackEdge(start, end, interiorSign) {
   if (isValidPhysicalPath([start, end])) return [start, end];
   const transitions = waterTransitions(start, end);
   if (transitions.length < 2 || transitions.length % 2 !== 0) return null;
@@ -214,14 +178,14 @@ function fallbackEdge(start, end, interiorSign, sourcePolygon) {
     const exitBoundary = resolvePhysicalGeometryBoundaryPoint(exit.point);
     if (!entryBoundary || !exitBoundary || !isValidPhysicalPath([cursor, entryBoundary])) return null;
     appendUnique(repaired, [entryBoundary]);
-    const boundaryPath = chooseBoundaryPath(entryBoundary, exitBoundary, start, end, interiorSign, sourcePolygon);
+    const boundaryPath = chooseBoundaryPath(entryBoundary, exitBoundary, start, end, interiorSign);
     if (!boundaryPath) return null;
     appendUnique(repaired, boundaryPath.slice(1));
     cursor = exitBoundary;
   }
   if (!isValidPhysicalPath([cursor, end])) return null;
   appendUnique(repaired, [end]);
-  return isValidPhysicalPath(repaired) && pathStaysInsideSourcePolygon(repaired, sourcePolygon) ? repaired : null;
+  return isValidPhysicalPath(repaired) ? repaired : null;
 }
 
 function normalizeVertices(polygon) {
@@ -240,19 +204,19 @@ function repairEdgesWithoutMutatingValidEdges(polygon) {
   for (let index = 0; index < polygon.length; index += 1) {
     const start = polygon[index];
     const end = polygon[(index + 1) % polygon.length];
-    const edge = fallbackEdge(start, end, interiorSign, polygon);
+    const edge = fallbackEdge(start, end, interiorSign);
     if (!edge) return null;
     appendUnique(repaired, edge.slice(0, -1));
   }
   appendUnique(repaired, [polygon[0]]);
-  return isValidPhysicalPath(repaired) && pathStaysInsideSourcePolygon(repaired, polygon) ? repaired : null;
+  return isValidPhysicalPath(repaired) ? repaired : null;
 }
 
 export function repairPhysicalPolygon(polygon) {
   // Phase 2D cells already form a topological partition. A shoreline repair may
-  // legitimately curve away from a straight partition edge, but it must remain
-  // inside the source cell. This preserves the cell's ownership envelope while
-  // allowing physical coast/lake geometry to replace an invalid straight edge.
+  // curve away from a straight partition edge, but it is constrained to the
+  // source cell's original interior half-plane. This keeps repair edge-local and
+  // prevents a legacy whole-polygon mutation from moving an edge into a neighbor.
   const edgeWise = repairEdgesWithoutMutatingValidEdges(polygon);
   if (edgeWise) return edgeWise;
   try {
