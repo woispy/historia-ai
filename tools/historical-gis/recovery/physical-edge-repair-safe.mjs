@@ -1,4 +1,3 @@
-import { repairPhysicalPolygon as repairLegacyPhysicalPolygon } from "./physical-edge-repair.mjs";
 import {
   AUTHORITATIVE_LAKES,
   PHYSICAL_LAND_POLYGONS,
@@ -96,11 +95,10 @@ function waterTransitions(start, end) {
     const current = states[index];
     const next = states[index + 1];
     if (current.valid === next.valid) continue;
-    transitions.push({
-      fraction: refineTransition(start, end, current.valid ? current.fraction : next.fraction, current.valid ? next.fraction : current.fraction),
-      point: sample(start, end, refineTransition(start, end, current.valid ? current.fraction : next.fraction, current.valid ? next.fraction : current.fraction)),
-      entersWater: current.valid && !next.valid,
-    });
+    const validFraction = current.valid ? current.fraction : next.fraction;
+    const invalidFraction = current.valid ? next.fraction : current.fraction;
+    const fraction = refineTransition(start, end, validFraction, invalidFraction);
+    transitions.push({ fraction, point: sample(start, end, fraction), entersWater: current.valid && !next.valid });
   }
   return transitions;
 }
@@ -191,14 +189,18 @@ function repairEdgesWithoutMutatingValidEdges(polygon) {
 }
 
 export function repairPhysicalPolygon(polygon) {
+  // Phase 2D cells already form a topological partition. Legacy whole-polygon
+  // recovery can move valid partition edges toward unrelated physical
+  // boundaries and thereby create overlap with a neighboring cell. Keep repair
+  // edge-local and refuse topology-changing fallback.
   const edgeWise = repairEdgesWithoutMutatingValidEdges(polygon);
   if (edgeWise) return edgeWise;
   try {
-    return repairLegacyPhysicalPolygon(polygon);
-  } catch (error) {
     const normalized = normalizeVertices(polygon);
     const repaired = repairEdgesWithoutMutatingValidEdges(normalized);
-    if (!repaired) throw error;
-    return repaired;
+    if (repaired) return repaired;
+  } catch {
+    // Fall through to a deterministic diagnostic error below.
   }
+  throw new Error("Physical polygon repair would require mutating a valid partition edge; refusing topology-changing recovery.");
 }
