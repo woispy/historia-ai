@@ -2,8 +2,89 @@ import "./MapView.css";
 
 import { getCountry } from "../../../countries";
 import { getProvince } from "../../../provinces";
+import { getProvinceMetadata } from "../../../map/data/AnatoliaProvinceMetadata.js";
+import { getAnatolia1300Hydrography } from "../../../map/data/Anatolia1300Hydrography.js";
+import { getAnatolia1300Lake } from "../../../map/data/Anatolia1300Lakes.js";
+import { getAnatolia1300NaturalBoundary } from "../../../map/data/Anatolia1300NaturalBoundaries.js";
+import { getAnatolia1300PhysicalFeatures } from "../../../map/data/Anatolia1300PhysicalFeatures.js";
+import { getHistoricalPolity } from "../../../world/map/historical/HistoricalPoliticalRuntime.js";
 import { WorldMap } from "../../../map";
 import ProvinceInspector from "./ProvinceInspector";
+
+const HISTORICAL_1300_DATE = "1300-01-01";
+
+function getScenarioStartDate(gameSession) {
+  return gameSession?.scenario?.startDate
+    ?? gameSession?.world?.scenario?.startDate
+    ?? null;
+}
+
+function getHistoricalNaturalBoundary(provinceId) {
+  return getAnatolia1300NaturalBoundary(provinceId);
+}
+
+function createHistoricalInspectorProvince(metadata) {
+  if (!metadata) return null;
+
+  const hydrography = getAnatolia1300Hydrography(metadata.id);
+  const lake = getAnatolia1300Lake(metadata.id);
+  const physicalFeatures = getAnatolia1300PhysicalFeatures(metadata.id);
+  const naturalBoundary = getHistoricalNaturalBoundary(metadata.id);
+
+  return {
+    id: metadata.id,
+    name: metadata.name,
+    owner: metadata.countryId ?? null,
+    controller: metadata.historicalControl?.controllerAt1300 ?? null,
+    terrain: metadata.terrain ?? null,
+    port: metadata.port === true,
+    strategic: metadata.strategic === true,
+    culture: null,
+    religion: null,
+    governor: null,
+    fortLevel: null,
+    population: null,
+    development: null,
+    river: Boolean(hydrography),
+    riverName: hydrography?.name ?? null,
+    riverDetail: hydrography?.detail ?? null,
+    lake: Boolean(lake),
+    lakeName: lake?.name ?? null,
+    lakeDetail: lake?.detail ?? null,
+    mountainsName: physicalFeatures?.mountains?.name ?? null,
+    mountainsDetail: physicalFeatures?.mountains?.detail ?? null,
+    passesName: physicalFeatures?.passes?.name ?? null,
+    passesDetail: physicalFeatures?.passes?.detail ?? null,
+    naturalBoundarySummary: naturalBoundary?.summary ?? null,
+    naturalBoundaryFeatures: naturalBoundary?.features ?? [],
+    historicalControl: metadata.historicalControl ?? null,
+  };
+}
+
+function mergeHistoricalPhysicalFeatures(province, historicalMetadata) {
+  if (!province || !historicalMetadata) return province;
+
+  const hydrography = getAnatolia1300Hydrography(historicalMetadata.id);
+  const lake = getAnatolia1300Lake(historicalMetadata.id);
+  const physicalFeatures = getAnatolia1300PhysicalFeatures(historicalMetadata.id);
+  const naturalBoundary = getHistoricalNaturalBoundary(historicalMetadata.id);
+
+  return {
+    ...province,
+    river: Boolean(hydrography),
+    riverName: hydrography?.name ?? null,
+    riverDetail: hydrography?.detail ?? null,
+    lake: Boolean(lake),
+    lakeName: lake?.name ?? null,
+    lakeDetail: lake?.detail ?? null,
+    mountainsName: physicalFeatures?.mountains?.name ?? null,
+    mountainsDetail: physicalFeatures?.mountains?.detail ?? null,
+    passesName: physicalFeatures?.passes?.name ?? null,
+    passesDetail: physicalFeatures?.passes?.detail ?? null,
+    naturalBoundarySummary: naturalBoundary?.summary ?? null,
+    naturalBoundaryFeatures: naturalBoundary?.features ?? [],
+  };
+}
 
 function MapView({
   gameSession,
@@ -14,11 +95,23 @@ function MapView({
 }) {
   const provinceRepository = gameSession?.world?.repositories?.provinces;
   const countryRepository = gameSession?.world?.repositories?.countries;
-  const selectedProvince = provinceRepository && selectedProvinceId
+  const scenarioDate = getScenarioStartDate(gameSession);
+  const historicalMetadata = scenarioDate === HISTORICAL_1300_DATE && selectedProvinceId
+    ? getProvinceMetadata(selectedProvinceId)
+    : null;
+  const repositoryProvince = provinceRepository && selectedProvinceId
     ? getProvince(provinceRepository, selectedProvinceId)
     : null;
-  const selectedCountry = selectedProvince?.owner && countryRepository
-    ? getCountry(countryRepository, selectedProvince.owner)
+  const selectedProvince = mergeHistoricalPhysicalFeatures(
+    repositoryProvince ?? createHistoricalInspectorProvince(historicalMetadata),
+    historicalMetadata,
+  );
+  const selectedCountry = repositoryProvince?.owner && countryRepository
+    ? getCountry(countryRepository, repositoryProvince.owner)
+    : null;
+  const historicalControllerId = historicalMetadata?.historicalControl?.controllerAt1300 ?? null;
+  const historicalPolity = historicalControllerId
+    ? getHistoricalPolity(historicalControllerId)
     : null;
 
   return (
@@ -37,6 +130,8 @@ function MapView({
         <ProvinceInspector
           province={selectedProvince}
           country={selectedCountry}
+          historicalMetadata={historicalMetadata}
+          historicalPolity={historicalPolity}
           onClose={onProvinceClose}
         />
       )}

@@ -21,6 +21,7 @@ on:
       - feat/cartography-visual-refinement
       - feat/cartography-foundation-v2
       - feat/map-gpu-texture-architecture
+      - feat/p3-map-performance
   push:
     branches:
       - main
@@ -48,6 +49,7 @@ on:
       - feat/runtime-province-selection
       - feat/historical-map-clean-foundation
       - feat/historical-political-map-v1
+      - feat/p3-map-performance
 
 jobs:
   validate:
@@ -110,6 +112,8 @@ jobs:
         run: npm run test:cartography-foundation
       - name: Run map texture atlas regression tests
         run: npm run test:map-texture-atlas
+      - name: Run P3 map performance regression tests
+        run: npm run test:map-performance
       - name: Run cartography visual regression tests
         run: npm run test:cartography-visual
       - name: Run map rendering contract tests

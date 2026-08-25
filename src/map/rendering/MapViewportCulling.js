@@ -5,6 +5,11 @@
  * two wrapped ranges. Geometry is culled before React creates SVG path nodes,
  * which keeps deep zoom interaction bounded by the visible region instead of
  * the total number of provinces.
+ *
+ * P3 note: camera motion is continuous, but expensive visibility/layout work
+ * does not need to run for every animation frame. A coarse camera snapshot is
+ * therefore used by geometry layers while the compositor remains free to move
+ * every frame.
  */
 
 const WORLD_MIN_X = -180;
@@ -33,6 +38,47 @@ export function getViewportBounds(camera = {}, padding = 0.08) {
     maxX: centerX + viewWidth / 2 + horizontalPadding,
     minY: centerY - viewHeight / 2 - verticalPadding,
     maxY: centerY + viewHeight / 2 + verticalPadding,
+  };
+}
+
+/**
+ * Quantize expensive visibility work to a fraction of the current viewport.
+ *
+ * The returned key changes only when the camera crosses a meaningful spatial
+ * boundary or a presentation zoom step. Rendering itself remains continuous;
+ * only culling/layout recomputation is quantized.
+ */
+export function getCameraCullingKey(camera = {}) {
+  const zoom = Math.max(1, Number(camera.zoom) || 1);
+  const lodZoom = Math.round(zoom * 20) / 20;
+  if (lodZoom <= 1.2) return "world";
+
+  const viewWidth = WORLD_WIDTH / lodZoom;
+  const viewHeight = WORLD_HEIGHT / lodZoom;
+  const cellWidth = Math.max(1, viewWidth * 0.24);
+  const cellHeight = Math.max(1, viewHeight * 0.24);
+  const x = Math.floor((Number(camera.x) + WORLD_WIDTH / 2) / cellWidth);
+  const y = Math.floor((Number(camera.y) + WORLD_HEIGHT / 2) / cellHeight);
+
+  return `${lodZoom}:${x}:${y}`;
+}
+
+export function getCameraCullingSnapshot(camera = {}) {
+  const zoom = Math.max(1, Number(camera.zoom) || 1);
+  if (zoom <= 1.2) return { x: 0, y: 0, zoom: 1.2 };
+
+  const lodZoom = Math.round(zoom * 20) / 20;
+  const viewWidth = WORLD_WIDTH / lodZoom;
+  const viewHeight = WORLD_HEIGHT / lodZoom;
+  const cellWidth = Math.max(1, viewWidth * 0.24);
+  const cellHeight = Math.max(1, viewHeight * 0.24);
+  const xIndex = Math.floor((Number(camera.x) + WORLD_WIDTH / 2) / cellWidth);
+  const yIndex = Math.floor((Number(camera.y) + WORLD_HEIGHT / 2) / cellHeight);
+
+  return {
+    x: xIndex * cellWidth - WORLD_WIDTH / 2 + cellWidth / 2,
+    y: yIndex * cellHeight - WORLD_HEIGHT / 2 + cellHeight / 2,
+    zoom: lodZoom,
   };
 }
 

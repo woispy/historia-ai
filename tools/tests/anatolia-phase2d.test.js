@@ -5,18 +5,37 @@ import {
   isPhysicalLandPoint,
 } from "../historical-gis/AnatoliaPhase2DGeometryBuilder.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
+import { ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST } from "../../src/map/data/Anatolia1300ProvinceGeometryManifest.js";
 
-const result = buildAnatoliaPhase2DAssets([
-  { polygons: [[[29.9, 40.7], [30.1, 40.7], [30.1, 40.9], [29.9, 40.7]]] },
-  { polygons: [[[27.4, 38.4], [27.7, 38.4], [27.7, 38.7], [27.4, 38.4]]] },
-]);
+const result = buildAnatoliaPhase2DAssets();
 
 assert.equal(result.historicalDate, "1300-01-01");
 assert.equal(result.provinceCount, ANATOLIA_PROVINCE_METADATA.length);
-assert.equal(result.provinceCount, 38);
+assert.equal(result.provinceCount, ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST.length);
+assert.equal(result.provinceCount, 38, "Phase 2D must match the current authoritative 1300 province dataset");
+
+function polygonArea(polygon) {
+  let area = 0;
+  for (let index = 0; index < polygon.length; index += 1) {
+    const current = polygon[index];
+    const next = polygon[(index + 1) % polygon.length];
+    area += current[0] * next[1] - next[0] * current[1];
+  }
+  return Math.abs(area) / 2;
+}
+
+const fallbackLikeProvinceIds = result.geometries
+  .filter((geometry) => geometry.polygons.some((polygon) => polygonArea(polygon) < 0.00005))
+  .map((geometry) => geometry.identity.provinceId);
+
+assert.equal(
+  result.fallbackProvinceCount,
+  0,
+  `Phase 2D must not silently replace historical province geometry with anchor fallbacks; builder reported ${result.fallbackProvinceCount}, fallback-like IDs: ${fallbackLikeProvinceIds.join(", ")}`,
+);
 console.log(`Phase 2D cartographic site count: ${result.siteCount}`);
 assert.ok(result.siteCount >= 1000, "Phase 2D must use a dense physical/cartographic site field");
-assert.ok(result.barrierSiteCount >= 300, "Phase 2D must include a substantial physical water/coast barrier field");
+assert.equal(result.barrierSiteCount, 0, "Physical water/coast features must constrain political geometry through land clipping, not compete as political Voronoi sites");
 assert.ok(
   result.politicalSiteCount >= result.provinceCount,
   "Phase 2D must retain at least one usable political control site per province",
@@ -41,16 +60,6 @@ function polygonCentroid(polygon) {
   return [sum[0] / polygon.length, sum[1] / polygon.length];
 }
 
-function polygonArea(polygon) {
-  let area = 0;
-  for (let index = 0; index < polygon.length; index += 1) {
-    const current = polygon[index];
-    const next = polygon[(index + 1) % polygon.length];
-    area += current[0] * next[1] - next[0] * current[1];
-  }
-  return Math.abs(area) / 2;
-}
-
 for (const geometry of result.geometries) {
   assert.ok(provinceIds.has(geometry.identity.provinceId));
   assert.ok(geometry.polygons.length > 0);
@@ -58,18 +67,14 @@ for (const geometry of result.geometries) {
     assert.ok(polygon.length >= 3);
     vertexCount += polygon.length;
     const centroid = polygonCentroid(polygon);
-    // Tiny anchor fallbacks are explicit reconciliation placeholders for
-    // coarse physical-atlas cells; normal geometry must satisfy the hard
-    // physical-land invariant.
-    if (polygonArea(polygon) >= 0.00005) {
-      assert.ok(
-        isPhysicalLandPoint(centroid),
-        `Phase 2D polygon centroid must remain on physical land: ${centroid.join(",")}`,
-      );
-    }
+    assert.ok(
+      isPhysicalLandPoint(centroid),
+      `Phase 2D polygon centroid must remain on physical land: ${centroid.join(",")}`,
+    );
     for (const [longitude, latitude] of polygon) {
       assert.ok(longitude >= 25 && longitude <= 46, `Longitude out of Phase 2D envelope: ${longitude}`);
       assert.ok(latitude >= 35 && latitude <= 43, `Latitude out of Phase 2D envelope: ${latitude}`);
+      assert.ok(isPhysicalLandPoint([longitude, latitude]), `Phase 2D polygon vertex must remain on physical land: ${longitude},${latitude}`);
     }
   }
 }
@@ -81,6 +86,6 @@ assert.equal(isAnatoliaGeometryPoint([26.5556, 41.6772]), false, "Adrianopolis m
 
 console.log(
   `Phase 2D Anatolia geometry tests passed: ${result.provinceCount} provinces, `
-  + `${result.siteCount} sites (${result.barrierSiteCount} physical barriers), `
+  + `${result.siteCount} political/cartographic sites, `
   + `${result.polygonCount} polygons and ${vertexCount} vertices.`,
 );

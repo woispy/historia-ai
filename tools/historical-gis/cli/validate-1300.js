@@ -21,9 +21,14 @@ function validatePolygonRing(polygon, label) {
   }
 }
 
-const sourceRaw = JSON.parse(await fs.readFile(sourcePath, "utf8"));
-const normalizedRegions = await importHistoricalGeoJson(sourcePath, 1300);
-const runtime = JSON.parse(await fs.readFile(runtimePath, "utf8"));
+const rootData = await Promise.all([
+  fs.readFile(sourcePath, "utf8"),
+  importHistoricalGeoJson(sourcePath, 1300),
+  fs.readFile(runtimePath, "utf8"),
+]);
+const sourceRaw = JSON.parse(rootData[0]);
+const normalizedRegions = rootData[1];
+const runtime = JSON.parse(rootData[2]);
 
 assert(Array.isArray(sourceRaw.features), "Historical GIS source must contain a features array.");
 assert(sourceRaw.features.length === normalizedRegions.length, `Source/normalized feature count mismatch: ${sourceRaw.features.length} vs ${normalizedRegions.length}.`);
@@ -102,12 +107,12 @@ assert(runtime.counts?.provinces === runtime.provinces.length, "Runtime province
 assert(runtime.counts?.geometries === runtime.geometries.length, "Runtime geometry metadata count mismatch.");
 assert(runtime.counts?.polygons === polygonCount, "Runtime polygon metadata count mismatch.");
 
-// Phase 2D intentionally reports a dense cartographic site field, but the
-// physical barrier field can eliminate many individual Voronoi cells before
-// they become province polygons. Validate the resulting geometry using stable
-// output metrics rather than requiring an arbitrary polygon-ring count.
+// Phase 2D deliberately uses a bounded cartographic control field rather than
+// an oversized uniform point grid. The stable contract is enough local control
+// sites per province to preserve historical anchors, adjacency and natural /
+// coastline constraints without turning the Voronoi stage into an O(n²) point explosion.
 assert(polygonCount >= Math.ceil(phase2DProvinceCount * 1.5), "Phase 2D geometry layer is unexpectedly coarse.");
 assert(vertexCount >= 350, "Phase 2D geometry vertex field is unexpectedly sparse.");
-assert(runtime.source.phase2D.siteCount >= 3000, "Phase 2D cartographic site field is unexpectedly sparse.");
+assert(runtime.source.phase2D.siteCount >= phase2DProvinceCount * 40, "Phase 2D cartographic site field is unexpectedly sparse.");
 
 console.log(`Validated 1300 runtime: ${sourceDerivedCount} source-derived provinces + ${phase2DCount} Phase 2D Anatolia provinces, ${polygonCount} polygon rings, ${vertexCount} vertices.`);

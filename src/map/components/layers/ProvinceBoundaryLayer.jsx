@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { buildProvinceTopology } from "../../rendering/province/ProvinceTopology";
 import { getProvincePresentation } from "../../rendering/CartographyModel";
 
@@ -43,4 +43,7 @@ function ProvinceBoundaryLayer({ provinces = [], zoom = 1 }) {
   );
 }
 
-export default ProvinceBoundaryLayer;
+export default memo(ProvinceBoundaryLayer, (previous, next) => (
+  previous.provinces === next.provinces
+  && previous.zoom === next.zoom
+));

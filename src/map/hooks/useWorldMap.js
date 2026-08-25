@@ -1,7 +1,9 @@
 import { useMemo } from "react";
 import { getProvinces } from "../../provinces";
 import { getCities } from "../../cities";
-import { getGeometry } from "../../world/map/geometry";
+import { getGeometries, getGeometry } from "../../world/map/geometry";
+import { loadHistoricalGeometryRepository } from "../../world/map/geometry/loader/index.js";
+import { ANATOLIA_PROVINCE_METADATA } from "../data/AnatoliaProvinceMetadata.js";
 import { createHistoricalPoliticalMapModel } from "../../world/map/historical/HistoricalPoliticalMapModel";
 
 function getScenarioStartDate(gameSession) {
@@ -10,18 +12,79 @@ function getScenarioStartDate(gameSession) {
     ?? null;
 }
 
+const HISTORICAL_1300_DATE = "1300-01-01";
+
+function createHistoricalAnatoliaProvinceFallbacks(sourceProvinces, date) {
+  if (date !== HISTORICAL_1300_DATE) return sourceProvinces;
+
+  const sourceIds = new Set(sourceProvinces.map((province) => province.id));
+  const missingAnatoliaProvinces = ANATOLIA_PROVINCE_METADATA
+    .filter((metadata) => !sourceIds.has(metadata.id))
+    .map((metadata) => ({
+      id: metadata.id,
+      name: metadata.name,
+      geometryId: metadata.id,
+      owner: metadata.countryId ?? null,
+      controller: metadata.historicalControl?.controllerAt1300 ?? null,
+      historical: Object.freeze({
+        classification: "phase2d-anatolia-province-geometry",
+        sourceType: "historical-runtime",
+        historicalDate: HISTORICAL_1300_DATE,
+      }),
+      historicalDate: HISTORICAL_1300_DATE,
+      historicalSource: "historia-ai-curated-cartography",
+    }));
+
+  return missingAnatoliaProvinces.length
+    ? [...sourceProvinces, ...missingAnatoliaProvinces]
+    : sourceProvinces;
+}
+
+function resolveGeometryRepository(gameSession, date) {
+  const sourceRepository = gameSession?.world?.map?.geometry ?? null;
+  if (date !== HISTORICAL_1300_DATE) return sourceRepository;
+  return loadHistoricalGeometryRepository(date) ?? sourceRepository;
+}
+
+function createHistoricalWorldRegions(geometryRepository, date) {
+  if (date !== HISTORICAL_1300_DATE || !geometryRepository) return [];
+
+  return getGeometries(geometryRepository)
+    .filter((geometry) => Array.isArray(geometry?.polygons) && geometry.polygons.length > 0)
+    .map((geometry) => ({
+      id: geometry.id ?? geometry.identity?.id ?? null,
+      geometry,
+      subject: geometry.metadata?.subject ?? null,
+      sourceName: geometry.metadata?.name ?? geometry.identity?.name ?? null,
+      borderPrecision: geometry.metadata?.borderPrecision ?? 1,
+    }));
+}
+
+function isCuratedAnatoliaProvince(province) {
+  return province?.historical?.classification === "phase2d-anatolia-province-geometry"
+    || ANATOLIA_PROVINCE_METADATA.some((metadata) => metadata.id === province?.id);
+}
+
 export function useWorldMap(gameSession) {
   return useMemo(() => {
-    if (!gameSession) return { provinces: [], cities: [] };
+    if (!gameSession) {
+      return {
+        provinces: [],
+        cities: [],
+        historicalRegions: [],
+      };
+    }
 
     const provinceRepository = gameSession.world.repositories.provinces;
     const cityRepository = gameSession.world.repositories.cities;
     const countryRepository = gameSession.world.repositories.countries;
-    const geometryRepository = gameSession.world.map.geometry;
+    const date = getScenarioStartDate(gameSession);
+    const geometryRepository = resolveGeometryRepository(gameSession, date);
     const sourceProvinces = getProvinces(provinceRepository);
+    const historicalSourceProvinces = createHistoricalAnatoliaProvinceFallbacks(sourceProvinces, date);
     const historicalModel = createHistoricalPoliticalMapModel({
-      date: getScenarioStartDate(gameSession),
-      provinces: sourceProvinces,
+      date,
+      provinces: historicalSourceProvinces,
       countryRepository,
     });
 
@@ -29,32 +92,47 @@ export function useWorldMap(gameSession) {
       ? new Map(historicalModel.map((entry) => [entry.province.id, entry]))
       : null;
 
-    const provinces = sourceProvinces.map((province) => {
+    const provinces = historicalSourceProvinces.map((province) => {
       const historical = historicalById?.get(province.id) ?? null;
-      return historical
-        ? {
+      if (historical) {
+        return {
           ...historical,
-          geometry: province.geometryId
-            ? getGeometry(geometryRepository, province.geometryId)
-            : null,
-        }
-        : {
-          province,
-          country: province.owner
-            ? gameSession.world.repositories.countries.byId?.[province.owner] ?? null
-            : null,
-          sourceCountry: province.owner
-            ? gameSession.world.repositories.countries.byId?.[province.owner] ?? null
-            : null,
-          historicalPolitical: null,
+          historicalProvince: isCuratedAnatoliaProvince(province)
+            ? {
+              ...historical.historicalProvince,
+              classification: "phase2d-anatolia-province-geometry",
+              coastal: ANATOLIA_PROVINCE_METADATA.find((metadata) => metadata.id === province.id)?.coastal ?? false,
+              port: ANATOLIA_PROVINCE_METADATA.find((metadata) => metadata.id === province.id)?.port ?? false,
+            }
+            : historical.historicalProvince,
           geometry: province.geometryId
             ? getGeometry(geometryRepository, province.geometryId)
             : null,
         };
+      }
+
+      return {
+        province,
+        country: province.owner
+          ? gameSession.world.repositories.countries.byId?.[province.owner] ?? null
+          : null,
+        sourceCountry: province.owner
+          ? gameSession.world.repositories.countries.byId?.[province.owner] ?? null
+          : null,
+        historicalPolitical: null,
+        geometry: province.geometryId
+          ? getGeometry(geometryRepository, province.geometryId)
+          : null,
+      };
     });
 
-    const cities = getCities(cityRepository);
+    const historicalRegions = createHistoricalWorldRegions(geometryRepository, date)
+      .filter((region) => !ANATOLIA_PROVINCE_METADATA.some((metadata) => metadata.id === region.id));
 
-    return { provinces, cities };
+    return {
+      provinces,
+      cities: getCities(cityRepository),
+      historicalRegions,
+    };
   }, [gameSession]);
 }
