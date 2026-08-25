@@ -1,13 +1,19 @@
-const viteHistoricalRuntimeAssets = import.meta.env
+const viteHistoricalRuntimeManifestAssets = import.meta.env
   ? import.meta.glob(
-      "../assets/historical/*/runtime.json",
-      {
-        eager: true,
-        import: "default",
-      }
+      "../assets/historical/*/manifest.json",
+      { import: "default" },
     )
   : null;
 
+const viteHistoricalRuntimeRegionAssets = import.meta.env
+  ? import.meta.glob(
+      "../assets/historical/*/regions/*.json",
+      { import: "default" },
+    )
+  : null;
+
+const runtimeCache = new Map();
+const manifestCache = new Map();
 const nodeProcess = globalThis.process;
 
 const nodeFs =
@@ -20,36 +26,131 @@ function normalizeYear(value) {
   return String(value ?? "").replace(/[^0-9]/g, "").slice(0, 4);
 }
 
-function loadNodeHistoricalRuntimeAsset(year) {
-  if (!nodeFs) {
-    return null;
-  }
-
-  const fileUrl = new URL(
-    `../assets/historical/${year}/runtime.json`,
-    import.meta.url
-  );
-
-  if (!nodeFs.existsSync(fileUrl)) {
-    return null;
-  }
-
-  return JSON.parse(
-    nodeFs.readFileSync(fileUrl, "utf8")
-  );
+function normalizeRegionIds(regionIds) {
+  if (!regionIds) return null;
+  return [...new Set(
+    (Array.isArray(regionIds) ? regionIds : [regionIds])
+      .map((value) => String(value ?? "").trim().toLowerCase())
+      .filter(Boolean),
+  )].sort();
 }
 
-export function loadHistoricalRuntimeAsset(date) {
+function runtimeCacheKey(year, regionIds) {
+  return `${year}:${regionIds?.join(",") ?? "*"}`;
+}
+
+function mergeRuntimeRegions(year, regions) {
+  const provinces = regions.flatMap((region) => region?.provinces ?? []);
+  const geometries = regions.flatMap((region) => region?.geometries ?? []);
+  const polygonCount = geometries.reduce(
+    (total, geometry) => total + (Array.isArray(geometry?.polygons) ? geometry.polygons.length : 0),
+    0,
+  );
+
+  return {
+    schemaVersion: 3,
+    assetType: "historical-runtime",
+    historicalDate: `${year}-01-01`,
+    source: regions[0]?.source ?? null,
+    counts: {
+      provinces: provinces.length,
+      geometries: geometries.length,
+      polygons: polygonCount,
+    },
+    provinces,
+    geometries,
+    loadedRegions: regions.map((region) => region.regionId).filter(Boolean),
+  };
+}
+
+async function loadNodeManifest(year) {
+  if (!nodeFs) return null;
+  const fileUrl = new URL(`../assets/historical/${year}/manifest.json`, import.meta.url);
+  if (!nodeFs.existsSync(fileUrl)) return null;
+  return JSON.parse(nodeFs.readFileSync(fileUrl, "utf8"));
+}
+
+async function loadManifest(year) {
+  if (manifestCache.has(year)) return manifestCache.get(year);
+
+  if (viteHistoricalRuntimeManifestAssets) {
+    const entry = Object.entries(viteHistoricalRuntimeManifestAssets).find(([path]) =>
+      path.includes(`/historical/${year}/manifest.json`),
+    );
+    if (!entry?.[1]) return null;
+    const manifest = await entry[1]();
+    manifestCache.set(year, manifest);
+    return manifest;
+  }
+
+  const manifest = await loadNodeManifest(year);
+  if (manifest) manifestCache.set(year, manifest);
+  return manifest;
+}
+
+async function loadNodeRegion(year, file) {
+  if (!nodeFs) return null;
+  const fileUrl = new URL(`../assets/historical/${year}/${file}`, import.meta.url);
+  if (!nodeFs.existsSync(fileUrl)) return null;
+  return JSON.parse(nodeFs.readFileSync(fileUrl, "utf8"));
+}
+
+async function loadRegion(year, file) {
+  if (viteHistoricalRuntimeRegionAssets) {
+    const suffix = `/historical/${year}/${file}`;
+    const entry = Object.entries(viteHistoricalRuntimeRegionAssets).find(([path]) => path.endsWith(suffix));
+    if (!entry?.[1]) return null;
+    return entry[1]();
+  }
+  return loadNodeRegion(year, file);
+}
+
+export async function loadHistoricalRuntimeAsset(date, regionIds = null) {
   const year = normalizeYear(date);
   if (!year) return null;
 
-  if (viteHistoricalRuntimeAssets) {
-    const entry = Object.entries(viteHistoricalRuntimeAssets).find(([path]) =>
-      path.includes(`/historical/${year}/runtime.json`)
-    );
+  const normalizedRegionIds = normalizeRegionIds(regionIds);
+  const cacheKey = runtimeCacheKey(year, normalizedRegionIds);
+  if (runtimeCache.has(cacheKey)) return runtimeCache.get(cacheKey);
 
-    return entry?.[1] ?? null;
+  const manifest = await loadManifest(year);
+  if (!manifest?.regions?.length) return null;
+
+  const selectedRegions = normalizedRegionIds
+    ? manifest.regions.filter((region) => normalizedRegionIds.includes(region.id))
+    : manifest.regions;
+
+  if (normalizedRegionIds && selectedRegions.length !== normalizedRegionIds.length) {
+    const missing = normalizedRegionIds.filter(
+      (regionId) => !selectedRegions.some((region) => region.id === regionId),
+    );
+    throw new Error(`Historical runtime regions are missing for ${year}: ${missing.join(", ")}`);
   }
 
-  return loadNodeHistoricalRuntimeAsset(year);
+  const loadedRegions = await Promise.all(
+    selectedRegions.map((region) => loadRegion(year, region.file)),
+  );
+  if (loadedRegions.some((region) => !region)) {
+    throw new Error(`Historical runtime region asset is missing for ${year}.`);
+  }
+
+  const runtime = mergeRuntimeRegions(year, loadedRegions);
+  runtimeCache.set(cacheKey, runtime);
+  return runtime;
+}
+
+export async function loadHistoricalRuntimeRegions(date, regionIds) {
+  if (!normalizeRegionIds(regionIds)?.length) {
+    throw new Error("At least one historical runtime region is required.");
+  }
+  return loadHistoricalRuntimeAsset(date, regionIds);
+}
+
+export async function loadHistoricalRuntimeManifest(date) {
+  return loadManifest(normalizeYear(date));
+}
+
+export function clearHistoricalRuntimeCache() {
+  runtimeCache.clear();
+  manifestCache.clear();
 }

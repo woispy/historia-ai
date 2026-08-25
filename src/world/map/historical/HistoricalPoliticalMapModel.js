@@ -44,13 +44,21 @@ export function createHistoricalPoliticalMapModel({
     const polityId = historicalProvince
       ? historicalProvince.polityId
       : null;
+    const isIlkhanidSuzerainty = historicalProvince?.controlStatus?.toLowerCase() === "ilkhanid-suzerainty";
+
+    // Historical land must never become visually blank merely because the
+    // exact sovereign is unresolved. Use the explicit neutral presentation
+    // polity for unresolved/contested land; this is visual completeness, not a
+    // fabricated sovereign claim. Suzerainty keeps its dedicated polity colour.
+    const presentationPolityId = polityId
+      ?? (isIlkhanidSuzerainty ? "ilkhanate" : "local_polities");
 
     // Presentation comes from the historical runtime registry, never from the
     // modern country repository. The repository remains available only as the
     // source/simulation identity for diagnostics and compatibility.
-    const historicalPolity = polityId ? getHistoricalPolity(polityId) : null;
+    const historicalPolity = getHistoricalPolity(presentationPolityId);
     const historicalPolitical = createHistoricalPoliticalPresentation({
-      polityId,
+      polityId: presentationPolityId,
       country: historicalPolity,
     });
 

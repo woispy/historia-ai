@@ -23,7 +23,7 @@ import {
  * Persistence is deliberately best-effort here: a browser storage failure
  * must not prevent the newly created game from entering the active runtime.
  */
-export function initializeGame() {
+export async function initializeGame() {
   const newGame = getNewGame();
 
   console.group("[GameInitializer]");
@@ -50,7 +50,7 @@ export function initializeGame() {
   }
 
   try {
-    const session = createGame({
+    const session = await createGame({
       scenarioId: newGame.scenarioId,
       player: {
         countryId: newGame.countryId,
@@ -60,9 +60,6 @@ export function initializeGame() {
     });
 
     console.log("Game Session:", session);
-
-    // The active runtime is authoritative. Saving is a persistence concern
-    // and must never block the transition into the game itself.
     setCurrentGame(session);
 
     try {
@@ -71,10 +68,7 @@ export function initializeGame() {
       console.warn("[GameInitializer] Initial save skipped:", saveError);
     }
 
-    // The pending setup has been consumed successfully. Keep the new-game
-    // buffer clean so a later game cannot inherit stale scenario data.
     resetNewGame();
-
     return session;
   } finally {
     console.groupEnd();

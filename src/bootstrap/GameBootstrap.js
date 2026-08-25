@@ -28,7 +28,7 @@ function runBootstrapStage(stage, callback) {
   }
 }
 
-export function createGame({
+export async function createGame({
   scenarioId,
   player = {},
   settings = {},
@@ -53,7 +53,7 @@ export function createGame({
     throw new Error(`Scenario validation failed.\n\n${messages}`);
   }
 
-  const world = runBootstrapStage("world bootstrap", () =>
+  const world = await runBootstrapStage("world bootstrap", async () =>
     bootstrapWorld(scenario)
   );
 

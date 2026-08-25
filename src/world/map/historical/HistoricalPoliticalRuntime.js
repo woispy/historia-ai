@@ -3,6 +3,8 @@ import {
   assertHistoricalProvinceRecord,
   createHistoricalMapDescriptor,
 } from "../HistoricalMapContract.js";
+import { createHistoricalProvincePoliticalStates } from "./HistoricalProvincePoliticalState.js";
+import { getVerified1300Control } from "./Historical1300ControlOverrides.js";
 
 const POLITY_DEFINITIONS = Object.freeze([
   ["byzantium", "Byzantine Empire", "empire", "#6A1B9A"],
@@ -12,11 +14,17 @@ const POLITY_DEFINITIONS = Object.freeze([
   ["mentese", "Menteşe Beylik", "beylik", "#3E7C59"],
   ["esref", "Eşrefoğlu Beylik", "beylik", "#7B6840"],
   ["germiyan", "Germiyan Beylik", "beylik", "#8C5A2B"],
+  ["inanc", "İnanç Beyliği", "local-polity", "#5E8C61"],
+  ["hamid", "Hamid Beyliği", "beylik", "#4F8065"],
+  ["sahibata", "Sâhib Ata Beyliği", "local-polity", "#806A4A"],
   ["karaman", "Karaman Beylik", "beylik", "#A33F3F"],
   ["pervane", "Pervâneoğlu Beylik", "local-polity", "#6B7280"],
+  ["cobanid", "Çobanoğulları Beylik", "local-polity", "#8A7358"],
   ["candar", "Candar Beylik", "local-polity", "#7A6A3A"],
   ["trebizond", "Empire of Trebizond", "empire", "#4A7896"],
+  ["ilkhanate", "Ilkhanate Suzerainty", "suzerain", "#3D73B9"],
   ["cilicia", "Kingdom of Cilicia", "kingdom", "#8B4A62"],
+  ["local_polities", "Unresolved Local Polities", "neutral", "#777777"],
 ]);
 
 const POLITY_BY_ID = new Map(
@@ -50,20 +58,20 @@ function clonePolity(id) {
 }
 
 function controllerForDate(metadata, date) {
-  const control = metadata?.historicalControl;
+  const override = date === "1300-01-01" ? getVerified1300Control(metadata.id) : null;
+  const control = override ?? metadata?.historicalControl;
   if (!control) return null;
-
   const year = Number(date.slice(0, 4));
   if (!Number.isFinite(year)) return null;
-
   const startYear = Number.isFinite(Number(control.startYear)) ? Number(control.startYear) : null;
   if (startYear !== null && year < startYear) return null;
   return control.controllerAt1300 ?? null;
 }
 
 function toHistoricalProvince(metadata, date) {
+  const override = date === "1300-01-01" ? getVerified1300Control(metadata.id) : null;
+  const control = override ?? metadata.historicalControl;
   const polityId = controllerForDate(metadata, date);
-
   return {
     id: metadata.id,
     type: "province",
@@ -71,32 +79,24 @@ function toHistoricalProvince(metadata, date) {
     cityId: metadata.cityId,
     regionId: metadata.regionId,
     centroid: metadata.centroid,
+    coastal: metadata.coastal === true,
+    port: metadata.port === true,
     polityId,
-    controlStatus: metadata.historicalControl?.statusAt1300 ?? "unknown",
-    controlConfidence: metadata.historicalControl?.confidence ?? "low",
-    controlNote: metadata.historicalControl?.note ?? null,
+    controlStatus: control?.statusAt1300 ?? "unknown",
+    controlConfidence: control?.confidence ?? "low",
+    controlNote: control?.note ?? null,
     timeModel: "historical",
     sourceType: "historical-runtime",
   };
 }
 
-/**
- * Builds the historical political layer without using Admin-0 country data.
- *
- * The presentation metadata remains responsible for persistent geography and
- * historical interpretation. This runtime owns the dated political identity.
- */
 export function createHistoricalPoliticalRuntime({ date, provinceMetadata = [] } = {}) {
   const normalizedDate = normalizeDate(date);
   if (!Array.isArray(provinceMetadata)) {
     throw new TypeError("provinceMetadata must be an array.");
   }
 
-  // Validate the source boundary before converting records. This is important:
-  // once a modern Admin-0 record is projected into a historical shape it would
-  // otherwise look historical and the provenance firewall could be bypassed.
   provinceMetadata.forEach(assertHistoricalProvinceRecord);
-
   const provinces = provinceMetadata.map((metadata) => toHistoricalProvince(metadata, normalizedDate));
   const polityIds = new Set(provinces.map((province) => province.polityId).filter(Boolean));
   const polities = [...polityIds].map(clonePolity);
@@ -110,10 +110,18 @@ export function createHistoricalPoliticalRuntime({ date, provinceMetadata = [] }
 
   assertHistoricalPoliticalIdentitiesAndProvinces({ polities, provinces });
 
-  return createHistoricalMapDescriptor({
+  const descriptor = createHistoricalMapDescriptor({
     date: normalizedDate,
     polities,
     provinces,
+  });
+
+  return Object.freeze({
+    ...descriptor,
+    provincePoliticalStates: createHistoricalProvincePoliticalStates({
+      date: normalizedDate,
+      provinces,
+    }),
   });
 }
 

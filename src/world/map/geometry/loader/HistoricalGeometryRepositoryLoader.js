@@ -4,8 +4,8 @@ import {
 } from "../GeometryRepository.js";
 import { loadHistoricalRuntimeAsset } from "../../loader/HistoricalRuntimeManifestLoader.js";
 
-export function loadHistoricalGeometryRepository(date) {
-  const runtimeAsset = loadHistoricalRuntimeAsset(date);
+export async function loadHistoricalGeometryRepository(date) {
+  const runtimeAsset = await loadHistoricalRuntimeAsset(date);
   const assets = runtimeAsset?.geometries ?? null;
   if (!assets) return null;
 

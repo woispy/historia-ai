@@ -118,3 +118,5 @@ Each sprint should:
 - Solve one responsibility.
 - Keep the project buildable.
 - Preserve architectural consistency.
+
+<!-- P1 CI trigger: historical political map suite follows the current head. -->

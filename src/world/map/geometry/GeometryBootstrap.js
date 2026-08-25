@@ -10,14 +10,16 @@ import {
  * historical runtime geometry. Falling back to modern Admin-0 country
  * geometry would silently turn modern countries into historical provinces.
  *
- * The undated path remains available for tooling and generic map previews.
+ * The runtime geometry loader is asynchronous in the browser because Vite's
+ * historical region assets are lazy-loaded. Consumers must await this
+ * bootstrap before dereferencing the repository.
  */
-export function bootstrapGeometry(date = null) {
+export async function bootstrapGeometry(date = null) {
   if (!date) {
     return loadGeometryRepository();
   }
 
-  const historicalRepository = loadHistoricalGeometryRepository(date);
+  const historicalRepository = await loadHistoricalGeometryRepository(date);
   if (!historicalRepository) {
     throw new Error(
       `Historical geometry runtime asset is missing for ${String(date)}. `
