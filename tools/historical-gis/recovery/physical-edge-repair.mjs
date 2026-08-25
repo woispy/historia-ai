@@ -136,6 +136,26 @@ function projectedBoundaryCandidates(point, boundaries, kind) {
   return result.slice(0, MAX_BOUNDARY_CANDIDATES);
 }
 
+function strictPhysicalVertexCandidate(point) {
+  if (isValidPhysicalPoint(point)) return [...point];
+  const lakeCandidates = projectedBoundaryCandidates(point, LAKE_BOUNDARIES, "lake");
+  const landCandidates = projectedBoundaryCandidates(point, PHYSICAL_LAND_POLYGONS, "land");
+  const candidates = [...lakeCandidates, ...landCandidates]
+    .filter((candidate) => isFinalPhysicalGeometryBoundaryPoint(candidate.point))
+    .sort((a, b) => a.distance - b.distance);
+  return candidates[0]?.point ? [...candidates[0].point] : null;
+}
+
+function normalizePhysicalVertices(polygon) {
+  return polygon.map((point) => {
+    const normalized = strictPhysicalVertexCandidate(point);
+    if (!normalized) {
+      throw new Error(`No strict authoritative physical boundary for polygon vertex: ${point.join(",")}`);
+    }
+    return normalized;
+  });
+}
+
 function locateTransition(start, end, validFraction, invalidFraction) {
   let valid = validFraction;
   let invalid = invalidFraction;
@@ -229,7 +249,6 @@ function recoverDegenerateWaterEdge(start, end) {
     for (const to of endCandidates) {
       if (from.boundary !== to.boundary) continue;
       if (from.kind === "lake" && (from.lake !== to.lake || from.ringIndex !== to.ringIndex)) continue;
-      if (!connectorIsValid(start, from.point) || !connectorIsValid(to.point, end)) continue;
       const path = [from.point, to.point];
       if (!isValidPhysicalPath(path)) continue;
       candidates.push({ path, score: pathLength(path) + from.distance + to.distance });
@@ -383,10 +402,11 @@ function repairPhysicalEdge(start, end) {
 
 export function repairPhysicalPolygon(polygon) {
   if (!Array.isArray(polygon) || polygon.length < 3) throw new Error("Physical polygon must contain at least three vertices");
+  const normalizedPolygon = normalizePhysicalVertices(polygon);
   const result = [];
-  for (let index = 0; index < polygon.length; index += 1) {
-    const start = polygon[index];
-    const end = polygon[(index + 1) % polygon.length];
+  for (let index = 0; index < normalizedPolygon.length; index += 1) {
+    const start = normalizedPolygon[index];
+    const end = normalizedPolygon[(index + 1) % normalizedPolygon.length];
     appendUnique(result, repairPhysicalEdge(start, end).slice(0, -1));
   }
   return result;
