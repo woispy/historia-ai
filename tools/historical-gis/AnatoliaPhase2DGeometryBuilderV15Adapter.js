@@ -45,12 +45,12 @@ function densifyPolygon(polygon) {
   return result;
 }
 
-function repairPhysicalPolygonToFixedPoint(polygon, provinceId, sourcePartitionCell) {
+function repairPhysicalPolygonToFixedPoint(polygon, provinceId) {
   if (isStrictlyPhysicalPath(polygon)) return polygon;
   let current = polygon; let lastError = null;
   for (let pass = 1; pass <= MAX_PHYSICAL_REPAIR_PASSES; pass += 1) {
     try {
-      const repaired = repairPhysicalPolygon(current, { containmentPolygon: sourcePartitionCell });
+      const repaired = repairPhysicalPolygon(current);
       if (repaired.length >= 3 && isStrictlyPhysicalPath(repaired)) return repaired;
       current = densifyPolygon(repaired);
     } catch (error) { lastError = error; break; }
@@ -64,13 +64,12 @@ function normalizeGeometryContract(assets) {
     ...assets,
     provinces: assets.provinces.map((province) => ({ ...province, header: { ...province.header, assetVersion: 16, generator: "Historia AI Phase 2D Geometry Builder V16" } })),
     geometries: assets.geometries.map((geometry) => {
-      const polygon = geometry.polygons?.[0]; const holes = geometry.holes ?? []; const sourcePartitionCell = geometry.sourcePartitionCell;
+      const polygon = geometry.polygons?.[0]; const holes = geometry.holes ?? [];
       if (!Array.isArray(polygon) || polygon.length < 3) return geometry;
       const provinceId = geometry.identity?.provinceId ?? geometry.identity?.id;
       const historicalAnchor = provinceId ? ANATOLIA_PROVINCE_REFINEMENTS[provinceId]?.anchor : null;
       if (!historicalAnchor) throw new Error(`Missing historical anchor in V16 adapter contract: ${provinceId ?? "unknown"}`);
-      if (!Array.isArray(sourcePartitionCell) || sourcePartitionCell.length < 3) throw new Error(`Missing source partition cell in V16 adapter contract: ${provinceId ?? "unknown"}`);
-      const repairedPolygon = repairPhysicalPolygonToFixedPoint(polygon, provinceId ?? "unknown", sourcePartitionCell);
+      const repairedPolygon = repairPhysicalPolygonToFixedPoint(polygon, provinceId ?? "unknown");
       return {
         ...geometry,
         sourcePartitionCell: undefined,
