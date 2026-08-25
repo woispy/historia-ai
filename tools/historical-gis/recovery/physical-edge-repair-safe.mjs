@@ -3,6 +3,7 @@ import {
   PHYSICAL_LAND_POLYGONS,
   isPhysicalLandPoint,
   isFinalPhysicalGeometryBoundaryPoint,
+  nearestLakeBoundaryPoint,
   resolvePhysicalGeometryBoundaryPoint,
 } from "./physical-land-authority.mjs";
 
@@ -13,6 +14,7 @@ const BINARY_ITERATIONS = 32;
 const MAX_PROJECTION_DISTANCE = 0.02;
 const MAX_ARC_VERTICES = 2048;
 const INTERIOR_SIDE_TOLERANCE = 1e-8;
+const LAKE_SHORELINE_TRANSITION_TOLERANCE = 0.0002;
 
 const distance = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const sample = (start, end, fraction) => [
@@ -175,6 +177,12 @@ function appendUnique(target, points) {
   }
 }
 
+function resolveTransitionBoundary(point) {
+  const lake = nearestLakeBoundaryPoint(point);
+  if (lake.point && lake.distance <= LAKE_SHORELINE_TRANSITION_TOLERANCE) return [...lake.point];
+  return resolvePhysicalGeometryBoundaryPoint(point);
+}
+
 function normalizeRepairEndpoint(point, originalStart, originalEnd, interiorSign) {
   if (isValidPhysicalPoint(point)) return [...point];
   const candidates = projectToBoundaryCandidates(point, originalStart, originalEnd, interiorSign);
@@ -204,8 +212,8 @@ function fallbackEdge(start, end, interiorSign) {
     const entry = transitions[index];
     const exit = transitions[index + 1];
     if (!entry.entersWater || exit.entersWater) return null;
-    const entryBoundary = resolvePhysicalGeometryBoundaryPoint(entry.point);
-    const exitBoundary = resolvePhysicalGeometryBoundaryPoint(exit.point);
+    const entryBoundary = resolveTransitionBoundary(entry.point);
+    const exitBoundary = resolveTransitionBoundary(exit.point);
     if (!entryBoundary || !exitBoundary || !isValidPhysicalPath([cursor, entryBoundary])) return null;
     appendUnique(repaired, [entryBoundary]);
     const boundaryPath = chooseBoundaryPath(entryBoundary, exitBoundary, start, end, interiorSign);
