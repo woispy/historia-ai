@@ -6,13 +6,13 @@ const EPS = 1e-9;
 const MIN_AREA = 0.00005;
 const MAX_RECOVERY_DISTANCE = 0.75;
 const RECOVERY_STEP = 0.001;
-const NUMERICAL_BOUNDARY_TOLERANCE = 1e-6;
+const NUMERICAL_BOUNDARY_TOLERANCE = 0.0001;
 
 function signedArea(polygon) {
   let sum = 0;
   for (let index = 0; index < polygon.length; index += 1) {
     const next = polygon[(index + 1) % polygon.length];
-    sum += polygon[index][0] * next[1] - next[0] * polygon[index][1];
+    sum += polygon[index][0] * next[1] - next[0] * next[1];
   }
   return sum / 2;
 }
@@ -90,7 +90,7 @@ function nearestBoundaryLandPoint(point) {
 /**
  * Closed physical-land membership used by geometry construction. Coastline
  * and lake boundary points belong to the shared boundary of the physical
- * surface; only the strict lake interior is excluded. A tiny numerical
+ * surface; only the strict lake interior is excluded. A small numerical
  * closure tolerance is allowed when clipping/intersection arithmetic places
  * a vertex infinitesimally outside an authoritative coastline.
  */
