@@ -16,12 +16,24 @@ function signedArea(polygon) {
   return sum / 2;
 }
 
+function pointOnSegment(point, start, end) {
+  const dx = end[0] - start[0];
+  const dy = end[1] - start[1];
+  const cross = (point[0] - start[0]) * dy - (point[1] - start[1]) * dx;
+  if (Math.abs(cross) > EPS) return false;
+  return point[0] >= Math.min(start[0], end[0]) - EPS
+    && point[0] <= Math.max(start[0], end[0]) + EPS
+    && point[1] >= Math.min(start[1], end[1]) - EPS
+    && point[1] <= Math.max(start[1], end[1]) + EPS;
+}
+
 function pointInPolygon(point, polygon) {
   if (!polygon?.length) return false;
   let inside = false;
   for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index++) {
     const a = polygon[index];
     const b = polygon[previous];
+    if (pointOnSegment(point, a, b)) return true;
     if ((a[1] > point[1]) !== (b[1] > point[1])
       && point[0] < ((b[0] - a[0]) * (point[1] - a[1])) / ((b[1] - a[1]) || EPS) + a[0]) {
       inside = !inside;
