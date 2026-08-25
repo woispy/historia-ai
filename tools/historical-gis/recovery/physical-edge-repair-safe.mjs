@@ -93,6 +93,27 @@ function isValidPhysicalPath(path) {
   return true;
 }
 
+function isPointOnSourceEdge(point, start, end) {
+  const projection = nearestPointOnSegment(point, start, end);
+  const scale = Math.max(1, distance(start, end));
+  return projection.distance <= GEOMETRY_EPS * scale;
+}
+
+function sourceEdgeFraction(point, start, end) {
+  const projection = nearestPointOnSegment(point, start, end);
+  return projection.fraction;
+}
+
+function sourceEdgeSubpathIsValid(fromPoint, toPoint, start, end) {
+  if (!isPointOnSourceEdge(fromPoint, start, end) || !isPointOnSourceEdge(toPoint, start, end)) return false;
+  const fromFraction = sourceEdgeFraction(fromPoint, start, end);
+  const toFraction = sourceEdgeFraction(toPoint, start, end);
+  if (Math.abs(fromFraction - toFraction) <= EPS) return true;
+  const orderedStart = fromFraction <= toFraction ? fromPoint : toPoint;
+  const orderedEnd = fromFraction <= toFraction ? toPoint : fromPoint;
+  return isValidPhysicalPath([orderedStart, orderedEnd]);
+}
+
 function refineTransition(start, end, validFraction, invalidFraction) {
   let valid = validFraction;
   let invalid = invalidFraction;
@@ -128,12 +149,20 @@ function arcCandidates(boundary, from, to) {
   const forward = [from.point];
   let index = (from.segmentIndex + 1) % count;
   let guard = 0;
-  while (index !== (to.segmentIndex + 1) % count && guard <= count && forward.length <= MAX_ARC_VERTICES) { forward.push(boundary[index]); index = (index + 1) % count; guard += 1; }
+  while (index !== (to.segmentIndex + 1) % count && guard <= count && forward.length <= MAX_ARC_VERTICES) {
+    forward.push(boundary[index]);
+    index = (index + 1) % count;
+    guard += 1;
+  }
   forward.push(to.point);
   const backward = [from.point];
   index = from.segmentIndex;
   guard = 0;
-  while (index !== to.segmentIndex && guard <= count && backward.length <= MAX_ARC_VERTICES) { backward.push(boundary[index]); index = (index - 1 + count) % count; guard += 1; }
+  while (index !== to.segmentIndex && guard <= count && backward.length <= MAX_ARC_VERTICES) {
+    backward.push(boundary[index]);
+    index = (index - 1 + count) % count;
+    guard += 1;
+  }
   backward.push(to.point);
   return [forward, backward];
 }
@@ -193,6 +222,9 @@ function normalizeRepairEndpoint(point, originalStart, originalEnd, interiorSign
 }
 
 function connectPhysicalPoints(fromPoint, toPoint, originalStart, originalEnd, interiorSign) {
+  if (sourceEdgeSubpathIsValid(fromPoint, toPoint, originalStart, originalEnd)) {
+    return [fromPoint, toPoint];
+  }
   if (isValidPhysicalPath([fromPoint, toPoint])) return [fromPoint, toPoint];
   return chooseBoundaryPath(fromPoint, toPoint, originalStart, originalEnd, interiorSign);
 }
@@ -220,9 +252,11 @@ function fallbackEdge(start, end, interiorSign) {
     const entryBoundary = resolveTransitionBoundary(entry.point);
     const exitBoundary = resolveTransitionBoundary(exit.point);
     if (!entryBoundary || !exitBoundary) return null;
+
     const entryPath = connectPhysicalPoints(cursor, entryBoundary, start, end, interiorSign);
     if (!entryPath) return null;
     appendUnique(repaired, entryPath.slice(1));
+
     const boundaryPath = chooseBoundaryPath(entryBoundary, exitBoundary, start, end, interiorSign);
     if (!boundaryPath) return null;
     appendUnique(repaired, boundaryPath.slice(1));
@@ -259,10 +293,6 @@ function repairEdgesWithoutMutatingValidEdges(polygon) {
 }
 
 export function repairPhysicalPolygon(polygon) {
-  // Phase 2D cells already form a topological partition. A shoreline repair may
-  // curve away from a straight partition edge, but it is constrained to the
-  // source cell's original interior half-plane. Candidate physical boundaries
-  // are filtered by that half-plane before any shoreline arc is considered.
   const edgeWise = repairEdgesWithoutMutatingValidEdges(polygon);
   if (edgeWise) return edgeWise;
   try {
@@ -270,7 +300,7 @@ export function repairPhysicalPolygon(polygon) {
     const repaired = repairEdgesWithoutMutatingValidEdges(normalized);
     if (repaired) return repaired;
   } catch {
-    // Fall through to a deterministic diagnostic error below.
+    // Fall through to the deterministic diagnostic error below.
   }
   throw new Error("Physical polygon repair would require mutating a valid partition edge; refusing topology-changing recovery.");
 }
