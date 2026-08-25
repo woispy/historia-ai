@@ -12,6 +12,7 @@ import {
 import {
   PHYSICAL_LAND_POLYGONS,
   isPhysicalLandPoint,
+  isPhysicalGeometryBoundaryPoint,
   resolveGeometryAnchor,
 } from "./recovery/physical-land-authority.mjs";
 
@@ -170,7 +171,7 @@ function edgeOnPhysicalLand(polygon) {
     const end = polygon[(index + 1) % polygon.length];
     for (const fraction of EDGE_FRACTIONS) {
       const point = [start[0] + (end[0] - start[0]) * fraction, start[1] + (end[1] - start[1]) * fraction];
-      if (!isPhysicalLandPoint(point)) return false;
+      if (!isPhysicalGeometryBoundaryPoint(point)) return false;
     }
   }
   return true;
