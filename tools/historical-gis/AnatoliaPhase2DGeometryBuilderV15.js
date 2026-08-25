@@ -3,7 +3,7 @@ import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceM
 import { ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST, ANATOLIA_1300_PROVINCE_GEOMETRY_KEYS } from "../../src/map/data/Anatolia1300ProvinceGeometryManifest.js";
 import { ANATOLIA_PROVINCE_REFINEMENTS, ANATOLIA_STRATEGIC_PASSES, ANATOLIA_RIVER_CROSSINGS } from "../../src/map/data/AnatoliaProvinceRefinement.js";
 import { PHYSICAL_LAND_POLYGONS, isPhysicalLandPoint, isPhysicalGeometryBoundaryPoint, isFinalPhysicalGeometryBoundaryPoint, resolveGeometryAnchor, resolvePhysicalGeometryBoundaryPoint } from "./recovery/physical-land-authority.mjs";
-const BBOX=[25.45,35.72,44.85,42.35],EPS=1e-7,MIN_AREA=.00005,SAMPLE_STEP=.06,MAX_AREA_RATIO=4.2,MAX_WEIGHT_ITERATIONS=24,MAX_WEIGHT_STEP=4,FEATURE_WEIGHT_STEP=.01;
+const BBOX=[25.45,35.72,44.85,42.35],EPS=1e-10,MIN_AREA=.00005,SAMPLE_STEP=.06,MAX_AREA_RATIO=4.2,MAX_WEIGHT_ITERATIONS=24,MAX_WEIGHT_STEP=4,FEATURE_WEIGHT_STEP=.01;
 const rawAnchor=item=>ANATOLIA_PROVINCE_REFINEMENTS[item.id]?.anchor??item.centroid;
 function pointInPolygon(point,polygon){if(!polygon?.length)return false;let inside=false;for(let i=0,j=polygon.length-1;i<polygon.length;j=i++){const a=polygon[i],b=polygon[j];if((a[1]>point[1])!==(b[1]>point[1])&&point[0]<((b[0]-a[0])*(point[1]-a[1]))/((b[1]-a[1])||EPS)+a[0])inside=!inside;}return inside;}
 function signedArea(polygon){let sum=0;for(let index=0;index<polygon.length;index+=1){const next=polygon[(index+1)%polygon.length];sum+=polygon[index][0]*next[1]-next[0]*polygon[index][1];}return sum/2;}
