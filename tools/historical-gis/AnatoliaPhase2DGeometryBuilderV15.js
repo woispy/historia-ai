@@ -21,7 +21,8 @@ const BBOX = [25.45, 35.72, 44.85, 42.35];
 const EPS = 1e-7;
 const MIN_AREA = 0.00005;
 const SAMPLE_STEP = 0.06;
-const EDGE_FRACTIONS = [0, 0.25, 0.5, 0.75, 1];
+const FINAL_EDGE_SAMPLE_COUNT = 64;
+const MAX_EDGE_REPAIR_DEPTH = 12;
 const MAX_AREA_RATIO = 4.2;
 const MAX_WEIGHT_ITERATIONS = 24;
 const MAX_WEIGHT_STEP = 4;
@@ -138,43 +139,76 @@ function clipCellToLand(cell, anchorPoint) {
   return selected ? [selected] : [];
 }
 
-function normalizePhysicalBoundary(polygon) {
-  const normalized = [];
-  for (const point of polygon) {
-    const resolved = resolvePhysicalGeometryBoundaryPoint(point);
-    if (!resolved) return null;
-    const last = normalized[normalized.length - 1];
-    if (!last || last[0] !== resolved[0] || last[1] !== resolved[1]) normalized.push(resolved);
-  }
-  if (normalized.length > 1) {
-    const first = normalized[0];
-    const last = normalized[normalized.length - 1];
-    if (first[0] === last[0] && first[1] === last[1]) normalized.pop();
-  }
-  return normalized.length >= 3 && area(normalized) >= MIN_AREA ? normalized : null;
+function interpolate(start, end, fraction) {
+  return [start[0] + (end[0] - start[0]) * fraction, start[1] + (end[1] - start[1]) * fraction];
 }
 
-function edgeOnPhysicalLand(polygon) {
+function edgeIsPhysical(start, end) {
+  for (let index = 0; index <= FINAL_EDGE_SAMPLE_COUNT; index += 1) {
+    if (!isPhysicalGeometryBoundaryPoint(interpolate(start, end, index / FINAL_EDGE_SAMPLE_COUNT))) return false;
+  }
+  return true;
+}
+
+function repairPhysicalEdge(start, end, depth = 0) {
+  if (edgeIsPhysical(start, end)) return [start, end];
+  if (depth >= MAX_EDGE_REPAIR_DEPTH) return null;
+
+  let invalidFraction = null;
+  for (let index = 1; index < FINAL_EDGE_SAMPLE_COUNT; index += 1) {
+    const fraction = index / FINAL_EDGE_SAMPLE_COUNT;
+    if (!isPhysicalGeometryBoundaryPoint(interpolate(start, end, fraction))) {
+      invalidFraction = fraction;
+      break;
+    }
+  }
+  if (invalidFraction === null) return [start, end];
+
+  const boundary = resolvePhysicalGeometryBoundaryPoint(interpolate(start, end, invalidFraction));
+  if (!boundary) return null;
+  const resolved = boundary.map((value) => Number(value.toFixed(7)));
+  if (Math.hypot(resolved[0] - start[0], resolved[1] - start[1]) <= EPS
+    || Math.hypot(resolved[0] - end[0], resolved[1] - end[1]) <= EPS) return null;
+
+  const left = repairPhysicalEdge(start, resolved, depth + 1);
+  const right = repairPhysicalEdge(resolved, end, depth + 1);
+  if (!left || !right) return null;
+  return [...left.slice(0, -1), ...right];
+}
+
+function normalizePhysicalBoundary(polygon) {
+  const normalized = [];
   for (let index = 0; index < polygon.length; index += 1) {
     const start = polygon[index];
     const end = polygon[(index + 1) % polygon.length];
-    for (const fraction of EDGE_FRACTIONS) {
-      const point = [start[0] + (end[0] - start[0]) * fraction, start[1] + (end[1] - start[1]) * fraction];
-      if (!isPhysicalGeometryBoundaryPoint(point)) return false;
-    }
+    const resolvedStart = isPhysicalLandPoint(start) ? start : resolvePhysicalGeometryBoundaryPoint(start);
+    const resolvedEnd = isPhysicalLandPoint(end) ? end : resolvePhysicalGeometryBoundaryPoint(end);
+    if (!resolvedStart || !resolvedEnd) return null;
+    const repaired = repairPhysicalEdge(resolvedStart, resolvedEnd);
+    if (!repaired) return null;
+    normalized.push(...repaired.slice(0, -1));
   }
-  return true;
+  const deduplicated = [];
+  for (const point of normalized) {
+    const last = deduplicated[deduplicated.length - 1];
+    if (!last || last[0] !== point[0] || last[1] !== point[1]) deduplicated.push(point);
+  }
+  if (deduplicated.length > 1) {
+    const first = deduplicated[0];
+    const last = deduplicated[deduplicated.length - 1];
+    if (first[0] === last[0] && first[1] === last[1]) deduplicated.pop();
+  }
+  return deduplicated.length >= 3 && area(deduplicated) >= MIN_AREA ? deduplicated : null;
+}
+
+function edgeOnPhysicalLand(polygon) {
+  return polygon.every((start, index) => edgeIsPhysical(start, polygon[(index + 1) % polygon.length]));
 }
 
 function buildControlSites() {
   return ANATOLIA_PROVINCE_METADATA.map((item) => {
     const historicalAnchor = rawAnchor(item);
-    return {
-      point: resolveGeometryAnchor(item.id, historicalAnchor),
-      historicalAnchor,
-      provinceId: item.id,
-      kind: "province-anchor",
-    };
+    return { point: resolveGeometryAnchor(item.id, historicalAnchor), historicalAnchor, provinceId: item.id, kind: "province-anchor" };
   });
 }
 
