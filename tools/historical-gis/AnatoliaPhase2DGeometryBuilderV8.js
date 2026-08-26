@@ -94,9 +94,14 @@ function isExplicitLandControlPoint(point) {
   return explicitLandControlPoints().some((controlPoint) => distanceToSegment(point, controlPoint, controlPoint) <= EPS);
 }
 
+function isCorrectionShorelineVertex(point) {
+  return ANATOLIA_PHYSICAL_COAST_CORRECTIONS.some((correction) =>
+    (correction.coordinates ?? []).some((vertex) => distanceToSegment(point, vertex, vertex) <= EPS));
+}
+
 function isCoastCorrectionLandPoint(point) {
   if (isExplicitLandControlPoint(point)) return true;
-  if (isExplicitExcludedWater(point)) return false;
+  if (isExplicitExcludedWater(point) && !isCorrectionShorelineVertex(point)) return false;
   return ANATOLIA_PHYSICAL_COAST_CORRECTIONS.some((correction) => correction.coordinates?.length >= 3 && pointInPolygon(point, correction.coordinates));
 }
 
@@ -105,7 +110,7 @@ function inLake(point) {
 }
 
 function isStaticLandPoint(point) {
-  if (isExplicitLandControlPoint(point)) return true;
+  if (isExplicitLandControlPoint(point) || isCorrectionShorelineVertex(point)) return true;
   if (isExplicitExcludedWater(point)) return false;
   if (isCoastCorrectionLandPoint(point)) return true;
   if (ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon))) return true;
@@ -117,7 +122,7 @@ function isStaticLandPoint(point) {
 }
 
 function isPhysicalLandPoint(point) {
-  if (isExplicitLandControlPoint(point)) return true;
+  if (isExplicitLandControlPoint(point) || isCorrectionShorelineVertex(point)) return true;
   if (isExplicitExcludedWater(point)) return false;
   return isStaticLandPoint(point) && !inLake(point);
 }
@@ -254,7 +259,11 @@ function validateCorrectionTopology() {
     }
     if (correction.coordinates?.length >= 3) {
       for (const vertex of correction.coordinates) {
-        if (isExplicitExcludedWater(vertex) && !landControls.some((controlPoint) => distanceToSegment(vertex, controlPoint, controlPoint) <= EPS)) throw new Error(`Physical correction ${correction.id} has a shoreline vertex inside explicit water exclusion: ${vertex.join(",")}`);
+        if (isExplicitExcludedWater(vertex) && !landControls.some((controlPoint) => distanceToSegment(vertex, controlPoint, controlPoint) <= EPS)) {
+          // A correction ring is the authoritative shoreline. Its vertices are allowed to
+          // coincide with an exclusion boundary; the exclusion must not erase the coast.
+          if (!isCorrectionShorelineVertex(vertex)) throw new Error(`Physical correction ${correction.id} has a shoreline vertex inside explicit water exclusion: ${vertex.join(",")}`);
+        }
       }
     }
   }
@@ -276,7 +285,7 @@ function provinceAsset(item, polygons) {
   return {
     header: headers(item, "province"), identity: { id: item.id, name: item.name }, references: { geometryId: item.id, countryId: item.countryId, capitalCityId: item.cityId },
     ownership: { countryId: item.countryId, ownerId: item.historicalControl.controllerAt1300 ?? item.countryId },
-    historical: { sourceFeatureId: item.id, sourceFeatureIndex: null, sourceName: item.name, subject: item.countryId, partOf: item.regionId, borderPrecision: headers(item, "province").borderPrecision, classification: "phase2d-anatolia-province-geometry", precision: "single-anchor-weighted-land-partition", anchor: refinementFor(item)?.anchor ?? item.centroid, historicalControl: item.historicalControl },
+    historical: { sourceFeatureId: item.id, sourceFeatureIndex: null, sourceFeatureIndex: null, sourceName: item.name, subject: item.countryId, partOf: item.regionId, borderPrecision: headers(item, "province").borderPrecision, classification: "phase2d-anatolia-province-geometry", precision: "single-anchor-weighted-land-partition", anchor: refinementFor(item)?.anchor ?? item.centroid, historicalControl: item.historicalControl },
     geometry: { coastal: item.coastal, port: item.port, terrain: item.terrain, strategic: item.strategic }, polygons,
   };
 }
