@@ -332,7 +332,9 @@ function createAnchorFallbackPolygon(centroid, requiresLandSafe = false, physica
     { radialStep: 0.01, maxRadius: 1.5, directions: 32 },
   ];
 
-  const explicitAnchor = physicalLandAnchor ?? PHYSICAL_LAND_ANCHORS["bithynia-nicaea"];
+  // A fallback without an explicit physical-land anchor must remain local to
+  // the province being reconciled. Never borrow another province's anchor.
+  const explicitAnchor = physicalLandAnchor;
   const initialCenters = [];
   if (explicitAnchor && isWithinAnatoliaEnvelope(explicitAnchor) && isPhysicalLandPoint(explicitAnchor)) initialCenters.push(explicitAnchor);
   if (!requiresLandSafe && isPhysicalLandPoint(centroid)) initialCenters.push(centroid);
