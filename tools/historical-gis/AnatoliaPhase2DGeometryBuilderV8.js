@@ -216,17 +216,37 @@ function clipLandByCell(land, cell) {
   return clipPolygonByRing(land, cell);
 }
 
+function representativeInsideExclusion(polygon, exclusion) {
+  const candidates = [polygonAreaCentroid(polygon), polygonVertexMean(polygon), ...polygon];
+  return candidates.some((point) => pointInPolygon(point, exclusion));
+}
+
+function excludeRingFromPolygon(polygon, exclusion) {
+  if (!polygon.length || !exclusion.length) return polygon;
+  if (!representativeInsideExclusion(polygon, exclusion)) return polygon;
+  return [];
+}
+
 function clipCellToMainland(cell) {
   const candidates = physicalLandPolygons().map((land) => clipLandByCell(land, cell))
     .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
   const lakeRings = lakePolygons();
   const explicitExclusions = exclusionPolygons();
-  return candidates.filter((polygon) => {
-    const representative = polygonAreaCentroid(polygon);
-    if (explicitExclusions.some((ring) => pointInPolygon(representative, ring))) return false;
-    if (lakeRings.some((ring) => pointInPolygon(representative, ring))) return false;
-    return polygon.every((point) => !isExplicitExcludedWater(point));
-  });
+  const filtered = [];
+  for (const candidate of candidates) {
+    if (lakeRings.some((ring) => pointInPolygon(polygonAreaCentroid(candidate), ring))) continue;
+    let polygon = candidate;
+    let removed = false;
+    for (const exclusion of explicitExclusions) {
+      polygon = excludeRingFromPolygon(polygon, exclusion);
+      if (!polygon.length) {
+        removed = true;
+        break;
+      }
+    }
+    if (!removed && polygon.length >= 3 && area(polygon) >= MIN_AREA) filtered.push(polygon);
+  }
+  return filtered;
 }
 
 function filterPhysicalPolygons(polygons, provinceId) {
@@ -243,7 +263,10 @@ function buildControlSites() {
 function validateCorrectionTopology() {
   for (const correction of ANATOLIA_PHYSICAL_COAST_CORRECTIONS) {
     const exclusion = correction.exclusionCoordinates ?? [];
-    const landControls = [...(correction.landControlPoints ?? []), ...(correction.controlPoints ?? [])];
+    const landControls = [
+      ...(correction.landControlPoints ?? []),
+      ...(correction.controlPoints ?? []),
+    ];
     for (const controlPoint of landControls) {
       if (exclusion.some((polygon) => pointInPolygon(controlPoint, polygon))) throw new Error(`Physical correction ${correction.id} marks a land control point inside an exclusion polygon: ${controlPoint.join(",")}`);
     }
@@ -356,14 +379,13 @@ export function buildAnatoliaPhase2DAssets() {
     geometries.push(geometryAsset(item, polygons));
   }
   const physicalSamplingSiteCount = samplingSiteCount();
-  const provinceCount = provinces.length;
   const politicalSiteCount = sites.length;
   return {
     schemaVersion: 1,
     geometryVersion: 11,
     generatedAt: "1300-01-01T00:00:00.000Z",
     historicalDate: "1300-01-01",
-    provinceCount,
+    provinceCount: provinces.length,
     fallbackProvinceCount: 0,
     siteCount: physicalSamplingSiteCount + politicalSiteCount,
     politicalSiteCount,
@@ -378,6 +400,7 @@ export function buildAnatoliaPhase2DAssets() {
       generator: "AnatoliaPhase2DGeometryBuilderV8",
       source: "historia-ai-curated-cartography",
       physicalLandAuthority: "atlas-land-polygons-plus-explicit-coast-corrections-minus-natural-earth-10m-lakes-minus-explicit-water-exclusions-plus-land-control-precedence",
+      iterations: solved.iterations,
     },
   };
 }
