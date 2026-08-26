@@ -1,8 +1,5 @@
 import assert from "node:assert/strict";
-import {
-  buildAnatoliaPhase2DAssets,
-  isPhysicalLandPoint,
-} from "../historical-gis/AnatoliaPhase2DGeometryBuilder.js";
+import { buildAnatoliaPhase2DAssets, isPhysicalLandPoint } from "../historical-gis/AnatoliaPhase2DGeometryBuilder.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 
 const result = buildAnatoliaPhase2DAssets([
@@ -13,6 +10,7 @@ const result = buildAnatoliaPhase2DAssets([
 const EDGE_STEP = 0.01;
 const AREA_EPSILON = 1e-7;
 const KEY_DIGITS = 6;
+const BOUNDARY_EPSILON = 1e-9;
 
 function polygonArea(polygon) {
   let sum = 0;
@@ -28,7 +26,19 @@ function orientation(a, b, c) {
   return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
 }
 
-function pointInPolygon(point, polygon) {
+function pointOnSegment(point, start, end) {
+  const cross = orientation(start, end, point);
+  if (Math.abs(cross) > BOUNDARY_EPSILON) return false;
+  return point[0] >= Math.min(start[0], end[0]) - BOUNDARY_EPSILON
+    && point[0] <= Math.max(start[0], end[0]) + BOUNDARY_EPSILON
+    && point[1] >= Math.min(start[1], end[1]) - BOUNDARY_EPSILON
+    && point[1] <= Math.max(start[1], end[1]) + BOUNDARY_EPSILON;
+}
+
+function pointInPolygonStrict(point, polygon) {
+  for (let index = 0; index < polygon.length; index += 1) {
+    if (pointOnSegment(point, polygon[index], polygon[(index + 1) % polygon.length])) return false;
+  }
   let inside = false;
   for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index += 1) {
     const current = polygon[index];
@@ -47,9 +57,8 @@ function segmentIntersection(a, b, c, d) {
   const cdA = orientation(c, d, a);
   const cdB = orientation(c, d, b);
   const epsilon = 1e-9;
-  const crosses = ((abC > epsilon && abD < -epsilon) || (abC < -epsilon && abD > epsilon))
+  return ((abC > epsilon && abD < -epsilon) || (abC < -epsilon && abD > epsilon))
     && ((cdA > epsilon && cdB < -epsilon) || (cdA < -epsilon && cdB > epsilon));
-  return crosses;
 }
 
 function polygonsOverlapPositiveArea(left, right) {
@@ -65,7 +74,6 @@ function polygonsOverlapPositiveArea(left, right) {
   const rightMaxX = Math.max(...right.map(([x]) => x));
   const rightMinY = Math.min(...right.map(([, y]) => y));
   const rightMaxY = Math.max(...right.map(([, y]) => y));
-
   if (leftMaxX <= rightMinX || rightMaxX <= leftMinX || leftMaxY <= rightMinY || rightMaxY <= leftMinY) return false;
 
   for (let leftIndex = 0; leftIndex < left.length; leftIndex += 1) {
@@ -82,7 +90,7 @@ function polygonsOverlapPositiveArea(left, right) {
     }
   }
 
-  return pointInPolygon(left[0], right) || pointInPolygon(right[0], left);
+  return pointInPolygonStrict(left[0], right) || pointInPolygonStrict(right[0], left);
 }
 
 function edgeKey(a, b) {
@@ -112,7 +120,6 @@ for (const geometry of result.geometries) {
   for (const polygon of geometry.polygons) {
     assert.ok(polygon.length >= 3, `${provinceId}: polygon must have at least three vertices`);
     assert.ok(polygonArea(polygon) > AREA_EPSILON, `${provinceId}: polygon must have positive area`);
-
     for (const point of polygon) {
       assert.ok(isPhysicalLandPoint(point), `${provinceId}: vertex leaves authoritative physical land at ${point.join(",")}`);
     }
@@ -124,20 +131,15 @@ for (const geometry of result.geometries) {
       const samples = Math.max(2, Math.ceil(distance / EDGE_STEP));
       for (let sample = 1; sample < samples; sample += 1) {
         const fraction = sample / samples;
-        const point = [
-          start[0] + (end[0] - start[0]) * fraction,
-          start[1] + (end[1] - start[1]) * fraction,
-        ];
+        const point = [start[0] + (end[0] - start[0]) * fraction, start[1] + (end[1] - start[1]) * fraction];
         assert.ok(isPhysicalLandPoint(point), `${provinceId}: edge ${index} leaves authoritative physical land at ${point.join(",")}`);
       }
-
       const key = edgeKey(start, end);
       const entries = sharedEdges.get(key) ?? [];
       entries.push({ provinceId, start, end });
       sharedEdges.set(key, entries);
       edgeCount += 1;
     }
-
     allPolygons.push({ provinceId, polygon });
   }
 }
