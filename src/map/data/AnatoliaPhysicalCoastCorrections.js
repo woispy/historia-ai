@@ -25,10 +25,10 @@ export const ANATOLIA_PHYSICAL_COAST_CORRECTIONS = Object.freeze([
   },
   {
     id: "nicaea-iznik-northshore",
-    reason: "The lightweight mainland mask/coarse generated lake geometry resolves the north shore too coarsely for the historical Nicaea province anchor.",
+    reason: "The lightweight mainland mask/coarse generated lake geometry resolves the Nicaea shore too coarsely for the historical province anchor.",
     coordinates: [
       [29.62, 40.405],
-      [29.70, 40.415],
+      [29.70, 40.435],
       [29.78, 40.455],
       [29.86, 40.445],
       [29.88, 40.415],
