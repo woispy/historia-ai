@@ -99,6 +99,20 @@ assert.equal(result.provinceCount, 38);
 assert.equal(result.provinces.length, 38);
 assert.equal(result.geometries.length, 38);
 
+// Lake-city reconciliation must resolve through the physical-land authority,
+// while the historical city anchor remains in its historical data layer.
+for (const [provinceId, anchor] of [
+  ["bithynia-nicaea", [29.72, 40.15]],
+  ["pisidia-egirdir", [30.85, 37.98]],
+  ["pisidia-beysehir", [31.72, 37.78]],
+]) {
+  assert.equal(
+    isPhysicalLandPoint(anchor),
+    true,
+    `${provinceId}: physical reconciliation anchor must remain on authoritative land`,
+  );
+}
+
 const allPolygons = [];
 const provinceIds = new Set();
 let edgeCount = 0;
