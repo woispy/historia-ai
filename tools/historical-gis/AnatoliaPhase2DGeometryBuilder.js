@@ -314,12 +314,32 @@ function polygonCentroid(polygon) {
 }
 
 function createAnchorFallbackPolygon(centroid) {
-  if (!isWithinAnatoliaEnvelope(centroid)) return [];
-  const radius = 0.002;
-  return Array.from({ length: 6 }, (_, index) => {
-    const angle = (index / 6) * Math.PI * 2;
-    return [centroid[0] + Math.cos(angle) * radius, centroid[1] + Math.sin(angle) * radius];
-  });
+  const radii = [0.002, 0.001, 0.0005];
+  const directions = 16;
+  const radialStep = 0.005;
+  const maxRadius = 1;
+
+  for (let radius = 0; radius <= maxRadius; radius += radialStep) {
+    for (let direction = 0; direction < directions; direction += 1) {
+      const angle = (direction / directions) * Math.PI * 2;
+      const center = [
+        centroid[0] + Math.cos(angle) * radius,
+        centroid[1] + Math.sin(angle) * radius,
+      ];
+      if (!isWithinAnatoliaEnvelope(center) || !isPhysicalLandPoint(center)) continue;
+      for (const polygonRadius of radii) {
+        const polygon = Array.from({ length: 6 }, (_, index) => {
+          const polygonAngle = (index / 6) * Math.PI * 2;
+          return [
+            center[0] + Math.cos(polygonAngle) * polygonRadius,
+            center[1] + Math.sin(polygonAngle) * polygonRadius,
+          ];
+        });
+        if (isPhysicalLandPolygon(polygon)) return polygon;
+      }
+    }
+  }
+  return [];
 }
 
 function createProvinceAsset(metadata, polygons) {
@@ -425,12 +445,8 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     let polygons = polygonsByProvince[metadata.id];
     if (!polygons.length) {
       const fallback = createAnchorFallbackPolygon(metadata.centroid);
-      if (fallback.length < 3) throw new Error(`Phase 2D produced no geometry for ${metadata.id}`);
-      const roundedFallback = roundPolygon(fallback);
-      if (!isPhysicalLandPolygon(roundedFallback)) {
-        throw new Error(`Phase 2D fallback geometry is not physically valid for ${metadata.id}`);
-      }
-      polygons = [roundedFallback];
+      if (fallback.length < 3) throw new Error(`Phase 2D produced no physically valid geometry for ${metadata.id}`);
+      polygons = [roundPolygon(fallback)];
       fallbackCount += 1;
     }
     provinces.push(createProvinceAsset(metadata, polygons));
