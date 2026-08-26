@@ -128,6 +128,12 @@ function physicalLandPolygons() {
   return [...landPolygons(), ...correctionPolygons()];
 }
 
+function lakePolygons() {
+  return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes
+    .map((lake) => lake.coordinates)
+    .filter((polygon) => polygon?.length >= 3 && area(polygon) >= MIN_AREA);
+}
+
 function halfPlane(polygon, a, b, c) {
   const output = [];
   const inside = (point) => a * point[0] + b * point[1] <= c + EPS;
@@ -204,7 +210,13 @@ function clipLandByCell(land, cell) {
 function clipCellToMainland(cell) {
   return physicalLandPolygons()
     .map((land) => clipLandByCell(land, cell))
-    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
+    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA)
+    .filter((polygon) => !isLakePolygonCentroid(polygon));
+}
+
+function isLakePolygonCentroid(polygon) {
+  const candidate = polygonAreaCentroid(polygon);
+  return lakePolygons().some((lake) => pointInPolygon(candidate, lake));
 }
 
 function filterPhysicalPolygons(polygons, provinceId) {
@@ -337,9 +349,7 @@ function solveWeights(sites) {
 function samplingSiteCount() {
   let count = 0;
   for (let longitude = BBOX[0]; longitude <= BBOX[2] + EPS; longitude += 0.06) {
-    for (let latitude = BBOX[1]; latitude <= BBOX[3] + EPS; latitude += 0.06) {
-      if (isPhysicalLandPoint([longitude, latitude])) count += 1;
-    }
+    for (let latitude = BBOX[1]; latitude <= BBOX[3] + EPS; latitude += 0.06) if (isPhysicalLandPoint([longitude, latitude])) count += 1;
   }
   return count;
 }
@@ -353,9 +363,7 @@ export function buildAnatoliaPhase2DAssets() {
   validateManifest();
   const sites = buildControlSites();
   for (const site of sites) {
-    if (!isAnatoliaGeometryPoint(site.point) || !isPhysicalLandPoint(site.point)) {
-      throw new Error(`Invalid 1300 province anchor: ${site.provinceId} ${site.point.join(",")}`);
-    }
+    if (!isAnatoliaGeometryPoint(site.point) || !isPhysicalLandPoint(site.point)) throw new Error(`Invalid 1300 province anchor: ${site.provinceId} ${site.point.join(",")}`);
   }
   const solved = solveWeights(sites);
   const provinces = [];
@@ -374,27 +382,11 @@ export function buildAnatoliaPhase2DAssets() {
   const provinceCount = provinces.length;
   const politicalSiteCount = sites.length;
   return {
-    schemaVersion: 1,
-    geometryVersion: 11,
-    generatedAt: "1300-01-01T00:00:00.000Z",
-    historicalDate: "1300-01-01",
-    provinceCount,
-    fallbackProvinceCount: 0,
-    siteCount: physicalSamplingSiteCount + politicalSiteCount,
-    politicalSiteCount,
-    barrierSiteCount: 0,
-    polygonCount,
-    vertexCount,
-    physicalSamplingSiteCount,
-    sites,
-    provinces,
-    geometries,
-    diagnostics: {
-      generator: "AnatoliaPhase2DGeometryBuilderV8",
-      source: "historia-ai-curated-cartography",
-      physicalLandAuthority: "atlas-land-polygons-plus-explicit-coast-corrections-minus-natural-earth-10m-lakes",
-      iterations: solved.iterations,
-    },
+    schemaVersion: 1, geometryVersion: 11, generatedAt: "1300-01-01T00:00:00.000Z", historicalDate: "1300-01-01",
+    provinceCount, fallbackProvinceCount: 0, siteCount: physicalSamplingSiteCount + politicalSiteCount,
+    politicalSiteCount, barrierSiteCount: 0, polygonCount, vertexCount, physicalSamplingSiteCount,
+    sites, provinces, geometries,
+    diagnostics: { generator: "AnatoliaPhase2DGeometryBuilderV8", source: "historia-ai-curated-cartography", physicalLandAuthority: "atlas-land-polygons-plus-explicit-coast-corrections-minus-natural-earth-10m-lakes", iterations: solved.iterations },
   };
 }
 
