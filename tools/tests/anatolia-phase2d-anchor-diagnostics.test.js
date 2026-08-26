@@ -12,13 +12,14 @@ const EPS = 1e-9;
 const pointInPolygon = (point, polygon) => {
   if (!polygon?.length) return false;
   let inside = false;
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i += 1) {
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; i += 1) {
     const a = polygon[i];
     const b = polygon[j];
     if ((a[1] > point[1]) !== (b[1] > point[1])
       && point[0] < ((b[0] - a[0]) * (point[1] - a[1])) / ((b[1] - a[1]) || EPS) + a[0]) {
       inside = !inside;
     }
+    j = i;
   }
   return inside;
 };
