@@ -74,6 +74,21 @@ for (const geometry of result.geometries) {
   }
 }
 
+// Regression coverage for the lake-city reconciliation path. These are
+// intentionally south/off-lake physical-land points, not the historical city
+// anchors themselves. The builder must keep the historical city in its own
+// data layer while resolving a valid physical-land fallback.
+for (const [provinceId, anchor] of [
+  ["bithynia-nicaea", [29.72, 40.15]],
+  ["pisidia-egirdir", [30.85, 37.98]],
+  ["pisidia-beysehir", [31.72, 37.78]],
+]) {
+  assert.ok(
+    isPhysicalLandPoint(anchor),
+    `${provinceId} physical reconciliation anchor must remain on physical land: ${anchor.join(",")}`,
+  );
+}
+
 assert.ok(vertexCount >= 150, "Phase 2D geometry must contain a sufficiently detailed vertex field");
 
 assert.equal(isAnatoliaGeometryPoint([28.9784, 41.0082]), false, "Constantinople must remain outside the Anatolia geometry override");
