@@ -319,6 +319,19 @@ function createAnchorFallbackPolygon(centroid) {
   const radialStep = 0.005;
   const maxRadius = 1;
 
+  for (const center of [centroid]) {
+    for (const polygonRadius of radii) {
+      const polygon = Array.from({ length: 6 }, (_, index) => {
+        const angle = (index / 6) * Math.PI * 2;
+        return [
+          center[0] + Math.cos(angle) * polygonRadius,
+          center[1] + Math.sin(angle) * polygonRadius,
+        ];
+      });
+      if (isWithinAnatoliaEnvelope(center) && isPhysicalLandPolygon(polygon)) return polygon;
+    }
+  }
+
   for (let radius = 0; radius <= maxRadius; radius += radialStep) {
     for (let direction = 0; direction < directions; direction += 1) {
       const angle = (direction / directions) * Math.PI * 2;
