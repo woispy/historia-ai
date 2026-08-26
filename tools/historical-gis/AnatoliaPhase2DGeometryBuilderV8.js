@@ -114,13 +114,11 @@ function cross(a, b, point) {
 }
 
 function landPolygons() {
-  return ANATOLIA_PHYSICAL_ATLAS.landPolygons
-    .filter((polygon) => area(polygon) >= MAINLAND_MIN_AREA);
+  return ANATOLIA_PHYSICAL_ATLAS.landPolygons.filter((polygon) => area(polygon) >= MAINLAND_MIN_AREA);
 }
 
 function correctionPolygons() {
-  return ANATOLIA_PHYSICAL_COAST_CORRECTIONS
-    .map((correction) => correction.coordinates)
+  return ANATOLIA_PHYSICAL_COAST_CORRECTIONS.map((correction) => correction.coordinates)
     .filter((polygon) => polygon?.length >= 3 && area(polygon) >= MIN_AREA);
 }
 
@@ -129,8 +127,7 @@ function physicalLandPolygons() {
 }
 
 function lakePolygons() {
-  return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes
-    .map((lake) => lake.coordinates)
+  return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.map((lake) => lake.coordinates)
     .filter((polygon) => polygon?.length >= 3 && area(polygon) >= MIN_AREA);
 }
 
@@ -147,10 +144,7 @@ function halfPlane(polygon, a, b, c) {
       const cv = a * current[0] + b * current[1] - c;
       const nv = a * next[0] + b * next[1] - c;
       const t = Math.abs(cv - nv) < EPS ? 0 : cv / (cv - nv);
-      output.push([
-        current[0] + (next[0] - current[0]) * t,
-        current[1] + (next[1] - current[1]) * t,
-      ]);
+      output.push([current[0] + (next[0] - current[0]) * t, current[1] + (next[1] - current[1]) * t]);
       if (!currentInside && nextInside) output.push(next);
     }
   }
@@ -165,12 +159,7 @@ function powerCell(index, sites, weights) {
     if (other === index) continue;
     const p = sites[other].point;
     const otherWeight = weights[sites[other].provinceId] ?? 0;
-    polygon = halfPlane(
-      polygon,
-      2 * (p[0] - site[0]),
-      2 * (p[1] - site[1]),
-      p[0] ** 2 + p[1] ** 2 - site[0] ** 2 - site[1] ** 2 + weight - otherWeight,
-    );
+    polygon = halfPlane(polygon, 2 * (p[0] - site[0]), 2 * (p[1] - site[1]), p[0] ** 2 + p[1] ** 2 - site[0] ** 2 - site[1] ** 2 + weight - otherWeight);
     if (polygon.length < 3) return [];
   }
   return polygon;
@@ -196,10 +185,7 @@ function clipLandByCell(land, cell) {
         const cv = cross(a, b, current);
         const nv = cross(a, b, next);
         const t = Math.abs(cv - nv) < EPS ? 0 : cv / (cv - nv);
-        output.push([
-          current[0] + (next[0] - current[0]) * t,
-          current[1] + (next[1] - current[1]) * t,
-        ]);
+        output.push([current[0] + (next[0] - current[0]) * t, current[1] + (next[1] - current[1]) * t]);
         if (!currentInside && nextInside) output.push(next);
       }
     }
@@ -208,24 +194,21 @@ function clipLandByCell(land, cell) {
 }
 
 function clipCellToMainland(cell) {
-  return physicalLandPolygons()
+  const candidates = physicalLandPolygons()
     .map((land) => clipLandByCell(land, cell))
-    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA)
-    .filter((polygon) => !isLakePolygonCentroid(polygon));
-}
-
-function isLakePolygonCentroid(polygon) {
-  const candidate = polygonAreaCentroid(polygon);
-  return lakePolygons().some((lake) => pointInPolygon(candidate, lake));
+    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
+  const lakes = lakePolygons();
+  return candidates.filter((polygon) => {
+    const centroid = polygonAreaCentroid(polygon);
+    return !lakes.some((lake) => pointInPolygon(centroid, lake));
+  });
 }
 
 function filterPhysicalPolygons(polygons, provinceId) {
   const safe = polygons.filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
   if (!safe.length) throw new Error(`Phase 2D V8 produced no physical-land geometry for ${provinceId}`);
   for (const polygon of safe) {
-    if (!physicalRepresentative(polygon)) {
-      throw new Error(`Phase 2D V8 produced geometry without a physical-land representative for ${provinceId}`);
-    }
+    if (!physicalRepresentative(polygon)) throw new Error(`Phase 2D V8 produced geometry without a physical-land representative for ${provinceId}`);
   }
   return safe;
 }
@@ -238,66 +221,25 @@ function validateManifest() {
   const ids = new Set(ANATOLIA_PROVINCE_METADATA.map((item) => item.id));
   if (ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST.length !== ids.size) throw new Error("1300 Anatolia geometry manifest is not aligned with province metadata.");
   for (const entry of ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST) {
-    if (!ids.has(entry.id) || !ANATOLIA_1300_PROVINCE_GEOMETRY_KEYS[entry.id] || entry.clipToPhysicalLand !== true) {
-      throw new Error(`Invalid 1300 geometry manifest entry: ${entry.id}`);
-    }
+    if (!ids.has(entry.id) || !ANATOLIA_1300_PROVINCE_GEOMETRY_KEYS[entry.id] || entry.clipToPhysicalLand !== true) throw new Error(`Invalid 1300 geometry manifest entry: ${entry.id}`);
   }
 }
 
 function headers(item, type) {
-  return {
-    assetType: type,
-    assetVersion: 9,
-    generator: "Historia AI Phase 2D Geometry Builder",
-    provider: "historia-ai-curated-cartography",
-    dataset: "anatolia-province-geometry-1300",
-    historicalDate: "1300-01-01",
-    borderPrecision: item.borderConfidence === "high" ? 3 : 2,
-    sourceFeatureId: item.id,
-    sourceFeatureIndex: null,
-  };
+  return { assetType: type, assetVersion: 9, generator: "Historia AI Phase 2D Geometry Builder", provider: "historia-ai-curated-cartography", dataset: "anatolia-province-geometry-1300", historicalDate: "1300-01-01", borderPrecision: item.borderConfidence === "high" ? 3 : 2, sourceFeatureId: item.id, sourceFeatureIndex: null };
 }
 
 function provinceAsset(item, polygons) {
   return {
-    header: headers(item, "province"),
-    identity: { id: item.id, name: item.name },
-    references: { geometryId: item.id, countryId: item.countryId, capitalCityId: item.cityId },
+    header: headers(item, "province"), identity: { id: item.id, name: item.name }, references: { geometryId: item.id, countryId: item.countryId, capitalCityId: item.cityId },
     ownership: { countryId: item.countryId, ownerId: item.historicalControl.controllerAt1300 ?? item.countryId },
-    historical: {
-      sourceFeatureId: item.id,
-      sourceFeatureIndex: null,
-      sourceName: item.name,
-      subject: item.countryId,
-      partOf: item.regionId,
-      borderPrecision: headers(item, "province").borderPrecision,
-      classification: "phase2d-anatolia-province-geometry",
-      precision: "single-anchor-weighted-land-partition",
-      anchor: refinementFor(item)?.anchor ?? item.centroid,
-      historicalControl: item.historicalControl,
-    },
-    geometry: { coastal: item.coastal, port: item.port, terrain: item.terrain, strategic: item.strategic },
-    polygons,
+    historical: { sourceFeatureId: item.id, sourceFeatureIndex: null, sourceName: item.name, subject: item.countryId, partOf: item.regionId, borderPrecision: headers(item, "province").borderPrecision, classification: "phase2d-anatolia-province-geometry", precision: "single-anchor-weighted-land-partition", anchor: refinementFor(item)?.anchor ?? item.centroid, historicalControl: item.historicalControl },
+    geometry: { coastal: item.coastal, port: item.port, terrain: item.terrain, strategic: item.strategic }, polygons,
   };
 }
 
 function geometryAsset(item, polygons) {
-  return {
-    header: headers(item, "geometry"),
-    identity: { id: item.id, provinceId: item.id },
-    metadata: {
-      sourceFeatureId: item.id,
-      sourceFeatureIndex: null,
-      name: item.name,
-      subject: item.countryId,
-      partOf: item.regionId,
-      borderPrecision: headers(item, "geometry").borderPrecision,
-      classification: "phase2d-anatolia-province-geometry",
-      precision: "single-anchor-weighted-land-partition",
-      anchor: rawAnchor(item),
-    },
-    polygons,
-  };
+  return { header: headers(item, "geometry"), identity: { id: item.id, provinceId: item.id }, metadata: { sourceFeatureId: item.id, sourceFeatureIndex: null, name: item.name, subject: item.countryId, partOf: item.regionId, borderPrecision: headers(item, "geometry").borderPrecision, classification: "phase2d-anatolia-province-geometry", precision: "single-anchor-weighted-land-partition", anchor: rawAnchor(item) }, polygons };
 }
 
 function buildPartition(sites, weights) {
@@ -312,17 +254,8 @@ function buildPartition(sites, weights) {
   return polygonsByProvince;
 }
 
-function areaSummary(polygonsByProvince) {
-  return [...polygonsByProvince.entries()].map(([id, polygons]) => ({
-    id,
-    area: polygons.reduce((sum, polygon) => sum + area(polygon), 0),
-  }));
-}
-
-function median(values) {
-  const sorted = [...values].sort((a, b) => a - b);
-  return sorted[Math.floor(sorted.length / 2)];
-}
+function areaSummary(polygonsByProvince) { return [...polygonsByProvince.entries()].map(([id, polygons]) => ({ id, area: polygons.reduce((sum, polygon) => sum + area(polygon), 0) })); }
+function median(values) { const sorted = [...values].sort((a, b) => a - b); return sorted[Math.floor(sorted.length / 2)]; }
 
 function solveWeights(sites) {
   const weights = Object.fromEntries(sites.map((site) => [site.provinceId, 0]));
@@ -334,8 +267,7 @@ function solveWeights(sites) {
     if (!oversized.length) return { weights, partition, iterations: iteration };
     for (const item of oversized) {
       const ratio = item.area / medianArea;
-      const step = Math.min(MAX_WEIGHT_STEP, Math.max(0.25, (ratio - MAX_AREA_RATIO) * 1.5));
-      weights[item.id] -= step;
+      weights[item.id] -= Math.min(MAX_WEIGHT_STEP, Math.max(0.25, (ratio - MAX_AREA_RATIO) * 1.5));
     }
     partition = buildPartition(sites, weights);
   }
@@ -383,9 +315,7 @@ export function buildAnatoliaPhase2DAssets() {
   const politicalSiteCount = sites.length;
   return {
     schemaVersion: 1, geometryVersion: 11, generatedAt: "1300-01-01T00:00:00.000Z", historicalDate: "1300-01-01",
-    provinceCount, fallbackProvinceCount: 0, siteCount: physicalSamplingSiteCount + politicalSiteCount,
-    politicalSiteCount, barrierSiteCount: 0, polygonCount, vertexCount, physicalSamplingSiteCount,
-    sites, provinces, geometries,
+    provinceCount, fallbackProvinceCount: 0, siteCount: physicalSamplingSiteCount + politicalSiteCount, politicalSiteCount, barrierSiteCount: 0, polygonCount, vertexCount, physicalSamplingSiteCount, sites, provinces, geometries,
     diagnostics: { generator: "AnatoliaPhase2DGeometryBuilderV8", source: "historia-ai-curated-cartography", physicalLandAuthority: "atlas-land-polygons-plus-explicit-coast-corrections-minus-natural-earth-10m-lakes", iterations: solved.iterations },
   };
 }
