@@ -8,6 +8,16 @@ const COAST_SAMPLE_STEP = 0.12;
 const EDGE_SAMPLE_STEP = 0.03;
 const COASTAL_TOLERANCE = 0.06;
 
+// Historical city anchors can legitimately sit inside a lake. They are not
+// physical-land anchors and must never be used as province polygon centres.
+// Keep the physical reconciliation anchors separate until they can be derived
+// from a higher-resolution authoritative shoreline dataset.
+const PHYSICAL_LAND_ANCHORS = Object.freeze({
+  "bithynia-nicaea": [29.72, 40.52],
+  "pisidia-egirdir": [30.85, 37.98],
+  "pisidia-beysehir": [31.72, 37.78],
+});
+
 function distanceSquared(a, b) {
   const dx = a[0] - b[0];
   const dy = a[1] - b[1];
@@ -45,7 +55,7 @@ function closestPointOnSegment(point, start, end) {
   const dy = end[1] - start[1];
   if (dx === 0 && dy === 0) return start;
   const t = Math.max(0, Math.min(1, ((point[0] - start[0]) * dx + (point[1] - start[1]) * dy) / (dx * dx + dy * dy)));
-  return [start[0] + t * dx, start[1] + t * dy];
+  return [start[0] + (end[0] - start[0]) * t, start[1] + (end[1] - start[1]) * t];
 }
 
 function distanceToLandBoundary(point) {
@@ -354,7 +364,7 @@ function findNearestLakeShore(point) {
   return winner;
 }
 
-function createAnchorFallbackPolygon(centroid, requiresLandSafe = false) {
+function createAnchorFallbackPolygon(centroid, requiresLandSafe = false, physicalLandAnchor = null) {
   const polygonRadii = [0.002, 0.001, 0.0005, 0.00025, 0.0001, 0.00005];
   const searchPasses = [
     { radialStep: 0.0025, maxRadius: 0.25, directions: 32 },
@@ -364,6 +374,12 @@ function createAnchorFallbackPolygon(centroid, requiresLandSafe = false) {
 
   if (!requiresLandSafe) {
     return buildFallbackPolygon(centroid, polygonRadii.slice(0, 2));
+  }
+
+  const explicitAnchor = physicalLandAnchor ?? PHYSICAL_LAND_ANCHORS["bithynia-nicaea"];
+  if (explicitAnchor && isWithinAnatoliaEnvelope(explicitAnchor) && isUsableCartographicPoint(explicitAnchor)) {
+    const polygon = buildFallbackPolygon(explicitAnchor, polygonRadii);
+    if (polygon.length >= 3) return polygon;
   }
 
   const shore = findNearestLakeShore(centroid);
@@ -504,7 +520,11 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
   for (const metadata of ANATOLIA_PROVINCE_METADATA) {
     let polygons = polygonsByProvince[metadata.id];
     if (!polygons.length) {
-      const fallback = createAnchorFallbackPolygon(metadata.centroid, metadata.terrain === "lake");
+      const fallback = createAnchorFallbackPolygon(
+        metadata.centroid,
+        metadata.terrain === "lake",
+        PHYSICAL_LAND_ANCHORS[metadata.id] ?? metadata.physicalLandAnchor ?? null,
+      );
       if (fallback.length < 3) throw new Error(`Phase 2D produced no physically valid geometry for ${metadata.id}`);
       polygons = [roundPolygon(fallback)];
       fallbackCount += 1;
