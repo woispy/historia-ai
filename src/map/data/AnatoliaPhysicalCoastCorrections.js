@@ -22,10 +22,11 @@ export const ANATOLIA_PHYSICAL_COAST_CORRECTIONS = Object.freeze([
       [35.02, 41.54],
       [34.82, 41.62],
     ],
+    controlPoints: [],
   },
   {
     id: "nicaea-iznik-northshore",
-    reason: "The lightweight mainland mask/coarse generated lake geometry resolves the Nicaea shore too coarsely for the historical province anchor.",
+    reason: "The lightweight mainland mask/coarse generated lake geometry resolves the Nicaea shore too coarsely for the historical province geometry anchor.",
     coordinates: [
       [29.58, 40.39],
       [29.64, 40.36],
@@ -37,5 +38,9 @@ export const ANATOLIA_PHYSICAL_COAST_CORRECTIONS = Object.freeze([
       [29.60, 40.43],
       [29.58, 40.39],
     ],
+    // Explicit terrestrial control points are part of the correction authority.
+    // They prevent a generated lake ring from invalidating a known land control
+    // point when the coarse polygon and the historical shoreline disagree.
+    controlPoints: [[29.69, 40.44]],
   },
 ]);
