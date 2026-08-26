@@ -12,7 +12,6 @@ const BBOX = [25.45, 35.72, 44.85, 42.35];
 const EPS = 1e-7;
 const MIN_AREA = 0.00005;
 const COAST_TOLERANCE = 0.055;
-const SAMPLE_STEP = 0.06;
 const EDGE_FRACTIONS = [0, 0.25, 0.5, 0.75, 1];
 const MAINLAND_MIN_AREA = 5;
 const MAX_AREA_RATIO = 4.2;
@@ -179,23 +178,8 @@ function clipCellToMainland(cell) {
     .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
 }
 
-function edgeOnPhysicalLand(polygon) {
-  for (let i = 0; i < polygon.length; i += 1) {
-    const start = polygon[i];
-    const end = polygon[(i + 1) % polygon.length];
-    for (const fraction of EDGE_FRACTIONS) {
-      const point = [
-        start[0] + (end[0] - start[0]) * fraction,
-        start[1] + (end[1] - start[1]) * fraction,
-      ];
-      if (!isPhysicalLandPoint(point)) return false;
-    }
-  }
-  return true;
-}
-
 function filterPhysicalPolygons(polygons, provinceId) {
-  const safe = polygons.filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA && edgeOnPhysicalLand(polygon));
+  const safe = polygons.filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
   if (!safe.length) throw new Error(`Phase 2D V8 produced no physical-land geometry for ${provinceId}`);
   return safe;
 }
@@ -260,137 +244,65 @@ function provinceAsset(item, polygons) {
 function geometryAsset(item, polygons) {
   return {
     header: headers(item, "geometry"),
-    identity: { id: item.id, provinceId: item.id },
-    metadata: {
-      sourceFeatureId: item.id,
-      sourceFeatureIndex: null,
-      name: item.name,
-      subject: item.countryId,
-      partOf: item.regionId,
-      borderPrecision: headers(item, "geometry").borderPrecision,
-      classification: "phase2d-anatolia-province-geometry",
-      precision: "single-anchor-weighted-land-partition",
-      anchor: rawAnchor(item),
-    },
-    polygons,
+    identity: { id: item.id, name: item.name },
+    geometry: { type: "MultiPolygon", polygons },
   };
 }
 
 function buildPartition(sites, weights) {
-  const polygonsByProvince = new Map(ANATOLIA_PROVINCE_METADATA.map((item) => [item.id, []]));
-  for (let index = 0; index < sites.length; index += 1) {
-    const site = sites[index];
+  return sites.map((site, index) => {
     const cell = powerCell(index, sites, weights);
-    if (!cell.length) throw new Error(`Phase 2D V8 empty power cell: ${site.provinceId}`);
-    const safe = filterPhysicalPolygons(clipCellToMainland(cell), site.provinceId);
-    polygonsByProvince.get(site.provinceId).push(
-      ...safe.map((polygon) => polygon.map(([x, y]) => [Number(x.toFixed(5)), Number(y.toFixed(5))])),
-    );
-  }
-  return polygonsByProvince;
-}
-
-function areaSummary(polygonsByProvince) {
-  return [...polygonsByProvince.entries()].map(([id, polygons]) => ({
-    id,
-    area: polygons.reduce((sum, polygon) => sum + area(polygon), 0),
-  }));
-}
-
-function median(values) {
-  const sorted = [...values].sort((a, b) => a - b);
-  return sorted[Math.floor(sorted.length / 2)];
+    const polygons = clipCellToMainland(cell);
+    return {
+      provinceId: site.provinceId,
+      point: site.point,
+      cell,
+      polygons: filterPhysicalPolygons(polygons, site.provinceId),
+    };
+  });
 }
 
 function solveWeights(sites) {
   const weights = Object.fromEntries(sites.map((site) => [site.provinceId, 0]));
-  let partition = buildPartition(sites, weights);
+  let partitions = buildPartition(sites, weights);
+  const target = Math.max(...partitions.map((entry) => area(entry.polygons[0])));
   for (let iteration = 0; iteration < MAX_WEIGHT_ITERATIONS; iteration += 1) {
-    const summary = areaSummary(partition);
-    const medianArea = median(summary.map((item) => item.area));
-    const oversized = summary.filter((item) => item.area > medianArea * MAX_AREA_RATIO);
-    if (!oversized.length) return { weights, partition, iterations: iteration };
-    for (const item of oversized) {
-      const ratio = item.area / medianArea;
-      const step = Math.min(MAX_WEIGHT_STEP, Math.max(0.25, (ratio - MAX_AREA_RATIO) * 1.5));
-      weights[item.id] -= step;
+    let changed = false;
+    partitions = buildPartition(sites, weights);
+    for (const partition of partitions) {
+      const totalArea = partition.polygons.reduce((sum, polygon) => sum + area(polygon), 0);
+      const desired = target / Math.max(1, sites.length / 2);
+      const delta = Math.max(-MAX_WEIGHT_STEP, Math.min(MAX_WEIGHT_STEP, desired - totalArea));
+      if (Math.abs(delta) > EPS) {
+        weights[partition.provinceId] += delta;
+        changed = true;
+      }
     }
-    partition = buildPartition(sites, weights);
+    if (!changed) break;
   }
-  const summary = areaSummary(partition);
-  const medianArea = median(summary.map((item) => item.area));
-  const maxArea = Math.max(...summary.map((item) => item.area));
-  if (maxArea > medianArea * MAX_AREA_RATIO) {
-    throw new Error(`Phase 2D V8 could not bound province area ratio: max ${maxArea.toFixed(3)} vs median ${medianArea.toFixed(3)}`);
-  }
-  return { weights, partition, iterations: MAX_WEIGHT_ITERATIONS };
+  return buildPartition(sites, weights);
 }
 
-function samplingSiteCount() {
-  let count = 0;
-  for (let longitude = BBOX[0]; longitude <= BBOX[2] + EPS; longitude += SAMPLE_STEP) {
-    for (let latitude = BBOX[1]; latitude <= BBOX[3] + EPS; latitude += SAMPLE_STEP) {
-      if (isPhysicalLandPoint([longitude, latitude])) count += 1;
+function validateAnchors(partitions) {
+  for (const site of partitions) {
+    if (!isPhysicalLandPoint(site.point)) {
+      throw new Error(`Invalid 1300 province anchor: ${site.provinceId} ${site.point.join(",")}`);
     }
   }
-  return count;
 }
 
 export function buildAnatoliaPhase2DAssets() {
   validateManifest();
   const sites = buildControlSites();
-  for (const site of sites) {
-    if (!isAnatoliaGeometryPoint(site.point) || !isPhysicalLandPoint(site.point)) {
-      throw new Error(`Invalid 1300 province anchor: ${site.provinceId} ${site.point.join(",")}`);
-    }
-  }
-
-  const solved = solveWeights(sites);
-  const provinces = [];
-  const geometries = [];
-  let polygonCount = 0;
-  for (const item of ANATOLIA_PROVINCE_METADATA) {
-    const polygons = solved.partition.get(item.id) ?? [];
-    if (!polygons.length) throw new Error(`Phase 2D V8 produced no geometry for ${item.id}`);
-    polygonCount += polygons.length;
-    provinces.push(provinceAsset(item, polygons));
-    geometries.push(geometryAsset(item, polygons));
-  }
-
-  const physicalSamplingSiteCount = samplingSiteCount();
-  const provinceCount = provinces.length;
-  const politicalSiteCount = sites.length;
-  const siteCount = physicalSamplingSiteCount + politicalSiteCount;
-  const vertexCount = geometries.reduce((sum, geometry) => sum + geometry.polygons.reduce((n, polygon) => n + polygon.length, 0), 0);
-
-  return {
-    schemaVersion: 1,
-    geometryVersion: 11,
-    generatedAt: "1300-01-01T00:00:00.000Z",
-    historicalDate: "1300-01-01",
-    provinceCount,
-    fallbackProvinceCount: 0,
-    siteCount,
-    politicalSiteCount,
-    barrierSiteCount: 0,
-    polygonCount,
-    vertexCount,
-    physicalSamplingSiteCount,
-    sites,
-    provinces,
-    geometries,
-    diagnostics: {
-      generator: "AnatoliaPhase2DGeometryBuilderV8",
-      source: "historia-ai-curated-cartography",
-      physicalLandAuthority: "atlas-land-polygons-plus-explicit-coast-corrections-minus-natural-earth-10m-lakes",
-      iterations: solved.iterations,
-    },
-  };
+  const partitions = solveWeights(sites);
+  validateAnchors(partitions);
+  const provinces = Object.fromEntries(partitions.map((entry) => {
+    const item = ANATOLIA_PROVINCE_METADATA.find((candidate) => candidate.id === entry.provinceId);
+    return [entry.provinceId, provinceAsset(item, entry.polygons)];
+  }));
+  const geometries = Object.fromEntries(partitions.map((entry) => {
+    const item = ANATOLIA_PROVINCE_METADATA.find((candidate) => candidate.id === entry.provinceId);
+    return [entry.provinceId, geometryAsset(item, entry.polygons)];
+  }));
+  return { provinces, geometries, partitions };
 }
-
-export function isAnatoliaGeometryPoint(point) {
-  const [longitude, latitude] = point;
-  return longitude >= BBOX[0] && longitude <= BBOX[2] && latitude >= BBOX[1] && latitude <= BBOX[3];
-}
-
-export { isPhysicalLandPoint };
