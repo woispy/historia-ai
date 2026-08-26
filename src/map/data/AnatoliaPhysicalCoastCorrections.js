@@ -38,9 +38,24 @@ export const ANATOLIA_PHYSICAL_COAST_CORRECTIONS = Object.freeze([
       [29.60, 40.43],
       [29.58, 40.39],
     ],
-    // Explicit terrestrial control points are part of the correction authority.
-    // They prevent a generated lake ring from invalidating a known land control
-    // point when the coarse polygon and the historical shoreline disagree.
     controlPoints: [[29.69, 40.44]],
+  },
+  {
+    id: "mentese-pecin-milasa-hinterland",
+    reason: "The lightweight Aegean mainland outline is too coarse around the Menteşe coastal interior and does not contain the Peçin/Milasa province control site.",
+    coordinates: [
+      [27.40, 37.08],
+      [27.48, 37.16],
+      [27.56, 37.25],
+      [27.66, 37.34],
+      [27.80, 37.40],
+      [27.90, 37.36],
+      [27.88, 37.26],
+      [27.78, 37.18],
+      [27.66, 37.10],
+      [27.54, 37.02],
+      [27.40, 37.08],
+    ],
+    controlPoints: [[27.57, 37.27]],
   },
 ]);
