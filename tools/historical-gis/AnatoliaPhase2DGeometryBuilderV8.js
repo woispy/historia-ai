@@ -97,7 +97,7 @@ function isExplicitLandControlPoint(point) {
 function isCoastCorrectionLandPoint(point) {
   if (isExplicitLandControlPoint(point)) return true;
   if (isExplicitExcludedWater(point)) return false;
-  return ANATOLIA_PHYSICAL_COAST_CORRECTIONS.some((correction) => pointInPolygon(point, correction.coordinates));
+  return ANATOLIA_PHYSICAL_COAST_CORRECTIONS.some((correction) => correction.coordinates?.length >= 3 && pointInPolygon(point, correction.coordinates));
 }
 
 function inLake(point) {
@@ -111,9 +111,7 @@ function isStaticLandPoint(point) {
   if (ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon))) return true;
   let distance = Infinity;
   for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
-    for (let i = 0; i < polygon.length; i += 1) {
-      distance = Math.min(distance, distanceToSegment(point, polygon[i], polygon[(i + 1) % polygon.length]));
-    }
+    for (let i = 0; i < polygon.length; i += 1) distance = Math.min(distance, distanceToSegment(point, polygon[i], polygon[(i + 1) % polygon.length]));
   }
   return distance <= COAST_TOLERANCE;
 }
@@ -186,9 +184,9 @@ function powerCell(index, sites, weights) {
   return polygon;
 }
 
-function clipLandByCell(land, cell) {
-  let output = land.slice();
-  const clip = signedArea(cell) < 0 ? [...cell].reverse() : cell;
+function clipPolygonByRing(polygon, ring) {
+  let output = polygon.slice();
+  const clip = signedArea(ring) < 0 ? [...ring].reverse() : ring;
   for (let edge = 0; edge < clip.length; edge += 1) {
     if (!output.length) return [];
     const a = clip[edge];
@@ -214,22 +212,31 @@ function clipLandByCell(land, cell) {
   return output;
 }
 
+function clipLandByCell(land, cell) {
+  return clipPolygonByRing(land, cell);
+}
+
+function excludeRingsFromPolygon(polygon, exclusions) {
+  const centroid = polygonAreaCentroid(polygon);
+  if (exclusions.some((ring) => pointInPolygon(centroid, ring))) return [];
+  return polygon;
+}
+
 function clipCellToMainland(cell) {
   const candidates = physicalLandPolygons().map((land) => clipLandByCell(land, cell))
     .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
-  const lakes = lakePolygons();
-  return candidates.filter((polygon) => {
-    const candidate = polygonAreaCentroid(polygon);
-    return !lakes.some((lake) => pointInPolygon(candidate, lake));
-  });
+  const lakeRings = lakePolygons();
+  const explicitExclusions = exclusionPolygons();
+  return candidates
+    .map((polygon) => excludeRingsFromPolygon(polygon, explicitExclusions))
+    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA)
+    .filter((polygon) => !lakeRings.some((lake) => pointInPolygon(polygonAreaCentroid(polygon), lake)));
 }
 
 function filterPhysicalPolygons(polygons, provinceId) {
   const safe = polygons.filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
   if (!safe.length) throw new Error(`Phase 2D V8 produced no physical-land geometry for ${provinceId}`);
-  for (const polygon of safe) {
-    if (!physicalRepresentative(polygon)) throw new Error(`Phase 2D V8 produced geometry without a physical-land representative for ${provinceId}`);
-  }
+  for (const polygon of safe) if (!physicalRepresentative(polygon)) throw new Error(`Phase 2D V8 produced geometry without a physical-land representative for ${provinceId}`);
   return safe;
 }
 
@@ -245,15 +252,11 @@ function validateCorrectionTopology() {
       ...(correction.controlPoints ?? []),
     ];
     for (const controlPoint of landControls) {
-      if (exclusion.some((polygon) => pointInPolygon(controlPoint, polygon))) {
-        throw new Error(`Physical correction ${correction.id} marks a land control point inside an exclusion polygon: ${controlPoint.join(",")}`);
-      }
+      if (exclusion.some((polygon) => pointInPolygon(controlPoint, polygon))) throw new Error(`Physical correction ${correction.id} marks a land control point inside an exclusion polygon: ${controlPoint.join(",")}`);
     }
     if (correction.coordinates?.length >= 3) {
       for (const vertex of correction.coordinates) {
-        if (isExplicitExcludedWater(vertex) && !landControls.some((controlPoint) => distanceToSegment(vertex, controlPoint, controlPoint) <= EPS)) {
-          throw new Error(`Physical correction ${correction.id} has a shoreline vertex inside explicit water exclusion: ${vertex.join(",")}`);
-        }
+        if (isExplicitExcludedWater(vertex) && !landControls.some((controlPoint) => distanceToSegment(vertex, controlPoint, controlPoint) <= EPS)) throw new Error(`Physical correction ${correction.id} has a shoreline vertex inside explicit water exclusion: ${vertex.join(",")}`);
       }
     }
   }
@@ -343,9 +346,7 @@ export function buildAnatoliaPhase2DAssets() {
   validateManifest();
   validateCorrectionTopology();
   const sites = buildControlSites();
-  for (const site of sites) {
-    if (!isAnatoliaGeometryPoint(site.point) || !isPhysicalLandPoint(site.point)) throw new Error(`Invalid 1300 province anchor: ${site.provinceId} ${site.point.join(",")}`);
-  }
+  for (const site of sites) if (!isAnatoliaGeometryPoint(site.point) || !isPhysicalLandPoint(site.point)) throw new Error(`Invalid 1300 province anchor: ${site.provinceId} ${site.point.join(",")}`);
   const solved = solveWeights(sites);
   const provinces = [];
   const geometries = [];
@@ -378,12 +379,7 @@ export function buildAnatoliaPhase2DAssets() {
     sites,
     provinces,
     geometries,
-    diagnostics: {
-      generator: "AnatoliaPhase2DGeometryBuilderV8",
-      source: "historia-ai-curated-cartography",
-      physicalLandAuthority: "atlas-land-polygons-plus-explicit-coast-corrections-minus-natural-earth-10m-lakes-minus-explicit-water-exclusions-plus-land-control-precedence",
-      iterations: solved.iterations,
-    },
+    diagnostics: { generator: "AnatoliaPhase2DGeometryBuilderV8", source: "historia-ai-curated-cartography", physicalLandAuthority: "atlas-land-polygons-plus-explicit-coast-corrections-minus-natural-earth-10m-lakes-minus-explicit-water-exclusions-plus-land-control-precedence", iterations: solved.iterations },
   };
 }
 
