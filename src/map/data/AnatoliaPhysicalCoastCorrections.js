@@ -66,8 +66,14 @@ export const ANATOLIA_PHYSICAL_COAST_CORRECTIONS = Object.freeze([
   },
   {
     id: "pontus-amisos-control",
-    reason: "The lightweight Black Sea mainland outline does not resolve the Samsun/Amisos coastal control site at sufficient detail for the province geometry anchor.",
+    reason: "The lightweight Black Sea mainland outline omits the Samsun/Amisos terrestrial control point; preserve the historical province anchor without expanding the coarse land mask into the Black Sea.",
     coordinates: [],
     controlPoints: [[36.33, 41.29]],
+  },
+  {
+    id: "pontus-kastamon-control",
+    reason: "The lightweight Pontus mainland outline resolves the Kastamon hinterland too coarsely for the historical province geometry anchor.",
+    coordinates: [],
+    controlPoints: [[33.78, 41.38]],
   },
 ]);
