@@ -217,15 +217,16 @@ function clipLandByCell(land, cell) {
 }
 
 function clipCellToMainland(cell) {
-  const candidates = physicalLandPolygons().flatMap((land) => {
-    const clipped = clipLandByCell(land, cell);
-    return clipped.length >= 3 && area(clipped) >= MIN_AREA ? [clipped] : [];
-  });
+  const candidates = physicalLandPolygons().map((land) => clipLandByCell(land, cell))
+    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
   const lakeRings = lakePolygons();
   const explicitExclusions = exclusionPolygons();
-  return candidates
-    .filter((polygon) => !explicitExclusions.some((ring) => pointInPolygon(polygonAreaCentroid(polygon), ring)))
-    .filter((polygon) => !lakeRings.some((lake) => pointInPolygon(polygonAreaCentroid(polygon), lake)));
+  return candidates.filter((polygon) => {
+    const representative = polygonAreaCentroid(polygon);
+    if (explicitExclusions.some((ring) => pointInPolygon(representative, ring))) return false;
+    if (lakeRings.some((ring) => pointInPolygon(representative, ring))) return false;
+    return polygon.every((point) => !isExplicitExcludedWater(point));
+  });
 }
 
 function filterPhysicalPolygons(polygons, provinceId) {
@@ -377,7 +378,6 @@ export function buildAnatoliaPhase2DAssets() {
       generator: "AnatoliaPhase2DGeometryBuilderV8",
       source: "historia-ai-curated-cartography",
       physicalLandAuthority: "atlas-land-polygons-plus-explicit-coast-corrections-minus-natural-earth-10m-lakes-minus-explicit-water-exclusions-plus-land-control-precedence",
-      iterations: solved.iterations,
     },
   };
 }
