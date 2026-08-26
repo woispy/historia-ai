@@ -23,4 +23,19 @@ export const ANATOLIA_PHYSICAL_COAST_CORRECTIONS = Object.freeze([
       [34.82, 41.62],
     ],
   },
+  {
+    id: "iznik-nicaea-northwest-land",
+    reason: "The lightweight mainland mask and generated Iznik lake polygon leave the historical Nicaea anchor on a coarse water-side boundary; this small terrestrial reconciliation preserves the historical city approach without weakening the global water exclusion rule.",
+    coordinates: [
+      [29.64, 40.47],
+      [29.72, 40.49],
+      [29.80, 40.47],
+      [29.86, 40.42],
+      [29.82, 40.36],
+      [29.74, 40.34],
+      [29.66, 40.37],
+      [29.62, 40.43],
+      [29.64, 40.47],
+    ],
+  },
 ]);
