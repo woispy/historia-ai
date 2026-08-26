@@ -76,7 +76,10 @@ function landPolygons() {
 }
 
 function isCoastCorrectionLandPoint(point) {
-  return ANATOLIA_PHYSICAL_COAST_CORRECTIONS.some((correction) => pointInPolygon(point, correction.coordinates));
+  return ANATOLIA_PHYSICAL_COAST_CORRECTIONS.some((correction) => (
+    pointInPolygon(point, correction.coordinates)
+    || correction.controlPoints?.some((controlPoint) => distanceToSegment(point, controlPoint, controlPoint) <= EPS)
+  ));
 }
 
 function inLake(point) {
@@ -92,6 +95,8 @@ function isStaticLandPoint(point) {
 }
 
 function isPhysicalLandPoint(point) {
+  // Explicit coast corrections have precedence over coarse generated lake
+  // masks. This is the physical-land authority, not a political exception.
   if (isCoastCorrectionLandPoint(point)) return true;
   return isStaticLandPoint(point) && !inLake(point);
 }
@@ -368,23 +373,17 @@ export function buildAnatoliaPhase2DAssets() {
   return {
     schemaVersion: 1,
     geometryVersion: 11,
-    historicalDate: "1300-01-01",
-    provider: "historia-ai-curated-cartography",
-    dataset: "anatolia-province-geometry-1300",
-    projection: "EPSG:4326",
-    method: "38 historical province identities partitioned by one geometry anchor per province using a deterministic weighted power diagram, clipped to the Anatolian mainland physical mask with explicit physical-coast corrections; no support-control fragments and no per-province shrink pass",
-    siteCount: physicalSamplingSiteCount + sites.length,
-    politicalSiteCount: sites.length,
+    generatedAt: "1300-01-01T00:00:00.000Z",
     physicalSamplingSiteCount,
-    barrierSiteCount: 0,
-    naturalFeatureSiteCount: 0,
-    supportSiteCount: 0,
-    fallbackProvinceCount: 0,
-    provinceCount: provinces.length,
-    polygonCount: geometries.reduce((sum, item) => sum + item.polygons.length, 0),
-    weightIterations: solved.iterations,
+    sites,
     provinces,
     geometries,
+    diagnostics: {
+      generator: "AnatoliaPhase2DGeometryBuilderV8",
+      source: "historia-ai-curated-cartography",
+      physicalLandAuthority: "atlas-land-polygons-plus-explicit-coast-corrections-minus-natural-earth-10m-lakes",
+      iterations: solved.iterations,
+    },
   };
 }
 
