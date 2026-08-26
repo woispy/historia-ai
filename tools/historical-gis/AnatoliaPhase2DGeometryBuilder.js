@@ -40,6 +40,14 @@ function pointToSegmentDistanceSquared(point, start, end) {
   return distanceSquared(point, [start[0] + t * dx, start[1] + t * dy]);
 }
 
+function closestPointOnSegment(point, start, end) {
+  const dx = end[0] - start[0];
+  const dy = end[1] - start[1];
+  if (dx === 0 && dy === 0) return start;
+  const t = Math.max(0, Math.min(1, ((point[0] - start[0]) * dx + (point[1] - start[1]) * dy) / (dx * dx + dy * dy)));
+  return [start[0] + t * dx, start[1] + t * dy];
+}
+
 function distanceToLandBoundary(point) {
   let best = Number.POSITIVE_INFINITY;
   for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
@@ -313,6 +321,39 @@ function polygonCentroid(polygon) {
   return [sum[0] / polygon.length, sum[1] / polygon.length];
 }
 
+function buildFallbackPolygon(center, polygonRadii) {
+  for (const polygonRadius of polygonRadii) {
+    const polygon = Array.from({ length: 6 }, (_, index) => {
+      const polygonAngle = (index / 6) * Math.PI * 2;
+      return [
+        center[0] + Math.cos(polygonAngle) * polygonRadius,
+        center[1] + Math.sin(polygonAngle) * polygonRadius,
+      ];
+    });
+    if (isPhysicalLandPolygon(polygon)) return polygon;
+  }
+  return [];
+}
+
+function findNearestLakeShore(point) {
+  let winner = null;
+  let bestDistance = Number.POSITIVE_INFINITY;
+
+  for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) {
+    const coordinates = lake.coordinates;
+    if (!Array.isArray(coordinates) || coordinates.length < 2) continue;
+    for (let index = 0; index < coordinates.length - 1; index += 1) {
+      const shore = closestPointOnSegment(point, coordinates[index], coordinates[index + 1]);
+      const distance = distanceSquared(point, shore);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        winner = { shore, lakeCenter: polygonCentroid(coordinates) };
+      }
+    }
+  }
+  return winner;
+}
+
 function createAnchorFallbackPolygon(centroid, requiresLandSafe = false) {
   const polygonRadii = [0.002, 0.001, 0.0005, 0.00025, 0.0001, 0.00005];
   const searchPasses = [
@@ -322,13 +363,26 @@ function createAnchorFallbackPolygon(centroid, requiresLandSafe = false) {
   ];
 
   if (!requiresLandSafe) {
-    return [0, 1, 2, 3, 4, 5].map((index) => {
-      const angle = (index / 6) * Math.PI * 2;
-      return [
-        centroid[0] + Math.cos(angle) * polygonRadii[1],
-        centroid[1] + Math.sin(angle) * polygonRadii[1],
-      ];
-    });
+    return buildFallbackPolygon(centroid, polygonRadii.slice(0, 2));
+  }
+
+  const shore = findNearestLakeShore(centroid);
+  if (shore) {
+    const outward = [shore.shore[0] - shore.lakeCenter[0], shore.shore[1] - shore.lakeCenter[1]];
+    const length = Math.hypot(outward[0], outward[1]) || 1;
+    const unit = [outward[0] / length, outward[1] / length];
+    const shoreDistances = [0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.35, 0.5, 0.75];
+    for (const sign of [1, -1]) {
+      for (const distance of shoreDistances) {
+        const center = [
+          shore.shore[0] + unit[0] * distance * sign,
+          shore.shore[1] + unit[1] * distance * sign,
+        ];
+        if (!isWithinAnatoliaEnvelope(center) || !isUsableCartographicPoint(center)) continue;
+        const polygon = buildFallbackPolygon(center, polygonRadii);
+        if (polygon.length >= 3) return polygon;
+      }
+    }
   }
 
   for (const search of searchPasses) {
@@ -340,17 +394,8 @@ function createAnchorFallbackPolygon(centroid, requiresLandSafe = false) {
           centroid[1] + Math.sin(angle) * radius,
         ];
         if (!isWithinAnatoliaEnvelope(center) || !isUsableCartographicPoint(center)) continue;
-
-        for (const polygonRadius of polygonRadii) {
-          const polygon = Array.from({ length: 6 }, (_, index) => {
-            const polygonAngle = (index / 6) * Math.PI * 2;
-            return [
-              center[0] + Math.cos(polygonAngle) * polygonRadius,
-              center[1] + Math.sin(polygonAngle) * polygonRadius,
-            ];
-          });
-          if (isPhysicalLandPolygon(polygon)) return polygon;
-        }
+        const polygon = buildFallbackPolygon(center, polygonRadii);
+        if (polygon.length >= 3) return polygon;
       }
     }
   }
