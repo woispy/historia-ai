@@ -24,7 +24,10 @@ export const ANATOLIA_PHYSICAL_COAST_CORRECTIONS = Object.freeze([
       [29.86, 40.44], [29.80, 40.47], [29.70, 40.46], [29.60, 40.43], [29.58, 40.39],
     ],
     controlPoints: [[29.69, 40.44]],
-    landControlPoints: [[29.69, 40.44]],
+    landControlPoints: [
+      [29.58, 40.39], [29.64, 40.36], [29.74, 40.37], [29.82, 40.40],
+      [29.86, 40.44], [29.80, 40.47], [29.70, 40.46], [29.60, 40.43],
+    ],
     exclusionCoordinates: [],
   },
   {
