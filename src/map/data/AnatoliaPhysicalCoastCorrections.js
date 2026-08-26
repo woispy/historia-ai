@@ -92,6 +92,17 @@ export const ANATOLIA_PHYSICAL_COAST_CORRECTIONS = Object.freeze([
     ]],
   },
   {
+    id: "marmara-bosphorus-transition-exclusion",
+    reason: "The coarse mainland ring still includes the European-facing Marmara/Bosphorus transition inside the Anatolia physical authority; remove the residual wedge directly rather than modifying province anchors.",
+    coordinates: [],
+    controlPoints: [],
+    landControlPoints: [],
+    exclusionCoordinates: [[
+      [28.25, 41.25], [29.02, 41.25], [29.02, 40.82], [28.90, 40.76],
+      [28.62, 40.68], [28.34, 40.64], [28.25, 40.72], [28.25, 41.25],
+    ]],
+  },
+  {
     id: "mysia-balikesir-marmara-land",
     reason: "The lightweight Anatolia mainland ring overextends into the southern Marmara coastline; trim the coarse mainland with an explicit water exclusion while preserving the terrestrial Balıkesir control site.",
     coordinates: [],
