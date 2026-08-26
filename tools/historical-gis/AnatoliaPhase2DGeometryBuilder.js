@@ -1,6 +1,7 @@
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
+import { pointInPhysicalLandReconciliation } from "../../src/map/data/AnatoliaPhysicalCoastalReconciliation.js";
 
 const BBOX = [25.45, 35.72, 44.85, 42.35];
 const SITE_EPSILON = 1e-6;
@@ -34,6 +35,7 @@ function pointInPolygon(point, polygon) {
 }
 
 function pointInWaterEnvelope(point) {
+  if (pointInPhysicalLandReconciliation(point)) return false;
   return ANATOLIA_PHYSICAL_ATLAS.seas.some((sea) => pointInPolygon(point, sea.coordinates))
     || ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygon(point, lake.coordinates));
 }
@@ -66,7 +68,8 @@ function distanceToLandBoundary(point) {
 }
 
 function pointInAnatoliaLand(point) {
-  return ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon));
+  return pointInPhysicalLandReconciliation(point)
+    || ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon));
 }
 
 function isWithinAnatoliaEnvelope(point) {
