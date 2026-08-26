@@ -11,13 +11,13 @@ export const ANATOLIA_TERRAIN_PROFILES = Object.freeze({
   "coastal-mountain": { movementCost: 2, defenseBonus: 2, winterSeverity: 2, agriculture: "moderate" },
   "coastal-plain": { movementCost: 1, defenseBonus: 0, winterSeverity: 1, agriculture: "good" },
   "coastal-hills": { movementCost: 2, defenseBonus: 1, winterSeverity: 2, agriculture: "moderate" },
-  lowland: { movementCost: 1, defenseBonus: 0, winterSeverity: 1, agriculture: "good" },
+  "lowland": { movementCost: 1, defenseBonus: 0, winterSeverity: 1, agriculture: "good" },
   "lowland-hills": { movementCost: 2, defenseBonus: 1, winterSeverity: 1, agriculture: "moderate" },
-  valley: { movementCost: 1, defenseBonus: 1, winterSeverity: 1, agriculture: "good" },
+  "valley": { movementCost: 1, defenseBonus: 1, winterSeverity: 1, agriculture: "good" },
   "river-valley": { movementCost: 1, defenseBonus: 1, winterSeverity: 1, agriculture: "good" },
-  plateau: { movementCost: 2, defenseBonus: 1, winterSeverity: 2, agriculture: "moderate" },
+  "plateau": { movementCost: 2, defenseBonus: 1, winterSeverity: 2, agriculture: "moderate" },
   "plateau-river": { movementCost: 2, defenseBonus: 1, winterSeverity: 2, agriculture: "moderate" },
-  highland: { movementCost: 3, defenseBonus: 2, winterSeverity: 3, agriculture: "poor" },
+  "highland": { movementCost: 3, defenseBonus: 2, winterSeverity: 3, agriculture: "poor" },
   "highland-frontier": { movementCost: 3, defenseBonus: 2, winterSeverity: 3, agriculture: "poor" },
   "highland-lake": { movementCost: 3, defenseBonus: 2, winterSeverity: 3, agriculture: "moderate" },
   "highland-valley": { movementCost: 3, defenseBonus: 2, winterSeverity: 3, agriculture: "moderate" },
@@ -25,12 +25,12 @@ export const ANATOLIA_TERRAIN_PROFILES = Object.freeze({
   "lake-basin": { movementCost: 2, defenseBonus: 1, winterSeverity: 2, agriculture: "good" },
   "lake-mountain": { movementCost: 3, defenseBonus: 2, winterSeverity: 3, agriculture: "moderate" },
   "mountain-foot": { movementCost: 3, defenseBonus: 2, winterSeverity: 3, agriculture: "moderate" },
-  mountain: { movementCost: 4, defenseBonus: 3, winterSeverity: 4, agriculture: "poor" },
+  "mountain": { movementCost: 4, defenseBonus: 3, winterSeverity: 4, agriculture: "poor" },
   "mountain-pass": { movementCost: 4, defenseBonus: 3, winterSeverity: 4, agriculture: "poor" },
   "hills-coast": { movementCost: 2, defenseBonus: 1, winterSeverity: 2, agriculture: "moderate" },
 });
 
-const anchor = (x, y, terrainClass, settlementDensity, geometryAnchor) => ({
+const anchor = (x, y, terrainClass, settlementDensity, geometryAnchor = null) => ({
   anchor: [x, y],
   geometryAnchor: geometryAnchor ?? [x, y],
   terrainClass,
@@ -41,15 +41,8 @@ const anchor = (x, y, terrainClass, settlementDensity, geometryAnchor) => ({
 });
 
 export const ANATOLIA_PROVINCE_REFINEMENTS = Object.freeze({
-  // Nicomedia is a coastal settlement at the head of the Gulf of İzmit. The
-  // lightweight mainland mask resolves the gulf coarsely, so the Phase 2D
-  // geometry anchor is placed on the first stable land row immediately inland
-  // rather than forcing the historical city point into the coarse water mask.
   "bithynia-nicomedia": anchor(29.92, 40.77, "coastal-lowland", "high", [29.92, 40.705]),
-  // Nicaea remains anchored to its historical settlement coordinate. The local
-  // physical-coast correction explicitly restores this north-shore land point,
-  // so the geometry anchor can remain coincident with the historical anchor.
-  "bithynia-nicaea": anchor(29.72, 40.43, "lake-basin", "high"),
+  "bithynia-nicaea": anchor(29.72, 40.43, "lake-basin", "high", [29.69, 40.44]),
   "bithynia-prusa": anchor(29.06, 40.19, "mountain-foot", "high"),
   "bithynia-sangarios": anchor(30.52, 40.00, "river-valley", "medium"),
   "phrygia-sogut": anchor(30.17, 40.02, "highland-frontier", "low"),
