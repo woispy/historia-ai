@@ -313,21 +313,20 @@ function polygonCentroid(polygon) {
   return [sum[0] / polygon.length, sum[1] / polygon.length];
 }
 
-function createAnchorFallbackPolygon(centroid) {
+function createAnchorFallbackPolygon(centroid, requiresLandSafe = false) {
   const radii = [0.002, 0.001, 0.0005];
   const directions = 16;
   const radialStep = 0.005;
   const maxRadius = 1;
 
-  for (const polygonRadius of radii) {
-    const polygon = Array.from({ length: 6 }, (_, index) => {
+  if (!requiresLandSafe) {
+    return [0, 1, 2, 3, 4, 5].map((index) => {
       const angle = (index / 6) * Math.PI * 2;
       return [
-        centroid[0] + Math.cos(angle) * polygonRadius,
-        centroid[1] + Math.sin(angle) * polygonRadius,
+        centroid[0] + Math.cos(angle) * radii[1],
+        centroid[1] + Math.sin(angle) * radii[1],
       ];
     });
-    if (isWithinAnatoliaEnvelope(centroid) && isPhysicalLandPolygon(polygon)) return polygon;
   }
 
   for (let radius = 0; radius <= maxRadius; radius += radialStep) {
@@ -455,7 +454,7 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
   for (const metadata of ANATOLIA_PROVINCE_METADATA) {
     let polygons = polygonsByProvince[metadata.id];
     if (!polygons.length) {
-      const fallback = createAnchorFallbackPolygon(metadata.centroid);
+      const fallback = createAnchorFallbackPolygon(metadata.centroid, metadata.terrain === "lake");
       if (fallback.length < 3) throw new Error(`Phase 2D produced no physically valid geometry for ${metadata.id}`);
       polygons = [roundPolygon(fallback)];
       fallbackCount += 1;
