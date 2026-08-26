@@ -50,7 +50,9 @@ function signedArea(polygon) {
   return sum / 2;
 }
 
-function area(polygon) { return Math.abs(signedArea(polygon)); }
+function area(polygon) {
+  return Math.abs(signedArea(polygon));
+}
 
 function polygonVertexMean(polygon) {
   const sum = polygon.reduce((total, [longitude, latitude]) => [total[0] + longitude, total[1] + latitude], [0, 0]);
@@ -138,7 +140,9 @@ function correctionLandPolygons() {
     .filter((polygon) => polygon?.length >= 3 && area(polygon) >= MIN_AREA);
 }
 
-function physicalLandPolygons() { return [...landPolygons(), ...correctionLandPolygons()]; }
+function physicalLandPolygons() {
+  return [...landPolygons(), ...correctionLandPolygons()];
+}
 
 function lakePolygons() {
   return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.map((lake) => lake.coordinates)
@@ -208,19 +212,8 @@ function clipPolygonByRing(polygon, ring) {
   return output;
 }
 
-function clipLandByCell(land, cell) { return clipPolygonByRing(land, cell); }
-
-function excludeRingsFromPolygon(polygon, exclusions) {
-  if (!exclusions.length) return [polygon];
-  const centroid = polygonAreaCentroid(polygon);
-  if (exclusions.some((ring) => pointInPolygon(centroid, ring))) return [];
-  const filtered = [];
-  for (let i = 0; i < polygon.length; i += 1) {
-    const vertex = polygon[i];
-    if (!isExplicitExcludedWater(vertex)) filtered.push(vertex);
-  }
-  if (filtered.length < 3) return [];
-  return [filtered];
+function clipLandByCell(land, cell) {
+  return clipPolygonByRing(land, cell);
 }
 
 function clipCellToMainland(cell) {
@@ -230,8 +223,8 @@ function clipCellToMainland(cell) {
   });
   const lakeRings = lakePolygons();
   const explicitExclusions = exclusionPolygons();
-  return candidates.flatMap((polygon) => excludeRingsFromPolygon(polygon, explicitExclusions))
-    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA)
+  return candidates
+    .filter((polygon) => !explicitExclusions.some((ring) => pointInPolygon(polygonAreaCentroid(polygon), ring)))
     .filter((polygon) => !lakeRings.some((lake) => pointInPolygon(polygonAreaCentroid(polygon), lake)));
 }
 
