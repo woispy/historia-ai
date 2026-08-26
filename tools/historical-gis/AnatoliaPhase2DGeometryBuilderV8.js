@@ -50,9 +50,7 @@ function signedArea(polygon) {
   return sum / 2;
 }
 
-function area(polygon) {
-  return Math.abs(signedArea(polygon));
-}
+function area(polygon) { return Math.abs(signedArea(polygon)); }
 
 function polygonVertexMean(polygon) {
   const sum = polygon.reduce((total, [longitude, latitude]) => [total[0] + longitude, total[1] + latitude], [0, 0]);
@@ -140,9 +138,7 @@ function correctionLandPolygons() {
     .filter((polygon) => polygon?.length >= 3 && area(polygon) >= MIN_AREA);
 }
 
-function physicalLandPolygons() {
-  return [...landPolygons(), ...correctionLandPolygons()];
-}
+function physicalLandPolygons() { return [...landPolygons(), ...correctionLandPolygons()]; }
 
 function lakePolygons() {
   return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.map((lake) => lake.coordinates)
@@ -212,23 +208,29 @@ function clipPolygonByRing(polygon, ring) {
   return output;
 }
 
-function clipLandByCell(land, cell) {
-  return clipPolygonByRing(land, cell);
-}
+function clipLandByCell(land, cell) { return clipPolygonByRing(land, cell); }
 
 function excludeRingsFromPolygon(polygon, exclusions) {
+  if (!exclusions.length) return [polygon];
   const centroid = polygonAreaCentroid(polygon);
   if (exclusions.some((ring) => pointInPolygon(centroid, ring))) return [];
-  return polygon;
+  const filtered = [];
+  for (let i = 0; i < polygon.length; i += 1) {
+    const vertex = polygon[i];
+    if (!isExplicitExcludedWater(vertex)) filtered.push(vertex);
+  }
+  if (filtered.length < 3) return [];
+  return [filtered];
 }
 
 function clipCellToMainland(cell) {
-  const candidates = physicalLandPolygons().map((land) => clipLandByCell(land, cell))
-    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
+  const candidates = physicalLandPolygons().flatMap((land) => {
+    const clipped = clipLandByCell(land, cell);
+    return clipped.length >= 3 && area(clipped) >= MIN_AREA ? [clipped] : [];
+  });
   const lakeRings = lakePolygons();
   const explicitExclusions = exclusionPolygons();
-  return candidates
-    .map((polygon) => excludeRingsFromPolygon(polygon, explicitExclusions))
+  return candidates.flatMap((polygon) => excludeRingsFromPolygon(polygon, explicitExclusions))
     .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA)
     .filter((polygon) => !lakeRings.some((lake) => pointInPolygon(polygonAreaCentroid(polygon), lake)));
 }
@@ -247,10 +249,7 @@ function buildControlSites() {
 function validateCorrectionTopology() {
   for (const correction of ANATOLIA_PHYSICAL_COAST_CORRECTIONS) {
     const exclusion = correction.exclusionCoordinates ?? [];
-    const landControls = [
-      ...(correction.landControlPoints ?? []),
-      ...(correction.controlPoints ?? []),
-    ];
+    const landControls = [...(correction.landControlPoints ?? []), ...(correction.controlPoints ?? [])];
     for (const controlPoint of landControls) {
       if (exclusion.some((polygon) => pointInPolygon(controlPoint, polygon))) throw new Error(`Physical correction ${correction.id} marks a land control point inside an exclusion polygon: ${controlPoint.join(",")}`);
     }
@@ -346,7 +345,9 @@ export function buildAnatoliaPhase2DAssets() {
   validateManifest();
   validateCorrectionTopology();
   const sites = buildControlSites();
-  for (const site of sites) if (!isAnatoliaGeometryPoint(site.point) || !isPhysicalLandPoint(site.point)) throw new Error(`Invalid 1300 province anchor: ${site.provinceId} ${site.point.join(",")}`);
+  for (const site of sites) {
+    if (!isAnatoliaGeometryPoint(site.point) || !isPhysicalLandPoint(site.point)) throw new Error(`Invalid 1300 province anchor: ${site.provinceId} ${site.point.join(",")}`);
+  }
   const solved = solveWeights(sites);
   const provinces = [];
   const geometries = [];
@@ -379,7 +380,12 @@ export function buildAnatoliaPhase2DAssets() {
     sites,
     provinces,
     geometries,
-    diagnostics: { generator: "AnatoliaPhase2DGeometryBuilderV8", source: "historia-ai-curated-cartography", physicalLandAuthority: "atlas-land-polygons-plus-explicit-coast-corrections-minus-natural-earth-10m-lakes-minus-explicit-water-exclusions-plus-land-control-precedence", iterations: solved.iterations },
+    diagnostics: {
+      generator: "AnatoliaPhase2DGeometryBuilderV8",
+      source: "historia-ai-curated-cartography",
+      physicalLandAuthority: "atlas-land-polygons-plus-explicit-coast-corrections-minus-natural-earth-10m-lakes-minus-explicit-water-exclusions-plus-land-control-precedence",
+      iterations: solved.iterations,
+    },
   };
 }
 
