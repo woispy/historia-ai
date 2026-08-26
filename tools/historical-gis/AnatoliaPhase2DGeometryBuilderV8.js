@@ -61,7 +61,11 @@ function cross(a, b, point) {
 }
 
 function landPolygons() {
-  return ANATOLIA_PHYSICAL_ATLAS.landPolygons.filter((polygon) => area(polygon) >= MAINLAND_MIN_AREA);
+  const atlasLand = ANATOLIA_PHYSICAL_ATLAS.landPolygons.filter((polygon) => area(polygon) >= MAINLAND_MIN_AREA);
+  const correctionLand = ANATOLIA_PHYSICAL_COAST_CORRECTIONS
+    .map((correction) => correction.coordinates)
+    .filter((polygon) => polygon?.length >= 3 && area(polygon) >= MIN_AREA);
+  return [...atlasLand, ...correctionLand];
 }
 
 function isCoastCorrectionLandPoint(point) {
