@@ -319,17 +319,15 @@ function createAnchorFallbackPolygon(centroid) {
   const radialStep = 0.005;
   const maxRadius = 1;
 
-  for (const center of [centroid]) {
-    for (const polygonRadius of radii) {
-      const polygon = Array.from({ length: 6 }, (_, index) => {
-        const angle = (index / 6) * Math.PI * 2;
-        return [
-          center[0] + Math.cos(angle) * polygonRadius,
-          center[1] + Math.sin(angle) * polygonRadius,
-        ];
-      });
-      if (isWithinAnatoliaEnvelope(center) && isPhysicalLandPolygon(polygon)) return polygon;
-    }
+  for (const polygonRadius of radii) {
+    const polygon = Array.from({ length: 6 }, (_, index) => {
+      const angle = (index / 6) * Math.PI * 2;
+      return [
+        centroid[0] + Math.cos(angle) * polygonRadius,
+        centroid[1] + Math.sin(angle) * polygonRadius,
+      ];
+    });
+    if (isWithinAnatoliaEnvelope(centroid) && isPhysicalLandPolygon(polygon)) return polygon;
   }
 
   for (let radius = 0; radius <= maxRadius; radius += radialStep) {
@@ -447,7 +445,7 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     if (!isPhysicalLandPoint(centroid)) continue;
     if (!cell.every((point) => isPhysicalLandPoint(point))) continue;
     const rounded = roundPolygon(cell);
-    if (!isPhysicalLandPolygon(rounded)) continue;
+    if (!rounded.every((point) => isPhysicalLandPoint(point))) continue;
     polygonsByProvince[sites[siteIndex].provinceId].push(rounded);
   }
 
