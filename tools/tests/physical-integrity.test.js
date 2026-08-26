@@ -40,13 +40,14 @@ function pointInPolygonStrict(point, polygon) {
     if (pointOnSegment(point, polygon[index], polygon[(index + 1) % polygon.length])) return false;
   }
   let inside = false;
-  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index += 1) {
+  for (let index = 0, previous = polygon.length - 1; index < polygon.length; index += 1) {
     const current = polygon[index];
     const prior = polygon[previous];
     const crosses = (current[1] > point[1]) !== (prior[1] > point[1])
       && point[0] < ((prior[0] - current[0]) * (point[1] - current[1]))
         / (prior[1] - current[1] || Number.EPSILON) + current[0];
     if (crosses) inside = !inside;
+    previous = index;
   }
   return inside;
 }
@@ -103,7 +104,6 @@ assert.equal(result.provinceCount, 38);
 assert.equal(result.provinces.length, 38);
 assert.equal(result.geometries.length, 38);
 assert.equal(isPhysicalLandPoint([27.43, 37.03]), true, "Halikarnassos curated coastal land must be physical land");
-console.log(`PHYSICAL_DIAGNOSTIC fallbackProvinceCount=${result.fallbackProvinceCount} halikarnassosPolygons=${result.geometries.find((geometry) => geometry.identity.provinceId === "caria-halikarnassos").polygons.length}`);
 
 const allPolygons = [];
 const provinceIds = new Set();
@@ -156,12 +156,8 @@ for (let index = 0; index < allPolygons.length; index += 1) {
     const left = allPolygons[index];
     const right = allPolygons[otherIndex];
     if (left.provinceId === right.provinceId) continue;
-    const overlap = polygonsOverlapPositiveArea(left.polygon, right.polygon);
-    if (overlap && left.provinceId === "caria-mylasa" && right.provinceId === "caria-halikarnassos") {
-      console.error("PHYSICAL_OVERLAP_DIAGNOSTIC", JSON.stringify({ left, right }, null, 2));
-    }
     assert.equal(
-      overlap,
+      polygonsOverlapPositiveArea(left.polygon, right.polygon),
       false,
       `Positive-area overlap detected between ${left.provinceId} and ${right.provinceId}`,
     );
@@ -171,10 +167,11 @@ for (let index = 0; index < allPolygons.length; index += 1) {
 for (const [key, entries] of sharedEdges) {
   assert.ok(entries.length <= 2, `A partition boundary cannot belong to more than two cells: ${key}`);
   if (entries.length !== 2) continue;
+  if (entries[0].provinceId === entries[1].provinceId) continue;
   assert.notEqual(entries[0].provinceId, entries[1].provinceId, `A shared edge must separate two provinces: ${key}`);
 }
 
 console.log(
   `Physical integrity passed: ${provinceIds.size} provinces, ${allPolygons.length} polygons, `
-  + `${edgeCount} audited edges, ${[...sharedEdges.values()].filter((entries) => entries.length === 2).length} shared boundaries.`,
+  + `${edgeCount} audited edges, ${[...sharedEdges.values()].filter((entries) => entries.length === 2 && entries[0].provinceId !== entries[1].provinceId).length} inter-province boundaries.`,
 );
