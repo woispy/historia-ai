@@ -30,7 +30,7 @@ export const ANATOLIA_TERRAIN_PROFILES = Object.freeze({
   "hills-coast": { movementCost: 2, defenseBonus: 1, winterSeverity: 2, agriculture: "moderate" },
 });
 
-const anchor = (x, y, terrainClass, settlementDensity, geometryAnchor = null) => ({
+const anchor = (x, y, terrainClass, settlementDensity, geometryAnchor) => ({
   anchor: [x, y],
   geometryAnchor: geometryAnchor ?? [x, y],
   terrainClass,
@@ -46,10 +46,10 @@ export const ANATOLIA_PROVINCE_REFINEMENTS = Object.freeze({
   // geometry anchor is placed on the first stable land row immediately inland
   // rather than forcing the historical city point into the coarse water mask.
   "bithynia-nicomedia": anchor(29.92, 40.77, "coastal-lowland", "high", [29.92, 40.705]),
-  // Nicaea remains anchored to its historical settlement coordinate, while
-  // Phase 2D receives a separate terrestrial control point because the coarse
-  // generated lake mask overlaps the city-side shore.
-  "bithynia-nicaea": anchor(29.72, 40.43, "lake-basin", "high", [29.72, 40.39]),
+  // Nicaea remains anchored to its historical settlement coordinate. The local
+  // physical-coast correction explicitly restores this north-shore land point,
+  // so the geometry anchor can remain coincident with the historical anchor.
+  "bithynia-nicaea": anchor(29.72, 40.43, "lake-basin", "high"),
   "bithynia-prusa": anchor(29.06, 40.19, "mountain-foot", "high"),
   "bithynia-sangarios": anchor(30.52, 40.00, "river-valley", "medium"),
   "phrygia-sogut": anchor(30.17, 40.02, "highland-frontier", "low"),
