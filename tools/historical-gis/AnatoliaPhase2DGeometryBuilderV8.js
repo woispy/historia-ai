@@ -5,11 +5,7 @@ import {
   ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST,
   ANATOLIA_1300_PROVINCE_GEOMETRY_KEYS,
 } from "../../src/map/data/Anatolia1300ProvinceGeometryManifest.js";
-import {
-  ANATOLIA_PROVINCE_REFINEMENTS,
-  ANATOLIA_STRATEGIC_PASSES,
-  ANATOLIA_RIVER_CROSSINGS,
-} from "../../src/map/data/AnatoliaProvinceRefinement.js";
+import { ANATOLIA_PROVINCE_REFINEMENTS } from "../../src/map/data/AnatoliaProvinceRefinement.js";
 
 const BBOX = [25.45, 35.72, 44.85, 42.35];
 const EPS = 1e-7;
@@ -22,7 +18,6 @@ const MAX_AREA_RATIO = 4.2;
 const MAX_WEIGHT_ITERATIONS = 24;
 const MAX_WEIGHT_STEP = 4;
 
-const province = (id) => ANATOLIA_PROVINCE_METADATA.find((item) => item.id === id) ?? null;
 const rawAnchor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id]?.anchor ?? item.centroid;
 
 function pointInPolygon(point, polygon) {
@@ -364,8 +359,7 @@ export function buildAnatoliaPhase2DAssets() {
     geometries.push(geometryAsset(item, polygons));
   }
 
-  const naturalFeatureSiteCount = [...ANATOLIA_STRATEGIC_PASSES, ...ANATOLIA_RIVER_CROSSINGS]
-    .reduce((count, feature) => count + (feature.provinces?.length ?? 0), 0);
+  const naturalFeatureSiteCount = 0;
   const physicalSamplingSiteCount = samplingSiteCount();
 
   return {
@@ -391,13 +385,9 @@ export function buildAnatoliaPhase2DAssets() {
   };
 }
 
-export function isAnatoliaGeometryPoint([longitude, latitude]) {
-  if (longitude < 26.5 || longitude > 44.8 || latitude < 35.7 || latitude > 42.2) return false;
-  const exclusion = [
-    [26.5, 42.2], [29.5, 42.2], [29.5, 41.25], [29.05, 40.72],
-    [28.45, 40.48], [27.55, 40.45], [26.5, 40.65],
-  ];
-  return !pointInPolygon([longitude, latitude], exclusion);
+export function isAnatoliaGeometryPoint(point) {
+  const [longitude, latitude] = point;
+  return longitude >= BBOX[0] && longitude <= BBOX[2] && latitude >= BBOX[1] && latitude <= BBOX[3];
 }
 
 export { isPhysicalLandPoint };
