@@ -80,6 +80,18 @@ export const ANATOLIA_PHYSICAL_COAST_CORRECTIONS = Object.freeze([
     ]],
   },
   {
+    id: "bosphorus-european-shore-exclusion",
+    reason: "The first Thrace exclusion intentionally stops at the northern Marmara water line; this second exclusion removes the remaining European shore wedge around the Bosphorus/Izmit-facing edge of the coarse mainland ring.",
+    coordinates: [],
+    controlPoints: [],
+    landControlPoints: [],
+    exclusionCoordinates: [[
+      [28.20, 41.95], [29.55, 41.95], [29.55, 40.90], [29.48, 40.88],
+      [29.10, 40.82], [28.70, 40.72], [28.28, 40.64], [28.20, 40.78],
+      [28.20, 41.95],
+    ]],
+  },
+  {
     id: "mysia-balikesir-marmara-land",
     reason: "The lightweight Anatolia mainland ring overextends into the southern Marmara coastline; trim the coarse mainland with an explicit water exclusion while preserving the terrestrial Balıkesir control site.",
     coordinates: [],
