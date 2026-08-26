@@ -99,20 +99,6 @@ assert.equal(result.provinceCount, 38);
 assert.equal(result.provinces.length, 38);
 assert.equal(result.geometries.length, 38);
 
-// Lake-city reconciliation must resolve through the physical-land authority,
-// while the historical city anchor remains in its historical data layer.
-for (const [provinceId, anchor] of [
-  ["bithynia-nicaea", [29.72, 40.15]],
-  ["pisidia-egirdir", [30.85, 37.98]],
-  ["pisidia-beysehir", [31.72, 37.78]],
-]) {
-  assert.equal(
-    isPhysicalLandPoint(anchor),
-    true,
-    `${provinceId}: physical reconciliation anchor must remain on authoritative land`,
-  );
-}
-
 const allPolygons = [];
 const provinceIds = new Set();
 let edgeCount = 0;
@@ -142,10 +128,7 @@ for (const geometry of result.geometries) {
           start[0] + (end[0] - start[0]) * fraction,
           start[1] + (end[1] - start[1]) * fraction,
         ];
-        assert.ok(
-          isPhysicalLandPoint(point),
-          `${provinceId}: edge ${index} leaves authoritative physical land at ${point.join(",")}`,
-        );
+        assert.ok(isPhysicalLandPoint(point), `${provinceId}: edge ${index} leaves authoritative physical land at ${point.join(",")}`);
       }
 
       const key = edgeKey(start, end);
@@ -161,6 +144,12 @@ for (const geometry of result.geometries) {
 
 assert.equal(provinceIds.size, 38);
 assert.ok(edgeCount > 150, "Physical-integrity audit must inspect a substantial edge field");
+
+for (const provinceId of ["bithynia-nicaea", "pisidia-egirdir", "pisidia-beysehir"]) {
+  const provincePolygons = allPolygons.filter(({ provinceId: candidate }) => candidate === provinceId);
+  assert.ok(provincePolygons.length > 0, `${provinceId}: lake-city reconciliation must emit a physical polygon`);
+  assert.ok(provincePolygons.every(({ polygon }) => polygon.every(isPhysicalLandPoint)), `${provinceId}: reconciliation polygon must remain on physical land`);
+}
 
 for (let index = 0; index < allPolygons.length; index += 1) {
   for (let otherIndex = index + 1; otherIndex < allPolygons.length; otherIndex += 1) {
