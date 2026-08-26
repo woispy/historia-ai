@@ -43,10 +43,7 @@ const anchor = (x, y, terrainClass, settlementDensity, geometryAnchor = null) =>
 export const ANATOLIA_PROVINCE_REFINEMENTS = Object.freeze({
   "bithynia-nicomedia": anchor(29.92, 40.77, "coastal-lowland", "high", [29.92, 40.705]),
   "bithynia-nicaea": anchor(29.72, 40.43, "lake-basin", "high", [29.69, 40.44]),
-  // The historical Bursa settlement remains at the city anchor. The lightweight
-  // mainland mask is coarse around Mount Olympus, so Phase 2D gets a separate
-  // terrestrial control point immediately inland from the city-side foothills.
-  "bithynia-prusa": anchor(29.06, 40.19, "mountain-foot", "high", [29.06, 40.16]),
+  "bithynia-prusa": anchor(29.06, 40.19, "mountain-foot", "high", [29.04, 40.12]),
   "bithynia-sangarios": anchor(30.52, 40.00, "river-valley", "medium"),
   "phrygia-sogut": anchor(30.17, 40.02, "highland-frontier", "low"),
   "phrygia-bilecik": anchor(30.15, 40.15, "highland-frontier", "low"),
