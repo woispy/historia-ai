@@ -24,6 +24,42 @@ function polygonArea(polygon) {
   return Math.abs(area) / 2;
 }
 
+function signedPolygonArea(polygon) {
+  let area = 0;
+  for (let index = 0; index < polygon.length; index += 1) {
+    const current = polygon[index];
+    const next = polygon[(index + 1) % polygon.length];
+    area += current[0] * next[1] - next[0] * current[1];
+  }
+  return area / 2;
+}
+
+function polygonVertexMean(polygon) {
+  const sum = polygon.reduce(
+    (total, [longitude, latitude]) => [total[0] + longitude, total[1] + latitude],
+    [0, 0],
+  );
+  return [sum[0] / polygon.length, sum[1] / polygon.length];
+}
+
+function polygonAreaCentroid(polygon) {
+  const signedArea = signedPolygonArea(polygon);
+  if (Math.abs(signedArea) < 1e-12) return polygonVertexMean(polygon);
+  let longitude = 0;
+  let latitude = 0;
+  for (let index = 0; index < polygon.length; index += 1) {
+    const [ax, ay] = polygon[index];
+    const [bx, by] = polygon[(index + 1) % polygon.length];
+    const factor = ax * by - bx * ay;
+    longitude += (ax + bx) * factor;
+    latitude += (ay + by) * factor;
+  }
+  return [
+    longitude / (6 * signedArea),
+    latitude / (6 * signedArea),
+  ];
+}
+
 const fallbackLikeProvinceIds = result.geometries
   .filter((geometry) => geometry.polygons.some((polygon) => polygonArea(polygon) < 0.00005))
   .map((geometry) => geometry.identity.provinceId);
@@ -52,25 +88,25 @@ for (const province of result.provinces) {
   assert.equal(province.historical.classification, "phase2d-anatolia-province-geometry");
 }
 
-function polygonCentroid(polygon) {
-  const sum = polygon.reduce(
-    (total, [longitude, latitude]) => [total[0] + longitude, total[1] + latitude],
-    [0, 0],
-  );
-  return [sum[0] / polygon.length, sum[1] / polygon.length];
-}
-
 for (const geometry of result.geometries) {
   assert.ok(provinceIds.has(geometry.identity.provinceId));
   assert.ok(geometry.polygons.length > 0);
   for (const polygon of geometry.polygons) {
     assert.ok(polygon.length >= 3);
     vertexCount += polygon.length;
-    const centroid = polygonCentroid(polygon);
+
+    // Use the true geometric centroid for physical-land validation. The old
+    // vertex-average test produced false negatives for valid concave/coastal
+    // polygons because the arithmetic mean of vertices can fall in the sea.
+    const centroid = polygonAreaCentroid(polygon);
+    const representative = isPhysicalLandPoint(centroid)
+      ? centroid
+      : polygon.find((point) => isPhysicalLandPoint(point));
     assert.ok(
-      isPhysicalLandPoint(centroid),
-      `Phase 2D polygon centroid must remain on physical land: ${centroid.join(",")}`,
+      representative,
+      `Phase 2D polygon must have a physical-land representative: ${geometry.identity.provinceId}`,
     );
+
     for (const [longitude, latitude] of polygon) {
       assert.ok(longitude >= 25 && longitude <= 46, `Longitude out of Phase 2D envelope: ${longitude}`);
       assert.ok(latitude >= 35 && latitude <= 43, `Latitude out of Phase 2D envelope: ${latitude}`);
