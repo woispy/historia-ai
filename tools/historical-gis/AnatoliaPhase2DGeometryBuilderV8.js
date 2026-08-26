@@ -25,13 +25,14 @@ const rawAnchor = (item) => refinementFor(item)?.geometryAnchor ?? refinementFor
 function pointInPolygon(point, polygon) {
   if (!polygon?.length) return false;
   let inside = false;
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i += 1) {
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; i += 1) {
     const a = polygon[i];
     const b = polygon[j];
     if (
       (a[1] > point[1]) !== (b[1] > point[1])
       && point[0] < ((b[0] - a[0]) * (point[1] - a[1])) / ((b[1] - a[1]) || EPS) + a[0]
     ) inside = !inside;
+    j = i;
   }
   return inside;
 }
@@ -95,8 +96,6 @@ function isStaticLandPoint(point) {
 }
 
 function isPhysicalLandPoint(point) {
-  // Explicit coast corrections have precedence over coarse generated lake
-  // masks. This is the physical-land authority, not a political exception.
   if (isCoastCorrectionLandPoint(point)) return true;
   return isStaticLandPoint(point) && !inLake(point);
 }
@@ -127,13 +126,7 @@ function halfPlane(polygon, a, b, c) {
 function powerCell(index, sites, weights) {
   const site = sites[index].point;
   const weight = weights[sites[index].provinceId] ?? 0;
-  let polygon = [
-    [BBOX[0], BBOX[1]],
-    [BBOX[2], BBOX[1]],
-    [BBOX[2], BBOX[3]],
-    [BBOX[0], BBOX[3]],
-  ];
-
+  let polygon = [[BBOX[0], BBOX[1]], [BBOX[2], BBOX[1]], [BBOX[2], BBOX[3]], [BBOX[0], BBOX[3]]];
   for (let other = 0; other < sites.length; other += 1) {
     if (other === index) continue;
     const p = sites[other].point;
@@ -246,10 +239,7 @@ function provinceAsset(item, polygons) {
     header: headers(item, "province"),
     identity: { id: item.id, name: item.name },
     references: { geometryId: item.id, countryId: item.countryId, capitalCityId: item.cityId },
-    ownership: {
-      countryId: item.countryId,
-      ownerId: item.historicalControl.controllerAt1300 ?? item.countryId,
-    },
+    ownership: { countryId: item.countryId, ownerId: item.historicalControl.controllerAt1300 ?? item.countryId },
     historical: {
       sourceFeatureId: item.id,
       sourceFeatureIndex: null,
@@ -315,13 +305,11 @@ function median(values) {
 function solveWeights(sites) {
   const weights = Object.fromEntries(sites.map((site) => [site.provinceId, 0]));
   let partition = buildPartition(sites, weights);
-
   for (let iteration = 0; iteration < MAX_WEIGHT_ITERATIONS; iteration += 1) {
     const summary = areaSummary(partition);
     const medianArea = median(summary.map((item) => item.area));
     const oversized = summary.filter((item) => item.area > medianArea * MAX_AREA_RATIO);
     if (!oversized.length) return { weights, partition, iterations: iteration };
-
     for (const item of oversized) {
       const ratio = item.area / medianArea;
       const step = Math.min(MAX_WEIGHT_STEP, Math.max(0.25, (ratio - MAX_AREA_RATIO) * 1.5));
@@ -329,7 +317,6 @@ function solveWeights(sites) {
     }
     partition = buildPartition(sites, weights);
   }
-
   const summary = areaSummary(partition);
   const medianArea = median(summary.map((item) => item.area));
   const maxArea = Math.max(...summary.map((item) => item.area));
@@ -361,19 +348,33 @@ export function buildAnatoliaPhase2DAssets() {
   const solved = solveWeights(sites);
   const provinces = [];
   const geometries = [];
+  let polygonCount = 0;
   for (const item of ANATOLIA_PROVINCE_METADATA) {
     const polygons = solved.partition.get(item.id) ?? [];
     if (!polygons.length) throw new Error(`Phase 2D V8 produced no geometry for ${item.id}`);
+    polygonCount += polygons.length;
     provinces.push(provinceAsset(item, polygons));
     geometries.push(geometryAsset(item, polygons));
   }
 
   const physicalSamplingSiteCount = samplingSiteCount();
+  const provinceCount = provinces.length;
+  const politicalSiteCount = sites.length;
+  const siteCount = physicalSamplingSiteCount + politicalSiteCount;
+  const vertexCount = geometries.reduce((sum, geometry) => sum + geometry.polygons.reduce((n, polygon) => n + polygon.length, 0), 0);
 
   return {
     schemaVersion: 1,
     geometryVersion: 11,
     generatedAt: "1300-01-01T00:00:00.000Z",
+    historicalDate: "1300-01-01",
+    provinceCount,
+    fallbackProvinceCount: 0,
+    siteCount,
+    politicalSiteCount,
+    barrierSiteCount: 0,
+    polygonCount,
+    vertexCount,
     physicalSamplingSiteCount,
     sites,
     provinces,
