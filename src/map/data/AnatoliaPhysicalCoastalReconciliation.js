@@ -22,12 +22,13 @@ const BODRUM_PENINSULA = Object.freeze([
 function pointInPolygon(point, polygon) {
   let inside = false;
   const [x, y] = point;
-  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index += 1) {
+  for (let index = 0, previous = polygon.length - 1; index < polygon.length; index += 1) {
     const [xi, yi] = polygon[index];
     const [xj, yj] = polygon[previous];
     const crosses = (yi > y) !== (yj > y)
       && x < ((xj - xi) * (y - yi)) / (yj - yi || Number.EPSILON) + xi;
     if (crosses) inside = !inside;
+    previous = index;
   }
   return inside;
 }
