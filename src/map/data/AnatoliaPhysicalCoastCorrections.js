@@ -58,4 +58,10 @@ export const ANATOLIA_PHYSICAL_COAST_CORRECTIONS = Object.freeze([
     ],
     controlPoints: [[27.57, 37.27]],
   },
+  {
+    id: "mentese-halikarnassos-control",
+    reason: "The lightweight Aegean mainland outline omits the Bodrum/Halikarnassos terrestrial control point; preserve the historical province anchor without expanding the coarse land mask into surrounding sea.",
+    coordinates: [],
+    controlPoints: [[27.43, 37.03]],
+  },
 ]);
