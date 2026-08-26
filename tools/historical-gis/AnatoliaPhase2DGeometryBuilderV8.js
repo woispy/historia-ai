@@ -216,15 +216,18 @@ function clipLandByCell(land, cell) {
   return clipPolygonByRing(land, cell);
 }
 
-function representativeInsideExclusion(polygon, exclusion) {
-  const candidates = [polygonAreaCentroid(polygon), polygonVertexMean(polygon), ...polygon];
-  return candidates.some((point) => pointInPolygon(point, exclusion));
+function polygonTouchesExclusion(polygon, exclusion) {
+  if (!polygon.length) return false;
+  const centroid = polygonAreaCentroid(polygon);
+  if (pointInPolygon(centroid, exclusion)) return true;
+  return polygon.some((point) => pointInPolygon(point, exclusion));
 }
 
-function excludeRingFromPolygon(polygon, exclusion) {
-  if (!polygon.length || !exclusion.length) return polygon;
-  if (!representativeInsideExclusion(polygon, exclusion)) return polygon;
-  return [];
+function exclusionAllowsPolygon(polygon, exclusions) {
+  if (!exclusions.length) return true;
+  const representative = physicalRepresentative(polygon);
+  if (!representative) return false;
+  return !exclusions.some((exclusion) => polygonTouchesExclusion(polygon, exclusion) && pointInPolygon(representative, exclusion));
 }
 
 function clipCellToMainland(cell) {
@@ -232,21 +235,12 @@ function clipCellToMainland(cell) {
     .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
   const lakeRings = lakePolygons();
   const explicitExclusions = exclusionPolygons();
-  const filtered = [];
-  for (const candidate of candidates) {
-    if (lakeRings.some((ring) => pointInPolygon(polygonAreaCentroid(candidate), ring))) continue;
-    let polygon = candidate;
-    let removed = false;
-    for (const exclusion of explicitExclusions) {
-      polygon = excludeRingFromPolygon(polygon, exclusion);
-      if (!polygon.length) {
-        removed = true;
-        break;
-      }
-    }
-    if (!removed && polygon.length >= 3 && area(polygon) >= MIN_AREA) filtered.push(polygon);
-  }
-  return filtered;
+  return candidates.filter((polygon) => {
+    const representative = polygonAreaCentroid(polygon);
+    if (lakeRings.some((ring) => pointInPolygon(representative, ring))) return false;
+    if (!exclusionAllowsPolygon(polygon, explicitExclusions)) return false;
+    return true;
+  });
 }
 
 function filterPhysicalPolygons(polygons, provinceId) {
@@ -263,10 +257,7 @@ function buildControlSites() {
 function validateCorrectionTopology() {
   for (const correction of ANATOLIA_PHYSICAL_COAST_CORRECTIONS) {
     const exclusion = correction.exclusionCoordinates ?? [];
-    const landControls = [
-      ...(correction.landControlPoints ?? []),
-      ...(correction.controlPoints ?? []),
-    ];
+    const landControls = [...(correction.landControlPoints ?? []), ...(correction.controlPoints ?? [])];
     for (const controlPoint of landControls) {
       if (exclusion.some((polygon) => pointInPolygon(controlPoint, polygon))) throw new Error(`Physical correction ${correction.id} marks a land control point inside an exclusion polygon: ${controlPoint.join(",")}`);
     }
