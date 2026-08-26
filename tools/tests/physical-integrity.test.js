@@ -154,8 +154,12 @@ for (let index = 0; index < allPolygons.length; index += 1) {
     const left = allPolygons[index];
     const right = allPolygons[otherIndex];
     if (left.provinceId === right.provinceId) continue;
+    const overlap = polygonsOverlapPositiveArea(left.polygon, right.polygon);
+    if (overlap && left.provinceId === "caria-mylasa" && right.provinceId === "caria-halikarnassos") {
+      console.error("PHYSICAL_OVERLAP_DIAGNOSTIC", JSON.stringify({ left, right }, null, 2));
+    }
     assert.equal(
-      polygonsOverlapPositiveArea(left.polygon, right.polygon),
+      overlap,
       false,
       `Positive-area overlap detected between ${left.provinceId} and ${right.provinceId}`,
     );
