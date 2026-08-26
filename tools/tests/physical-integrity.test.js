@@ -82,11 +82,7 @@ function polygonsOverlapPositiveArea(left, right) {
     for (let rightIndex = 0; rightIndex < right.length; rightIndex += 1) {
       const rightStart = right[rightIndex];
       const rightEnd = right[(rightIndex + 1) % right.length];
-      assert.equal(
-        segmentIntersection(leftStart, leftEnd, rightStart, rightEnd),
-        false,
-        "Positive-area overlap audit encountered a crossing boundary; inspect the reported province pair.",
-      );
+      if (segmentIntersection(leftStart, leftEnd, rightStart, rightEnd)) return true;
     }
   }
 
