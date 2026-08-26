@@ -1,5 +1,6 @@
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
+import { ANATOLIA_PHYSICAL_COAST_CORRECTIONS } from "../../src/map/data/AnatoliaPhysicalCoastCorrections.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 import {
   ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST,
@@ -73,11 +74,16 @@ function landPolygons() {
   return ANATOLIA_PHYSICAL_ATLAS.landPolygons.filter((polygon) => area(polygon) >= MAINLAND_MIN_AREA);
 }
 
+function isCoastCorrectionLandPoint(point) {
+  return ANATOLIA_PHYSICAL_COAST_CORRECTIONS.some((correction) => pointInPolygon(point, correction.coordinates));
+}
+
 function inLake(point) {
   return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygon(point, lake.coordinates));
 }
 
 function isStaticLandPoint(point) {
+  if (isCoastCorrectionLandPoint(point)) return true;
   if (ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon))) return true;
   let distance = Infinity;
   for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) distance = Math.min(distance, distanceToPolygon(point, polygon));
@@ -261,6 +267,7 @@ function provinceAsset(item, polygons) {
 function geometryAsset(item, polygons) {
   return {
     header: headers(item, "geometry"),
+    assetVersion: 9,
     identity: { id: item.id, provinceId: item.id },
     metadata: {
       sourceFeatureId: item.id,
@@ -359,7 +366,6 @@ export function buildAnatoliaPhase2DAssets() {
     geometries.push(geometryAsset(item, polygons));
   }
 
-  const naturalFeatureSiteCount = 0;
   const physicalSamplingSiteCount = samplingSiteCount();
 
   return {
@@ -369,12 +375,12 @@ export function buildAnatoliaPhase2DAssets() {
     provider: "historia-ai-curated-cartography",
     dataset: "anatolia-province-geometry-1300",
     projection: "EPSG:4326",
-    method: "38 historical province identities partitioned by one historical anchor per province using a deterministic weighted power diagram, clipped to the Anatolian mainland physical mask; no support-control fragments and no per-province shrink pass",
-    siteCount: physicalSamplingSiteCount + sites.length + naturalFeatureSiteCount,
+    method: "38 historical province identities partitioned by one historical anchor per province using a deterministic weighted power diagram, clipped to the Anatolian mainland physical mask with explicit physical-coast corrections; no support-control fragments and no per-province shrink pass",
+    siteCount: physicalSamplingSiteCount + sites.length,
     politicalSiteCount: sites.length,
     physicalSamplingSiteCount,
     barrierSiteCount: 0,
-    naturalFeatureSiteCount,
+    naturalFeatureSiteCount: 0,
     supportSiteCount: 0,
     fallbackProvinceCount: 0,
     provinceCount: provinces.length,
