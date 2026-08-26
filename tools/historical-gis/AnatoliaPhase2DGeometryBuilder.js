@@ -314,38 +314,43 @@ function polygonCentroid(polygon) {
 }
 
 function createAnchorFallbackPolygon(centroid, requiresLandSafe = false) {
-  const radii = [0.002, 0.001, 0.0005];
-  const directions = 16;
-  const radialStep = 0.005;
-  const maxRadius = 1;
+  const polygonRadii = [0.002, 0.001, 0.0005, 0.00025, 0.0001, 0.00005];
+  const searchPasses = [
+    { radialStep: 0.0025, maxRadius: 0.25, directions: 32 },
+    { radialStep: 0.005, maxRadius: 0.75, directions: 32 },
+    { radialStep: 0.01, maxRadius: 1.5, directions: 32 },
+  ];
 
   if (!requiresLandSafe) {
     return [0, 1, 2, 3, 4, 5].map((index) => {
       const angle = (index / 6) * Math.PI * 2;
       return [
-        centroid[0] + Math.cos(angle) * radii[1],
-        centroid[1] + Math.sin(angle) * radii[1],
+        centroid[0] + Math.cos(angle) * polygonRadii[1],
+        centroid[1] + Math.sin(angle) * polygonRadii[1],
       ];
     });
   }
 
-  for (let radius = 0; radius <= maxRadius; radius += radialStep) {
-    for (let direction = 0; direction < directions; direction += 1) {
-      const angle = (direction / directions) * Math.PI * 2;
-      const center = [
-        centroid[0] + Math.cos(angle) * radius,
-        centroid[1] + Math.sin(angle) * radius,
-      ];
-      if (!isWithinAnatoliaEnvelope(center) || !isPhysicalLandPoint(center)) continue;
-      for (const polygonRadius of radii) {
-        const polygon = Array.from({ length: 6 }, (_, index) => {
-          const polygonAngle = (index / 6) * Math.PI * 2;
-          return [
-            center[0] + Math.cos(polygonAngle) * polygonRadius,
-            center[1] + Math.sin(polygonAngle) * polygonRadius,
-          ];
-        });
-        if (isPhysicalLandPolygon(polygon)) return polygon;
+  for (const search of searchPasses) {
+    for (let radius = 0; radius <= search.maxRadius; radius += search.radialStep) {
+      for (let direction = 0; direction < search.directions; direction += 1) {
+        const angle = (direction / search.directions) * Math.PI * 2;
+        const center = [
+          centroid[0] + Math.cos(angle) * radius,
+          centroid[1] + Math.sin(angle) * radius,
+        ];
+        if (!isWithinAnatoliaEnvelope(center) || !isUsableCartographicPoint(center)) continue;
+
+        for (const polygonRadius of polygonRadii) {
+          const polygon = Array.from({ length: 6 }, (_, index) => {
+            const polygonAngle = (index / 6) * Math.PI * 2;
+            return [
+              center[0] + Math.cos(polygonAngle) * polygonRadius,
+              center[1] + Math.sin(polygonAngle) * polygonRadius,
+            ];
+          });
+          if (isPhysicalLandPolygon(polygon)) return polygon;
+        }
       }
     }
   }
