@@ -102,6 +102,8 @@ assert.equal(result.provinceCount, ANATOLIA_PROVINCE_METADATA.length);
 assert.equal(result.provinceCount, 38);
 assert.equal(result.provinces.length, 38);
 assert.equal(result.geometries.length, 38);
+assert.equal(isPhysicalLandPoint([27.43, 37.03]), true, "Halikarnassos curated coastal land must be physical land");
+console.log(`PHYSICAL_DIAGNOSTIC fallbackProvinceCount=${result.fallbackProvinceCount} halikarnassosPolygons=${result.geometries.find((geometry) => geometry.identity.provinceId === "caria-halikarnassos").polygons.length}`);
 
 const allPolygons = [];
 const provinceIds = new Set();
