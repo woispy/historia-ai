@@ -1,7 +1,7 @@
 /**
  * Physical-coast corrections for details omitted by the lightweight mainland
- * atlas. These are land geometries, not political fallbacks. They participate
- * in the same physical-land authority used by province generation.
+ * atlas. Corrections can add terrestrial detail or explicitly exclude water
+ * that the coarse mainland ring incorrectly includes.
  */
 
 export const ANATOLIA_PHYSICAL_COAST_CORRECTIONS = Object.freeze([
@@ -14,6 +14,7 @@ export const ANATOLIA_PHYSICAL_COAST_CORRECTIONS = Object.freeze([
       [35.34, 41.72], [35.18, 41.60], [35.02, 41.54], [34.82, 41.62],
     ],
     controlPoints: [],
+    exclusionCoordinates: [],
   },
   {
     id: "nicaea-iznik-northshore",
@@ -23,6 +24,7 @@ export const ANATOLIA_PHYSICAL_COAST_CORRECTIONS = Object.freeze([
       [29.86, 40.44], [29.80, 40.47], [29.70, 40.46], [29.60, 40.43], [29.58, 40.39],
     ],
     controlPoints: [[29.69, 40.44]],
+    exclusionCoordinates: [],
   },
   {
     id: "mentese-pecin-milasa-hinterland",
@@ -32,34 +34,39 @@ export const ANATOLIA_PHYSICAL_COAST_CORRECTIONS = Object.freeze([
       [27.90, 37.36], [27.88, 37.26], [27.78, 37.18], [27.66, 37.10], [27.54, 37.02], [27.40, 37.08],
     ],
     controlPoints: [[27.57, 37.27]],
+    exclusionCoordinates: [],
   },
   {
     id: "mentese-halikarnassos-control",
     reason: "The lightweight Aegean mainland outline omits the Bodrum/Halikarnassos terrestrial control point; preserve the historical province anchor with a minimal inland physical-land patch rather than expanding the coarse land mask into surrounding sea.",
     coordinates: [[27.42, 37.02], [27.48, 37.04], [27.50, 37.09], [27.43, 37.08], [27.42, 37.02]],
     controlPoints: [[27.43, 37.03]],
+    exclusionCoordinates: [],
   },
   {
     id: "pontus-amisos-control",
     reason: "The lightweight Black Sea mainland outline omits the Samsun/Amisos terrestrial control point; preserve the historical province anchor with a minimal inland physical-land patch rather than expanding the coarse land mask into the Black Sea.",
     coordinates: [[36.30, 41.25], [36.38, 41.26], [36.40, 41.34], [36.32, 41.34], [36.30, 41.25]],
     controlPoints: [[36.33, 41.29]],
+    exclusionCoordinates: [],
   },
   {
     id: "pontus-kastamon-control",
     reason: "The lightweight Pontus mainland outline resolves the Kastamon hinterland too coarsely for the historical province geometry anchor; preserve the terrestrial site with a minimal physical-land patch.",
     coordinates: [[33.72, 41.32], [33.84, 41.32], [33.88, 41.43], [33.72, 41.44], [33.72, 41.32]],
     controlPoints: [[33.78, 41.38]],
+    exclusionCoordinates: [],
   },
   {
     id: "mysia-balikesir-marmara-land",
-    reason: "The lightweight Anatolia mainland ring overextends into the southern Marmara coastline; restore the terrestrial Balıkesir control band without changing political ownership.",
-    coordinates: [
-      [27.50, 39.18], [27.58, 39.30], [27.70, 39.42], [27.84, 39.54], [27.98, 39.66],
-      [28.10, 39.78], [28.16, 39.90], [28.10, 40.02], [28.00, 40.06], [27.90, 39.98],
-      [27.78, 39.90], [27.66, 39.82], [27.54, 39.74], [27.44, 39.64], [27.36, 39.52],
-      [27.30, 39.40], [27.32, 39.28], [27.40, 39.20], [27.50, 39.18],
-    ],
+    reason: "The lightweight Anatolia mainland ring overextends into the southern Marmara coastline; trim the coarse mainland with an explicit water exclusion and preserve the terrestrial Balıkesir control site.",
+    coordinates: [],
     controlPoints: [[27.88, 39.65]],
+    exclusionCoordinates: [[
+      [26.90, 40.20], [27.12, 40.30], [27.34, 40.42], [27.60, 40.55],
+      [27.88, 40.68], [28.12, 40.78], [28.26, 40.86], [28.20, 40.96],
+      [27.96, 40.92], [27.72, 40.82], [27.46, 40.70], [27.22, 40.58],
+      [27.02, 40.44], [26.88, 40.30], [26.90, 40.20],
+    ]],
   },
 ]);
