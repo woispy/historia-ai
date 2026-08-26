@@ -56,16 +56,37 @@ function area(polygon) {
   return Math.abs(signedArea(polygon));
 }
 
+function polygonVertexMean(polygon) {
+  const sum = polygon.reduce((total, [longitude, latitude]) => [total[0] + longitude, total[1] + latitude], [0, 0]);
+  return [sum[0] / polygon.length, sum[1] / polygon.length];
+}
+
+function polygonAreaCentroid(polygon) {
+  const signed = signedArea(polygon);
+  if (Math.abs(signed) < EPS) return polygonVertexMean(polygon);
+  let x = 0;
+  let y = 0;
+  for (let i = 0; i < polygon.length; i += 1) {
+    const [ax, ay] = polygon[i];
+    const [bx, by] = polygon[(i + 1) % polygon.length];
+    const factor = ax * by - bx * ay;
+    x += (ax + bx) * factor;
+    y += (ay + by) * factor;
+  }
+  return [x / (6 * signed), y / (6 * signed)];
+}
+
+function physicalRepresentative(polygon) {
+  const candidates = [polygonAreaCentroid(polygon), polygonVertexMean(polygon), ...polygon];
+  return candidates.find((candidate) => isPhysicalLandPoint(candidate)) ?? null;
+}
+
 function cross(a, b, point) {
   return (b[0] - a[0]) * (point[1] - a[1]) - (b[1] - a[1]) * (point[0] - a[0]);
 }
 
 function landPolygons() {
-  const atlasLand = ANATOLIA_PHYSICAL_ATLAS.landPolygons.filter((polygon) => area(polygon) >= MAINLAND_MIN_AREA);
-  const correctionLand = ANATOLIA_PHYSICAL_COAST_CORRECTIONS
-    .map((correction) => correction.coordinates)
-    .filter((polygon) => polygon?.length >= 3 && area(polygon) >= MIN_AREA);
-  return [...atlasLand, ...correctionLand];
+  return ANATOLIA_PHYSICAL_ATLAS.landPolygons.filter((polygon) => area(polygon) >= MAINLAND_MIN_AREA);
 }
 
 function isCoastCorrectionLandPoint(point) {
@@ -167,6 +188,11 @@ function clipCellToMainland(cell) {
 function filterPhysicalPolygons(polygons, provinceId) {
   const safe = polygons.filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
   if (!safe.length) throw new Error(`Phase 2D V8 produced no physical-land geometry for ${provinceId}`);
+  for (const polygon of safe) {
+    if (!physicalRepresentative(polygon)) {
+      throw new Error(`Phase 2D V8 produced geometry without a physical-land representative for ${provinceId}`);
+    }
+  }
   return safe;
 }
 
