@@ -377,7 +377,7 @@ function createAnchorFallbackPolygon(centroid, requiresLandSafe = false, physica
   }
 
   const explicitAnchor = physicalLandAnchor ?? PHYSICAL_LAND_ANCHORS["bithynia-nicaea"];
-  if (explicitAnchor && isWithinAnatoliaEnvelope(explicitAnchor) && isUsableCartographicPoint(explicitAnchor)) {
+  if (explicitAnchor && isWithinAnatoliaEnvelope(explicitAnchor) && isPhysicalLandPoint(explicitAnchor)) {
     const polygon = buildFallbackPolygon(explicitAnchor, polygonRadii);
     if (polygon.length >= 3) return polygon;
   }
@@ -394,7 +394,7 @@ function createAnchorFallbackPolygon(centroid, requiresLandSafe = false, physica
           shore.shore[0] + unit[0] * distance * sign,
           shore.shore[1] + unit[1] * distance * sign,
         ];
-        if (!isWithinAnatoliaEnvelope(center) || !isUsableCartographicPoint(center)) continue;
+        if (!isWithinAnatoliaEnvelope(center) || !isPhysicalLandPoint(center)) continue;
         const polygon = buildFallbackPolygon(center, polygonRadii);
         if (polygon.length >= 3) return polygon;
       }
@@ -409,7 +409,7 @@ function createAnchorFallbackPolygon(centroid, requiresLandSafe = false, physica
           centroid[0] + Math.cos(angle) * radius,
           centroid[1] + Math.sin(angle) * radius,
         ];
-        if (!isWithinAnatoliaEnvelope(center) || !isUsableCartographicPoint(center)) continue;
+        if (!isWithinAnatoliaEnvelope(center) || !isPhysicalLandPoint(center)) continue;
         const polygon = buildFallbackPolygon(center, polygonRadii);
         if (polygon.length >= 3) return polygon;
       }
@@ -556,4 +556,4 @@ export function isAnatoliaGeometryPoint(point) {
   return isWithinAnatoliaEnvelope(point);
 }
 
-export { isPhysicalLandPoint };
+export { isPhysicalLandPoint, isPhysicalLandPolygon };
