@@ -13,7 +13,7 @@ const COASTAL_TOLERANCE = 0.06;
 // Keep the physical reconciliation anchors separate until they can be derived
 // from a higher-resolution authoritative shoreline dataset.
 const PHYSICAL_LAND_ANCHORS = Object.freeze({
-  "bithynia-nicaea": [29.72, 40.60],
+  "bithynia-nicaea": [29.72, 40.15],
   "pisidia-egirdir": [30.85, 37.98],
   "pisidia-beysehir": [31.72, 37.78],
 });
