@@ -19,7 +19,8 @@ const MAX_AREA_RATIO = 4.2;
 const MAX_WEIGHT_ITERATIONS = 24;
 const MAX_WEIGHT_STEP = 4;
 
-const rawAnchor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id]?.anchor ?? item.centroid;
+const refinementFor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id] ?? null;
+const rawAnchor = (item) => refinementFor(item)?.geometryAnchor ?? refinementFor(item)?.anchor ?? item.centroid;
 
 function pointInPolygon(point, polygon) {
   if (!polygon?.length) return false;
@@ -91,9 +92,6 @@ function isStaticLandPoint(point) {
 }
 
 function isPhysicalLandPoint(point) {
-  // Explicit physical-coast corrections are authoritative land geometry. They
-  // reconcile omissions in the lightweight mainland mask and therefore take
-  // precedence over coarse generated lake coverage at the corrected shore.
   if (isCoastCorrectionLandPoint(point)) return true;
   return isStaticLandPoint(point) && !inLake(point);
 }
@@ -121,10 +119,6 @@ function halfPlane(polygon, a, b, c) {
   return output;
 }
 
-// Power-diagram cells retain one site per province, so every province has one
-// contiguous convex ownership cell before the physical-land clipping. Unlike
-// the previous multi-control Voronoi, this cannot create detached province
-// islands inside another province.
 function powerCell(index, sites, weights) {
   const site = sites[index].point;
   const weight = weights[sites[index].provinceId] ?? 0;
@@ -260,7 +254,7 @@ function provinceAsset(item, polygons) {
       borderPrecision: headers(item, "province").borderPrecision,
       classification: "phase2d-anatolia-province-geometry",
       precision: "single-anchor-weighted-land-partition",
-      anchor: rawAnchor(item),
+      anchor: refinementFor(item)?.anchor ?? item.centroid,
       historicalControl: item.historicalControl,
     },
     geometry: { coastal: item.coastal, port: item.port, terrain: item.terrain, strategic: item.strategic },
@@ -271,7 +265,6 @@ function provinceAsset(item, polygons) {
 function geometryAsset(item, polygons) {
   return {
     header: headers(item, "geometry"),
-    assetVersion: 9,
     identity: { id: item.id, provinceId: item.id },
     metadata: {
       sourceFeatureId: item.id,
@@ -379,7 +372,7 @@ export function buildAnatoliaPhase2DAssets() {
     provider: "historia-ai-curated-cartography",
     dataset: "anatolia-province-geometry-1300",
     projection: "EPSG:4326",
-    method: "38 historical province identities partitioned by one historical anchor per province using a deterministic weighted power diagram, clipped to the Anatolian mainland physical mask with explicit physical-coast corrections; no support-control fragments and no per-province shrink pass",
+    method: "38 historical province identities partitioned by one geometry anchor per province using a deterministic weighted power diagram, clipped to the Anatolian mainland physical mask with explicit physical-coast corrections; no support-control fragments and no per-province shrink pass",
     siteCount: physicalSamplingSiteCount + sites.length,
     politicalSiteCount: sites.length,
     physicalSamplingSiteCount,
