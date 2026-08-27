@@ -106,7 +106,7 @@ export const ANATOLIA_PHYSICAL_COAST_CORRECTIONS = Object.freeze([
     id: "south-marmara-anatolian-coast-exclusion",
     reason: "The coarse mainland ring still exposes the Marmara-facing Anatolian coastal shelf as physical land where the 1300 province partition must stop at the southern Marmara shoreline.",
     coordinates: [],
-    controlPoints: [],
+    controlPoints: [[27.88, 39.65]],
     landControlPoints: [[27.88, 39.65]],
     exclusionCoordinates: [[
       [27.70, 40.56], [27.92, 40.66], [28.20, 40.78], [28.44, 40.92],
@@ -117,15 +117,15 @@ export const ANATOLIA_PHYSICAL_COAST_CORRECTIONS = Object.freeze([
   },
   {
     id: "mysia-balikesir-marmara-land",
-    reason: "The lightweight Anatolia mainland ring overextends into the southern Marmara coastline; trim the coarse mainland with an explicit water exclusion while preserving the terrestrial Balıkesir control site.",
+    reason: "The lightweight Anatolia mainland ring overextends into the southern Marmara coastline; trim the coarse mainland with an explicit water exclusion while preserving the terrestrial Balıkesir control site. The exclusion shoreline is kept just seaward of the coarse atlas shoreline so shared boundary vertices remain authoritative land.",
     coordinates: [],
     controlPoints: [[27.88, 39.65]],
     landControlPoints: [[27.88, 39.65]],
     exclusionCoordinates: [[
-      [26.90, 40.20], [27.12, 40.30], [27.34, 40.42], [27.60, 40.55],
-      [27.88, 40.68], [28.12, 40.78], [28.26, 40.86], [28.20, 40.96],
-      [27.96, 40.92], [27.72, 40.82], [27.46, 40.70], [27.22, 40.58],
-      [27.02, 40.44], [26.88, 40.30], [26.90, 40.20],
+      [26.90, 40.21], [27.12, 40.31], [27.34, 40.43], [27.60, 40.56],
+      [27.88, 40.69], [28.12, 40.79], [28.26, 40.87], [28.20, 40.97],
+      [27.96, 40.93], [27.72, 40.83], [27.46, 40.71], [27.22, 40.59],
+      [27.02, 40.45], [26.88, 40.31], [26.90, 40.21],
     ]],
   },
 ]);
