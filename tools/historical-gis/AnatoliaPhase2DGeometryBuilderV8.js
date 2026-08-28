@@ -133,10 +133,14 @@ function inLake(point) {
 
 export function isPhysicalLandPoint(point) {
   if (!Array.isArray(point) || point.length !== 2) return false;
-  if (inLake(point)) return false;
-  if (isExplicitLandControlPoint(point) || isCorrectionShorelineVertex(point) || isAtlasLandBoundaryPoint(point)) return true;
+  // Physical authority is ordered: explicit water wins first; curated
+  // terrestrial corrections then override generated hydrography; generated
+  // lakes and the coarse atlas are fallbacks, never higher authority.
   if (isExplicitExcludedWater(point)) return false;
+  if (isExplicitLandControlPoint(point) || isCorrectionShorelineVertex(point)) return true;
   if (inCorrectionLandPatch(point)) return true;
+  if (inLake(point)) return false;
+  if (isAtlasLandBoundaryPoint(point)) return true;
   if (ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon))) return true;
   let distance = Infinity;
   for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
@@ -193,9 +197,6 @@ function powerCell(index, sites, weights, forceUnweighted = false) {
       2 * (point[1] - site[1]),
       point[0] ** 2 + point[1] ** 2 - site[0] ** 2 - site[1] ** 2 + weight - otherWeight,
     );
-    // A weighted cell must never lose its own anchor. If this half-plane
-    // would do that, ignore the weighted constraint for this pair. This keeps
-    // the partition deterministic and anchor-safe without a geometry hack.
     if (next.length >= 3 && pointInPolygon(site, next)) polygon = next;
   }
   return polygon;
@@ -258,7 +259,6 @@ function repairPolygon(polygon, anchorPoint) {
   const center = centerCandidates.find((point) => point && isPhysicalLandPoint(point) && pointInPolygon(point, polygon))
     ?? centerCandidates.find((point) => point && isPhysicalLandPoint(point));
   if (!center) return [];
-
   let result = polygon;
   for (let iteration = 0; iteration < MAX_REPAIR_ITERATIONS; iteration += 1) {
     result = result.map((point) => [
@@ -279,14 +279,9 @@ function clipCellToPhysicalLand(cell, anchorPoint) {
   const candidates = landSources
     .map((land) => clipLandByCell(land, cell))
     .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
-
-  // Prefer the land fragment containing the province anchor. This is the
-  // invariant that prevents a neighbouring coastal fragment from becoming a
-  // province's geometry merely because it has more area.
   const anchored = candidates.filter((polygon) => pointInPolygon(anchorPoint, polygon));
   const ordered = [...anchored, ...candidates.filter((polygon) => !anchored.includes(polygon))]
     .sort((a, b) => area(b) - area(a));
-
   return ordered
     .map((polygon) => repairPolygon(polygon, anchorPoint))
     .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA && polygonIsSafe(polygon));
@@ -414,11 +409,7 @@ function buildPartition(sites, weights) {
     const site = sites[index];
     let cell = powerCell(index, sites, weights);
     if (!pointInPolygon(site.point, cell)) cell = powerCell(index, sites, weights, true);
-
     let polygons = clipCellToPhysicalLand(cell, site.point);
-    // A weighted cell can be physically valid yet miss the tiny coastal land
-    // fragment containing its anchor. Retry the same site with the unweighted
-    // anchor-safe partition instead of deleting or inventing geometry.
     if (!polygons.length) {
       const safeCell = powerCell(index, sites, weights, true);
       polygons = clipCellToPhysicalLand(safeCell, site.point);
@@ -489,8 +480,8 @@ export function buildAnatoliaPhase2DAssets() {
     geometries.push(geometryAsset(item, polygons));
   }
 
-  const polygonCount = geometries.reduce((sum, geometry) => sum + geometry.polygons.length, 0);
-  const fallbackProvinceCount = geometries.filter((geometry) => geometry.polygons.some((polygon) => area(polygon) < MIN_AREA)).length;
+  const polygonCount = geometries.reduce((sum, geometry) => sum + geometry.geometry.polygons.length, 0);
+  const fallbackProvinceCount = geometries.filter((geometry) => geometry.geometry.polygons.some((polygon) => area(polygon) < MIN_AREA)).length;
 
   return {
     historicalDate: "1300-01-01",
