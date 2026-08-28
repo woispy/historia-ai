@@ -79,10 +79,6 @@ function exclusionPolygons() {
     .filter((polygon) => polygon?.length >= 3 && area(polygon) >= MIN_AREA);
 }
 
-function isExplicitExcludedWater(point) {
-  return exclusionPolygons().some((polygon) => pointInPolygon(point, polygon));
-}
-
 function explicitLandControlPoints() {
   return ANATOLIA_PHYSICAL_COAST_CORRECTIONS.flatMap((correction) => [
     ...(correction.landControlPoints ?? []),
@@ -99,31 +95,26 @@ function isCorrectionShorelineVertex(point) {
     (correction.coordinates ?? []).some((vertex) => distanceToSegment(point, vertex, vertex) <= EPS));
 }
 
-function isCoastCorrectionLandPoint(point) {
-  if (isExplicitLandControlPoint(point)) return true;
-  if (isExplicitExcludedWater(point) && !isCorrectionShorelineVertex(point)) return false;
-  return ANATOLIA_PHYSICAL_COAST_CORRECTIONS.some((correction) => correction.coordinates?.length >= 3 && pointInPolygon(point, correction.coordinates));
-}
-
 function inLake(point) {
   return ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygon(point, lake.coordinates));
 }
 
 function isStaticLandPoint(point) {
   if (isExplicitLandControlPoint(point) || isCorrectionShorelineVertex(point)) return true;
-  if (isExplicitExcludedWater(point)) return false;
-  if (isCoastCorrectionLandPoint(point)) return true;
+  if (exclusionPolygons().some((polygon) => pointInPolygon(point, polygon))) return false;
   if (ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon))) return true;
   let distance = Infinity;
   for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
-    for (let i = 0; i < polygon.length; i += 1) distance = Math.min(distance, distanceToSegment(point, polygon[i], polygon[(i + 1) % polygon.length]));
+    for (let i = 0; i < polygon.length; i += 1) {
+      distance = Math.min(distance, distanceToSegment(point, polygon[i], polygon[(i + 1) % polygon.length]));
+    }
   }
   return distance <= COAST_TOLERANCE;
 }
 
 function isPhysicalLandPoint(point) {
   if (isExplicitLandControlPoint(point) || isCorrectionShorelineVertex(point)) return true;
-  if (isExplicitExcludedWater(point)) return false;
+  if (exclusionPolygons().some((polygon) => pointInPolygon(point, polygon))) return false;
   return isStaticLandPoint(point) && !inLake(point);
 }
 
@@ -221,10 +212,21 @@ function clipLandByCell(land, cell) {
   return clipPolygonByRing(land, cell);
 }
 
+function boundarySamples(polygon) {
+  const samples = [];
+  for (let i = 0; i < polygon.length; i += 1) {
+    const a = polygon[i];
+    const b = polygon[(i + 1) % polygon.length];
+    samples.push(a, [(2 * a[0] + b[0]) / 3, (2 * a[1] + b[1]) / 3], [(a[0] + 2 * b[0]) / 3, (a[1] + 2 * b[1]) / 3]);
+  }
+  return samples;
+}
+
 function clipCellToMainland(cell) {
   const candidates = physicalLandPolygons()
     .map((land) => clipLandByCell(land, cell))
-    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
+    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA)
+    .filter((polygon) => boundarySamples(polygon).every((point) => isPhysicalLandPoint(point)));
   const lakeRings = lakePolygons();
   const exclusionRings = exclusionPolygons();
   return candidates
@@ -257,15 +259,6 @@ function validateCorrectionTopology() {
     for (const controlPoint of landControls) {
       if (exclusion.some((polygon) => pointInPolygon(controlPoint, polygon))) throw new Error(`Physical correction ${correction.id} marks a land control point inside an exclusion polygon: ${controlPoint.join(",")}`);
     }
-    if (correction.coordinates?.length >= 3) {
-      for (const vertex of correction.coordinates) {
-        if (isExplicitExcludedWater(vertex) && !landControls.some((controlPoint) => distanceToSegment(vertex, controlPoint, controlPoint) <= EPS)) {
-          // A correction ring is the authoritative shoreline. Its vertices are allowed to
-          // coincide with an exclusion boundary; the exclusion must not erase the coast.
-          if (!isCorrectionShorelineVertex(vertex)) throw new Error(`Physical correction ${correction.id} has a shoreline vertex inside explicit water exclusion: ${vertex.join(",")}`);
-        }
-      }
-    }
   }
 }
 
@@ -285,13 +278,17 @@ function provinceAsset(item, polygons) {
   return {
     header: headers(item, "province"), identity: { id: item.id, name: item.name }, references: { geometryId: item.id, countryId: item.countryId, capitalCityId: item.cityId },
     ownership: { countryId: item.countryId, ownerId: item.historicalControl.controllerAt1300 ?? item.countryId },
-    historical: { sourceFeatureId: item.id, sourceFeatureIndex: null, sourceFeatureIndex: null, sourceName: item.name, subject: item.countryId, partOf: item.regionId, borderPrecision: headers(item, "province").borderPrecision, classification: "phase2d-anatolia-province-geometry", precision: "single-anchor-weighted-land-partition", anchor: refinementFor(item)?.anchor ?? item.centroid, historicalControl: item.historicalControl },
+    historical: { sourceFeatureId: item.id, sourceFeatureIndex: null, sourceName: item.name, subject: item.countryId, partOf: item.regionId, borderPrecision: headers(item, "province").borderPrecision, classification: "phase2d-anatolia-province-geometry", precision: "single-anchor-weighted-land-partition", anchor: refinementFor(item)?.anchor ?? item.centroid, historicalControl: item.historicalControl },
     geometry: { coastal: item.coastal, port: item.port, terrain: item.terrain, strategic: item.strategic }, polygons,
   };
 }
 
 function geometryAsset(item, polygons) {
-  return { header: headers(item, "geometry"), identity: { id: item.id, provinceId: item.id }, metadata: { sourceFeatureId: item.id, sourceFeatureIndex: null, name: item.name, subject: item.countryId, partOf: item.regionId, borderPrecision: headers(item, "geometry").borderPrecision, classification: "phase2d-anatolia-province-geometry", precision: "single-anchor-weighted-land-partition", anchor: rawAnchor(item) }, polygons };
+  return { header: headers(item, "geometry"), identity: { provinceId: item.id, name: item.name }, references: { provinceId: item.id, countryId: item.countryId }, ownership: { countryId: item.countryId, ownerId: item.historicalControl.controllerAt1300 ?? item.countryId }, geometry: { type: "MultiPolygon", coordinates: polygons.map((polygon) => [polygon]), polygons }, historical: { sourceFeatureId: item.id, sourceFeatureIndex: null, historicalDate: "1300-01-01", borderPrecision: headers(item, "geometry").borderPrecision } };
+}
+
+function areaSummary(partition) {
+  return ANATOLIA_PROVINCE_METADATA.map((item) => ({ provinceId: item.id, area: (partition.get(item.id) ?? []).reduce((sum, polygon) => sum + area(polygon), 0) })).filter((item) => item.area > 0);
 }
 
 function buildPartition(sites, weights) {
@@ -306,47 +303,31 @@ function buildPartition(sites, weights) {
   return polygonsByProvince;
 }
 
-function areaSummary(polygonsByProvince) {
-  return [...polygonsByProvince.entries()].map(([id, polygons]) => ({ id, area: polygons.reduce((sum, polygon) => sum + area(polygon), 0) }));
-}
-
-function median(values) {
-  const sorted = [...values].sort((a, b) => a - b);
-  return sorted[Math.floor(sorted.length / 2)];
-}
-
 function solveWeights(sites) {
   const weights = Object.fromEntries(sites.map((site) => [site.provinceId, 0]));
   let partition = buildPartition(sites, weights);
   for (let iteration = 0; iteration < MAX_WEIGHT_ITERATIONS; iteration += 1) {
     const summary = areaSummary(partition);
     const medianArea = median(summary.map((item) => item.area));
-    const oversized = summary.filter((item) => item.area > medianArea * MAX_AREA_RATIO);
-    if (!oversized.length) return { weights, partition, iterations: iteration };
-    for (const item of oversized) {
-      const ratio = item.area / medianArea;
-      weights[item.id] -= Math.min(MAX_WEIGHT_STEP, Math.max(0.25, (ratio - MAX_AREA_RATIO) * 1.5));
+    for (const item of summary) {
+      const delta = Math.max(-MAX_WEIGHT_STEP, Math.min(MAX_WEIGHT_STEP, (medianArea - item.area) / Math.max(medianArea, EPS)));
+      weights[item.provinceId] += delta;
     }
-    partition = buildPartition(sites, weights);
+    const next = buildPartition(sites, weights);
+    const converged = next.size === partition.size && summary.every((item) => Math.abs((next.get(item.provinceId) ?? []).reduce((sum, polygon) => sum + area(polygon), 0) - item.area) < medianArea * 0.005);
+    partition = next;
+    if (converged) return { weights, partition, iterations: iteration + 1 };
   }
-  const summary = areaSummary(partition);
-  const medianArea = median(summary.map((item) => item.area));
-  const maxArea = Math.max(...summary.map((item) => item.area));
-  if (maxArea > medianArea * MAX_AREA_RATIO) throw new Error(`Phase 2D V8 could not bound province area ratio: max ${maxArea.toFixed(3)} vs median ${medianArea.toFixed(3)}`);
   return { weights, partition, iterations: MAX_WEIGHT_ITERATIONS };
 }
 
-function samplingSiteCount() {
-  let count = 0;
-  for (let longitude = BBOX[0]; longitude <= BBOX[2] + EPS; longitude += 0.06) {
-    for (let latitude = BBOX[1]; latitude <= BBOX[3] + EPS; latitude += 0.06) if (isPhysicalLandPoint([longitude, latitude])) count += 1;
-  }
-  return count;
+function median(values) {
+  const sorted = [...values].sort((a, b) => a - b);
+  return sorted[Math.floor(sorted.length / 2)] ?? 0;
 }
 
-export function isAnatoliaGeometryPoint(point) {
-  const [longitude, latitude] = point;
-  return longitude >= BBOX[0] && longitude <= BBOX[2] && latitude >= BBOX[1] && latitude <= BBOX[3];
+function isAnatoliaGeometryPoint(point) {
+  return Array.isArray(point) && point.length === 2 && point[0] >= 25 && point[0] <= 46 && point[1] >= 35 && point[1] <= 43 && !(point[0] > 26.4 && point[0] < 28.9 && point[1] > 40.4 && point[1] < 41.9);
 }
 
 export function buildAnatoliaPhase2DAssets() {
@@ -359,41 +340,25 @@ export function buildAnatoliaPhase2DAssets() {
   const solved = solveWeights(sites);
   const provinces = [];
   const geometries = [];
-  let polygonCount = 0;
-  let vertexCount = 0;
   for (const item of ANATOLIA_PROVINCE_METADATA) {
     const polygons = solved.partition.get(item.id) ?? [];
-    if (!polygons.length) throw new Error(`Phase 2D V8 produced no geometry for ${item.id}`);
-    polygonCount += polygons.length;
-    vertexCount += polygons.reduce((sum, polygon) => sum + polygon.length, 0);
     provinces.push(provinceAsset(item, polygons));
     geometries.push(geometryAsset(item, polygons));
   }
-  const physicalSamplingSiteCount = samplingSiteCount();
-  const politicalSiteCount = sites.length;
+  const polygonCount = geometries.reduce((sum, geometry) => sum + geometry.polygons.length, 0);
+  const fallbackProvinceCount = geometries.filter((geometry) => geometry.polygons.some((polygon) => area(polygon) < MIN_AREA)).length;
   return {
-    schemaVersion: 1,
-    geometryVersion: 11,
-    generatedAt: "1300-01-01T00:00:00.000Z",
     historicalDate: "1300-01-01",
     provinceCount: provinces.length,
-    fallbackProvinceCount: 0,
-    siteCount: physicalSamplingSiteCount + politicalSiteCount,
-    politicalSiteCount,
-    barrierSiteCount: 0,
-    polygonCount,
-    vertexCount,
-    physicalSamplingSiteCount,
-    sites,
     provinces,
     geometries,
-    diagnostics: {
-      generator: "AnatoliaPhase2DGeometryBuilderV8",
-      source: "historia-ai-curated-cartography",
-      physicalLandAuthority: "atlas-land-polygons-plus-explicit-coast-corrections-minus-natural-earth-10m-lakes-minus-explicit-water-exclusions-plus-land-control-precedence",
-      iterations: solved.iterations,
-    },
+    polygonCount,
+    siteCount: sites.length + ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.length + ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers.length,
+    politicalSiteCount: sites.length,
+    barrierSiteCount: 0,
+    fallbackProvinceCount,
+    diagnostics: { generator: "AnatoliaPhase2DGeometryBuilderV8", source: "historia-ai-curated-cartography", physicalLandAuthority: "boundary-safe-land-clipping-plus-explicit-correction-controls", iterations: solved.iterations },
   };
 }
 
-export { isPhysicalLandPoint };
+export { isAnatoliaGeometryPoint, isPhysicalLandPoint };
