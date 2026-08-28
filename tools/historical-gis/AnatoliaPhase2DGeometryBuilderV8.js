@@ -243,7 +243,8 @@ function shrinkToPhysicalLand(cell, anchorPoint) {
 function clipCellToPhysicalLand(cell, anchorPoint) {
   const candidates = ANATOLIA_PHYSICAL_ATLAS.landPolygons
     .map((land) => clipLandByCell(land, cell))
-    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
+    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA)
+    .filter((polygon) => pointInPolygon(anchorPoint, polygon));
 
   return candidates
     .map((polygon) => shrinkToPhysicalLand(polygon, anchorPoint))
