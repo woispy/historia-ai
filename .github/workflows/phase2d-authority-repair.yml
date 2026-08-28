@@ -66,6 +66,7 @@ jobs:
       - name: Verify targeted Phase 2D contracts
         run: |
           npm ci
+          npm run build:assets
           npm run test:anatolia-phase2d
           npm run test:anatolia-phase2d-physical-authority
       - name: Commit repair and remove temporary workflow
