@@ -90,9 +90,23 @@ function isExplicitLandControlPoint(point) {
   return explicitLandControlPoints().some((controlPoint) => distanceToSegment(point, controlPoint, controlPoint) <= EPS);
 }
 
+function correctionByShorelineVertex(point) {
+  return ANATOLIA_PHYSICAL_COAST_CORRECTIONS.find((correction) =>
+    (correction.coordinates ?? []).some((vertex) => distanceToSegment(point, vertex, vertex) <= EPS)) ?? null;
+}
+
 function isCorrectionShorelineVertex(point) {
-  return ANATOLIA_PHYSICAL_COAST_CORRECTIONS.some((correction) =>
-    (correction.coordinates ?? []).some((vertex) => distanceToSegment(point, vertex, vertex) <= EPS));
+  return Boolean(correctionByShorelineVertex(point));
+}
+
+function isExplicitExcludedWater(point) {
+  return exclusionPolygons().some((polygon) => pointInPolygon(point, polygon));
+}
+
+function isCoastCorrectionLandPoint(point) {
+  if (isExplicitLandControlPoint(point) || isCorrectionShorelineVertex(point)) return true;
+  if (isExplicitExcludedWater(point)) return false;
+  return ANATOLIA_PHYSICAL_COAST_CORRECTIONS.some((correction) => correction.coordinates?.length >= 3 && pointInPolygon(point, correction.coordinates));
 }
 
 function inLake(point) {
@@ -101,20 +115,19 @@ function inLake(point) {
 
 function isStaticLandPoint(point) {
   if (isExplicitLandControlPoint(point) || isCorrectionShorelineVertex(point)) return true;
-  if (exclusionPolygons().some((polygon) => pointInPolygon(point, polygon))) return false;
+  if (isExplicitExcludedWater(point)) return false;
+  if (isCoastCorrectionLandPoint(point)) return true;
   if (ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon))) return true;
   let distance = Infinity;
   for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
-    for (let i = 0; i < polygon.length; i += 1) {
-      distance = Math.min(distance, distanceToSegment(point, polygon[i], polygon[(i + 1) % polygon.length]));
-    }
+    for (let i = 0; i < polygon.length; i += 1) distance = Math.min(distance, distanceToSegment(point, polygon[i], polygon[(i + 1) % polygon.length]));
   }
   return distance <= COAST_TOLERANCE;
 }
 
 function isPhysicalLandPoint(point) {
   if (isExplicitLandControlPoint(point) || isCorrectionShorelineVertex(point)) return true;
-  if (exclusionPolygons().some((polygon) => pointInPolygon(point, polygon))) return false;
+  if (isExplicitExcludedWater(point)) return false;
   return isStaticLandPoint(point) && !inLake(point);
 }
 
@@ -173,8 +186,7 @@ function powerCell(index, sites, weights) {
     if (other === index) continue;
     const p = sites[other].point;
     const otherWeight = weights[sites[other].provinceId] ?? 0;
-    polygon = halfPlane(polygon, 2 * (p[0] - site[0]), 2 * (p[1] - site[1]),
-      p[0] ** 2 + p[1] ** 2 - site[0] ** 2 - site[1] ** 2 + weight - otherWeight);
+    polygon = halfPlane(polygon, 2 * (p[0] - site[0]), 2 * (p[1] - site[1]), p[0] ** 2 + p[1] ** 2 - site[0] ** 2 - site[1] ** 2 + weight - otherWeight);
     if (polygon.length < 3) return [];
   }
   return polygon;
@@ -222,11 +234,17 @@ function boundarySamples(polygon) {
   return samples;
 }
 
+function boundarySampleIsPhysicalLand(point) {
+  if (isPhysicalLandPoint(point)) return true;
+  const shoreline = correctionByShorelineVertex(point);
+  return Boolean(shoreline);
+}
+
 function clipCellToMainland(cell) {
   const candidates = physicalLandPolygons()
     .map((land) => clipLandByCell(land, cell))
     .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA)
-    .filter((polygon) => boundarySamples(polygon).every((point) => isPhysicalLandPoint(point)));
+    .filter((polygon) => boundarySamples(polygon).every(boundarySampleIsPhysicalLand));
   const lakeRings = lakePolygons();
   const exclusionRings = exclusionPolygons();
   return candidates
@@ -357,7 +375,14 @@ export function buildAnatoliaPhase2DAssets() {
     politicalSiteCount: sites.length,
     barrierSiteCount: 0,
     fallbackProvinceCount,
-    diagnostics: { generator: "AnatoliaPhase2DGeometryBuilderV8", source: "historia-ai-curated-cartography", physicalLandAuthority: "boundary-safe-land-clipping-plus-explicit-correction-controls", iterations: solved.iterations },
+    iterations: solved.iterations,
+    sites,
+    diagnostics: {
+      generator: "AnatoliaPhase2DGeometryBuilderV8",
+      source: "historia-ai-curated-cartography",
+      physicalLandAuthority: "boundary-safe-land-clipping-plus-explicit-correction-controls",
+      iterations: solved.iterations,
+    },
   };
 }
 
