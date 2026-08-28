@@ -225,9 +225,12 @@ function shrinkToPhysicalLand(cell, anchorPoint) {
   let result = cell;
   for (let iteration = 0; iteration < MAX_SHRINK_ITERATIONS; iteration += 1) {
     const center = result.length >= 3 ? polygonAreaCentroid(result) : null;
+    const anchorInside = result.length >= 3 && pointInPolygon(anchorPoint, result);
     if (
       result.length >= 3
       && area(result) >= MIN_AREA
+      && anchorInside
+      && isPhysicalLandPoint(anchorPoint)
       && center
       && isPhysicalLandPoint(center)
       && edgeOnPhysicalLand(result)
