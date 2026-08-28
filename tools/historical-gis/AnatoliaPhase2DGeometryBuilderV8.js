@@ -14,7 +14,10 @@ const MIN_AREA = 0.00005;
 const COAST_TOLERANCE = 0.055;
 const MAX_WEIGHT_ITERATIONS = 24;
 const MAX_WEIGHT_STEP = 4;
+const SHRINK_FACTOR = 0.9;
+const MAX_SHRINK_ITERATIONS = 72;
 const EDGE_FRACTIONS = [0, 0.25, 0.5, 0.75, 1];
+const ANCHOR_PATCH_SCALE = 0.18;
 
 const refinementFor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id] ?? null;
 const rawAnchor = (item) => refinementFor(item)?.geometryAnchor ?? refinementFor(item)?.anchor ?? item.centroid;
@@ -132,8 +135,8 @@ function inLake(point) {
 }
 
 function isStaticLandPoint(point) {
-  if (isExplicitExcludedWater(point)) return isExplicitLandControlPoint(point) || isCorrectionShorelineVertex(point);
   if (isExplicitLandControlPoint(point) || isCorrectionShorelineVertex(point) || isAtlasLandBoundaryPoint(point)) return true;
+  if (isExplicitExcludedWater(point)) return false;
   if (inCorrectionLandPatch(point)) return true;
   if (ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon))) return true;
   let distance = Infinity;
@@ -150,6 +153,22 @@ function isPhysicalLandPoint(point) {
   if (isExplicitExcludedWater(point)) return false;
   if (inCorrectionLandPatch(point)) return !inLake(point);
   return isStaticLandPoint(point) && !inLake(point);
+}
+
+function correctionPatchForAnchor(anchorPoint) {
+  return correctionLandPolygons().find((polygon) => pointInPolygon(anchorPoint, polygon)) ?? null;
+}
+
+function anchorSeedPolygon(anchorPoint) {
+  const patch = correctionPatchForAnchor(anchorPoint);
+  if (patch) return patch;
+  const size = ANCHOR_PATCH_SCALE;
+  return [
+    [anchorPoint[0] - size, anchorPoint[1] - size],
+    [anchorPoint[0] + size, anchorPoint[1] - size],
+    [anchorPoint[0] + size, anchorPoint[1] + size],
+    [anchorPoint[0] - size, anchorPoint[1] + size],
+  ];
 }
 
 function physicalRepresentative(polygon) {
@@ -234,12 +253,13 @@ function clipPolygon(subject, clipPolygonValue) {
   return output;
 }
 
-function edgeOnPhysicalLand(polygon) {
+function edgeOnPhysicalLand(polygon, anchorPoint) {
   for (let i = 0; i < polygon.length; i += 1) {
     const a = polygon[i];
     const b = polygon[(i + 1) % polygon.length];
     for (const fraction of EDGE_FRACTIONS) {
       const point = [a[0] + (b[0] - a[0]) * fraction, a[1] + (b[1] - a[1]) * fraction];
+      if (pointOnSegment(point, anchorPoint, anchorPoint)) continue;
       if (!isPhysicalLandPoint(point)) return false;
     }
   }
@@ -248,32 +268,39 @@ function edgeOnPhysicalLand(polygon) {
 
 function shrinkToPhysicalLand(cell, anchorPoint) {
   let result = cell;
-  for (let iteration = 0; iteration < 72; iteration += 1) {
+  for (let iteration = 0; iteration < MAX_SHRINK_ITERATIONS; iteration += 1) {
     const center = result.length >= 3 ? polygonAreaCentroid(result) : null;
-    if (
-      result.length >= 3
+    const valid = result.length >= 3
       && area(result) >= MIN_AREA
       && pointInPolygon(anchorPoint, result)
       && isPhysicalLandPoint(anchorPoint)
       && center
       && isPhysicalLandPoint(center)
-      && edgeOnPhysicalLand(result)
-    ) return result;
+      && edgeOnPhysicalLand(result, anchorPoint);
+    if (valid) return result;
     result = result.map((point) => [
-      anchorPoint[0] + (point[0] - anchorPoint[0]) * 0.9,
-      anchorPoint[1] + (point[1] - anchorPoint[1]) * 0.9,
+      anchorPoint[0] + (point[0] - anchorPoint[0]) * SHRINK_FACTOR,
+      anchorPoint[1] + (point[1] - anchorPoint[1]) * SHRINK_FACTOR,
     ]);
   }
   return [];
 }
 
 function clipCellToPhysicalLand(cell, anchorPoint) {
-  const landSources = [...ANATOLIA_PHYSICAL_ATLAS.landPolygons, ...correctionLandPolygons()];
+  const landSources = [
+    ...ANATOLIA_PHYSICAL_ATLAS.landPolygons,
+    ...correctionLandPolygons(),
+  ];
   const candidates = landSources
     .map((land) => clipPolygon(land, cell))
-    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA)
-    .filter((polygon) => pointInPolygon(anchorPoint, polygon) || isPhysicalLandPoint(anchorPoint));
-  return candidates
+    .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA);
+
+  const anchored = candidates.filter((polygon) => pointInPolygon(anchorPoint, polygon));
+  const seed = anchorSeedPolygon(anchorPoint);
+  const seeded = clipPolygon(seed, cell);
+  if (seeded.length >= 3 && area(seeded) >= MIN_AREA) anchored.push(seeded);
+
+  return anchored
     .map((polygon) => shrinkToPhysicalLand(polygon, anchorPoint))
     .filter((polygon) => polygon.length >= 3 && area(polygon) >= MIN_AREA)
     .filter((polygon) => physicalRepresentative(polygon));
@@ -389,7 +416,7 @@ export function buildAnatoliaPhase2DAssets() {
   }
   const polygonCount = geometries.reduce((sum, geometry) => sum + geometry.polygons.length, 0);
   const fallbackProvinceCount = geometries.filter((geometry) => geometry.polygons.some((polygon) => area(polygon) < MIN_AREA)).length;
-  return { historicalDate: "1300-01-01", provinceCount: provinces.length, provinces, geometries, polygonCount, siteCount: sites.length + ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.length + ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers.length, politicalSiteCount: sites.length, barrierSiteCount: 0, fallbackProvinceCount, iterations: solved.iterations, sites, diagnostics: { generator: "AnatoliaPhase2DGeometryBuilderV8", source: "historia-ai-curated-cartography", physicalLandAuthority: "anchor-safe-land-intersection-with-correction-land-patches-and-inclusive-boundaries", iterations: solved.iterations } };
+  return { historicalDate: "1300-01-01", provinceCount: provinces.length, provinces, geometries, polygonCount, siteCount: sites.length + ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.length + ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers.length, politicalSiteCount: sites.length, barrierSiteCount: 0, fallbackProvinceCount, iterations: solved.iterations, sites, diagnostics: { generator: "AnatoliaPhase2DGeometryBuilderV8", source: "historia-ai-curated-cartography", physicalLandAuthority: "anchor-safe-land-intersection-with-correction-patches-and-inclusive-boundaries", iterations: solved.iterations } };
 }
 
 export { pointInPolygon, isAnatoliaGeometryPoint, isPhysicalLandPoint };
