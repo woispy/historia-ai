@@ -26,6 +26,7 @@
     "test:anatolia-phase2c": "node tools/tests/anatolia-phase2c.test.js",
     "test:anatolia-phase2d": "node tools/tests/anatolia-phase2d.test.js",
     "test:anatolia-phase2d-geometry-integrity": "node tools/tests/anatolia-phase2d-geometry-integrity.test.js",
+    "test:anatolia-phase2d-physical-authority": "node tools/tests/anatolia-phase2d-physical-authority.test.js",
     "test:anatolia-historical-control": "node tools/tests/anatolia-historical-control.test.js",
     "test:cartography-2efgh": "node tools/tests/cartography-2efgh.test.js",
     "test:map-texture-atlas": "node tools/tests/map-texture-atlas.test.js",
@@ -58,8 +59,6 @@
     "@vitejs/plugin-react": "^6.0.3",
     "eslint": "^10.6.0",
     "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-react-refresh": "^0.5.3",
-    "globals": "^17.7.0",
-    "vite": "^8.1.1"
+    "eslint-plugin-react-refresh": "^0.5.3"
   }
 }
