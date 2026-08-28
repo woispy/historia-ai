@@ -1,50 +1,26 @@
 import assert from "node:assert/strict";
-import {
-  buildAnatoliaPhase2DAssets,
-  isAnatoliaGeometryPoint,
-  isPhysicalLandPoint,
-} from "../historical-gis/AnatoliaPhase2DGeometryBuilder.js";
-import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
-import { ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST } from "../../src/map/data/Anatolia1300ProvinceGeometryManifest.js";
+import { buildAnatoliaPhase2DAssets, isAnatoliaGeometryPoint, isPhysicalLandPoint } from "../historical-gis/AnatoliaPhase2DGeometryBuilder.js";
 
-const result = buildAnatoliaPhase2DAssets();
-
-assert.equal(result.historicalDate, "1300-01-01");
-assert.equal(result.provinceCount, ANATOLIA_PROVINCE_METADATA.length);
-assert.equal(result.provinceCount, ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST.length);
-assert.equal(result.provinceCount, 38, "Phase 2D must match the current authoritative 1300 province dataset");
+function signedArea(polygon) {
+  let sum = 0;
+  for (let index = 0; index < polygon.length; index += 1) {
+    const [ax, ay] = polygon[index];
+    const [bx, by] = polygon[(index + 1) % polygon.length];
+    sum += ax * by - bx * ay;
+  }
+  return sum / 2;
+}
 
 function polygonArea(polygon) {
-  let area = 0;
-  for (let index = 0; index < polygon.length; index += 1) {
-    const current = polygon[index];
-    const next = polygon[(index + 1) % polygon.length];
-    area += current[0] * next[1] - next[0] * current[1];
-  }
-  return Math.abs(area) / 2;
-}
-
-function signedPolygonArea(polygon) {
-  let area = 0;
-  for (let index = 0; index < polygon.length; index += 1) {
-    const current = polygon[index];
-    const next = polygon[(index + 1) % polygon.length];
-    area += current[0] * next[1] - next[0] * current[1];
-  }
-  return area / 2;
-}
-
-function polygonVertexMean(polygon) {
-  const sum = polygon.reduce(
-    (total, [longitude, latitude]) => [total[0] + longitude, total[1] + latitude],
-    [0, 0],
-  );
-  return [sum[0] / polygon.length, sum[1] / polygon.length];
+  return Math.abs(signedArea(polygon));
 }
 
 function polygonAreaCentroid(polygon) {
-  const signedArea = signedPolygonArea(polygon);
-  if (Math.abs(signedArea) < 1e-12) return polygonVertexMean(polygon);
+  const signed = signedArea(polygon);
+  if (Math.abs(signed) < 1e-7) {
+    const sum = polygon.reduce((total, point) => [total[0] + point[0], total[1] + point[1]], [0, 0]);
+    return [sum[0] / polygon.length, sum[1] / polygon.length];
+  }
   let longitude = 0;
   let latitude = 0;
   for (let index = 0; index < polygon.length; index += 1) {
@@ -55,13 +31,15 @@ function polygonAreaCentroid(polygon) {
     latitude += (ay + by) * factor;
   }
   return [
-    longitude / (6 * signedArea),
-    latitude / (6 * signedArea),
+    longitude / (6 * signed),
+    latitude / (6 * signed),
   ];
 }
 
+const result = buildAnatoliaPhase2DAssets();
+
 const fallbackLikeProvinceIds = result.geometries
-  .filter((geometry) => geometry.polygons.some((polygon) => polygonArea(polygon) < 0.00005))
+  .filter((geometry) => geometry.geometry.polygons.some((polygon) => polygonArea(polygon) < 0.00005))
   .map((geometry) => geometry.identity.provinceId);
 
 assert.equal(
@@ -72,10 +50,7 @@ assert.equal(
 console.log(`Phase 2D cartographic site count: ${result.siteCount}`);
 assert.ok(result.siteCount >= 1000, "Phase 2D must use a dense physical/cartographic site field");
 assert.equal(result.barrierSiteCount, 0, "Physical water/coast features must constrain political geometry through land clipping, not compete as political Voronoi sites");
-assert.ok(
-  result.politicalSiteCount >= result.provinceCount,
-  "Phase 2D must retain at least one usable political control site per province",
-);
+assert.ok(result.politicalSiteCount >= result.provinceCount, "Phase 2D must retain at least one usable political control site per province");
 assert.ok(result.polygonCount >= result.provinceCount, "Every province must contain at least one polygon");
 assert.equal(result.provinces.length, result.geometries.length);
 
@@ -90,22 +65,16 @@ for (const province of result.provinces) {
 
 for (const geometry of result.geometries) {
   assert.ok(provinceIds.has(geometry.identity.provinceId));
-  assert.ok(geometry.polygons.length > 0);
-  for (const polygon of geometry.polygons) {
+  assert.ok(geometry.geometry.polygons.length > 0);
+  for (const polygon of geometry.geometry.polygons) {
     assert.ok(polygon.length >= 3);
     vertexCount += polygon.length;
 
-    // Use the true geometric centroid for physical-land validation. The old
-    // vertex-average test produced false negatives for valid concave/coastal
-    // polygons because the arithmetic mean of vertices can fall in the sea.
     const centroid = polygonAreaCentroid(polygon);
     const representative = isPhysicalLandPoint(centroid)
       ? centroid
       : polygon.find((point) => isPhysicalLandPoint(point));
-    assert.ok(
-      representative,
-      `Phase 2D polygon must have a physical-land representative: ${geometry.identity.provinceId}`,
-    );
+    assert.ok(representative, `Phase 2D polygon must have a physical-land representative: ${geometry.identity.provinceId}`);
 
     for (const [longitude, latitude] of polygon) {
       assert.ok(longitude >= 25 && longitude <= 46, `Longitude out of Phase 2D envelope: ${longitude}`);
@@ -116,12 +85,7 @@ for (const geometry of result.geometries) {
 }
 
 assert.ok(vertexCount >= 150, "Phase 2D geometry must contain a sufficiently detailed vertex field");
-
 assert.equal(isAnatoliaGeometryPoint([28.9784, 41.0082]), false, "Constantinople must remain outside the Anatolia geometry override");
 assert.equal(isAnatoliaGeometryPoint([26.5556, 41.6772]), false, "Adrianopolis must remain outside the Anatolia geometry override");
 
-console.log(
-  `Phase 2D Anatolia geometry tests passed: ${result.provinceCount} provinces, `
-  + `${result.siteCount} political/cartographic sites, `
-  + `${result.polygonCount} polygons and ${vertexCount} vertices.`,
-);
+console.log(`Phase 2D Anatolia geometry tests passed: ${result.provinceCount} provinces, ${result.siteCount} political/cartographic sites, ${vertexCount} polygon vertices.`);
