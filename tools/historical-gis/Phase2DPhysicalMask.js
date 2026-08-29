@@ -60,21 +60,18 @@ function controlPatches() {
     [x - 0.025, y - 0.025], [x + 0.025, y - 0.025], [x + 0.025, y + 0.025], [x - 0.025, y + 0.025], [x - 0.025, y - 0.025],
   ])));
 }
+function physicalLandPolygons() { return [...ANATOLIA_PHYSICAL_ATLAS.landPolygons, ...correctionLandPolygons(), ...controlPatches()]; }
 
 export function isPhysicalLandPoint(point) {
   if (!Array.isArray(point) || point.length !== 2) return false;
   if (exclusionPolygons().some((polygon) => pointInPolygonStrict(point, polygon))) return false;
   if (explicitLandControlPoints().some((control) => point[0] === control[0] && point[1] === control[1])) return true;
   if (ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygonStrict(point, lake.coordinates))) return false;
-  if (correctionLandPolygons().some((polygon) => pointInPolygon(point, polygon))) return true;
-  if (controlPatches().some((polygon) => pointInPolygon(point, polygon))) return true;
-  if (ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon))) return true;
+  if (physicalLandPolygons().some((polygon) => pointInPolygon(point, polygon))) return true;
   return ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => polygon.some((a, index) => distanceToSegment(point, a, polygon[(index + 1) % polygon.length]) <= COAST_TOLERANCE));
 }
 
-export function getPhysicalLandPolygons() {
-  return [...ANATOLIA_PHYSICAL_ATLAS.landPolygons, ...correctionLandPolygons(), ...controlPatches()];
-}
+export function getPhysicalLandPolygons() { return physicalLandPolygons(); }
 
 export function getPhysicalWaterPolygons() {
   return [...ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.map((lake) => lake.coordinates), ...exclusionPolygons()].filter((polygon) => polygon.length >= 3 && polygonArea(polygon) >= MIN_AREA);
