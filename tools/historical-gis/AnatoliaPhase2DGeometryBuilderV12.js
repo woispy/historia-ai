@@ -23,24 +23,6 @@ const FALLBACK_SCALES = [0.75, 0.5, 0.35, 0.25, 0.125, 0.0625];
 const refinementFor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id] ?? null;
 const rawAnchor = (item) => refinementFor(item)?.geometryAnchor ?? refinementFor(item)?.anchor ?? item.centroid;
 
-function polygonCentroid(polygon) {
-  const signed = signedArea(polygon);
-  if (Math.abs(signed) < EPS) {
-    const sum = polygon.reduce((acc, point) => [acc[0] + point[0], acc[1] + point[1]], [0, 0]);
-    return [sum[0] / polygon.length, sum[1] / polygon.length];
-  }
-  let x = 0;
-  let y = 0;
-  for (let i = 0; i < polygon.length; i += 1) {
-    const a = polygon[i];
-    const b = polygon[(i + 1) % polygon.length];
-    const factor = a[0] * b[1] - b[0] * a[1];
-    x += (a[0] + b[0]) * factor;
-    y += (a[1] + b[1]) * factor;
-  }
-  return [x / (6 * signed), y / (6 * signed)];
-}
-
 function cross(a, b, point) {
   return (b[0] - a[0]) * (point[1] - a[1]) - (b[1] - a[1]) * (point[0] - a[0]);
 }
@@ -167,7 +149,7 @@ function clippedLandFragments(cell, anchor) {
 
 function buildProvinceGeometry(cell, anchor, provinceId) {
   const fragments = clippedLandFragments(cell, anchor);
-  if (fragments.length) return fragments.sort((a, b) => polygonArea(b) - polygonArea(a)).slice(0, 1);
+  if (fragments.length) return fragments.sort((a, b) => polygonArea(b) - polygonArea(a));
   const repaired = repairCell(cell, anchor);
   if (repaired.length) return repaired;
   throw new Error(`Phase 2D V12 could not construct physical geometry for ${provinceId}`);
@@ -215,8 +197,8 @@ function validateManifest() {
 function headers(item, type) {
   return {
     assetType: type,
-    assetVersion: 15,
-    generator: "Historia AI Phase 2D Geometry Builder V12",
+    assetVersion: 16,
+    generator: "Historia AI Phase 2D Geometry Builder",
     provider: "historia-ai-curated-cartography",
     dataset: "anatolia-province-geometry-1300",
     historicalDate: "1300-01-01",
@@ -315,6 +297,8 @@ function samplingSiteCount() {
   return count;
 }
 
+export { isPhysicalLandPoint, isAnatoliaGeometryPoint, buildAnatoliaPhase2DAssets };
+
 export function isAnatoliaGeometryPoint(point) {
   if (!Array.isArray(point) || point.length !== 2) return false;
   const [longitude, latitude] = point;
@@ -339,12 +323,12 @@ export function buildAnatoliaPhase2DAssets() {
   const polygonCount = geometries.reduce((sum, item) => sum + item.geometry.polygons.length, 0);
   return {
     schemaVersion: 1,
-    geometryVersion: 15,
+    geometryVersion: 16,
     historicalDate: "1300-01-01",
     provider: "historia-ai-curated-cartography",
     dataset: "anatolia-province-geometry-1300",
     projection: "EPSG:4326",
-    method: "one historical province anchor per political cell, canonical physical-land mask, deterministic physical anchor resolution, anchor-preserving weighted cell clipping, canonical physical components, explicit water exclusions, lake-safe validation, dense physical sampling",
+    method: "one historical province anchor per political cell, deterministic interior physical-anchor resolution, weighted physical-land intersection, anchor-preserving physical fallback, explicit water exclusions, lake-safe validation, dense physical sampling",
     siteCount: physicalSamplingSiteCount + sites.length,
     politicalSiteCount: sites.length,
     physicalSamplingSiteCount,
@@ -361,4 +345,6 @@ export function buildAnatoliaPhase2DAssets() {
   };
 }
 
-export function isPhysicalLandPointLegacy(point) { return isPhysicalLandPoint(point); }
+export function isPhysicalLandPointLegacy(point) {
+  return isPhysicalLandPoint(point);
+}
