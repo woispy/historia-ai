@@ -9,8 +9,7 @@ const COAST_TOLERANCE = 0.055;
 export function signedArea(polygon) {
   let sum = 0;
   for (let i = 0; i < polygon.length; i += 1) {
-    const a = polygon[i];
-    const b = polygon[(i + 1) % polygon.length];
+    const a = polygon[i]; const b = polygon[(i + 1) % polygon.length];
     sum += a[0] * b[1] - b[0] * a[1];
   }
   return sum / 2;
@@ -34,8 +33,7 @@ export function pointInPolygon(point, polygon) {
   }
   let inside = false;
   for (let i = 0, j = polygon.length - 1; i < polygon.length; i += 1) {
-    const a = polygon[i];
-    const b = polygon[j];
+    const a = polygon[i]; const b = polygon[j];
     if ((a[1] > point[1]) !== (b[1] > point[1])
       && point[0] < ((b[0] - a[0]) * (point[1] - a[1])) / ((b[1] - a[1]) || EPS) + a[0]) inside = !inside;
     j = i;
@@ -49,32 +47,18 @@ export function pointInPolygonStrict(point, polygon) {
 }
 
 export function distanceToSegment(point, a, b) {
-  const dx = b[0] - a[0];
-  const dy = b[1] - a[1];
-  const denominator = dx * dx + dy * dy;
-  const t = denominator <= EPS
-    ? 0
-    : Math.max(0, Math.min(1, ((point[0] - a[0]) * dx + (point[1] - a[1]) * dy) / denominator));
+  const dx = b[0] - a[0]; const dy = b[1] - a[1]; const denominator = dx * dx + dy * dy;
+  const t = denominator <= EPS ? 0 : Math.max(0, Math.min(1, ((point[0] - a[0]) * dx + (point[1] - a[1]) * dy) / denominator));
   return Math.hypot(point[0] - (a[0] + dx * t), point[1] - (a[1] + dy * t));
 }
 
-function correctionLandPolygons() {
-  return ANATOLIA_PHYSICAL_COAST_CORRECTIONS
-    .map((correction) => correction.coordinates ?? [])
-    .filter((polygon) => polygon.length >= 3 && polygonArea(polygon) >= MIN_AREA);
-}
-
-function exclusionPolygons() {
-  return ANATOLIA_PHYSICAL_COAST_CORRECTIONS
-    .flatMap((correction) => correction.exclusionCoordinates ?? [])
-    .filter((polygon) => polygon.length >= 3 && polygonArea(polygon) >= MIN_AREA);
-}
-
-function explicitLandControlPoints() {
-  return ANATOLIA_PHYSICAL_COAST_CORRECTIONS.flatMap((correction) => [
-    ...(correction.landControlPoints ?? []),
-    ...(correction.controlPoints ?? []),
-  ]);
+function correctionLandPolygons() { return ANATOLIA_PHYSICAL_COAST_CORRECTIONS.map((correction) => correction.coordinates ?? []).filter((polygon) => polygon.length >= 3 && polygonArea(polygon) >= MIN_AREA); }
+function exclusionPolygons() { return ANATOLIA_PHYSICAL_COAST_CORRECTIONS.flatMap((correction) => correction.exclusionCoordinates ?? []).filter((polygon) => polygon.length >= 3 && polygonArea(polygon) >= MIN_AREA); }
+function explicitLandControlPoints() { return ANATOLIA_PHYSICAL_COAST_CORRECTIONS.flatMap((correction) => [...(correction.landControlPoints ?? []), ...(correction.controlPoints ?? [])]); }
+function controlPatches() {
+  return ANATOLIA_PHYSICAL_COAST_CORRECTIONS.flatMap((correction) => (correction.coordinates?.length >= 3 ? [correction.coordinates] : (correction.landControlPoints ?? correction.controlPoints ?? []).map(([x, y]) => [
+    [x - 0.025, y - 0.025], [x + 0.025, y - 0.025], [x + 0.025, y + 0.025], [x - 0.025, y + 0.025], [x - 0.025, y - 0.025],
+  ])));
 }
 
 export function isPhysicalLandPoint(point) {
@@ -83,19 +67,15 @@ export function isPhysicalLandPoint(point) {
   if (explicitLandControlPoints().some((control) => point[0] === control[0] && point[1] === control[1])) return true;
   if (ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygonStrict(point, lake.coordinates))) return false;
   if (correctionLandPolygons().some((polygon) => pointInPolygon(point, polygon))) return true;
+  if (controlPatches().some((polygon) => pointInPolygon(point, polygon))) return true;
   if (ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon))) return true;
-  return ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => polygon.some((a, index) => (
-    distanceToSegment(point, a, polygon[(index + 1) % polygon.length]) <= COAST_TOLERANCE
-  )));
+  return ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => polygon.some((a, index) => distanceToSegment(point, a, polygon[(index + 1) % polygon.length]) <= COAST_TOLERANCE));
 }
 
 export function getPhysicalLandPolygons() {
-  return [...ANATOLIA_PHYSICAL_ATLAS.landPolygons, ...correctionLandPolygons()];
+  return [...ANATOLIA_PHYSICAL_ATLAS.landPolygons, ...correctionLandPolygons(), ...controlPatches()];
 }
 
 export function getPhysicalWaterPolygons() {
-  return [
-    ...ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.map((lake) => lake.coordinates),
-    ...exclusionPolygons(),
-  ].filter((polygon) => polygon.length >= 3 && polygonArea(polygon) >= MIN_AREA);
+  return [...ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.map((lake) => lake.coordinates), ...exclusionPolygons()].filter((polygon) => polygon.length >= 3 && polygonArea(polygon) >= MIN_AREA);
 }
