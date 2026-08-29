@@ -2,6 +2,7 @@ import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceM
 import { ANATOLIA_1300_PROVINCE_GEOMETRY_MANIFEST, ANATOLIA_1300_PROVINCE_GEOMETRY_KEYS } from "../../src/map/data/Anatolia1300ProvinceGeometryManifest.js";
 import { ANATOLIA_PROVINCE_REFINEMENTS } from "../../src/map/data/AnatoliaProvinceRefinement.js";
 import { getPhysicalLandPolygons, isPhysicalLandPoint, pointInPolygon, polygonArea } from "./Phase2DPhysicalMask.js";
+import { convexCellMaskIntersection } from "./Phase2DConvexMaskIntersection.js";
 
 const BBOX = [25.45, 35.72, 44.85, 42.35];
 const EPS = 1e-7;
@@ -16,42 +17,6 @@ const FALLBACK_SCALES = [0.75, 0.5, 0.35, 0.25, 0.125, 0.0625];
 
 const refinementFor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id] ?? null;
 const rawAnchor = (item) => refinementFor(item)?.geometryAnchor ?? refinementFor(item)?.anchor ?? item.centroid;
-function cross(a, b, point) { return (b[0] - a[0]) * (point[1] - a[1]) - (b[1] - a[1]) * (point[0] - a[0]); }
-function polygonBBox(polygon) { return polygon.reduce((box, point) => [Math.min(box[0], point[0]), Math.min(box[1], point[1]), Math.max(box[2], point[0]), Math.max(box[3], point[1])], [Infinity, Infinity, -Infinity, -Infinity]); }
-function bboxesOverlap(a, b) { return !(a[2] < b[0] - EPS || a[0] > b[2] + EPS || a[3] < b[1] - EPS || a[1] > b[3] + EPS); }
-function segmentIntersection(a, b, c, d) {
-  const r = [b[0] - a[0], b[1] - a[1]]; const s = [d[0] - c[0], d[1] - c[1]];
-  const denominator = r[0] * s[1] - r[1] * s[0];
-  if (Math.abs(denominator) <= EPS) return null;
-  const qmp = [c[0] - a[0], c[1] - a[1]];
-  const t = (qmp[0] * s[1] - qmp[1] * s[0]) / denominator;
-  const u = (qmp[0] * r[1] - qmp[1] * r[0]) / denominator;
-  if (t < -EPS || t > 1 + EPS || u < -EPS || u > 1 + EPS) return null;
-  return [a[0] + t * r[0], a[1] + t * r[1]];
-}
-function orderPoints(points) {
-  const unique = [];
-  for (const point of points) if (!unique.some((candidate) => Math.hypot(candidate[0] - point[0], candidate[1] - point[1]) <= 1e-6)) unique.push(point);
-  if (unique.length < 3) return [];
-  const cx = unique.reduce((sum, point) => sum + point[0], 0) / unique.length;
-  const cy = unique.reduce((sum, point) => sum + point[1], 0) / unique.length;
-  return unique.sort((a, b) => Math.atan2(a[1] - cy, a[0] - cx) - Math.atan2(b[1] - cy, b[0] - cx));
-}
-function clipMaskToCell(mask, cell) {
-  const maskBox = polygonBBox(mask); const cellBox = polygonBBox(cell);
-  if (!bboxesOverlap(maskBox, cellBox)) return [];
-  const points = [];
-  for (const point of mask) if (pointInPolygon(point, cell)) points.push(point);
-  for (const point of cell) if (pointInPolygon(point, mask)) points.push(point);
-  for (let i = 0; i < mask.length; i += 1) {
-    const a = mask[i]; const b = mask[(i + 1) % mask.length];
-    for (let j = 0; j < cell.length; j += 1) {
-      const intersection = segmentIntersection(a, b, cell[j], cell[(j + 1) % cell.length]);
-      if (intersection) points.push(intersection);
-    }
-  }
-  return orderPoints(points);
-}
 function halfPlane(polygon, a, b, c) {
   const output = []; const inside = (point) => a * point[0] + b * point[1] <= c + EPS;
   for (let i = 0; i < polygon.length; i += 1) {
@@ -97,7 +62,7 @@ function repairCell(cell, anchor) {
 function clippedLandFragments(cell, anchor) {
   const fragments = [];
   for (const land of getPhysicalLandPolygons()) {
-    const clipped = clipMaskToCell(land, cell);
+    const clipped = convexCellMaskIntersection(cell, land, anchor);
     if (clipped.length < 3 || polygonArea(clipped) < MIN_AREA || !polygonIsSafe(clipped)) continue;
     if (pointInPolygon(anchor, clipped)) fragments.push(clipped);
   }
