@@ -46,25 +46,6 @@ function powerCell(index, sites, weights) {
   }
   return polygon;
 }
-function clipPolygon(subject, clip) {
-  if (!subject.length || !clip.length) return [];
-  let output = subject.slice(); const boundary = signedArea(clip) < 0 ? [...clip].reverse() : clip;
-  for (let edge = 0; edge < boundary.length; edge += 1) {
-    if (!output.length) return [];
-    const a = boundary[edge]; const b = boundary[(edge + 1) % boundary.length]; const input = output; output = [];
-    const inside = (point) => cross(a, b, point) >= -EPS;
-    for (let i = 0; i < input.length; i += 1) {
-      const current = input[i]; const next = input[(i + 1) % input.length]; const ci = inside(current); const ni = inside(next);
-      if (ci && ni) output.push(next);
-      else if (ci !== ni) {
-        const cv = cross(a, b, current); const nv = cross(a, b, next); const t = Math.abs(cv - nv) < EPS ? 0 : cv / (cv - nv);
-        output.push([current[0] + (next[0] - current[0]) * t, current[1] + (next[1] - current[1]) * t]);
-        if (!ci && ni) output.push(next);
-      }
-    }
-  }
-  return output;
-}
 function edgeOnPhysicalLand(polygon) {
   for (let i = 0; i < polygon.length; i += 1) {
     const start = polygon[i]; const end = polygon[(i + 1) % polygon.length];
@@ -72,35 +53,54 @@ function edgeOnPhysicalLand(polygon) {
   }
   return true;
 }
-function polygonIsSafe(polygon, anchor) { return polygon.length >= 3 && polygonArea(polygon) >= MIN_AREA && pointInPolygon(anchor, polygon) && polygon.every(isPhysicalLandPoint) && edgeOnPhysicalLand(polygon); }
+function polygonIsSafe(polygon) { return polygon.length >= 3 && polygonArea(polygon) >= MIN_AREA && polygon.every(isPhysicalLandPoint) && edgeOnPhysicalLand(polygon); }
 function repairCell(cell, anchor) {
   if (!pointInPolygon(anchor, cell)) return [];
   for (const scale of FALLBACK_SCALES) {
     const candidate = cell.map((point) => [anchor[0] + (point[0] - anchor[0]) * scale, anchor[1] + (point[1] - anchor[1]) * scale]);
-    if (polygonIsSafe(candidate, anchor)) return [candidate];
+    if (polygonIsSafe(candidate) && pointInPolygon(anchor, candidate)) return [candidate];
   }
   return [];
 }
 function clippedLandFragments(cell, anchor) {
   const fragments = [];
   for (const land of getPhysicalLandPolygons()) {
-    const clipped = clipPolygon(land, cell);
-    if (clipped.length < 3 || polygonArea(clipped) < MIN_AREA || !pointInPolygon(anchor, clipped)) continue;
-    if (polygonIsSafe(clipped, anchor)) fragments.push(clipped);
+    const clipped = clipConvexCellToMask(cell, land);
+    if (clipped.length < 3 || polygonArea(clipped) < MIN_AREA || !polygonIsSafe(clipped)) continue;
+    fragments.push(clipped);
   }
-  return fragments;
+  return fragments.filter((polygon) => pointInPolygon(anchor, polygon));
+}
+function clipConvexCellToMask(cell, mask) {
+  // The cell is convex; instead of treating the potentially concave mask as a
+  // clipping boundary, retain mask vertices and cell intersections that lie
+  // inside the cell. This avoids the old convex-clip/concave-mask mismatch.
+  const points = [];
+  for (const point of mask) if (pointInPolygon(point, cell)) points.push(point);
+  for (let i = 0; i < cell.length; i += 1) {
+    const a = cell[i]; const b = cell[(i + 1) % cell.length];
+    for (let j = 0; j < mask.length; j += 1) {
+      const c = mask[j]; const d = mask[(j + 1) % mask.length];
+      const denominator = (b[0] - a[0]) * (d[1] - c[1]) - (b[1] - a[1]) * (d[0] - c[0]);
+      if (Math.abs(denominator) < EPS) continue;
+      const t = ((c[0] - a[0]) * (d[1] - c[1]) - (c[1] - a[1]) * (d[0] - c[0])) / denominator;
+      const u = ((c[0] - a[0]) * (b[1] - a[1]) - (c[1] - a[1]) * (b[0] - a[0])) / denominator;
+      if (t >= -EPS && t <= 1 + EPS && u >= -EPS && u <= 1 + EPS) points.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]);
+    }
+  }
+  if (points.length < 3) return [];
+  const cx = points.reduce((sum, p) => sum + p[0], 0) / points.length;
+  const cy = points.reduce((sum, p) => sum + p[1], 0) / points.length;
+  return points.sort((p, q) => Math.atan2(p[1] - cy, p[0] - cx) - Math.atan2(q[1] - cy, q[0] - cx));
 }
 function buildProvinceGeometry(cell, anchor, provinceId) {
-  const fragments = clippedLandFragments(cell, anchor);
-  if (fragments.length) return fragments.sort((a, b) => polygonArea(b) - polygonArea(a));
+  const containing = clippedLandFragments(cell, anchor);
+  if (containing.length) return containing.sort((a, b) => polygonArea(b) - polygonArea(a));
   const repaired = repairCell(cell, anchor);
   if (repaired.length) return repaired;
   throw new Error(`Phase 2D V12 could not construct physical geometry for ${provinceId}`);
 }
-function isPhysicalGeometryAnchor(point) {
-  if (!isPhysicalLandPoint(point)) return false;
-  return getPhysicalLandPolygons().some((polygon) => pointInPolygon(point, polygon));
-}
+function isPhysicalGeometryAnchor(point) { return isPhysicalLandPoint(point) && getPhysicalLandPolygons().some((polygon) => pointInPolygon(point, polygon)); }
 function resolvePhysicalAnchor(point) {
   if (isPhysicalGeometryAnchor(point)) return point;
   let best = null; let bestDistance = Infinity; const max = Math.ceil(SEARCH_RADIUS / SEARCH_STEP);
@@ -133,5 +133,4 @@ function isPhysicalLandPointLegacy(point) { return isPhysicalLandPoint(point); }
 function isAnatoliaGeometryPoint(point) { if (!Array.isArray(point) || point.length !== 2) return false; const [longitude, latitude] = point; if (longitude < 25 || longitude > 46 || latitude < 35 || latitude > 43) return false; if (longitude > 26.4 && longitude < 28.9 && latitude > 40.4 && latitude < 41.9) return false; return true; }
 function buildAnatoliaPhase2DAssets() { validateManifest(); const sites = buildSites(); const solved = solveWeights(sites); const provinces = []; const geometries = []; for (const item of ANATOLIA_PROVINCE_METADATA) { const polygons = solved.partition.get(item.id) ?? []; if (!polygons.length) throw new Error(`Phase 2D produced no polygons for ${item.id}`); provinces.push(provinceAsset(item, polygons)); geometries.push(geometryAsset(item, polygons)); } const physicalSamplingSiteCount = samplingSiteCount(); const polygonCount = geometries.reduce((sum, item) => sum + item.geometry.polygons.length, 0); return { schemaVersion: 1, geometryVersion: 16, historicalDate: "1300-01-01", provider: "historia-ai-curated-cartography", dataset: "anatolia-province-geometry-1300", projection: "EPSG:4326", method: "one historical province anchor per political cell, deterministic interior physical-anchor resolution, weighted physical-land intersection, anchor-preserving physical fallback, explicit water exclusions, lake-safe validation, dense physical sampling", siteCount: physicalSamplingSiteCount + sites.length, politicalSiteCount: sites.length, physicalSamplingSiteCount, naturalFeatureSiteCount: physicalSamplingSiteCount, barrierSiteCount: 0, supportSiteCount: 0, fallbackProvinceCount: 0, provinceCount: provinces.length, polygonCount, weightIterations: solved.iterations, provinces, geometries, sites }; }
 
-export { isPhysicalLandPoint, isPhysicalLandPointLegacy };
-export { isAnatoliaGeometryPoint, buildAnatoliaPhase2DAssets };
+export { isPhysicalLandPoint, isPhysicalLandPointLegacy, isAnatoliaGeometryPoint, buildAnatoliaPhase2DAssets };
