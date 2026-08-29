@@ -102,25 +102,23 @@ function polygonCycles(segments) {
   const cycles = [];
   for (let startEdge = 0; startEdge < edges.length; startEdge += 1) {
     if (visited.has(startEdge)) continue;
-    const [start, next] = edges[startEdge];
+    const [start] = edges[startEdge];
     const polygon = [nodes.get(start).point];
     let current = start;
     let edge = startEdge;
-    let previous = null;
     while (!visited.has(edge)) {
       visited.add(edge);
       const [a, b] = edges[edge];
       const destination = a === current ? b : a;
+      const incomingPoint = nodes.get(current).point;
       polygon.push(nodes.get(destination).point);
-      previous = current;
       current = destination;
       const candidates = nodes.get(current).edges.filter((candidate) => !visited.has(candidate));
       if (!candidates.length) break;
       if (candidates.length === 1) edge = candidates[0];
       else {
-        const incoming = nodes.get(previous).point;
         const currentPoint = nodes.get(current).point;
-        const incomingAngle = Math.atan2(currentPoint[1] - incoming[1], currentPoint[0] - incoming[0]);
+        const incomingAngle = Math.atan2(currentPoint[1] - incomingPoint[1], currentPoint[0] - incomingPoint[0]);
         edge = candidates.reduce((best, candidate) => {
           const [ca, cb] = edges[candidate];
           const destinationKey = ca === current ? cb : ca;
