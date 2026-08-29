@@ -97,18 +97,22 @@ function buildProvinceGeometry(cell, anchor, provinceId) {
   if (repaired.length) return repaired;
   throw new Error(`Phase 2D V12 could not construct physical geometry for ${provinceId}`);
 }
+function isPhysicalGeometryAnchor(point) {
+  if (!isPhysicalLandPoint(point)) return false;
+  return getPhysicalLandPolygons().some((polygon) => pointInPolygon(point, polygon));
+}
 function resolvePhysicalAnchor(point) {
-  if (isPhysicalLandPoint(point)) return point;
+  if (isPhysicalGeometryAnchor(point)) return point;
   let best = null; let bestDistance = Infinity; const max = Math.ceil(SEARCH_RADIUS / SEARCH_STEP);
   for (let dx = -max; dx <= max; dx += 1) for (let dy = -max; dy <= max; dy += 1) {
     const distance = Math.hypot(dx, dy) * SEARCH_STEP;
     if (!distance || distance > SEARCH_RADIUS || distance >= bestDistance) continue;
     const candidate = [point[0] + dx * SEARCH_STEP, point[1] + dy * SEARCH_STEP];
-    if (!isPhysicalLandPoint(candidate)) continue;
+    if (!isPhysicalGeometryAnchor(candidate)) continue;
     best = candidate; bestDistance = distance;
   }
   if (best) return best;
-  throw new Error(`No physical-land anchor can be resolved for ${point.join(",")}`);
+  throw new Error(`No physical geometry anchor can be resolved for ${point.join(",")}`);
 }
 function buildSites() { return ANATOLIA_PROVINCE_METADATA.map((item) => { const sourcePoint = rawAnchor(item); return { point: resolvePhysicalAnchor(sourcePoint), sourcePoint, provinceId: item.id, kind: "province-anchor" }; }); }
 function validateManifest() {
