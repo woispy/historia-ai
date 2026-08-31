@@ -22,6 +22,20 @@ assert.equal(geometry.indices.length, 18);
 assert.equal(geometry.riverRanges.length, 2);
 assert.equal(getRiverGpuDrawCount(geometry), 1);
 assert.ok(geometry.vertices.some((value) => value !== 0));
+assert.equal(geometry.sourcePointCount, 5);
+assert.equal(geometry.renderedPointCount, 5);
+assert.equal(geometry.reductionRatio, 0);
+
+const denseRiver = Array.from({ length: 101 }, (_, index) => [index * 0.001, Math.sin(index * 0.03) * 0.0002]);
+const simplified = buildRiverRibbonGeometry([
+  { id: "dense", rank: 2, coordinates: denseRiver, simplificationTolerance: 0.001 },
+]);
+assert.equal(simplified.sourcePointCount, 101);
+assert.ok(simplified.renderedPointCount < simplified.sourcePointCount);
+assert.ok(simplified.reductionRatio > 0);
+assert.equal(getRiverGpuDrawCount(simplified), 1);
+assert.equal(simplified.riverRanges[0].sourcePointCount, 101);
+assert.equal(simplified.riverRanges[0].pointCount, simplified.renderedPointCount);
 
 const land = physicalMaskClassification({ land: 1, lake: 0, sea: 0 });
 assert.equal(land.allowsPolitical, true);
