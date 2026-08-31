@@ -1,6 +1,6 @@
 import { assertRealDemProvenance } from "./CopernicusDemSource.js";
 
-export const TERRAIN_DEM_PIPELINE_VERSION = 1;
+export const TERRAIN_DEM_PIPELINE_VERSION = 2;
 
 export function validateDemRaster({ width, height, samples, noDataValue = null, min = null, max = null } = {}) {
   if (!Number.isInteger(width) || !Number.isInteger(height) || width < 2 || height < 2) throw new Error("DEM raster dimensions must be integers >= 2.");
@@ -12,7 +12,11 @@ export function validateDemRaster({ width, height, samples, noDataValue = null, 
   const observedMax = Math.max(...valid);
   if (min !== null && observedMin < min) throw new Error("DEM raster is below declared minimum.");
   if (max !== null && observedMax > max) throw new Error("DEM raster exceeds declared maximum.");
-  return Object.freeze({ width, height, validSamples: valid.length, min: observedMin, max: observedMax });
+  return Object.freeze({ width, height, validSamples: valid.length, min: observedMin, max: observedMax, noDataValue });
+}
+
+function isValidSample(value, noDataValue) {
+  return Number.isFinite(value) && (noDataValue === null || value !== noDataValue);
 }
 
 export function bilinearSample(raster, u, v) {
@@ -22,9 +26,11 @@ export function bilinearSample(raster, u, v) {
   const x0 = Math.floor(x); const y0 = Math.floor(y);
   const x1 = Math.min(raster.width - 1, x0 + 1); const y1 = Math.min(raster.height - 1, y0 + 1);
   const tx = x - x0; const ty = y - y0;
+  const noDataValue = raster.noDataValue ?? null;
   const at = (ix, iy) => raster.samples[iy * raster.width + ix];
   const a = at(x0, y0); const b = at(x1, y0); const c = at(x0, y1); const d = at(x1, y1);
-  if (![a, b, c, d].every(Number.isFinite)) return null;
+  const samples = [a, b, c, d];
+  if (!samples.every((value) => isValidSample(value, noDataValue))) return null;
   return a * (1 - tx) * (1 - ty) + b * tx * (1 - ty) + c * (1 - tx) * ty + d * tx * ty;
 }
 
@@ -40,7 +46,7 @@ export function buildHeightmap({ raster, outputSize, provenance } = {}) {
       heights[y * outputSize + x] = sample;
     }
   }
-  return Object.freeze({ version: TERRAIN_DEM_PIPELINE_VERSION, size: outputSize, heights, provenance });
+  return Object.freeze({ version: TERRAIN_DEM_PIPELINE_VERSION, size: outputSize, heights, provenance, noDataValue: raster.noDataValue ?? null });
 }
 
 export function deriveNormals(heights, size, cellSize = 1) {
