@@ -5,12 +5,7 @@ import { ANATOLIA_PHYSICAL_COAST_CORRECTIONS } from "../../../src/map/data/Anato
 const EPS = 1e-9;
 const MIN_AREA = 0.00005;
 const MAX_RECOVERY_DISTANCE = 0.75;
-// Political partition vertices must never be moved broadly toward ordinary land
-// boundaries. Lake-interior vertices are different: the physical atlas models
-// lakes as holes, so a cell vertex inherited from a mainland ring may legitimately
-// land inside a lake and must be projected back to that lake's authoritative shore.
 const STRICT_BOUNDARY_RECOVERY_DISTANCE = 0.0001;
-const RECOVERY_STEP = 0.001;
 const NUMERICAL_BOUNDARY_TOLERANCE = 0.0001;
 const BBOX_EPS = NUMERICAL_BOUNDARY_TOLERANCE;
 
@@ -52,13 +47,6 @@ function segmentBounds(start, end) {
     maxX: Math.max(start[0], end[0]),
     maxY: Math.max(start[1], end[1]),
   };
-}
-
-function bboxesOverlap(a, b, padding = 0) {
-  return !(a.maxX + padding < b.minX
-    || a.minX - padding > b.maxX
-    || a.maxY + padding < b.minY
-    || a.minY - padding > b.maxY);
 }
 
 export function pointOnSegment(point, start, end) {
@@ -264,9 +252,6 @@ export function resolvePhysicalGeometryBoundaryPointStrict(point) {
   const shoreline = nearestLakeBoundaryPoint(point);
   const landBoundary = nearestBoundaryLandPoint(point);
 
-  // A lake is a hole in the physical atlas. If a partition ring inherited a
-  // mainland vertex that falls inside that hole, preserving the authoritative
-  // lake shoreline is safer than moving the vertex toward an unrelated coast.
   if (isLakeInteriorPoint(point)
     && shoreline.point
     && shoreline.distance <= MAX_RECOVERY_DISTANCE) {
@@ -297,19 +282,26 @@ export function isFinalPhysicalGeometryBoundaryPoint(point) {
 
 export function resolveGeometryAnchor(provinceId, sourceAnchor) {
   if (isPhysicalLandPoint(sourceAnchor)) return [...sourceAnchor];
-  for (let distance = RECOVERY_STEP; distance <= MAX_RECOVERY_DISTANCE + EPS; distance += RECOVERY_STEP) {
-    const samples = Math.max(96, Math.ceil((Math.PI * 2 * distance) / RECOVERY_STEP));
-    for (let sample = 0; sample < samples; sample += 1) {
-      const angle = (sample / samples) * Math.PI * 2;
-      const candidate = [
-        sourceAnchor[0] + Math.cos(angle) * distance,
-        sourceAnchor[1] + Math.sin(angle) * distance,
-      ];
-      if (isPhysicalLandPoint(candidate)) return candidate;
-    }
+
+  // Anchor recovery is a correctness path, not a radial brute-force search.
+  // Resolve directly against the authoritative lake shoreline when the
+  // historical point is inside a lake; otherwise use the nearest authoritative
+  // land boundary. Both operations are bounded by the actual atlas geometry.
+  const lakeBoundary = nearestLakeBoundaryPoint(sourceAnchor);
+  if (isLakeInteriorPoint(sourceAnchor)
+    && lakeBoundary.point
+    && lakeBoundary.distance <= MAX_RECOVERY_DISTANCE
+    && isPhysicalLandPoint(lakeBoundary.point)) {
+    return [...lakeBoundary.point];
   }
-  const boundary = nearestBoundaryLandPoint(sourceAnchor);
-  if (boundary.point && boundary.distance <= MAX_RECOVERY_DISTANCE && isPhysicalLandPoint(boundary.point)) return [...boundary.point];
+
+  const landBoundary = nearestBoundaryLandPoint(sourceAnchor);
+  if (landBoundary.point
+    && landBoundary.distance <= MAX_RECOVERY_DISTANCE
+    && isPhysicalLandPoint(landBoundary.point)) {
+    return [...landBoundary.point];
+  }
+
   throw new Error(`No authoritative physical-land geometry anchor candidate for ${provinceId} from ${sourceAnchor.join(",")}`);
 }
 
