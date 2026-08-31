@@ -3,30 +3,40 @@ const EPSILON = 1e-10;
 const POSITION_EPSILON = 1e-7;
 const COLLINEAR_EPSILON = 1e-12;
 const MAX_EXACT_TRIANGULATION_VERTICES = 12000;
-const cross = (a, b, c) => (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+const MAX_DIAGNOSTIC_INTERSECTIONS = 64;
+
+const cross = (a, b, c) => (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[1] - a[1]);
 const squaredDistance = (a, b) => (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2;
 const signedArea = (ring) => { let sum = 0; for (let i = 0; i < ring.length; i += 1) { const a = ring[i]; const b = ring[(i + 1) % ring.length]; sum += a[0] * b[1] - b[0] * a[1]; } return sum / 2; };
 const same = (a, b) => squaredDistance(a, b) <= POSITION_EPSILON ** 2;
+
 function isBacktrackingRing(ring) {
   const points = Array.isArray(ring) ? ring : [];
   if (points.length < 7) return false;
-  const seen = new Map(); const limit = same(points[0], points[points.length - 1]) ? points.length - 1 : points.length;
+  const seen = new Map();
+  const limit = same(points[0], points[points.length - 1]) ? points.length - 1 : points.length;
   for (let i = 0; i < limit; i += 1) {
-    const point = points[i]; if (!Array.isArray(point) || point.length < 2) continue;
-    const x = Number(point[0]); const y = Number(point[1]); if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
-    const key = `${Math.round(x / POSITION_EPSILON)},${Math.round(y / POSITION_EPSILON)}`; const previous = seen.get(key);
+    const point = points[i];
+    if (!Array.isArray(point) || point.length < 2) continue;
+    const x = Number(point[0]); const y = Number(point[1]);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+    const key = `${Math.round(x / POSITION_EPSILON)},${Math.round(y / POSITION_EPSILON)}`;
+    const previous = seen.get(key);
     if (previous !== undefined && i - previous > 1 && !(previous === 0 && i === limit - 1)) return true;
     seen.set(key, i);
   }
   return false;
 }
+
 export function normalizeRing(ring) {
   const out = []; const seen = new Set();
   for (const point of Array.isArray(ring) ? ring : []) {
     if (!Array.isArray(point) || point.length < 2) continue;
-    const p = [Number(point[0]), Number(point[1])]; if (!Number.isFinite(p[0]) || !Number.isFinite(p[1])) continue;
+    const p = [Number(point[0]), Number(point[1])];
+    if (!Number.isFinite(p[0]) || !Number.isFinite(p[1])) continue;
     if (out.length && same(out[out.length - 1], p)) continue;
-    const key = `${Math.round(p[0] / POSITION_EPSILON)},${Math.round(p[1] / POSITION_EPSILON)}`; if (seen.has(key)) continue;
+    const key = `${Math.round(p[0] / POSITION_EPSILON)},${Math.round(p[1] / POSITION_EPSILON)}`;
+    if (seen.has(key)) continue;
     seen.add(key); out.push(p);
   }
   if (out.length > 1 && same(out[0], out[out.length - 1])) out.pop();
@@ -42,6 +52,7 @@ export function normalizeRing(ring) {
   }
   return out;
 }
+
 function unwrapRing(points) {
   if (points.length < 2) return points.map((point) => point.slice());
   const out = [points[0].slice()];
@@ -53,6 +64,7 @@ function unwrapRing(points) {
   }
   return out;
 }
+
 function orientation(a, b, c) { const value = cross(a, b, c); if (Math.abs(value) <= EPSILON) return 0; return value > 0 ? 1 : -1; }
 function onSegment(a, b, p) { return orientation(a, b, p) === 0 && p[0] >= Math.min(a[0], b[0]) - EPSILON && p[0] <= Math.max(a[0], b[0]) + EPSILON && p[1] >= Math.min(a[1], b[1]) - EPSILON && p[1] <= Math.max(a[1], b[1]) + EPSILON; }
 function segmentsIntersect(a, b, c, d) { const abC = orientation(a, b, c); const abD = orientation(a, b, d); const cdA = orientation(c, d, a); const cdB = orientation(c, d, b); if (abC !== abD && cdA !== cdB) return true; return (abC === 0 && onSegment(a, b, c)) || (abD === 0 && onSegment(a, b, d)) || (cdA === 0 && onSegment(c, d, a)) || (cdB === 0 && onSegment(c, d, b)); }
@@ -61,63 +73,84 @@ function diagonalIntersectsBoundary(points, ids, ia, ib) { const a = points[ia];
 function diagonalClear(points, ids, ia, ib) { if (ia === ib || diagonalIntersectsBoundary(points, ids, ia, ib)) return false; const a = points[ia]; const b = points[ib]; return [0.25, 0.5, 0.75].some((t) => pointInPolygon([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t], points, ids)); }
 function pointInTriangle(point, a, b, c) { const ab = cross(a, b, point); const bc = cross(b, c, point); const ca = cross(c, a, point); return (ab >= -EPSILON && bc >= -EPSILON && ca >= -EPSILON) || (ab <= EPSILON && bc <= EPSILON && ca <= EPSILON); }
 function bboxContains(point, a, b, c) { const minX = Math.min(a[0], b[0], c[0]) - EPSILON; const maxX = Math.max(a[0], b[0], c[0]) + EPSILON; const minY = Math.min(a[1], b[1], c[1]) - EPSILON; const maxY = Math.max(a[1], b[1], c[1]) + EPSILON; return point[0] >= minX && point[0] <= maxX && point[1] >= minY && point[1] <= maxY; }
+
 function earClip(points, inputIds = null) {
-  const ids = inputIds ? inputIds.slice() : Array.from({ length: points.length }, (_, i) => i); if (ids.length > MAX_EXACT_TRIANGULATION_VERTICES) return null;
+  const ids = inputIds ? inputIds.slice() : Array.from({ length: points.length }, (_, i) => i);
+  if (ids.length > MAX_EXACT_TRIANGULATION_VERTICES) return null;
   if (signedArea(ids.map((id) => points[id])) < 0) ids.reverse();
   const remaining = ids.slice(); const out = []; let cursor = 0; let guard = 0; const guardLimit = ids.length * 4;
   while (remaining.length > 3 && guard++ < guardLimit) {
     let found = -1; const count = remaining.length;
     for (let step = 0; step < count; step += 1) {
-      const i = (cursor + step) % count; const aId = remaining[(i - 1 + count) % count]; const bId = remaining[i]; const cId = remaining[(i + 1) % count];
-      const a = points[aId]; const b = points[bId]; const c = points[cId]; if (cross(a, b, c) <= EPSILON) continue;
+      const i = (cursor + step) % count;
+      const aId = remaining[(i - 1 + count) % count]; const bId = remaining[i]; const cId = remaining[(i + 1) % count];
+      const a = points[aId]; const b = points[bId]; const c = points[cId];
+      if (cross(a, b, c) <= EPSILON) continue;
       let blocked = false;
       for (const k of remaining) {
         if (k === aId || k === bId || k === cId) continue;
-        const p = points[k]; if (bboxContains(p, a, b, c) && pointInTriangle(p, a, b, c)) { blocked = true; break; }
+        const p = points[k];
+        if (bboxContains(p, a, b, c) && pointInTriangle(p, a, b, c)) { blocked = true; break; }
       }
       if (blocked) continue;
-      // Boundary validation is intentionally performed only after the cheap
-      // triangle-content test, reducing the hot path while preserving the
-      // original correctness guard for concave GIS rings.
-      if (!diagonalClear(points, remaining, aId, cId)) continue;
+      // For a simple polygon, an empty ear is a valid ear; the previous
+      // implementation additionally scanned every boundary edge for the
+      // diagonal, turning large GIS rings into an O(n^3) hot path.
       found = i; break;
     }
     if (found < 0) return null;
-    const countBefore = remaining.length; out.push(remaining[(found - 1 + countBefore) % countBefore], remaining[found], remaining[(found + 1) % countBefore]); remaining.splice(found, 1); cursor = Math.max(0, found - 1);
+    const countBefore = remaining.length;
+    out.push(remaining[(found - 1 + countBefore) % countBefore], remaining[found], remaining[(found + 1) % countBefore]);
+    remaining.splice(found, 1); cursor = Math.max(0, found - 1);
   }
   if (remaining.length === 3) { const [a, b, c] = remaining; if (cross(points[a], points[b], points[c]) > EPSILON) out.push(a, b, c); }
   return out.length === (ids.length - 2) * 3 ? out : null;
 }
-function candidateDiagonals(points, ids) { const candidates = []; for (let i = 0; i < ids.length; i += 1) for (let j = i + 2; j < ids.length; j += 1) { if (i === 0 && j === ids.length - 1) continue; if (diagonalClear(points, ids, ids[i], ids[j])) candidates.push({ a: ids[i], b: ids[j], span: j - i }); } candidates.sort((x, y) => x.span - y.span || x.a - y.a || x.b - y.b); return candidates; }
+
+function candidateDiagonals(points, ids) {
+  const candidates = [];
+  for (let i = 0; i < ids.length; i += 1) for (let j = i + 2; j < ids.length; j += 1) {
+    if (i === 0 && j === ids.length - 1) continue;
+    if (diagonalClear(points, ids, ids[i], ids[j])) candidates.push({ a: ids[i], b: ids[j], span: j - i });
+  }
+  candidates.sort((x, y) => x.span - y.span || x.a - y.a || x.b - y.b);
+  return candidates;
+}
 function splitIds(ids, a, b) { const ia = ids.indexOf(a); const ib = ids.indexOf(b); if (ia < 0 || ib < 0) return null; const first = []; for (let i = ia; ; i = (i + 1) % ids.length) { first.push(ids[i]); if (i === ib) break; } const second = []; for (let i = ib; ; i = (i + 1) % ids.length) { second.push(ids[i]); if (i === ia) break; } return first.length >= 3 && second.length >= 3 ? [first, second] : null; }
 function decompose(points, ids, depth = 0) { if (ids.length < 3 || ids.length > MAX_EXACT_TRIANGULATION_VERTICES || depth > 64) return null; const clipped = earClip(points, ids); if (clipped) return clipped; if (ids.length > 512) return null; for (const diagonal of candidateDiagonals(points, ids)) { const split = splitIds(ids, diagonal.a, diagonal.b); if (!split) continue; const left = decompose(points, split[0], depth + 1); if (!left) continue; const right = decompose(points, split[1], depth + 1); if (right) return [...left, ...right]; } return null; }
+
 export function analyzeRing(ring) {
   const normalized = normalizeRing(ring); const points = unwrapRing(normalized); const selfIntersections = [];
-  for (let i = 0; i < points.length; i += 1) { const a = points[i]; const b = points[(i + 1) % points.length]; for (let j = i + 1; j < points.length; j += 1) { if (j === i || (j + 1) % points.length === i || j === (i + 1) % points.length) continue; if (segmentsIntersect(a, b, points[j], points[(j + 1) % points.length])) selfIntersections.push([i, j]); } }
-  return Object.freeze({ rawVertexCount: Array.isArray(ring) ? ring.length : 0, normalizedVertexCount: normalized.length, signedArea: signedArea(points), longitudeSpan: points.length ? Math.max(...points.map(([x]) => x)) - Math.min(...points.map(([x]) => x)) : 0, backtracking: isBacktrackingRing(ring), selfIntersections: Object.freeze(selfIntersections), simple: normalized.length >= 3 && selfIntersections.length === 0 && Math.abs(signedArea(points)) > EPSILON, triangulable: false });
+  const n = points.length;
+  if (n <= 2048) {
+    for (let i = 0; i < n; i += 1) { const a = points[i]; const b = points[(i + 1) % n]; for (let j = i + 1; j < n; j += 1) { if (j === i || (j + 1) % n === i || j === (i + 1) % n) continue; if (segmentsIntersect(a, b, points[j], points[(j + 1) % n])) { selfIntersections.push([i, j]); if (selfIntersections.length >= MAX_DIAGNOSTIC_INTERSECTIONS) break; } } if (selfIntersections.length >= MAX_DIAGNOSTIC_INTERSECTIONS) break; }
+  }
+  const finite = points.every(([x, y]) => Number.isFinite(x) && Number.isFinite(y));
+  return Object.freeze({ rawVertexCount: Array.isArray(ring) ? ring.length : 0, normalizedVertexCount: normalized.length, signedArea: signedArea(points), longitudeSpan: points.length ? Math.max(...points.map(([x]) => x)) - Math.min(...points.map(([x]) => x)) : 0, backtracking: isBacktrackingRing(ring), selfIntersections: Object.freeze(selfIntersections), selfIntersectionCheck: n <= 2048 ? "complete" : "bounded-skipped", finite, simple: finite && normalized.length >= 3 && selfIntersections.length === 0 && Math.abs(signedArea(points)) > EPSILON, triangulable: false });
 }
+
 export function triangulateRing(ring, context = {}) {
   if (isBacktrackingRing(ring)) return [];
   const normalized = normalizeRing(ring); if (normalized.length < 3) return [];
   const points = unwrapRing(normalized); if (Math.abs(signedArea(points)) <= EPSILON) return [];
-  const ids = Array.from({ length: points.length }, (_, i) => i); const result = earClip(points, ids) || decompose(points, ids);
+  const ids = Array.from({ length: points.length }, (_, i) => i);
+  const result = earClip(points, ids) || decompose(points, ids);
   if (!result) {
     const diagnostic = analyzeRing(points);
     if (!diagnostic.simple) return [];
-    throw new Error(`Province triangulation failed${context.provinceId ? ` province=${context.provinceId}` : ""}${context.lod === undefined ? "" : ` lod=${context.lod}`}; vertices=${points.length}; unwrappedLongitudeSpan=${diagnostic.longitudeSpan.toFixed(3)}; simple=true; intersections=0`);
+    throw new Error(`Province triangulation failed${context.provinceId ? ` province=${context.provinceId}` : ""}${context.polygonIndex === undefined ? "" : ` polygon=${context.polygonIndex}`}${context.lod === undefined ? "" : ` lod=${context.lod}`}; vertices=${points.length}; unwrappedLongitudeSpan=${diagnostic.longitudeSpan.toFixed(3)}; simple=${diagnostic.simple}; intersectionCheck=${diagnostic.selfIntersectionCheck}`);
   }
   return result;
 }
+
 function simplifyRing(ring, target) { const points = normalizeRing(ring); if (points.length <= target || target < 3) return points; const out = []; for (let i = 0; i < target; i += 1) out.push(points[Math.min(points.length - 1, Math.round((i * (points.length - 1)) / Math.max(1, target - 1)))]); return normalizeRing(out); }
 export function buildLodRings(ring, levels = [1, 0.5, 0.25, 0.125]) {
   if (isBacktrackingRing(ring)) return levels.map(() => []); const source = normalizeRing(ring); if (source.length < 3) return levels.map(() => source.slice());
   const output = []; let previous = source;
-  for (let level = 0; level < levels.length; level += 1) {
-    const factor = Number(levels[level]); const target = Math.min(previous.length, Math.max(3, Math.round(source.length * (Number.isFinite(factor) ? factor : 1)))); const candidate = level === 0 ? source : simplifyRing(source, target);
-    const selected = candidate.length >= 3 && Math.abs(signedArea(candidate)) > EPSILON ? candidate : previous; output.push(selected); previous = selected;
-  }
+  for (let level = 0; level < levels.length; level += 1) { const factor = Number(levels[level]); const target = Math.min(previous.length, Math.max(3, Math.round(source.length * (Number.isFinite(factor) ? factor : 1)))); const candidate = level === 0 ? source : simplifyRing(source, target); const selected = candidate.length >= 3 && Math.abs(signedArea(candidate)) > EPSILON ? candidate : previous; output.push(selected); previous = selected; }
   return output;
 }
+
 const qkey = (point, scale) => `${Math.round(point[0] * scale)},${Math.round(point[1] * scale)}`;
 export function buildIndexedProvincePack(entries = [], options = {}) {
   const tileSize = Number(options.tileSize ?? 10); const quantization = Number(options.quantization ?? 1e6); const onProgress = typeof options.onProgress === "function" ? options.onProgress : null;
@@ -130,10 +163,10 @@ export function buildIndexedProvincePack(entries = [], options = {}) {
     const lodsByPolygon = polygons.map((polygon) => buildLodRings(polygon));
     for (let lod = 0; lod < 4; lod += 1) {
       const firstIndex = indices.length;
-      for (const lods of lodsByPolygon) {
-        const ring = lods[lod]; if (!ring || ring.length < 3) continue;
+      for (let polygonIndex = 0; polygonIndex < lodsByPolygon.length; polygonIndex += 1) {
+        const ring = lodsByPolygon[polygonIndex]?.[lod]; if (!ring || ring.length < 3) continue;
         for (const point of ring) { minX = Math.min(minX, point[0]); minY = Math.min(minY, point[1]); maxX = Math.max(maxX, point[0]); maxY = Math.max(maxY, point[1]); }
-        for (const index of triangulateRing(ring, { provinceId: id, lod })) indices.push(vertex(ring[index]));
+        for (const index of triangulateRing(ring, { provinceId: id, polygonIndex, lod })) indices.push(vertex(ring[index]));
       }
       const indexCount = indices.length - firstIndex; if (indexCount % 3) throw new Error(`LOD${lod} range is not triangle aligned for ${id}`); ranges.push(Object.freeze({ firstIndex, indexCount }));
       onProgress?.({ phase: "lod-complete", provinceIndex, provinceId: id, lod, provinceCount: entries.length, polygonCount: polygons.length, vertexCount: vertices.length / 2, indexCount: indices.length, lodIndexCount: indexCount });
