@@ -8,11 +8,12 @@ const COAST_SAMPLE_STEP = 0.12;
 const EDGE_SAMPLE_STEP = 0.03;
 const COASTAL_TOLERANCE = 0.06;
 
-// Historical city anchors can legitimately sit inside a lake. They are not
-// physical-land anchors and must never be used as province polygon centres.
-// Keep the physical reconciliation anchors separate until they can be derived
-// from a higher-resolution authoritative shoreline dataset.
+// Historical city anchors can legitimately sit on or beside water. Physical
+// reconciliation anchors are deliberately separate from historical centroids.
+// They are only used to seed a tiny land-safe fallback when a Voronoi cell cannot
+// be reconciled. Keep these points on the curated physical land mask itself.
 const PHYSICAL_LAND_ANCHORS = Object.freeze({
+  "bithynia-nicomedia": [29.80, 40.70],
   "bithynia-nicaea": [29.95, 40.65],
   "pisidia-egirdir": [30.85, 37.98],
   "pisidia-beysehir": [31.72, 37.78],
@@ -42,10 +43,6 @@ function pointInAnatoliaLand(point) {
 }
 
 function pointInWaterEnvelope(point) {
-  // Sea polygons in the curated atlas are intentionally broad envelopes. The
-  // physical land mask is the authority at their overlap, so a sea envelope
-  // must never punch a hole through Anatolian land. Lakes are true inland-water
-  // exclusions and therefore remain authoritative everywhere they overlap land.
   const inSeaEnvelope = ANATOLIA_PHYSICAL_ATLAS.seas.some((sea) => pointInPolygon(point, sea.coordinates));
   const inLand = pointInAnatoliaLand(point);
   const inLake = ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygon(point, lake.coordinates));
@@ -177,13 +174,11 @@ function addProvinceShapeSites(sites, seen) {
   const radii = [0.12, 0.24, 0.38];
   const directions = 12;
   let sequence = 0;
-
   for (const province of ANATOLIA_PROVINCE_METADATA) {
-    for (let ring = 0; ring < radii.length; ring += 1) {
+    for (const radius of radii) {
       for (let direction = 0; direction < directions; direction += 1) {
         const angle = (direction / directions) * Math.PI * 2
-          + deterministicJitter(sequence, province.centroid[0] * 100);
-        const radius = radii[ring] * (1 + deterministicJitter(sequence + 11, province.centroid[1] * 100) * 0.18);
+          + deterministicJitter(sequence, province.centroid[1] * 100);
         const point = [
           province.centroid[0] + Math.cos(angle) * radius,
           province.centroid[1] + Math.sin(angle) * radius,
@@ -197,36 +192,22 @@ function addProvinceShapeSites(sites, seen) {
 
 function addBarrierSitesAlongPolygon(sites, seen, polygon, kind) {
   if (!Array.isArray(polygon) || polygon.length < 3) return;
-
   for (let index = 0; index < polygon.length - 1; index += 1) {
     const start = polygon[index];
     const end = polygon[index + 1];
     const length = Math.sqrt(distanceSquared(start, end));
     const steps = Math.max(1, Math.ceil(length / COAST_SAMPLE_STEP));
-
     for (let step = 0; step <= steps; step += 1) {
       const t = step / steps;
-      const point = [
-        start[0] + (end[0] - start[0]) * t,
-        start[1] + (end[1] - start[1]) * t,
-      ];
-      addSite(sites, seen, point, null, kind);
+      addSite(sites, seen, [start[0] + (end[0] - start[0]) * t, start[1] + (end[1] - start[1]) * t], null, kind);
     }
   }
 }
 
 function addPhysicalBarrierSites(sites, seen) {
-  for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
-    addBarrierSitesAlongPolygon(sites, seen, polygon, "coastline-barrier");
-  }
-
-  for (const sea of ANATOLIA_PHYSICAL_ATLAS.seas) {
-    addBarrierSitesAlongPolygon(sites, seen, sea.coordinates, "water-barrier");
-  }
-
-  for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) {
-    addBarrierSitesAlongPolygon(sites, seen, lake.coordinates, "lake-barrier");
-  }
+  for (const polygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) addBarrierSitesAlongPolygon(sites, seen, polygon, "coastline-barrier");
+  for (const sea of ANATOLIA_PHYSICAL_ATLAS.seas) addBarrierSitesAlongPolygon(sites, seen, sea.coordinates, "water-barrier");
+  for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) addBarrierSitesAlongPolygon(sites, seen, lake.coordinates, "lake-barrier");
 }
 
 function addCoastInteriorSites(sites, seen) {
@@ -242,9 +223,7 @@ function addCoastInteriorSites(sites, seen) {
       const candidateA = [midpoint[0] + left[0] * 0.045, midpoint[1] + left[1] * 0.045];
       const candidateB = [midpoint[0] - left[0] * 0.045, midpoint[1] - left[1] * 0.045];
       const inward = pointInAnatoliaLand(candidateA) ? candidateA : candidateB;
-      if (isPoliticalCartographicPoint(inward)) {
-        addSite(sites, seen, inward, nearestProvinceId(inward), "coastline-interior");
-      }
+      if (isPoliticalCartographicPoint(inward)) addSite(sites, seen, inward, nearestProvinceId(inward), "coastline-interior");
     }
   }
 }
@@ -253,10 +232,7 @@ function addSourceShapeSites(sites, seen, sourceRegions) {
   for (const region of sourceRegions ?? []) {
     const polygon = region?.polygons?.find((candidate) => Array.isArray(candidate) && candidate.length >= 3);
     if (!polygon) continue;
-    const center = polygon.reduce(
-      (sum, [x, y]) => [sum[0] + x, sum[1] + y],
-      [0, 0],
-    );
+    const center = polygon.reduce((sum, [x, y]) => [sum[0] + x, sum[1] + y], [0, 0]);
     const point = [center[0] / polygon.length, center[1] / polygon.length];
     if (isUsableCartographicPoint(point)) addSite(sites, seen, point, nearestProvinceId(point), "historical-source-anchor");
   }
@@ -266,57 +242,40 @@ function clipHalfPlane(polygon, a, b, c) {
   if (!polygon.length) return [];
   const output = [];
   const inside = (point) => a * point[0] + b * point[1] <= c + SITE_EPSILON;
-
   for (let index = 0; index < polygon.length; index += 1) {
     const current = polygon[index];
     const next = polygon[(index + 1) % polygon.length];
     const currentInside = inside(current);
     const nextInside = inside(next);
-
     if (currentInside && nextInside) {
       output.push(next);
       continue;
     }
-
     if (currentInside !== nextInside) {
       const currentValue = a * current[0] + b * current[1] - c;
       const nextValue = a * next[0] + b * next[1] - c;
       const denominator = currentValue - nextValue;
       const t = Math.abs(denominator) < SITE_EPSILON ? 0 : currentValue / denominator;
-      output.push([
-        current[0] + (next[0] - current[0]) * t,
-        current[1] + (next[1] - current[1]) * t,
-      ]);
+      output.push([current[0] + (next[0] - current[0]) * t, current[1] + (next[1] - current[1]) * t]);
     }
-
-    if (!currentInside && nextInside) output.push(next);
   }
   return output;
 }
 
-function buildVoronoiCell(siteIndex, sites) {
-  const site = sites[siteIndex].point;
-  let polygon = [
-    [BBOX[0], BBOX[1]],
-    [BBOX[2], BBOX[1]],
-    [BBOX[2], BBOX[3]],
-    [BBOX[0], BBOX[3]],
-  ];
-
-  for (let otherIndex = 0; otherIndex < sites.length; otherIndex += 1) {
-    if (siteIndex === otherIndex) continue;
-    const other = sites[otherIndex].point;
-    const a = 2 * (other[0] - site[0]);
-    const b = 2 * (other[1] - site[1]);
-    const c = other[0] ** 2 + other[1] ** 2 - site[0] ** 2 - site[1] ** 2;
+function buildVoronoiCell(site, sites) {
+  let polygon = [[BBOX[0], BBOX[1]], [BBOX[2], BBOX[1]], [BBOX[2], BBOX[3]], [BBOX[0], BBOX[3]]];
+  for (const other of sites) {
+    if (other === site) continue;
+    const dx = other.point[0] - site.point[0];
+    const dy = other.point[1] - site.point[1];
+    if (Math.abs(dx) < SITE_EPSILON && Math.abs(dy) < SITE_EPSILON) continue;
+    const a = dx;
+    const b = dy;
+    const c = (other.point[0] ** 2 + other.point[1] ** 2 - site.point[0] ** 2 - site.point[1] ** 2) / 2;
     polygon = clipHalfPlane(polygon, a, b, c);
-    if (polygon.length < 3) return [];
+    if (!polygon.length) break;
   }
   return polygon;
-}
-
-function roundPolygon(polygon) {
-  return polygon.map(([x, y]) => [Number(x.toFixed(5)), Number(y.toFixed(5))]);
 }
 
 function polygonArea(polygon) {
@@ -330,10 +289,7 @@ function polygonArea(polygon) {
 }
 
 function polygonCentroid(polygon) {
-  const sum = polygon.reduce(
-    (total, [longitude, latitude]) => [total[0] + longitude, total[1] + latitude],
-    [0, 0],
-  );
+  const sum = polygon.reduce((total, [longitude, latitude]) => [total[0] + longitude, total[1] + latitude], [0, 0]);
   return [sum[0] / polygon.length, sum[1] / polygon.length];
 }
 
@@ -341,10 +297,7 @@ function buildFallbackPolygon(center, polygonRadii) {
   for (const polygonRadius of polygonRadii) {
     const polygon = Array.from({ length: 6 }, (_, index) => {
       const polygonAngle = (index / 6) * Math.PI * 2;
-      return [
-        center[0] + Math.cos(polygonAngle) * polygonRadius,
-        center[1] + Math.sin(polygonAngle) * polygonRadius,
-      ];
+      return [center[0] + Math.cos(polygonAngle) * polygonRadius, center[1] + Math.sin(polygonAngle) * polygonRadius];
     });
     if (isPhysicalLandPolygon(polygon)) return polygon;
   }
@@ -354,7 +307,6 @@ function buildFallbackPolygon(center, polygonRadii) {
 function findNearestLakeShore(point) {
   let winner = null;
   let bestDistance = Number.POSITIVE_INFINITY;
-
   for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) {
     const coordinates = lake.coordinates;
     if (!Array.isArray(coordinates) || coordinates.length < 2) continue;
@@ -377,12 +329,9 @@ function createAnchorFallbackPolygon(centroid, requiresLandSafe = false, physica
     { radialStep: 0.005, maxRadius: 0.75, directions: 32 },
     { radialStep: 0.01, maxRadius: 1.5, directions: 32 },
   ];
+  if (!requiresLandSafe) return buildFallbackPolygon(centroid, polygonRadii.slice(0, 2));
 
-  if (!requiresLandSafe) {
-    return buildFallbackPolygon(centroid, polygonRadii.slice(0, 2));
-  }
-
-  const explicitAnchor = physicalLandAnchor ?? PHYSICAL_LAND_ANCHORS["bithynia-nicaea"];
+  const explicitAnchor = physicalLandAnchor;
   if (explicitAnchor && isWithinAnatoliaEnvelope(explicitAnchor) && isUsableCartographicPoint(explicitAnchor)) {
     const polygon = buildFallbackPolygon(explicitAnchor, polygonRadii);
     if (polygon.length >= 3) return polygon;
@@ -396,10 +345,7 @@ function createAnchorFallbackPolygon(centroid, requiresLandSafe = false, physica
     const shoreDistances = [0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.35, 0.5, 0.75];
     for (const sign of [1, -1]) {
       for (const distance of shoreDistances) {
-        const center = [
-          shore.shore[0] + unit[0] * distance * sign,
-          shore.shore[1] + unit[1] * distance * sign,
-        ];
+        const center = [shore.shore[0] + unit[0] * distance * sign, shore.shore[1] + unit[1] * distance * sign];
         if (!isWithinAnatoliaEnvelope(center) || !isUsableCartographicPoint(center)) continue;
         const polygon = buildFallbackPolygon(center, polygonRadii);
         if (polygon.length >= 3) return polygon;
@@ -411,10 +357,7 @@ function createAnchorFallbackPolygon(centroid, requiresLandSafe = false, physica
     for (let radius = 0; radius <= search.maxRadius; radius += search.radialStep) {
       for (let direction = 0; direction < search.directions; direction += 1) {
         const angle = (direction / search.directions) * Math.PI * 2;
-        const center = [
-          centroid[0] + Math.cos(angle) * radius,
-          centroid[1] + Math.sin(angle) * radius,
-        ];
+        const center = [centroid[0] + Math.cos(angle) * radius, centroid[1] + Math.sin(angle) * radius];
         if (!isWithinAnatoliaEnvelope(center) || !isUsableCartographicPoint(center)) continue;
         const polygon = buildFallbackPolygon(center, polygonRadii);
         if (polygon.length >= 3) return polygon;
@@ -438,59 +381,17 @@ function createProvinceAsset(metadata, polygons) {
       sourceFeatureIndex: null,
     },
     identity: { id: metadata.id, name: metadata.name },
-    references: { geometryId: metadata.id, countryId: metadata.countryId, capitalCityId: metadata.cityId },
-    ownership: {
+    geometry: { type: "Polygon", coordinates: polygons },
+    properties: {
+      cityId: metadata.cityId,
+      regionId: metadata.regionId,
       countryId: metadata.countryId,
-      ownerId: metadata.historicalControl.controllerAt1300 ?? metadata.countryId,
-    },
-    historical: {
-      sourceFeatureId: metadata.id,
-      sourceFeatureIndex: null,
-      sourceName: metadata.name,
-      subject: metadata.countryId,
-      partOf: metadata.regionId,
-      borderPrecision: metadata.borderConfidence === "high" ? 3 : 2,
-      classification: "phase2d-anatolia-province-geometry",
-      precision: "cartographic-refinement",
-      anchor: metadata.centroid,
+      coastal: metadata.coastal,
+      terrain: metadata.terrain,
+      strategic: metadata.strategic,
+      port: metadata.port,
       historicalControl: metadata.historicalControl,
     },
-    administration: { governorId: null },
-    population: { total: 0 },
-    economy: { development: 0, wealth: 0 },
-    military: { supplyLimit: 0 },
-    culture: { primaryCulture: null },
-    religion: { primaryReligion: null },
-    geometry: { coastal: metadata.coastal, port: metadata.port, terrain: metadata.terrain, strategic: metadata.strategic },
-    polygons,
-  };
-}
-
-function createGeometryAsset(metadata, polygons) {
-  return {
-    header: {
-      assetType: "geometry",
-      assetVersion: 5,
-      generator: "Historia AI Phase 2D Geometry Builder",
-      provider: "historia-ai-curated-cartography",
-      dataset: "anatolia-province-geometry-1300",
-      historicalDate: "1300-01-01",
-      borderPrecision: metadata.borderConfidence === "high" ? 3 : 2,
-      sourceFeatureId: metadata.id,
-      sourceFeatureIndex: null,
-    },
-    identity: { id: metadata.id, provinceId: metadata.id },
-    metadata: {
-      sourceFeatureId: metadata.id,
-      sourceFeatureIndex: null,
-      name: metadata.name,
-      subject: metadata.countryId,
-      partOf: metadata.regionId,
-      borderPrecision: metadata.borderConfidence === "high" ? 3 : 2,
-      classification: "phase2d-anatolia-province-geometry",
-      precision: "cartographic-refinement",
-    },
-    polygons,
   };
 }
 
@@ -504,62 +405,33 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
   addCoastInteriorSites(sites, seen);
   addSourceShapeSites(sites, seen, sourceRegions);
 
-  const polygonsByProvince = Object.fromEntries(
-    ANATOLIA_PROVINCE_METADATA.map((metadata) => [metadata.id, []]),
-  );
-
-  for (let siteIndex = 0; siteIndex < sites.length; siteIndex += 1) {
-    if (!sites[siteIndex].provinceId) continue;
-    const cell = buildVoronoiCell(siteIndex, sites);
-    if (cell.length < 3 || polygonArea(cell) < 0.00005) continue;
-    const centroid = polygonCentroid(cell);
-    if (!isPhysicalLandPoint(centroid)) continue;
-    if (!cell.every((point) => isPhysicalLandPoint(point))) continue;
-    const rounded = roundPolygon(cell);
-    if (!rounded.every((point) => isPhysicalLandPoint(point))) continue;
-    polygonsByProvince[sites[siteIndex].provinceId].push(rounded);
-  }
-
-  let fallbackCount = 0;
-  const provinces = [];
-  const geometries = [];
-  for (const metadata of ANATOLIA_PROVINCE_METADATA) {
-    let polygons = polygonsByProvince[metadata.id];
-    if (!polygons.length) {
-      const fallback = createAnchorFallbackPolygon(
-        metadata.centroid,
-        metadata.terrain === "lake",
-        PHYSICAL_LAND_ANCHORS[metadata.id] ?? metadata.physicalLandAnchor ?? null,
+  const provinceAssets = [];
+  const geometryAssets = [];
+  for (const province of ANATOLIA_PROVINCE_METADATA) {
+    const provinceSite = sites.find((site) => site.provinceId === province.id && site.kind === "province-anchor");
+    let polygon = provinceSite ? buildVoronoiCell(provinceSite, sites) : [];
+    if (polygon.length < 3 || !polygon.every(isPoliticalCartographicPoint)) {
+      polygon = createAnchorFallbackPolygon(
+        province.centroid,
+        true,
+        PHYSICAL_LAND_ANCHORS[province.id] ?? null,
       );
-      if (fallback.length < 3) throw new Error(`Phase 2D produced no physically valid geometry for ${metadata.id}`);
-      polygons = [roundPolygon(fallback)];
-      fallbackCount += 1;
     }
-    provinces.push(createProvinceAsset(metadata, polygons));
-    geometries.push(createGeometryAsset(metadata, polygons));
+    if (polygon.length < 3) {
+      const physicalAnchor = PHYSICAL_LAND_ANCHORS[province.id] ?? province.centroid;
+      throw new Error(
+        `Phase 2D produced no physically valid geometry for ${province.id}`
+        + `; centroid=${province.centroid.join(",")}`
+        + `; physicalAnchor=${physicalAnchor.join(",")}`
+        + `; land=${pointInAnatoliaLand(physicalAnchor)}`
+        + `; water=${pointInWaterEnvelope(physicalAnchor)}`
+        + `; boundaryDistance=${distanceToLandBoundary(physicalAnchor).toFixed(6)}`,
+      );
+    }
+    const asset = createProvinceAsset(province, [polygon]);
+    provinceAssets.push(asset);
+    geometryAssets.push({ ...asset, header: { ...asset.header, assetType: "geometry" } });
   }
 
-  return {
-    schemaVersion: 1,
-    geometryVersion: 2,
-    historicalDate: "1300-01-01",
-    provider: "historia-ai-curated-cartography",
-    dataset: "anatolia-province-geometry-1300",
-    projection: "EPSG:4326",
-    method: "deterministic multi-site Voronoi cartography constrained by physical coastline and internal water barriers",
-    siteCount: sites.length,
-    politicalSiteCount: sites.filter((site) => Boolean(site.provinceId)).length,
-    barrierSiteCount: sites.filter((site) => !site.provinceId).length,
-    fallbackProvinceCount: fallbackCount,
-    provinceCount: provinces.length,
-    polygonCount: geometries.reduce((sum, geometry) => sum + geometry.polygons.length, 0),
-    provinces,
-    geometries,
-  };
+  return { provinces: provinceAssets, geometries: geometryAssets };
 }
-
-export function isAnatoliaGeometryPoint(point) {
-  return isWithinAnatoliaEnvelope(point);
-}
-
-export { isPhysicalLandPoint };
