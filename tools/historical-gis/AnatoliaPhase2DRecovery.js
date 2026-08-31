@@ -100,8 +100,6 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
       originals.set(metadata.id, clonePoint(metadata.centroid));
       changed.push([metadata, metadata.centroid, metadata.terrain]);
       metadata.centroid = clonePoint(anchor);
-      // A recovered terrestrial anchor must use the ordinary land fallback
-      // path. Restore the presentation terrain after geometry generation.
       if (EXPLICIT_RECOVERY_ANCHORS[metadata.id]) metadata.terrain = "recovery-land";
     }
 
@@ -118,3 +116,6 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
 }
 
 export { isAnatoliaGeometryPoint };
+
+// Recovery remains a compatibility boundary for legacy Phase 2D callers;
+// the component-safe physical authority is now the primary geometry path.
