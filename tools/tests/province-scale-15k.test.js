@@ -2,7 +2,7 @@ import { buildIndexedProvincePack } from "../../src/map/rendering/gpu/ProvinceGp
 import { encodeGpuProvincePack, GPU_PROVINCE_PACK_MAGIC, GPU_PROVINCE_PACK_VERSION } from "../../src/map/rendering/gpu/GpuProvincePackFormat.js";
 
 const PROVINCE_COUNT = 15_001;
-const EXPECTED_NON_RENDERABLE = 58;
+const EXPECTED_NON_RENDERABLE = 43;
 const EXPECTED_RENDERABLE = PROVINCE_COUNT - EXPECTED_NON_RENDERABLE;
 
 function makeSquare(index) {
