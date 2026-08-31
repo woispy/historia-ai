@@ -6,15 +6,20 @@ function assertFinite(value, name) { if (!finite(value)) throw new Error(`${name
 
 export function createTerrainMetricSpace({ crs } = {}) {
   if (crs !== "EPSG:4326" && crs !== "EPSG:3857") throw new Error(`Unsupported terrain metric CRS: ${crs || "missing"}`);
-  return Object.freeze({ crs, project, distancePerDegree });
+  return Object.freeze({ crs, project: (longitude, latitude) => project(crs, longitude, latitude), distancePerDegree });
 }
 
-function project(longitude, latitude) {
+function project(crs, longitude, latitude) {
   assertFinite(longitude, "longitude"); assertFinite(latitude, "latitude");
   if (longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90) throw new Error("Geographic coordinate outside WGS84 bounds.");
-  if (this?.crs === "EPSG:3857") return Object.freeze({ x: longitude * Math.PI / 180 * EARTH_RADIUS_M, y: Math.log(Math.tan(Math.PI / 4 + Math.min(Math.max(latitude, -WEB_MERCATOR_LIMIT), WEB_MERCATOR_LIMIT) * Math.PI / 360)) * EARTH_RADIUS_M });
-  const latitudeScale = Math.PI / 180 * EARTH_RADIUS_M;
-  return Object.freeze({ x: longitude * latitudeScale * Math.cos(latitude * Math.PI / 180), y: latitude * latitudeScale });
+  if (crs === "EPSG:3857") {
+    if (latitude < -WEB_MERCATOR_LIMIT || latitude > WEB_MERCATOR_LIMIT) throw new Error("Latitude outside Web Mercator domain.");
+    const radians = Math.PI / 180;
+    return Object.freeze({ x: longitude * radians * EARTH_RADIUS_M, y: Math.log(Math.tan(Math.PI / 4 + latitude * radians / 2)) * EARTH_RADIUS_M });
+  }
+  const radians = Math.PI / 180;
+  const latitudeScale = radians * EARTH_RADIUS_M;
+  return Object.freeze({ x: longitude * latitudeScale * Math.cos(latitude * radians), y: latitude * latitudeScale });
 }
 
 function distancePerDegree(latitude) {
