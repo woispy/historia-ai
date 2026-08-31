@@ -23,6 +23,14 @@ const started = Date.now();
 console.log(`GPU province worker start index=${index} province=${provinceId} polygons=${polygons.length} rawVertices=${rawVertices}`);
 
 const ringDiagnostics = polygons.map((polygon, polygonIndex) => ({ polygonIndex, ...analyzeRing(polygon) }));
+const renderableRingCount = ringDiagnostics.filter((diagnostics) => diagnostics.triangulable).length;
+if (renderableRingCount === 0) {
+  const reason = ringDiagnostics[0]?.reason ?? "no-rings";
+  const areas = ringDiagnostics.map((diagnostics) => diagnostics.signedArea).join(",");
+  console.log(`GPU province worker PASS province=${provinceId} status=non-renderable reason=${reason} rings=${ringDiagnostics.length} areas=[${areas}] elapsed=${Date.now() - started}ms`);
+  process.exit(0);
+}
+
 const pack = buildIndexedProvincePack([{ province, geometry }], {
   tileSize: 10,
   quantization: 1e6,
@@ -36,12 +44,9 @@ const pack = buildIndexedProvincePack([{ province, geometry }], {
 const packedProvince = pack.provinces[0];
 if (!packedProvince) throw new Error(`GPU worker omitted province=${provinceId}.`);
 if (!packedProvince.bounds || !Object.values(packedProvince.bounds).every(Number.isFinite)) throw new Error(`Invalid bounds province=${provinceId}.`);
-if (packedProvince.renderable) {
-  if (!pack.indices.length || pack.indices.length % 3 !== 0) throw new Error(`Invalid worker index buffer for province=${provinceId}.`);
-  for (const indexValue of pack.indices) if (indexValue >= pack.vertices.length / 2) throw new Error(`Out-of-bounds index=${indexValue} province=${provinceId}.`);
-  for (const value of pack.vertices) if (!Number.isFinite(value)) throw new Error(`Non-finite vertex province=${provinceId}.`);
-  console.log(`GPU province worker PASS province=${provinceId} status=renderable vertices=${pack.vertices.length / 2} indices=${pack.indices.length} elapsed=${Date.now() - started}ms`);
-} else {
-  const reason = packedProvince.nonRenderableReason ?? ringDiagnostics[0]?.reason ?? "unknown";
-  console.log(`GPU province worker PASS province=${provinceId} status=non-renderable reason=${reason} elapsed=${Date.now() - started}ms`);
-}
+if (!packedProvince.renderable) throw new Error(`GPU worker classified expected renderable province as non-renderable: ${provinceId}`);
+if (!pack.indices.length || pack.indices.length % 3 !== 0) throw new Error(`Invalid worker index buffer for province=${provinceId}.`);
+for (const indexValue of pack.indices) if (indexValue >= pack.vertices.length / 2) throw new Error(`Out-of-bounds index=${indexValue} province=${provinceId}.`);
+for (const value of pack.vertices) if (!Number.isFinite(value)) throw new Error(`Non-finite vertex province=${provinceId}.`);
+
+console.log(`GPU province worker PASS province=${provinceId} status=renderable vertices=${pack.vertices.length / 2} indices=${pack.indices.length} elapsed=${Date.now() - started}ms`);
