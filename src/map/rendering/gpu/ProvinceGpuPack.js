@@ -1,9 +1,11 @@
 /** Deterministic indexed GPU province geometry. HMAP/GIS remains authoritative. */
 const EPSILON = 1e-10;
+const POSITION_EPSILON = 1e-7;
 const COLLINEAR_EPSILON = 1e-12;
 
 const cross = (a, b, c) =>
   (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+const squaredDistance = (a, b) => (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2;
 const signedArea = (ring) => {
   let sum = 0;
   for (let i = 0; i < ring.length; i += 1) {
@@ -13,7 +15,7 @@ const signedArea = (ring) => {
   }
   return sum / 2;
 };
-const same = (a, b) => Math.abs(a[0] - b[0]) <= EPSILON && Math.abs(a[1] - b[1]) <= EPSILON;
+const same = (a, b) => squaredDistance(a, b) <= POSITION_EPSILON ** 2;
 
 export function normalizeRing(ring) {
   const out = [];
@@ -22,20 +24,28 @@ export function normalizeRing(ring) {
     if (!Array.isArray(point) || point.length < 2) continue;
     const p = [Number(point[0]), Number(point[1])];
     if (!Number.isFinite(p[0]) || !Number.isFinite(p[1])) continue;
-    const key = `${Math.round(p[0] / EPSILON)},${Math.round(p[1] / EPSILON)}`;
+    if (out.length && same(out[out.length - 1], p)) continue;
+    const key = `${Math.round(p[0] / POSITION_EPSILON)},${Math.round(p[1] / POSITION_EPSILON)}`;
     if (seen.has(key)) continue;
     seen.add(key);
     out.push(p);
   }
   if (out.length > 1 && same(out[0], out[out.length - 1])) out.pop();
+
   let changed = true;
   let guard = 0;
-  while (changed && out.length > 3 && guard++ < out.length * 2) {
+  while (changed && out.length > 3 && guard++ < out.length * 3) {
     changed = false;
     for (let i = 0; i < out.length && out.length > 3; i += 1) {
       const a = out[(i - 1 + out.length) % out.length];
       const b = out[i];
       const c = out[(i + 1) % out.length];
+      if (same(a, c) || squaredDistance(a, b) <= POSITION_EPSILON ** 2 || squaredDistance(b, c) <= POSITION_EPSILON ** 2) {
+        out.splice(i, 1);
+        changed = true;
+        i -= 1;
+        continue;
+      }
       const scale = Math.max(1, Math.hypot(c[0] - a[0], c[1] - a[1]));
       if (Math.abs(cross(a, b, c)) <= COLLINEAR_EPSILON * scale) {
         out.splice(i, 1);
