@@ -29,7 +29,7 @@ export function addTerrainSkirts(mesh, { size, depth = 0.02 } = {}) {
   uvs.set(mesh.uvs);
   normals.set(mesh.normals);
 
-  const skirtIndices = new Uint32Array(extraVertices * 6);
+  const skirtIndices = new Uint32Array(EDGE_NAMES.length * (size - 1) * 6);
   let vertexCursor = baseVertexCount;
   let indexCursor = 0;
 
