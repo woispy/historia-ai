@@ -17,6 +17,14 @@ export const ANATOLIA_PHYSICAL_COAST_CORRECTIONS = Object.freeze([
     exclusionCoordinates: [],
   },
   {
+    id: "nicomedia-izmit-control",
+    reason: "The lightweight Marmara mainland mask does not resolve the historical Nicomedia terrestrial control site; preserve the site as a minimal physical-land correction without expanding the coarse water boundary.",
+    coordinates: [[29.88, 40.67], [29.94, 40.67], [29.96, 40.74], [29.90, 40.75], [29.88, 40.67]],
+    controlPoints: [[29.92, 40.705]],
+    landControlPoints: [[29.92, 40.705]],
+    exclusionCoordinates: [],
+  },
+  {
     id: "nicaea-iznik-northshore",
     reason: "The lightweight mainland mask/coarse generated lake geometry resolves the Nicaea shore too coarsely for the historical province geometry anchor.",
     coordinates: [
