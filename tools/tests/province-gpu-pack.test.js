@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { buildIndexedProvincePack } from "../../src/map/rendering/gpu/ProvinceGpuPack.js";
+import { analyzeRing, buildIndexedProvincePack, triangulateRing } from "../../src/map/rendering/gpu/ProvinceGpuPack.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const runtimePath = path.join(root, "src/world/map/assets/historical/1300/runtime.json");
@@ -77,9 +77,9 @@ if (fixtureA.vertices.length !== fixtureB.vertices.length || fixtureA.indices.le
 for (let i = 0; i < fixtureA.vertices.length; i += 1) if (fixtureA.vertices[i] !== fixtureB.vertices[i]) throw new Error(`GPU fixture vertices are non-deterministic at ${i}`);
 for (let i = 0; i < fixtureA.indices.length; i += 1) if (fixtureA.indices[i] !== fixtureB.indices[i]) throw new Error(`GPU fixture indices are non-deterministic at ${i}`);
 
-const degenerateFixture = [{ id: "degenerate-fixture", geometry: { polygons: [[[0, 0], [1, 0], [2, 0], [0, 0]]] } }];
-const degeneratePack = buildIndexedProvincePack(degenerateFixture, { tileSize: 10, quantization: 1e6 });
-if (degeneratePack.provinces[0].geometryStatus !== "non-renderable") throw new Error("Degenerate fixture was not classified as non-renderable.");
-if (degeneratePack.indices.length !== 0) throw new Error("Degenerate fixture produced GPU triangles.");
+const degenerateRing = [[0, 0], [1, 0], [2, 0], [0, 0]];
+const degenerateDiagnostics = analyzeRing(degenerateRing);
+if (degenerateDiagnostics.triangulable || degenerateDiagnostics.reason !== "zero-area") throw new Error("Degenerate fixture was not classified as zero-area.");
+if (triangulateRing(degenerateRing).length !== 0) throw new Error("Degenerate fixture produced GPU triangles.");
 
 console.log(`GPU province pack integrity: PASS (${entries.length} provinces, renderable=${renderableCount}, non-renderable=${nonRenderableCount}, ${vertexCount} vertices, ${pack.indices.length} indices, ${pack.tiles.length} tiles, build=${buildMs}ms; determinism=fixture; degeneracy=classified).`);
