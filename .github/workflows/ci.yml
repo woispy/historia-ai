@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - master
+      - phase-d-water-engine
       - feat/phase1-polish
       - feat/phase1-historical-gis-runtime
       - feat/phase1-map-camera-ui-polish
