@@ -43,7 +43,6 @@ on:
       - feat/phase2d-anatolia-province-geometry
       - feat/phase2efgh-cartography
       - feat/cartography-visual-refinement
-      - feat/map-gpu-texture-architecture
       - feat/cartography-foundation-v2
       - feat/phase3-runtime-engine
       - feat/runtime-province-selection
@@ -110,6 +109,8 @@ jobs:
         run: npm run test:anatolia-phase2c
       - name: Run Phase 2D Anatolia geometry tests
         run: npm run test:anatolia-phase2d
+      - name: Run Phase 2D physical recovery contract tests
+        run: node tools/tests/phase2d-recovery-contract.test.js
       - name: Run Phase 2F physical integrity tests
         run: npm run test:physical-integrity
       - name: Run Phase 2E-2H cartography tests
@@ -130,6 +131,8 @@ jobs:
         run: npm run test:gpu-province-pipeline
       - name: Run GPU picking and LOD contract tests
         run: npm run test:gpu-picking-lod
+      - name: Run 15,000 province GPU pack stress test
+        run: node tools/tests/gpu-15000-stress.test.js
       - name: Run new game state tests
         run: npm run test:new-game
       - name: Run new game startup tests
