@@ -19,11 +19,17 @@ export function resolveCopernicusDemSource(instance = "COPERNICUS_90") {
   return source;
 }
 
+export function createDemTileId(latitude, longitude) {
+  if (!Number.isInteger(latitude) || !Number.isInteger(longitude)) throw new Error("DEM tile coordinates must be integer degrees.");
+  if (latitude < -90 || latitude > 89 || longitude < -180 || longitude > 179) throw new Error("DEM tile coordinate is outside the global 1-degree grid.");
+  const ns = latitude >= 0 ? "N" : "S";
+  const ew = longitude >= 0 ? "E" : "W";
+  return `${ns}${String(Math.abs(latitude)).padStart(2, "0")}_${ew}${String(Math.abs(longitude)).padStart(3, "0")}`;
+}
+
 export function createDemTileProvenance({ source, gridId, productId, acquiredAt = null }) {
   const resolved = typeof source === "string" ? resolveCopernicusDemSource(source) : source;
-  if (!resolved?.id || !gridId || !productId) {
-    throw new Error("DEM provenance requires source, gridId and productId.");
-  }
+  if (!resolved?.id || !gridId || !productId) throw new Error("DEM provenance requires source, gridId and productId.");
   return Object.freeze({
     authority: "Copernicus Data Space Ecosystem",
     sourceInstance: resolved.id,
@@ -33,5 +39,13 @@ export function createDemTileProvenance({ source, gridId, productId, acquiredAt 
     gridId,
     productId,
     acquiredAt,
+    fictionalElevationAllowed: false,
   });
+}
+
+export function assertRealDemProvenance(provenance) {
+  if (!provenance || provenance.authority !== "Copernicus Data Space Ecosystem" || provenance.surfaceType !== "DSM" || provenance.fictionalElevationAllowed !== false) {
+    throw new Error("Terrain elevation must carry authoritative real-DEM provenance.");
+  }
+  return provenance;
 }
