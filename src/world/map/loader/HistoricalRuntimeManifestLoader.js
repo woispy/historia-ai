@@ -1,3 +1,5 @@
+import { decodeHistoricalRuntimeRegion } from "../binary/HistoricalRuntimeBinary.js";
+
 const viteHistoricalRuntimeManifestAssets = import.meta.env
   ? import.meta.glob(
       "../assets/historical/*/manifest.json",
@@ -7,8 +9,8 @@ const viteHistoricalRuntimeManifestAssets = import.meta.env
 
 const viteHistoricalRuntimeRegionAssets = import.meta.env
   ? import.meta.glob(
-      "../assets/historical/*/regions/*.json",
-      { import: "default" },
+      "../assets/historical/*/regions/*.bin",
+      { query: "?url", import: "default" },
     )
   : null;
 
@@ -88,21 +90,27 @@ async function loadManifest(year) {
   return manifest;
 }
 
-async function loadNodeRegion(year, file) {
+async function loadNodeRegion(year, file, metadata) {
   if (!nodeFs) return null;
   const fileUrl = new URL(`../assets/historical/${year}/${file}`, import.meta.url);
   if (!nodeFs.existsSync(fileUrl)) return null;
-  return JSON.parse(nodeFs.readFileSync(fileUrl, "utf8"));
+  const bytes = nodeFs.readFileSync(fileUrl);
+  return decodeHistoricalRuntimeRegion(bytes, metadata);
 }
 
-async function loadRegion(year, file) {
-  if (viteHistoricalRuntimeRegionAssets) {
-    const suffix = `/historical/${year}/${file}`;
-    const entry = Object.entries(viteHistoricalRuntimeRegionAssets).find(([path]) => path.endsWith(suffix));
-    if (!entry?.[1]) return null;
-    return entry[1]();
-  }
-  return loadNodeRegion(year, file);
+async function loadBrowserRegion(year, file, metadata) {
+  const suffix = `/historical/${year}/${file}`;
+  const entry = Object.entries(viteHistoricalRuntimeRegionAssets ?? {}).find(([path]) => path.endsWith(suffix));
+  if (!entry?.[1]) return null;
+  const url = await entry[1]();
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Historical runtime binary request failed: ${response.status} ${file}`);
+  return decodeHistoricalRuntimeRegion(new Uint8Array(await response.arrayBuffer()), metadata);
+}
+
+async function loadRegion(year, file, metadata) {
+  if (viteHistoricalRuntimeRegionAssets) return loadBrowserRegion(year, file, metadata);
+  return loadNodeRegion(year, file, metadata);
 }
 
 export async function loadHistoricalRuntimeAsset(date, regionIds = null) {
@@ -128,10 +136,13 @@ export async function loadHistoricalRuntimeAsset(date, regionIds = null) {
   }
 
   const loadedRegions = await Promise.all(
-    selectedRegions.map((region) => loadRegion(year, region.file)),
+    selectedRegions.map((region) => loadRegion(year, region.file, {
+      source: manifest.source,
+      historicalDate: manifest.historicalDate,
+    })),
   );
   if (loadedRegions.some((region) => !region)) {
-    throw new Error(`Historical runtime region asset is missing for ${year}.`);
+    throw new Error(`Historical runtime region binary asset is missing for ${year}.`);
   }
 
   const runtime = mergeRuntimeRegions(year, loadedRegions);
