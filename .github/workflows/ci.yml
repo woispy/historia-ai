@@ -75,6 +75,8 @@ jobs:
         run: npm run test:repository-cleanliness
       - name: Generate historical GIS runtime assets
         run: npm run build:historical-gis:1300
+      - name: Diagnose GPU province topology
+        run: node tools/tests/gpu-province-topology-diagnostic.test.js
       - name: Build deterministic GPU province pack
         run: npm run build:gpu-province-pack
       - name: Verify repository cleanliness after historical GIS and GPU pack
