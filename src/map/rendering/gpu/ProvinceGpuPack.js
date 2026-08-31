@@ -1,155 +1,28 @@
-/**
- * Deterministic, indexed GPU geometry pack.
- * HMAP remains authoritative; this is a derived render representation only.
- */
-const EPSILON = 1e-10;
-const COLLINEAR_EPSILON = 1e-12;
+/** Deterministic indexed GPU province geometry. HMAP/GIS remains authoritative. */
+const EPSILON=1e-10;
+const COLLINEAR_EPSILON=1e-12;
+const cross=(a,b,c)=>(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);
+const signedArea=(r)=>{let s=0;for(let i=0;i<r.length;i+=1){const a=r[i],b=r[(i+1)%r.length];s+=a[0]*b[1]-b[0]*a[1];}return s/2;};
+const same=(a,b)=>Math.abs(a[0]-b[0])<=EPSILON&&Math.abs(a[1]-b[1])<=EPSILON;
 
-function samePoint(a, b) { return Math.abs(a[0] - b[0]) <= EPSILON && Math.abs(a[1] - b[1]) <= EPSILON; }
-function cross(a, b, c) { return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]); }
-function signedArea(ring) { let sum = 0; for (let i = 0; i < ring.length; i += 1) { const a = ring[i]; const b = ring[(i + 1) % ring.length]; sum += a[0] * b[1] - b[0] * a[1]; } return sum / 2; }
-
-function normalizeIndexedRing(ring) {
-  if (!Array.isArray(ring)) return [];
-  const out = [];
-  const seen = new Map();
-  ring.forEach((point, originalIndex) => {
-    if (!Array.isArray(point) || point.length < 2) return;
-    const x = Number(point[0]); const y = Number(point[1]);
-    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
-    const p = [x, y];
-    const key = `${Math.round(x / EPSILON)},${Math.round(y / EPSILON)}`;
-    if (seen.has(key)) return;
-    seen.set(key, true);
-    out.push({ point: p, originalIndex });
-  });
-  if (out.length > 1 && samePoint(out[0].point, out[out.length - 1].point)) out.pop();
-  return out;
+export function normalizeRing(ring){
+ const out=[],seen=new Set();
+ for(const p of Array.isArray(ring)?ring:[]){if(!Array.isArray(p)||p.length<2)continue;const q=[Number(p[0]),Number(p[1])];if(!Number.isFinite(q[0])||!Number.isFinite(q[1]))continue;const k=`${Math.round(q[0]/EPSILON)},${Math.round(q[1]/EPSILON)}`;if(seen.has(k))continue;seen.add(k);out.push(q);}
+ if(out.length>1&&same(out[0],out[out.length-1]))out.pop();
+ let changed=true,guard=0;while(changed&&out.length>3&&guard++<out.length*2){changed=false;for(let i=0;i<out.length&&out.length>3;i+=1){const a=out[(i-1+out.length)%out.length],b=out[i],c=out[(i+1)%out.length];const scale=Math.max(1,Math.hypot(c[0]-a[0],c[1]-a[1]));if(Math.abs(cross(a,b,c))<=COLLINEAR_EPSILON*scale){out.splice(i,1);changed=true;i-=1;}}}return out;
 }
-export function normalizeRing(ring) { return normalizeIndexedRing(ring).map(({ point }) => point); }
-
-function removeCollinearIndexed(points) {
-  const out = points.slice();
-  if (out.length <= 3) return out;
-  let changed = true; let guard = 0;
-  while (changed && out.length > 3 && guard <= out.length * 2) {
-    changed = false; guard += 1;
-    for (let i = 0; i < out.length && out.length > 3; i += 1) {
-      const prev = out[(i - 1 + out.length) % out.length].point; const current = out[i].point; const next = out[(i + 1) % out.length].point;
-      const scale = Math.max(1, Math.hypot(next[0] - prev[0], next[1] - prev[1]));
-      if (Math.abs(cross(prev, current, next)) <= COLLINEAR_EPSILON * scale) { out.splice(i, 1); changed = true; i -= 1; }
-    }
-  }
-  return out;
+function properIntersection(a,b,c,d){const x=cross(a,b,c),y=cross(a,b,d),u=cross(c,d,a),v=cross(c,d,b);return((x>EPSILON&&y<-EPSILON)||(x<-EPSILON&&y>EPSILON))&&((u>EPSILON&&v<-EPSILON)||(u<-EPSILON&&v>EPSILON));}
+function diagonalClear(points,rem,a,b){const p=points[a],q=points[b];for(let i=0;i<rem.length;i+=1){const u=rem[i],v=rem[(i+1)%rem.length];if(u===a||u===b||v===a||v===b)continue;if(properIntersection(p,q,points[u],points[v]))return false;}return true;}
+function strictlyInside(p,a,b,c){const x=cross(a,b,p),y=cross(b,c,p),z=cross(c,a,p);return(x>EPSILON&&y>EPSILON&&z>EPSILON)||(x<-EPSILON&&y<-EPSILON&&z<-EPSILON);}
+function earClip(points){
+ const pts=signedArea(points)<0?[...points].reverse():points.slice(),rem=Array.from({length:pts.length},(_,i)=>i),out=[];let guard=0;
+ while(rem.length>3&&guard++<pts.length*pts.length*2){let found=-1;for(let i=0;i<rem.length;i+=1){const a=rem[(i-1+rem.length)%rem.length],b=rem[i],c=rem[(i+1)%rem.length];if(cross(pts[a],pts[b],pts[c])<=EPSILON||!diagonalClear(pts,rem,a,c))continue;let blocked=false;for(const k of rem){if(k!==a&&k!==b&&k!==c&&strictlyInside(pts[k],pts[a],pts[b],pts[c])){blocked=true;break;}}if(!blocked){found=i;break;}}if(found<0)return null;const a=rem[(found-1+rem.length)%rem.length],b=rem[found],c=rem[(found+1)%rem.length];out.push(a,b,c);rem.splice(found,1);}
+ if(rem.length===3&&cross(pts[rem[0]],pts[rem[1]],pts[rem[2]])>EPSILON)out.push(...rem);return out.length===(pts.length-2)*3?{points:pts,indices:out}:null;
 }
-function pointOnSegment(p, a, b) {
-  if (Math.abs(cross(a, b, p)) > EPSILON) return false;
-  return p[0] >= Math.min(a[0], b[0]) - EPSILON && p[0] <= Math.max(a[0], b[0]) + EPSILON && p[1] >= Math.min(a[1], b[1]) - EPSILON && p[1] <= Math.max(a[1], b[1]) + EPSILON;
-}
-function pointInPolygon(p, ring) {
-  let inside = false;
-  for (let i = 0, j = ring.length - 1; i < ring.length; j = i, i += 1) {
-    const a = ring[i]; const b = ring[j];
-    if (pointOnSegment(p, a, b)) return true;
-    if ((a[1] > p[1]) !== (b[1] > p[1])) { const x = ((b[0] - a[0]) * (p[1] - a[1])) / (b[1] - a[1]) + a[0]; if (p[0] < x) inside = !inside; }
-  }
-  return inside;
-}
-function pointStrictlyInsideTriangle(p, a, b, c) {
-  const ab = cross(a, b, p); const bc = cross(b, c, p); const ca = cross(c, a, p);
-  return (ab > EPSILON && bc > EPSILON && ca > EPSILON) || (ab < -EPSILON && bc < -EPSILON && ca < -EPSILON);
-}
-function segmentsProperlyIntersect(a, b, c, d) {
-  const abC = cross(a, b, c); const abD = cross(a, b, d); const cdA = cross(c, d, a); const cdB = cross(c, d, b);
-  return ((abC > EPSILON && abD < -EPSILON) || (abC < -EPSILON && abD > EPSILON)) && ((cdA > EPSILON && cdB < -EPSILON) || (cdA < -EPSILON && cdB > EPSILON));
-}
-function diagonalIsValid(points, remaining, ia, ib) {
-  const a = points[ia].point; const b = points[ib].point;
-  if (!pointInPolygon([(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], remaining.map((index) => points[index].point))) return false;
-  for (let i = 0; i < remaining.length; i += 1) {
-    const ea = remaining[i]; const eb = remaining[(i + 1) % remaining.length];
-    if (ea === ia || ea === ib || eb === ia || eb === ib) continue;
-    if (segmentsProperlyIntersect(a, b, points[ea].point, points[eb].point)) return false;
-  }
-  return true;
-}
-function triangleIsValid(points, remaining, ia, ib, ic) {
-  const a = points[ia].point; const b = points[ib].point; const c = points[ic].point;
-  if (cross(a, b, c) <= EPSILON || !diagonalIsValid(points, remaining, ia, ic)) return false;
-  for (const candidate of remaining) if (candidate !== ia && candidate !== ib && candidate !== ic && pointStrictlyInsideTriangle(points[candidate].point, a, b, c)) return false;
-  return true;
-}
-function findDeterministicDiagonal(points, remaining) {
-  const candidates = [];
-  for (let ai = 0; ai < remaining.length; ai += 1) for (let bi = ai + 2; bi < remaining.length; bi += 1) {
-    if (ai === 0 && bi === remaining.length - 1) continue;
-    const a = remaining[ai]; const b = remaining[bi];
-    if (diagonalIsValid(points, remaining, a, b)) candidates.push([a, b]);
-  }
-  candidates.sort((a, b) => { const amin = Math.min(a[0], a[1]); const bmin = Math.min(b[0], b[1]); if (amin !== bmin) return amin - bmin; return Math.max(a[0], a[1]) - Math.max(b[0], b[1]); });
-  return candidates[0] ?? null;
-}
-function triangulateByDecomposition(points, remaining, context) {
-  const diagonal = findDeterministicDiagonal(points, remaining);
-  if (!diagonal) return null;
-  const ai = remaining.indexOf(diagonal[0]); const bi = remaining.indexOf(diagonal[1]);
-  const first = remaining.slice(Math.min(ai, bi), Math.max(ai, bi) + 1);
-  const second = [...remaining.slice(Math.max(ai, bi)), ...remaining.slice(0, Math.min(ai, bi) + 1)];
-  if (first.length < 3 || second.length < 3) return null;
-  const left = triangulateNormalized(points, first, context); const right = triangulateNormalized(points, second, context);
-  return left && right ? [...left, ...right] : null;
-}
-function triangulateNormalized(points, remaining, context) {
-  if (remaining.length < 3) return [];
-  if (remaining.length === 3) {
-    const [a, b, c] = remaining;
-    return cross(points[a].point, points[b].point, points[c].point) > EPSILON ? [points[a].originalIndex, points[b].originalIndex, points[c].originalIndex] : null;
-  }
-  for (let i = 0; i < remaining.length; i += 1) {
-    const ia = remaining[(i - 1 + remaining.length) % remaining.length]; const ib = remaining[i]; const ic = remaining[(i + 1) % remaining.length];
-    if (!triangleIsValid(points, remaining, ia, ib, ic)) continue;
-    const next = remaining.slice(); next.splice(i, 1);
-    const tail = triangulateNormalized(points, next, context);
-    if (tail) return [points[ia].originalIndex, points[ib].originalIndex, points[ic].originalIndex, ...tail];
-  }
-  return triangulateByDecomposition(points, remaining, context);
-}
-export function triangulateRing(ring, context = {}) {
-  const normalized = removeCollinearIndexed(normalizeIndexedRing(ring));
-  if (normalized.length < 3) return [];
-  const signed = signedArea(normalized.map(({ point }) => point));
-  if (Math.abs(signed) <= EPSILON) throw new Error(`Degenerate province ring${context.provinceId ? ` for ${context.provinceId}` : ""}`);
-  const points = signed > 0 ? normalized : [...normalized].reverse();
-  const result = triangulateNormalized(points, points.map((_, i) => i), context);
-  if (!result) { const province = context.provinceId ? ` province=${context.provinceId}` : ""; const lod = context.lod === undefined ? "" : ` lod=${context.lod}`; throw new Error(`Province triangulation failed${province}${lod}; vertices=${points.length}`); }
-  return result;
-}
-function simplifyRing(ring, targetCount) {
-  const normalized = normalizeRing(ring); if (normalized.length <= targetCount || targetCount < 3) return normalized;
-  const keep = new Set([0, normalized.length - 1]); const stride = (normalized.length - 2) / Math.max(1, targetCount - 2);
-  for (let i = 1; i < targetCount - 1; i += 1) keep.add(Math.min(normalized.length - 2, Math.round(i * stride)));
-  return normalizeRing([...keep].sort((a, b) => a - b).map((i) => normalized[i]));
-}
-export function buildLodRings(ring, levels = [1, 0.5, 0.25, 0.125]) { const normalized = normalizeRing(ring); return levels.map((factor, level) => simplifyRing(normalized, Math.min(normalized.length, Math.max(level === levels.length - 1 ? 3 : 4, Math.round(normalized.length * factor))))); }
-function quantizedKey(point, scale) { return `${Math.round(point[0] * scale)},${Math.round(point[1] * scale)}`; }
-export function buildIndexedProvincePack(entries = [], options = {}) {
-  const tileSize = Number(options.tileSize ?? 10); const quantization = Number(options.quantization ?? 1e6);
-  if (!Number.isFinite(tileSize) || tileSize <= 0) throw new Error("Invalid tile size");
-  if (!Number.isFinite(quantization) || quantization <= 0) throw new Error("Invalid quantization");
-  const vertices = []; const indices = []; const vertexMap = new Map(); const provinces = []; const tiles = new Map();
-  const getVertex = (point) => { const key = quantizedKey(point, quantization); const existing = vertexMap.get(key); if (existing !== undefined) return existing; const index = vertices.length / 2; vertices.push(point[0], point[1]); vertexMap.set(key, index); return index; };
-  entries.forEach((entry, provinceIndex) => {
-    const id = String(entry?.province?.id ?? entry?.id ?? provinceIndex); const polygons = entry?.geometry?.polygons ?? entry?.polygons ?? [];
-    const lodRanges = []; let minX = Infinity; let minY = Infinity; let maxX = -Infinity; let maxY = -Infinity;
-    for (let lod = 0; lod < 4; lod += 1) {
-      const firstIndex = indices.length;
-      for (const polygon of polygons) { const ring = buildLodRings(polygon)[lod]; if (ring.length < 3) continue; for (const point of ring) { minX = Math.min(minX, point[0]); minY = Math.min(minY, point[1]); maxX = Math.max(maxX, point[0]); maxY = Math.max(maxY, point[1]); } const triangles = triangulateRing(ring, { provinceId: id, lod }); for (const localIndex of triangles) indices.push(getVertex(ring[localIndex])); }
-      const indexCount = indices.length - firstIndex; if (indexCount % 3 !== 0) throw new Error(`LOD${lod} range is not triangle aligned for ${id}`); lodRanges.push(Object.freeze({ firstIndex, indexCount }));
-    }
-    const bounds = Number.isFinite(minX) ? Object.freeze({ minX, minY, maxX, maxY }) : null;
-    provinces.push(Object.freeze({ provinceIndex, provinceId: id, bounds, lodRanges: Object.freeze(lodRanges) }));
-    if (bounds) { const minTileX = Math.floor(bounds.minX / tileSize); const maxTileX = Math.floor(bounds.maxX / tileSize); const minTileY = Math.floor(bounds.minY / tileSize); const maxTileY = Math.floor(bounds.maxY / tileSize); for (let x = minTileX; x <= maxTileX; x += 1) for (let y = minTileY; y <= maxTileY; y += 1) { const key = `${x}:${y}`; if (!tiles.has(key)) tiles.set(key, { tileId: key, x, y, provinceIndices: [] }); tiles.get(key).provinceIndices.push(provinceIndex); } }
-  });
-  const tileList = [...tiles.values()].map((tile) => Object.freeze({ ...tile, provinceIndices: Object.freeze([...new Set(tile.provinceIndices)].sort((a, b) => a - b)) }));
-  return Object.freeze({ version: 2, tileSize, quantization, vertices: new Float32Array(vertices), indices: new Uint32Array(indices), provinces: Object.freeze(provinces), tiles: Object.freeze(tileList) });
-}
+function deterministicSplit(points){const rem=Array.from({length:points.length},(_,i)=>i),c=[];for(let i=0;i<rem.length;i+=1)for(let j=i+2;j<rem.length;j+=1){if(i===0&&j===rem.length-1)continue;if(diagonalClear(points,rem,rem[i],rem[j]))c.push([rem[i],rem[j]]);}c.sort((a,b)=>a[0]-b[0]||a[1]-b[1]);return c[0]??null;}
+function decompose(points){const d=deterministicSplit(points);if(!d)return null;const i=points.indexOf(points[d[0]]),j=points.indexOf(points[d[1]]),lo=Math.min(i,j),hi=Math.max(i,j);const a=points.slice(lo,hi+1),b=[...points.slice(hi),...points.slice(0,lo+1)];if(a.length<3||b.length<3)return null;const x=earClip(a),y=earClip(b);return x&&y?{points,indices:[...x.indices.map(k=>a[k]),...y.indices.map(k=>b[k])]}:null;}
+export function triangulateRing(ring,context={}){const cleaned=normalizeRing(ring);if(cleaned.length<3)return[];if(Math.abs(signedArea(cleaned))<=EPSILON)throw new Error(`Degenerate province ring${context.provinceId?` for ${context.provinceId}`:""}`);const direct=earClip(cleaned),result=direct||decompose(cleaned);if(!result){const p=context.provinceId?` province=${context.provinceId}`:"",l=context.lod===undefined?"":` lod=${context.lod}`;throw new Error(`Province triangulation failed${p}${l}; vertices=${cleaned.length}`);}return result.indices;}
+function simplifyRing(ring,target){const p=normalizeRing(ring);if(p.length<=target||target<3)return p;const out=[];for(let i=0;i<target;i+=1)out.push(p[Math.min(p.length-1,Math.round(i*(p.length-1)/Math.max(1,target-1)))]);return normalizeRing(out);}
+export function buildLodRings(ring,levels=[1,.5,.25,.125]){const p=normalizeRing(ring);return levels.map((f,l)=>simplifyRing(p,Math.min(p.length,Math.max(l===levels.length-1?3:4,Math.round(p.length*f)))));}
+const qkey=(p,s)=>`${Math.round(p[0]*s)},${Math.round(p[1]*s)}`;
+export function buildIndexedProvincePack(entries=[],options={}){const tileSize=Number(options.tileSize??10),quantization=Number(options.quantization??1e6);if(!Number.isFinite(tileSize)||tileSize<=0)throw new Error("Invalid tile size");if(!Number.isFinite(quantization)||quantization<=0)throw new Error("Invalid quantization");const vertices=[],indices=[],map=new Map(),provinces=[],tiles=new Map();const vertex=p=>{const k=qkey(p,quantization),old=map.get(k);if(old!==undefined)return old;const i=vertices.length/2;vertices.push(p[0],p[1]);map.set(k,i);return i;};entries.forEach((entry,provinceIndex)=>{const id=String(entry?.province?.id??entry?.id??provinceIndex),polygons=entry?.geometry?.polygons??entry?.polygons??[],ranges=[];let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;for(let lod=0;lod<4;lod+=1){const firstIndex=indices.length;for(const polygon of polygons){const ring=buildLodRings(polygon)[lod];if(ring.length<3)continue;for(const p of ring){minX=Math.min(minX,p[0]);minY=Math.min(minY,p[1]);maxX=Math.max(maxX,p[0]);maxY=Math.max(maxY,p[1]);}for(const i of triangulateRing(ring,{provinceId:id,lod}))indices.push(vertex(ring[i]));}const indexCount=indices.length-firstIndex;if(indexCount%3)throw new Error(`LOD${lod} range is not triangle aligned for ${id}`);ranges.push(Object.freeze({firstIndex,indexCount}));}const bounds=Number.isFinite(minX)?Object.freeze({minX,minY,maxX,maxY}):null;provinces.push(Object.freeze({provinceIndex,provinceId:id,bounds,lodRanges:Object.freeze(ranges)}));if(bounds){for(let x=Math.floor(bounds.minX/tileSize);x<=Math.floor(bounds.maxX/tileSize);x+=1)for(let y=Math.floor(bounds.minY/tileSize);y<=Math.floor(bounds.maxY/tileSize);y+=1){const k=`${x}:${y}`;if(!tiles.has(k))tiles.set(k,{tileId:k,x,y,provinceIndices:[]});tiles.get(k).provinceIndices.push(provinceIndex);}}});return Object.freeze({version:2,tileSize,quantization,vertices:new Float32Array(vertices),indices:new Uint32Array(indices),provinces:Object.freeze(provinces),tiles:Object.freeze([...tiles.values()].map(t=>Object.freeze({...t,provinceIndices:Object.freeze([...new Set(t.provinceIndices)].sort((a,b)=>a-b))})))});}
