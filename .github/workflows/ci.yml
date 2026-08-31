@@ -23,6 +23,7 @@ on:
       - feat/cartography-foundation-v2
       - feat/map-gpu-texture-architecture
       - feat/phase-e-terrain-lod-streaming
+      - feat/phase-e-terrain-gpu-streaming
 
   push:
     branches:
@@ -48,6 +49,7 @@ on:
       - feat/cartography-foundation-v2
       - feat/map-gpu-texture-architecture
       - feat/phase-e-terrain-lod-streaming
+      - feat/phase-e-terrain-gpu-streaming
       - feat/phase3-runtime-engine
       - feat/runtime-province-selection
       - feat/historical-map-clean-foundation
