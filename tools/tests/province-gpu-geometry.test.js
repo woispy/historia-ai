@@ -80,9 +80,13 @@ assert.ok(geometry.positions instanceof Float32Array);
 assert.ok(geometry.provinceIndices instanceof Uint32Array);
 assert.ok(geometry.colors instanceof Uint8Array);
 
+// GPU must preserve the same finite 360x180 world as SvgRenderer's
+// preserveAspectRatio="xMidYMid meet" contract, including tall/square canvases.
 assert.deepEqual(getGpuViewportWorld(1000, 500, 1), [180, 90]);
-assert.deepEqual(getGpuViewportWorld(1000, 1000, 1), [180, 180]);
+assert.deepEqual(getGpuViewportWorld(1000, 1000, 1), [180, 90]);
+assert.deepEqual(getGpuViewportWorld(500, 1000, 1), [180, 90]);
 assert.deepEqual(getGpuViewportWorld(1000, 500, 2), [90, 45]);
+assert.deepEqual(getGpuViewportWorld(1000, 1000, 48), [3.75, 1.875]);
 
 const shaders = getProvinceGpuShaderSources();
 assert.match(shaders.vertex, /#version 300 es/);
@@ -93,4 +97,4 @@ assert.match(shaders.vertex, /u_camera/);
 assert.match(shaders.fragment, /u_selectedProvince/);
 assert.match(shaders.fragment, /out vec4 outColor/);
 
-console.log("Province GPU geometry tests passed: normalization, triangulation, packing, political colors, viewport mapping and WebGL2 shader contract.");
+console.log("Province GPU geometry tests passed: normalization, triangulation, packing, political colors, finite-world viewport parity and WebGL2 shader contract.");
