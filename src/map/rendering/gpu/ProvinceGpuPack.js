@@ -12,12 +12,16 @@ function signedArea(ring) { let sum = 0; for (let i = 0; i < ring.length; i += 1
 function normalizeIndexedRing(ring) {
   if (!Array.isArray(ring)) return [];
   const out = [];
+  const seen = new Map();
   ring.forEach((point, originalIndex) => {
     if (!Array.isArray(point) || point.length < 2) return;
     const x = Number(point[0]); const y = Number(point[1]);
     if (!Number.isFinite(x) || !Number.isFinite(y)) return;
     const p = [x, y];
-    if (!out.length || !samePoint(out[out.length - 1].point, p)) out.push({ point: p, originalIndex });
+    const key = `${Math.round(x / EPSILON)},${Math.round(y / EPSILON)}`;
+    if (seen.has(key)) return;
+    seen.set(key, true);
+    out.push({ point: p, originalIndex });
   });
   if (out.length > 1 && samePoint(out[0].point, out[out.length - 1].point)) out.pop();
   return out;
@@ -44,7 +48,7 @@ function pointOnSegment(p, a, b) {
 }
 function pointInPolygon(p, ring) {
   let inside = false;
-  for (let i = 0, j = ring.length - 1; i < ring.length; j = i += 1) {
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i, i += 1) {
     const a = ring[i]; const b = ring[j];
     if (pointOnSegment(p, a, b)) return true;
     if ((a[1] > p[1]) !== (b[1] > p[1])) { const x = ((b[0] - a[0]) * (p[1] - a[1])) / (b[1] - a[1]) + a[0]; if (p[0] < x) inside = !inside; }
