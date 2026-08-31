@@ -51,7 +51,10 @@ for (const [provinceIndex, entry] of entries.entries()) {
         triangulateRing(ring, { provinceId, lod });
       } catch (error) {
         const diagnostics = diagnosticsForRing(ring);
-        throw new Error(`GPU geometry preflight failed: province=${provinceId} polygon=${polygonIndex} lod=${lod}; ${error.message}; diagnostics=${JSON.stringify(diagnostics)}`);
+        throw new Error(
+          `GPU geometry preflight failed: province=${provinceId} polygon=${polygonIndex} lod=${lod}; ${error.message}; diagnostics=${JSON.stringify(diagnostics)}`,
+          { cause: error },
+        );
       }
     }
   }
