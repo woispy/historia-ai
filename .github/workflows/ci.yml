@@ -151,3 +151,7 @@ jobs:
         run: |
           git status --short
           git ls-files --others --exclude-standard
+      - name: Run 15K+ province scalability and diagnostics tests
+        run: npm run test:province-scale-15k
+      - name: Verify repository cleanliness after scalability tests
+        run: npm run test:repository-cleanliness
