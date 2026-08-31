@@ -2,11 +2,9 @@ import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtla
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 
-const BBOX = [25.45, 35.72, 44.85, 42.35];
 const EDGE_SAMPLE_STEP = 0.03;
 const COAST_SAMPLE_STEP = 0.12;
 const COASTAL_TOLERANCE = 0.06;
-const SITE_EPSILON = 1e-6;
 
 // Historical city anchors can legitimately lie in inland water. Physical
 // geometry must use a separate, deterministic land reconciliation anchor.
