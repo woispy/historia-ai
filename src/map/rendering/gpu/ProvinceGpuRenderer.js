@@ -15,7 +15,7 @@ out vec4 v_color;
 
 void main() {
   vec2 world = (a_position - u_camera) / u_viewportWorld;
-  gl_Position = vec4(world, 0.0, 1.0);
+  gl_Position = vec4(world.x, -world.y, 0.0, 1.0);
   v_provinceIndex = a_provinceIndex;
   v_color = a_color;
 }`;
@@ -86,11 +86,7 @@ export function getGpuViewportWorld(width, height, zoom = 1) {
   ];
 }
 
-/**
- * Creates a stateful WebGL2 renderer for a packed province geometry buffer.
- * The renderer owns only GPU resources; source geometry remains in the runtime
- * repository and can be rebuilt independently when the historical asset changes.
- */
+/** Creates a stateful WebGL2 renderer for a packed province geometry buffer. */
 export function createProvinceGpuRenderer(canvas) {
   if (!canvas) throw new Error("Province GPU renderer requires a canvas.");
   const gl = canvas.getContext("webgl2", {
