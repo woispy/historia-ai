@@ -18,7 +18,6 @@ function clampTileY(y, zoom) {
 
 export function makeTerrainTileKey(level, x, y) {
   if (!Number.isInteger(level) || level < 0 || level > 5) throw new Error("Terrain tile zoom must be an integer in [0, 5].");
-  const count = 2 ** level;
   if (!Number.isInteger(x) || !Number.isInteger(y)) throw new Error("Terrain tile coordinates must be integers.");
   const tx = wrapTileX(x, level);
   const ty = clampTileY(y, level);
