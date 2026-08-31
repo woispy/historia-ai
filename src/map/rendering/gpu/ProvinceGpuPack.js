@@ -7,19 +7,21 @@ const COLLINEAR_EPSILON = 1e-12;
 
 function samePoint(a, b) { return Math.abs(a[0] - b[0]) <= EPSILON && Math.abs(a[1] - b[1]) <= EPSILON; }
 
-export function normalizeRing(ring) {
+function normalizeIndexedRing(ring) {
   if (!Array.isArray(ring)) return [];
   const out = [];
-  for (const point of ring) {
-    if (!Array.isArray(point) || point.length < 2) continue;
+  ring.forEach((point, originalIndex) => {
+    if (!Array.isArray(point) || point.length < 2) return;
     const x = Number(point[0]); const y = Number(point[1]);
-    if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
     const p = [x, y];
-    if (!out.length || !samePoint(out[out.length - 1], p)) out.push(p);
-  }
-  if (out.length > 1 && samePoint(out[0], out[out.length - 1])) out.pop();
+    if (!out.length || !samePoint(out[out.length - 1].point, p)) out.push({ point: p, originalIndex });
+  });
+  if (out.length > 1 && samePoint(out[0].point, out[out.length - 1].point)) out.pop();
   return out;
 }
+
+export function normalizeRing(ring) { return normalizeIndexedRing(ring).map(({ point }) => point); }
 
 function cross(a, b, c) { return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]); }
 function signedArea(ring) {
@@ -28,27 +30,27 @@ function signedArea(ring) {
   return sum / 2;
 }
 
-function removeCollinearVertices(ring) {
-  const points = normalizeRing(ring);
-  if (points.length <= 3) return points;
+function removeCollinearIndexed(points) {
+  const out = points.slice();
+  if (out.length <= 3) return out;
   let changed = true;
   let guard = 0;
-  while (changed && points.length > 3 && guard <= points.length * 2) {
+  while (changed && out.length > 3 && guard <= out.length * 2) {
     changed = false;
     guard += 1;
-    for (let i = 0; i < points.length && points.length > 3; i += 1) {
-      const prev = points[(i - 1 + points.length) % points.length];
-      const current = points[i];
-      const next = points[(i + 1) % points.length];
+    for (let i = 0; i < out.length && out.length > 3; i += 1) {
+      const prev = out[(i - 1 + out.length) % out.length].point;
+      const current = out[i].point;
+      const next = out[(i + 1) % out.length].point;
       const scale = Math.max(1, Math.hypot(next[0] - prev[0], next[1] - prev[1]));
       if (Math.abs(cross(prev, current, next)) <= COLLINEAR_EPSILON * scale) {
-        points.splice(i, 1);
+        out.splice(i, 1);
         changed = true;
         i -= 1;
       }
     }
   }
-  return points;
+  return out;
 }
 
 function pointStrictlyInsideTriangle(p, a, b, c) {
@@ -66,27 +68,27 @@ function isValidEar(points, remaining, i) {
   const ia = remaining[(i - 1 + remaining.length) % remaining.length];
   const ib = remaining[i];
   const ic = remaining[(i + 1) % remaining.length];
-  const a = points[ia]; const b = points[ib]; const c = points[ic];
+  const a = points[ia].point; const b = points[ib].point; const c = points[ic].point;
   if (cross(a, b, c) <= EPSILON) return false;
   for (const candidate of remaining) {
     if (candidate === ia || candidate === ib || candidate === ic) continue;
-    if (pointStrictlyInsideTriangle(points[candidate], a, b, c)) return false;
+    if (pointStrictlyInsideTriangle(points[candidate].point, a, b, c)) return false;
   }
   for (let edgeIndex = 0; edgeIndex < remaining.length; edgeIndex += 1) {
     const ea = remaining[edgeIndex]; const eb = remaining[(edgeIndex + 1) % remaining.length];
     if (ea === ia || ea === ib || ea === ic || eb === ia || eb === ib || eb === ic) continue;
-    if (segmentCrossesInterior(a, c, points[ea], points[eb])) return false;
+    if (segmentCrossesInterior(a, c, points[ea].point, points[eb].point)) return false;
   }
   return true;
 }
 
 export function triangulateRing(ring, context = {}) {
-  const normalized = removeCollinearVertices(ring);
+  const normalized = removeCollinearIndexed(normalizeIndexedRing(ring));
   if (normalized.length < 3) return [];
-  const signed = signedArea(normalized);
+  const signed = signedArea(normalized.map(({ point }) => point));
   if (Math.abs(signed) <= EPSILON) throw new Error(`Degenerate province ring${context.provinceId ? ` for ${context.provinceId}` : ""}`);
   const points = signed > 0 ? normalized : [...normalized].reverse();
-  const source = signed > 0 ? points.map((_, i) => i) : points.map((_, i) => normalized.length - 1 - i);
+  const source = points.map(({ originalIndex }) => originalIndex);
   const remaining = points.map((_, i) => i); const result = [];
   let guard = 0;
   while (remaining.length > 3) {
@@ -113,12 +115,12 @@ export function triangulateRing(ring, context = {}) {
 }
 
 function simplifyRing(ring, targetCount) {
-  const normalized = removeCollinearVertices(ring);
+  const normalized = normalizeRing(ring);
   if (normalized.length <= targetCount || targetCount < 3) return normalized;
   const keep = new Set([0, normalized.length - 1]);
   const stride = (normalized.length - 2) / Math.max(1, targetCount - 2);
   for (let i = 1; i < targetCount - 1; i += 1) keep.add(Math.min(normalized.length - 2, Math.round(i * stride)));
-  return removeCollinearVertices([...keep].sort((a, b) => a - b).map((i) => normalized[i]));
+  return normalizeRing([...keep].sort((a, b) => a - b).map((i) => normalized[i]));
 }
 
 export function buildLodRings(ring, levels = [1, 0.5, 0.25, 0.125]) {
