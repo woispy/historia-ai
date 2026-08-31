@@ -42,6 +42,17 @@ function uploadTexture(gl, texture, unit, source, internalFormat = gl.RGBA8, for
   gl.generateMipmap(gl.TEXTURE_2D);
 }
 
+function validateViewProjection(viewProjection) {
+  if (!viewProjection || viewProjection.length !== 16) throw new Error("Terrain draw requires a 4x4 view-projection matrix.");
+  return viewProjection;
+}
+
+function validateTileTransform(tileTransform) {
+  if (!tileTransform || tileTransform.length !== 4) throw new Error("Terrain draw requires a tile transform [scaleX, scaleY, offsetX, offsetY].");
+  if (!tileTransform.every(Number.isFinite)) throw new Error("Terrain tile transform values must be finite.");
+  return tileTransform;
+}
+
 export class TerrainGpuRenderer {
   constructor(gl, material = TERRAIN_MATERIAL_DEFAULTS) {
     if (!gl || typeof gl.createVertexArray !== "function") throw new Error("TerrainGpuRenderer requires a WebGL2 context.");
@@ -55,6 +66,22 @@ export class TerrainGpuRenderer {
     this.indexBuffer = gl.createBuffer();
     this.textures = [gl.createTexture(), gl.createTexture(), gl.createTexture(), gl.createTexture(), gl.createTexture()];
     this.indexCount = 0;
+    this.uniforms = Object.freeze({
+      viewProjection: gl.getUniformLocation(this.program, "uViewProjection"),
+      tileTransform: gl.getUniformLocation(this.program, "uTileTransform"),
+      heightScale: gl.getUniformLocation(this.program, "uHeightScale"),
+      roughness: gl.getUniformLocation(this.program, "uRoughness"),
+      ambient: gl.getUniformLocation(this.program, "uAmbient"),
+      sunStrength: gl.getUniformLocation(this.program, "uSunStrength"),
+      normalStrength: gl.getUniformLocation(this.program, "uNormalStrength"),
+      sunDirection: gl.getUniformLocation(this.program, "uSunDirection"),
+      terrainPalette: gl.getUniformLocation(this.program, "uTerrainPalette"),
+      baseColor: gl.getUniformLocation(this.program, "uBaseColor"),
+      normal: gl.getUniformLocation(this.program, "uNormal"),
+      splatRgba: gl.getUniformLocation(this.program, "uSplatRgba"),
+      splatSnow: gl.getUniformLocation(this.program, "uSplatSnow"),
+      landMask: gl.getUniformLocation(this.program, "uLandMask"),
+    });
     if (!this.vao || this.textures.some((texture) => !texture)) throw new Error("Unable to allocate terrain GPU resources.");
   }
 
@@ -92,28 +119,31 @@ export class TerrainGpuRenderer {
     uploadTexture(this.gl, this.textures[4], 4, landMask);
   }
 
-  draw({ viewProjection, heightScale = this.material.heightScale } = {}) {
+  draw({ viewProjection, tileTransform = [1, 1, 0, 0], heightScale = this.material.heightScale } = {}) {
     if (!this.indexCount) return 0;
     const { gl } = this;
+    validateViewProjection(viewProjection);
+    validateTileTransform(tileTransform);
     gl.useProgram(this.program);
     gl.bindVertexArray(this.vao);
-    gl.uniformMatrix4fv(gl.getUniformLocation(this.program, "uViewProjection"), false, viewProjection);
-    gl.uniform1f(gl.getUniformLocation(this.program, "uHeightScale"), heightScale);
-    gl.uniform1f(gl.getUniformLocation(this.program, "uRoughness"), this.material.roughness);
-    gl.uniform1f(gl.getUniformLocation(this.program, "uAmbient"), this.material.ambient);
-    gl.uniform1f(gl.getUniformLocation(this.program, "uSunStrength"), this.material.sunStrength);
-    gl.uniform1f(gl.getUniformLocation(this.program, "uNormalStrength"), this.material.normalStrength);
-    gl.uniform3fv(gl.getUniformLocation(this.program, "uSunDirection"), this.material.sunDirection);
-    gl.uniform3fv(gl.getUniformLocation(this.program, "uTerrainPalette"), new Float32Array(this.material.palette.flat()));
+    gl.uniformMatrix4fv(this.uniforms.viewProjection, false, viewProjection);
+    gl.uniform4fv(this.uniforms.tileTransform, tileTransform);
+    gl.uniform1f(this.uniforms.heightScale, heightScale);
+    gl.uniform1f(this.uniforms.roughness, this.material.roughness);
+    gl.uniform1f(this.uniforms.ambient, this.material.ambient);
+    gl.uniform1f(this.uniforms.sunStrength, this.material.sunStrength);
+    gl.uniform1f(this.uniforms.normalStrength, this.material.normalStrength);
+    gl.uniform3fv(this.uniforms.sunDirection, this.material.sunDirection);
+    gl.uniform3fv(this.uniforms.terrainPalette, new Float32Array(this.material.palette.flat()));
     for (let unit = 0; unit < this.textures.length; unit += 1) {
       gl.activeTexture(gl.TEXTURE0 + unit);
       gl.bindTexture(gl.TEXTURE_2D, this.textures[unit]);
     }
-    gl.uniform1i(gl.getUniformLocation(this.program, "uBaseColor"), 0);
-    gl.uniform1i(gl.getUniformLocation(this.program, "uNormal"), 1);
-    gl.uniform1i(gl.getUniformLocation(this.program, "uSplatRgba"), 2);
-    gl.uniform1i(gl.getUniformLocation(this.program, "uSplatSnow"), 3);
-    gl.uniform1i(gl.getUniformLocation(this.program, "uLandMask"), 4);
+    gl.uniform1i(this.uniforms.baseColor, 0);
+    gl.uniform1i(this.uniforms.normal, 1);
+    gl.uniform1i(this.uniforms.splatRgba, 2);
+    gl.uniform1i(this.uniforms.splatSnow, 3);
+    gl.uniform1i(this.uniforms.landMask, 4);
     gl.drawElements(gl.TRIANGLES, this.indexCount, gl.UNSIGNED_INT, 0);
     gl.bindVertexArray(null);
     return this.indexCount / 3;
