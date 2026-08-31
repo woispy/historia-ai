@@ -18,12 +18,16 @@ const cameraController = read("src/map/camera/CameraController.jsx");
 const cartographyLayer = read("src/map/components/layers/CartographyLayer.jsx");
 const cityLayer = read("src/map/components/layers/CityLayer.jsx");
 const physicalLayer = read("src/map/components/layers/WorldPhysicalLayer.jsx");
+const waterRenderer = read("src/map/rendering/water/WaterRenderer.jsx");
+const passGraph = read("src/map/rendering/RenderPassGraph.js");
 
-// One physical coastline authority and one map viewport. The game viewport
-// must not mount a second legacy/far-zoom map or empty overlay map layers.
-assert.equal((worldMap.match(/<SvgRenderer\b/g) ?? []).length, 1);
+// One physical coastline authority and one map viewport. Phase D deliberately
+// uses two SVG compositor surfaces so water can sit between land/province and
+// cities/labels without introducing a second map viewport.
+assert.equal((worldMap.match(/<SvgRenderer\b/g) ?? []).length, 2);
 assert.equal((worldMap.match(/<WorldPhysicalLayer\b[^>]*\/>/g) ?? []).length, 1);
 assert.equal((worldMap.match(/<ProvinceTextureLayer\b/g) ?? []).length, 1);
+assert.equal((worldMap.match(/<WaterRenderer\b/g) ?? []).length, 1);
 assert.equal((mapView.match(/<WorldMap\b/g) ?? []).length, 1);
 assert.ok(!mapView.includes("country-layer"));
 assert.ok(!mapView.includes("city-layer"));
@@ -47,13 +51,20 @@ assert.ok(cameraModel.includes("minZoom: 1"));
 assert.ok(cameraActions.includes("const horizontalRange = Math.max(0, (WORLD_WIDTH - visibleWidth) / 2);"));
 assert.ok(cameraActions.includes("x: clamp(x, -horizontalRange, horizontalRange)"));
 
-// The physical world owns the complete water/land base. Political geometry
-// may only appear inside its land silhouette.
+// Pass 0/5/6/7 now belong to the Water Engine. Physical land remains the only
+// base SVG water-independent authority; the shared GPU mask owns water truth.
 assert.match(svgRenderer, /id="world-land-mask"/);
 assert.match(svgRenderer, /WORLD_LAND_PATH/);
 assert.match(provinceLayer, /clipPath="url\(#world-land-mask\)"/);
 assert.match(physicalLayer, /WORLD_LAND_PATH/);
-assert.match(physicalLayer, /WORLD_PHYSICAL_ATLAS\.water\.fill/);
+assert.ok(!physicalLayer.includes("WORLD_PHYSICAL_ATLAS.water.fill"));
+assert.match(waterRenderer, /uPhysicalMask/);
+assert.match(waterRenderer, /webgl2/);
+assert.match(passGraph, /background-ocean/);
+assert.match(passGraph, /rivers/);
+assert.match(passGraph, /lakes/);
+assert.match(passGraph, /coastline/);
+assert.ok((passGraph.match(/mask: "physical"/g) ?? []).length === 11);
 
 // Province paths are explicit interaction surfaces. This remains true when
 // GPU compositing hides the CPU fill; transparent pixels must still be clickable.
@@ -72,8 +83,8 @@ assert.ok(!pointerDownBlock.includes("setPointerCapture"));
 assert.ok(cameraController.includes("totalDistance > 2"));
 assert.ok(cameraController.includes("viewportTarget.current?.setPointerCapture?.(event.pointerId)"));
 
-// The GPU layer is a political-fill compositor only. Its political raster is
-// hard-masked to physical land before upload, and the shader repeats the mask
+// The GPU layer remains a political-fill compositor only. Its political raster
+// is hard-masked to physical land before upload, and the shader repeats the mask
 // check as defence in depth. It never supplies its own water or land base.
 assert.ok(gpuLayer.includes("globalCompositeOperation = \"destination-in\""));
 assert.ok(gpuLayer.includes("applyLandMask(provinceContext, landCanvas)"));
@@ -115,4 +126,4 @@ assert.ok(!cityLayer.includes("fortified &&"));
 assert.ok(!worldMap.includes('phase="base"'));
 assert.ok(!worldMap.includes('phase="water"'));
 
-console.log("Map rendering contract tests passed: one synchronized world, explicit province interaction, one physical coastline authority, and no legacy overlay layers.");
+console.log("Map rendering contract tests passed: Phase D water passes are separated from physical land, political fill, cities and labels while sharing one physical mask contract.");
