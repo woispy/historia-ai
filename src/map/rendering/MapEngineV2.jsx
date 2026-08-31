@@ -4,10 +4,7 @@ import { buildGpuAssetBridge } from "./gpu/MapAssetBridge.js";
 import { MapCameraRig } from "../runtime/MapCameraRig.js";
 import { buildSpatialItems, ProvinceSoA, QuadtreeIndex } from "../runtime/index.js";
 
-/**
- * Thin React host. One canvas, one imperative GPU renderer and no SVG map
- * subtree. React only supplies coarse application/session changes.
- */
+/** Thin React host: one canvas, one imperative GPU renderer, no SVG map tree. */
 export default function MapEngineV2({
   provinces = [],
   camera = {},
@@ -31,13 +28,12 @@ export default function MapEngineV2({
     rig.setState(camera);
     const renderer = new GpuMapRenderer(canvas);
     renderer.setCamera(rig.snapshot());
-    const ready = renderer.initialize({
+    if (!renderer.initialize({
       provinceSource: asset.provinceSource,
       landSource: asset.landSource,
       palette: asset.palette,
       provinceIds: asset.provinceIds,
-    });
-    if (!ready) {
+    })) {
       renderer.dispose();
       return undefined;
     }
@@ -48,24 +44,20 @@ export default function MapEngineV2({
     rigRef.current = rig;
     rendererRef.current = renderer;
 
-    const resizeObserver = new ResizeObserver(() => {
-      renderer.resize(canvas.clientWidth, canvas.clientHeight);
-    });
+    const resizeObserver = new ResizeObserver(() => renderer.resize(canvas.clientWidth, canvas.clientHeight));
     resizeObserver.observe(canvas);
-
     return () => {
       resizeObserver.disconnect();
       renderer.dispose();
       rendererRef.current = null;
       rigRef.current = null;
     };
-  }, [mapStyle, provinces, camera.x, camera.y, camera.zoom, camera.pitch, camera.yaw, selectedProvinceId]);
+    // Province/style changes rebuild GPU resources once; camera changes never do.
+  }, [mapStyle, provinces]);
 
   useEffect(() => {
-    const renderer = rendererRef.current;
-    if (!renderer) return;
-    renderer.setCamera(camera);
-    renderer.setSelectedProvinceId(selectedProvinceId);
+    rendererRef.current?.setCamera(camera);
+    rendererRef.current?.setSelectedProvinceId(selectedProvinceId);
   }, [camera, selectedProvinceId]);
 
   useEffect(() => {
@@ -102,10 +94,9 @@ export default function MapEngineV2({
 
   const stopDrag = (event) => {
     const drag = dragRef.current;
-    if (drag.active && drag.pointerId === event.pointerId) {
-      event.currentTarget.releasePointerCapture?.(event.pointerId);
-      dragRef.current.active = false;
-    }
+    if (!drag.active || drag.pointerId !== event.pointerId) return;
+    event.currentTarget.releasePointerCapture?.(event.pointerId);
+    dragRef.current.active = false;
   };
 
   const handleHover = (event) => {
