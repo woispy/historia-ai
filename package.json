@@ -48,7 +48,8 @@
     "validate:historical-gis:1300": "node tools/historical-gis/cli/validate-1300.js",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:cartography-foundation": "node tools/tests/cartography-foundation.test.js"
+    "test:cartography-foundation": "node tools/tests/cartography-foundation.test.js",
+    "test:gpu-triangulation-regression": "node tools/tests/gpu-triangulation-regression.test.js"
   },
   "dependencies": { "react": "^19.2.7", "react-dom": "^19.2.7", "react-router-dom": "^7.18.2" },
   "devDependencies": { "@eslint/js": "^10.0.1", "@types/react": "^19.2.17", "@types/react-dom": "^19.2.3", "@vitejs/plugin-react": "^6.0.3", "eslint": "^10.6.0", "eslint-plugin-react-hooks": "^7.1.1", "eslint-plugin-react-refresh": "^0.5.3", "vite": "^8.1.1" }
