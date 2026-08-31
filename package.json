@@ -38,6 +38,7 @@
     "test:anatolia-historical-control": "node tools/tests/anatolia-historical-control.test.js",
     "test:cartography-2efgh": "node tools/tests/cartography-2efgh.test.js",
     "test:map-texture-atlas": "node tools/tests/map-texture-atlas.test.js",
+    "test:province-gpu-geometry": "node tools/tests/province-gpu-geometry.test.js",
     "test:new-game": "node tools/tests/new-game-state.test.js",
     "test:new-game-startup": "node tools/tests/new-game-startup.test.js",
     "test:game-entry-handoff": "node tools/tests/game-entry-handoff.test.js",
