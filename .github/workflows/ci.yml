@@ -6,12 +6,50 @@ on:
     branches:
       - main
       - master
+      - feat/phase1-polish
+      - feat/phase1-historical-gis-runtime
+      - feat/phase1-map-camera-ui-polish
+      - agent/anatolia-byzantium-regional-layer
+      - feat/anatolia-historical-map-overhaul
+      - feat/anatolia-physical-geography
+      - feat/anatolia-map-label-water-overhaul
+      - feat/world-1300-map-foundation
+      - feat/phase2b-anatolia-reconstruction
+      - feat/phase2c-anatolia-geometry-refinement
+      - feat/phase2d-anatolia-province-geometry
+      - feat/phase2efgh-cartography
+      - feat/cartography-visual-refinement
+      - feat/cartography-foundation-v2
+      - feat/map-gpu-texture-architecture
       - feat/phase-c-gpu-native-geometry
       - feat/phase-c-gpu-live-active
   push:
     branches:
       - main
       - master
+      - feat/living-game-foundation
+      - feat/phase1-polish
+      - feat/phase1-historical-gis-runtime
+      - feat/phase1-map-camera-ui-polish
+      - feat/phase1-save-menu-camera-ux
+      - fix/historical-gis-import-integrity
+      - agent/anatolia-byzantium-regional-layer
+      - feat/anatolia-historical-map-overhaul
+      - feat/anatolia-physical-geography
+      - feat/anatolia-map-label-water-overhaul
+      - feat/world-1300-map-foundation
+      - feat/anatolia-phase2-historical-gis
+      - feat/phase2b-anatolia-reconstruction
+      - feat/phase2c-anatolia-geometry-refinement
+      - feat/phase2d-anatolia-province-geometry
+      - feat/phase2efgh-cartography
+      - feat/cartography-visual-refinement
+      - feat/map-gpu-texture-architecture
+      - feat/cartography-foundation-v2
+      - feat/phase3-runtime-engine
+      - feat/runtime-province-selection
+      - feat/historical-map-clean-foundation
+      - feat/historical-political-map-v1
       - feat/phase-c-gpu-native-geometry
       - feat/phase-c-gpu-live-active
 
