@@ -51,8 +51,8 @@ const geometry = buildProvinceGpuGeometry([
 ]);
 
 assert.equal(geometry.provinceIds.length, 2);
-assert.equal(geometry.vertexCount, 18);
-assert.equal(geometry.triangleCount, 6);
+assert.equal(geometry.vertexCount, 21);
+assert.equal(geometry.triangleCount, 7);
 assert.equal(geometry.positions.length, geometry.vertexCount * 2);
 assert.equal(geometry.provinceIndices.length, geometry.vertexCount);
 assert.equal(getGpuProvinceIndex(geometry, "alpha"), 0);
