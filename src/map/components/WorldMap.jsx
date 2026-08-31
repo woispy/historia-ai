@@ -1,126 +1,35 @@
-import { useCallback, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useWorldMap } from "../hooks";
-import {
-  ProvinceLayer,
-  CityLayer,
-  PhysicalGeographyLayer,
-  WorldPhysicalLayer,
-  CartographyLayer,
-} from "./layers";
-import { CameraProvider, CameraViewport, useCamera, useCameraController } from "../camera";
-import { RenderRoot, RenderLayer, SvgRenderer } from "../rendering";
-import ProvinceTextureLayer from "../rendering/gpu/ProvinceTextureLayer";
-import { shouldUseGpuProvinceFill } from "../rendering/CartographyModel";
+import { CameraProvider, useCamera } from "../camera";
+import MapEngineV2 from "../rendering/MapEngineV2.jsx";
 
 function WorldMap({
   runtime,
   selectedProvinceId,
   onProvinceClick,
-  onCityClick,
-  selectedCityId: controlledSelectedCityId = null,
   settings = {},
 }) {
-  const { provinces, cities } = useWorldMap(runtime);
+  const { provinces } = useWorldMap(runtime);
   const camera = useCamera();
   const cameraState = camera.camera;
-  const [textureReady, setTextureReady] = useState(false);
-  const [internalSelectedCityId, setInternalSelectedCityId] = useState(null);
-  const selectedCityId = controlledSelectedCityId ?? internalSelectedCityId;
-
-  const cameraInput = useCameraController({
-    zoom: camera.zoom,
-    move: camera.move,
-    smooth: settings.smoothCamera !== false,
-  });
-
-  const ready = useCallback((value) => setTextureReady(Boolean(value)), []);
-
-  const cityClick = useCallback((cityId) => {
-    setInternalSelectedCityId(cityId);
-    onCityClick?.(cityId);
-  }, [onCityClick]);
-
-  const useGpuProvinceFill = shouldUseGpuProvinceFill(cameraState.zoom);
-  const gpuProvinceActive = useGpuProvinceFill && textureReady;
-
-  const world = useMemo(
-    () => <WorldPhysicalLayer zoom={cameraState.zoom} />,
-    [cameraState.zoom],
-  );
-
-  const provincesLayer = useMemo(
-    () => (
-      <ProvinceLayer
-        provinces={provinces}
-        selectedProvinceId={selectedProvinceId}
-        onProvinceClick={onProvinceClick}
-        mapStyle={settings.mapStyle ?? "detailed"}
-        mapShadows={settings.mapShadows !== false}
-        zoom={cameraState.zoom}
-        camera={cameraState}
-        renderFill={!gpuProvinceActive}
-      />
-    ),
-    [
-      provinces,
-      selectedProvinceId,
-      onProvinceClick,
-      settings.mapStyle,
-      settings.mapShadows,
-      cameraState,
-      gpuProvinceActive,
-    ],
-  );
-
-  const cartography = useMemo(
-    () => <CartographyLayer zoom={cameraState.zoom} />,
-    [cameraState.zoom],
-  );
-  const detail = useMemo(
-    () => <PhysicalGeographyLayer phase="detail" zoom={cameraState.zoom} camera={cameraState} />,
-    [cameraState],
-  );
-  const citiesLayer = useMemo(
-    () => (
-      <CityLayer
-        cities={cities}
-        zoom={cameraState.zoom}
-        camera={cameraState}
-        selectedCityId={selectedCityId}
-        onCityClick={cityClick}
-      />
-    ),
-    [cities, cameraState, selectedCityId, cityClick],
-  );
-  const layers = useMemo(
-    () => (
-      <RenderLayer>
-        {world}
-        {provincesLayer}
-        {cartography}
-        {detail}
-        {citiesLayer}
-      </RenderLayer>
-    ),
-    [world, provincesLayer, cartography, detail, citiesLayer],
-  );
+  const stableProvinces = useMemo(() => provinces, [provinces]);
 
   return (
     <CameraProvider value={camera}>
-      <CameraViewport cameraInput={cameraInput}>
-        <RenderRoot>
-          {useGpuProvinceFill && (
-            <ProvinceTextureLayer
-              provinces={provinces}
-              camera={cameraState}
-              selectedProvinceId={selectedProvinceId}
-              mapStyle={settings.mapStyle ?? "detailed"}
-              onReady={ready}
-            />
-          )}
-          <SvgRenderer camera={cameraState}>{layers}</SvgRenderer>
-        </RenderRoot>
-      </CameraViewport>
+      <main
+        className="map-gpu-viewport"
+        title={settings.tips ? "Haritayı sürükleyerek gezinebilir, tekerlek ile yakınlaşıp uzaklaşabilirsiniz." : undefined}
+        aria-label="Historia AI GPU dünya haritası"
+        style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}
+      >
+        <MapEngineV2
+          provinces={stableProvinces}
+          camera={cameraState}
+          selectedProvinceId={selectedProvinceId}
+          mapStyle={settings.mapStyle ?? "detailed"}
+          onProvinceClick={onProvinceClick}
+        />
+      </main>
     </CameraProvider>
   );
 }
