@@ -86,7 +86,7 @@ function PhysicalGeographyLayer({ phase = "terrain", zoom = 1, camera }) {
   const stroke = getPhysicalStrokeProfile(zoom);
 
   if (phase === "labels") {
-    if (!profile.mountainLabels || !profile.physicalLabels) return null;
+    if (!profile.physicalLabels) return null;
     const labels = layoutPhysicalLabels(
       atlas.labels.filter((label) => isFeatureVisible({ coordinates: [[label.x, label.y]] }, camera)),
       zoom,
