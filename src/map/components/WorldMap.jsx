@@ -10,6 +10,7 @@ import {
 } from "./layers";
 import { CameraProvider, CameraViewport, useCamera, useCameraController } from "../camera";
 import { RenderRoot, RenderLayer, SvgRenderer } from "../rendering";
+import ProvinceGpuCanvas from "../rendering/gpu/ProvinceGpuCanvas.jsx";
 
 const HISTORICAL_1300_DATE = "1300-01-01";
 
@@ -39,9 +40,15 @@ function WorldMap({
   const camera = useCamera();
   const cameraState = camera.camera;
   const [internalSelectedCityId, setInternalSelectedCityId] = useState(null);
+  const [gpuProvinceReady, setGpuProvinceReady] = useState(false);
   const selectedCityId = controlledSelectedCityId ?? internalSelectedCityId;
   const scenarioDate = getScenarioStartDate(runtime);
   const isHistoricalPoliticalMap = scenarioDate === HISTORICAL_1300_DATE;
+  const useGpuProvinceFill = !isHistoricalPoliticalMap;
+
+  const handleGpuProvinceReady = useCallback((ready) => {
+    setGpuProvinceReady(Boolean(ready));
+  }, []);
 
   const cameraInput = useCameraController({
     zoom: camera.zoom,
@@ -79,7 +86,7 @@ function WorldMap({
         mapShadows={settings.mapShadows !== false}
         zoom={cameraState.zoom}
         camera={cameraState}
-        renderFill={!isHistoricalPoliticalMap}
+        renderFill={!useGpuProvinceFill || !gpuProvinceReady}
         renderBoundaries={!isHistoricalPoliticalMap}
       />
     ),
@@ -91,6 +98,8 @@ function WorldMap({
       settings.mapShadows,
       cameraState,
       isHistoricalPoliticalMap,
+      useGpuProvinceFill,
+      gpuProvinceReady,
     ],
   );
 
@@ -132,6 +141,15 @@ function WorldMap({
     <CameraProvider value={camera}>
       <CameraViewport cameraInput={cameraInput}>
         <RenderRoot>
+          {useGpuProvinceFill && (
+            <ProvinceGpuCanvas
+              provinces={provinces}
+              camera={cameraState}
+              zoom={cameraState.zoom}
+              selectedProvinceId={selectedProvinceId}
+              onReady={handleGpuProvinceReady}
+            />
+          )}
           <SvgRenderer camera={cameraState}>{layers}</SvgRenderer>
         </RenderRoot>
       </CameraViewport>
