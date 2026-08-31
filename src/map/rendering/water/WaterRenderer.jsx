@@ -369,7 +369,9 @@ function WaterRenderer({ camera }) {
   const geometry = useMemo(() => buildRiverRibbonGeometry(ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers), []);
   const maskCanvas = useMemo(() => buildPhysicalWaterMask(), []);
 
-  cameraRef.current = camera;
+  useEffect(() => {
+    cameraRef.current = camera;
+  }, [camera]);
 
   useEffect(() => {
     if (!maskCanvas) return undefined;
