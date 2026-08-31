@@ -1,0 +1,4 @@
+import assert from "node:assert/strict";
+import { createTerrainEdgeIndexTopology } from "./TerrainEdgeIndexTopology.js";
+import { createTerrainGpuDrawPacket } from "./TerrainGpuDrawPacket.js";
+const topology=createTerrainEdgeIndexTopology({size:3,edges:{}});const positions=new Float32Array(Array.from({length:9},(_,i)=>[i%3,Math.floor(i/3),i].flat()).flat());const packet=createTerrainGpuDrawPacket({tileId:"3/4/5",lod:2,positions,indices:topology.indices,vertexCount:9,terrainTileId:"3/4/5",topologyVariant:"base"});assert.equal(packet.indexCount,topology.indices.length);assert.equal(packet.vertexCount,9);assert.equal(Object.isFrozen(packet),true);assert.equal(packet.coverage.completeGridEdgeCoverage,true);assert.throws(()=>createTerrainGpuDrawPacket({tileId:"bad",lod:0,positions:new Float32Array([0,0,NaN]),indices:new Uint32Array([0,1,2]),vertexCount:3}),/finite/);console.log("Phase E GPU draw packet: PASS");
