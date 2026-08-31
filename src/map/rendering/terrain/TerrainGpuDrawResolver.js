@@ -8,7 +8,7 @@ export function resolveTerrainGpuDraw({ size, drawPlan, positions = null } = {})
   const edges = Object.fromEntries(["north","east","south","west"].map(edge => [edge, drawPlan.edges?.[edge]?.mode ?? "same"]));
   const topology = createTerrainEdgeIndexTopology({ size, edges });
   validateTerrainIndexTopology({ indices: topology.indices, vertexCount: topology.vertexCount, positions });
-  const coverage = validateTerrainTopologyCoverage({ indices: topology.indices, vertexCount: topology.vertexCount, size });
+  const coverage = validateTerrainTopologyCoverage({ indices: topology.indices, vertexCount: topology.vertexCount, size, edges });
   if (!coverage.completeGridEdgeCoverage) throw new Error(`Terrain topology coverage is incomplete: ${coverage.missingGridEdges} grid edge(s) missing.`);
   return Object.freeze({ drawable: true, tileId: drawPlan.tileId, topologyVariant: topology.transitionEdges.length ? "stitched" : "base", indexCount: topology.indexCount, indices: topology.indices, edges: topology.edges, coverage });
 }
