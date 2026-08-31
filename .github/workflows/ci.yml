@@ -21,6 +21,7 @@ on:
       - feat/cartography-visual-refinement
       - feat/cartography-foundation-v2
       - feat/map-gpu-texture-architecture
+      - feat/phase-c-gpu-native-geometry
   push:
     branches:
       - main
@@ -48,6 +49,7 @@ on:
       - feat/runtime-province-selection
       - feat/historical-map-clean-foundation
       - feat/historical-political-map-v1
+      - feat/phase-c-gpu-native-geometry
 
 jobs:
   validate:
@@ -72,7 +74,9 @@ jobs:
         run: npm run test:repository-cleanliness
       - name: Generate historical GIS runtime assets
         run: npm run build:historical-gis:1300
-      - name: Verify repository cleanliness after historical GIS
+      - name: Build deterministic GPU province pack
+        run: npm run build:gpu-province-pack
+      - name: Verify repository cleanliness after historical GIS and GPU pack
         run: npm run test:repository-cleanliness
       - name: Validate historical GIS runtime assets
         run: npm run validate:historical-gis:1300
@@ -120,6 +124,12 @@ jobs:
         run: npm run test:map-rendering-contract
       - name: Run province selection contract tests
         run: npm run test:province-selection
+      - name: Run GPU-native geometry contract tests
+        run: npm run test:gpu-native-geometry
+      - name: Run GPU province pipeline tests
+        run: npm run test:gpu-province-pipeline
+      - name: Run GPU picking and LOD contract tests
+        run: npm run test:gpu-picking-lod
       - name: Run new game state tests
         run: npm run test:new-game
       - name: Run new game startup tests
