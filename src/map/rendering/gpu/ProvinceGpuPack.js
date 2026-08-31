@@ -53,6 +53,26 @@ function removeCollinearIndexed(points) {
   return out;
 }
 
+function pointOnSegment(p, a, b) {
+  if (Math.abs(cross(a, b, p)) > EPSILON) return false;
+  return p[0] >= Math.min(a[0], b[0]) - EPSILON && p[0] <= Math.max(a[0], b[0]) + EPSILON
+    && p[1] >= Math.min(a[1], b[1]) - EPSILON && p[1] <= Math.max(a[1], b[1]) + EPSILON;
+}
+
+function pointInPolygon(p, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i += 1) {
+    const a = ring[i]; const b = ring[j];
+    if (pointOnSegment(p, a, b)) return true;
+    const crossesY = (a[1] > p[1]) !== (b[1] > p[1]);
+    if (crossesY) {
+      const x = ((b[0] - a[0]) * (p[1] - a[1])) / (b[1] - a[1]) + a[0];
+      if (p[0] < x) inside = !inside;
+    }
+  }
+  return inside;
+}
+
 function pointStrictlyInsideTriangle(p, a, b, c) {
   const ab = cross(a, b, p); const bc = cross(b, c, p); const ca = cross(c, a, p);
   return (ab > EPSILON && bc > EPSILON && ca > EPSILON) || (ab < -EPSILON && bc < -EPSILON && ca < -EPSILON);
@@ -70,8 +90,17 @@ function isValidEar(points, remaining, i) {
   const ic = remaining[(i + 1) % remaining.length];
   const a = points[ia].point; const b = points[ib].point; const c = points[ic].point;
   if (cross(a, b, c) <= EPSILON) return false;
+
+  // The ear diagonal must remain inside the current polygon. The midpoint
+  // check rejects concave shortcuts that do not properly cross an edge.
+  const currentRing = remaining.map((index) => points[index].point);
+  const midpoint = [(a[0] + c[0]) / 2, (a[1] + c[1]) / 2];
+  if (!pointInPolygon(midpoint, currentRing)) return false;
+
   for (const candidate of remaining) {
     if (candidate === ia || candidate === ib || candidate === ic) continue;
+    // Boundary contact is explicitly allowed; only strict interior points
+    // invalidate an ear. This is important after LOD simplification.
     if (pointStrictlyInsideTriangle(points[candidate].point, a, b, c)) return false;
   }
   for (let edgeIndex = 0; edgeIndex < remaining.length; edgeIndex += 1) {
