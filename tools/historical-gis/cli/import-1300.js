@@ -5,6 +5,7 @@ import { downloadHistorical1300GeoJson, importHistoricalGeoJson } from "../Histo
 import { buildHistoricalGeometryAsset, buildHistoricalProvinceAsset } from "../HistoricalProvinceAssetBuilder.js";
 import { buildAnatoliaPhase2DAssets, isAnatoliaGeometryPoint } from "../AnatoliaPhase2DGeometryBuilder.js";
 import { refineAnatoliaPhase2DCoastline } from "../AnatoliaPhase2DCoastlineRefinement.js";
+import { writeHistoricalRuntimeBinaryRegion } from "../HistoricalRuntimeBinaryWriter.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const inputArgument = process.argv[2] ?? "--download";
@@ -78,52 +79,56 @@ for (const regionId of [...regionIds].sort()) {
     .filter((geometry) => geometry.__runtimeRegion === regionId)
     .map(stripRuntimeRegion);
   const polygonCount = regionGeometries.reduce((total, geometry) => total + geometry.polygons.length, 0);
-  const file = `regions/${regionId}.json`;
-
-  await fs.writeFile(
-    path.join(runtimeDir, file),
-    `${JSON.stringify({
-      schemaVersion: 3,
-      assetType: "historical-runtime-region",
-      historicalDate: "1300-01-01",
-      regionId,
-      source: {
-        provider: "historical-basemaps",
-        dataset: "world_1300.geojson",
-        projection: "EPSG:4326",
-        phase2D: {
-          status: "runtime",
-          dataset: phase2D.dataset,
-          geometryVersion: phase2D.geometryVersion,
-          coastlineRefinement: phase2D.coastlineRefinement ?? null,
-        },
+  const regionAsset = {
+    schemaVersion: 3,
+    assetType: "historical-runtime-region",
+    historicalDate: "1300-01-01",
+    regionId,
+    source: {
+      provider: "historical-basemaps",
+      dataset: "world_1300.geojson",
+      projection: "EPSG:4326",
+      phase2D: {
+        status: "runtime",
+        dataset: phase2D.dataset,
+        geometryVersion: phase2D.geometryVersion,
+        coastlineRefinement: phase2D.coastlineRefinement ?? null,
       },
-      counts: {
-        provinces: regionProvinces.length,
-        geometries: regionGeometries.length,
-        polygons: polygonCount,
-      },
-      provinces: regionProvinces,
-      geometries: regionGeometries,
-    }, null, 2)}\n`,
-    "utf8",
-  );
+    },
+    counts: {
+      provinces: regionProvinces.length,
+      geometries: regionGeometries.length,
+      polygons: polygonCount,
+    },
+    provinces: regionProvinces,
+    geometries: regionGeometries,
+  };
 
+  const binary = await writeHistoricalRuntimeBinaryRegion(runtimeDir, regionAsset);
   regionManifest.push({
     id: regionId,
-    file,
+    file: binary.file,
     provinceCount: regionProvinces.length,
     geometryCount: regionGeometries.length,
     polygonCount,
+    byteLength: binary.bytes,
   });
 }
 
 await fs.writeFile(
   manifestPath,
   `${JSON.stringify({
-    schemaVersion: 1,
+    schemaVersion: 2,
     assetType: "historical-runtime-manifest",
     historicalDate: "1300-01-01",
+    dataPlane: {
+      format: "hmap",
+      version: 1,
+      encoding: "little-endian",
+      geometryPrecision: "float64",
+      controlPlane: "manifest.json",
+      regionAssets: "regions/*.bin",
+    },
     source: {
       provider: "historical-basemaps",
       dataset: "world_1300.geojson",
@@ -132,7 +137,7 @@ await fs.writeFile(
       regionalOverlay: {
         status: "research-only",
         id: "anatolia-byzantium-1300",
-        note: "Phase 2D replaces the coarse Anatolia source-province presentation with deterministic 38-province cartographic geometry; all remaining source-derived provinces are partitioned into stable runtime regions.",
+        note: "Phase 2D replaces the coarse Anatolia source-province presentation with deterministic curated cartographic geometry; all remaining source-derived provinces are partitioned into stable runtime regions.",
       },
       phase2D: {
         status: "runtime",
@@ -159,7 +164,7 @@ console.log(`Imported ${regions.length} historical GIS features for 1300.`);
 console.log(`Phase 2D generated ${phase2D.provinceCount} Anatolia provinces from ${phase2D.siteCount} cartographic sites.`);
 console.log(`Phase 2D coastline refinement applied to ${phase2D.coastlineRefinement?.coastalProvinceCount ?? 0} coastal provinces.`);
 console.log(`Phase 2D replaced ${regions.length - sourceRegionsOutsidePhase2D.length} coarse source features in the Anatolia envelope.`);
-console.log(`Generated ${regionManifest.length} historical runtime regions containing ${provinces.length} provinces and ${geometries.length} geometries.`);
+console.log(`Generated ${regionManifest.length} binary historical runtime regions containing ${provinces.length} provinces and ${geometries.length} geometries.`);
 console.log(`Historical runtime manifest: ${manifestPath}`);
 console.log("Phase 2D: Anatolia uses curated cartographic province geometry; the rest of the world remains source-derived.");
 console.log("Generated GIS source/assets are reproducible build artifacts and should not be committed unless redistribution is explicitly approved by the source license.");
