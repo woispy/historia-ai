@@ -1,5 +1,6 @@
 import { createTerrainAssetManifest, validateTerrainAssetManifest } from "./TerrainAssetManifest.js";
 import { buildTerrainGridMesh } from "./TerrainGeometry.js";
+import { createTerrainHeightSampler } from "./TerrainHeightSampler.js";
 
 const TEXTURE_KEYS = Object.freeze(["normal", "splatRgba", "splatSnow", "landMask"]);
 function assertBytes(value, name) { if (!(value instanceof ArrayBuffer)) throw new Error(`${name} must be an ArrayBuffer.`); }
@@ -20,9 +21,10 @@ export function createCanonicalTerrainTileLoader({ manifestForTile, fetchBinary,
     if (!decoded.bounds || !sameBounds(decoded.bounds, manifest.bounds)) throw new Error(`Terrain tile ${tileId} DEM bounds do not match its manifest.`);
     if (!Number.isFinite(decoded.spacingX) || !Number.isFinite(decoded.spacingY) || decoded.spacingX <= 0 || decoded.spacingY <= 0) throw new Error(`Terrain tile ${tileId} requires explicit metric sample spacing.`);
     const mesh = buildTerrainGridMesh({ heights: decoded.samples, size: decoded.width, spacingX: decoded.spacingX, spacingY: decoded.spacingY });
+    const sampler = createTerrainHeightSampler({ bounds: decoded.bounds, width: decoded.width, height: decoded.height, samples: decoded.samples, spacingX: decoded.spacingX, spacingY: decoded.spacingY });
     const textureBuffers = {};
     for (const key of TEXTURE_KEYS) { const buffer = await fetchBinary(manifest.assets[key]); assertBytes(buffer, key); textureBuffers[key] = buffer; }
     const textures = await buildTexturePayloads(textureBuffers, manifest);
-    return Object.freeze({ tileId, manifest, mesh, textures, byteLength: heightBuffer.byteLength + Object.values(textureBuffers).reduce((sum, buffer) => sum + buffer.byteLength, 0), physical: Object.freeze({ crs: decoded.crs, bounds: decoded.bounds, resolutionMeters: decoded.resolutionMeters }) });
+    return Object.freeze({ tileId, manifest, mesh, sampler, textures, byteLength: heightBuffer.byteLength + Object.values(textureBuffers).reduce((sum, buffer) => sum + buffer.byteLength, 0), physical: Object.freeze({ crs: decoded.crs, bounds: decoded.bounds, resolutionMeters: decoded.resolutionMeters, spacingX: decoded.spacingX, spacingY: decoded.spacingY }) });
   };
 }
