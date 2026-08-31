@@ -118,6 +118,10 @@ jobs:
         run: npm run test:cartography-visual
       - name: Run map rendering contract tests
         run: npm run test:map-rendering-contract
+      - name: Run GPU province pack integrity tests
+        run: npm run test:province-gpu-pack
+      - name: Build deterministic GPU province pack
+        run: npm run build:gpu-province-pack
       - name: Run province selection contract tests
         run: npm run test:province-selection
       - name: Run new game state tests
