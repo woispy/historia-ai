@@ -4,6 +4,7 @@ import { createHistoricalAssetId, slug } from "./HistoricalAssetId.js";
 
 const HISTORICAL_1300_URL =
   "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1300.geojson";
+const GEOMETRY_EPSILON = 1e-10;
 
 function assertGeoJson(input) {
   if (
@@ -17,13 +18,90 @@ function assertGeoJson(input) {
   }
 }
 
+function samePoint(a, b) {
+  return (
+    Math.abs(a[0] - b[0]) <= GEOMETRY_EPSILON &&
+    Math.abs(a[1] - b[1]) <= GEOMETRY_EPSILON
+  );
+}
+
+function cross(a, b, c) {
+  return (
+    (b[0] - a[0]) * (c[1] - a[1]) -
+    (b[1] - a[1]) * (c[0] - a[0])
+  );
+}
+
+function signedArea(ring) {
+  let area = 0;
+  for (let index = 0; index < ring.length; index += 1) {
+    const current = ring[index];
+    const next = ring[(index + 1) % ring.length];
+    area += current[0] * next[1] - next[0] * current[1];
+  }
+  return area / 2;
+}
+
+function ringScale(ring) {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const point of ring) {
+    minX = Math.min(minX, point[0]);
+    minY = Math.min(minY, point[1]);
+    maxX = Math.max(maxX, point[0]);
+    maxY = Math.max(maxY, point[1]);
+  }
+  return Math.max(1, Math.hypot(maxX - minX, maxY - minY));
+}
+
+function areaTolerance(ring) {
+  const scale = ringScale(ring);
+  return Math.max(Number.EPSILON * scale * scale * 16, GEOMETRY_EPSILON * scale * scale);
+}
+
+function canonicalizeRing(ring) {
+  const output = [];
+  for (const coordinate of ring) {
+    if (!Array.isArray(coordinate) || coordinate.length < 2) continue;
+    const longitude = Number(coordinate[0]);
+    const latitude = Number(coordinate[1]);
+    if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) continue;
+    const point = [longitude, latitude];
+    if (!output.length || !samePoint(output[output.length - 1], point)) {
+      output.push(point);
+    }
+  }
+
+  if (output.length > 1 && samePoint(output[0], output[output.length - 1])) {
+    output.pop();
+  }
+
+  let changed = true;
+  let guard = 0;
+  while (changed && output.length > 3 && guard < output.length * 2) {
+    changed = false;
+    guard += 1;
+    for (let index = 0; index < output.length && output.length > 3; index += 1) {
+      const previous = output[(index - 1 + output.length) % output.length];
+      const current = output[index];
+      const next = output[(index + 1) % output.length];
+      if (Math.abs(cross(previous, current, next)) <= GEOMETRY_EPSILON) {
+        output.splice(index, 1);
+        changed = true;
+        index -= 1;
+      }
+    }
+  }
+
+  if (output.length < 3) return null;
+  if (Math.abs(signedArea(output)) <= areaTolerance(output)) return null;
+  return output;
+}
+
 function normalizeRing(ring) {
-  return ring
-    .filter((coordinate) => Array.isArray(coordinate) && coordinate.length >= 2)
-    .map(([longitude, latitude]) => [
-      Number(longitude),
-      Number(latitude),
-    ]);
+  return canonicalizeRing(ring);
 }
 
 function extractPolygons(geometry) {
@@ -31,13 +109,13 @@ function extractPolygons(geometry) {
 
   if (geometry.type === "Polygon") {
     const outerRing = normalizeRing(geometry.coordinates?.[0] ?? []);
-    return outerRing.length >= 3 ? [outerRing] : [];
+    return outerRing ? [outerRing] : [];
   }
 
   if (geometry.type === "MultiPolygon") {
     return geometry.coordinates
       .map((polygon) => normalizeRing(polygon?.[0] ?? []))
-      .filter((ring) => ring.length >= 3);
+      .filter(Boolean);
   }
 
   return [];
