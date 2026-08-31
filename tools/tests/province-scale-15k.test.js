@@ -14,22 +14,13 @@ function makeSquare(index) {
 function makeFixtureProvince(index) {
   const id = `stress-${String(index).padStart(5, "0")}`;
   if (index % 811 === 0) {
-    return {
-      province: { identity: { id } },
-      geometry: { polygons: [[[index * 0.001, 0], [index * 0.001 + 1, 0], [index * 0.001 + 2, 0]]] },
-    };
+    return { province: { identity: { id } }, geometry: { polygons: [[[index * 0.001, 0], [index * 0.001 + 1, 0], [index * 0.001 + 2, 0]]] } };
   }
   if (index % 977 === 0) {
-    return {
-      province: { identity: { id } },
-      geometry: { polygons: [[[index * 0.001, 0], [index * 0.001 + 1, 1], [index * 0.001 + 2, 0], [index * 0.001 + 1, -1]]] },
-    };
+    return { province: { identity: { id } }, geometry: { polygons: [[[index * 0.001, 0], [index * 0.001 + 1, 1], [index * 0.001 + 2, 0], [index * 0.001 + 1, -1]]] } };
   }
   if (index % 613 === 0) {
-    return {
-      province: { identity: { id } },
-      geometry: { polygons: [[[index * 0.001, 0], [index * 0.001 + 1, 0], [index * 0.001 + 2, 0], [index * 0.001 + 3, 0]]] },
-    };
+    return { province: { identity: { id } }, geometry: { polygons: [[[index * 0.001, 0], [index * 0.001 + 1, 0], [index * 0.001 + 2, 0], [index * 0.001 + 3, 0]]] } };
   }
   return { province: { identity: { id } }, geometry: { polygons: [makeSquare(index)] } };
 }
@@ -39,9 +30,7 @@ const build = () => buildIndexedProvincePack(entries, {
   tileSize: 10,
   quantization: 1e6,
   onProgress: (event) => {
-    if (event.phase === "province-complete" && (event.provinceIndex + 1) % 1000 === 0) {
-      console.log(`15K GPU stress progress=${event.provinceIndex + 1}/${event.provinceCount} status=${event.geometryStatus} vertices=${event.vertexCount} indices=${event.indexCount}`);
-    }
+    if (event.phase === "province-complete" && (event.provinceIndex + 1) % 1000 === 0) console.log(`15K GPU stress progress=${event.provinceIndex + 1}/${event.provinceCount} status=${event.geometryStatus} vertices=${event.vertexCount} indices=${event.indexCount}`);
   },
 });
 
@@ -74,7 +63,7 @@ if (binary.length < 64) throw new Error(`Encoded GPU pack unexpectedly small: ${
 const view = new DataView(binary.buffer, binary.byteOffset, binary.byteLength);
 for (let i = 0; i < GPU_PROVINCE_PACK_MAGIC.length; i += 1) if (binary[i] !== GPU_PROVINCE_PACK_MAGIC[i]) throw new Error("GPU binary magic mismatch.");
 if (view.getUint32(8, true) !== GPU_PROVINCE_PACK_VERSION) throw new Error("GPU binary version mismatch.");
-if (view.getUint32(32, true) !== PROVINCE_COUNT) throw new Error(`GPU binary province header mismatch: ${view.getUint32(32, true)}`);
+if (view.getUint32(36, true) !== PROVINCE_COUNT) throw new Error(`GPU binary province header mismatch: ${view.getUint32(36, true)}`);
 
 const secondStarted = Date.now();
 const packB = build();
