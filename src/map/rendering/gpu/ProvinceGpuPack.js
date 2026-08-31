@@ -61,7 +61,13 @@ function orientation(a, b, c) { const value = cross(a, b, c); if (Math.abs(value
 function onSegment(a, b, p) { return orientation(a, b, p) === 0 && p[0] >= Math.min(a[0], b[0]) - EPSILON && p[0] <= Math.max(a[0], b[0]) + EPSILON && p[1] >= Math.min(a[1], b[1]) - EPSILON && p[1] <= Math.max(a[1], b[1]) + EPSILON; }
 function segmentsIntersect(a, b, c, d) { const abC = orientation(a, b, c); const abD = orientation(a, b, d); const cdA = orientation(c, d, a); const cdB = orientation(c, d, b); if (abC !== abD && cdA !== cdB) return true; return (abC === 0 && onSegment(a, b, c)) || (abD === 0 && onSegment(a, b, d)) || (cdA === 0 && onSegment(c, d, a)) || (cdB === 0 && onSegment(c, d, b)); }
 function pointInPolygon(point, points, ids) { let inside = false; for (let i = 0, j = ids.length - 1; i < ids.length; j = i++) { const a = points[ids[i]]; const b = points[ids[j]]; if (onSegment(a, b, point)) return true; if ((a[1] > point[1]) !== (b[1] > point[1])) { const x = ((b[0] - a[0]) * (point[1] - a[1])) / (b[1] - a[1]) + a[0]; if (point[0] < x) inside = !inside; } } return inside; }
-function diagonalClear(points, ids, ia, ib) { const a = points[ia]; const b = points[ib]; for (let i = 0; i < ids.length; i += 1) { const u = ids[i]; const v = ids[(i + 1) % ids.length]; if (u === ia || u === ib || v === ia || v === ib) continue; if (segmentsIntersect(a, b, points[u], points[v])) return false; } return pointInPolygon([(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], points, ids); }
+function diagonalIntersectsBoundary(points, ids, ia, ib) { const a = points[ia]; const b = points[ib]; for (let i = 0; i < ids.length; i += 1) { const u = ids[i]; const v = ids[(i + 1) % ids.length]; if (u === ia || u === ib || v === ia || v === ib) continue; if (segmentsIntersect(a, b, points[u], points[v])) return true; } return false; }
+function diagonalClear(points, ids, ia, ib) {
+  if (ia === ib || diagonalIntersectsBoundary(points, ids, ia, ib)) return false;
+  const a = points[ia]; const b = points[ib];
+  const samples = [0.25, 0.5, 0.75].map((t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]);
+  return samples.some((sample) => pointInPolygon(sample, points, ids));
+}
 function strictlyInside(point, a, b, c) { const x = cross(a, b, point); const y = cross(b, c, point); const z = cross(c, a, point); return (x > EPSILON && y > EPSILON && z > EPSILON) || (x < -EPSILON && y < -EPSILON && z < -EPSILON); }
 function earClip(points, inputIds = null) {
   const ids = inputIds ? inputIds.slice() : Array.from({ length: points.length }, (_, i) => i); if (signedArea(ids.map((id) => points[id])) < 0) ids.reverse();
@@ -83,12 +89,31 @@ function candidateDiagonals(points, ids) { const candidates = []; for (let i = 0
 function splitIds(ids, a, b) { const ia = ids.indexOf(a); const ib = ids.indexOf(b); if (ia < 0 || ib < 0) return null; const first = []; for (let i = ia; ; i = (i + 1) % ids.length) { first.push(ids[i]); if (i === ib) break; } const second = []; for (let i = ib; ; i = (i + 1) % ids.length) { second.push(ids[i]); if (i === ia) break; } return first.length >= 3 && second.length >= 3 ? [first, second] : null; }
 function decompose(points, ids, depth = 0) { if (ids.length < 3 || depth > ids.length * 2) return null; const clipped = earClip(points, ids); if (clipped) return clipped; for (const diagonal of candidateDiagonals(points, ids)) { const split = splitIds(ids, diagonal.a, diagonal.b); if (!split) continue; const left = decompose(points, split[0], depth + 1); if (!left) continue; const right = decompose(points, split[1], depth + 1); if (right) return [...left, ...right]; } return null; }
 
+export function analyzeRing(ring) {
+  const normalized = normalizeRing(ring);
+  const points = unwrapRing(normalized);
+  const selfIntersections = [];
+  for (let i = 0; i < points.length; i += 1) {
+    const a = points[i]; const b = points[(i + 1) % points.length];
+    for (let j = i + 1; j < points.length; j += 1) {
+      if (j === i || (j + 1) % points.length === i || j === (i + 1) % points.length) continue;
+      if (segmentsIntersect(a, b, points[j], points[(j + 1) % points.length])) selfIntersections.push([i, j]);
+    }
+  }
+  return Object.freeze({ rawVertexCount: Array.isArray(ring) ? ring.length : 0, normalizedVertexCount: normalized.length, signedArea: signedArea(points), longitudeSpan: points.length ? Math.max(...points.map(([x]) => x)) - Math.min(...points.map(([x]) => x)) : 0, backtracking: isBacktrackingRing(ring), selfIntersections: Object.freeze(selfIntersections), simple: normalized.length >= 3 && selfIntersections.length === 0 && Math.abs(signedArea(points)) > EPSILON, triangulable: false });
+}
+
 export function triangulateRing(ring, context = {}) {
   if (isBacktrackingRing(ring)) return [];
   const normalized = normalizeRing(ring); if (normalized.length < 3) return [];
   const points = unwrapRing(normalized); if (Math.abs(signedArea(points)) <= EPSILON) return [];
   const ids = Array.from({ length: points.length }, (_, i) => i); const result = earClip(points, ids) || decompose(points, ids);
-  if (!result) { const longitudeSpan = Math.max(...points.map(([longitude]) => longitude)) - Math.min(...points.map(([longitude]) => longitude)); throw new Error(`Province triangulation failed${context.provinceId ? ` province=${context.provinceId}` : ""}${context.lod === undefined ? "" : ` lod=${context.lod}`}; vertices=${points.length}; unwrappedLongitudeSpan=${longitudeSpan.toFixed(3)}`); }
+  if (!result) {
+    const diagnostic = analyzeRing(points);
+    if (!diagnostic.simple) return [];
+    const longitudeSpan = Math.max(...points.map(([longitude]) => longitude)) - Math.min(...points.map(([longitude]) => longitude));
+    throw new Error(`Province triangulation failed${context.provinceId ? ` province=${context.provinceId}` : ""}${context.lod === undefined ? "" : ` lod=${context.lod}`}; vertices=${points.length}; unwrappedLongitudeSpan=${longitudeSpan.toFixed(3)}; simple=true; intersections=0`);
+  }
   return result;
 }
 
@@ -108,7 +133,7 @@ export function buildIndexedProvincePack(entries = [], options = {}) {
   const vertices = []; const indices = []; const map = new Map(); const provinces = []; const tiles = new Map();
   const vertex = (point) => { const key = qkey(point, quantization); const old = map.get(key); if (old !== undefined) return old; const index = vertices.length / 2; vertices.push(point[0], point[1]); map.set(key, index); return index; };
   entries.forEach((entry, provinceIndex) => {
-    const id = String(entry?.province?.identity?.id ?? entry?.province?.id ?? entry?.id ?? provinceIndex); const polygons = entry?.geometry?.polygons ?? entry?.polygons ?? []; const ranges = []; let minX = Infinity; let minY = Infinity; let maxX = -Infinity; let maxY = -Infinity;
+    const id = String(entry?.province?.identity?.id ?? entry?.province?.id ?? entry?.id ?? provinceIndex); const polygons = entry?.geometry?.polygons ?? []; const ranges = []; let minX = Infinity; let minY = Infinity; let maxX = -Infinity; let maxY = -Infinity;
     for (let lod = 0; lod < 4; lod += 1) { const firstIndex = indices.length; for (const polygon of polygons) { const ring = buildLodRings(polygon)[lod]; if (ring.length < 3) continue; for (const point of ring) { minX = Math.min(minX, point[0]); minY = Math.min(minY, point[1]); maxX = Math.max(maxX, point[0]); maxY = Math.max(maxY, point[1]); } for (const index of triangulateRing(ring, { provinceId: id, lod })) indices.push(vertex(ring[index])); } const indexCount = indices.length - firstIndex; if (indexCount % 3) throw new Error(`LOD${lod} range is not triangle aligned for ${id}`); ranges.push(Object.freeze({ firstIndex, indexCount })); }
     const bounds = Number.isFinite(minX) ? Object.freeze({ minX, minY, maxX, maxY }) : null; provinces.push(Object.freeze({ provinceIndex, provinceId: id, bounds, lodRanges: Object.freeze(ranges) }));
     if (bounds) for (let x = Math.floor(bounds.minX / tileSize); x <= Math.floor(bounds.maxX / tileSize); x += 1) for (let y = Math.floor(bounds.minY / tileSize); y <= Math.floor(bounds.maxY / tileSize); y += 1) { const key = `${x}:${y}`; if (!tiles.has(key)) tiles.set(key, { tileId: key, x, y, provinceIndices: [] }); tiles.get(key).provinceIndices.push(provinceIndex); }
