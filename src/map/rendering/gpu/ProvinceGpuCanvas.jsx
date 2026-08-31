@@ -13,6 +13,7 @@ function ProvinceGpuCanvas({
   zoom = 1,
   selectedProvinceId = null,
   selectedColor = "#d6b04d",
+  onReady,
 }) {
   const canvasRef = useRef(null);
   const rendererRef = useRef(null);
@@ -23,22 +24,30 @@ function ProvinceGpuCanvas({
     if (!canvas) return undefined;
 
     try {
-      rendererRef.current = createProvinceGpuRenderer(canvas);
+      const renderer = createProvinceGpuRenderer(canvas);
+      rendererRef.current = renderer;
+      onReady?.(true);
     } catch {
       rendererRef.current = null;
+      onReady?.(false);
     }
 
     return () => {
       rendererRef.current?.dispose?.();
       rendererRef.current = null;
     };
-  }, []);
+  }, [onReady]);
 
   useEffect(() => {
-    if (!rendererRef.current) return;
-    geometryRef.current = buildProvinceGpuGeometry(provinces);
-    rendererRef.current.upload(geometryRef.current);
-  }, [provinces]);
+    const renderer = rendererRef.current;
+    if (!renderer) return;
+    try {
+      geometryRef.current = buildProvinceGpuGeometry(provinces);
+      renderer.upload(geometryRef.current);
+    } catch {
+      onReady?.(false);
+    }
+  }, [provinces, onReady]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
