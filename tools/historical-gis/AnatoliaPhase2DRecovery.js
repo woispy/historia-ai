@@ -1,10 +1,7 @@
-import { buildAnatoliaPhase2DAssets as buildPhase2D, isAnatoliaGeometryPoint } from "./AnatoliaPhase2DGeometryBuilder.js";
-import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
-import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
-import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
-
-const RECOVERY_GRID_STEP = 0.01;
-const RECOVERY_MAX_RADIUS = 1.5;
+import { buildAnatoliaPhase2DAssets as buildPhase2D } from "./AnatoliaPhase2DGeometryBuilderV15.js";
+import { isAnatoliaGeometryPoint } from "./AnatoliaGeometryAuthority.js";
+import { resolveGeometryAnchor } from "./recovery/physical-land-authority.mjs";
+import { ANATOLIA_PROVINCE_REFINEMENTS } from "../../src/map/data/AnatoliaProvinceRefinement.js";
 
 const EXPLICIT_RECOVERY_ANCHORS = Object.freeze({
   "bithynia-nicaea": [29.69, 40.44],
@@ -20,102 +17,40 @@ function distanceSquared(a, b) {
   return dx * dx + dy * dy;
 }
 
-function pointInPolygon(point, polygon) {
-  if (!Array.isArray(polygon) || polygon.length < 3) return false;
-  let inside = false;
-  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index += 1) {
-    const current = polygon[index];
-    const prior = polygon[previous];
-    const crosses = (current[1] > point[1]) !== (prior[1] > point[1])
-      && point[0] < ((prior[0] - current[0]) * (point[1] - current[1]))
-        / (prior[1] - current[1] || Number.EPSILON) + current[0];
-    if (crosses) inside = !inside;
-  }
-  return inside;
-}
-
-function pointInWater(point) {
-  return ANATOLIA_PHYSICAL_ATLAS.seas.some((sea) => pointInPolygon(point, sea.coordinates))
-    || ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygon(point, lake.coordinates));
-}
-
-function pointInLand(point) {
-  return ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon));
-}
-
-function isPhysicalRecoveryPoint(point) {
-  return isAnatoliaGeometryPoint(point) && pointInLand(point) && !pointInWater(point);
-}
-
-function findPhysicalRecoveryAnchor(origin, provinceId) {
+function resolveRecoveryAnchor(provinceId, original) {
   const explicit = EXPLICIT_RECOVERY_ANCHORS[provinceId];
-  if (explicit && !pointInWater(explicit)) return clonePoint(explicit);
-  if (isPhysicalRecoveryPoint(origin)) return clonePoint(origin);
-
-  let best = null;
-  let bestDistance = Number.POSITIVE_INFINITY;
-  for (let radius = 0; radius <= RECOVERY_MAX_RADIUS; radius += RECOVERY_GRID_STEP) {
-    const directions = radius === 0 ? 1 : 72;
-    for (let direction = 0; direction < directions; direction += 1) {
-      const angle = (direction / directions) * Math.PI * 2;
-      const candidate = [
-        origin[0] + Math.cos(angle) * radius,
-        origin[1] + Math.sin(angle) * radius,
-      ];
-      if (!isPhysicalRecoveryPoint(candidate)) continue;
-      const distance = distanceSquared(candidate, origin);
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        best = candidate;
-      }
-    }
-    if (best) return best;
-  }
-  return null;
+  if (explicit && isAnatoliaGeometryPoint(explicit)) return clonePoint(explicit);
+  const resolved = resolveGeometryAnchor(provinceId, original);
+  if (!resolved || !isAnatoliaGeometryPoint(resolved)) return null;
+  return clonePoint(resolved);
 }
 
-function restoreHistoricalAnchors(result, originals) {
-  for (const province of result.provinces ?? []) {
-    const original = originals.get(province.identity.id);
-    if (original && province.historical) province.historical.anchor = clonePoint(original);
+function withRecoveredAnchors(callback) {
+  const originals = new Map();
+  try {
+    for (const [provinceId, refinement] of Object.entries(ANATOLIA_PROVINCE_REFINEMENTS)) {
+      if (!refinement?.anchor) continue;
+      const original = refinement.anchor;
+      const resolved = resolveRecoveryAnchor(provinceId, original);
+      if (!resolved || distanceSquared(resolved, original) <= Number.EPSILON) continue;
+      originals.set(provinceId, clonePoint(original));
+      refinement.anchor = resolved;
+    }
+    return callback();
+  } finally {
+    for (const [provinceId, original] of originals) {
+      ANATOLIA_PROVINCE_REFINEMENTS[provinceId].anchor = original;
+    }
   }
-  for (const geometry of result.geometries ?? []) {
-    const original = originals.get(geometry.identity.provinceId);
-    if (original && geometry.metadata) geometry.metadata.anchor = clonePoint(original);
-  }
-  return result;
 }
 
 export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
   try {
     return buildPhase2D(sourceRegions);
   } catch (error) {
-    if (!(error instanceof Error) || !/Phase 2D produced no physically valid geometry/.test(error.message)) throw error;
-
-    const originals = new Map();
-    const changed = [];
-    for (const metadata of ANATOLIA_PROVINCE_METADATA) {
-      const anchor = findPhysicalRecoveryAnchor(metadata.centroid, metadata.id);
-      if (!anchor) continue;
-      originals.set(metadata.id, clonePoint(metadata.centroid));
-      changed.push([metadata, metadata.centroid, metadata.terrain]);
-      metadata.centroid = clonePoint(anchor);
-      if (EXPLICIT_RECOVERY_ANCHORS[metadata.id]) metadata.terrain = "recovery-land";
-    }
-
-    try {
-      const recovered = buildPhase2D(sourceRegions);
-      return restoreHistoricalAnchors(recovered, originals);
-    } finally {
-      for (const [metadata, centroid, terrain] of changed) {
-        metadata.centroid = centroid;
-        metadata.terrain = terrain;
-      }
-    }
+    if (!(error instanceof Error) || !/Phase 2D/.test(error.message)) throw error;
+    return withRecoveredAnchors(() => buildPhase2D(sourceRegions));
   }
 }
 
 export { isAnatoliaGeometryPoint };
-
-// Recovery remains a compatibility boundary for legacy Phase 2D callers;
-// the component-safe physical authority is now the primary geometry path.
