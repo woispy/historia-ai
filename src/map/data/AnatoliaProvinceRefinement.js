@@ -30,8 +30,9 @@ export const ANATOLIA_TERRAIN_PROFILES = Object.freeze({
   "hills-coast": { movementCost: 2, defenseBonus: 1, winterSeverity: 2, agriculture: "moderate" },
 });
 
-const anchor = (x, y, terrainClass, settlementDensity) => ({
+const anchor = (x, y, terrainClass, settlementDensity, geometryAnchor = null) => ({
   anchor: [x, y],
+  geometryAnchor: geometryAnchor ?? [x, y],
   terrainClass,
   settlementDensity,
   geometryMode: "source-derived-with-anchor-refinement",
@@ -40,9 +41,9 @@ const anchor = (x, y, terrainClass, settlementDensity) => ({
 });
 
 export const ANATOLIA_PROVINCE_REFINEMENTS = Object.freeze({
-  "bithynia-nicomedia": anchor(29.92, 40.77, "coastal-lowland", "high"),
-  "bithynia-nicaea": anchor(29.72, 40.43, "lake-basin", "high"),
-  "bithynia-prusa": anchor(29.06, 40.19, "mountain-foot", "high"),
+  "bithynia-nicomedia": anchor(29.92, 40.77, "coastal-lowland", "high", [29.92, 40.705]),
+  "bithynia-nicaea": anchor(29.72, 40.43, "lake-basin", "high", [29.69, 40.44]),
+  "bithynia-prusa": anchor(29.06, 40.19, "mountain-foot", "high", [29.04, 40.12]),
   "bithynia-sangarios": anchor(30.52, 40.00, "river-valley", "medium"),
   "phrygia-sogut": anchor(30.17, 40.02, "highland-frontier", "low"),
   "phrygia-bilecik": anchor(30.15, 40.15, "highland-frontier", "low"),
@@ -79,77 +80,3 @@ export const ANATOLIA_PROVINCE_REFINEMENTS = Object.freeze({
   "cilicia-tarsos": anchor(34.90, 36.92, "coastal-plain", "high"),
   "cilicia-alaiye": anchor(31.99, 36.55, "coastal-mountain", "low"),
 });
-
-export const ANATOLIA_ADJACENCY_HINTS = Object.freeze({
-  "bithynia-nicomedia": ["bithynia-nicaea", "bithynia-prusa", "bithynia-sangarios"],
-  "bithynia-nicaea": ["bithynia-nicomedia", "bithynia-prusa", "bithynia-sangarios"],
-  "bithynia-prusa": ["bithynia-nicomedia", "bithynia-nicaea", "bithynia-sangarios", "phrygia-sogut", "phrygia-bilecik"],
-  "bithynia-sangarios": ["bithynia-nicomedia", "bithynia-nicaea", "bithynia-prusa", "phrygia-sogut", "phrygia-bilecik", "phrygia-eskisehir"],
-  "phrygia-sogut": ["bithynia-sangarios", "bithynia-prusa", "phrygia-bilecik", "phrygia-kutahya"],
-  "phrygia-bilecik": ["bithynia-sangarios", "bithynia-prusa", "phrygia-sogut", "phrygia-eskisehir", "phrygia-kutahya"],
-  "phrygia-eskisehir": ["bithynia-sangarios", "phrygia-bilecik", "phrygia-kutahya", "galatia-ankara"],
-  "mysia-balikesir": ["mysia-pergamon", "phrygia-kutahya", "lydia-magnesia"],
-  "mysia-pergamon": ["mysia-balikesir", "lydia-magnesia"],
-  "lydia-magnesia": ["mysia-balikesir", "mysia-pergamon", "lydia-smyrna", "lydia-birgi", "phrygia-kutahya"],
-  "lydia-smyrna": ["lydia-magnesia", "ionia-ayasuluk"],
-  "ionia-ayasuluk": ["lydia-smyrna", "lydia-birgi", "caria-tralleis"],
-  "lydia-birgi": ["lydia-magnesia", "ionia-ayasuluk", "caria-tralleis", "phrygia-denizli"],
-  "caria-tralleis": ["ionia-ayasuluk", "lydia-birgi", "caria-mylasa", "phrygia-denizli"],
-  "caria-mylasa": ["caria-tralleis", "caria-pecin", "caria-halikarnassos"],
-  "caria-pecin": ["caria-mylasa", "caria-halikarnassos"],
-  "caria-halikarnassos": ["caria-mylasa", "caria-pecin"],
-  "phrygia-denizli": ["lydia-birgi", "caria-tralleis", "phrygia-afyon", "phrygia-uluborlu"],
-  "phrygia-uluborlu": ["phrygia-denizli", "pisidia-egirdir", "phrygia-afyon", "pisidia-beysehir"],
-  "pisidia-egirdir": ["phrygia-uluborlu", "phrygia-afyon", "pisidia-beysehir", "lycaonia-konya"],
-  "phrygia-afyon": ["phrygia-denizli", "phrygia-uluborlu", "pisidia-egirdir", "phrygia-kutahya", "pisidia-beysehir"],
-  "pisidia-beysehir": ["phrygia-uluborlu", "pisidia-egirdir", "phrygia-afyon", "lycaonia-konya", "lycaonia-larende"],
-  "phrygia-kutahya": ["phrygia-sogut", "phrygia-bilecik", "phrygia-eskisehir", "mysia-balikesir", "lydia-magnesia", "phrygia-afyon", "galatia-ankara"],
-  "galatia-ankara": ["phrygia-eskisehir", "phrygia-kutahya", "cappadocia-sivas", "lycaonia-konya", "pontus-kastamon"],
-  "cappadocia-kayseri": ["cappadocia-sivas", "lycaonia-konya", "eastern-anatolia-erzincan"],
-  "cappadocia-sivas": ["galatia-ankara", "cappadocia-kayseri", "lycaonia-konya", "pontus-amasya", "pontus-kastamon", "eastern-anatolia-erzincan", "eastern-anatolia-erzurum"],
-  "lycaonia-konya": ["galatia-ankara", "cappadocia-kayseri", "cappadocia-sivas", "pisidia-egirdir", "pisidia-beysehir", "lycaonia-larende"],
-  "lycaonia-larende": ["lycaonia-konya", "pisidia-beysehir", "cilicia-sis", "cilicia-alaiye"],
-  "pontus-sinop": ["pontus-amisos", "pontus-kastamon"],
-  "pontus-amisos": ["pontus-sinop", "pontus-amasya", "pontus-trebizond"],
-  "pontus-amasya": ["pontus-amisos", "pontus-kastamon", "cappadocia-sivas", "eastern-anatolia-erzincan"],
-  "pontus-kastamon": ["pontus-sinop", "pontus-amasya", "galatia-ankara", "cappadocia-sivas"],
-  "pontus-trebizond": ["pontus-amisos", "eastern-anatolia-erzincan", "eastern-anatolia-erzurum"],
-  "eastern-anatolia-erzincan": ["cappadocia-kayseri", "cappadocia-sivas", "pontus-amasya", "pontus-trebizond", "eastern-anatolia-erzurum", "cilicia-sis"],
-  "eastern-anatolia-erzurum": ["cappadocia-sivas", "pontus-trebizond", "eastern-anatolia-erzincan"],
-  "cilicia-sis": ["lycaonia-larende", "eastern-anatolia-erzincan", "cilicia-tarsos"],
-  "cilicia-tarsos": ["cilicia-sis", "cilicia-alaiye"],
-  "cilicia-alaiye": ["lycaonia-larende", "cilicia-tarsos"],
-});
-
-export const ANATOLIA_STRATEGIC_PASSES = Object.freeze([
-  { id: "dorylaion-sangarios-corridor", name: "Dorylaion–Sangarios Corridor", provinces: ["phrygia-eskisehir", "phrygia-sogut"], coordinate: [30.30, 39.93], kind: "frontier-corridor", confidence: "medium" },
-  { id: "bithynian-olympus-pass", name: "Bithynian Olympus Pass", provinces: ["bithynia-prusa", "bithynia-nicaea"], coordinate: [29.45, 40.34], kind: "mountain-pass", confidence: "medium" },
-  { id: "kutahya-sangarios-route", name: "Kütahya–Sangarios Route", provinces: ["phrygia-kutahya", "phrygia-bilecik"], coordinate: [30.05, 39.85], kind: "highland-pass", confidence: "medium" },
-  { id: "afyon-saddle", name: "Afyon Saddle", provinces: ["phrygia-afyon", "pisidia-beysehir"], coordinate: [30.95, 38.30], kind: "highland-pass", confidence: "high" },
-  { id: "egirdir-konya-corridor", name: "Eğirdir–Konya Corridor", provinces: ["pisidia-egirdir", "lycaonia-konya"], coordinate: [31.25, 37.78], kind: "lake-highland-pass", confidence: "medium" },
-  { id: "cilician-gates", name: "Cilician Gates", provinces: ["cilicia-sis", "lycaonia-larende"], coordinate: [34.69, 37.24], kind: "mountain-pass", confidence: "high" },
-  { id: "taurus-western-pass", name: "Western Taurus Pass", provinces: ["lycaonia-larende", "cilicia-alaiye"], coordinate: [32.15, 36.70], kind: "mountain-pass", confidence: "medium" },
-  { id: "pontic-interior-pass", name: "Pontic Interior Pass", provinces: ["pontus-kastamon", "galatia-ankara"], coordinate: [33.15, 40.55], kind: "mountain-pass", confidence: "medium" },
-  { id: "sivas-erzincan-corridor", name: "Sivas–Erzincan Corridor", provinces: ["cappadocia-sivas", "eastern-anatolia-erzincan"], coordinate: [38.15, 39.75], kind: "highland-corridor", confidence: "medium" },
-]);
-
-export const ANATOLIA_RIVER_CROSSINGS = Object.freeze([
-  { id: "sakarya-upper-crossing", name: "Upper Sakarya Crossing", provinces: ["bithynia-sangarios", "phrygia-eskisehir"], coordinate: [30.78, 40.32], river: "Sakarya", confidence: "high" },
-  { id: "sakarya-bilecik-crossing", name: "Bilecik Sakarya Crossing", provinces: ["phrygia-bilecik", "phrygia-eskisehir"], coordinate: [30.36, 39.96], river: "Sakarya", confidence: "medium" },
-  { id: "gediz-valley-crossing", name: "Gediz Valley Crossing", provinces: ["lydia-magnesia", "phrygia-kutahya"], coordinate: [28.75, 38.95], river: "Gediz", confidence: "medium" },
-  { id: "buyuk-menderes-crossing", name: "Büyük Menderes Crossing", provinces: ["caria-tralleis", "phrygia-denizli"], coordinate: [29.35, 37.72], river: "Büyük Menderes", confidence: "medium" },
-  { id: "kizilirmak-ankara-corridor", name: "Kızılırmak Ankara Corridor", provinces: ["galatia-ankara", "cappadocia-sivas"], coordinate: [34.10, 39.85], river: "Kızılırmak", confidence: "medium" },
-  { id: "yesilirmak-amasya-crossing", name: "Yeşilırmak Amasya Crossing", provinces: ["pontus-amasya", "cappadocia-sivas"], coordinate: [35.65, 40.30], river: "Yeşilırmak", confidence: "medium" },
-  { id: "seyhan-tarsos-crossing", name: "Seyhan Tarsos Crossing", provinces: ["cilicia-tarsos", "cilicia-sis"], coordinate: [35.35, 37.25], river: "Seyhan", confidence: "medium" },
-]);
-
-export function getAnatoliaProvinceRefinement(id) {
-  const item = ANATOLIA_PROVINCE_REFINEMENTS[id];
-  if (!item) return null;
-  const terrain = ANATOLIA_TERRAIN_PROFILES[item.terrainClass];
-  return terrain ? Object.freeze({ ...item, terrain }) : item;
-}
-
-export function getAnatoliaProvinceNeighbors(id) {
-  return ANATOLIA_ADJACENCY_HINTS[id] ?? [];
-}
