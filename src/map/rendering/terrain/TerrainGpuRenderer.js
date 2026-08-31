@@ -53,7 +53,7 @@ export class TerrainGpuRenderer {
     this.heightBuffer = gl.createBuffer();
     this.uvBuffer = gl.createBuffer();
     this.indexBuffer = gl.createBuffer();
-    this.textures = [gl.createTexture(), gl.createTexture(), gl.createTexture(), gl.createTexture()];
+    this.textures = [gl.createTexture(), gl.createTexture(), gl.createTexture(), gl.createTexture(), gl.createTexture()];
     this.indexCount = 0;
     if (!this.vao || this.textures.some((texture) => !texture)) throw new Error("Unable to allocate terrain GPU resources.");
   }
@@ -81,12 +81,15 @@ export class TerrainGpuRenderer {
     gl.bindVertexArray(null);
   }
 
-  uploadTextures({ baseColor, normal, splatRgba, landMask }) {
-    if (!baseColor || !normal || !splatRgba || !landMask) throw new Error("Terrain renderer requires baseColor, normal, splat and land-mask textures.");
+  uploadTextures({ baseColor, normal, splatRgba, splatSnow, landMask }) {
+    if (!baseColor || !normal || !splatRgba || !splatSnow || !landMask) {
+      throw new Error("Terrain renderer requires baseColor, normal, RGBA splat, snow splat and land-mask textures.");
+    }
     uploadTexture(this.gl, this.textures[0], 0, baseColor);
     uploadTexture(this.gl, this.textures[1], 1, normal);
     uploadTexture(this.gl, this.textures[2], 2, splatRgba);
-    uploadTexture(this.gl, this.textures[3], 3, landMask);
+    uploadTexture(this.gl, this.textures[3], 3, splatSnow);
+    uploadTexture(this.gl, this.textures[4], 4, landMask);
   }
 
   draw({ viewProjection, heightScale = this.material.heightScale } = {}) {
@@ -106,7 +109,8 @@ export class TerrainGpuRenderer {
     gl.uniform1i(gl.getUniformLocation(this.program, "uBaseColor"), 0);
     gl.uniform1i(gl.getUniformLocation(this.program, "uNormal"), 1);
     gl.uniform1i(gl.getUniformLocation(this.program, "uSplatRgba"), 2);
-    gl.uniform1i(gl.getUniformLocation(this.program, "uLandMask"), 3);
+    gl.uniform1i(gl.getUniformLocation(this.program, "uSplatSnow"), 3);
+    gl.uniform1i(gl.getUniformLocation(this.program, "uLandMask"), 4);
     gl.drawElements(gl.TRIANGLES, this.indexCount, gl.UNSIGNED_INT, 0);
     gl.bindVertexArray(null);
     return this.indexCount / 3;
