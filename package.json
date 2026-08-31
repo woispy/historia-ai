@@ -46,6 +46,7 @@
     "test:water-engine": "node tools/tests/water-engine.test.js",
     "test:water-engine-diagnostics": "node tools/tests/water-engine-diagnostics.test.js",
     "test:terrain-phase-e": "node tools/tests/terrain-phase-e.test.js",
+    "test:terrain-dem-source": "node tools/terrain/CopernicusDemSource.test.js",
     "validate:historical-gis:1300": "node tools/historical-gis/cli/validate-1300.js",
     "lint": "eslint .",
     "preview": "vite preview",
