@@ -44,13 +44,15 @@ function parseGeoTiff(buffer) {
   const bits = fields.get(258);
   const samplesPerPixel = fields.get(277);
   const sampleFormat = fields.get(339);
+  const compression = fields.get(259);
   if (!width || !height || !bits) throw new Error("GeoTIFF requires width, height and bits-per-sample tags.");
   const widthValue = readValue(view, width.offset, width.type, little);
   const heightValue = readValue(view, height.offset, height.type, little);
   const bitsValue = readValue(view, bits.offset, bits.type, little);
   const samplesValue = samplesPerPixel ? readValue(view, samplesPerPixel.offset, samplesPerPixel.type, little) : 1;
   const sampleFormatValue = sampleFormat ? readValue(view, sampleFormat.offset, sampleFormat.type, little) : 1;
-  if (samplesValue !== 1 || bitsValue !== 16 || (sampleFormatValue !== 1 && sampleFormatValue !== 2)) throw new Error("Only single-band 16-bit GeoTIFF DEM payloads are supported by the Phase E decoder.");
+  const compressionValue = compression ? readValue(view, compression.offset, compression.type, little) : 1;
+  if (samplesValue !== 1 || bitsValue !== 16 || compressionValue !== 1 || (sampleFormatValue !== 1 && sampleFormatValue !== 2)) throw new Error("Only uncompressed single-band 16-bit GeoTIFF DEM payloads are supported by the Phase E decoder.");
   return { width: widthValue, height: heightValue, sampleFormat: sampleFormatValue, little, fields };
 }
 
@@ -63,7 +65,7 @@ function decodeRawStripPayload(view, info) {
   for (let i = 0; i < offsets.count; i += 1) {
     const offset = readValue(view, offsets.offset + i * 4, offsets.type, info.little);
     const byteCount = readValue(view, counts.offset + i * 4, counts.type, info.little);
-    if (offset + byteCount > view.byteLength || byteCount % 2 !== 0) throw new Error("GeoTIFF strip payload is invalid.");
+    if (offset < 0 || byteCount < 0 || offset + byteCount > view.byteLength || byteCount % 2 !== 0) throw new Error("GeoTIFF strip payload is invalid.");
     for (let position = offset; position < offset + byteCount; position += 2) {
       if (cursor >= samples.length) throw new Error("GeoTIFF contains more samples than declared.");
       samples[cursor++] = info.sampleFormat === 2 ? view.getInt16(position, info.little) : view.getUint16(position, info.little);
