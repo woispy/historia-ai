@@ -1,5 +1,3 @@
-const EARTH_HALF_CIRCUMFERENCE_M = 20037508.342789244;
-
 function finite(v) { return Number.isFinite(v); }
 function assertBounds(bounds) { if (!bounds || ![bounds.minX,bounds.minY,bounds.maxX,bounds.maxY].every(finite) || bounds.minX >= bounds.maxX || bounds.minY >= bounds.maxY) throw new Error("Invalid spatial bounds."); }
 
