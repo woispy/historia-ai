@@ -47,9 +47,17 @@ function pointInTriangle(point, a, b, c) {
   return !(hasNegative && hasPositive);
 }
 
-/**
- * Removes invalid/duplicate vertices and returns an open ring.
- */
+function parseHexColor(hex, fallback = [111, 118, 95]) {
+  const value = String(hex ?? "").trim().replace(/^#/, "");
+  if (!/^[0-9a-f]{6}$/i.test(value)) return fallback;
+  return [
+    Number.parseInt(value.slice(0, 2), 16),
+    Number.parseInt(value.slice(2, 4), 16),
+    Number.parseInt(value.slice(4, 6), 16),
+  ];
+}
+
+/** Removes invalid/duplicate vertices and returns an open ring. */
 export function normalizeProvinceRing(ring) {
   if (!Array.isArray(ring)) return [];
 
@@ -69,24 +77,19 @@ export function normalizeProvinceRing(ring) {
   return points;
 }
 
-/**
- * Deterministic ear-clipping triangulation for one simple outer ring.
- * Returns vertex indices in counter-clockwise triangle order.
- */
+/** Deterministic ear-clipping triangulation for one simple outer ring. */
 export function triangulateProvinceRing(ring) {
   const normalized = normalizeProvinceRing(ring);
   if (normalized.length < 3) return [];
-  if (Math.abs(signedArea(normalized)) <= EPSILON) {
+  const area = signedArea(normalized);
+  if (Math.abs(area) <= EPSILON) {
     throw new Error("Province polygon is degenerate and cannot be triangulated.");
   }
 
-  const points = signedArea(normalized) > 0
-    ? normalized
-    : [...normalized].reverse();
-  const originalIndices = signedArea(normalized) > 0
+  const points = area > 0 ? normalized : [...normalized].reverse();
+  const originalIndices = area > 0
     ? points.map((_, index) => index)
     : points.map((_, index) => normalized.length - 1 - index);
-
   const remaining = points.map((_, index) => index);
   const triangles = [];
   let guard = 0;
@@ -101,7 +104,6 @@ export function triangulateProvinceRing(ring) {
       const a = points[previous];
       const b = points[current];
       const c = points[next];
-
       if (cross(a, b, c) <= EPSILON) continue;
 
       let containsVertex = false;
@@ -135,17 +137,13 @@ export function triangulateProvinceRing(ring) {
     originalIndices[remaining[1]],
     originalIndices[remaining[2]],
   );
-
   return triangles;
 }
 
 function normalizeProvinceEntry(entry) {
   if (entry?.province && entry?.geometry) return entry;
   if (entry?.identity && entry?.polygons) {
-    return {
-      province: entry,
-      geometry: entry,
-    };
+    return { province: entry, geometry: entry };
   }
   return null;
 }
@@ -155,36 +153,39 @@ function normalizeProvinceEntry(entry) {
  *
  * Non-indexed triangles are intentional here: WebGL2 can consume the result
  * directly with drawArrays, avoiding 16/32-bit index capability differences
- * across WebGL implementations while keeping the province id per vertex.
+ * across WebGL implementations while keeping province identity per vertex.
  */
-export function buildProvinceGpuGeometry(entries) {
+export function buildProvinceGpuGeometry(entries, colorResolver = ({ country }) => country?.color) {
   const normalizedEntries = (entries ?? [])
     .map(normalizeProvinceEntry)
     .filter(Boolean);
 
   const positions = [];
   const provinceIndices = [];
+  const colors = [];
   const provinceIds = [];
   const drawRanges = [];
   const bounds = [];
   let vertexOffset = 0;
 
-  normalizedEntries.forEach(({ province, geometry }, provinceIndex) => {
+  normalizedEntries.forEach(({ province, country, geometry }, provinceIndex) => {
     const polygons = Array.isArray(geometry?.polygons) ? geometry.polygons : [];
     const start = vertexOffset;
     let minX = Infinity;
     let minY = Infinity;
     let maxX = -Infinity;
     let maxY = -Infinity;
+    const rgb = parseHexColor(colorResolver({ province, country, geometry }));
 
     for (const polygon of polygons) {
       const ring = normalizeProvinceRing(polygon);
       if (ring.length < 3) continue;
       const triangles = triangulateProvinceRing(ring);
-      for (let index = 0; index < triangles.length; index += 1) {
-        const point = ring[triangles[index]];
+      for (const triangleIndex of triangles) {
+        const point = ring[triangleIndex];
         positions.push(point[0], point[1]);
         provinceIndices.push(provinceIndex);
+        colors.push(rgb[0], rgb[1], rgb[2], 255);
         minX = Math.min(minX, point[0]);
         minY = Math.min(minY, point[1]);
         maxX = Math.max(maxX, point[0]);
@@ -211,6 +212,7 @@ export function buildProvinceGpuGeometry(entries) {
   return Object.freeze({
     positions: new Float32Array(positions),
     provinceIndices: new Uint32Array(provinceIndices),
+    colors: new Uint8Array(colors),
     provinceIds: Object.freeze(provinceIds),
     drawRanges: Object.freeze(drawRanges),
     bounds: Object.freeze(bounds),
