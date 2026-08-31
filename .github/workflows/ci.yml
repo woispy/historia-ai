@@ -50,6 +50,7 @@ on:
       - feat/historical-political-map-v1
       - feat/p1-historical-political-map-foundation
       - feat/p1-historical-political-map-geographic-province-rework
+      - feat/phase-b-binary-map-data-plane
 
 jobs:
   validate:
@@ -72,7 +73,7 @@ jobs:
         run: npm run build:assets
       - name: Verify repository cleanliness after physical assets
         run: npm run test:repository-cleanliness
-      - name: Generate historical GIS runtime assets
+      - name: Generate historical GIS runtime binary assets
         run: npm run build:historical-gis:1300
       - name: Verify repository cleanliness after historical GIS
         run: npm run test:repository-cleanliness
@@ -80,6 +81,8 @@ jobs:
         run: npm run validate:historical-gis:1300
       - name: Run historical GIS identity tests
         run: npm run test:historical-gis
+      - name: Run historical runtime binary codec tests
+        run: npm run test:historical-runtime-binary
       - name: Run historical runtime regionalization tests
         run: npm run test:historical-runtime-regions
       - name: Run physical geography tests
