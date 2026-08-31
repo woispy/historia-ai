@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { buildIndexedProvincePack, normalizeRing, triangulateRing } from "../../../src/map/rendering/gpu/ProvinceGpuPackBuilderV2.js";
+import { buildIndexedProvincePack, buildLodRings, normalizeRing, triangulateRing } from "../../../src/map/rendering/gpu/ProvinceGpuPackBuilderV2.js";
 import { encodeGpuProvincePack } from "../../../src/map/rendering/gpu/GpuProvincePackFormat.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -28,7 +28,6 @@ const diagnosticsForRing = (ring) => {
     inputVertices: Array.isArray(ring) ? ring.length : 0,
     normalizedVertices: normalized.length,
     uniqueVertices: unique,
-    duplicateVerticesRemoved: Math.max(0, normalized.length - unique),
     signedArea: signedArea(normalized),
     bbox: normalized.length
       ? { minX: Math.min(...xs), minY: Math.min(...ys), maxX: Math.max(...xs), maxY: Math.max(...ys) }
@@ -41,22 +40,17 @@ const geometryById = new Map((runtime.geometries ?? []).map((geometry) => [Strin
 const entries = (runtime.provinces ?? []).map((province) => ({ province, geometry: geometryById.get(String(province.identity?.id)) })).filter((entry) => entry.geometry);
 if (!entries.length) throw new Error("Historical runtime contains no geometry suitable for GPU packing.");
 
-// Preflight every ring before allocating the final GPU pack. This turns a
-// generic builder failure into a deterministic province/polygon/LOD report.
+// Preflight every actual LOD ring before allocating the final GPU pack. This
+// makes the first bad source ring reproducible and names province/polygon/LOD.
 for (const [provinceIndex, entry] of entries.entries()) {
   const provinceId = String(entry.province?.identity?.id ?? entry.province?.id ?? provinceIndex);
-  const polygons = entry.geometry?.polygons ?? [];
-  for (const [polygonIndex, polygon] of polygons.entries()) {
-    for (const [lod, ring] of [0, 0.5, 0.25, 0.125].map((_, level) => [level, null])) {
-      const levels = [0, 0.5, 0.25, 0.125];
-      const source = normalizeRing(polygon);
-      const target = Math.min(source.length, Math.max(lod === 0 ? Math.min(512, source.length) : 3, Math.round(source.length * levels[lod])));
-      const candidate = target >= source.length ? source : normalizeRing(source.filter((_, index) => index % Math.max(1, Math.ceil(source.length / target)) === 0));
-      if (candidate.length < 3) continue;
+  for (const [polygonIndex, polygon] of (entry.geometry?.polygons ?? []).entries()) {
+    for (const [lod, ring] of buildLodRings(polygon).entries()) {
+      if (ring.length < 3) continue;
       try {
-        triangulateRing(candidate, { provinceId, lod });
+        triangulateRing(ring, { provinceId, lod });
       } catch (error) {
-        const diagnostics = diagnosticsForRing(candidate);
+        const diagnostics = diagnosticsForRing(ring);
         throw new Error(`GPU geometry preflight failed: province=${provinceId} polygon=${polygonIndex} lod=${lod}; ${error.message}; diagnostics=${JSON.stringify(diagnostics)}`);
       }
     }
