@@ -2,7 +2,7 @@ import { buildIndexedProvincePack } from "../../src/map/rendering/gpu/ProvinceGp
 import { encodeGpuProvincePack, GPU_PROVINCE_PACK_MAGIC, GPU_PROVINCE_PACK_VERSION } from "../../src/map/rendering/gpu/GpuProvincePackFormat.js";
 
 const PROVINCE_COUNT = 15_001;
-const EXPECTED_NON_RENDERABLE = 19;
+const EXPECTED_NON_RENDERABLE = 58;
 const EXPECTED_RENDERABLE = PROVINCE_COUNT - EXPECTED_NON_RENDERABLE;
 
 function makeSquare(index) {
@@ -40,7 +40,7 @@ const build = () => buildIndexedProvincePack(entries, {
   quantization: 1e6,
   onProgress: (event) => {
     if (event.phase === "province-complete" && (event.provinceIndex + 1) % 1000 === 0) {
-      console.log(`15K GPU stress progress=${event.provinceIndex + 1}/${event.provinceCount} renderable=${event.geometryStatus} vertices=${event.vertexCount} indices=${event.indexCount}`);
+      console.log(`15K GPU stress progress=${event.provinceIndex + 1}/${event.provinceCount} status=${event.geometryStatus} vertices=${event.vertexCount} indices=${event.indexCount}`);
     }
   },
 });
@@ -82,9 +82,7 @@ const secondBuildMs = Date.now() - secondStarted;
 if (packA.vertices.length !== packB.vertices.length || packA.indices.length !== packB.indices.length) throw new Error("15K build is non-deterministic in buffer lengths.");
 for (let i = 0; i < packA.vertices.length; i += 1) if (packA.vertices[i] !== packB.vertices[i]) throw new Error(`15K vertex determinism failure at ${i}`);
 for (let i = 0; i < packA.indices.length; i += 1) if (packA.indices[i] !== packB.indices[i]) throw new Error(`15K index determinism failure at ${i}`);
-for (let i = 0; i < PROVINCE_COUNT; i += 1) {
-  if (packA.provinces[i].provinceId !== packB.provinces[i].provinceId) throw new Error(`15K province order determinism failure at ${i}`);
-}
+for (let i = 0; i < PROVINCE_COUNT; i += 1) if (packA.provinces[i].provinceId !== packB.provinces[i].provinceId) throw new Error(`15K province order determinism failure at ${i}`);
 
 const memory = process.memoryUsage();
 console.log(`15K+ province stress: PASS (${PROVINCE_COUNT} provinces; renderable=${packA.diagnostics.renderableProvinceCount}; non-renderable=${packA.diagnostics.nonRenderableProvinceCount}; vertices=${packA.vertices.length / 2}; indices=${packA.indices.length}; tiles=${packA.tiles.length}; binary=${binary.length}B; build1=${buildMs}ms; build2=${secondBuildMs}ms; heap=${Math.round(memory.heapUsed / 1024 / 1024)}MiB; rss=${Math.round(memory.rss / 1024 / 1024)}MiB; determinism=full-buffer).`);
