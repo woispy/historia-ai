@@ -21,6 +21,7 @@ on:
       - feat/cartography-visual-refinement
       - feat/cartography-foundation-v2
       - feat/map-gpu-texture-architecture
+
   push:
     branches:
       - main
@@ -123,6 +124,8 @@ jobs:
         run: npm run test:cartography-visual
       - name: Run map rendering contract tests
         run: npm run test:map-rendering-contract
+      - name: Run Phase D water engine contract tests
+        run: npm run test:water-engine
       - name: Run GPU province pack integrity tests
         run: npm run test:province-gpu-pack
       - name: Build deterministic GPU province pack
