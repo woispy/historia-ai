@@ -1,20 +1,81 @@
 import { buildAnatoliaPhase2DAssets as buildPhase2D, isAnatoliaGeometryPoint } from "./AnatoliaPhase2DGeometryBuilder.js";
+import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
+import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 
-const LAND_SAFE_ANCHORS = Object.freeze({
-  "bithynia-nicaea": [29.72, 40.20],
-  "pisidia-egirdir": [30.85, 37.98],
-  "pisidia-beysehir": [31.72, 37.78],
-});
+const LAKE_TERRAIN = "lake";
+const RECOVERY_GRID_STEP = 0.01;
+const RECOVERY_MAX_RADIUS = 1.5;
 
 function clonePoint(point) {
   return Array.isArray(point) ? [point[0], point[1]] : point;
+}
+
+function distanceSquared(a, b) {
+  const dx = a[0] - b[0];
+  const dy = a[1] - b[1];
+  return dx * dx + dy * dy;
+}
+
+function pointInPolygon(point, polygon) {
+  let inside = false;
+  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index += 1) {
+    const current = polygon[index];
+    const prior = polygon[previous];
+    const crosses = (current[1] > point[1]) !== (prior[1] > point[1])
+      && point[0] < ((prior[0] - current[0]) * (point[1] - current[1]))
+        / (prior[1] - current[1] || Number.EPSILON) + current[0];
+    if (crosses) inside = !inside;
+  }
+  return inside;
+}
+
+function pointInWater(point) {
+  return ANATOLIA_PHYSICAL_ATLAS.seas.some((sea) => pointInPolygon(point, sea.coordinates))
+    || ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygon(point, lake.coordinates));
+}
+
+function pointInLand(point) {
+  return ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon));
+}
+
+function isPhysicalRecoveryPoint(point) {
+  return isAnatoliaGeometryPoint(point) && pointInLand(point) && !pointInWater(point);
+}
+
+function findPhysicalRecoveryAnchor(origin) {
+  if (isPhysicalRecoveryPoint(origin)) return origin;
+
+  let best = null;
+  let bestDistance = Number.POSITIVE_INFINITY;
+  for (let radius = 0; radius <= RECOVERY_MAX_RADIUS; radius += RECOVERY_GRID_STEP) {
+    const directions = radius === 0 ? 1 : 72;
+    for (let direction = 0; direction < directions; direction += 1) {
+      const angle = (direction / directions) * Math.PI * 2;
+      const candidate = [
+        origin[0] + Math.cos(angle) * radius,
+        origin[1] + Math.sin(angle) * radius,
+      ];
+      if (!isPhysicalRecoveryPoint(candidate)) continue;
+      const distance = distanceSquared(candidate, origin);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        best = candidate;
+      }
+    }
+    if (best) return best;
+  }
+  return null;
 }
 
 function restoreHistoricalAnchors(result, originals) {
   for (const province of result.provinces ?? []) {
     const original = originals.get(province.identity.id);
     if (original && province.historical) province.historical.anchor = clonePoint(original);
+  }
+  for (const geometry of result.geometries ?? []) {
+    const original = originals.get(geometry.identity.provinceId);
+    if (original && geometry.metadata) geometry.metadata.anchor = clonePoint(original);
   }
   return result;
 }
@@ -28,8 +89,9 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     const originals = new Map();
     const changed = [];
     for (const metadata of ANATOLIA_PROVINCE_METADATA) {
-      const anchor = LAND_SAFE_ANCHORS[metadata.id];
-      if (!anchor || metadata.terrain !== "lake") continue;
+      if (metadata.terrain !== LAKE_TERRAIN) continue;
+      const anchor = findPhysicalRecoveryAnchor(metadata.centroid);
+      if (!anchor) continue;
       originals.set(metadata.id, clonePoint(metadata.centroid));
       changed.push([metadata, metadata.centroid]);
       metadata.centroid = clonePoint(anchor);
