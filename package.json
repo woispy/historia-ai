@@ -45,6 +45,7 @@
     "test:province-scale-15k": "node tools/tests/province-scale-15k.test.js",
     "test:water-engine": "node tools/tests/water-engine.test.js",
     "test:water-engine-diagnostics": "node tools/tests/water-engine-diagnostics.test.js",
+    "test:terrain-phase-e": "node tools/tests/terrain-phase-e.test.js",
     "validate:historical-gis:1300": "node tools/historical-gis/cli/validate-1300.js",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -56,7 +57,7 @@
     "react-router-dom": "^7.18.2"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@eslint/js": "^10.6.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
