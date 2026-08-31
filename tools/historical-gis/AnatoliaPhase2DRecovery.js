@@ -1,4 +1,4 @@
-import { buildAnatoliaPhase2DAssets as buildPhase2D } from "./AnatoliaPhase2DGeometryBuilder.js";
+import { buildAnatoliaPhase2DAssets as buildPhase2D, isAnatoliaGeometryPoint } from "./AnatoliaPhase2DGeometryBuilder.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 
 const LAND_SAFE_ANCHORS = Object.freeze({
@@ -43,3 +43,5 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     }
   }
 }
+
+export { isAnatoliaGeometryPoint };
