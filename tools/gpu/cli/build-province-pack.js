@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { analyzeRing, buildIndexedProvincePack, buildLodRings, normalizeRing } from "../../../src/map/rendering/gpu/ProvinceGpuPackBuilderV2.js";
+import { buildIndexedProvincePack, buildLodRings, normalizeRing } from "../../../src/map/rendering/gpu/ProvinceGpuPackBuilderV2.js";
 import { encodeGpuProvincePack } from "../../../src/map/rendering/gpu/GpuProvincePackFormat.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -21,17 +21,22 @@ const signedArea = (ring) => {
 
 const diagnosticsForRing = (ring) => {
   const normalized = normalizeRing(ring);
-  const unique = new Set(normalized.map(([x, y]) => `${x},${y}`)).size;
-  const xs = normalized.map(([x]) => x);
-  const ys = normalized.map(([, y]) => y);
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  let nonFinite = 0;
+  for (const point of normalized) {
+    if (!Number.isFinite(point[0]) || !Number.isFinite(point[1])) { nonFinite += 1; continue; }
+    minX = Math.min(minX, point[0]); minY = Math.min(minY, point[1]);
+    maxX = Math.max(maxX, point[0]); maxY = Math.max(maxY, point[1]);
+  }
   return {
     inputVertices: Array.isArray(ring) ? ring.length : 0,
     normalizedVertices: normalized.length,
-    uniqueVertices: unique,
     signedArea: signedArea(normalized),
-    bbox: normalized.length
-      ? { minX: Math.min(...xs), minY: Math.min(...ys), maxX: Math.max(...xs), maxY: Math.max(...ys) }
-      : null,
+    nonFinite,
+    bbox: normalized.length && nonFinite === 0 ? { minX, minY, maxX, maxY } : null,
   };
 };
 
@@ -40,22 +45,26 @@ const geometryById = new Map((runtime.geometries ?? []).map((geometry) => [Strin
 const entries = (runtime.provinces ?? []).map((province) => ({ province, geometry: geometryById.get(String(province.identity?.id)) })).filter((entry) => entry.geometry);
 if (!entries.length) throw new Error("Historical runtime contains no geometry suitable for GPU packing.");
 
-// Fast diagnostic preflight only. Full triangulation is intentionally owned by
-// buildIndexedProvincePack so a ring is never triangulated twice in production.
+// Cheap structural preflight. Do not run O(n²) self-intersection analysis here:
+// the production triangulator is the authoritative topology gate and reports the
+// exact province/LOD on failure. This pass exists only to reject corrupt numbers.
+let ringCount = 0;
+let vertexCount = 0;
 for (const [provinceIndex, entry] of entries.entries()) {
   const provinceId = String(entry.province?.identity?.id ?? entry.province?.id ?? provinceIndex);
   for (const [polygonIndex, polygon] of (entry.geometry?.polygons ?? []).entries()) {
     for (const [lod, ring] of buildLodRings(polygon).entries()) {
       if (ring.length < 3) continue;
-      const diagnostics = analyzeRing(ring);
-      if (!diagnostics.simple) {
-        throw new Error(
-          `GPU geometry preflight failed: province=${provinceId} polygon=${polygonIndex} lod=${lod}; diagnostics=${JSON.stringify(diagnosticsForRing(ring))}`,
-        );
+      const diagnostics = diagnosticsForRing(ring);
+      ringCount += 1;
+      vertexCount += diagnostics.normalizedVertices;
+      if (diagnostics.nonFinite || Math.abs(diagnostics.signedArea) <= 1e-10) {
+        throw new Error(`GPU geometry preflight failed: province=${provinceId} polygon=${polygonIndex} lod=${lod}; diagnostics=${JSON.stringify(diagnostics)}`);
       }
     }
   }
 }
+console.log(`GPU geometry preflight: PASS (${ringCount} rings, ${vertexCount} vertices; linear checks).`);
 
 const buildStartedAt = Date.now();
 let pack;
