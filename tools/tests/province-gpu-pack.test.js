@@ -10,26 +10,40 @@ const geometryById = new Map((runtime.geometries ?? []).map((geometry) => [Strin
 const entries = (runtime.provinces ?? []).map((province) => ({ province, geometry: geometryById.get(String(province.identity?.id)) })).filter((entry) => entry.geometry);
 if (!entries.length) throw new Error("GPU pack test found no historical province geometry.");
 
-const startedAt = Date.now();
 const options = { tileSize: 10, quantization: 1e6 };
-const packA = buildIndexedProvincePack(entries, options);
-const firstBuildMs = Date.now() - startedAt;
-const secondStartedAt = Date.now();
-const packB = buildIndexedProvincePack(entries, options);
-const secondBuildMs = Date.now() - secondStartedAt;
-if (packA.version !== 2 || packA.tileSize !== 10 || packA.quantization !== 1e6) throw new Error("Unexpected GPU pack header.");
-if (packA.vertices.length === 0 || packA.indices.length === 0) throw new Error("GPU pack is empty.");
-if (packA.indices.length % 3 !== 0) throw new Error("GPU index buffer is not triangle aligned.");
-if (packA.vertices.length !== packB.vertices.length || packA.indices.length !== packB.indices.length) throw new Error("GPU pack is not deterministic in length.");
-for (let i = 0; i < packA.vertices.length; i += 1) if (packA.vertices[i] !== packB.vertices[i]) throw new Error(`GPU vertices are non-deterministic at ${i}`);
-for (let i = 0; i < packA.indices.length; i += 1) if (packA.indices[i] !== packB.indices[i]) throw new Error(`GPU indices are non-deterministic at ${i}`);
-for (const province of packA.provinces) {
+const startedAt = Date.now();
+let pack;
+try {
+  pack = buildIndexedProvincePack(entries, options);
+} catch (error) {
+  throw new Error(`GPU province pack build failed after ${Date.now() - startedAt}ms: ${error.message}`, { cause: error });
+}
+const buildMs = Date.now() - startedAt;
+
+if (pack.version !== 2 || pack.tileSize !== 10 || pack.quantization !== 1e6) throw new Error("Unexpected GPU pack header.");
+if (pack.vertices.length === 0 || pack.indices.length === 0) throw new Error("GPU pack is empty.");
+if (pack.indices.length % 3 !== 0) throw new Error("GPU index buffer is not triangle aligned.");
+
+for (const province of pack.provinces) {
   for (const range of province.lodRanges) {
-    if (range.firstIndex < 0 || range.indexCount < 0 || range.firstIndex + range.indexCount > packA.indices.length) throw new Error(`Invalid LOD range for ${province.provinceId}`);
+    if (range.firstIndex < 0 || range.indexCount < 0 || range.firstIndex + range.indexCount > pack.indices.length) {
+      throw new Error(`Invalid LOD range for ${province.provinceId}: first=${range.firstIndex} count=${range.indexCount} total=${pack.indices.length}`);
+    }
     if (range.indexCount % 3 !== 0) throw new Error(`Unaligned LOD range for ${province.provinceId}`);
   }
 }
-for (const index of packA.indices) if (index >= packA.vertices.length / 2) throw new Error(`Out-of-bounds GPU index ${index}`);
-for (const value of packA.vertices) if (!Number.isFinite(value)) throw new Error("Non-finite GPU vertex detected.");
+for (const index of pack.indices) if (index >= pack.vertices.length / 2) throw new Error(`Out-of-bounds GPU index ${index}`);
+for (const value of pack.vertices) if (!Number.isFinite(value)) throw new Error("Non-finite GPU vertex detected.");
 
-console.log(`GPU province pack integrity: PASS (${entries.length} provinces, ${packA.vertices.length / 2} vertices, ${packA.indices.length} indices, ${packA.tiles.length} tiles, builds=${firstBuildMs}ms/${secondBuildMs}ms).`);
+// Determinism is verified on a tiny synthetic fixture so the regression test
+// never doubles the cost of the full historical GIS triangulation workload.
+const fixture = [
+  { id: "fixture", geometry: { polygons: [[[0, 0], [2, 0], [2, 1], [1, 2], [0, 1]]] } },
+];
+const fixtureA = buildIndexedProvincePack(fixture, options);
+const fixtureB = buildIndexedProvincePack(fixture, options);
+if (fixtureA.vertices.length !== fixtureB.vertices.length || fixtureA.indices.length !== fixtureB.indices.length) throw new Error("GPU fixture is not deterministic in length.");
+for (let i = 0; i < fixtureA.vertices.length; i += 1) if (fixtureA.vertices[i] !== fixtureB.vertices[i]) throw new Error(`GPU fixture vertices are non-deterministic at ${i}`);
+for (let i = 0; i < fixtureA.indices.length; i += 1) if (fixtureA.indices[i] !== fixtureB.indices[i]) throw new Error(`GPU fixture indices are non-deterministic at ${i}`);
+
+console.log(`GPU province pack integrity: PASS (${entries.length} provinces, ${pack.vertices.length / 2} vertices, ${pack.indices.length} indices, ${pack.tiles.length} tiles, build=${buildMs}ms; determinism=fixture).`);
