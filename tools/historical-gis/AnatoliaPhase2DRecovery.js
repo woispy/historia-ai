@@ -3,9 +3,15 @@ import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtla
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 
-const LAKE_TERRAIN = "lake";
 const RECOVERY_GRID_STEP = 0.01;
 const RECOVERY_MAX_RADIUS = 1.5;
+
+// These are curated physical-land reconciliation points, not historical city
+// anchors. They are used only when the coarse physical mask cannot represent
+// the terrestrial side of a known shoreline anchor.
+const EXPLICIT_RECOVERY_ANCHORS = Object.freeze({
+  "bithynia-nicaea": [29.69, 40.44],
+});
 
 function clonePoint(point) {
   return Array.isArray(point) ? [point[0], point[1]] : point;
@@ -18,6 +24,7 @@ function distanceSquared(a, b) {
 }
 
 function pointInPolygon(point, polygon) {
+  if (!Array.isArray(polygon) || polygon.length < 3) return false;
   let inside = false;
   for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index += 1) {
     const current = polygon[index];
@@ -43,8 +50,10 @@ function isPhysicalRecoveryPoint(point) {
   return isAnatoliaGeometryPoint(point) && pointInLand(point) && !pointInWater(point);
 }
 
-function findPhysicalRecoveryAnchor(origin) {
-  if (isPhysicalRecoveryPoint(origin)) return origin;
+function findPhysicalRecoveryAnchor(origin, provinceId) {
+  const explicit = EXPLICIT_RECOVERY_ANCHORS[provinceId];
+  if (explicit && !pointInWater(explicit)) return clonePoint(explicit);
+  if (isPhysicalRecoveryPoint(origin)) return clonePoint(origin);
 
   let best = null;
   let bestDistance = Number.POSITIVE_INFINITY;
@@ -89,7 +98,7 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     const originals = new Map();
     const changed = [];
     for (const metadata of ANATOLIA_PROVINCE_METADATA) {
-      const anchor = findPhysicalRecoveryAnchor(metadata.centroid);
+      const anchor = findPhysicalRecoveryAnchor(metadata.centroid, metadata.id);
       if (!anchor) continue;
       originals.set(metadata.id, clonePoint(metadata.centroid));
       changed.push([metadata, metadata.centroid]);
