@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { buildIndexedProvincePack } from "../../../src/map/rendering/gpu/ProvinceGpuPack.js";
+import { buildIndexedProvincePack } from "../../../src/map/rendering/gpu/ProvinceGpuPackBuilderV2.js";
 import { encodeGpuProvincePack } from "../../../src/map/rendering/gpu/GpuProvincePackFormat.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -11,10 +11,7 @@ const outputPath = path.join(outputDir, "provinces.gpu.bin");
 
 const runtime = JSON.parse(await fs.readFile(inputPath, "utf8"));
 const geometryById = new Map((runtime.geometries ?? []).map((geometry) => [String(geometry.identity?.provinceId ?? geometry.identity?.id), geometry]));
-const entries = (runtime.provinces ?? []).map((province) => ({
-  province,
-  geometry: geometryById.get(String(province.identity?.id)),
-})).filter((entry) => entry.geometry);
+const entries = (runtime.provinces ?? []).map((province) => ({ province, geometry: geometryById.get(String(province.identity?.id)) })).filter((entry) => entry.geometry);
 if (!entries.length) throw new Error("Historical runtime contains no geometry suitable for GPU packing.");
 
 const pack = buildIndexedProvincePack(entries, { tileSize: 10, quantization: 1e6 });
