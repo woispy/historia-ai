@@ -33,6 +33,7 @@
     "test:gpu-province-pipeline": "node tools/tests/gpu-province-pipeline.test.js",
     "test:gpu-picking-lod": "node tools/tests/gpu-province-picking-lod-contract.test.js",
     "test:gpu-native-geometry": "node tools/tests/gpu-native-geometry-contract.test.js",
+    "test:gpu-backend-router": "node tools/tests/gpu-backend-router.test.js",
     "test:gpu-15k-stress": "node tools/tests/gpu-province-15k-stress.test.js",
     "test:new-game": "node tools/tests/new-game-state.test.js",
     "test:new-game-startup": "node tools/tests/new-game-startup.test.js",
