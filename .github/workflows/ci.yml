@@ -42,16 +42,21 @@ on:
       - feat/phase2d-anatolia-province-geometry
       - feat/phase2efgh-cartography
       - feat/cartography-visual-refinement
-      - feat/map-gpu-texture-architecture
       - feat/cartography-foundation-v2
+      - feat/map-gpu-texture-architecture
       - feat/phase3-runtime-engine
       - feat/runtime-province-selection
       - feat/historical-map-clean-foundation
       - feat/historical-political-map-v1
 
+concurrency:
+  group: historia-ai-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
