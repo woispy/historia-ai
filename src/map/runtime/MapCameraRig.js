@@ -25,6 +25,14 @@ export class MapCameraRig {
     this.yawMax = options.yawMax ?? 12;
   }
 
+  setState(next = {}) {
+    this.state.x = Number.isFinite(Number(next.x)) ? Number(next.x) : this.state.x;
+    this.state.y = Number.isFinite(Number(next.y)) ? Number(next.y) : this.state.y;
+    this.state.zoom = clamp(Number(next.zoom) || this.state.zoom, this.minZoom, this.maxZoom);
+    this.state.pitch = clamp(Number(next.pitch) || this.state.pitch, this.pitchMin, this.pitchMax);
+    this.state.yaw = clamp(Number(next.yaw) || this.state.yaw, this.yawMin, this.yawMax);
+  }
+
   beginDrag() {
     this.velocity.x = 0;
     this.velocity.y = 0;
@@ -34,24 +42,20 @@ export class MapCameraRig {
     const zoom = Math.max(0.001, this.state.zoom);
     const scaleX = 360 / (Math.max(1, viewportWidth) * zoom);
     const scaleY = 180 / (Math.max(1, viewportHeight) * zoom);
-    const nextX = this.state.x - dx * scaleX;
-    const nextY = this.state.y + dy * scaleY;
     this.velocity.x = -dx * scaleX;
     this.velocity.y = dy * scaleY;
-    this.state.x = clamp(nextX, WORLD.minX + 1, WORLD.maxX - 1);
-    this.state.y = clamp(nextY, WORLD.minY + 1, WORLD.maxY - 1);
+    this.state.x = clamp(this.state.x + this.velocity.x, WORLD.minX + 1, WORLD.maxX - 1);
+    this.state.y = clamp(this.state.y + this.velocity.y, WORLD.minY + 1, WORLD.maxY - 1);
   }
 
   zoomBy(delta) {
-    const current = this.state.zoom;
-    const next = clamp(current * Math.exp(delta), this.minZoom, this.maxZoom);
-    this.velocity.zoom = next - current;
+    const next = clamp(this.state.zoom * Math.exp(Number(delta) || 0), this.minZoom, this.maxZoom);
     this.state.zoom = next;
   }
 
   rotateBy(deltaYaw, deltaPitch) {
-    this.state.yaw = clamp(this.state.yaw + deltaYaw, this.yawMin, this.yawMax);
-    this.state.pitch = clamp(this.state.pitch + deltaPitch, this.pitchMin, this.pitchMax);
+    this.state.yaw = clamp(this.state.yaw + (Number(deltaYaw) || 0), this.yawMin, this.yawMax);
+    this.state.pitch = clamp(this.state.pitch + (Number(deltaPitch) || 0), this.pitchMin, this.pitchMax);
   }
 
   tick(dtSeconds) {
@@ -63,18 +67,11 @@ export class MapCameraRig {
     }
     this.velocity.x *= damping;
     this.velocity.y *= damping;
-    this.velocity.zoom *= damping;
     return this.snapshot();
   }
 
   snapshot() {
-    return {
-      x: this.state.x,
-      y: this.state.y,
-      zoom: this.state.zoom,
-      pitch: this.state.pitch,
-      yaw: this.state.yaw,
-    };
+    return { ...this.state };
   }
 }
 
