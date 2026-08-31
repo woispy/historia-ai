@@ -2,7 +2,7 @@ import { buildAnatoliaPhase2DAssets as buildPhase2D, isAnatoliaGeometryPoint } f
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 
 const LAND_SAFE_ANCHORS = Object.freeze({
-  "bithynia-nicaea": [29.72, 40.15],
+  "bithynia-nicaea": [29.72, 40.20],
   "pisidia-egirdir": [30.85, 37.98],
   "pisidia-beysehir": [31.72, 37.78],
 });
