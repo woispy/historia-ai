@@ -20,6 +20,7 @@
     "test:historical-political-runtime": "node tools/tests/historical-political-runtime.test.js",
     "test:historical-political-map-v1": "node tools/tests/historical-political-map-v1.test.js",
     "test:repository-cleanliness": "node tools/tests/repository-cleanliness.test.js",
+    "test:city-label-scale": "node tools/tests/repository-cleanliness.test.js",
     "test:city-label-scale": "node tools/tests/city-label-scale.test.js",
     "test:province-topology": "node tools/tests/province-topology.test.js",
     "test:anatolia-phase2b": "node tools/tests/anatolia-phase2b.test.js",
@@ -59,7 +60,8 @@
     "@eslint/js": "^10.6.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.0",
+    "@vitejs/plugin-react": "^6.0.3",
+    "eslint": "^10.6.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
     "vite": "^8.1.1"
