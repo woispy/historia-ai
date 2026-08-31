@@ -25,8 +25,10 @@ assert.doesNotMatch(layerSource, /HISTORICAL_POLITICAL_CARTOGRAPHIC_FILTER_ID|fe
 assert.match(boundarySource, /C \$\{oneThird\[0\]\}/, "cartographic province borders must be rendered as curved shared boundaries");
 assert.match(boundarySource, /edge\.provinceIds\.size >= 2/, "cartographic boundary construction must render only edges shared by different provinces");
 assert.match(worldMapSource, /runtime\?\.world\?\.scenario\?\.startDate/, "WorldMap must use the same nested scenario-date contract as the geometry bootstrap");
-assert.match(worldMapSource, /renderFill=\{!isHistoricalPoliticalMap\}/, "modern province fills must be disabled for the 1300 historical political layer");
+assert.match(worldMapSource, /renderFill=\{!useGpuProvinceFill \|\| !gpuProvinceReady\}/, "modern SVG province fills must be fallback-only while the GPU province compositor is active");
+assert.match(worldMapSource, /useGpuProvinceFill = !isHistoricalPoliticalMap/, "GPU province fills must remain disabled for the 1300 historical political presentation");
 assert.match(worldMapSource, /renderBoundaries=\{!isHistoricalPoliticalMap\}/, "modern straight province topology must be disabled when the historical cartographic boundary layer is active");
+assert.match(worldMapSource, /<ProvinceGpuCanvas/, "modern province fills must have an explicit GPU rendering surface");
 assert.match(worldMapHookSource, /historicalControl: historicalProvince\n\s*\? \{/, "historical map entries must expose their 1300 control metadata to the province inspector");
 assert.match(worldMapHookSource, /terrain: geometryMetadata\.terrain/, "historical map entries must hydrate terrain from curated geometry metadata");
 assert.match(worldMapHookSource, /regionId: historicalProvince\?\.regionId/, "historical map entries must hydrate the historical region identifier");

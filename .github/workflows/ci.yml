@@ -52,6 +52,7 @@ on:
       - feat/p1-historical-political-map-foundation
       - feat/p1-historical-political-map-geographic-province-rework
       - feat/phase-b-binary-map-data-plane
+      - feat/phase-c-gpu-province-geometry
 
 jobs:
   validate:
@@ -126,6 +127,8 @@ jobs:
         run: npm run test:cartography-foundation
       - name: Run map texture atlas regression tests
         run: npm run test:map-texture-atlas
+      - name: Run Phase C GPU province geometry tests
+        run: npm run test:province-gpu-geometry
       - name: Run cartography visual regression tests
         run: npm run test:cartography-visual
       - name: Run map rendering contract tests
