@@ -89,7 +89,6 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     const originals = new Map();
     const changed = [];
     for (const metadata of ANATOLIA_PROVINCE_METADATA) {
-      if (metadata.terrain !== LAKE_TERRAIN) continue;
       const anchor = findPhysicalRecoveryAnchor(metadata.centroid);
       if (!anchor) continue;
       originals.set(metadata.id, clonePoint(metadata.centroid));
