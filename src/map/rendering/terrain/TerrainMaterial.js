@@ -1,10 +1,4 @@
-export const TERRAIN_SPLAT_CHANNELS = Object.freeze([
-  "desert",
-  "forest",
-  "steppe",
-  "rock",
-  "snow",
-]);
+export const TERRAIN_SPLAT_CHANNELS = Object.freeze(["desert", "forest", "steppe", "rock", "snow"]);
 
 export const TERRAIN_MATERIAL_DEFAULTS = Object.freeze({
   roughness: 0.82,
@@ -38,6 +32,7 @@ layout(location = 1) in float aHeight;
 layout(location = 2) in vec2 aUv;
 out vec2 vUv;
 out float vHeight;
+out vec3 vWorldNormal;
 uniform mat4 uViewProjection;
 uniform vec4 uTileTransform;
 uniform float uHeightScale;
@@ -46,12 +41,14 @@ void main() {
   vHeight = aHeight;
   vec2 worldPosition = aPosition * uTileTransform.xy + uTileTransform.zw;
   gl_Position = uViewProjection * vec4(worldPosition, aHeight * uHeightScale, 1.0);
+  vWorldNormal = vec3(0.0, 0.0, 1.0);
 }`;
 
 export const TERRAIN_FRAGMENT_SHADER = `#version 300 es
 precision highp float;
 in vec2 vUv;
 in float vHeight;
+in vec3 vWorldNormal;
 layout(location = 0) out vec4 outColor;
 uniform sampler2D uBaseColor;
 uniform sampler2D uNormal;
@@ -72,16 +69,16 @@ void main() {
   float total = max(dot(splat, vec4(1.0)) + snow, 0.0001);
   splat /= total;
   snow /= total;
-  vec3 weights = vec3(splat.r, splat.g, splat.b);
-  vec3 palette = uTerrainPalette[0] * weights.r + uTerrainPalette[1] * weights.g + uTerrainPalette[2] * weights.b;
-  palette += uTerrainPalette[3] * splat.a + uTerrainPalette[4] * snow;
-  vec3 base = texture(uBaseColor, vUv).rgb * max(palette, vec3(0.05));
+  vec3 palette = uTerrainPalette[0] * splat.r + uTerrainPalette[1] * splat.g + uTerrainPalette[2] * splat.b + uTerrainPalette[3] * splat.a + uTerrainPalette[4] * snow;
+  vec3 sourceBase = texture(uBaseColor, vUv).rgb;
+  vec3 base = sourceBase * max(palette, vec3(0.05));
   vec3 rawNormal = texture(uNormal, vUv).xyz * 2.0 - 1.0;
   vec3 normalMap = normalize(vec3(rawNormal.xy * uNormalStrength, max(rawNormal.z, 0.05)));
-  float sun = max(dot(normalMap, normalize(uSunDirection)), 0.0);
+  vec3 normal = normalize(normalMap);
+  float sun = max(dot(normal, normalize(uSunDirection)), 0.0);
   float lighting = clamp(uAmbient + sun * uSunStrength, 0.0, 1.5);
-  float tonal = mix(0.88, 1.08, clamp(vHeight, 0.0, 1.0));
+  float tonal = mix(0.92, 1.05, clamp(vHeight, 0.0, 1.0));
   float rough = clamp(uRoughness + splat.g * 0.05 + splat.b * 0.08 + snow * 0.02, 0.0, 1.0);
-  float highlight = mix(1.04, 0.97, rough);
-  outColor = vec4(base * lighting * tonal * highlight, 1.0);
+  float diffuse = mix(1.0, 0.94, rough);
+  outColor = vec4(base * lighting * tonal * diffuse, 1.0);
 }`;
