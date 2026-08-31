@@ -11,6 +11,7 @@
     "build:historical-gis:1300": "node tools/historical-gis/cli/import-1300.js",
     "test:historical-gis": "node tools/historical-gis/cli/test-1300.js",
     "test:historical-runtime-regions": "node tools/tests/historical-runtime-regions.test.js",
+    "test:historical-runtime-binary": "node tools/tests/historical-runtime-binary.test.js",
     "test:physical-geography": "node tools/tests/physical-geography-1300.test.js && node tools/tests/physical-land-topology.test.js && node tools/tests/physical-land-authority.test.js",
     "test:physical-land-topology": "node tools/tests/physical-land-topology.test.js",
     "test:physical-land-authority": "node tools/tests/physical-land-authority.test.js",
