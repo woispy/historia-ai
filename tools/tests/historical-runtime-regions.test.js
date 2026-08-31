@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { decodeHistoricalRuntimeRegion } from "../../src/world/map/binary/HistoricalRuntimeBinary.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const runtimeDir = path.join(root, "src/world/map/assets/historical/1300");
@@ -10,6 +11,9 @@ const manifestPath = path.join(runtimeDir, "manifest.json");
 const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
 assert.equal(manifest.assetType, "historical-runtime-manifest");
 assert.equal(manifest.historicalDate, "1300-01-01");
+assert.equal(manifest.schemaVersion, 2);
+assert.equal(manifest.dataPlane?.format, "hmap");
+assert.equal(manifest.dataPlane?.version, 1);
 assert.ok(Array.isArray(manifest.regions));
 assert.ok(manifest.regions.length >= 2, "Historical runtime must be split into multiple regions");
 assert.equal(manifest.counts.provinces, manifest.counts.geometries);
@@ -22,19 +26,23 @@ let polygonCount = 0;
 
 for (const region of manifest.regions) {
   assert.match(region.id, /^[a-z0-9-]+$/);
-  assert.match(region.file, /^regions\/[a-z0-9-]+\.json$/);
+  assert.match(region.file, /^regions\/[a-z0-9-]+\.bin$/);
+  assert.ok(region.byteLength > 52, `Binary region ${region.id} must contain a valid header and payload.`);
 
-  const regionAsset = JSON.parse(
-    await fs.readFile(path.join(runtimeDir, region.file), "utf8"),
-  );
+  const bytes = new Uint8Array(await fs.readFile(path.join(runtimeDir, region.file)));
+  const regionAsset = decodeHistoricalRuntimeRegion(bytes, {
+    source: manifest.source,
+  });
 
   assert.equal(regionAsset.assetType, "historical-runtime-region");
   assert.equal(regionAsset.regionId, region.id);
   assert.equal(regionAsset.historicalDate, "1300-01-01");
+  assert.deepEqual(regionAsset.source, manifest.source);
   assert.equal(regionAsset.counts.provinces, region.provinceCount);
   assert.equal(regionAsset.counts.geometries, region.geometryCount);
   assert.equal(regionAsset.counts.polygons, region.polygonCount);
   assert.equal(regionAsset.provinces.length, regionAsset.geometries.length);
+  assert.equal(bytes.byteLength, region.byteLength);
 
   for (const province of regionAsset.provinces) {
     assert.ok(province?.identity?.id, `Missing province identity in ${region.id}`);
@@ -64,6 +72,7 @@ const selectedRuntime = await loader.loadHistoricalRuntimeRegions("1300", select
 assert.deepEqual(selectedRuntime.loadedRegions, [selectedRegion.id]);
 assert.equal(selectedRuntime.counts.provinces, selectedRegion.provinceCount);
 assert.equal(selectedRuntime.counts.geometries, selectedRegion.geometryCount);
+assert.deepEqual(selectedRuntime.source, manifest.source);
 
 const mergedRuntime = await loader.loadHistoricalRuntimeAsset("1300");
 assert.equal(mergedRuntime.counts.provinces, manifest.counts.provinces);
@@ -81,5 +90,5 @@ await assert.rejects(
 loader.clearHistoricalRuntimeCache();
 
 console.log(
-  `historical-runtime-regions.test.js: ${manifest.regions.length} regions, ${provinceCount} provinces, ${geometryCount} geometries and selective loading validated`,
+  `historical-runtime-regions.test.js: ${manifest.regions.length} binary regions, ${provinceCount} provinces, ${geometryCount} geometries and selective loading validated`,
 );
