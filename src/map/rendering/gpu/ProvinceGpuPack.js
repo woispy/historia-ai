@@ -109,20 +109,27 @@ function earClip(points, inputIds = null) {
   if (ids.length > MAX_EXACT_TRIANGULATION_VERTICES) return null;
   const fan = convexFan(points, ids); if (fan) return fan;
   if (signedArea(ids.map((id) => points[id])) < 0) ids.reverse();
-  const remaining = ids.slice(); const active = new Set(ids); const grid = createPointGrid(points, ids); const out = []; let cursor = 0; let guard = 0; const guardLimit = ids.length * 4;
-  while (remaining.length > 3 && guard++ < guardLimit) {
-    let found = -1; const count = remaining.length;
-    for (let step = 0; step < count; step += 1) {
-      const i = (cursor + step) % count; const aId = remaining[(i - 1 + count) % count]; const bId = remaining[i]; const cId = remaining[(i + 1) % count];
-      const a = points[aId]; const b = points[bId]; const c = points[cId]; if (cross(a, b, c) <= EPSILON) continue;
-      if (triangleHasActivePoint(points, grid, active, a, b, c)) continue;
-      found = i; break;
-    }
-    if (found < 0) return null;
-    const countBefore = remaining.length; const earId = remaining[found];
-    out.push(remaining[(found - 1 + countBefore) % countBefore], earId, remaining[(found + 1) % countBefore]);
-    remaining.splice(found, 1); active.delete(earId); cursor = Math.max(0, found - 1);
+  const previous = new Map(); const next = new Map(); const active = new Set(ids); const grid = createPointGrid(points, ids); const queue = [];
+  for (let i = 0; i < ids.length; i += 1) { const id = ids[i]; previous.set(id, ids[(i - 1 + ids.length) % ids.length]); next.set(id, ids[(i + 1) % ids.length]); }
+  const isEar = (id) => {
+    if (!active.has(id)) return false;
+    const aId = previous.get(id); const cId = next.get(id); if (aId === undefined || cId === undefined || aId === cId) return false;
+    const a = points[aId]; const b = points[id]; const c = points[cId];
+    if (cross(a, b, c) <= EPSILON) return false;
+    return !triangleHasActivePoint(points, grid, active, a, b, c);
+  };
+  for (const id of ids) if (isEar(id)) queue.push(id);
+  const out = []; let guard = 0; const guardLimit = ids.length * 4;
+  while (active.size > 3 && guard++ < guardLimit) {
+    let earId = null;
+    while (queue.length) { const candidate = queue.shift(); if (isEar(candidate)) { earId = candidate; break; } }
+    if (earId === null) return null;
+    const aId = previous.get(earId); const cId = next.get(earId); if (aId === undefined || cId === undefined) return null;
+    out.push(aId, earId, cId); active.delete(earId);
+    previous.set(cId, aId); next.set(aId, cId); previous.delete(earId); next.delete(earId);
+    if (isEar(aId)) queue.push(aId); if (isEar(cId)) queue.push(cId);
   }
+  const remaining = [...active];
   if (remaining.length === 3) { const [a, b, c] = remaining; if (cross(points[a], points[b], points[c]) > EPSILON) out.push(a, b, c); }
   return out.length === (ids.length - 2) * 3 ? out : null;
 }
