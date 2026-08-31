@@ -55,7 +55,8 @@ const manifest = createTerrainTileManifest({
   assets: {
     heightmap: "terrain/2/3/2/height.r16",
     normal: "terrain/2/3/2/normal.ktx2",
-    splat: "terrain/2/3/2/splat.ktx2",
+    splatRgba: "terrain/2/3/2/splat-rgba.ktx2",
+    splatSnow: "terrain/2/3/2/splat-snow.ktx2",
     landMask: "terrain/2/3/2/land-mask.ktx2",
   },
 });
