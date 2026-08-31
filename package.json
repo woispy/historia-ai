@@ -42,6 +42,7 @@
     "test:map-rendering-contract": "node tools/tests/map-rendering-contract.test.js",
     "test:province-gpu-pack": "node tools/gpu/diagnose-province-pack.js && node tools/tests/province-gpu-pack.test.js",
     "test:province-gpu-pack-integrity": "node tools/tests/province-gpu-pack.test.js",
+    "test:province-scale-15k": "node tools/tests/province-scale-15k.test.js",
     "validate:historical-gis:1300": "node tools/historical-gis/cli/validate-1300.js",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -60,7 +61,6 @@
     "eslint": "^10.6.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
-    "globals": "^17.7.0",
     "vite": "^8.1.1"
   }
 }
