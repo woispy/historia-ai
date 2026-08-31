@@ -22,6 +22,7 @@ on:
       - feat/cartography-foundation-v2
       - feat/map-gpu-texture-architecture
       - feat/phase-c-gpu-native-geometry
+      - fix/phase-c-gpu-triangulation
   push:
     branches:
       - main
@@ -49,6 +50,7 @@ on:
       - feat/historical-map-clean-foundation
       - feat/historical-political-map-v1
       - feat/phase-c-gpu-native-geometry
+      - fix/gpu-triangulation-fallback
 
 jobs:
   validate:
