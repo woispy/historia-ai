@@ -10,7 +10,14 @@ const geometryById = new Map((runtime.geometries ?? []).map((geometry) => [Strin
 const entries = (runtime.provinces ?? []).map((province) => ({ province, geometry: geometryById.get(String(province.identity?.id)) })).filter((entry) => entry.geometry);
 if (!entries.length) throw new Error("GPU pack test found no historical province geometry.");
 
-const options = { tileSize: 10, quantization: 1e6 };
+const options = {
+  tileSize: 10,
+  quantization: 1e6,
+  onProgress: (event) => {
+    if (event.phase === "province-start") console.log(`GPU province start: ${event.provinceIndex + 1}/${event.provinceCount} ${event.provinceId} polygons=${event.polygonCount} vertices=${event.vertexCount} indices=${event.indexCount}`);
+    if (event.phase === "province-complete") console.log(`GPU province complete: ${event.provinceIndex + 1}/${event.provinceCount} ${event.provinceId} vertices=${event.vertexCount} indices=${event.indexCount}`);
+  },
+};
 const startedAt = Date.now();
 let pack;
 try {
@@ -35,13 +42,11 @@ for (const province of pack.provinces) {
 for (const index of pack.indices) if (index >= pack.vertices.length / 2) throw new Error(`Out-of-bounds GPU index ${index}`);
 for (const value of pack.vertices) if (!Number.isFinite(value)) throw new Error("Non-finite GPU vertex detected.");
 
-// Determinism is verified on a tiny synthetic fixture so the regression test
-// never doubles the cost of the full historical GIS triangulation workload.
 const fixture = [
   { id: "fixture", geometry: { polygons: [[[0, 0], [2, 0], [2, 1], [1, 2], [0, 1]]] } },
 ];
-const fixtureA = buildIndexedProvincePack(fixture, options);
-const fixtureB = buildIndexedProvincePack(fixture, options);
+const fixtureA = buildIndexedProvincePack(fixture, { tileSize: 10, quantization: 1e6 });
+const fixtureB = buildIndexedProvincePack(fixture, { tileSize: 10, quantization: 1e6 });
 if (fixtureA.vertices.length !== fixtureB.vertices.length || fixtureA.indices.length !== fixtureB.indices.length) throw new Error("GPU fixture is not deterministic in length.");
 for (let i = 0; i < fixtureA.vertices.length; i += 1) if (fixtureA.vertices[i] !== fixtureB.vertices[i]) throw new Error(`GPU fixture vertices are non-deterministic at ${i}`);
 for (let i = 0; i < fixtureA.indices.length; i += 1) if (fixtureA.indices[i] !== fixtureB.indices[i]) throw new Error(`GPU fixture indices are non-deterministic at ${i}`);
