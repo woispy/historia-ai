@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { importHistoricalGeoJson } from "../HistoricalGeometryImporter.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../../src/map/data/AnatoliaProvinceMetadata.js";
+import { decodeHistoricalRuntimeRegion } from "../../../src/world/map/binary/HistoricalRuntimeBinary.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const sourcePath = path.join(root, "data/gis/1300/source/world_1300.geojson");
@@ -30,9 +31,12 @@ const curatedAnatoliaProvinceCount = ANATOLIA_PROVINCE_METADATA.length;
 
 assert(Array.isArray(sourceRaw.features), "Historical GIS source must contain a features array.");
 assert(sourceRaw.features.length === normalizedRegions.length, `Source/normalized feature count mismatch: ${sourceRaw.features.length} vs ${normalizedRegions.length}.`);
-assert(manifest.schemaVersion === 1, "Unsupported historical runtime manifest schema.");
+assert(manifest.schemaVersion === 2, "Unsupported historical runtime manifest schema.");
 assert(manifest.assetType === "historical-runtime-manifest", "Invalid historical runtime manifest type.");
 assert(manifest.historicalDate === "1300-01-01", "Historical runtime manifest date mismatch.");
+assert(manifest.dataPlane?.format === "hmap", "Historical runtime must use the HMAP binary data plane.");
+assert(manifest.dataPlane?.version === 1, "Unsupported historical binary data-plane version.");
+assert(manifest.dataPlane?.geometryPrecision === "float64", "Historical binary geometry precision contract changed.");
 assert(Array.isArray(manifest.regions) && manifest.regions.length >= 2, "Historical runtime must contain multiple regions.");
 assert(manifest.source?.sourceFeatureCount === normalizedRegions.length, "Runtime source feature count mismatch.");
 assert(manifest.source?.regionalOverlay?.status === "research-only", "Runtime regional overlay policy must be research-only.");
@@ -42,12 +46,16 @@ assert(curatedAnatoliaProvinceCount >= 40, "Curated Anatolia mesh must remain ma
 
 const regionAssets = [];
 for (const region of manifest.regions) {
-  const asset = JSON.parse(await fs.readFile(path.join(runtimeDir, region.file), "utf8"));
+  assert(/^regions\/[a-z0-9-]+\.bin$/.test(region.file), `Historical runtime region must be binary: ${region.id}.`);
+  const bytes = new Uint8Array(await fs.readFile(path.join(runtimeDir, region.file)));
+  assert(bytes.byteLength === region.byteLength, `Binary byte length mismatch: ${region.id}.`);
+  const asset = decodeHistoricalRuntimeRegion(bytes, { source: manifest.source });
   assert(asset.assetType === "historical-runtime-region", `Invalid historical runtime region asset: ${region.id}.`);
   assert(asset.regionId === region.id, `Region identity mismatch: ${region.id}.`);
   assert(asset.historicalDate === manifest.historicalDate, `Region date mismatch: ${region.id}.`);
   assert(asset.counts?.provinces === asset.provinces.length, `Region province count mismatch: ${region.id}.`);
   assert(asset.counts?.geometries === asset.geometries.length, `Region geometry count mismatch: ${region.id}.`);
+  assert(asset.counts?.polygons === region.polygonCount, `Region polygon count mismatch: ${region.id}.`);
   regionAssets.push(asset);
 }
 
@@ -132,4 +140,4 @@ assert(polygonCount >= Math.ceil(phase2DProvinceCount * 1.5), "Phase 2D geometry
 assert(vertexCount >= 350, "Phase 2D geometry vertex field is unexpectedly sparse.");
 assert(runtime.source.phase2D.siteCount >= 3000, "Phase 2D cartographic site field is unexpectedly sparse.");
 
-console.log(`Validated 1300 regional runtime: ${manifest.regions.length} regions, ${sourceDerivedCount} source-derived provinces + ${phase2DCount} Phase 2D Anatolia provinces, ${polygonCount} polygon rings, ${vertexCount} vertices.`);
+console.log(`Validated 1300 binary regional runtime: ${manifest.regions.length} regions, ${sourceDerivedCount} source-derived provinces + ${phase2DCount} Phase 2D Anatolia provinces, ${polygonCount} polygon rings, ${vertexCount} vertices.`);
