@@ -40,9 +40,9 @@ export default function MapEngineV2({
 
     renderer.resize(canvas.clientWidth, canvas.clientHeight);
     renderer.setSelectedProvinceId(selectedProvinceId);
-    renderer.start();
     rigRef.current = rig;
     rendererRef.current = renderer;
+    renderer.start();
 
     const resizeObserver = new ResizeObserver(() => renderer.resize(canvas.clientWidth, canvas.clientHeight));
     resizeObserver.observe(canvas);
@@ -52,10 +52,12 @@ export default function MapEngineV2({
       rendererRef.current = null;
       rigRef.current = null;
     };
-    // Province/style changes rebuild GPU resources once; camera changes never do.
   }, [mapStyle, provinces]);
 
   useEffect(() => {
+    // Synchronize only external application changes. Pointer/wheel animation
+    // remains inside MapCameraRig and never waits for React state updates.
+    rigRef.current?.setState(camera);
     rendererRef.current?.setCamera(camera);
     rendererRef.current?.setSelectedProvinceId(selectedProvinceId);
   }, [camera, selectedProvinceId]);
