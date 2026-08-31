@@ -30,7 +30,7 @@ function orientation(a, b, c) {
 
 function pointInPolygon(point, polygon) {
   let inside = false;
-  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index += 1) {
+  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index, index += 1) {
     const current = polygon[index];
     const prior = polygon[previous];
     const crosses = (current[1] > point[1]) !== (prior[1] > point[1])

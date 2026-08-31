@@ -26,7 +26,7 @@ function distanceSquared(a, b) {
 function pointInPolygon(point, polygon) {
   let inside = false;
   const [x, y] = point;
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i += 1) {
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i, i += 1) {
     const [xi, yi] = polygon[i];
     const [xj, yj] = polygon[j];
     const intersects = yi > y !== yj > y
