@@ -1,6 +1,6 @@
 /** Deterministic indexed GPU province geometry. HMAP/GIS remains authoritative. */
 const EPSILON = 1e-10;
-const COLLINEAR_EPSILON = 1e-12;
+const COLLINEAR_EPSILON = 1e-10;
 
 const cross = (a, b, c) =>
   (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
@@ -38,7 +38,10 @@ export function normalizeRing(ring) {
       const a = out[(i - 1 + out.length) % out.length];
       const b = out[i];
       const c = out[(i + 1) % out.length];
-      const scale = Math.max(1, Math.hypot(c[0] - a[0], c[1] - a[1]));
+      const ab = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      const bc = Math.hypot(c[0] - b[0], c[1] - b[1]);
+      const ac = Math.hypot(c[0] - a[0], c[1] - a[1]);
+      const scale = Math.max(1, ab, bc, ac);
       if (Math.abs(cross(a, b, c)) <= COLLINEAR_EPSILON * scale) {
         out.splice(i, 1);
         changed = true;
@@ -165,9 +168,7 @@ function candidateDiagonals(points, ids) {
       if (i === 0 && j === ids.length - 1) continue;
       const a = ids[i];
       const b = ids[j];
-      if (diagonalClear(points, ids, a, b)) {
-        candidates.push({ a, b, span: j - i });
-      }
+      if (diagonalClear(points, ids, a, b)) candidates.push({ a, b, span: j - i });
     }
   }
   candidates.sort((x, y) => x.span - y.span || x.a - y.a || x.b - y.b);
@@ -282,9 +283,7 @@ export function buildIndexedProvincePack(entries = [], options = {}) {
           maxX = Math.max(maxX, point[0]);
           maxY = Math.max(maxY, point[1]);
         }
-        for (const index of triangulateRing(ring, { provinceId: id, lod })) {
-          indices.push(vertex(ring[index]));
-        }
+        for (const index of triangulateRing(ring, { provinceId: id, lod })) indices.push(vertex(ring[index]));
       }
       const indexCount = indices.length - firstIndex;
       if (indexCount % 3) throw new Error(`LOD${lod} range is not triangle aligned for ${id}`);
