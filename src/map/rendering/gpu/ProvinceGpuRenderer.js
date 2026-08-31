@@ -6,15 +6,13 @@ layout(location = 0) in vec2 a_position;
 layout(location = 1) in uint a_provinceIndex;
 
 uniform vec2 u_camera;
-uniform vec2 u_viewport;
-uniform float u_zoom;
+uniform vec2 u_viewportWorld;
 uniform uint u_selectedProvince;
 
 flat out uint v_provinceIndex;
 
 void main() {
-  vec2 halfView = u_viewport / (2.0 * u_zoom);
-  vec2 world = (a_position - u_camera) / halfView;
+  vec2 world = (a_position - u_camera) / u_viewportWorld;
   gl_Position = vec4(world, 0.0, 1.0);
   v_provinceIndex = a_provinceIndex;
 }`;
@@ -83,6 +81,19 @@ function parseHexColor(hex, fallback) {
   ];
 }
 
+export function getGpuViewportWorld(width, height, zoom = 1) {
+  const safeWidth = Math.max(1, Number(width) || 1);
+  const safeHeight = Math.max(1, Number(height) || 1);
+  const safeZoom = Math.max(0.0001, Number(zoom) || 1);
+  const worldWidth = 360 / safeZoom;
+  const worldHeight = 180 / safeZoom;
+  const fitScale = Math.min(safeWidth / worldWidth, safeHeight / worldHeight);
+  return [
+    safeWidth / (2 * fitScale),
+    safeHeight / (2 * fitScale),
+  ];
+}
+
 /**
  * Creates a stateful WebGL2 renderer for a packed province geometry buffer.
  * The renderer owns only GPU resources; source geometry remains in the runtime
@@ -107,8 +118,7 @@ export function createProvinceGpuRenderer(canvas) {
   }
 
   const cameraLocation = gl.getUniformLocation(program, "u_camera");
-  const viewportLocation = gl.getUniformLocation(program, "u_viewport");
-  const zoomLocation = gl.getUniformLocation(program, "u_zoom");
+  const viewportWorldLocation = gl.getUniformLocation(program, "u_viewportWorld");
   const selectedLocation = gl.getUniformLocation(program, "u_selectedProvince");
   const defaultColorLocation = gl.getUniformLocation(program, "u_defaultColor");
   const selectedColorLocation = gl.getUniformLocation(program, "u_selectedColor");
@@ -153,9 +163,7 @@ export function createProvinceGpuRenderer(canvas) {
 
     render({ camera = {}, width, height, zoom = 1, selectedProvinceIndex = -1, color, selectedColor } = {}) {
       if (!vertexCount) return;
-      const safeWidth = Math.max(1, Number(width) || canvas.clientWidth || canvas.width);
-      const safeHeight = Math.max(1, Number(height) || canvas.clientHeight || canvas.height);
-      const safeZoom = Math.max(0.0001, Number(zoom) || 1);
+      const viewportWorld = getGpuViewportWorld(width, height, zoom);
       const selected = Number.isInteger(selectedProvinceIndex) && selectedProvinceIndex >= 0
         ? selectedProvinceIndex
         : 0xffffffff;
@@ -163,8 +171,7 @@ export function createProvinceGpuRenderer(canvas) {
       gl.useProgram(program);
       gl.bindVertexArray(vao);
       gl.uniform2f(cameraLocation, Number(camera.x) || 0, Number(camera.y) || 0);
-      gl.uniform2f(viewportLocation, safeWidth, safeHeight);
-      gl.uniform1f(zoomLocation, safeZoom);
+      gl.uniform2f(viewportWorldLocation, viewportWorld[0], viewportWorld[1]);
       gl.uniform1ui(selectedLocation, selected);
       gl.uniform4fv(defaultColorLocation, parseHexColor(color, [0.43, 0.46, 0.37, 1]));
       gl.uniform4fv(selectedColorLocation, parseHexColor(selectedColor, [0.84, 0.69, 0.30, 1]));
