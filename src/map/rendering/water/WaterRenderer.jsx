@@ -31,8 +31,8 @@ void main() {
   neighbours += waterAt(vUv - vec2(texel.x, 0.0));
   neighbours += waterAt(vUv + vec2(0.0, texel.y));
   neighbours += waterAt(vUv - vec2(0.0, texel.y));
-  float boundary = 1.0 - abs(neighbours * 0.25 - centerWater);
-  float edge = smoothstep(0.48, 0.96, boundary) * (0.45 + 0.55 * centerWater);
+  float gradient = abs(neighbours * 0.25 - centerWater);
+  float edge = smoothstep(0.10, 0.42, gradient);
   float wave = 0.5 + 0.5 * sin(vUv.x * 96.0 + vUv.y * 71.0 + uTime * 0.42);
   edge *= 0.70 + wave * 0.30;
   if (edge < 0.12) discard;
