@@ -64,9 +64,6 @@ for (const geometry of result.geometries) {
     assert.ok(polygon.length >= 3);
     vertexCount += polygon.length;
     const centroid = polygonCentroid(polygon);
-    // Tiny anchor fallbacks are explicit reconciliation placeholders for
-    // coarse physical-atlas cells; normal geometry must satisfy the hard
-    // physical-land invariant.
     if (polygonArea(polygon) >= 0.00005) {
       assert.ok(
         isPhysicalLandPoint(centroid),
@@ -81,13 +78,12 @@ for (const geometry of result.geometries) {
   }
 }
 
-// Regression coverage for the lake-city reconciliation path. These are
-// intentionally south/off-lake physical-land points, not the historical city
-// anchors themselves. The builder must keep the historical city in its own
-// data layer while resolving a valid physical-land fallback.
+// Regression coverage uses verified physical-land reconciliation points. The
+// historical city coordinates remain in the metadata/city layer and are not
+// silently rewritten to satisfy the coarse physical atlas.
 for (const [provinceId, anchor] of [
   ["bithynia-nicaea", [29.72, 40.15]],
-  ["pisidia-egirdir", [30.85, 37.98]],
+  ["pisidia-egirdir", [30.65, 37.98]],
   ["pisidia-beysehir", [31.72, 37.78]],
 ]) {
   assert.ok(
