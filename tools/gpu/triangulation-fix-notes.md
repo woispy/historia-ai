@@ -1,0 +1,1 @@
+The GPU province pack triangulation is being hardened against collinear and boundary points. The authoritative GIS geometry remains unchanged.

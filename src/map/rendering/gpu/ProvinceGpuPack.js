@@ -3,22 +3,25 @@
  * HMAP remains authoritative; this is a derived render representation only.
  */
 const EPSILON = 1e-10;
+const COLLINEAR_EPSILON = 1e-12;
 
 function samePoint(a, b) { return Math.abs(a[0] - b[0]) <= EPSILON && Math.abs(a[1] - b[1]) <= EPSILON; }
 
-export function normalizeRing(ring) {
+function normalizeIndexedRing(ring) {
   if (!Array.isArray(ring)) return [];
   const out = [];
-  for (const point of ring) {
-    if (!Array.isArray(point) || point.length < 2) continue;
+  ring.forEach((point, originalIndex) => {
+    if (!Array.isArray(point) || point.length < 2) return;
     const x = Number(point[0]); const y = Number(point[1]);
-    if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
     const p = [x, y];
-    if (!out.length || !samePoint(out[out.length - 1], p)) out.push(p);
-  }
-  if (out.length > 1 && samePoint(out[0], out[out.length - 1])) out.pop();
+    if (!out.length || !samePoint(out[out.length - 1].point, p)) out.push({ point: p, originalIndex });
+  });
+  if (out.length > 1 && samePoint(out[0].point, out[out.length - 1].point)) out.pop();
   return out;
 }
+
+export function normalizeRing(ring) { return normalizeIndexedRing(ring).map(({ point }) => point); }
 
 function cross(a, b, c) { return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]); }
 function signedArea(ring) {
@@ -26,38 +29,115 @@ function signedArea(ring) {
   for (let i = 0; i < ring.length; i += 1) { const a = ring[i]; const b = ring[(i + 1) % ring.length]; sum += a[0] * b[1] - b[0] * a[1]; }
   return sum / 2;
 }
-function pointInTriangle(p, a, b, c) {
-  const ab = cross(a, b, p); const bc = cross(b, c, p); const ca = cross(c, a, p);
-  const negative = ab < -EPSILON || bc < -EPSILON || ca < -EPSILON;
-  const positive = ab > EPSILON || bc > EPSILON || ca > EPSILON;
-  return !(negative && positive);
+
+function removeCollinearIndexed(points) {
+  const out = points.slice();
+  if (out.length <= 3) return out;
+  let changed = true;
+  let guard = 0;
+  while (changed && out.length > 3 && guard <= out.length * 2) {
+    changed = false;
+    guard += 1;
+    for (let i = 0; i < out.length && out.length > 3; i += 1) {
+      const prev = out[(i - 1 + out.length) % out.length].point;
+      const current = out[i].point;
+      const next = out[(i + 1) % out.length].point;
+      const scale = Math.max(1, Math.hypot(next[0] - prev[0], next[1] - prev[1]));
+      if (Math.abs(cross(prev, current, next)) <= COLLINEAR_EPSILON * scale) {
+        out.splice(i, 1);
+        changed = true;
+        i -= 1;
+      }
+    }
+  }
+  return out;
 }
 
-export function triangulateRing(ring) {
-  const normalized = normalizeRing(ring);
+function pointOnSegment(p, a, b) {
+  if (Math.abs(cross(a, b, p)) > EPSILON) return false;
+  return p[0] >= Math.min(a[0], b[0]) - EPSILON && p[0] <= Math.max(a[0], b[0]) + EPSILON
+    && p[1] >= Math.min(a[1], b[1]) - EPSILON && p[1] <= Math.max(a[1], b[1]) + EPSILON;
+}
+
+function pointInPolygon(p, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i += 1) {
+    const a = ring[i]; const b = ring[j];
+    if (pointOnSegment(p, a, b)) return true;
+    const crossesY = (a[1] > p[1]) !== (b[1] > p[1]);
+    if (crossesY) {
+      const x = ((b[0] - a[0]) * (p[1] - a[1])) / (b[1] - a[1]) + a[0];
+      if (p[0] < x) inside = !inside;
+    }
+  }
+  return inside;
+}
+
+function pointStrictlyInsideTriangle(p, a, b, c) {
+  const ab = cross(a, b, p); const bc = cross(b, c, p); const ca = cross(c, a, p);
+  return (ab > EPSILON && bc > EPSILON && ca > EPSILON) || (ab < -EPSILON && bc < -EPSILON && ca < -EPSILON);
+}
+
+function segmentCrossesInterior(a, b, c, d) {
+  const abC = cross(a, b, c); const abD = cross(a, b, d); const cdA = cross(c, d, a); const cdB = cross(c, d, b);
+  return ((abC > EPSILON && abD < -EPSILON) || (abC < -EPSILON && abD > EPSILON)) &&
+    ((cdA > EPSILON && cdB < -EPSILON) || (cdA < -EPSILON && cdB > EPSILON));
+}
+
+function isValidEar(points, remaining, i) {
+  const ia = remaining[(i - 1 + remaining.length) % remaining.length];
+  const ib = remaining[i];
+  const ic = remaining[(i + 1) % remaining.length];
+  const a = points[ia].point; const b = points[ib].point; const c = points[ic].point;
+  if (cross(a, b, c) <= EPSILON) return false;
+
+  // The ear diagonal must remain inside the current polygon. The midpoint
+  // check rejects concave shortcuts that do not properly cross an edge.
+  const currentRing = remaining.map((index) => points[index].point);
+  const midpoint = [(a[0] + c[0]) / 2, (a[1] + c[1]) / 2];
+  if (!pointInPolygon(midpoint, currentRing)) return false;
+
+  for (const candidate of remaining) {
+    if (candidate === ia || candidate === ib || candidate === ic) continue;
+    // Boundary contact is explicitly allowed; only strict interior points
+    // invalidate an ear. This is important after LOD simplification.
+    if (pointStrictlyInsideTriangle(points[candidate].point, a, b, c)) return false;
+  }
+  for (let edgeIndex = 0; edgeIndex < remaining.length; edgeIndex += 1) {
+    const ea = remaining[edgeIndex]; const eb = remaining[(edgeIndex + 1) % remaining.length];
+    if (ea === ia || ea === ib || ea === ic || eb === ia || eb === ib || eb === ic) continue;
+    if (segmentCrossesInterior(a, c, points[ea].point, points[eb].point)) return false;
+  }
+  return true;
+}
+
+export function triangulateRing(ring, context = {}) {
+  const normalized = removeCollinearIndexed(normalizeIndexedRing(ring));
   if (normalized.length < 3) return [];
-  const signed = signedArea(normalized);
-  if (Math.abs(signed) <= EPSILON) throw new Error("Degenerate province ring");
+  const signed = signedArea(normalized.map(({ point }) => point));
+  if (Math.abs(signed) <= EPSILON) throw new Error(`Degenerate province ring${context.provinceId ? ` for ${context.provinceId}` : ""}`);
   const points = signed > 0 ? normalized : [...normalized].reverse();
-  const source = signed > 0 ? points.map((_, i) => i) : points.map((_, i) => normalized.length - 1 - i);
+  const source = points.map(({ originalIndex }) => originalIndex);
   const remaining = points.map((_, i) => i); const result = [];
   let guard = 0;
   while (remaining.length > 3) {
     let clipped = false;
     for (let i = 0; i < remaining.length; i += 1) {
-      const ia = remaining[(i - 1 + remaining.length) % remaining.length]; const ib = remaining[i]; const ic = remaining[(i + 1) % remaining.length];
-      const a = points[ia]; const b = points[ib]; const c = points[ic];
-      if (cross(a, b, c) <= EPSILON) continue;
-      let blocked = false;
-      for (const candidate of remaining) {
-        if (candidate === ia || candidate === ib || candidate === ic) continue;
-        if (pointInTriangle(points[candidate], a, b, c)) { blocked = true; break; }
-      }
-      if (blocked) continue;
-      result.push(source[ia], source[ib], source[ic]); remaining.splice(i, 1); clipped = true; break;
+      if (!isValidEar(points, remaining, i)) continue;
+      const ia = remaining[(i - 1 + remaining.length) % remaining.length];
+      const ib = remaining[i];
+      const ic = remaining[(i + 1) % remaining.length];
+      result.push(source[ia], source[ib], source[ic]);
+      remaining.splice(i, 1);
+      clipped = true;
+      break;
     }
     guard += 1;
-    if (!clipped || guard > points.length * points.length) throw new Error("Province triangulation failed");
+    if (!clipped || guard > points.length * points.length) {
+      const province = context.provinceId ? ` province=${context.provinceId}` : "";
+      const lod = context.lod === undefined ? "" : ` lod=${context.lod}`;
+      throw new Error(`Province triangulation failed${province}${lod}; vertices=${points.length}; remaining=${remaining.length}`);
+    }
   }
   result.push(source[remaining[0]], source[remaining[1]], source[remaining[2]]);
   return result;
@@ -69,7 +149,7 @@ function simplifyRing(ring, targetCount) {
   const keep = new Set([0, normalized.length - 1]);
   const stride = (normalized.length - 2) / Math.max(1, targetCount - 2);
   for (let i = 1; i < targetCount - 1; i += 1) keep.add(Math.min(normalized.length - 2, Math.round(i * stride)));
-  return [...keep].sort((a, b) => a - b).map((i) => normalized[i]);
+  return normalizeRing([...keep].sort((a, b) => a - b).map((i) => normalized[i]));
 }
 
 export function buildLodRings(ring, levels = [1, 0.5, 0.25, 0.125]) {
@@ -85,7 +165,6 @@ export function buildIndexedProvincePack(entries = [], options = {}) {
   if (!Number.isFinite(quantization) || quantization <= 0) throw new Error("Invalid quantization");
   const vertices = []; const indices = []; const vertexMap = new Map(); const provinces = []; const tiles = new Map();
   const getVertex = (point) => { const key = quantizedKey(point, quantization); const existing = vertexMap.get(key); if (existing !== undefined) return existing; const index = vertices.length / 2; vertices.push(point[0], point[1]); vertexMap.set(key, index); return index; };
-
   entries.forEach((entry, provinceIndex) => {
     const id = String(entry?.province?.id ?? entry?.id ?? provinceIndex); const polygons = entry?.geometry?.polygons ?? entry?.polygons ?? [];
     const lodRanges = []; let minX = Infinity; let minY = Infinity; let maxX = -Infinity; let maxY = -Infinity;
@@ -94,7 +173,7 @@ export function buildIndexedProvincePack(entries = [], options = {}) {
       for (const polygon of polygons) {
         const ring = buildLodRings(polygon)[lod]; if (ring.length < 3) continue;
         for (const point of ring) { minX = Math.min(minX, point[0]); minY = Math.min(minY, point[1]); maxX = Math.max(maxX, point[0]); maxY = Math.max(maxY, point[1]); }
-        const triangles = triangulateRing(ring);
+        const triangles = triangulateRing(ring, { provinceId: id, lod });
         for (const localIndex of triangles) indices.push(getVertex(ring[localIndex]));
       }
       const indexCount = indices.length - firstIndex; if (indexCount % 3 !== 0) throw new Error(`LOD${lod} range is not triangle aligned for ${id}`);

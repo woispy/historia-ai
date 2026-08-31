@@ -1,0 +1,1 @@
+GPU province triangulation hardening is validated by CI before merge.
