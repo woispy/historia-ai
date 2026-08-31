@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - master
+      - phase-d-water-engine
       - feat/phase1-polish
       - feat/phase1-historical-gis-runtime
       - feat/phase1-map-camera-ui-polish
@@ -21,6 +22,7 @@ on:
       - feat/cartography-visual-refinement
       - feat/cartography-foundation-v2
       - feat/map-gpu-texture-architecture
+      - feat/phase-e-terrain-lod-streaming
 
   push:
     branches:
@@ -45,6 +47,7 @@ on:
       - feat/cartography-visual-refinement
       - feat/cartography-foundation-v2
       - feat/map-gpu-texture-architecture
+      - feat/phase-e-terrain-lod-streaming
       - feat/phase3-runtime-engine
       - feat/runtime-province-selection
       - feat/historical-map-clean-foundation
@@ -128,6 +131,8 @@ jobs:
         run: npm run test:water-engine
       - name: Run Phase D water engine diagnostics
         run: npm run test:water-engine-diagnostics
+      - name: Run Phase E terrain geometry LOD contract tests
+        run: npm run test:terrain-phase-e
       - name: Run GPU province pack integrity tests
         run: npm run test:province-gpu-pack
       - name: Build deterministic GPU province pack
