@@ -73,17 +73,20 @@ function createProgram(gl) {
   return program;
 }
 
+/**
+ * Returns the half-extents of the finite SVG world in world coordinates.
+ *
+ * SvgRenderer uses preserveAspectRatio="xMidYMid meet", which preserves the
+ * complete 360x180 world on every canvas aspect ratio. The GPU layer therefore
+ * uses the same fixed world extents rather than deriving Y extent from the
+ * physical canvas height. This prevents square/tall canvases from vertically
+ * stretching province geometry relative to the authoritative SVG layers.
+ */
 export function getGpuViewportWorld(width, height, zoom = 1) {
-  const safeWidth = Math.max(1, Number(width) || 1);
-  const safeHeight = Math.max(1, Number(height) || 1);
+  void width;
+  void height;
   const safeZoom = Math.max(0.0001, Number(zoom) || 1);
-  const worldWidth = 360 / safeZoom;
-  const worldHeight = 180 / safeZoom;
-  const fitScale = Math.min(safeWidth / worldWidth, safeHeight / worldHeight);
-  return [
-    safeWidth / (2 * fitScale),
-    safeHeight / (2 * fitScale),
-  ];
+  return [180 / safeZoom, 90 / safeZoom];
 }
 
 /** Creates a stateful WebGL2 renderer for a packed province geometry buffer. */
