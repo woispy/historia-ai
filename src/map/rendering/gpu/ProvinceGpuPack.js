@@ -150,7 +150,7 @@ function decompose(points, ids, depth = 0) {
 export function triangulateRing(ring, context = {}) {
   const normalized = normalizeRing(ring); if (normalized.length < 3) return [];
   const points = unwrapRing(normalized);
-  if (Math.abs(signedArea(points)) <= EPSILON) throw new Error(`Degenerate province ring${context.provinceId ? ` for ${context.provinceId}` : ""}`);
+  if (Math.abs(signedArea(points)) <= EPSILON) return [];
   const ids = Array.from({ length: points.length }, (_, i) => i); const result = earClip(points, ids) || decompose(points, ids);
   if (!result) {
     const longitudeSpan = Math.max(...points.map(([longitude]) => longitude)) - Math.min(...points.map(([longitude]) => longitude));
@@ -177,7 +177,7 @@ function ringIsValid(ring) {
       if (segmentsIntersect(a, b, working[j], working[(j + 1) % working.length])) return false;
     }
   }
-  try { triangulateRing(points); return true; } catch { return false; }
+  try { return triangulateRing(points).length > 0; } catch { return false; }
 }
 
 export function buildLodRings(ring, levels = [1, 0.5, 0.25, 0.125]) {
