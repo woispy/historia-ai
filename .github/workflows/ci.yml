@@ -21,6 +21,7 @@ on:
       - feat/cartography-visual-refinement
       - feat/map-gpu-texture-architecture
       - feat/p1-historical-political-map-foundation
+      - feat/phase-b-binary-map-data-plane
   push:
     branches:
       - main
