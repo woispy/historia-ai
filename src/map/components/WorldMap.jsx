@@ -10,7 +10,15 @@ import {
 import { CameraProvider, CameraViewport, useCamera, useCameraController } from "../camera";
 import { RenderRoot, RenderLayer, SvgRenderer } from "../rendering";
 import ProvinceTextureLayer from "../rendering/gpu/ProvinceTextureLayer";
+import WaterRenderer from "../rendering/water/WaterRenderer";
 import { shouldUseGpuProvinceFill } from "../rendering/CartographyModel";
+
+const FULL_LAYER_STYLE = Object.freeze({
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
+});
 
 function WorldMap({
   runtime,
@@ -34,7 +42,6 @@ function WorldMap({
   });
 
   const ready = useCallback((value) => setTextureReady(Boolean(value)), []);
-
   const cityClick = useCallback((cityId) => {
     setInternalSelectedCityId(cityId);
     onCityClick?.(cityId);
@@ -43,82 +50,84 @@ function WorldMap({
   const useGpuProvinceFill = shouldUseGpuProvinceFill(cameraState.zoom);
   const gpuProvinceActive = useGpuProvinceFill && textureReady;
 
-  const world = useMemo(
-    () => <WorldPhysicalLayer zoom={cameraState.zoom} />,
-    [cameraState.zoom],
+  const terrain = useMemo(
+    () => <PhysicalGeographyLayer phase="terrain" zoom={cameraState.zoom} camera={cameraState} />,
+    [cameraState],
   );
-
-  const provincesLayer = useMemo(
+  const labels = useMemo(
+    () => <PhysicalGeographyLayer phase="labels" zoom={cameraState.zoom} camera={cameraState} />,
+    [cameraState],
+  );
+  const baseLayers = useMemo(
     () => (
-      <ProvinceLayer
-        provinces={provinces}
-        selectedProvinceId={selectedProvinceId}
-        onProvinceClick={onProvinceClick}
-        mapStyle={settings.mapStyle ?? "detailed"}
-        mapShadows={settings.mapShadows !== false}
-        zoom={cameraState.zoom}
-        camera={cameraState}
-        renderFill={!gpuProvinceActive}
-      />
+      <RenderLayer>
+        <WorldPhysicalLayer zoom={cameraState.zoom} />
+        <ProvinceLayer
+          provinces={provinces}
+          selectedProvinceId={selectedProvinceId}
+          onProvinceClick={onProvinceClick}
+          mapStyle={settings.mapStyle ?? "detailed"}
+          mapShadows={settings.mapShadows !== false}
+          zoom={cameraState.zoom}
+          camera={cameraState}
+          renderFill={!gpuProvinceActive}
+        />
+        {terrain}
+      </RenderLayer>
     ),
     [
+      cameraState,
       provinces,
       selectedProvinceId,
       onProvinceClick,
       settings.mapStyle,
       settings.mapShadows,
-      cameraState,
       gpuProvinceActive,
+      terrain,
     ],
   );
-
-  const cartography = useMemo(
-    () => <CartographyLayer zoom={cameraState.zoom} />,
-    [cameraState.zoom],
-  );
-  const detail = useMemo(
-    () => <PhysicalGeographyLayer phase="detail" zoom={cameraState.zoom} camera={cameraState} />,
-    [cameraState],
-  );
-  const citiesLayer = useMemo(
-    () => (
-      <CityLayer
-        cities={cities}
-        zoom={cameraState.zoom}
-        camera={cameraState}
-        selectedCityId={selectedCityId}
-        onCityClick={cityClick}
-      />
-    ),
-    [cities, cameraState, selectedCityId, cityClick],
-  );
-  const layers = useMemo(
+  const overlayLayers = useMemo(
     () => (
       <RenderLayer>
-        {world}
-        {provincesLayer}
-        {cartography}
-        {detail}
-        {citiesLayer}
+        <CityLayer
+          cities={cities}
+          zoom={cameraState.zoom}
+          camera={cameraState}
+          selectedCityId={selectedCityId}
+          onCityClick={cityClick}
+        />
+        <CartographyLayer zoom={cameraState.zoom} />
+        {labels}
       </RenderLayer>
     ),
-    [world, provincesLayer, cartography, detail, citiesLayer],
+    [cities, cameraState, selectedCityId, cityClick, labels],
   );
 
   return (
     <CameraProvider value={camera}>
       <CameraViewport cameraInput={cameraInput}>
         <RenderRoot>
+          <WaterRenderer camera={cameraState} />
+
+          <div style={{ ...FULL_LAYER_STYLE, zIndex: 1 }}>
+            <SvgRenderer camera={cameraState}>{baseLayers}</SvgRenderer>
+          </div>
+
           {useGpuProvinceFill && (
-            <ProvinceTextureLayer
-              provinces={provinces}
-              camera={cameraState}
-              selectedProvinceId={selectedProvinceId}
-              mapStyle={settings.mapStyle ?? "detailed"}
-              onReady={ready}
-            />
+            <div style={{ ...FULL_LAYER_STYLE, zIndex: 2 }}>
+              <ProvinceTextureLayer
+                provinces={provinces}
+                camera={cameraState}
+                selectedProvinceId={selectedProvinceId}
+                mapStyle={settings.mapStyle ?? "detailed"}
+                onReady={ready}
+              />
+            </div>
           )}
-          <SvgRenderer camera={cameraState}>{layers}</SvgRenderer>
+
+          <div style={{ ...FULL_LAYER_STYLE, zIndex: 4 }}>
+            <SvgRenderer camera={cameraState}>{overlayLayers}</SvgRenderer>
+          </div>
         </RenderRoot>
       </CameraViewport>
     </CameraProvider>
