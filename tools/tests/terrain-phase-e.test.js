@@ -4,6 +4,7 @@ import { makeTerrainTileKey, terrainTileBounds, terrainTilesForBounds } from "..
 import { planTerrainStreaming, terrainTileZoomForLod } from "../../src/map/rendering/terrain/TerrainStreaming.js";
 import { normalizeSplatWeights } from "../../src/map/rendering/terrain/TerrainMaterial.js";
 import { buildTerrainGridMesh } from "../../src/map/rendering/terrain/TerrainGeometry.js";
+import { addTerrainSkirts, terrainLodEdgeCompatible } from "../../src/map/rendering/terrain/TerrainSeams.js";
 import { buildTerrainEdgeSignature, clipTerrainSampleToLand } from "../../src/map/rendering/terrain/TerrainTopology.js";
 import { createTerrainTileManifest, validateTerrainTileManifest } from "../../src/map/rendering/terrain/TerrainTileManifest.js";
 
@@ -41,6 +42,11 @@ assert.equal(mesh.positions.length, 27);
 assert.equal(mesh.normals.length, 27);
 assert.equal(mesh.indices.length, 24);
 assert.ok(mesh.indices.every((index) => index < 9));
+assert.equal(terrainLodEdgeCompatible(129, 65), true);
+assert.equal(terrainLodEdgeCompatible(65, 33), true);
+const skirted = addTerrainSkirts(mesh, { size: 3, depth: 0.03 });
+assert.equal(skirted.positions.length, 27 + 12 * 3);
+assert.equal(skirted.indices.length, 24 + 12 * 6);
 
 const landMask = { contains: (x, y) => x >= 0 && y >= 0 };
 assert.equal(clipTerrainSampleToLand({ x: 1, y: 2, height: 3, landMask }).land, true);
