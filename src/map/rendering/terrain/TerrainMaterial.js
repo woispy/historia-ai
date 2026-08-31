@@ -74,11 +74,12 @@ void main() {
   vec3 palette = uTerrainPalette[0] * weights.r + uTerrainPalette[1] * weights.g + uTerrainPalette[2] * weights.b;
   palette += uTerrainPalette[3] * splat.a + uTerrainPalette[4] * snow;
   vec3 base = texture(uBaseColor, vUv).rgb * max(palette, vec3(0.05));
-  vec3 normalMap = normalize(texture(uNormal, vUv).xyz * 2.0 - 1.0);
+  vec3 rawNormal = texture(uNormal, vUv).xyz * 2.0 - 1.0;
+  vec3 normalMap = normalize(vec3(rawNormal.xy * uNormalStrength, max(rawNormal.z, 0.05)));
   float sun = max(dot(normalMap, normalize(uSunDirection)), 0.0);
   float lighting = clamp(uAmbient + sun * uSunStrength, 0.0, 1.5);
   float tonal = mix(0.88, 1.08, clamp(vHeight, 0.0, 1.0));
   float rough = clamp(uRoughness + splat.g * 0.05 + splat.b * 0.08 + snow * 0.02, 0.0, 1.0);
   float highlight = mix(1.04, 0.97, rough);
-  outColor = vec4(base * lighting * tonal * highlight * uNormalStrength, 1.0);
+  outColor = vec4(base * lighting * tonal * highlight, 1.0);
 }`;
