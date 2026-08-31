@@ -31,16 +31,22 @@ if (pack.version !== 2 || pack.tileSize !== 10 || pack.quantization !== 1e6) thr
 if (pack.vertices.length === 0 || pack.indices.length === 0) throw new Error("GPU pack is empty.");
 if (pack.indices.length % 3 !== 0) throw new Error("GPU index buffer is not triangle aligned.");
 
+const vertexCount = pack.vertices.length / 2;
 for (const province of pack.provinces) {
+  if (!province.provinceId) throw new Error(`GPU province ${province.provinceIndex} has no stable id.`);
+  if (!province.bounds) throw new Error(`GPU province ${province.provinceId} has no bounds.`);
+  const { minX, minY, maxX, maxY } = province.bounds;
+  if (![minX, minY, maxX, maxY].every(Number.isFinite) || minX > maxX || minY > maxY) throw new Error(`Invalid bounds for ${province.provinceId}.`);
+  if (province.lodRanges.length !== 4) throw new Error(`Expected 4 LOD ranges for ${province.provinceId}.`);
   for (const range of province.lodRanges) {
     if (range.firstIndex < 0 || range.indexCount < 0 || range.firstIndex + range.indexCount > pack.indices.length) {
       throw new Error(`Invalid LOD range for ${province.provinceId}: first=${range.firstIndex} count=${range.indexCount} total=${pack.indices.length}`);
     }
-    if (range.indexCount % 3 !== 0) throw new Error(`Unaligned LOD range for ${province.provinceId}`);
+    if (range.firstIndex % 3 !== 0 || range.indexCount % 3 !== 0) throw new Error(`Unaligned LOD range for ${province.provinceId}`);
   }
 }
-for (const index of pack.indices) if (index >= pack.vertices.length / 2) throw new Error(`Out-of-bounds GPU index ${index}`);
-for (const value of pack.vertices) if (!Number.isFinite(value)) throw new Error("Non-finite GPU vertex detected.");
+for (let i = 0; i < pack.indices.length; i += 1) if (pack.indices[i] >= vertexCount) throw new Error(`Out-of-bounds GPU index ${pack.indices[i]} at ${i}.`);
+for (let i = 0; i < pack.vertices.length; i += 1) if (!Number.isFinite(pack.vertices[i])) throw new Error(`Non-finite GPU vertex detected at ${i}.`);
 
 const fixture = [
   { id: "fixture", geometry: { polygons: [[[0, 0], [2, 0], [2, 1], [1, 2], [0, 1]]] } },
@@ -51,4 +57,4 @@ if (fixtureA.vertices.length !== fixtureB.vertices.length || fixtureA.indices.le
 for (let i = 0; i < fixtureA.vertices.length; i += 1) if (fixtureA.vertices[i] !== fixtureB.vertices[i]) throw new Error(`GPU fixture vertices are non-deterministic at ${i}`);
 for (let i = 0; i < fixtureA.indices.length; i += 1) if (fixtureA.indices[i] !== fixtureB.indices[i]) throw new Error(`GPU fixture indices are non-deterministic at ${i}`);
 
-console.log(`GPU province pack integrity: PASS (${entries.length} provinces, ${pack.vertices.length / 2} vertices, ${pack.indices.length} indices, ${pack.tiles.length} tiles, build=${buildMs}ms; determinism=fixture).`);
+console.log(`GPU province pack integrity: PASS (${entries.length} provinces, ${vertexCount} vertices, ${pack.indices.length} indices, ${pack.tiles.length} tiles, build=${buildMs}ms; determinism=fixture).`);
