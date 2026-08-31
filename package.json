@@ -51,6 +51,7 @@
     "test:terrain-data-contract": "node tools/terrain/TerrainDataContract.test.js",
     "test:terrain-dem-fetch-plan": "node tools/terrain/CopernicusDemFetchPlan.test.js",
     "test:terrain-dem-coverage": "node tools/terrain/TerrainCoverageAudit.test.js",
+    "test:terrain-dem-binary": "node tools/terrain/RealDemBinaryContract.test.js",
     "validate:historical-gis:1300": "node tools/historical-gis/cli/validate-1300.js",
     "lint": "eslint .",
     "preview": "vite preview",
