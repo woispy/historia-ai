@@ -37,9 +37,19 @@ function pointInPolygon(point, polygon) {
   return inside;
 }
 
+function pointInAnatoliaLand(point) {
+  return ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon));
+}
+
 function pointInWaterEnvelope(point) {
-  return ANATOLIA_PHYSICAL_ATLAS.seas.some((sea) => pointInPolygon(point, sea.coordinates))
-    || ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygon(point, lake.coordinates));
+  // Sea polygons in the curated atlas are intentionally broad envelopes. The
+  // physical land mask is the authority at their overlap, so a sea envelope
+  // must never punch a hole through Anatolian land. Lakes are true inland-water
+  // exclusions and therefore remain authoritative everywhere they overlap land.
+  const inSeaEnvelope = ANATOLIA_PHYSICAL_ATLAS.seas.some((sea) => pointInPolygon(point, sea.coordinates));
+  const inLand = pointInAnatoliaLand(point);
+  const inLake = ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes.some((lake) => pointInPolygon(point, lake.coordinates));
+  return (inSeaEnvelope && !inLand) || inLake;
 }
 
 function pointToSegmentDistanceSquared(point, start, end) {
@@ -47,7 +57,7 @@ function pointToSegmentDistanceSquared(point, start, end) {
   const dy = end[1] - start[1];
   if (dx === 0 && dy === 0) return distanceSquared(point, start);
   const t = Math.max(0, Math.min(1, ((point[0] - start[0]) * dx + (point[1] - start[1]) * dy) / (dx * dx + dy * dy)));
-  return distanceSquared(point, [start[0] + t * dx, start[1] + t * dy]);
+  return distanceSquared(point, [start[0] + (end[0] - start[0]) * t, start[1] + (end[1] - start[1]) * t]);
 }
 
 function closestPointOnSegment(point, start, end) {
@@ -67,10 +77,6 @@ function distanceToLandBoundary(point) {
     }
   }
   return Math.sqrt(best);
-}
-
-function pointInAnatoliaLand(point) {
-  return ANATOLIA_PHYSICAL_ATLAS.landPolygons.some((polygon) => pointInPolygon(point, polygon));
 }
 
 function isWithinAnatoliaEnvelope(point) {
