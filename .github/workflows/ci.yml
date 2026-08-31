@@ -141,6 +141,8 @@ jobs:
         run: npm run test:terrain-data-contract
       - name: Run Phase E DEM fetch plan tests
         run: npm run test:terrain-dem-fetch-plan
+      - name: Run Phase E DEM coverage audit tests
+        run: npm run test:terrain-dem-coverage
       - name: Run GPU province pack integrity tests
         run: npm run test:province-gpu-pack
       - name: Build deterministic GPU province pack
