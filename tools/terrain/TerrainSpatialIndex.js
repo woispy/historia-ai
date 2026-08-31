@@ -1,27 +1,3 @@
-function finite(v) { return Number.isFinite(v); }
-function assertBounds(bounds) { if (!bounds || ![bounds.minX,bounds.minY,bounds.maxX,bounds.maxY].every(finite) || bounds.minX >= bounds.maxX || bounds.minY >= bounds.maxY) throw new Error("Invalid spatial bounds."); }
-
-export function createTerrainSpatialIndex({ bounds, maxLod = 4 } = {}) {
-  assertBounds(bounds);
-  if (!Number.isInteger(maxLod) || maxLod < 0) throw new Error("maxLod must be a non-negative integer.");
-  const root = Object.freeze({ ...bounds });
-  return Object.freeze({ version: 1, maxLod, bounds: root, select: ({ cameraX, cameraY, viewDistance, maxTiles = 256 } = {}) => selectTerrainTiles({ bounds: root, maxLod, cameraX, cameraY, viewDistance, maxTiles }) });
-}
-
-function selectTerrainTiles({ bounds, maxLod, cameraX, cameraY, viewDistance, maxTiles }) {
-  if (![cameraX,cameraY,viewDistance].every(finite) || viewDistance <= 0) throw new Error("Terrain selection requires finite camera position and positive view distance.");
-  if (!Number.isInteger(maxTiles) || maxTiles < 1) throw new Error("maxTiles must be a positive integer.");
-  const width = bounds.maxX - bounds.minX; const height = bounds.maxY - bounds.minY;
-  const selected = [];
-  for (let lod = maxLod; lod >= 0; lod -= 1) {
-    const count = 2 ** lod;
-    const tileWidth = width / count; const tileHeight = height / count;
-    const radius = viewDistance / (2 ** (maxLod - lod));
-    const minX = Math.max(0, Math.floor((cameraX - radius - bounds.minX) / tileWidth));
-    const maxX = Math.min(count - 1, Math.floor((cameraX + radius - bounds.minX) / tileWidth));
-    const minY = Math.max(0, Math.floor((cameraY - radius - bounds.minY) / tileHeight));
-    const maxY = Math.min(count - 1, Math.floor((cameraY + radius - bounds.minY) / tileHeight));
-    for (let y = minY; y <= maxY && selected.length < maxTiles; y += 1) for (let x = minX; x <= maxX && selected.length < maxTiles; x += 1) selected.push({ lod, x, y, bounds: { minX: bounds.minX + x * tileWidth, maxX: bounds.minX + (x + 1) * tileWidth, minY: bounds.minY + y * tileHeight, maxY: bounds.minY + (y + 1) * tileHeight } });
-  }
-  return selected;
-}
+function finite(v){return Number.isFinite(v);}function assertBounds(bounds){if(!bounds||![bounds.minX,bounds.minY,bounds.maxX,bounds.maxY].every(finite)||bounds.minX>=bounds.maxX||bounds.minY>=bounds.maxY)throw new Error("Invalid spatial bounds.");}function key(lod,x,y){return `${lod}:${x}:${y}`;}function tileBounds(bounds,lod,x,y){const count=2**lod,w=(bounds.maxX-bounds.minX)/count,h=(bounds.maxY-bounds.minY)/count;return {minX:bounds.minX+x*w,maxX:bounds.minX+(x+1)*w,minY:bounds.minY+y*h,maxY:bounds.minY+(y+1)*h};}function intersects(a,b){return a.minX<b.maxX&&a.maxX>b.minX&&a.minY<b.maxY&&a.maxY>b.minY;}function sharedBoundary(a,b){const eps=1e-12;const vertical=Math.abs(a.maxX-b.minX)<=eps||Math.abs(b.maxX-a.minX)<=eps;const horizontal=Math.abs(a.maxY-b.minY)<=eps||Math.abs(b.maxY-a.minY)<=eps;return (vertical&&Math.max(a.minY,b.minY)<Math.min(a.maxY,b.maxY)-eps)||(horizontal&&Math.max(a.minX,b.minX)<Math.min(a.maxX,b.maxX)-eps);}function balance(selected,bounds){let changed=true;while(changed){changed=false;for(let i=0;i<selected.length;i++)for(let j=i+1;j<selected.length;j++){const a=selected[i],b=selected[j];if(a.lod===b.lod||Math.abs(a.lod-b.lod)<=1)continue;if(!sharedBoundary(a.bounds,b.bounds))continue;const coarse=a.lod<b.lod?a:b;const fine=a.lod<b.lod?b:a;if(fine.lod-coarse.lod<=1)continue;const nextLod=coarse.lod+1;const count=2**nextLod;const parentCount=2**coarse.lod;const px=coarse.x*2,py=coarse.y*2;const replacements=[];for(let dy=0;dy<2;dy++)for(let dx=0;dx<2;dx++){const x=px+dx,y=py+dy;const boundsForChild=tileBounds(bounds,nextLod,x,y);if(intersects(boundsForChild,fine.bounds)||sharedBoundary(boundsForChild,fine.bounds))replacements.push({lod:nextLod,x,y,bounds:boundsForChild});}selected.splice(i,1,...replacements);changed=true;break;}if(changed)break;}const seen=new Set();return selected.filter(t=>{const k=key(t.lod,t.x,t.y);if(seen.has(k))return false;seen.add(k);return true;});}
+export function createTerrainSpatialIndex({bounds,maxLod=4}={}){assertBounds(bounds);if(!Number.isInteger(maxLod)||maxLod<0)throw new Error("maxLod must be a non-negative integer.");const root=Object.freeze({...bounds});return Object.freeze({version:2,maxLod,bounds:root,select:({cameraX,cameraY,viewDistance,maxTiles=256}={})=>selectTerrainTiles({bounds:root,maxLod,cameraX,cameraY,viewDistance,maxTiles})});}
+function selectTerrainTiles({bounds,maxLod,cameraX,cameraY,viewDistance,maxTiles}){if(![cameraX,cameraY,viewDistance].every(finite)||viewDistance<=0)throw new Error("Terrain selection requires finite camera position and positive view distance.");if(!Number.isInteger(maxTiles)||maxTiles<1)throw new Error("maxTiles must be a positive integer.");const width=bounds.maxX-bounds.minX,height=bounds.maxY-bounds.minY;let selected=[];for(let lod=maxLod;lod>=0;lod--){const count=2**lod,tileWidth=width/count,tileHeight=height/count,radius=viewDistance/(2**(maxLod-lod));const minX=Math.max(0,Math.floor((cameraX-radius-bounds.minX)/tileWidth)),maxX=Math.min(count-1,Math.floor((cameraX+radius-bounds.minX)/tileWidth)),minY=Math.max(0,Math.floor((cameraY-radius-bounds.minY)/tileHeight)),maxY=Math.min(count-1,Math.floor((cameraY+radius-bounds.minY)/tileHeight));for(let y=minY;y<=maxY&&selected.length<maxTiles;y++)for(let x=minX;x<=maxX&&selected.length<maxTiles;x++)selected.push({lod,x,y,bounds:tileBounds(bounds,lod,x,y)});}selected=balance(selected,bounds);return selected.slice(0,maxTiles);}
