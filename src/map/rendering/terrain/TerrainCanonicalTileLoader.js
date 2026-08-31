@@ -1,6 +1,7 @@
 import { createTerrainAssetManifest, validateTerrainAssetManifest } from "./TerrainAssetManifest.js";
 import { buildTerrainGridMesh } from "./TerrainGeometry.js";
 import { createTerrainHeightSampler } from "./TerrainHeightSampler.js";
+import { makeTerrainTileKey, terrainTileBounds } from "./TerrainTile.js";
 
 const TEXTURE_KEYS = Object.freeze(["normal", "splatRgba", "splatSnow", "landMask"]);
 function assertBytes(value, name) { if (!(value instanceof ArrayBuffer)) throw new Error(`${name} must be an ArrayBuffer.`); }
@@ -11,6 +12,11 @@ export function createCanonicalTerrainTileLoader({ manifestForTile, fetchBinary,
   return async function load(tileId) {
     const manifest = createTerrainAssetManifest(await manifestForTile(tileId));
     validateTerrainAssetManifest(manifest);
+    if (manifest.tileId !== tileId) throw new Error(`Terrain tile manifest identity mismatch: requested ${tileId}, received ${manifest.tileId}.`);
+    const [level, x, y] = String(tileId).split("/").map(Number);
+    const canonicalTile = makeTerrainTileKey(level, x, y);
+    if (!sameBounds(manifest.bounds, terrainTileBounds(canonicalTile))) throw new Error(`Terrain tile ${tileId} manifest bounds do not match canonical tile bounds.`);
+
     const heightBuffer = await fetchBinary(manifest.assets.heightmap);
     assertBytes(heightBuffer, "heightmap");
     const decoded = await decodeHeightmap(heightBuffer, manifest);
