@@ -7,6 +7,7 @@
  */
 export {
   normalizeRing,
+  analyzeRing,
   triangulateRing,
   buildLodRings,
   buildIndexedProvincePack,
