@@ -5,7 +5,7 @@ const COLLINEAR_EPSILON = 1e-12;
 const MAX_EXACT_TRIANGULATION_VERTICES = 12000;
 const MAX_DIAGNOSTIC_INTERSECTIONS = 64;
 
-const cross = (a, b, c) => (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[1] - a[1]);
+const cross = (a, b, c) => (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
 const squaredDistance = (a, b) => (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2;
 const signedArea = (ring) => { let sum = 0; for (let i = 0; i < ring.length; i += 1) { const a = ring[i]; const b = ring[(i + 1) % ring.length]; sum += a[0] * b[1] - b[0] * a[1]; } return sum / 2; };
 const same = (a, b) => squaredDistance(a, b) <= POSITION_EPSILON ** 2;
@@ -13,15 +13,11 @@ const same = (a, b) => squaredDistance(a, b) <= POSITION_EPSILON ** 2;
 function isBacktrackingRing(ring) {
   const points = Array.isArray(ring) ? ring : [];
   if (points.length < 7) return false;
-  const seen = new Map();
-  const limit = same(points[0], points[points.length - 1]) ? points.length - 1 : points.length;
+  const seen = new Map(); const limit = same(points[0], points[points.length - 1]) ? points.length - 1 : points.length;
   for (let i = 0; i < limit; i += 1) {
-    const point = points[i];
-    if (!Array.isArray(point) || point.length < 2) continue;
-    const x = Number(point[0]); const y = Number(point[1]);
-    if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
-    const key = `${Math.round(x / POSITION_EPSILON)},${Math.round(y / POSITION_EPSILON)}`;
-    const previous = seen.get(key);
+    const point = points[i]; if (!Array.isArray(point) || point.length < 2) continue;
+    const x = Number(point[0]); const y = Number(point[1]); if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+    const key = `${Math.round(x / POSITION_EPSILON)},${Math.round(y / POSITION_EPSILON)}`; const previous = seen.get(key);
     if (previous !== undefined && i - previous > 1 && !(previous === 0 && i === limit - 1)) return true;
     seen.set(key, i);
   }
@@ -32,11 +28,9 @@ export function normalizeRing(ring) {
   const out = []; const seen = new Set();
   for (const point of Array.isArray(ring) ? ring : []) {
     if (!Array.isArray(point) || point.length < 2) continue;
-    const p = [Number(point[0]), Number(point[1])];
-    if (!Number.isFinite(p[0]) || !Number.isFinite(p[1])) continue;
+    const p = [Number(point[0]), Number(point[1])]; if (!Number.isFinite(p[0]) || !Number.isFinite(p[1])) continue;
     if (out.length && same(out[out.length - 1], p)) continue;
-    const key = `${Math.round(p[0] / POSITION_EPSILON)},${Math.round(p[1] / POSITION_EPSILON)}`;
-    if (seen.has(key)) continue;
+    const key = `${Math.round(p[0] / POSITION_EPSILON)},${Math.round(p[1] / POSITION_EPSILON)}`; if (seen.has(key)) continue;
     seen.add(key); out.push(p);
   }
   if (out.length > 1 && same(out[0], out[out.length - 1])) out.pop();
@@ -74,57 +68,72 @@ function diagonalClear(points, ids, ia, ib) { if (ia === ib || diagonalIntersect
 function pointInTriangle(point, a, b, c) { const ab = cross(a, b, point); const bc = cross(b, c, point); const ca = cross(c, a, point); return (ab >= -EPSILON && bc >= -EPSILON && ca >= -EPSILON) || (ab <= EPSILON && bc <= EPSILON && ca <= EPSILON); }
 function bboxContains(point, a, b, c) { const minX = Math.min(a[0], b[0], c[0]) - EPSILON; const maxX = Math.max(a[0], b[0], c[0]) + EPSILON; const minY = Math.min(a[1], b[1], c[1]) - EPSILON; const maxY = Math.max(a[1], b[1], c[1]) + EPSILON; return point[0] >= minX && point[0] <= maxX && point[1] >= minY && point[1] <= maxY; }
 
+function convexFan(points, ids) {
+  if (ids.length < 3) return null;
+  let sign = 0;
+  for (let i = 0; i < ids.length; i += 1) {
+    const value = cross(points[ids[(i - 1 + ids.length) % ids.length]], points[ids[i]], points[ids[(i + 1) % ids.length]]);
+    if (Math.abs(value) <= EPSILON) continue;
+    const current = value > 0 ? 1 : -1;
+    if (sign && current !== sign) return null;
+    sign = current;
+  }
+  if (!sign) return null;
+  const ordered = signedArea(ids.map((id) => points[id])) < 0 ? ids.slice().reverse() : ids.slice();
+  const out = [];
+  for (let i = 1; i < ordered.length - 1; i += 1) out.push(ordered[0], ordered[i], ordered[i + 1]);
+  return out;
+}
+
+function createPointGrid(points, ids) {
+  let minX = Infinity; let minY = Infinity; let maxX = -Infinity; let maxY = -Infinity;
+  for (const id of ids) { const p = points[id]; minX = Math.min(minX, p[0]); minY = Math.min(minY, p[1]); maxX = Math.max(maxX, p[0]); maxY = Math.max(maxY, p[1]); }
+  const span = Math.max(maxX - minX, maxY - minY, 1e-9); const cellSize = span / Math.max(4, Math.sqrt(ids.length));
+  const grid = new Map(); const cell = (x, y) => `${Math.floor((x - minX) / cellSize)}:${Math.floor((y - minY) / cellSize)}`;
+  for (const id of ids) { const p = points[id]; const key = cell(p[0], p[1]); const list = grid.get(key); if (list) list.push(id); else grid.set(key, [id]); }
+  return { minX, minY, cellSize, grid };
+}
+
+function triangleHasActivePoint(points, gridInfo, active, a, b, c) {
+  const minX = Math.min(a[0], b[0], c[0]); const maxX = Math.max(a[0], b[0], c[0]); const minY = Math.min(a[1], b[1], c[1]); const maxY = Math.max(a[1], b[1], c[1]);
+  const size = gridInfo.cellSize; const x0 = Math.floor((minX - gridInfo.minX) / size); const x1 = Math.floor((maxX - gridInfo.minX) / size); const y0 = Math.floor((minY - gridInfo.minY) / size); const y1 = Math.floor((maxY - gridInfo.minY) / size);
+  for (let x = x0; x <= x1; x += 1) for (let y = y0; y <= y1; y += 1) {
+    const list = gridInfo.grid.get(`${x}:${y}`); if (!list) continue;
+    for (const id of list) { if (!active.has(id)) continue; const p = points[id]; if (p === a || p === b || p === c) continue; if (bboxContains(p, a, b, c) && pointInTriangle(p, a, b, c)) return true; }
+  }
+  return false;
+}
+
 function earClip(points, inputIds = null) {
   const ids = inputIds ? inputIds.slice() : Array.from({ length: points.length }, (_, i) => i);
   if (ids.length > MAX_EXACT_TRIANGULATION_VERTICES) return null;
+  const fan = convexFan(points, ids); if (fan) return fan;
   if (signedArea(ids.map((id) => points[id])) < 0) ids.reverse();
-  const remaining = ids.slice(); const out = []; let cursor = 0; let guard = 0; const guardLimit = ids.length * 4;
+  const remaining = ids.slice(); const active = new Set(ids); const grid = createPointGrid(points, ids); const out = []; let cursor = 0; let guard = 0; const guardLimit = ids.length * 4;
   while (remaining.length > 3 && guard++ < guardLimit) {
     let found = -1; const count = remaining.length;
     for (let step = 0; step < count; step += 1) {
-      const i = (cursor + step) % count;
-      const aId = remaining[(i - 1 + count) % count]; const bId = remaining[i]; const cId = remaining[(i + 1) % count];
-      const a = points[aId]; const b = points[bId]; const c = points[cId];
-      if (cross(a, b, c) <= EPSILON) continue;
-      let blocked = false;
-      for (const k of remaining) {
-        if (k === aId || k === bId || k === cId) continue;
-        const p = points[k];
-        if (bboxContains(p, a, b, c) && pointInTriangle(p, a, b, c)) { blocked = true; break; }
-      }
-      if (blocked) continue;
-      // For a simple polygon, an empty ear is a valid ear; the previous
-      // implementation additionally scanned every boundary edge for the
-      // diagonal, turning large GIS rings into an O(n^3) hot path.
+      const i = (cursor + step) % count; const aId = remaining[(i - 1 + count) % count]; const bId = remaining[i]; const cId = remaining[(i + 1) % count];
+      const a = points[aId]; const b = points[bId]; const c = points[cId]; if (cross(a, b, c) <= EPSILON) continue;
+      if (triangleHasActivePoint(points, grid, active, a, b, c)) continue;
       found = i; break;
     }
     if (found < 0) return null;
-    const countBefore = remaining.length;
-    out.push(remaining[(found - 1 + countBefore) % countBefore], remaining[found], remaining[(found + 1) % countBefore]);
-    remaining.splice(found, 1); cursor = Math.max(0, found - 1);
+    const countBefore = remaining.length; const earId = remaining[found];
+    out.push(remaining[(found - 1 + countBefore) % countBefore], earId, remaining[(found + 1) % countBefore]);
+    remaining.splice(found, 1); active.delete(earId); cursor = Math.max(0, found - 1);
   }
   if (remaining.length === 3) { const [a, b, c] = remaining; if (cross(points[a], points[b], points[c]) > EPSILON) out.push(a, b, c); }
   return out.length === (ids.length - 2) * 3 ? out : null;
 }
 
-function candidateDiagonals(points, ids) {
-  const candidates = [];
-  for (let i = 0; i < ids.length; i += 1) for (let j = i + 2; j < ids.length; j += 1) {
-    if (i === 0 && j === ids.length - 1) continue;
-    if (diagonalClear(points, ids, ids[i], ids[j])) candidates.push({ a: ids[i], b: ids[j], span: j - i });
-  }
-  candidates.sort((x, y) => x.span - y.span || x.a - y.a || x.b - y.b);
-  return candidates;
-}
+function candidateDiagonals(points, ids) { const candidates = []; for (let i = 0; i < ids.length; i += 1) for (let j = i + 2; j < ids.length; j += 1) { if (i === 0 && j === ids.length - 1) continue; if (diagonalClear(points, ids, ids[i], ids[j])) candidates.push({ a: ids[i], b: ids[j], span: j - i }); } candidates.sort((x, y) => x.span - y.span || x.a - y.a || x.b - y.b); return candidates; }
 function splitIds(ids, a, b) { const ia = ids.indexOf(a); const ib = ids.indexOf(b); if (ia < 0 || ib < 0) return null; const first = []; for (let i = ia; ; i = (i + 1) % ids.length) { first.push(ids[i]); if (i === ib) break; } const second = []; for (let i = ib; ; i = (i + 1) % ids.length) { second.push(ids[i]); if (i === ia) break; } return first.length >= 3 && second.length >= 3 ? [first, second] : null; }
 function decompose(points, ids, depth = 0) { if (ids.length < 3 || ids.length > MAX_EXACT_TRIANGULATION_VERTICES || depth > 64) return null; const clipped = earClip(points, ids); if (clipped) return clipped; if (ids.length > 512) return null; for (const diagonal of candidateDiagonals(points, ids)) { const split = splitIds(ids, diagonal.a, diagonal.b); if (!split) continue; const left = decompose(points, split[0], depth + 1); if (!left) continue; const right = decompose(points, split[1], depth + 1); if (right) return [...left, ...right]; } return null; }
 
 export function analyzeRing(ring) {
-  const normalized = normalizeRing(ring); const points = unwrapRing(normalized); const selfIntersections = [];
-  const n = points.length;
-  if (n <= 2048) {
-    for (let i = 0; i < n; i += 1) { const a = points[i]; const b = points[(i + 1) % n]; for (let j = i + 1; j < n; j += 1) { if (j === i || (j + 1) % n === i || j === (i + 1) % n) continue; if (segmentsIntersect(a, b, points[j], points[(j + 1) % n])) { selfIntersections.push([i, j]); if (selfIntersections.length >= MAX_DIAGNOSTIC_INTERSECTIONS) break; } } if (selfIntersections.length >= MAX_DIAGNOSTIC_INTERSECTIONS) break; }
-  }
+  const normalized = normalizeRing(ring); const points = unwrapRing(normalized); const selfIntersections = []; const n = points.length;
+  if (n <= 2048) for (let i = 0; i < n; i += 1) { const a = points[i]; const b = points[(i + 1) % n]; for (let j = i + 1; j < n; j += 1) { if (j === i || (j + 1) % n === i || j === (i + 1) % n) continue; if (segmentsIntersect(a, b, points[j], points[(j + 1) % n])) { selfIntersections.push([i, j]); if (selfIntersections.length >= MAX_DIAGNOSTIC_INTERSECTIONS) break; } } if (selfIntersections.length >= MAX_DIAGNOSTIC_INTERSECTIONS) break; }
   const finite = points.every(([x, y]) => Number.isFinite(x) && Number.isFinite(y));
   return Object.freeze({ rawVertexCount: Array.isArray(ring) ? ring.length : 0, normalizedVertexCount: normalized.length, signedArea: signedArea(points), longitudeSpan: points.length ? Math.max(...points.map(([x]) => x)) - Math.min(...points.map(([x]) => x)) : 0, backtracking: isBacktrackingRing(ring), selfIntersections: Object.freeze(selfIntersections), selfIntersectionCheck: n <= 2048 ? "complete" : "bounded-skipped", finite, simple: finite && normalized.length >= 3 && selfIntersections.length === 0 && Math.abs(signedArea(points)) > EPSILON, triangulable: false });
 }
@@ -133,8 +142,7 @@ export function triangulateRing(ring, context = {}) {
   if (isBacktrackingRing(ring)) return [];
   const normalized = normalizeRing(ring); if (normalized.length < 3) return [];
   const points = unwrapRing(normalized); if (Math.abs(signedArea(points)) <= EPSILON) return [];
-  const ids = Array.from({ length: points.length }, (_, i) => i);
-  const result = earClip(points, ids) || decompose(points, ids);
+  const ids = Array.from({ length: points.length }, (_, i) => i); const result = earClip(points, ids) || decompose(points, ids);
   if (!result) {
     const diagnostic = analyzeRing(points);
     if (!diagnostic.simple) return [];
