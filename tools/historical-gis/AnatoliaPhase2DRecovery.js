@@ -6,9 +6,6 @@ import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceM
 const RECOVERY_GRID_STEP = 0.01;
 const RECOVERY_MAX_RADIUS = 1.5;
 
-// These are curated physical-land reconciliation points, not historical city
-// anchors. They are used only when the coarse physical mask cannot represent
-// the terrestrial side of a known shoreline anchor.
 const EXPLICIT_RECOVERY_ANCHORS = Object.freeze({
   "bithynia-nicaea": [29.69, 40.44],
 });
@@ -101,15 +98,21 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
       const anchor = findPhysicalRecoveryAnchor(metadata.centroid, metadata.id);
       if (!anchor) continue;
       originals.set(metadata.id, clonePoint(metadata.centroid));
-      changed.push([metadata, metadata.centroid]);
+      changed.push([metadata, metadata.centroid, metadata.terrain]);
       metadata.centroid = clonePoint(anchor);
+      // A recovered terrestrial anchor must use the ordinary land fallback
+      // path. Restore the presentation terrain after geometry generation.
+      if (EXPLICIT_RECOVERY_ANCHORS[metadata.id]) metadata.terrain = "recovery-land";
     }
 
     try {
       const recovered = buildPhase2D(sourceRegions);
       return restoreHistoricalAnchors(recovered, originals);
     } finally {
-      for (const [metadata, centroid] of changed) metadata.centroid = centroid;
+      for (const [metadata, centroid, terrain] of changed) {
+        metadata.centroid = centroid;
+        metadata.terrain = terrain;
+      }
     }
   }
 }
