@@ -1,5 +1,6 @@
 import { createTerrainEdgeIndexTopology } from "./TerrainEdgeIndexTopology.js";
 import { validateTerrainIndexTopology } from "./TerrainTopologyValidator.js";
+import { validateTerrainTopologyCoverage } from "./TerrainTopologyCoverageValidator.js";
 
 export function resolveTerrainGpuDraw({ size, drawPlan, positions = null } = {}) {
   if (!drawPlan || typeof drawPlan !== "object") throw new Error("Terrain GPU draw resolution requires a draw plan.");
@@ -7,5 +8,7 @@ export function resolveTerrainGpuDraw({ size, drawPlan, positions = null } = {})
   const edges = Object.fromEntries(["north","east","south","west"].map(edge => [edge, drawPlan.edges?.[edge]?.mode ?? "same"]));
   const topology = createTerrainEdgeIndexTopology({ size, edges });
   validateTerrainIndexTopology({ indices: topology.indices, vertexCount: topology.vertexCount, positions });
-  return Object.freeze({ drawable: true, tileId: drawPlan.tileId, topologyVariant: topology.transitionEdges.length ? "stitched" : "base", indexCount: topology.indexCount, indices: topology.indices, edges: topology.edges });
+  const coverage = validateTerrainTopologyCoverage({ indices: topology.indices, vertexCount: topology.vertexCount, size });
+  if (!coverage.completeGridEdgeCoverage) throw new Error(`Terrain topology coverage is incomplete: ${coverage.missingGridEdges} grid edge(s) missing.`);
+  return Object.freeze({ drawable: true, tileId: drawPlan.tileId, topologyVariant: topology.transitionEdges.length ? "stitched" : "base", indexCount: topology.indexCount, indices: topology.indices, edges: topology.edges, coverage });
 }
