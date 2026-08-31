@@ -39,11 +39,13 @@ layout(location = 2) in vec2 aUv;
 out vec2 vUv;
 out float vHeight;
 uniform mat4 uViewProjection;
+uniform vec4 uTileTransform;
 uniform float uHeightScale;
 void main() {
   vUv = aUv;
   vHeight = aHeight;
-  gl_Position = uViewProjection * vec4(aPosition, aHeight * uHeightScale, 1.0);
+  vec2 worldPosition = aPosition * uTileTransform.xy + uTileTransform.zw;
+  gl_Position = uViewProjection * vec4(worldPosition, aHeight * uHeightScale, 1.0);
 }`;
 
 export const TERRAIN_FRAGMENT_SHADER = `#version 300 es
