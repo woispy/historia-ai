@@ -8,6 +8,7 @@ import {
   auditHistoricalPoliticalCoverage,
   pointInPolygon,
 } from "../../src/world/map/historical/HistoricalPoliticalCoverageInvariants.js";
+import { decodeHistoricalRuntimeRegion } from "../../src/world/map/binary/HistoricalRuntimeBinary.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -70,10 +71,8 @@ test("generated 1300 political geometry is presented across all physical land an
   const manifestPath = resolve(root, "src/world/map/assets/historical/1300/manifest.json");
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   const politicalEntries = manifest.regions.flatMap((region) => {
-    const regionAsset = JSON.parse(
-      readFileSync(resolve(root, "src/world/map/assets/historical/1300", region.file), "utf8"),
-    );
-    return regionAsset.geometries ?? [];
+    const bytes = readFileSync(resolve(root, "src/world/map/assets/historical/1300", region.file));
+    return decodeHistoricalRuntimeRegion(bytes, { source: manifest.source }).geometries ?? [];
   });
 
   assert.ok(landPolygons.length > 0, "Generated physical land geometry must exist before the coverage audit.");
