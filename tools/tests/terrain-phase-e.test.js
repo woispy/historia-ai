@@ -46,7 +46,8 @@ assert.equal(terrainLodEdgeCompatible(129, 65), true);
 assert.equal(terrainLodEdgeCompatible(65, 33), true);
 const skirted = addTerrainSkirts(mesh, { size: 3, depth: 0.03 });
 assert.equal(skirted.positions.length, 27 + 12 * 3);
-assert.equal(skirted.indices.length, 24 + 12 * 6);
+assert.equal(skirted.indices.length, 24 + 4 * 2 * 6);
+assert.ok(skirted.indices.every((index) => index < 21));
 
 const landMask = { contains: (x, y) => x >= 0 && y >= 0 };
 assert.equal(clipTerrainSampleToLand({ x: 1, y: 2, height: 3, landMask }).land, true);
