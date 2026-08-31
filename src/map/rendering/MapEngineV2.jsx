@@ -1,65 +1,89 @@
 import { useEffect, useRef } from "react";
 import { GpuMapRenderer } from "./gpu/GpuMapRenderer.js";
+import { buildGpuAssetBridge } from "./gpu/MapAssetBridge.js";
 import { MapCameraRig } from "../runtime/MapCameraRig.js";
 import { buildSpatialItems, ProvinceSoA, QuadtreeIndex } from "../runtime/index.js";
 
 /**
- * Thin React host for the GPU map engine. It mounts one canvas and delegates
- * all hot interaction/render work to an imperative renderer instance.
+ * Thin React host. One canvas, one imperative GPU renderer and no SVG map
+ * subtree. React only supplies coarse application/session changes.
  */
 export default function MapEngineV2({
   provinces = [],
   camera = {},
   selectedProvinceId = null,
+  mapStyle = "detailed",
   onProvinceClick,
 }) {
   const canvasRef = useRef(null);
   const rendererRef = useRef(null);
   const rigRef = useRef(null);
   const indexRef = useRef(null);
-  const dragRef = useRef({ active: false, pointerId: null, lastX: 0, lastY: 0 });
+  const dragRef = useRef({ active: false, pointerId: null, moved: false, lastX: 0, lastY: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return undefined;
+    const asset = buildGpuAssetBridge(provinces, mapStyle);
+    if (!asset) return undefined;
 
     const rig = new MapCameraRig({ minZoom: 1, maxZoom: 96 });
-    rig.state = { ...rig.state, ...camera };
-    const renderer = new GpuMapRenderer(canvas, { cameraRig: rig });
+    rig.setState(camera);
+    const renderer = new GpuMapRenderer(canvas);
+    renderer.setCamera(rig.snapshot());
+    const ready = renderer.initialize({
+      provinceSource: asset.provinceSource,
+      landSource: asset.landSource,
+      palette: asset.palette,
+      provinceIds: asset.provinceIds,
+    });
+    if (!ready) {
+      renderer.dispose();
+      return undefined;
+    }
+
+    renderer.resize(canvas.clientWidth, canvas.clientHeight);
+    renderer.setSelectedProvinceId(selectedProvinceId);
+    renderer.start();
     rigRef.current = rig;
     rendererRef.current = renderer;
 
-    // This host intentionally has no React-driven animation state. The next
-    // migration step supplies build-time binary texture assets to this API.
-    const raf = requestAnimationFrame(() => renderer.start());
+    const resizeObserver = new ResizeObserver(() => {
+      renderer.resize(canvas.clientWidth, canvas.clientHeight);
+    });
+    resizeObserver.observe(canvas);
+
     return () => {
-      cancelAnimationFrame(raf);
+      resizeObserver.disconnect();
       renderer.dispose();
       rendererRef.current = null;
       rigRef.current = null;
     };
-  }, []);
+  }, [mapStyle, provinces, camera.x, camera.y, camera.zoom, camera.pitch, camera.yaw, selectedProvinceId]);
+
+  useEffect(() => {
+    const renderer = rendererRef.current;
+    if (!renderer) return;
+    renderer.setCamera(camera);
+    renderer.setSelectedProvinceId(selectedProvinceId);
+  }, [camera, selectedProvinceId]);
 
   useEffect(() => {
     const soa = new ProvinceSoA(provinces);
     indexRef.current = new QuadtreeIndex(buildSpatialItems(soa));
   }, [provinces]);
 
-  useEffect(() => {
-    rendererRef.current?.setCamera(camera);
-    rendererRef.current?.setSelectedProvinceId(selectedProvinceId);
-  }, [camera, selectedProvinceId]);
-
   const handleWheel = (event) => {
     event.preventDefault();
     const rig = rigRef.current;
     if (!rig) return;
     rig.zoomBy(-event.deltaY * 0.0015);
+    rendererRef.current?.setCamera(rig.snapshot());
   };
 
   const handlePointerDown = (event) => {
     if (event.button !== 0) return;
-    dragRef.current = { active: true, pointerId: event.pointerId, lastX: event.clientX, lastY: event.clientY };
+    dragRef.current = { active: true, pointerId: event.pointerId, moved: false, lastX: event.clientX, lastY: event.clientY };
     rigRef.current?.beginDrag();
     event.currentTarget.setPointerCapture?.(event.pointerId);
   };
@@ -69,23 +93,34 @@ export default function MapEngineV2({
     if (!drag.active || drag.pointerId !== event.pointerId) return;
     const dx = event.clientX - drag.lastX;
     const dy = event.clientY - drag.lastY;
+    if (Math.abs(dx) + Math.abs(dy) > 2) drag.moved = true;
     drag.lastX = event.clientX;
     drag.lastY = event.clientY;
     rigRef.current?.panPixels(dx, dy, event.currentTarget.clientWidth, event.currentTarget.clientHeight);
-    const renderer = rendererRef.current;
-    renderer?.setCamera(rigRef.current?.snapshot() ?? camera);
+    rendererRef.current?.setCamera(rigRef.current?.snapshot() ?? camera);
   };
 
   const stopDrag = (event) => {
     const drag = dragRef.current;
     if (drag.active && drag.pointerId === event.pointerId) {
       event.currentTarget.releasePointerCapture?.(event.pointerId);
-      dragRef.current = { active: false, pointerId: null, lastX: 0, lastY: 0 };
+      dragRef.current.active = false;
     }
   };
 
-  const handleClick = (event) => {
+  const handleHover = (event) => {
     if (dragRef.current.active) return;
+    const renderer = rendererRef.current;
+    if (!renderer) return;
+    const provinceId = renderer.pick(event.clientX, event.clientY);
+    renderer.setHoveredRasterId(provinceId ? renderer.lookupRasterId(provinceId) : 0);
+  };
+
+  const handleClick = (event) => {
+    if (dragRef.current.moved) {
+      dragRef.current.moved = false;
+      return;
+    }
     const provinceId = rendererRef.current?.pick(event.clientX, event.clientY);
     if (provinceId) onProvinceClick?.(provinceId);
   };
@@ -97,7 +132,10 @@ export default function MapEngineV2({
       aria-label="Historia AI GPU map"
       onWheel={handleWheel}
       onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
+      onPointerMove={(event) => {
+        handlePointerMove(event);
+        handleHover(event);
+      }}
       onPointerUp={stopDrag}
       onPointerCancel={stopDrag}
       onClick={handleClick}
