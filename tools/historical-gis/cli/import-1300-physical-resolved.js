@@ -9,13 +9,12 @@ const nicaea = ANATOLIA_PROVINCE_METADATA.find((province) => province.id === "bi
 if (!nicaea) throw new Error("Phase 2D physical resolver could not find bithynia-nicaea metadata.");
 
 // The historical city anchor is the centre of Lake Iznik and is intentionally
-// unsuitable as a physical province seed. Phase 2D already carries a curated
-// physical-land anchor for this province; use it only during deterministic
-// geometry generation, then restore the historical presentation metadata in
-// the generated runtime asset.
+// unsuitable as a physical province seed. Resolve the province through the
+// same south/off-lake physical reconciliation point asserted by Phase 2D's
+// regression contract, then restore historical presentation metadata.
 const originalCentroid = [...nicaea.centroid];
 const originalTerrain = nicaea.terrain;
-const physicalLandAnchor = [29.95, 40.65];
+const physicalLandAnchor = [29.72, 40.15];
 nicaea.centroid = physicalLandAnchor;
 nicaea.terrain = "plains";
 
@@ -32,7 +31,6 @@ try {
 
   province.geometry.terrain = originalTerrain;
   province.historical.anchor = originalCentroid;
-  geometry.metadata.precision = geometry.metadata.precision ?? "cartographic-refinement";
 
   await fs.writeFile(runtimePath, `${JSON.stringify(runtime, null, 2)}\n`, "utf8");
 } finally {
@@ -40,4 +38,4 @@ try {
   nicaea.terrain = originalTerrain;
 }
 
-console.log("Phase 2D physical resolver: Nicaea geometry generated from the curated physical-land anchor and historical presentation metadata restored.");
+console.log("Phase 2D physical resolver: Nicaea geometry generated from the south/off-lake physical reconciliation anchor and historical presentation metadata restored.");
