@@ -47,6 +47,19 @@ export function normalizeRing(ring) {
   return out;
 }
 
+function unwrapRing(points) {
+  if (points.length < 2) return points.map((point) => point.slice());
+  const out = [points[0].slice()];
+  for (let i = 1; i < points.length; i += 1) {
+    let longitude = points[i][0];
+    const previousLongitude = out[i - 1][0];
+    while (longitude - previousLongitude > 180) longitude -= 360;
+    while (longitude - previousLongitude < -180) longitude += 360;
+    out.push([longitude, points[i][1]]);
+  }
+  return out;
+}
+
 function orientation(a, b, c) { const value = cross(a, b, c); if (Math.abs(value) <= EPSILON) return 0; return value > 0 ? 1 : -1; }
 function onSegment(a, b, p) { return orientation(a, b, p) === 0 && p[0] >= Math.min(a[0], b[0]) - EPSILON && p[0] <= Math.max(a[0], b[0]) + EPSILON && p[1] >= Math.min(a[1], b[1]) - EPSILON && p[1] <= Math.max(a[1], b[1]) + EPSILON; }
 function segmentsIntersect(a, b, c, d) {
@@ -125,10 +138,14 @@ function decompose(points, ids, depth = 0) {
   return null;
 }
 export function triangulateRing(ring, context = {}) {
-  const points = normalizeRing(ring); if (points.length < 3) return [];
+  const normalized = normalizeRing(ring); if (normalized.length < 3) return [];
+  const points = unwrapRing(normalized);
   if (Math.abs(signedArea(points)) <= EPSILON) throw new Error(`Degenerate province ring${context.provinceId ? ` for ${context.provinceId}` : ""}`);
   const ids = Array.from({ length: points.length }, (_, i) => i); const result = earClip(points, ids) || decompose(points, ids);
-  if (!result) throw new Error(`Province triangulation failed${context.provinceId ? ` province=${context.provinceId}` : ""}${context.lod === undefined ? "" : ` lod=${context.lod}`}; vertices=${points.length}`);
+  if (!result) {
+    const longitudeSpan = Math.max(...points.map(([longitude]) => longitude)) - Math.min(...points.map(([longitude]) => longitude));
+    throw new Error(`Province triangulation failed${context.provinceId ? ` province=${context.provinceId}` : ""}${context.lod === undefined ? "" : ` lod=${context.lod}`}; vertices=${points.length}; unwrappedLongitudeSpan=${longitudeSpan.toFixed(3)}`);
+  }
   return result;
 }
 
@@ -141,12 +158,13 @@ function simplifyRing(ring, target) {
 
 function ringIsValid(ring) {
   const points = normalizeRing(ring);
-  if (points.length < 3 || Math.abs(signedArea(points)) <= EPSILON) return false;
-  for (let i = 0; i < points.length; i += 1) {
-    const a = points[i]; const b = points[(i + 1) % points.length];
-    for (let j = i + 1; j < points.length; j += 1) {
-      if (j === i || (j + 1) % points.length === i || j === (i + 1) % points.length) continue;
-      if (segmentsIntersect(a, b, points[j], points[(j + 1) % points.length])) return false;
+  if (points.length < 3 || Math.abs(signedArea(unwrapRing(points))) <= EPSILON) return false;
+  const working = unwrapRing(points);
+  for (let i = 0; i < working.length; i += 1) {
+    const a = working[i]; const b = working[(i + 1) % working.length];
+    for (let j = i + 1; j < working.length; j += 1) {
+      if (j === i || (j + 1) % working.length === i || j === (i + 1) % working.length) continue;
+      if (segmentsIntersect(a, b, working[j], working[(j + 1) % working.length])) return false;
     }
   }
   try { triangulateRing(points); return true; } catch { return false; }
