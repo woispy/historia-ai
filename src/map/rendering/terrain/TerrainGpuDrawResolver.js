@@ -4,11 +4,14 @@ import { validateTerrainTopologyCoverage } from "./TerrainTopologyCoverageValida
 import { validateTerrainTriangleCoverage } from "./TerrainTriangleCoverageValidator.js";
 import { validateTerrainCellOccupancy } from "./TerrainTopologyOccupancyValidator.js";
 import { validateTerrainExactCellCoverage } from "./TerrainTopologyExactCoverageValidator.js";
+import { resolveTerrainCornerTopologyPolicy } from "./TerrainCornerTopologyPolicy.js";
 
 export function resolveTerrainGpuDraw({ size, drawPlan, positions = null } = {}) {
   if (!drawPlan || typeof drawPlan !== "object") throw new Error("Terrain GPU draw resolution requires a draw plan.");
   if (!drawPlan.draw) return Object.freeze({ drawable: false, reason: drawPlan.deferUntilResident ? "not-resident" : "draw-disabled" });
   const edges = Object.fromEntries(["north","east","south","west"].map(edge => [edge, drawPlan.edges?.[edge]?.mode ?? "same"]));
+  const cornerPolicy = resolveTerrainCornerTopologyPolicy(edges);
+  if (!cornerPolicy.supported) return Object.freeze({ drawable: false, reason: "unsupported-corner-topology", unsupportedCorners: cornerPolicy.unsupportedCorners });
   const topology = createTerrainEdgeIndexTopology({ size, edges });
   validateTerrainIndexTopology({ indices: topology.indices, vertexCount: topology.vertexCount, positions });
   const coverage = validateTerrainTopologyCoverage({ indices: topology.indices, vertexCount: topology.vertexCount, size, edges });
