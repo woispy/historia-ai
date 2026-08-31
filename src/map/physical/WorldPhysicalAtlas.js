@@ -12,10 +12,17 @@ import {
   normalizeGeometryModule,
 } from "./WorldLandMask.js";
 
-const geometryModules = import.meta.glob(
-  "../../world/map/assets/geometry/geometry_country_*.json",
-  { eager: true, import: "default" },
-);
+// Vite exposes import.meta.glob during the browser build. Node's ESM runtime
+// does not. Keep the module importable by deterministic contract tests without
+// weakening the browser asset path: the production bundler still evaluates the
+// glob and supplies every generated geometry asset.
+const geometryGlob = typeof import.meta.glob === "function" ? import.meta.glob : null;
+const geometryModules = geometryGlob
+  ? geometryGlob("../../world/map/assets/geometry/geometry_country_*.json", {
+    eager: true,
+    import: "default",
+  })
+  : {};
 
 export { normalizeGeometryModule };
 
