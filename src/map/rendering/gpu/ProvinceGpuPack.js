@@ -2,21 +2,28 @@
 const EPSILON = 1e-10;
 const POSITION_EPSILON = 1e-7;
 const COLLINEAR_EPSILON = 1e-12;
+const MAX_EXACT_TRIANGULATION_VERTICES = 12000;
 const cross = (a, b, c) => (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
 const squaredDistance = (a, b) => (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2;
 const signedArea = (ring) => { let sum = 0; for (let i = 0; i < ring.length; i += 1) { const a = ring[i]; const b = ring[(i + 1) % ring.length]; sum += a[0] * b[1] - b[0] * a[1]; } return sum / 2; };
 const same = (a, b) => squaredDistance(a, b) <= POSITION_EPSILON ** 2;
 
+// Linear-time invalid-ring guard. Historical GIS must not contain repeated vertices;
+// detecting that fact here avoids the old O(n²) backtracking preflight on large rings.
 function isBacktrackingRing(ring) {
-  const points = (Array.isArray(ring) ? ring : []).filter((point) => Array.isArray(point) && point.length >= 2).map(([x, y]) => [Number(x), Number(y)]);
+  const points = Array.isArray(ring) ? ring : [];
   if (points.length < 7) return false;
-  if (same(points[0], points[points.length - 1])) points.pop();
-  for (let pivot = 2; pivot < points.length - 2; pivot += 1) {
-    const span = Math.min(pivot, points.length - 1 - pivot);
-    if (span < 3) continue;
-    let matches = 0;
-    for (let offset = 1; offset <= span; offset += 1) if (same(points[pivot - offset], points[pivot + offset])) matches += 1;
-    if (matches >= span - 1 && matches >= 3) return true;
+  const seen = new Map();
+  const limit = same(points[0], points[points.length - 1]) ? points.length - 1 : points.length;
+  for (let i = 0; i < limit; i += 1) {
+    const point = points[i];
+    if (!Array.isArray(point) || point.length < 2) continue;
+    const p = [Number(point[0]), Number(point[1])];
+    if (!Number.isFinite(p[0]) || !Number.isFinite(p[1])) continue;
+    const key = `${Math.round(p[0] / POSITION_EPSILON)},${Math.round(p[1] / POSITION_EPSILON)}`;
+    const previous = seen.get(key);
+    if (previous !== undefined && i - previous > 1 && !(previous === 0 && i === limit - 1)) return true;
+    seen.set(key, i);
   }
   return false;
 }
@@ -67,28 +74,50 @@ function diagonalClear(points, ids, ia, ib) {
   const a = points[ia]; const b = points[ib];
   return [0.25, 0.5, 0.75].some((t) => pointInPolygon([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t], points, ids));
 }
-function strictlyInside(point, a, b, c) { const x = cross(a, b, point); const y = cross(b, c, point); const z = cross(c, a, point); return (x > EPSILON && y > EPSILON && z > EPSILON) || (x < -EPSILON && y < -EPSILON && z < -EPSILON); }
+function pointInTriangle(point, a, b, c) { const ab = cross(a, b, point); const bc = cross(b, c, point); const ca = cross(c, a, point); return (ab >= -EPSILON && bc >= -EPSILON && ca >= -EPSILON) || (ab <= EPSILON && bc <= EPSILON && ca <= EPSILON); }
+function bboxContains(point, a, b, c) { const minX = Math.min(a[0], b[0], c[0]) - EPSILON; const maxX = Math.max(a[0], b[0], c[0]) + EPSILON; const minY = Math.min(a[1], b[1], c[1]) - EPSILON; const maxY = Math.max(a[1], b[1], c[1]) + EPSILON; return point[0] >= minX && point[0] <= maxX && point[1] >= minY && point[1] <= maxY; }
+
+// Standard ear clipping with local triangle tests. Unlike the previous implementation,
+// an ear candidate no longer performs a full boundary intersection + three point-in-
+// polygon scans. For simple GIS rings this reduces the hot path from roughly cubic-
+// per-ear work to quadratic total work in the common case.
 function earClip(points, inputIds = null) {
-  const ids = inputIds ? inputIds.slice() : Array.from({ length: points.length }, (_, i) => i); if (signedArea(ids.map((id) => points[id])) < 0) ids.reverse();
-  const remaining = ids.slice(); const out = []; let guard = 0;
-  while (remaining.length > 3 && guard++ < ids.length * ids.length * 4) {
+  const ids = inputIds ? inputIds.slice() : Array.from({ length: points.length }, (_, i) => i);
+  if (ids.length > MAX_EXACT_TRIANGULATION_VERTICES) return null;
+  if (signedArea(ids.map((id) => points[id])) < 0) ids.reverse();
+  const remaining = ids.slice(); const out = [];
+  let cursor = 0; let guard = 0; const guardLimit = ids.length * 4;
+  while (remaining.length > 3 && guard++ < guardLimit) {
     let found = -1;
-    for (let i = 0; i < remaining.length; i += 1) {
-      const a = remaining[(i - 1 + remaining.length) % remaining.length]; const b = remaining[i]; const c = remaining[(i + 1) % remaining.length];
-      if (cross(points[a], points[b], points[c]) <= EPSILON || !diagonalClear(points, remaining, a, c)) continue;
+    const count = remaining.length;
+    for (let step = 0; step < count; step += 1) {
+      const i = (cursor + step) % count;
+      const aId = remaining[(i - 1 + count) % count]; const bId = remaining[i]; const cId = remaining[(i + 1) % count];
+      const a = points[aId]; const b = points[bId]; const c = points[cId];
+      if (cross(a, b, c) <= EPSILON) continue;
       let blocked = false;
-      for (const k of remaining) if (k !== a && k !== b && k !== c && strictlyInside(points[k], points[a], points[b], points[c])) { blocked = true; break; }
+      for (const k of remaining) {
+        if (k === aId || k === bId || k === cId) continue;
+        const p = points[k];
+        if (bboxContains(p, a, b, c) && pointInTriangle(p, a, b, c)) { blocked = true; break; }
+      }
       if (!blocked) { found = i; break; }
     }
     if (found < 0) return null;
-    out.push(remaining[(found - 1 + remaining.length) % remaining.length], remaining[found], remaining[(found + 1) % remaining.length]); remaining.splice(found, 1);
+    const countBefore = remaining.length;
+    out.push(remaining[(found - 1 + countBefore) % countBefore], remaining[found], remaining[(found + 1) % countBefore]);
+    remaining.splice(found, 1); cursor = Math.max(0, found - 1);
   }
-  if (remaining.length === 3 && cross(points[remaining[0]], points[remaining[1]], points[remaining[2]]) > EPSILON) out.push(...remaining);
+  if (remaining.length === 3) {
+    const [a, b, c] = remaining;
+    if (cross(points[a], points[b], points[c]) > EPSILON) out.push(a, b, c);
+  }
   return out.length === (ids.length - 2) * 3 ? out : null;
 }
+
 function candidateDiagonals(points, ids) { const candidates = []; for (let i = 0; i < ids.length; i += 1) for (let j = i + 2; j < ids.length; j += 1) { if (i === 0 && j === ids.length - 1) continue; if (diagonalClear(points, ids, ids[i], ids[j])) candidates.push({ a: ids[i], b: ids[j], span: j - i }); } candidates.sort((x, y) => x.span - y.span || x.a - y.a || x.b - y.b); return candidates; }
 function splitIds(ids, a, b) { const ia = ids.indexOf(a); const ib = ids.indexOf(b); if (ia < 0 || ib < 0) return null; const first = []; for (let i = ia; ; i = (i + 1) % ids.length) { first.push(ids[i]); if (i === ib) break; } const second = []; for (let i = ib; ; i = (i + 1) % ids.length) { second.push(ids[i]); if (i === ia) break; } return first.length >= 3 && second.length >= 3 ? [first, second] : null; }
-function decompose(points, ids, depth = 0) { if (ids.length < 3 || depth > ids.length * 2) return null; const clipped = earClip(points, ids); if (clipped) return clipped; for (const diagonal of candidateDiagonals(points, ids)) { const split = splitIds(ids, diagonal.a, diagonal.b); if (!split) continue; const left = decompose(points, split[0], depth + 1); if (!left) continue; const right = decompose(points, split[1], depth + 1); if (right) return [...left, ...right]; } return null; }
+function decompose(points, ids, depth = 0) { if (ids.length < 3 || ids.length > MAX_EXACT_TRIANGULATION_VERTICES || depth > 64) return null; const clipped = earClip(points, ids); if (clipped) return clipped; if (ids.length > 512) return null; for (const diagonal of candidateDiagonals(points, ids)) { const split = splitIds(ids, diagonal.a, diagonal.b); if (!split) continue; const left = decompose(points, split[0], depth + 1); if (!left) continue; const right = decompose(points, split[1], depth + 1); if (right) return [...left, ...right]; } return null; }
 
 export function analyzeRing(ring) {
   const normalized = normalizeRing(ring); const points = unwrapRing(normalized); const selfIntersections = [];
@@ -123,7 +152,10 @@ export function buildLodRings(ring, levels = [1, 0.5, 0.25, 0.125]) {
   const output = []; let previous = source;
   for (let level = 0; level < levels.length; level += 1) {
     const factor = Number(levels[level]); const target = Math.min(previous.length, Math.max(3, Math.round(source.length * (Number.isFinite(factor) ? factor : 1))));
-    const candidate = level === 0 ? source : simplifyRing(source, target); const selected = ringIsSimple(candidate) ? candidate : previous;
+    const candidate = level === 0 ? source : simplifyRing(source, target);
+    // LOD simplification is intentionally cheap; triangulation is the authoritative
+    // validity gate. This avoids four O(n²) self-intersection scans per source ring.
+    const selected = candidate.length >= 3 && Math.abs(signedArea(candidate)) > EPSILON ? candidate : previous;
     output.push(selected); previous = selected;
   }
   return output;
