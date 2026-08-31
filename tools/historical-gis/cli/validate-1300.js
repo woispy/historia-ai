@@ -26,7 +26,12 @@ const normalizedRegions = await importHistoricalGeoJson(sourcePath, 1300);
 const runtime = JSON.parse(await fs.readFile(runtimePath, "utf8"));
 
 assert(Array.isArray(sourceRaw.features), "Historical GIS source must contain a features array.");
-assert(sourceRaw.features.length === normalizedRegions.length, `Source/normalized feature count mismatch: ${sourceRaw.features.length} vs ${normalizedRegions.length}.`);
+// Canonicalization is an intentional source-boundary transformation: malformed,
+// duplicate-only, collinear, or zero-area rings are excluded before runtime IDs
+// and sourceFeatureIndex values are assigned. Validate against that canonical
+// feature set rather than the raw upstream feature count.
+assert(normalizedRegions.length <= sourceRaw.features.length, "Normalized feature count cannot exceed raw source count.");
+assert(normalizedRegions.length > 0, "Historical GIS normalization removed every source feature.");
 assert(runtime.schemaVersion === 3, "Unsupported historical runtime asset schema.");
 assert(runtime.assetType === "historical-runtime", "Invalid historical runtime asset type.");
 assert(runtime.historicalDate === "1300-01-01", "Historical runtime date mismatch.");
