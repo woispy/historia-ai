@@ -4,17 +4,20 @@ precision highp int;
 
 layout(location = 0) in vec2 a_position;
 layout(location = 1) in uint a_provinceIndex;
+layout(location = 2) in vec4 a_color;
 
 uniform vec2 u_camera;
 uniform vec2 u_viewportWorld;
 uniform uint u_selectedProvince;
 
 flat out uint v_provinceIndex;
+out vec4 v_color;
 
 void main() {
   vec2 world = (a_position - u_camera) / u_viewportWorld;
   gl_Position = vec4(world, 0.0, 1.0);
   v_provinceIndex = a_provinceIndex;
+  v_color = a_color;
 }`;
 
 const FRAGMENT_SHADER_SOURCE = `#version 300 es
@@ -22,7 +25,7 @@ precision highp float;
 precision highp int;
 
 flat in uint v_provinceIndex;
-uniform vec4 u_defaultColor;
+in vec4 v_color;
 uniform vec4 u_selectedColor;
 uniform uint u_selectedProvince;
 
@@ -31,7 +34,7 @@ out vec4 outColor;
 void main() {
   outColor = v_provinceIndex == u_selectedProvince
     ? u_selectedColor
-    : u_defaultColor;
+    : v_color;
 }`;
 
 function assertWebGl2(gl) {
@@ -70,17 +73,6 @@ function createProgram(gl) {
   return program;
 }
 
-function parseHexColor(hex, fallback) {
-  const value = String(hex ?? "").replace(/^#/, "");
-  if (!/^[0-9a-f]{6}$/i.test(value)) return fallback;
-  return [
-    Number.parseInt(value.slice(0, 2), 16) / 255,
-    Number.parseInt(value.slice(2, 4), 16) / 255,
-    Number.parseInt(value.slice(4, 6), 16) / 255,
-    1,
-  ];
-}
-
 export function getGpuViewportWorld(width, height, zoom = 1) {
   const safeWidth = Math.max(1, Number(width) || 1);
   const safeHeight = Math.max(1, Number(height) || 1);
@@ -113,14 +105,14 @@ export function createProvinceGpuRenderer(canvas) {
   const vao = gl.createVertexArray();
   const positionBuffer = gl.createBuffer();
   const provinceIndexBuffer = gl.createBuffer();
-  if (!vao || !positionBuffer || !provinceIndexBuffer) {
+  const colorBuffer = gl.createBuffer();
+  if (!vao || !positionBuffer || !provinceIndexBuffer || !colorBuffer) {
     throw new Error("Unable to allocate province GPU buffers.");
   }
 
   const cameraLocation = gl.getUniformLocation(program, "u_camera");
   const viewportWorldLocation = gl.getUniformLocation(program, "u_viewportWorld");
   const selectedLocation = gl.getUniformLocation(program, "u_selectedProvince");
-  const defaultColorLocation = gl.getUniformLocation(program, "u_defaultColor");
   const selectedColorLocation = gl.getUniformLocation(program, "u_selectedColor");
 
   gl.bindVertexArray(vao);
@@ -130,23 +122,31 @@ export function createProvinceGpuRenderer(canvas) {
   gl.bindBuffer(gl.ARRAY_BUFFER, provinceIndexBuffer);
   gl.enableVertexAttribArray(1);
   gl.vertexAttribIPointer(1, 1, gl.UNSIGNED_INT, 0, 0);
+  gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+  gl.enableVertexAttribArray(2);
+  gl.vertexAttribPointer(2, 4, gl.UNSIGNED_BYTE, true, 0, 0);
   gl.bindVertexArray(null);
 
   let vertexCount = 0;
 
   return {
     upload(geometry) {
-      if (!geometry?.positions || !geometry?.provinceIndices) {
+      if (!geometry?.positions || !geometry?.provinceIndices || !geometry?.colors) {
         throw new Error("Province GPU renderer received an invalid geometry buffer.");
       }
       if (geometry.positions.length !== geometry.provinceIndices.length * 2) {
         throw new Error("Province GPU position/index buffer lengths do not match.");
+      }
+      if (geometry.colors.length !== geometry.provinceIndices.length * 4) {
+        throw new Error("Province GPU color/index buffer lengths do not match.");
       }
 
       gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, geometry.positions, gl.STATIC_DRAW);
       gl.bindBuffer(gl.ARRAY_BUFFER, provinceIndexBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, geometry.provinceIndices, gl.STATIC_DRAW);
+      gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, geometry.colors, gl.STATIC_DRAW);
       gl.bindBuffer(gl.ARRAY_BUFFER, null);
       vertexCount = geometry.provinceIndices.length;
       return vertexCount;
@@ -161,20 +161,28 @@ export function createProvinceGpuRenderer(canvas) {
       gl.viewport(0, 0, canvas.width, canvas.height);
     },
 
-    render({ camera = {}, width, height, zoom = 1, selectedProvinceIndex = -1, color, selectedColor } = {}) {
+    render({ camera = {}, width, height, zoom = 1, selectedProvinceIndex = -1, selectedColor = "#d6b04d" } = {}) {
       if (!vertexCount) return;
       const viewportWorld = getGpuViewportWorld(width, height, zoom);
       const selected = Number.isInteger(selectedProvinceIndex) && selectedProvinceIndex >= 0
         ? selectedProvinceIndex
         : 0xffffffff;
+      const value = String(selectedColor).replace(/^#/, "");
+      const selectedRgba = /^[0-9a-f]{6}$/i.test(value)
+        ? [
+          Number.parseInt(value.slice(0, 2), 16) / 255,
+          Number.parseInt(value.slice(2, 4), 16) / 255,
+          Number.parseInt(value.slice(4, 6), 16) / 255,
+          1,
+        ]
+        : [0.84, 0.69, 0.30, 1];
 
       gl.useProgram(program);
       gl.bindVertexArray(vao);
       gl.uniform2f(cameraLocation, Number(camera.x) || 0, Number(camera.y) || 0);
       gl.uniform2f(viewportWorldLocation, viewportWorld[0], viewportWorld[1]);
       gl.uniform1ui(selectedLocation, selected);
-      gl.uniform4fv(defaultColorLocation, parseHexColor(color, [0.43, 0.46, 0.37, 1]));
-      gl.uniform4fv(selectedColorLocation, parseHexColor(selectedColor, [0.84, 0.69, 0.30, 1]));
+      gl.uniform4fv(selectedColorLocation, selectedRgba);
 
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -187,6 +195,7 @@ export function createProvinceGpuRenderer(canvas) {
     dispose() {
       gl.deleteBuffer(positionBuffer);
       gl.deleteBuffer(provinceIndexBuffer);
+      gl.deleteBuffer(colorBuffer);
       gl.deleteVertexArray(vao);
       gl.deleteProgram(program);
     },
