@@ -2,11 +2,12 @@ import assert from "node:assert/strict";
 import { TERRAIN_LODS, terrainLodForDistance } from "../../src/map/rendering/terrain/TerrainLod.js";
 import { makeTerrainTileKey, terrainTileBounds, terrainTilesForBounds } from "../../src/map/rendering/terrain/TerrainTile.js";
 import { planTerrainStreaming, terrainTileZoomForLod } from "../../src/map/rendering/terrain/TerrainStreaming.js";
-import { normalizeSplatWeights } from "../../src/map/rendering/terrain/TerrainMaterial.js";
+import { normalizeSplatWeights, TERRAIN_VERTEX_SHADER } from "../../src/map/rendering/terrain/TerrainMaterial.js";
 import { buildTerrainGridMesh } from "../../src/map/rendering/terrain/TerrainGeometry.js";
 import { addTerrainSkirts, terrainLodEdgeCompatible } from "../../src/map/rendering/terrain/TerrainSeams.js";
 import { buildTerrainEdgeSignature, clipTerrainSampleToLand } from "../../src/map/rendering/terrain/TerrainTopology.js";
 import { createTerrainTileManifest, validateTerrainTileManifest } from "../../src/map/rendering/terrain/TerrainTileManifest.js";
+import { TerrainGpuRenderer } from "../../src/map/rendering/terrain/TerrainGpuRenderer.js";
 
 assert.deepEqual(TERRAIN_LODS.map((lod) => lod.level), [0, 1, 2, 3, 4]);
 assert.equal(terrainLodForDistance(300), 0);
@@ -48,6 +49,31 @@ const skirted = addTerrainSkirts(mesh, { size: 3, depth: 0.03 });
 assert.equal(skirted.positions.length, 27 + 12 * 3);
 assert.equal(skirted.indices.length, 24 + 4 * 2 * 6);
 assert.ok(skirted.indices.every((index) => index < 21));
+
+assert.match(TERRAIN_VERTEX_SHADER, /uTileTransform/);
+assert.match(TERRAIN_VERTEX_SHADER, /worldPosition/);
+
+const fakeGl = {
+  VERTEX_SHADER: 1, FRAGMENT_SHADER: 2, COMPILE_STATUS: 3, LINK_STATUS: 4,
+  ARRAY_BUFFER: 5, ELEMENT_ARRAY_BUFFER: 6, STATIC_DRAW: 7, FLOAT: 8,
+  TEXTURE_2D: 9, RGBA8: 10, RGBA: 11, UNSIGNED_BYTE: 12,
+  TEXTURE_MIN_FILTER: 13, TEXTURE_MAG_FILTER: 14, LINEAR_MIPMAP_LINEAR: 15, LINEAR: 16,
+  TEXTURE_WRAP_S: 17, TEXTURE_WRAP_T: 18, CLAMP_TO_EDGE: 19, TEXTURE0: 20,
+  TRIANGLES: 21, UNSIGNED_INT: 22,
+  createShader: () => ({}), shaderSource: () => {}, compileShader: () => {}, getShaderParameter: () => true,
+  getShaderInfoLog: () => "", createProgram: () => ({}), attachShader: () => {}, linkProgram: () => {},
+  getProgramParameter: () => true, getProgramInfoLog: () => "", deleteShader: () => {}, deleteProgram: () => {},
+  createVertexArray: () => ({}), createBuffer: () => ({}), createTexture: () => ({}),
+  getUniformLocation: (_program, name) => name, bindVertexArray: () => {}, bindBuffer: () => {},
+  bufferData: () => {}, enableVertexAttribArray: () => {}, vertexAttribPointer: () => {},
+  activeTexture: () => {}, bindTexture: () => {}, texParameteri: () => {}, texImage2D: () => {}, generateMipmap: () => {},
+  useProgram: () => {}, uniformMatrix4fv: () => {}, uniform4fv: () => {}, uniform1f: () => {}, uniform3fv: () => {}, uniform1i: () => {},
+  drawElements: () => {}, deleteTexture: () => {}, deleteBuffer: () => {}, deleteVertexArray: () => {},
+};
+const renderer = new TerrainGpuRenderer(fakeGl);
+renderer.uploadMesh(mesh);
+assert.equal(renderer.draw({ viewProjection: new Float32Array(16), tileTransform: [90, 45, 90, 0] }), 8);
+renderer.dispose();
 
 const landMask = { contains: (x, y) => x >= 0 && y >= 0 };
 assert.equal(clipTerrainSampleToLand({ x: 1, y: 2, height: 3, landMask }).land, true);
