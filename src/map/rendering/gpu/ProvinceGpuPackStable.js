@@ -49,20 +49,12 @@ function orientation(a, b, c) { const v = cross(a, b, c); return Math.abs(v) <= 
 function onSegment(a, b, p) { return orientation(a, b, p) === 0 && p[0] >= Math.min(a[0], b[0]) - EPSILON && p[0] <= Math.max(a[0], b[0]) + EPSILON && p[1] >= Math.min(a[1], b[1]) - EPSILON && p[1] <= Math.max(a[1], b[1]) + EPSILON; }
 function segmentsIntersect(a, b, c, d) { const abC = orientation(a, b, c); const abD = orientation(a, b, d); const cdA = orientation(c, d, a); const cdB = orientation(c, d, b); if (abC !== abD && cdA !== cdB) return true; return (abC === 0 && onSegment(a, b, c)) || (abD === 0 && onSegment(a, b, d)) || (cdA === 0 && onSegment(c, d, a)) || (cdB === 0 && onSegment(c, d, b)); }
 function pointInTriangle(p, a, b, c) { const ab = cross(a, b, p); const bc = cross(b, c, p); const ca = cross(c, a, p); return (ab >= -EPSILON && bc >= -EPSILON && ca >= -EPSILON) || (ab <= EPSILON && bc <= EPSILON && ca <= EPSILON); }
-function diagonalClear(points, ids, ia, ib) {
-  const a = points[ia]; const b = points[ib];
-  for (let i = 0; i < ids.length; i += 1) { const u = ids[i]; const v = ids[(i + 1) % ids.length]; if (u === ia || u === ib || v === ia || v === ib) continue; if (segmentsIntersect(a, b, points[u], points[v])) return false; }
-  const mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
-  let inside = false;
-  for (let i = 0, j = ids.length - 1; i < ids.length; j = i++) { const p = points[ids[i]]; const q = points[ids[j]]; if ((p[1] > mid[1]) !== (q[1] > mid[1])) { const x = ((q[0] - p[0]) * (mid[1] - p[1])) / (q[1] - p[1]) + p[0]; if (mid[0] < x) inside = !inside; } }
-  return inside;
-}
 function isSimple(points) {
   const n = points.length;
   if (n < 3) return false;
   if (n > 2048) return true;
   for (let i = 0; i < n; i += 1) for (let j = i + 1; j < n; j += 1) {
-    if (j === i || j === (i + 1) % n || i === (j + 1) % n) continue;
+    if (j === (i + 1) % n || i === (j + 1) % n) continue;
     if (segmentsIntersect(points[i], points[(i + 1) % n], points[j], points[(j + 1) % n])) return false;
   }
   return true;
@@ -70,7 +62,7 @@ function isSimple(points) {
 
 export function analyzeRing(ring) {
   const normalized = normalizeRing(ring); const points = unwrapRing(normalized); const intersections = []; const n = points.length;
-  if (n <= 2048) for (let i = 0; i < n; i += 1) for (let j = i + 1; j < n; j += 1) { if (j === i || j === (i + 1) % n || i === (j + 1) % n) continue; if (segmentsIntersect(points[i], points[(i + 1) % n], points[j], points[(j + 1) % n])) { intersections.push([i, j]); if (intersections.length >= MAX_DIAGNOSTIC_INTERSECTIONS) break; } if (intersections.length >= MAX_DIAGNOSTIC_INTERSECTIONS) break; }
+  if (n <= 2048) for (let i = 0; i < n; i += 1) for (let j = i + 1; j < n; j += 1) { if (j === (i + 1) % n || i === (j + 1) % n) continue; if (segmentsIntersect(points[i], points[(i + 1) % n], points[j], points[(j + 1) % n])) { intersections.push([i, j]); if (intersections.length >= MAX_DIAGNOSTIC_INTERSECTIONS) break; } if (intersections.length >= MAX_DIAGNOSTIC_INTERSECTIONS) break; }
   return Object.freeze({ rawVertexCount: Array.isArray(ring) ? ring.length : 0, normalizedVertexCount: normalized.length, signedArea: signedArea(points), longitudeSpan: points.length ? Math.max(...points.map((p) => p[0])) - Math.min(...points.map((p) => p[0])) : 0, selfIntersections: Object.freeze(intersections), selfIntersectionCheck: n <= 2048 ? "complete" : "bounded-skipped", finite: points.every((p) => Number.isFinite(p[0]) && Number.isFinite(p[1])), simple: isSimple(points) && Math.abs(signedArea(points)) > EPSILON });
 }
 
@@ -88,7 +80,6 @@ export function triangulateRing(ring, context = {}) {
     for (let i = 0; i < ids.length; i += 1) {
       const prev = ids[(i - 1 + ids.length) % ids.length]; const curr = ids[i]; const next = ids[(i + 1) % ids.length];
       if (cross(points[prev], points[curr], points[next]) <= EPSILON) continue;
-      if (!diagonalClear(points, ids, prev, next)) continue;
       let contains = false;
       for (const candidate of ids) { if (candidate === prev || candidate === curr || candidate === next) continue; if (pointInTriangle(points[candidate], points[prev], points[curr], points[next])) { contains = true; break; } }
       if (contains) continue;
