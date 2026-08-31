@@ -23,6 +23,12 @@ assert.ok(
 );
 assert.ok(result.polygonCount >= result.provinceCount, "Every province must contain at least one polygon");
 assert.equal(result.provinces.length, result.geometries.length);
+assert.ok(Array.isArray(result.diagnostics), "Phase 2D must expose deterministic fallback diagnostics");
+assert.equal(
+  result.diagnostics.filter((entry) => entry.status === "failure").length,
+  0,
+  "Phase 2D diagnostics must contain no unresolved province failures",
+);
 
 const provinceIds = new Set();
 let vertexCount = 0;
@@ -70,6 +76,7 @@ for (const geometry of result.geometries) {
     for (const [longitude, latitude] of polygon) {
       assert.ok(longitude >= 25 && longitude <= 46, `Longitude out of Phase 2D envelope: ${longitude}`);
       assert.ok(latitude >= 35 && latitude <= 43, `Latitude out of Phase 2D envelope: ${latitude}`);
+      assert.ok(isPhysicalLandPoint([longitude, latitude]), `Phase 2D vertex must remain physically land-safe: ${longitude},${latitude}`);
     }
   }
 }
@@ -97,5 +104,6 @@ assert.equal(isAnatoliaGeometryPoint([26.5556, 41.6772]), false, "Adrianopolis m
 console.log(
   `Phase 2D Anatolia geometry tests passed: ${result.provinceCount} provinces, `
   + `${result.siteCount} sites (${result.barrierSiteCount} physical barriers), `
-  + `${result.polygonCount} polygons and ${vertexCount} vertices.`,
+  + `${result.polygonCount} polygons and ${vertexCount} vertices; `
+  + `${result.fallbackProvinceCount} deterministic fallbacks.`,
 );

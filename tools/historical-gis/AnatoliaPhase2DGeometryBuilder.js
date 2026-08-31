@@ -7,6 +7,8 @@ const SITE_EPSILON = 1e-6;
 const COAST_SAMPLE_STEP = 0.12;
 const EDGE_SAMPLE_STEP = 0.03;
 const COASTAL_TOLERANCE = 0.06;
+const FALLBACK_RADII = [0.001, 0.002, 0.004, 0.008, 0.015, 0.025, 0.05, 0.1, 0.2, 0.4, 0.8];
+const FALLBACK_DIRECTIONS = 64;
 
 const PHYSICAL_LAND_ANCHORS = Object.freeze({
   "bithynia-nicomedia": [29.80, 40.70],
@@ -212,6 +214,7 @@ function polygonCentroid(polygon) {
 }
 
 function buildFallbackPolygon(center) {
+  if (!isUsableCartographicPoint(center)) return [];
   for (const radius of [0.002, 0.001, 0.0005, 0.00025, 0.0001, 0.00005]) {
     const polygon = Array.from({ length: 6 }, (_, index) => {
       const angle = (index / 6) * Math.PI * 2;
@@ -222,26 +225,75 @@ function buildFallbackPolygon(center) {
   return [];
 }
 
-function resolvePhysicalFallback(province) {
-  const explicit = PHYSICAL_LAND_ANCHORS[province.id];
-  const candidates = [];
-  if (explicit) candidates.push({ point: explicit, source: "physical-anchor" });
-  if (isUsableCartographicPoint(province.centroid)) candidates.push({ point: province.centroid, source: "historical-centroid" });
+function candidateStatus(point) {
+  return {
+    inEnvelope: isWithinAnatoliaEnvelope(point),
+    inLand: pointInAnatoliaLand(point),
+    inWater: pointInWaterEnvelope(point),
+    boundaryDistance: Number(distanceToLandBoundary(point).toFixed(6)),
+  };
+}
 
-  const radial = [0.01, 0.025, 0.05, 0.1, 0.2, 0.4, 0.8];
-  for (const radius of radial) {
-    for (let direction = 0; direction < 32; direction += 1) {
-      const angle = (direction / 32) * Math.PI * 2;
-      candidates.push({ point: [province.centroid[0] + Math.cos(angle) * radius, province.centroid[1] + Math.sin(angle) * radius], source: `radial-${radius}` });
+function resolvePhysicalFallback(province) {
+  const seeds = [];
+  const explicit = PHYSICAL_LAND_ANCHORS[province.id];
+  if (explicit) seeds.push({ point: explicit, source: "physical-anchor" });
+  seeds.push({ point: province.centroid, source: "historical-centroid" });
+
+  const candidates = [];
+  const seen = new Set();
+  const addCandidate = (point, source) => {
+    const key = `${point[0].toFixed(6)}:${point[1].toFixed(6)}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    candidates.push({ point, source });
+  };
+
+  for (const seed of seeds) addCandidate(seed.point, seed.source);
+  for (const seed of seeds) {
+    for (const radius of FALLBACK_RADII) {
+      for (let direction = 0; direction < FALLBACK_DIRECTIONS; direction += 1) {
+        const angle = (direction / FALLBACK_DIRECTIONS) * Math.PI * 2;
+        addCandidate(
+          [seed.point[0] + Math.cos(angle) * radius, seed.point[1] + Math.sin(angle) * radius],
+          `${seed.source}-radial-${radius}`,
+        );
+      }
     }
   }
 
+  let usableCandidateCount = 0;
+  let polygonCandidateCount = 0;
+  const firstUsable = [];
   for (const candidate of candidates) {
     if (!isUsableCartographicPoint(candidate.point)) continue;
+    usableCandidateCount += 1;
+    if (firstUsable.length < 5) firstUsable.push({ ...candidate, status: candidateStatus(candidate.point) });
     const polygon = buildFallbackPolygon(candidate.point);
-    if (polygon.length >= 3) return { polygon, candidate };
+    if (polygon.length >= 3) {
+      polygonCandidateCount += 1;
+      return {
+        polygon,
+        candidate,
+        diagnostics: {
+          candidateCount: candidates.length,
+          usableCandidateCount,
+          polygonCandidateCount,
+          firstUsable,
+        },
+      };
+    }
   }
-  return null;
+  return {
+    polygon: [],
+    candidate: null,
+    diagnostics: {
+      candidateCount: candidates.length,
+      usableCandidateCount,
+      polygonCandidateCount,
+      firstUsable,
+    },
+  };
 }
 
 function createProvinceAsset(metadata, polygons) {
@@ -331,22 +383,28 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
   }
 
   let fallbackCount = 0;
+  const diagnostics = [];
   const provinces = [];
   const geometries = [];
   for (const metadata of ANATOLIA_PROVINCE_METADATA) {
     let polygons = polygonsByProvince[metadata.id];
     if (!polygons.length) {
       const resolved = resolvePhysicalFallback(metadata);
-      if (!resolved) {
+      diagnostics.push({
+        provinceId: metadata.id,
+        status: resolved.polygon.length ? "fallback" : "failure",
+        candidate: resolved.candidate,
+        ...resolved.diagnostics,
+      });
+      if (!resolved.polygon.length) {
         const physicalAnchor = PHYSICAL_LAND_ANCHORS[metadata.id] ?? metadata.centroid;
         throw new Error(
           `Phase 2D produced no physically valid geometry for ${metadata.id}`
           + `; centroid=${metadata.centroid.join(",")}`
           + `; physicalAnchor=${physicalAnchor.join(",")}`
-          + `; anchorLand=${pointInAnatoliaLand(physicalAnchor)}`
-          + `; anchorWater=${pointInWaterEnvelope(physicalAnchor)}`
-          + `; anchorBoundaryDistance=${distanceToLandBoundary(physicalAnchor).toFixed(6)}`
-          + `; candidates=${1 + radialCandidateCount()}`,
+          + `; anchorStatus=${JSON.stringify(candidateStatus(physicalAnchor))}`
+          + `; candidates=${resolved.diagnostics.candidateCount}`
+          + `; usableCandidates=${resolved.diagnostics.usableCandidateCount}`,
         );
       }
       polygons = [roundPolygon(resolved.polygon)];
@@ -370,13 +428,10 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     fallbackProvinceCount: fallbackCount,
     provinceCount: provinces.length,
     polygonCount: geometries.reduce((sum, geometry) => sum + geometry.polygons.length, 0),
+    diagnostics,
     provinces,
     geometries,
   };
-}
-
-function radialCandidateCount() {
-  return 7 * 32;
 }
 
 export function isAnatoliaGeometryPoint(point) {
