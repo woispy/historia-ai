@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { downloadHistorical1300GeoJson, importHistoricalGeoJson } from "../HistoricalGeometryImporter.js";
 import { buildHistoricalGeometryAsset, buildHistoricalProvinceAsset } from "../HistoricalProvinceAssetBuilder.js";
-import { buildAnatoliaPhase2DAssets, isAnatoliaGeometryPoint } from "../AnatoliaPhase2DGeometryBuilder.js";
+import { buildAnatoliaPhase2DAssets, isAnatoliaGeometryPoint } from "../AnatoliaPhase2DRecovery.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const inputArgument = process.argv[2] ?? "--download";
@@ -99,9 +99,4 @@ await fs.writeFile(runtimePath, `${JSON.stringify({
   geometries,
 }, null, 2)}\n`, "utf8");
 
-console.log(`Imported ${regions.length} historical GIS features for 1300.`);
-console.log(`Phase 2D generated ${phase2D.provinceCount} Anatolia provinces from ${phase2D.siteCount} cartographic sites.`);
-console.log(`Phase 2D replaced ${regions.length - sourceRegionsOutsidePhase2D.length} coarse source features in the Anatolia envelope.`);
-console.log(`Generated one consolidated runtime asset containing ${provinces.length} provinces and ${geometries.length} geometries.`);
-console.log("Phase 2D: Anatolia uses curated cartographic province geometry; the rest of the world remains source-derived.");
-console.log("Generated GIS source/assets are reproducible build artifacts and should not be committed unless redistribution is explicitly approved by the source license.");
+console.log(`Historical GIS runtime generated: ${provinces.length} provinces, ${polygonCount} polygons.`);
