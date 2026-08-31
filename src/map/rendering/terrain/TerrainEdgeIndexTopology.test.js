@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { createTerrainEdgeIndexTopology } from "./TerrainEdgeIndexTopology.js";
-const same=createTerrainEdgeIndexTopology({size:5,edges:{}});
-assert.equal(same.vertexCount,25);assert.equal(same.indexCount,96);assert.equal(same.transitionEdges.length,0);
-const stitched=createTerrainEdgeIndexTopology({size:5,edges:{north:"neighbor-coarser"}});
-assert.equal(stitched.transitionEdges.length,1);assert.equal(stitched.transitionEdges[0],"north");assert.ok(stitched.indices instanceof Uint32Array);assert.ok(stitched.indexCount>same.indexCount);
+const modes=["same","neighbor-coarser","neighbor-finer","boundary"];
+for(const north of modes)for(const east of modes){const topology=createTerrainEdgeIndexTopology({size:5,edges:{north,east}});assert.equal(topology.vertexCount,25);assert.ok(topology.indexCount>0);assert.equal(topology.edges.north,north);assert.equal(topology.edges.east,east);}
+const corners=createTerrainEdgeIndexTopology({size:5,edges:{north:"neighbor-coarser",east:"neighbor-coarser",south:"neighbor-finer",west:"neighbor-finer"}});
+assert.equal(corners.transitionEdges.length,4);assert.ok(corners.indices instanceof Uint32Array);
 assert.throws(()=>createTerrainEdgeIndexTopology({size:4}),/odd integer/);
-assert.throws(()=>createTerrainEdgeIndexTopology({size:5,edges:{east:"invalid"}}),/Unknown terrain edge mode/);
-console.log("Phase E edge index topology: PASS");
+assert.throws(()=>createTerrainEdgeIndexTopology({size:5,edges:{north:"invalid"}}),/Unknown terrain edge mode/);
+console.log("Phase E terrain edge topology combinations: PASS");
