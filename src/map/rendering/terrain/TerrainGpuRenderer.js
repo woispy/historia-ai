@@ -101,7 +101,10 @@ export class TerrainGpuRenderer {
     gl.uniform1f(gl.getUniformLocation(this.program, "uHeightScale"), heightScale);
     gl.uniform1f(gl.getUniformLocation(this.program, "uRoughness"), this.material.roughness);
     gl.uniform1f(gl.getUniformLocation(this.program, "uAmbient"), this.material.ambient);
+    gl.uniform1f(gl.getUniformLocation(this.program, "uSunStrength"), this.material.sunStrength);
     gl.uniform1f(gl.getUniformLocation(this.program, "uNormalStrength"), this.material.normalStrength);
+    gl.uniform3fv(gl.getUniformLocation(this.program, "uSunDirection"), this.material.sunDirection);
+    gl.uniform3fv(gl.getUniformLocation(this.program, "uTerrainPalette"), new Float32Array(this.material.palette.flat()));
     for (let unit = 0; unit < this.textures.length; unit += 1) {
       gl.activeTexture(gl.TEXTURE0 + unit);
       gl.bindTexture(gl.TEXTURE_2D, this.textures[unit]);
