@@ -2,6 +2,7 @@ import { createTerrainEdgeIndexTopology } from "./TerrainEdgeIndexTopology.js";
 import { validateTerrainIndexTopology } from "./TerrainTopologyValidator.js";
 import { validateTerrainTopologyCoverage } from "./TerrainTopologyCoverageValidator.js";
 import { validateTerrainTriangleCoverage } from "./TerrainTriangleCoverageValidator.js";
+import { validateTerrainCellOccupancy } from "./TerrainTopologyOccupancyValidator.js";
 
 export function resolveTerrainGpuDraw({ size, drawPlan, positions = null } = {}) {
   if (!drawPlan || typeof drawPlan !== "object") throw new Error("Terrain GPU draw resolution requires a draw plan.");
@@ -14,5 +15,7 @@ export function resolveTerrainGpuDraw({ size, drawPlan, positions = null } = {})
   if (!(positions instanceof Float32Array) || positions.length !== size * size * 2) throw new Error("Terrain GPU draw resolution requires XY positions for geometric coverage validation.");
   const areaCoverage = validateTerrainTriangleCoverage({ indices: topology.indices, positions, size });
   if (!areaCoverage.completeAreaCoverage) throw new Error(`Terrain geometric coverage is incomplete: area difference ${areaCoverage.areaDifference}.`);
-  return Object.freeze({ drawable: true, tileId: drawPlan.tileId, topologyVariant: topology.transitionEdges.length ? "stitched" : "base", indexCount: topology.indexCount, indices: topology.indices, edges: topology.edges, coverage, areaCoverage });
+  const occupancy = validateTerrainCellOccupancy({ indices: topology.indices, positions, size });
+  if (!occupancy.completeCellCoverage) throw new Error(`Terrain cell occupancy is incomplete: ${occupancy.uncoveredCells} uncovered, ${occupancy.overlapCells} overlapping.`);
+  return Object.freeze({ drawable: true, tileId: drawPlan.tileId, topologyVariant: topology.transitionEdges.length ? "stitched" : "base", indexCount: topology.indexCount, indices: topology.indices, edges: topology.edges, coverage, areaCoverage, occupancy });
 }
