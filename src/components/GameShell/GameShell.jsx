@@ -9,14 +9,11 @@ import NotificationToast from "../NotificationToast/NotificationToast";
 import { getCurrentGame, updateCurrentGame, setCurrentGame, clearCurrentGame } from "../../game/currentGame";
 import { getCurrentDate, getTimeline, getPendingActions } from "../../state/index.js";
 import { GameEngine } from "../../engine/index.js";
-import { saveGame, loadGame, deleteGame } from "../../save/index.js";
+import { saveGameToSlot, loadGame, deleteGame } from "../../save/index.js";
 import { useDecisionEditor } from "../../hooks/useDecisionEditor";
 import { readSettings, STORAGE_KEY } from "./SettingsMenu/SettingsConfig";
 
-function monthIndex(date) {
-  return Number(date?.year ?? 0) * 12 + Number(date?.month ?? 0);
-}
-
+function monthIndex(date) { return Number(date?.year ?? 0) * 12 + Number(date?.month ?? 0); }
 function shouldAutoSave(previousSession, nextSession, autosave) {
   if (autosave === "off") return false;
   const previousDate = getCurrentDate(previousSession);
@@ -36,7 +33,6 @@ function GameShell() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [advisorOpen, setAdvisorOpen] = useState(false);
   const [settings, setSettings] = useState(readSettings);
-
   const { editingAction, decisionText, setDecisionText, submitAction, startEditing, cancelEditing, deleteAction } = useDecisionEditor(setGameSession);
 
   useEffect(() => {
@@ -56,7 +52,7 @@ function GameShell() {
     setGameSession((previousSession) => {
       const nextSession = GameEngine.advance(previousSession, unit, amount);
       updateCurrentGame(nextSession);
-      if (shouldAutoSave(previousSession, nextSession, settings.autosave)) saveGame(nextSession);
+      if (shouldAutoSave(previousSession, nextSession, settings.autosave)) saveGameToSlot(nextSession, "autosave");
       return nextSession;
     });
     setBusy(false);
@@ -68,39 +64,23 @@ function GameShell() {
     if (open) { setAdvisorOpen(false); setTimeMenuOpen(false); }
   }
 
-  function handleManualSave() { saveGame(gameSession); }
-
+  function handleManualSave() { saveGameToSlot(gameSession, "1"); }
   function handleLoadGame(session = null) {
     try {
       const loaded = session ?? loadGame();
       if (!loaded) return false;
-      setGameSession(loaded);
-      setCurrentGame(loaded);
-      setSelectedProvinceId(null);
-      setAdvisorOpen(false);
-      setTimeMenuOpen(false);
+      setGameSession(loaded); setCurrentGame(loaded); setSelectedProvinceId(null); setAdvisorOpen(false); setTimeMenuOpen(false);
       return true;
-    } catch {
-      return false;
-    }
+    } catch { return false; }
   }
-
   function handleDeleteSave() { deleteGame(); }
   function handleProvinceClick(provinceId) { setSelectedProvinceId((currentId) => currentId === provinceId ? null : provinceId); }
   function leaveToMainMenu() { clearCurrentGame(); setSelectedProvinceId(null); setSettingsOpen(false); navigate("/"); }
 
   const simulation = gameSession.state?.simulation ?? {};
-
   return (
     <Layout title="">
-      <TopBar
-        currentDate={getCurrentDate(gameSession)} simulation={simulation} timeMenuOpen={timeMenuOpen}
-        onToggleTimeMenu={() => { if (!settingsOpen) setTimeMenuOpen((open) => !open); }}
-        timeControls={<TimeControls busy={busy} onAdvance={advanceBy} />} settingsOpen={settingsOpen}
-        onToggleSettings={toggleSettings} settings={settings} onSettingsChange={setSettings}
-        onSaveGame={handleManualSave} onLoadGame={handleLoadGame} onDeleteSave={handleDeleteSave}
-        onMainMenu={leaveToMainMenu} onExitGame={leaveToMainMenu}
-      />
+      <TopBar currentDate={getCurrentDate(gameSession)} simulation={simulation} timeMenuOpen={timeMenuOpen} onToggleTimeMenu={() => { if (!settingsOpen) setTimeMenuOpen((open) => !open); }} timeControls={<TimeControls busy={busy} onAdvance={advanceBy} />} settingsOpen={settingsOpen} onToggleSettings={toggleSettings} settings={settings} onSettingsChange={setSettings} onSaveGame={handleManualSave} onLoadGame={handleLoadGame} onDeleteSave={handleDeleteSave} onMainMenu={leaveToMainMenu} onExitGame={leaveToMainMenu} />
       {settings.notifications && <NotificationToast />}
       <MapView gameSession={gameSession} settings={settings} selectedProvinceId={selectedProvinceId} onProvinceClick={handleProvinceClick} onProvinceClose={() => setSelectedProvinceId(null)} />
       <OverlayManager timeline={getTimeline(gameSession)} pendingActions={getPendingActions(gameSession)} editingAction={editingAction} decisionText={decisionText} onDecisionTextChange={setDecisionText} onSubmitAction={submitAction} onUpdateAction={startEditing} onRemoveAction={deleteAction} onCancelEditing={cancelEditing} advisorOpen={advisorOpen} onAdvisorOpenChange={setAdvisorOpen} world={gameSession} settingsOpen={settingsOpen} />
