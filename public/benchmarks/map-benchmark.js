@@ -24,6 +24,18 @@ function resize() {
   renderer?.resize(BENCHMARK_TARGET.viewportWidth, BENCHMARK_TARGET.viewportHeight);
 }
 
+function benchmarkSnapshot(now = performance.now()) {
+  const summary = diagnostics.summary(now);
+  const gpu = renderer?.getTelemetrySnapshot?.() ?? null;
+  return {
+    ...summary,
+    gpu,
+    gpuTimeMs: gpu?.gpuTimeMs?.average ?? null,
+    gpuTiming: gpu?.gpuTiming ?? summary.gpuTiming,
+    backend: renderer instanceof WebGPUMapRenderer ? "webgpu" : renderer ? "webgl2" : null,
+  };
+}
+
 async function main() {
   const asset = await loadMapBin(assetUrl);
   const cameraRig = new MapCameraRig({ minZoom: 1, maxZoom: 96 });
@@ -45,11 +57,7 @@ async function main() {
   runtime.start();
   diagnostics.start();
   const benchmarkStart = performance.now();
-  const snapshot = () => ({
-    ...diagnostics.summary(performance.now()),
-    gpu: renderer.getTelemetrySnapshot?.() ?? null,
-  });
-  soak.start(snapshot);
+  soak.start(() => benchmarkSnapshot());
 
   let frameCount = 0;
   const frame = (now) => {
@@ -83,14 +91,13 @@ async function finish(now) {
   await renderer.collectTelemetry?.();
   soak.stop();
   const result = {
-    ...diagnostics.summary(now),
+    ...benchmarkSnapshot(now),
     backend: renderer instanceof WebGPUMapRenderer ? "webgpu" : "webgl2",
     backendPreference,
     assetUrl,
     provinceCount: renderer.assetSource?.provinceCount ?? null,
     geometryPointCount: renderer.assetSource?.geometryPointCount ?? null,
     internalCanvas: { width: canvas.width, height: canvas.height },
-    gpu: renderer.getTelemetrySnapshot?.() ?? null,
     soak: soak.summary(),
   };
   diagnosticsNode.textContent = JSON.stringify(result, null, 2);
