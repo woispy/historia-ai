@@ -8,6 +8,7 @@ const defaultGpuFlags = [
   "--enable-gpu-rasterization",
   "--enable-zero-copy",
   "--use-angle=d3d11",
+  "--enable-dawn-features=use_d3d12_fxc",
   "--disable-software-rasterizer",
 ];
 const launchArgs = process.env.HISTORIA_CHROMIUM_FLAGS
