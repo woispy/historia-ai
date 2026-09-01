@@ -1,11 +1,15 @@
-const MAX_QUERY_PAIRS = 2048;
-const QUERY_STRIDE = 256;
+const RING_SLOT_COUNT = 4;
+const QUERY_VALUES_PER_SLOT = 2;
+const QUERY_BYTES_PER_SLOT = QUERY_VALUES_PER_SLOT * 8;
+const RESOLVE_STRIDE = 256;
+const RESOLVE_BUFFER_SIZE = RING_SLOT_COUNT * RESOLVE_STRIDE;
+const STAGING_BUFFER_SIZE = RESOLVE_STRIDE;
 const TIMESTAMP_SAMPLE_INTERVAL_FRAMES = 8;
 const SLOT_STATES = Object.freeze({
-  PENDING_SUBMIT: "PENDING_SUBMIT",
+  FREE: "FREE",
+  RECORDING: "RECORDING",
   RESOLVED: "RESOLVED",
   READBACK_PENDING: "READBACK_PENDING",
-  COMPLETED: "COMPLETED",
 });
 
 export function createWebGpuBenchmarkTelemetry(device) {
@@ -27,23 +31,46 @@ export function createWebGpuBenchmarkTelemetry(device) {
 
   let querySet = null;
   let resolveBuffer = null;
-  let nextQueryPair = 0;
   let frameCounter = 0;
+  let nextRingSlot = 0;
   let collectPromise = null;
   let disposed = false;
-  const slots = new Map();
+  const slots = Array.from({ length: RING_SLOT_COUNT }, (_, slot) => ({
+    slot,
+    state: SLOT_STATES.FREE,
+    submitted: false,
+    beginWritten: false,
+    endWritten: false,
+    resolveOffset: slot * RESOLVE_STRIDE,
+    stagingBuffer: null,
+  }));
+
   const timestampSupported = Boolean(device?.features?.has?.("timestamp-query"));
 
   if (timestampSupported && typeof device.createQuerySet === "function") {
     try {
-      querySet = device.createQuerySet({ type: "timestamp", count: MAX_QUERY_PAIRS * 2 });
+      querySet = device.createQuerySet({
+        type: "timestamp",
+        count: RING_SLOT_COUNT * QUERY_VALUES_PER_SLOT,
+      });
       resolveBuffer = device.createBuffer({
-        size: MAX_QUERY_PAIRS * QUERY_STRIDE,
+        size: RESOLVE_BUFFER_SIZE,
         usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
       });
+      for (const slot of slots) {
+        slot.stagingBuffer = device.createBuffer({
+          size: STAGING_BUFFER_SIZE,
+          usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+        });
+      }
       telemetry.gpuTiming = "supported";
     } catch (error) {
       telemetry.timestampError = String(error?.message || error);
+      for (const slot of slots) slot.stagingBuffer?.destroy?.();
+      querySet?.destroy?.();
+      resolveBuffer?.destroy?.();
+      querySet = null;
+      resolveBuffer = null;
     }
   }
 
@@ -51,62 +78,83 @@ export function createWebGpuBenchmarkTelemetry(device) {
     frameCounter += 1;
     if (!querySet || disposed) return -1;
     if (frameCounter % TIMESTAMP_SAMPLE_INTERVAL_FRAMES !== 0) return -1;
-    if (nextQueryPair >= MAX_QUERY_PAIRS) {
-      telemetry.timestampSamplesDropped += 1;
-      return -1;
+
+    for (let i = 0; i < RING_SLOT_COUNT; i += 1) {
+      const index = (nextRingSlot + i) % RING_SLOT_COUNT;
+      const slot = slots[index];
+      if (slot.state !== SLOT_STATES.FREE) continue;
+
+      nextRingSlot = (index + 1) % RING_SLOT_COUNT;
+      slot.state = SLOT_STATES.RECORDING;
+      slot.submitted = false;
+      slot.beginWritten = false;
+      slot.endWritten = false;
+      return slot.slot;
     }
 
-    const slot = nextQueryPair++;
-    slots.set(slot, {
-      slot,
-      state: SLOT_STATES.PENDING_SUBMIT,
-      submitted: false,
-      resolveOffset: slot * QUERY_STRIDE,
-    });
-    return slot;
+    telemetry.timestampSamplesDropped += 1;
+    telemetry.timestampError = "WebGPU timestamp ring buffer exhausted";
+    return -1;
   }
 
-  function writeTimestamp(encoder, slot, phase) {
-    const entry = slots.get(slot);
-    if (!querySet || !entry || entry.state !== SLOT_STATES.PENDING_SUBMIT || !encoder?.writeTimestamp) return false;
+  function writeTimestamp(encoder, slotId, phase) {
+    const slot = slots[slotId];
+    if (!querySet || !slot || slot.state !== SLOT_STATES.RECORDING || typeof encoder?.writeTimestamp !== "function") {
+      return false;
+    }
 
+    const isBegin = phase === "begin";
+    const isEnd = phase === "end";
+    if (!isBegin && !isEnd) throw new Error(`Unknown timestamp phase: ${phase}`);
+    if (isBegin && slot.beginWritten) return false;
+    if (isEnd && (!slot.beginWritten || slot.endWritten)) return false;
+
+    const queryIndex = slot.slot * QUERY_VALUES_PER_SLOT + (isEnd ? 1 : 0);
     try {
-      encoder.writeTimestamp(querySet, slot * 2 + (phase === "end" ? 1 : 0));
+      encoder.writeTimestamp(querySet, queryIndex);
+      if (isBegin) slot.beginWritten = true;
+      else slot.endWritten = true;
       return true;
     } catch (error) {
+      telemetry.timestampSamplesDropped += 1;
       telemetry.timestampError = String(error?.message || error);
+      slot.state = SLOT_STATES.FREE;
       return false;
     }
   }
 
-  function getTimestampWrites(slot, phase) {
-    const entry = slots.get(slot);
-    if (!querySet || !entry || entry.state !== SLOT_STATES.PENDING_SUBMIT) return undefined;
-    if (phase === "begin") return { querySet, beginningOfPassWriteIndex: slot * 2 };
-    if (phase === "end") return { querySet, endOfPassWriteIndex: slot * 2 + 1 };
-    throw new Error(`Unknown timestamp phase: ${phase}`);
-  }
-
-  function finishFrame(encoder, slot) {
-    const entry = slots.get(slot);
-    if (!querySet || !entry || entry.state !== SLOT_STATES.PENDING_SUBMIT) return false;
+  function finishFrame(encoder, slotId) {
+    const slot = slots[slotId];
+    if (!querySet || !slot || slot.state !== SLOT_STATES.RECORDING) return false;
+    if (!slot.beginWritten || !slot.endWritten) {
+      telemetry.timestampSamplesDropped += 1;
+      telemetry.timestampError = "Timestamp pair was not completely written";
+      slot.state = SLOT_STATES.FREE;
+      return false;
+    }
 
     try {
-      encoder.resolveQuerySet(querySet, slot * 2, 2, resolveBuffer, entry.resolveOffset);
-      entry.state = SLOT_STATES.RESOLVED;
+      encoder.resolveQuerySet(
+        querySet,
+        slot.slot * QUERY_VALUES_PER_SLOT,
+        QUERY_VALUES_PER_SLOT,
+        resolveBuffer,
+        slot.resolveOffset,
+      );
+      slot.state = SLOT_STATES.RESOLVED;
       return true;
     } catch (error) {
-      entry.state = SLOT_STATES.COMPLETED;
       telemetry.timestampSamplesDropped += 1;
       telemetry.timestampError = String(error?.message || error);
+      slot.state = SLOT_STATES.FREE;
       return false;
     }
   }
 
   function recordSubmit() {
     telemetry.queueSubmits += 1;
-    for (const entry of slots.values()) {
-      if (entry.state === SLOT_STATES.RESOLVED && !entry.submitted) entry.submitted = true;
+    for (const slot of slots) {
+      if (slot.state === SLOT_STATES.RESOLVED && !slot.submitted) slot.submitted = true;
     }
   }
 
@@ -114,74 +162,85 @@ export function createWebGpuBenchmarkTelemetry(device) {
     if (collectPromise) return collectPromise;
     if (disposed || !resolveBuffer || !device?.queue?.onSubmittedWorkDone) return;
 
-    const candidates = [...slots.values()].filter(
-      (entry) => entry.state === SLOT_STATES.RESOLVED && entry.submitted,
+    const candidates = slots.filter(
+      (slot) => slot.state === SLOT_STATES.RESOLVED && slot.submitted,
     );
     if (!candidates.length) return;
 
-    for (const entry of candidates) entry.state = SLOT_STATES.READBACK_PENDING;
+    for (const slot of candidates) slot.state = SLOT_STATES.READBACK_PENDING;
 
     collectPromise = (async () => {
-      let readbackBuffer = null;
-      let mapped = false;
       try {
+        // First fence: the resolve writes from the render submission are complete.
         await device.queue.onSubmittedWorkDone();
 
-        const maxOffset = Math.max(...candidates.map((entry) => entry.resolveOffset));
-        const readbackSize = maxOffset + 16;
-        readbackBuffer = device.createBuffer({
-          size: readbackSize,
-          usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
-        });
-
-        const encoder = device.createCommandEncoder();
-        for (const entry of candidates) {
-          encoder.copyBufferToBuffer(
+        const copyEncoder = device.createCommandEncoder();
+        for (const slot of candidates) {
+          copyEncoder.copyBufferToBuffer(
             resolveBuffer,
-            entry.resolveOffset,
-            readbackBuffer,
-            entry.resolveOffset,
-            16,
+            slot.resolveOffset,
+            slot.stagingBuffer,
+            0,
+            QUERY_BYTES_PER_SLOT,
           );
         }
-        device.queue.submit([encoder.finish()]);
+        device.queue.submit([copyEncoder.finish()]);
+
+        // Second fence: the staging copies are complete before mapAsync.
         await device.queue.onSubmittedWorkDone();
 
-        await readbackBuffer.mapAsync(GPUMapMode.READ, 0, readbackSize);
-        mapped = true;
-        const data = new BigUint64Array(readbackBuffer.getMappedRange(0, readbackSize));
+        for (const slot of candidates) {
+          let mapped = false;
+          try {
+            await slot.stagingBuffer.mapAsync(GPUMapMode.READ, 0, QUERY_BYTES_PER_SLOT);
+            mapped = true;
+            const mappedRange = slot.stagingBuffer.getMappedRange(0, QUERY_BYTES_PER_SLOT);
+            const data = new BigUint64Array(mappedRange);
+            const begin = Number(data[0]);
+            const end = Number(data[1]);
+            const deltaNs = end - begin;
 
-        for (const entry of candidates) {
-          const base = entry.resolveOffset / 8;
-          const begin = Number(data[base]);
-          const end = Number(data[base + 1]);
-          const deltaNs = end - begin;
+            if (telemetry.timestampRawSamples.length < 4) {
+              telemetry.timestampRawSamples.push({ slot: slot.slot, begin, end, deltaNs });
+            }
 
-          if (telemetry.timestampRawSamples.length < 4) {
-            telemetry.timestampRawSamples.push({ slot: entry.slot, begin, end, deltaNs });
-          }
-
-          if (!Number.isFinite(begin) || !Number.isFinite(end) || end < begin) {
+            if (!Number.isFinite(begin) || !Number.isFinite(end) || end < begin) {
+              telemetry.timestampSamplesDropped += 1;
+              telemetry.timestampError = "Invalid WebGPU timestamp pair";
+            } else if (deltaNs <= 0) {
+              telemetry.timestampSamplesDropped += 1;
+              telemetry.timestampSamplesZero += 1;
+            } else {
+              telemetry.gpuSamples.push(deltaNs / 1e6);
+            }
+          } catch (error) {
             telemetry.timestampSamplesDropped += 1;
-          } else if (deltaNs <= 0) {
-            telemetry.timestampSamplesZero += 1;
-          } else {
-            telemetry.gpuSamples.push(deltaNs / 1e6);
+            telemetry.timestampError = String(error?.message || error);
+          } finally {
+            if (mapped) {
+              try {
+                slot.stagingBuffer.unmap();
+              } catch (error) {
+                telemetry.timestampError = String(error?.message || error);
+              }
+            }
+            slot.state = SLOT_STATES.FREE;
+            slot.submitted = false;
+            slot.beginWritten = false;
+            slot.endWritten = false;
           }
-
-          entry.state = SLOT_STATES.COMPLETED;
         }
       } catch (error) {
-        telemetry.gpuTiming = "unsupported";
+        telemetry.timestampSamplesDropped += candidates.length;
         telemetry.timestampError = String(error?.message || error);
-        for (const entry of candidates) {
-          if (entry.state === SLOT_STATES.READBACK_PENDING) entry.state = SLOT_STATES.RESOLVED;
+        for (const slot of candidates) {
+          try { slot.stagingBuffer?.unmap?.(); } catch {}
+          slot.state = SLOT_STATES.FREE;
+          slot.submitted = false;
+          slot.beginWritten = false;
+          slot.endWritten = false;
         }
       } finally {
-        if (mapped) {
-          try { readbackBuffer?.unmap?.(); } catch {}
-        }
-        readbackBuffer?.destroy?.();
         collectPromise = null;
       }
     })();
@@ -212,26 +271,32 @@ export function createWebGpuBenchmarkTelemetry(device) {
       timestampError: telemetry.timestampError,
       timestampRawSamples: [...telemetry.timestampRawSamples],
       timestampSampleIntervalFrames: TIMESTAMP_SAMPLE_INTERVAL_FRAMES,
+      timestampRingSlotCount: RING_SLOT_COUNT,
       adapter: telemetry.adapter,
     };
   }
 
   function dispose() {
     disposed = true;
+    for (const slot of slots) {
+      try { slot.stagingBuffer?.unmap?.(); } catch {}
+      slot.stagingBuffer?.destroy?.();
+      slot.stagingBuffer = null;
+      slot.state = SLOT_STATES.FREE;
+    }
     querySet?.destroy?.();
     resolveBuffer?.destroy?.();
     querySet = null;
     resolveBuffer = null;
-    slots.clear();
+    collectPromise = null;
     frameCounter = 0;
-    nextQueryPair = 0;
+    nextRingSlot = 0;
   }
 
   return {
     telemetry,
     beginFrame,
     writeTimestamp,
-    getTimestampWrites,
     finishFrame,
     collect,
     snapshot,
