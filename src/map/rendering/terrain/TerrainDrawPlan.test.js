@@ -1,15 +1,6 @@
 import assert from "node:assert/strict";
 import { createTerrainDrawPlan } from "./TerrainDrawPlan.js";
-
-const plan = createTerrainDrawPlan({ tile: { id: "3/10/20" }, lod: 3, adjacency: {
-  north: { lod: 2, resident: true }, east: { lod: 3, resident: true }, south: { lod: 4, resident: true }, west: null,
-} });
-assert.equal(plan.draw, true);
-assert.equal(plan.edges.north.mode, "neighbor-finer");
-assert.equal(plan.edges.east.mode, "same");
-assert.equal(plan.edges.south.mode, "neighbor-coarser");
-assert.equal(plan.edges.west.mode, "boundary");
-const deferred = createTerrainDrawPlan({ tile: { id: "3/10/21" }, lod: 3, resident: false, adjacency: {} });
-assert.equal(deferred.draw, false); assert.equal(deferred.deferUntilResident, true);
-assert.throws(() => createTerrainDrawPlan({ tile: { id: "3/10/22" }, lod: 3, adjacency: { north: { lod: 1 } } }), /exceeds one level/);
-console.log("Phase E terrain draw plan: PASS");
+const plan=createTerrainDrawPlan({tile:{id:"3/10/20"},lod:3,adjacency:{north:{lod:2,resident:true},east:{lod:3,resident:true},south:{lod:4,resident:true},west:null}});assert.equal(plan.draw,true);assert.equal(plan.edges.north.mode,"neighbor-finer");assert.equal(plan.edges.east.mode,"same");assert.equal(plan.edges.south.mode,"neighbor-coarser");assert.equal(plan.edges.west.mode,"boundary");
+const corner=createTerrainDrawPlan({tile:{id:"3/10/21"},lod:3,adjacency:{north:{id:"2/n",lod:2,resident:true},east:{id:"2/e",lod:2,resident:true}}});assert.deepEqual(corner.corners,["north-east"]);assert.equal(corner.topologyVariant,"corner-ne");assert.equal(corner.edges.north.topology,"corner-ne");assert.equal(corner.edges.east.topology,"corner-ne");
+const mixed=createTerrainDrawPlan({tile:{id:"3/10/23"},lod:3,adjacency:{north:{lod:2},east:{lod:4}}});assert.throws(()=>mixed,/Mixed adjacent terrain LOD transitions/);
+const deferred=createTerrainDrawPlan({tile:{id:"3/10/24"},lod:3,resident:false,adjacency:{}});assert.equal(deferred.draw,false);assert.equal(deferred.deferUntilResident,true);assert.throws(()=>createTerrainDrawPlan({tile:{id:"3/10/25"},lod:3,adjacency:{north:{lod:1}}}),/exceeds one level/);console.log("Phase E terrain draw plan corner variants: PASS");
