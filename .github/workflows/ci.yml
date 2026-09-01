@@ -49,6 +49,7 @@ on:
       - feat/runtime-province-selection
       - feat/historical-map-clean-foundation
       - feat/historical-political-map-v1
+      - phase-f-deterministic-rng
 
 concurrency:
   group: historia-ai-ci-${{ github.workflow }}-${{ github.ref }}
