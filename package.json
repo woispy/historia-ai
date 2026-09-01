@@ -41,6 +41,7 @@
     "test:action-identity-integrity": "node tools/tests/action-identity-integrity.test.js",
     "test:phase-g-save-continuation": "node tools/tests/phase-g-save-continuation.test.js",
     "test:phase-g-save-slots": "node tools/tests/phase-g-save-slots.test.js",
+    "test:save-library-runtime-contract": "node tools/tests/save-library-runtime-contract.test.js",
     "test:esm-import-contract": "node tools/tests/esm-import-contract.test.js",
     "test:cartography-visual": "node tools/tests/cartography-visual-regression.test.js",
     "test:map-rendering-contract": "node tools/tests/map-rendering-contract.test.js",
