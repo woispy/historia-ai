@@ -4,7 +4,6 @@ const QUERY_STRIDE = 256;
 export function installWebGpuBenchmarkTelemetry(renderer) {
   if (!renderer?.device?.queue) return null;
   const device = renderer.device;
-  const queue = device.queue;
   const telemetry = {
     gpuTiming: "unsupported",
     timestampPeriodNs: null,
@@ -19,7 +18,6 @@ export function installWebGpuBenchmarkTelemetry(renderer) {
     timestampSamplesDropped: 0,
   };
 
-  let pickingActive = false;
   let querySet = null;
   let resolveBuffer = null;
   let readbackBuffer = null;
@@ -39,14 +37,8 @@ export function installWebGpuBenchmarkTelemetry(renderer) {
         usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
       });
       telemetry.gpuTiming = "supported";
-      const period = Number(device.limits?.timestampPeriod);
-      if (Number.isFinite(period) && period > 0) {
-        telemetry.timestampPeriodNs = period;
-        telemetry.timestampPeriodSource = "device.limits.timestampPeriod";
-      } else {
-        telemetry.timestampPeriodNs = 1;
-        telemetry.timestampPeriodSource = "WebGPU timestamp values are nanoseconds";
-      }
+      telemetry.timestampPeriodNs = 1;
+      telemetry.timestampPeriodSource = "WebGPU timestamp values are nanoseconds";
     } catch (error) {
       telemetry.gpuTiming = "unsupported";
       telemetry.timestampError = String(error?.message || error);
@@ -54,9 +46,7 @@ export function installWebGpuBenchmarkTelemetry(renderer) {
   }
 
   const originalCreateCommandEncoder = device.createCommandEncoder.bind(device);
-  const originalSubmit = queue.submit.bind(queue);
-  const originalOnSubmittedWorkDone = queue.onSubmittedWorkDone?.bind(queue);
-  const originalPick = typeof renderer.pick === "function" ? renderer.pick.bind(renderer) : null;
+  const originalOnSubmittedWorkDone = device.queue.onSubmittedWorkDone?.bind(device.queue);
 
   device.createCommandEncoder = (descriptor) => {
     const encoder = originalCreateCommandEncoder(descriptor);
@@ -75,38 +65,8 @@ export function installWebGpuBenchmarkTelemetry(renderer) {
       telemetry.timestampSamplesDropped += 1;
     }
 
-    const beginPass = (kind, original, passDescriptor) => {
-      const pass = original(passDescriptor);
-      if (kind === "compute") {
-        telemetry.computePasses += 1;
-      } else {
-        telemetry.renderPasses += 1;
-        if (pickingActive) telemetry.picking.renderPasses += 1;
-      }
-      return new Proxy(pass, {
-        get(target, property, receiver) {
-          if (property === "dispatchWorkgroups" || property === "dispatchWorkgroupsIndirect") {
-            return (...args) => {
-              telemetry.dispatchCalls += 1;
-              return target[property](...args);
-            };
-          }
-          if (property === "draw" || property === "drawIndexed" || property === "drawIndirect" || property === "drawIndexedIndirect") {
-            return (...args) => {
-              telemetry.drawCalls += 1;
-              if (pickingActive) telemetry.picking.drawCalls += 1;
-              return target[property](...args);
-            };
-          }
-          return Reflect.get(target, property, receiver);
-        },
-      });
-    };
-
     return new Proxy(encoder, {
       get(target, property, receiver) {
-        if (property === "beginComputePass") return (passDescriptor) => beginPass("compute", target.beginComputePass.bind(target), passDescriptor);
-        if (property === "beginRenderPass") return (passDescriptor) => beginPass("render", target.beginRenderPass.bind(target), passDescriptor);
         if (property === "finish") {
           return (...args) => {
             if (querySet && querySlot >= 0) {
@@ -127,24 +87,6 @@ export function installWebGpuBenchmarkTelemetry(renderer) {
       },
     });
   };
-
-  queue.submit = (commandBuffers) => {
-    const count = commandBuffers?.length || 0;
-    telemetry.queueSubmits += count;
-    if (pickingActive) telemetry.picking.queueSubmits += count;
-    return originalSubmit(commandBuffers);
-  };
-
-  if (originalPick) {
-    renderer.pick = (...args) => {
-      pickingActive = true;
-      try {
-        return originalPick(...args);
-      } finally {
-        pickingActive = false;
-      }
-    };
-  }
 
   const collect = async () => {
     if (!readbackBuffer || !pendingSamples.size || !originalOnSubmittedWorkDone) return;
@@ -184,7 +126,19 @@ export function installWebGpuBenchmarkTelemetry(renderer) {
     timestampError: telemetry.timestampError || null,
   });
 
-  renderer.__benchmarkGpuTelemetry = { telemetry, collect, snapshot };
+  renderer.__benchmarkGpuTelemetry = {
+    telemetry,
+    collect,
+    snapshot,
+    recordComputePass(){telemetry.computePasses += 1;},
+    recordDispatch(){telemetry.dispatchCalls += 1;},
+    recordRenderPass(){telemetry.renderPasses += 1;},
+    recordDraw(){telemetry.drawCalls += 1;},
+    recordSubmit(){telemetry.queueSubmits += 1;},
+    recordPickingRenderPass(){telemetry.picking.renderPasses += 1;},
+    recordPickingDraw(){telemetry.picking.drawCalls += 1;},
+    recordPickingSubmit(){telemetry.picking.queueSubmits += 1;},
+  };
   return renderer.__benchmarkGpuTelemetry;
 }
 
