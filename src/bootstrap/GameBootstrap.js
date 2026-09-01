@@ -63,6 +63,7 @@ export function createGame({
       scenario,
       player,
       world,
+      randomSeed: settings?.randomSeed,
     })
   );
 

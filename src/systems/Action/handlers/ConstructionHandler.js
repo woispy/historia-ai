@@ -6,8 +6,7 @@ export function handleConstructionAction(gameSession, action) {
   const runtime = getRuntime(gameSession);
   const simulation = runtime.simulation ?? {};
   const cityId = action.interpretation?.entities?.city;
-  const cityRepository = gameSession.world.repositories.cities;
-  const city = cityId ? cityRepository.byId[cityId] : null;
+  const city = cityId ? runtime.cities.byId[cityId] : null;
 
   if (!city) {
     return addTimelineEvent(gameSession, {
@@ -30,35 +29,26 @@ export function handleConstructionAction(gameSession, action) {
     });
   }
 
-  const nextCityRepository = updateCity(cityRepository, {
+  const nextCity = {
     ...city,
     prosperity: Math.min(100, Number(city.prosperity ?? 0) + 5),
     buildings: [
       ...(city.buildings ?? []),
       { id: crypto.randomUUID(), type: "infrastructure", level: 1 },
     ],
-  });
+  };
 
-  const nextSession = updateRuntime(
-    {
-      ...gameSession,
-      world: {
-        ...gameSession.world,
-        repositories: {
-          ...gameSession.world.repositories,
-          cities: nextCityRepository,
-        },
-      },
+  const nextRuntime = {
+    ...runtime,
+    cities: updateCity(runtime.cities, nextCity),
+    simulation: {
+      ...simulation,
+      treasury: simulation.treasury - cost,
+      lastTurnSummary: `${city.name} şehrinde yeni bir yapı inşa edildi.`,
     },
-    {
-      ...runtime,
-      simulation: {
-        ...simulation,
-        treasury: simulation.treasury - cost,
-        lastTurnSummary: `${city.name} şehrinde yeni bir yapı inşa edildi.`,
-      },
-    }
-  );
+  };
+
+  const nextSession = updateRuntime(gameSession, nextRuntime);
 
   return addTimelineEvent(nextSession, {
     category: "construction",

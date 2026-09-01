@@ -21,6 +21,7 @@ on:
       - feat/cartography-visual-refinement
       - feat/cartography-foundation-v2
       - feat/map-gpu-texture-architecture
+      - phase-f-runtime-boundary
   push:
     branches:
       - main
@@ -48,6 +49,7 @@ on:
       - feat/runtime-province-selection
       - feat/historical-map-clean-foundation
       - feat/historical-political-map-v1
+      - phase-f-deterministic-rng
 
 concurrency:
   group: historia-ai-ci-${{ github.workflow }}-${{ github.ref }}
@@ -147,6 +149,10 @@ jobs:
         run: npm run test:runtime-engine
       - name: Run Phase F canonical world state tests
         run: npm run test:phase-f-canonical-world-state
+      - name: Run Phase F deterministic RNG tests
+        run: npm run test:phase-f-deterministic-rng
+      - name: Run Phase F canonical state binding tests
+        run: npm run test:phase-f-canonical-state-binding
       - name: Build
         run: npm run build
       - name: Verify repository cleanliness after production build

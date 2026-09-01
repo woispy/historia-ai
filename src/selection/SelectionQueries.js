@@ -66,3 +66,18 @@ export function isArmySelected(
     SelectionTypes.ARMY
   );
 }
+
+/**
+ * Resolve the currently selected province against the canonical simulation
+ * state. Selection stores only the stable province ID; it never owns a
+ * province snapshot.
+ */
+export function getSelectedProvince(selectionRepository, worldState) {
+  if (!selectionRepository || !worldState) return null;
+  if (!isProvinceSelected(selectionRepository)) return null;
+
+  const provinceId = getSelectionId(selectionRepository);
+  if (!provinceId) return null;
+
+  return worldState.provinces?.byId?.[provinceId] ?? null;
+}
