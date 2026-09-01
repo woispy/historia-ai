@@ -9,11 +9,7 @@ import NotificationToast from "../NotificationToast/NotificationToast";
 import { getCurrentGame, updateCurrentGame, setCurrentGame, clearCurrentGame } from "../../game/currentGame";
 import { getCurrentDate, getTimeline, getPendingActions } from "../../state/index.js";
 import { GameEngine } from "../../engine/index.js";
-import {
-  saveGame,
-  loadGame,
-  deleteGame,
-} from "../../save/index.js";
+import { saveGame, loadGame, deleteGame } from "../../save/index.js";
 import { useDecisionEditor } from "../../hooks/useDecisionEditor";
 import { readSettings, STORAGE_KEY } from "./SettingsMenu/SettingsConfig";
 
@@ -23,14 +19,11 @@ function monthIndex(date) {
 
 function shouldAutoSave(previousSession, nextSession, autosave) {
   if (autosave === "off") return false;
-
   const previousDate = getCurrentDate(previousSession);
   const nextDate = getCurrentDate(nextSession);
   const elapsedMonths = monthIndex(nextDate) - monthIndex(previousDate);
-
   if (autosave === "6m") return elapsedMonths >= 6;
   if (autosave === "1y") return Number(nextDate?.year) > Number(previousDate?.year);
-
   return false;
 }
 
@@ -44,15 +37,7 @@ function GameShell() {
   const [advisorOpen, setAdvisorOpen] = useState(false);
   const [settings, setSettings] = useState(readSettings);
 
-  const {
-    editingAction,
-    decisionText,
-    setDecisionText,
-    submitAction,
-    startEditing,
-    cancelEditing,
-    deleteAction,
-  } = useDecisionEditor(setGameSession);
+  const { editingAction, decisionText, setDecisionText, submitAction, startEditing, cancelEditing, deleteAction } = useDecisionEditor(setGameSession);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
@@ -62,53 +47,33 @@ function GameShell() {
     document.documentElement.dataset.effects = String(settings.effects);
     document.documentElement.dataset.tips = String(settings.tips);
     document.body.style.zoom = `${Number(settings.uiScale) / 100}`;
-
-    return () => {
-      document.body.style.zoom = "1";
-    };
+    return () => { document.body.style.zoom = "1"; };
   }, [settings]);
 
   function advanceBy(unit, amount) {
     if (busy) return;
     setBusy(true);
-
     setGameSession((previousSession) => {
-      const nextSession = GameEngine.advance(
-        previousSession,
-        unit,
-        amount
-      );
-
+      const nextSession = GameEngine.advance(previousSession, unit, amount);
       updateCurrentGame(nextSession);
-
-      if (shouldAutoSave(previousSession, nextSession, settings.autosave)) {
-        saveGame(nextSession);
-      }
-
+      if (shouldAutoSave(previousSession, nextSession, settings.autosave)) saveGame(nextSession);
       return nextSession;
     });
-
     setBusy(false);
   }
 
   function toggleSettings(nextOpen) {
     const open = Boolean(nextOpen);
     setSettingsOpen(open);
-    if (open) {
-      setAdvisorOpen(false);
-      setTimeMenuOpen(false);
-    }
+    if (open) { setAdvisorOpen(false); setTimeMenuOpen(false); }
   }
 
-  function handleManualSave() {
-    saveGame(gameSession);
-  }
+  function handleManualSave() { saveGame(gameSession); }
 
-  function handleLoadGame() {
+  function handleLoadGame(session = null) {
     try {
-      const loaded = loadGame();
+      const loaded = session ?? loadGame();
       if (!loaded) return false;
-
       setGameSession(loaded);
       setCurrentGame(loaded);
       setSelectedProvinceId(null);
@@ -120,68 +85,25 @@ function GameShell() {
     }
   }
 
-  function handleDeleteSave() {
-    deleteGame();
-  }
-
-  function handleProvinceClick(provinceId) {
-    setSelectedProvinceId((currentId) => (
-      currentId === provinceId ? null : provinceId
-    ));
-  }
-
-  function leaveToMainMenu() {
-    clearCurrentGame();
-    setSelectedProvinceId(null);
-    setSettingsOpen(false);
-    navigate("/");
-  }
+  function handleDeleteSave() { deleteGame(); }
+  function handleProvinceClick(provinceId) { setSelectedProvinceId((currentId) => currentId === provinceId ? null : provinceId); }
+  function leaveToMainMenu() { clearCurrentGame(); setSelectedProvinceId(null); setSettingsOpen(false); navigate("/"); }
 
   const simulation = gameSession.state?.simulation ?? {};
 
   return (
     <Layout title="">
       <TopBar
-        currentDate={getCurrentDate(gameSession)}
-        simulation={simulation}
-        timeMenuOpen={timeMenuOpen}
-        onToggleTimeMenu={() => {
-          if (!settingsOpen) setTimeMenuOpen((open) => !open);
-        }}
-        timeControls={<TimeControls busy={busy} onAdvance={advanceBy} />}
-        settingsOpen={settingsOpen}
-        onToggleSettings={toggleSettings}
-        settings={settings}
-        onSettingsChange={setSettings}
-        onSaveGame={handleManualSave}
-        onLoadGame={handleLoadGame}
-        onDeleteSave={handleDeleteSave}
-        onMainMenu={leaveToMainMenu}
-        onExitGame={leaveToMainMenu}
+        currentDate={getCurrentDate(gameSession)} simulation={simulation} timeMenuOpen={timeMenuOpen}
+        onToggleTimeMenu={() => { if (!settingsOpen) setTimeMenuOpen((open) => !open); }}
+        timeControls={<TimeControls busy={busy} onAdvance={advanceBy} />} settingsOpen={settingsOpen}
+        onToggleSettings={toggleSettings} settings={settings} onSettingsChange={setSettings}
+        onSaveGame={handleManualSave} onLoadGame={handleLoadGame} onDeleteSave={handleDeleteSave}
+        onMainMenu={leaveToMainMenu} onExitGame={leaveToMainMenu}
       />
       {settings.notifications && <NotificationToast />}
-      <MapView
-        gameSession={gameSession}
-        settings={settings}
-        selectedProvinceId={selectedProvinceId}
-        onProvinceClick={handleProvinceClick}
-        onProvinceClose={() => setSelectedProvinceId(null)}
-      />
-      <OverlayManager
-        timeline={getTimeline(gameSession)}
-        pendingActions={getPendingActions(gameSession)}
-        editingAction={editingAction}
-        decisionText={decisionText}
-        onDecisionTextChange={setDecisionText}
-        onSubmitAction={submitAction}
-        onUpdateAction={startEditing}
-        onRemoveAction={deleteAction}
-        onCancelEditing={cancelEditing}
-        advisorOpen={advisorOpen}
-        onAdvisorOpenChange={setAdvisorOpen}
-        world={gameSession}
-        settingsOpen={settingsOpen}
-      />
+      <MapView gameSession={gameSession} settings={settings} selectedProvinceId={selectedProvinceId} onProvinceClick={handleProvinceClick} onProvinceClose={() => setSelectedProvinceId(null)} />
+      <OverlayManager timeline={getTimeline(gameSession)} pendingActions={getPendingActions(gameSession)} editingAction={editingAction} decisionText={decisionText} onDecisionTextChange={setDecisionText} onSubmitAction={submitAction} onUpdateAction={startEditing} onRemoveAction={deleteAction} onCancelEditing={cancelEditing} advisorOpen={advisorOpen} onAdvisorOpenChange={setAdvisorOpen} world={gameSession} settingsOpen={settingsOpen} />
     </Layout>
   );
 }
