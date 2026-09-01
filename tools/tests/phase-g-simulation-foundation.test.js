@@ -46,4 +46,16 @@ assert.deepEqual(replayA.state.simulation, replayB.state.simulation);
 assert.deepEqual(replayA.state.timeline, replayB.state.timeline);
 assert.equal(replayA.state.simulation.rngState, replayB.state.simulation.rngState);
 
+const month = GameEngine.advance(sessionA, "month", 1);
+const sixMonths = GameEngine.advance(sessionA, "month", 6);
+const year = GameEngine.advance(sessionA, "year", 1);
+
+assert.ok(month.state.simulation.income > 0);
+assert.ok(month.state.simulation.expenses > 0);
+assert.ok(sixMonths.state.simulation.income >= month.state.simulation.income * 5);
+assert.ok(year.state.simulation.income >= month.state.simulation.income * 11);
+assert.ok(month.state.simulation.population > 0);
+assert.ok(sixMonths.state.simulation.population > 0);
+assert.ok(year.state.simulation.population > 0);
+
 console.log("phase-g-simulation-foundation.test.js: all assertions passed");
