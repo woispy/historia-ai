@@ -1,6 +1,6 @@
 const MAX_QUERY_PAIRS = 2048;
 const QUERY_STRIDE = 256;
-const TIMESTAMP_BATCH_FRAMES = 8;
+const TIMESTAMP_SAMPLE_INTERVAL_FRAMES = 8;
 
 export function createWebGpuBenchmarkTelemetry(device) {
   const telemetry = {
@@ -23,8 +23,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
   let resolveBuffer = null;
   let readbackBuffer = null;
   let nextQueryPair = 0;
-  let activeBatchSlot = -1;
-  let batchFrameCount = 0;
+  let frameCounter = 0;
   const pendingSamples = new Set();
   const timestampSupported = Boolean(device?.features?.has?.("timestamp-query"));
 
@@ -46,44 +45,38 @@ export function createWebGpuBenchmarkTelemetry(device) {
   }
 
   function beginFrame(encoder) {
+    frameCounter += 1;
     if (!querySet || typeof encoder?.writeTimestamp !== "function") return -1;
-
-    if (activeBatchSlot < 0) {
-      if (nextQueryPair >= MAX_QUERY_PAIRS) {
-        telemetry.timestampSamplesDropped += 1;
-        return -1;
-      }
-      activeBatchSlot = nextQueryPair++;
-      batchFrameCount = 0;
-      try {
-        encoder.writeTimestamp(querySet, activeBatchSlot * 2);
-      } catch (error) {
-        telemetry.gpuTiming = "unsupported";
-        telemetry.timestampError = String(error?.message || error);
-        activeBatchSlot = -1;
-        batchFrameCount = 0;
-        return -1;
-      }
+    if (frameCounter % TIMESTAMP_SAMPLE_INTERVAL_FRAMES !== 0) return -1;
+    if (nextQueryPair >= MAX_QUERY_PAIRS) {
+      telemetry.timestampSamplesDropped += 1;
+      return -1;
     }
 
-    batchFrameCount += 1;
-    return batchFrameCount >= TIMESTAMP_BATCH_FRAMES ? activeBatchSlot : -1;
+    const slot = nextQueryPair++;
+    try {
+      // Keep both timestamps inside the same command encoder/submission. The
+      // measured interval is therefore the GPU work of this frame only, rather
+      // than an interval spanning several independently submitted frames.
+      encoder.writeTimestamp(querySet, slot * 2);
+      return slot;
+    } catch (error) {
+      telemetry.gpuTiming = "unsupported";
+      telemetry.timestampError = String(error?.message || error);
+      return -1;
+    }
   }
 
   function finishFrame(encoder, slot) {
-    if (!querySet || slot < 0 || slot !== activeBatchSlot) return;
+    if (!querySet || slot < 0) return;
     try {
       encoder.writeTimestamp(querySet, slot * 2 + 1);
       encoder.resolveQuerySet(querySet, slot * 2, 2, resolveBuffer, slot * QUERY_STRIDE);
       encoder.copyBufferToBuffer(resolveBuffer, slot * QUERY_STRIDE, readbackBuffer, slot * QUERY_STRIDE, 16);
       pendingSamples.add(slot);
-      activeBatchSlot = -1;
-      batchFrameCount = 0;
     } catch (error) {
       telemetry.gpuTiming = "unsupported";
       telemetry.timestampError = String(error?.message || error);
-      activeBatchSlot = -1;
-      batchFrameCount = 0;
     }
   }
 
@@ -106,9 +99,8 @@ export function createWebGpuBenchmarkTelemetry(device) {
           continue;
         }
         if (deltaNs <= 0) {
-          // Chromium quantizes WebGPU timestamps for security. A zero delta can
-          // therefore mean that the measured GPU interval is below the browser's
-          // useful timing resolution; never convert it into a fabricated duration.
+          // Chromium can quantize WebGPU timestamps. A zero interval is retained
+          // as an explicit observation and is never converted into fake timing.
           telemetry.timestampSamplesZero += 1;
           continue;
         }
@@ -149,7 +141,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
       timestampSamplesZero: telemetry.timestampSamplesZero,
       timestampError: telemetry.timestampError,
       timestampRawSamples: [...telemetry.timestampRawSamples],
-      timestampBatchFrames: TIMESTAMP_BATCH_FRAMES,
+      timestampSampleIntervalFrames: TIMESTAMP_SAMPLE_INTERVAL_FRAMES,
       adapter: telemetry.adapter,
     };
   }
@@ -162,8 +154,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
     resolveBuffer = null;
     readbackBuffer = null;
     pendingSamples.clear();
-    activeBatchSlot = -1;
-    batchFrameCount = 0;
+    frameCounter = 0;
   }
 
   return {
