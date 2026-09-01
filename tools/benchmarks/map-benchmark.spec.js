@@ -137,7 +137,22 @@ async function runTimestampProbe(page) {
   });
 }
 
-async function runBenchmark(page, backend, file) {
+async function readSoftwareGpuError(page) {
+  return page.evaluate(() => {
+    const canvas = document.createElement("canvas");
+    const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
+    if (!gl) return null;
+    const debug = gl.getExtension("WEBGL_debug_renderer_info");
+    return debug ? String(gl.getParameter(debug.UNMASKED_RENDERER_WEBGL) || "") : String(gl.getParameter(gl.RENDERER) || "");
+  });
+}
+
+function isRecoverableAutoWebGpuFailure(error) {
+  const message = String(error?.message || error || "");
+  return /dxil\.dll|EnsureDXCLibraries|requestDevice.*OperationError|DynamicLib\.Open|WebGPU backend failed to initialize|navigator\.gpu unavailable|GPUAdapter/i.test(message);
+}
+
+async function runBenchmark(page, backend, file, metadata = {}) {
   await page.goto(`/benchmarks/map-benchmark.html?backend=${backend}&durationMs=${durationMs}`, { waitUntil: "load" });
   const gpuInfo = await page.evaluate(() => {
     const canvas = document.createElement("canvas");
@@ -170,6 +185,7 @@ async function runBenchmark(page, backend, file) {
   }
   result.gpuInfo = gpuInfo;
   result.webgpuCapability = webgpuCapability;
+  Object.assign(result, metadata);
   await fs.mkdir(path.dirname(file), { recursive: true });
   await fs.writeFile(file, JSON.stringify(result, null, 2));
   console.log(`HISTORIA_BENCHMARK_JSON ${JSON.stringify(result)}`);
@@ -191,7 +207,17 @@ test("Historia AI WebGPU timestamp probe", async ({ page }) => {
 });
 
 test("Historia AI 15k / 4K / 2x DPR benchmark", async ({ page }) => {
-  await runBenchmark(page, "auto", output);
+  try {
+    await runBenchmark(page, "auto", output);
+  } catch (error) {
+    if (process.env.HISTORIA_REQUIRE_WEBGPU === "1" || !isRecoverableAutoWebGpuFailure(error)) throw error;
+    const renderer = await readSoftwareGpuError(page);
+    console.warn(`HISTORIA_WEBGPU_AUTO_FALLBACK ${JSON.stringify({ reason: String(error?.message || error), renderer })}`);
+    await runBenchmark(page, "webgl2", output, {
+      backendFallback: "webgl2",
+      backendFallbackReason: String(error?.message || error),
+    });
+  }
 });
 
 test("Historia AI WebGL2 fallback parity benchmark", async ({ page }) => {
