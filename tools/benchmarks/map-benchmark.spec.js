@@ -30,14 +30,42 @@ async function runTimestampProbe(page) {
     if (!result.supported) return result;
 
     let device;
+    let readback;
+    let resolve;
+    let querySet;
+    let workload;
     try {
       device = await adapter.requestDevice({ requiredFeatures: ["timestamp-query"] });
-      const querySet = device.createQuerySet({ type: "timestamp", count: 2 });
-      const resolve = device.createBuffer({ size: 16, usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC });
-      const readback = device.createBuffer({ size: 16, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+      const shader = device.createShaderModule({ code: `
+        @group(0) @binding(0) var<storage, read_write> data: array<u32>;
+        @compute @workgroup_size(64)
+        fn main(@builtin(global_invocation_id) id: vec3<u32>) {
+          var x = id.x + 1u;
+          for (var i = 0u; i < 64u; i = i + 1u) {
+            x = x * 1664525u + 1013904223u;
+          }
+          data[id.x] = x;
+        }
+      ` });
+      const pipeline = device.createComputePipeline({
+        layout: "auto",
+        compute: { module: shader, entryPoint: "main" },
+      });
+      workload = device.createBuffer({ size: 65536 * 4, usage: GPUBufferUsage.STORAGE });
+      const bindGroup = device.createBindGroup({
+        layout: pipeline.getBindGroupLayout(0),
+        entries: [{ binding: 0, resource: { buffer: workload } }],
+      });
+      querySet = device.createQuerySet({ type: "timestamp", count: 2 });
+      resolve = device.createBuffer({ size: 16, usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC });
+      readback = device.createBuffer({ size: 16, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+
       const encoder = device.createCommandEncoder();
       encoder.writeTimestamp(querySet, 0);
       const compute = encoder.beginComputePass();
+      compute.setPipeline(pipeline);
+      compute.setBindGroup(0, bindGroup);
+      compute.dispatchWorkgroups(1024);
       compute.end();
       encoder.writeTimestamp(querySet, 1);
       encoder.resolveQuerySet(querySet, 0, 2, resolve, 0);
@@ -52,13 +80,15 @@ async function runTimestampProbe(page) {
       result.raw = { begin, end };
       result.deltaNs = Number.isFinite(deltaNs) ? deltaNs : null;
       readback.unmap();
-      querySet.destroy?.();
-      resolve.destroy?.();
-      readback.destroy?.();
-      device.destroy?.();
     } catch (error) {
       result.error = String(error?.message || error);
-      try { device?.destroy?.(); } catch {}
+      try { readback?.unmap?.(); } catch {}
+    } finally {
+      querySet?.destroy?.();
+      resolve?.destroy?.();
+      readback?.destroy?.();
+      workload?.destroy?.();
+      device?.destroy?.();
     }
     return result;
   });
