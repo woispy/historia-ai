@@ -16,13 +16,17 @@ export class BenchmarkDiagnostics {
     this.startedAt = 0;
     this.lastFrameAt = 0;
     this.peakHeapBytes = 0;
+    this.heapStartBytes = null;
+    this.heapEndBytes = null;
     this.heapSamples = 0;
+    this.gcPressureProxy = 0;
   }
 
   start(now = performance.now()) {
     this.reset();
     this.startedAt = now;
     this.lastFrameAt = now;
+    this.sampleHeap();
   }
 
   frame(now = performance.now(), drawCalls = 0) {
@@ -47,10 +51,12 @@ export class BenchmarkDiagnostics {
 
   sampleHeap() {
     const used = globalThis.performance?.memory?.usedJSHeapSize;
-    if (Number.isFinite(used)) {
-      this.peakHeapBytes = Math.max(this.peakHeapBytes, used);
-      this.heapSamples += 1;
-    }
+    if (!Number.isFinite(used)) return;
+    if (this.heapStartBytes === null) this.heapStartBytes = used;
+    if (this.heapEndBytes !== null && used > this.heapEndBytes) this.gcPressureProxy += used - this.heapEndBytes;
+    this.heapEndBytes = used;
+    this.peakHeapBytes = Math.max(this.peakHeapBytes, used);
+    this.heapSamples += 1;
   }
 
   summary(now = performance.now()) {
@@ -70,14 +76,18 @@ export class BenchmarkDiagnostics {
       pickLatencyMs: pick,
       heap: {
         supported: this.heapSamples > 0,
-        currentBytes: heap?.usedJSHeapSize ?? null,
+        startBytes: this.heapStartBytes,
+        currentBytes: heap?.usedJSHeapSize ?? this.heapEndBytes,
+        endBytes: this.heapEndBytes,
+        growthBytes: this.heapStartBytes !== null && this.heapEndBytes !== null ? this.heapEndBytes - this.heapStartBytes : null,
         peakBytes: this.peakHeapBytes || null,
+        gcPressureProxyBytes: this.heapSamples > 1 ? this.gcPressureProxy : null,
         totalBytes: heap?.totalJSHeapSize ?? null,
         limitBytes: heap?.jsHeapSizeLimit ?? null,
       },
       gpuTimeMs: null,
       gpuTiming: "not instrumented",
-      notes: ["GPU time remains null until timestamp-query or EXT_disjoint_timer_query2 is available and enabled.", "A 144 FPS claim requires a real GPU/browser run; this collector does not infer it from CPU frame cadence."],
+      notes: ["GPU time remains null until timestamp-query or EXT_disjoint_timer_query2 is available and enabled.", "Heap growth is a diagnostic signal, not a GC measurement; browser GC telemetry is intentionally not fabricated.", "A 144 FPS claim requires a real GPU/browser run; this collector does not infer it from CPU frame cadence."],
     };
   }
 }
