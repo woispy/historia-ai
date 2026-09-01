@@ -1,5 +1,5 @@
 import { MapRendererContract } from "../MapRendererContract.js";
-import { createWebGpuBenchmarkTelemetry } from "../../src/map/runtime/BenchmarkGpuTelemetry.js";
+import { createWebGpuBenchmarkTelemetry } from "../../runtime/BenchmarkGpuTelemetry.js";
 
 const ID_SCALE = 1 / 255;
 const ID_CLEAR = "vec4<f32>(0.0,0.0,0.0,0.0)";
