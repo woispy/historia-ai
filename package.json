@@ -12,7 +12,7 @@
     "build:mapbin": "node tools/build/build-mapbin.js",
     "benchmark:prepare": "node tools/benchmarks/generate-15k-mapbin.js",
     "benchmark": "node tools/benchmarks/run-browser-benchmark.js",
-    "benchmark:soak": "HISTORIA_BENCHMARK_DURATION_MS=1800000 node tools/benchmarks/run-browser-benchmark.js",
+    "benchmark:soak": "node tools/benchmarks/run-browser-benchmark.js",
     "test:historical-gis": "node tools/historical-gis/cli/test-1300.js",
     "test:physical-geography": "node tools/tests/physical-geography-1300.test.js",
     "test:hydrography-10m": "node tools/tests/hydrography-10m.test.js",
@@ -56,5 +56,5 @@
     "test:cartography-foundation": "node tools/tests/cartography-foundation.test.js"
   },
   "dependencies": {"react":"^19.2.7","react-dom":"^19.2.7","react-router-dom":"^7.18.2"},
-  "devDependencies": {"@eslint/js":"^10.6.0","@playwright/test":"^1.55.0","@types/react":"^19.2.17","@types/react-dom":"^19.2.3","@vitejs/plugin-react":"^6.0.3","eslint":"^10.6.0","eslint-plugin-react-hooks":"^7.1.1","eslint-plugin-react-refresh":"^0.5.3","vite":"^8.1.1"}
+  "devDependencies": {"@eslint/js":"^10.0.1","@playwright/test":"^1.55.0","@types/react":"^19.2.17","@types/react-dom":"^19.2.3","@vitejs/plugin-react":"^6.0.3","eslint":"^10.0.1","eslint-plugin-react-hooks":"^7.1.1","eslint-plugin-react-refresh":"^0.5.3","vite":"^8.1.1"}
 }
