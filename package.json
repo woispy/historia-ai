@@ -4,11 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npm run build:assets && node tools/historical-gis/cli/import-1300.js && vite",
-    "build": "npm run build:assets && node tools/historical-gis/cli/import-1300.js && vite build",
+    "dev": "npm run build:assets && node tools/historical-gis/cli/import-1300.js && npm run build:mapbin && vite",
+    "build": "npm run build:assets && node tools/historical-gis/cli/import-1300.js && npm run build:mapbin && vite build",
     "build:assets": "node tools/asset-builder/cli/fetch-natural-earth-50m.js && node tools/asset-builder/cli/fetch-natural-earth-hydrography-10m.js && node tools/asset-builder/cli/build-assets.js && node tools/asset-builder/cli/build-anatolia-hydrography-10m.js",
     "build:assets:debug": "node tools/asset-builder/cli/fetch-natural-earth-50m.js && node tools/asset-builder/cli/fetch-natural-earth-hydrography-10m.js && node --trace-uncaught tools/asset-builder/cli/build-assets.js && node tools/asset-builder/cli/build-anatolia-hydrography-10m.js",
     "build:historical-gis:1300": "node tools/historical-gis/cli/import-1300.js",
+    "build:mapbin": "node tools/build/build-mapbin.js",
     "test:historical-gis": "node tools/historical-gis/cli/test-1300.js",
     "test:physical-geography": "node tools/tests/physical-geography-1300.test.js",
     "test:hydrography-10m": "node tools/tests/hydrography-10m.test.js",
@@ -31,6 +32,8 @@
     "test:map-engine-v2-contract": "node tools/tests/map-engine-v2-contract.test.js",
     "test:map-runtime-controller": "node tools/tests/map-runtime-controller.test.js",
     "test:binary-map-asset": "node tools/tests/binary-map-asset.test.js",
+    "test:mapbin-loader": "node tools/tests/mapbin-loader.test.js",
+    "test:webgpu-map-renderer": "node tools/tests/webgpu-map-renderer.test.js",
     "test:new-game": "node tools/tests/new-game-state.test.js",
     "test:new-game-startup": "node tools/tests/new-game-startup.test.js",
     "test:game-entry-handoff": "node tools/tests/game-entry-handoff.test.js",
@@ -48,5 +51,5 @@
     "test:cartography-foundation": "node tools/tests/cartography-foundation.test.js"
   },
   "dependencies": {"react":"^19.2.7","react-dom":"^19.2.7","react-router-dom":"^7.18.2"},
-  "devDependencies": {"@eslint/js":"^10.0.1","@types/react":"^19.2.17","@types/react-dom":"^19.2.3","@vitejs/plugin-react":"^6.0.3","eslint":"^10.6.0","eslint-plugin-react-hooks":"^7.1.1","eslint-plugin-react-refresh":"^0.5.3","vite":"^8.1.1"}
+  "devDependencies": {"@eslint/js":"^10.6.0","@types/react":"^19.2.17","@types/react-dom":"^19.2.3","@vitejs/plugin-react":"^6.0.3","eslint":"^10.6.0","eslint-plugin-react-hooks":"^7.1.1","eslint-plugin-react-refresh":"^0.5.3","vite":"^8.1.1"}
 }
