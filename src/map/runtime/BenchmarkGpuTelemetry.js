@@ -52,11 +52,8 @@ export function createWebGpuBenchmarkTelemetry(device) {
     const slot = slots[slotId];
     if (!slot?.querySet || slot.state !== SLOT_STATES.RECORDING) return false;
     if (!slot.beginWritten || !slot.endWritten) { telemetry.timestampSamplesDropped += 1; telemetry.timestampError = "Timestamp pair was not completely written"; slot.state = SLOT_STATES.FREE; return false; }
-    try {
-      encoder.resolveQuerySet(slot.querySet, 0, QUERY_VALUES_PER_SLOT, slot.resolveBuffer, 0);
-      encoder.copyBufferToBuffer(slot.resolveBuffer, 0, slot.stagingBuffer, 0, QUERY_BYTES_PER_SLOT);
-      slot.state = SLOT_STATES.RESOLVED; return true;
-    } catch (error) { telemetry.timestampSamplesDropped += 1; telemetry.timestampError = String(error?.message || error); slot.state = SLOT_STATES.FREE; return false; }
+    try { encoder.resolveQuerySet(slot.querySet, 0, QUERY_VALUES_PER_SLOT, slot.resolveBuffer, 0); encoder.copyBufferToBuffer(slot.resolveBuffer, 0, slot.stagingBuffer, 0, QUERY_BYTES_PER_SLOT); slot.state = SLOT_STATES.RESOLVED; return true; }
+    catch (error) { telemetry.timestampSamplesDropped += 1; telemetry.timestampError = String(error?.message || error); slot.state = SLOT_STATES.FREE; return false; }
   }
   function recordSubmit() { telemetry.queueSubmits += 1; for (const slot of slots) if (slot.state === SLOT_STATES.RESOLVED && !slot.submitted) slot.submitted = true; }
   async function collect() {
