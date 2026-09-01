@@ -27,6 +27,14 @@ async function runBenchmark(page, backend, file) {
   await page.waitForFunction(() => Boolean(window.__HISTORIA_BENCHMARK_RESULT__), null, { timeout: durationMs + 120000 });
   const result = await page.evaluate(() => window.__HISTORIA_BENCHMARK_RESULT__);
   if (result.error) throw new Error(result.error);
+  if (result.backend === "webgpu") {
+    if (!result.gpu || result.gpu.computePasses <= 0) throw new Error("WebGPU telemetry missing compute pass count");
+    if (result.gpu.dispatchCalls <= 0) throw new Error("WebGPU telemetry missing dispatch count");
+    if (result.gpu.renderPasses <= 0) throw new Error("WebGPU telemetry missing render pass count");
+    if (result.gpu.drawCalls <= 0) throw new Error("WebGPU telemetry missing draw call count");
+    if (result.gpu.queueSubmits <= 0) throw new Error("WebGPU telemetry missing queue submission count");
+    if (!result.gpu.gpuTiming || !["supported", "unsupported"].includes(result.gpu.gpuTiming)) throw new Error(`Invalid GPU timing state: ${result.gpu.gpuTiming}`);
+  }
   result.gpuInfo = gpuInfo;
   await fs.mkdir(path.dirname(file), { recursive: true });
   await fs.writeFile(file, JSON.stringify(result, null, 2));
