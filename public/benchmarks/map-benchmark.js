@@ -5,7 +5,6 @@ import { BinaryMapRenderer } from "/src/map/rendering/gpu/BinaryMapRenderer.js";
 import { WebGPUMapRenderer } from "/src/map/rendering/gpu/WebGPUMapRenderer.js";
 import { BenchmarkDiagnostics, BENCHMARK_TARGET } from "/src/map/runtime/BenchmarkDiagnostics.js";
 import { BenchmarkSoakRecorder } from "/src/map/runtime/BenchmarkSoakRecorder.js";
-import { installWebGpuBenchmarkTelemetry } from "/src/map/runtime/BenchmarkGpuTelemetry.js";
 
 const params = new URLSearchParams(location.search);
 const assetUrl = params.get("asset") || "/assets/stress-15k.mapbin";
@@ -17,7 +16,6 @@ const diagnostics = new BenchmarkDiagnostics();
 const soak = new BenchmarkSoakRecorder({ sampleIntervalMs: Number(params.get("sampleMs") || 1000) });
 let renderer;
 let runtime;
-let gpuTelemetry;
 let lastHover = 0;
 
 function resize() {
@@ -42,10 +40,6 @@ async function main() {
   }
   if (!renderer) throw new Error(`Requested backend is unavailable: ${backendPreference}`);
 
-  if (renderer instanceof WebGPUMapRenderer) {
-    gpuTelemetry = installWebGpuBenchmarkTelemetry(renderer);
-  }
-
   resize();
   runtime = new MapRuntimeController({ canvas, cameraRig, renderer });
   runtime.start();
@@ -53,7 +47,7 @@ async function main() {
   const benchmarkStart = performance.now();
   const snapshot = () => ({
     ...diagnostics.summary(performance.now()),
-    gpu: gpuTelemetry?.snapshot() ?? null,
+    gpu: renderer.getTelemetrySnapshot?.() ?? null,
   });
   soak.start(snapshot);
 
@@ -86,7 +80,7 @@ async function main() {
 
 async function finish(now) {
   runtime?.stop();
-  await gpuTelemetry?.collect();
+  await renderer.collectTelemetry?.();
   soak.stop();
   const result = {
     ...diagnostics.summary(now),
@@ -96,7 +90,7 @@ async function finish(now) {
     provinceCount: renderer.assetSource?.provinceCount ?? null,
     geometryPointCount: renderer.assetSource?.geometryPointCount ?? null,
     internalCanvas: { width: canvas.width, height: canvas.height },
-    gpu: gpuTelemetry?.snapshot() ?? null,
+    gpu: renderer.getTelemetrySnapshot?.() ?? null,
     soak: soak.summary(),
   };
   diagnosticsNode.textContent = JSON.stringify(result, null, 2);
