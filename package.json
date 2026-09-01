@@ -38,6 +38,7 @@
     "test:mapbin-loader": "node tools/tests/mapbin-loader.test.js",
     "test:webgpu-map-renderer": "node tools/tests/webgpu-map-renderer.test.js",
     "test:map-stress-15k": "node tools/tests/map-stress-15k.test.js",
+    "test:benchmark-diagnostics": "node tools/tests/benchmark-diagnostics.test.js",
     "test:new-game": "node tools/tests/new-game-state.test.js",
     "test:new-game-startup": "node tools/tests/new-game-startup.test.js",
     "test:game-entry-handoff": "node tools/tests/game-entry-handoff.test.js",
@@ -55,5 +56,5 @@
     "test:cartography-foundation": "node tools/tests/cartography-foundation.test.js"
   },
   "dependencies": {"react":"^19.2.7","react-dom":"^19.2.7","react-router-dom":"^7.18.2"},
-  "devDependencies": {"@eslint/js":"^10.6.0","@types/react":"^19.2.17","@types/react-dom":"^19.2.3","@vitejs/plugin-react":"^6.0.3","eslint":"^10.6.0","eslint-plugin-react-hooks":"^7.1.1","eslint-plugin-react-refresh":"^0.5.3","vite":"^8.1.1"}
+  "devDependencies": {"@eslint/js":"^10.6.0","@playwright/test":"^1.55.0","@types/react":"^19.2.17","@types/react-dom":"^19.2.3","@vitejs/plugin-react":"^6.0.3","eslint":"^10.6.0","eslint-plugin-react-hooks":"^7.1.1","eslint-plugin-react-refresh":"^0.5.3","vite":"^8.1.1"}
 }
