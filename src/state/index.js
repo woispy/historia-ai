@@ -2,6 +2,14 @@ export {
   createRuntimeState,
 } from "./RuntimeState.js";
 
+export {
+  createWorldState,
+  assertWorldState,
+  deepFreeze,
+} from "./WorldState.js";
+
+import { deepFreeze } from "./WorldState.js";
+
 export function getState(gameSession) {
   if (!gameSession) {
     throw new Error("GameSession is required.");
@@ -25,7 +33,7 @@ export function updateState(gameSession, state) {
 
   return {
     ...gameSession,
-    state,
+    state: deepFreeze(state),
   };
 }
 
