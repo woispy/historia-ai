@@ -1,8 +1,6 @@
 const RING_SLOT_COUNT = 4;
 const QUERY_VALUES_PER_SLOT = 2;
 const QUERY_BYTES_PER_SLOT = QUERY_VALUES_PER_SLOT * 8;
-const RESOLVE_STRIDE = 256;
-const RESOLVE_BUFFER_SIZE = RING_SLOT_COUNT * RESOLVE_STRIDE;
 const TIMESTAMP_SAMPLE_INTERVAL_FRAMES = 8;
 const SLOT_STATES = Object.freeze({
   FREE: "FREE",
@@ -28,8 +26,6 @@ export function createWebGpuBenchmarkTelemetry(device) {
     adapter: readAdapterInfo(device),
   };
 
-  let querySet = null;
-  let resolveBuffer = null;
   let frameCounter = 0;
   let nextRingSlot = 0;
   let collectPromise = null;
@@ -40,7 +36,8 @@ export function createWebGpuBenchmarkTelemetry(device) {
     submitted: false,
     beginWritten: false,
     endWritten: false,
-    resolveOffset: slot * RESOLVE_STRIDE,
+    querySet: null,
+    resolveBuffer: null,
     stagingBuffer: null,
   }));
 
@@ -48,15 +45,18 @@ export function createWebGpuBenchmarkTelemetry(device) {
 
   if (timestampSupported && typeof device.createQuerySet === "function") {
     try {
-      querySet = device.createQuerySet({
-        type: "timestamp",
-        count: RING_SLOT_COUNT * QUERY_VALUES_PER_SLOT,
-      });
-      resolveBuffer = device.createBuffer({
-        size: RESOLVE_BUFFER_SIZE,
-        usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
-      });
       for (const slot of slots) {
+        // Keep query state physically isolated per ring slot. Some Dawn/backend
+        // combinations can return zeroes when a single timestamp query set is
+        // repeatedly resolved while other query indices are still in flight.
+        slot.querySet = device.createQuerySet({
+          type: "timestamp",
+          count: QUERY_VALUES_PER_SLOT,
+        });
+        slot.resolveBuffer = device.createBuffer({
+          size: QUERY_BYTES_PER_SLOT,
+          usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
+        });
         slot.stagingBuffer = device.createBuffer({
           size: QUERY_BYTES_PER_SLOT,
           usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
@@ -65,17 +65,20 @@ export function createWebGpuBenchmarkTelemetry(device) {
       telemetry.gpuTiming = "supported";
     } catch (error) {
       telemetry.timestampError = String(error?.message || error);
-      for (const slot of slots) slot.stagingBuffer?.destroy?.();
-      querySet?.destroy?.();
-      resolveBuffer?.destroy?.();
-      querySet = null;
-      resolveBuffer = null;
+      for (const slot of slots) {
+        slot.querySet?.destroy?.();
+        slot.resolveBuffer?.destroy?.();
+        slot.stagingBuffer?.destroy?.();
+        slot.querySet = null;
+        slot.resolveBuffer = null;
+        slot.stagingBuffer = null;
+      }
     }
   }
 
   function beginFrame() {
     frameCounter += 1;
-    if (!querySet || disposed) return -1;
+    if (disposed || telemetry.gpuTiming !== "supported") return -1;
     if (frameCounter % TIMESTAMP_SAMPLE_INTERVAL_FRAMES !== 0) return -1;
 
     for (let i = 0; i < RING_SLOT_COUNT; i += 1) {
@@ -98,7 +101,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
 
   function writeTimestamp(encoder, slotId, phase) {
     const slot = slots[slotId];
-    if (!querySet || !slot || slot.state !== SLOT_STATES.RECORDING || typeof encoder?.writeTimestamp !== "function") {
+    if (!slot?.querySet || slot.state !== SLOT_STATES.RECORDING || typeof encoder?.writeTimestamp !== "function") {
       return false;
     }
 
@@ -108,9 +111,9 @@ export function createWebGpuBenchmarkTelemetry(device) {
     if (isBegin && slot.beginWritten) return false;
     if (isEnd && (!slot.beginWritten || slot.endWritten)) return false;
 
-    const queryIndex = slot.slot * QUERY_VALUES_PER_SLOT + (isEnd ? 1 : 0);
+    const queryIndex = isEnd ? 1 : 0;
     try {
-      encoder.writeTimestamp(querySet, queryIndex);
+      encoder.writeTimestamp(slot.querySet, queryIndex);
       if (isBegin) slot.beginWritten = true;
       else slot.endWritten = true;
       return true;
@@ -124,7 +127,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
 
   function finishFrame(encoder, slotId) {
     const slot = slots[slotId];
-    if (!querySet || !slot || slot.state !== SLOT_STATES.RECORDING) return false;
+    if (!slot?.querySet || slot.state !== SLOT_STATES.RECORDING) return false;
     if (!slot.beginWritten || !slot.endWritten) {
       telemetry.timestampSamplesDropped += 1;
       telemetry.timestampError = "Timestamp pair was not completely written";
@@ -133,19 +136,16 @@ export function createWebGpuBenchmarkTelemetry(device) {
     }
 
     try {
-      // Keep resolveQuerySet and the readback copy in the same command
-      // submission. This avoids a driver/backend hazard where a resolved
-      // timestamp buffer can be observed as zero after a submission boundary.
       encoder.resolveQuerySet(
-        querySet,
-        slot.slot * QUERY_VALUES_PER_SLOT,
+        slot.querySet,
+        0,
         QUERY_VALUES_PER_SLOT,
-        resolveBuffer,
-        slot.resolveOffset,
+        slot.resolveBuffer,
+        0,
       );
       encoder.copyBufferToBuffer(
-        resolveBuffer,
-        slot.resolveOffset,
+        slot.resolveBuffer,
+        0,
         slot.stagingBuffer,
         0,
         QUERY_BYTES_PER_SLOT,
@@ -169,7 +169,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
 
   async function collect() {
     if (collectPromise) return collectPromise;
-    if (disposed || !resolveBuffer || !device?.queue?.onSubmittedWorkDone) return;
+    if (disposed || !device?.queue?.onSubmittedWorkDone) return;
 
     const candidates = slots.filter(
       (slot) => slot.state === SLOT_STATES.RESOLVED && slot.submitted,
@@ -180,8 +180,6 @@ export function createWebGpuBenchmarkTelemetry(device) {
 
     collectPromise = (async () => {
       try {
-        // The render/compute submission already contains both resolveQuerySet
-        // and copyBufferToBuffer. Fence that submission before any CPU map.
         await device.queue.onSubmittedWorkDone();
 
         for (const slot of candidates) {
@@ -207,7 +205,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
               });
             }
 
-            if (begin < 0n || end < 0n || end < begin || !Number.isFinite(deltaNs)) {
+            if (end < begin || !Number.isFinite(deltaNs)) {
               telemetry.timestampSamplesDropped += 1;
               telemetry.timestampError = "Invalid WebGPU timestamp pair";
             } else if (deltaTicks <= 0n) {
@@ -221,9 +219,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
             telemetry.timestampError = String(error?.message || error);
           } finally {
             if (mapped) {
-              try {
-                slot.stagingBuffer.unmap();
-              } catch (error) {
+              try { slot.stagingBuffer.unmap(); } catch (error) {
                 telemetry.timestampError = String(error?.message || error);
               }
             }
@@ -284,13 +280,13 @@ export function createWebGpuBenchmarkTelemetry(device) {
     for (const slot of slots) {
       try { slot.stagingBuffer?.unmap?.(); } catch {}
       slot.stagingBuffer?.destroy?.();
+      slot.resolveBuffer?.destroy?.();
+      slot.querySet?.destroy?.();
       slot.stagingBuffer = null;
+      slot.resolveBuffer = null;
+      slot.querySet = null;
       slot.state = SLOT_STATES.FREE;
     }
-    querySet?.destroy?.();
-    resolveBuffer?.destroy?.();
-    querySet = null;
-    resolveBuffer = null;
     collectPromise = null;
     frameCounter = 0;
     nextRingSlot = 0;
@@ -339,6 +335,8 @@ function summarize(values) {
   };
 }
 
-function percentile(sorted, p) {
-  return sorted[Math.min(sorted.length - 1, Math.max(0, Math.ceil(sorted.length * p) - 1))];
+function percentile(sorted, quantile) {
+  if (!sorted.length) return null;
+  const index = Math.min(sorted.length - 1, Math.max(0, Math.ceil(quantile * sorted.length) - 1));
+  return sorted[index];
 }
