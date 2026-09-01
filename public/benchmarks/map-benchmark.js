@@ -7,6 +7,7 @@ import { BenchmarkDiagnostics, BENCHMARK_TARGET } from "/src/map/runtime/Benchma
 
 const params = new URLSearchParams(location.search);
 const assetUrl = params.get("asset") || "/assets/stress-15k.mapbin";
+const backendPreference = params.get("backend") || "auto";
 const durationMs = Number(params.get("durationMs") || 30000);
 const canvas = document.querySelector("#map");
 const diagnosticsNode = document.querySelector("#diagnostics");
@@ -26,15 +27,16 @@ async function main() {
   const cameraRig = new MapCameraRig({ minZoom: 1, maxZoom: 96 });
   cameraRig.setState({ x: 0, y: 0, zoom: 2, pitch: 24, yaw: 0 });
 
-  if (WebGPUMapRenderer.isSupported()) {
+  if (backendPreference !== "webgl2" && WebGPUMapRenderer.isSupported()) {
     const candidate = new WebGPUMapRenderer(canvas);
     if (await candidate.initialize({ assetSource: asset })) renderer = candidate;
     else candidate.dispose();
   }
-  if (!renderer) {
+  if (!renderer && backendPreference !== "webgpu") {
     renderer = new BinaryMapRenderer(canvas);
-    if (!renderer.initialize({ assetSource: asset })) throw new Error("Neither WebGPU nor WebGL2 map backend initialized");
+    if (!renderer.initialize({ assetSource: asset })) throw new Error("WebGL2 backend failed to initialize");
   }
+  if (!renderer) throw new Error(`Requested backend is unavailable: ${backendPreference}`);
 
   resize();
   runtime = new MapRuntimeController({ canvas, cameraRig, renderer });
@@ -74,6 +76,7 @@ function finish(now) {
   const result = {
     ...diagnostics.summary(now),
     backend: renderer instanceof WebGPUMapRenderer ? "webgpu" : "webgl2",
+    backendPreference,
     assetUrl,
     provinceCount: renderer.assetSource?.provinceCount ?? null,
     geometryPointCount: renderer.assetSource?.geometryPointCount ?? null,
@@ -87,7 +90,7 @@ function finish(now) {
 
 window.addEventListener("resize", resize);
 main().catch((error) => {
-  const result = { error: String(error?.stack || error), target: BENCHMARK_TARGET };
+  const result = { error: String(error?.stack || error), target: BENCHMARK_TARGET, backendPreference };
   window.__HISTORIA_BENCHMARK_RESULT__ = result;
   diagnosticsNode.textContent = JSON.stringify(result, null, 2);
   console.error("HISTORIA_BENCHMARK_ERROR", result.error);
