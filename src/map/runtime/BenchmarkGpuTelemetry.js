@@ -1,13 +1,9 @@
 const MAX_QUERY_PAIRS = 2048;
 const QUERY_STRIDE = 256;
 
-export function installWebGpuBenchmarkTelemetry(renderer) {
-  if (!renderer?.device?.queue) return null;
-  const device = renderer.device;
+export function createWebGpuBenchmarkTelemetry(device) {
   const telemetry = {
     gpuTiming: "unsupported",
-    timestampPeriodNs: null,
-    timestampPeriodSource: null,
     computePasses: 0,
     dispatchCalls: 0,
     renderPasses: 0,
@@ -16,14 +12,15 @@ export function installWebGpuBenchmarkTelemetry(renderer) {
     picking: { renderPasses: 0, drawCalls: 0, queueSubmits: 0 },
     gpuSamples: [],
     timestampSamplesDropped: 0,
+    timestampError: null,
   };
 
   let querySet = null;
   let resolveBuffer = null;
   let readbackBuffer = null;
   let nextQueryPair = 0;
-  const pendingSamples = new Map();
-  const timestampSupported = Boolean(device.features?.has?.("timestamp-query"));
+  const pendingSamples = new Set();
+  const timestampSupported = Boolean(device?.features?.has?.("timestamp-query"));
 
   if (timestampSupported && typeof device.createQuerySet === "function") {
     try {
@@ -37,69 +34,53 @@ export function installWebGpuBenchmarkTelemetry(renderer) {
         usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
       });
       telemetry.gpuTiming = "supported";
-      telemetry.timestampPeriodNs = 1;
-      telemetry.timestampPeriodSource = "WebGPU timestamp values are nanoseconds";
+    } catch (error) {
+      telemetry.timestampError = String(error?.message || error);
+    }
+  }
+
+  function beginFrame(encoder) {
+    if (!querySet || nextQueryPair >= MAX_QUERY_PAIRS || typeof encoder?.writeTimestamp !== "function") {
+      if (querySet) telemetry.timestampSamplesDropped += 1;
+      return -1;
+    }
+    const slot = nextQueryPair++;
+    try {
+      encoder.writeTimestamp(querySet, slot * 2);
+      return slot;
+    } catch (error) {
+      telemetry.gpuTiming = "unsupported";
+      telemetry.timestampError = String(error?.message || error);
+      return -1;
+    }
+  }
+
+  function finishFrame(encoder, slot) {
+    if (!querySet || slot < 0) return;
+    try {
+      encoder.writeTimestamp(querySet, slot * 2 + 1);
+      encoder.resolveQuerySet(querySet, slot * 2, 2, resolveBuffer, slot * QUERY_STRIDE);
+      encoder.copyBufferToBuffer(resolveBuffer, slot * QUERY_STRIDE, readbackBuffer, slot * QUERY_STRIDE, 16);
+      pendingSamples.add(slot);
     } catch (error) {
       telemetry.gpuTiming = "unsupported";
       telemetry.timestampError = String(error?.message || error);
     }
   }
 
-  const originalCreateCommandEncoder = device.createCommandEncoder.bind(device);
-  const originalOnSubmittedWorkDone = device.queue.onSubmittedWorkDone?.bind(device.queue);
-
-  device.createCommandEncoder = (descriptor) => {
-    const encoder = originalCreateCommandEncoder(descriptor);
-    let querySlot = -1;
-
-    if (querySet && nextQueryPair < MAX_QUERY_PAIRS && typeof encoder.writeTimestamp === "function") {
-      querySlot = nextQueryPair++;
-      try {
-        encoder.writeTimestamp(querySet, querySlot * 2);
-      } catch (error) {
-        telemetry.gpuTiming = "unsupported";
-        telemetry.timestampError = String(error?.message || error);
-        querySlot = -1;
-      }
-    } else if (querySet) {
-      telemetry.timestampSamplesDropped += 1;
-    }
-
-    return new Proxy(encoder, {
-      get(target, property, receiver) {
-        if (property === "finish") {
-          return (...args) => {
-            if (querySet && querySlot >= 0) {
-              try {
-                target.writeTimestamp(querySet, querySlot * 2 + 1);
-                target.resolveQuerySet(querySet, querySlot * 2, 2, resolveBuffer, querySlot * QUERY_STRIDE);
-                target.copyBufferToBuffer(resolveBuffer, querySlot * QUERY_STRIDE, readbackBuffer, querySlot * QUERY_STRIDE, 16);
-                pendingSamples.set(querySlot, true);
-              } catch (error) {
-                telemetry.gpuTiming = "unsupported";
-                telemetry.timestampError = String(error?.message || error);
-              }
-            }
-            return target.finish(...args);
-          };
-        }
-        return Reflect.get(target, property, receiver);
-      },
-    });
-  };
-
-  const collect = async () => {
-    if (!readbackBuffer || !pendingSamples.size || !originalOnSubmittedWorkDone) return;
+  async function collect() {
+    if (!readbackBuffer || !pendingSamples.size) return;
     try {
-      await originalOnSubmittedWorkDone();
+      await device.queue.onSubmittedWorkDone();
       await readbackBuffer.mapAsync(GPUMapMode.READ);
-      const data = new BigInt64Array(readbackBuffer.getMappedRange());
-      for (const slot of pendingSamples.keys()) {
+      const data = new BigUint64Array(readbackBuffer.getMappedRange());
+      for (const slot of pendingSamples) {
         const base = (slot * QUERY_STRIDE) / 8;
         const begin = Number(data[base]);
         const end = Number(data[base + 1]);
         if (Number.isFinite(begin) && Number.isFinite(end) && end >= begin) {
-          telemetry.gpuSamples.push((end - begin) * telemetry.timestampPeriodNs / 1e6);
+          // WebGPU timestamp query values are expressed in nanoseconds.
+          telemetry.gpuSamples.push((end - begin) / 1e6);
         }
       }
       readbackBuffer.unmap();
@@ -109,37 +90,58 @@ export function installWebGpuBenchmarkTelemetry(renderer) {
       telemetry.timestampError = String(error?.message || error);
       try { readbackBuffer.unmap(); } catch {}
     }
-  };
+  }
 
-  const snapshot = () => ({
-    computePasses: telemetry.computePasses,
-    dispatchCalls: telemetry.dispatchCalls,
-    renderPasses: telemetry.renderPasses,
-    drawCalls: telemetry.drawCalls,
-    queueSubmits: telemetry.queueSubmits,
-    picking: { ...telemetry.picking },
-    gpuTiming: telemetry.gpuTiming,
-    gpuTimeMs: telemetry.gpuSamples.length ? summarize(telemetry.gpuSamples) : null,
-    timestampPeriodNs: telemetry.timestampPeriodNs,
-    timestampPeriodSource: telemetry.timestampPeriodSource,
-    timestampSamplesDropped: telemetry.timestampSamplesDropped,
-    timestampError: telemetry.timestampError || null,
-  });
+  function recordComputePass() { telemetry.computePasses += 1; }
+  function recordDispatch() { telemetry.dispatchCalls += 1; }
+  function recordRenderPass() { telemetry.renderPasses += 1; }
+  function recordDraw() { telemetry.drawCalls += 1; }
+  function recordSubmit() { telemetry.queueSubmits += 1; }
+  function recordPickingRenderPass() { telemetry.picking.renderPasses += 1; }
+  function recordPickingDraw() { telemetry.picking.drawCalls += 1; }
+  function recordPickingSubmit() { telemetry.picking.queueSubmits += 1; }
 
-  renderer.__benchmarkGpuTelemetry = {
+  function snapshot() {
+    return {
+      computePasses: telemetry.computePasses,
+      dispatchCalls: telemetry.dispatchCalls,
+      renderPasses: telemetry.renderPasses,
+      drawCalls: telemetry.drawCalls,
+      queueSubmits: telemetry.queueSubmits,
+      picking: { ...telemetry.picking },
+      gpuTiming: telemetry.gpuTiming,
+      gpuTimeMs: telemetry.gpuSamples.length ? summarize(telemetry.gpuSamples) : null,
+      timestampSamplesDropped: telemetry.timestampSamplesDropped,
+      timestampError: telemetry.timestampError,
+    };
+  }
+
+  function dispose() {
+    querySet?.destroy?.();
+    resolveBuffer?.destroy?.();
+    readbackBuffer?.destroy?.();
+    querySet = null;
+    resolveBuffer = null;
+    readbackBuffer = null;
+    pendingSamples.clear();
+  }
+
+  return {
     telemetry,
+    beginFrame,
+    finishFrame,
     collect,
     snapshot,
-    recordComputePass(){telemetry.computePasses += 1;},
-    recordDispatch(){telemetry.dispatchCalls += 1;},
-    recordRenderPass(){telemetry.renderPasses += 1;},
-    recordDraw(){telemetry.drawCalls += 1;},
-    recordSubmit(){telemetry.queueSubmits += 1;},
-    recordPickingRenderPass(){telemetry.picking.renderPasses += 1;},
-    recordPickingDraw(){telemetry.picking.drawCalls += 1;},
-    recordPickingSubmit(){telemetry.picking.queueSubmits += 1;},
+    recordComputePass,
+    recordDispatch,
+    recordRenderPass,
+    recordDraw,
+    recordSubmit,
+    recordPickingRenderPass,
+    recordPickingDraw,
+    recordPickingSubmit,
+    dispose,
   };
-  return renderer.__benchmarkGpuTelemetry;
 }
 
 function summarize(values) {
