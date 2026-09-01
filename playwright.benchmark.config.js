@@ -1,6 +1,18 @@
 import { defineConfig } from "@playwright/test";
 
 const port = Number(process.env.HISTORIA_BENCHMARK_PORT || 4173);
+const defaultGpuFlags = [
+  "--enable-unsafe-webgpu",
+  "--enable-gpu",
+  "--ignore-gpu-blocklist",
+  "--enable-gpu-rasterization",
+  "--enable-zero-copy",
+  "--use-angle=d3d11",
+  "--disable-software-rasterizer",
+];
+const launchArgs = process.env.HISTORIA_CHROMIUM_FLAGS
+  ? process.env.HISTORIA_CHROMIUM_FLAGS.split(/\s+/).filter(Boolean)
+  : defaultGpuFlags;
 
 export default defineConfig({
   testDir: "./tools/benchmarks",
@@ -17,7 +29,7 @@ export default defineConfig({
         viewport: { width: 3840, height: 2160 },
         deviceScaleFactor: 2,
         launchOptions: {
-          args: (process.env.HISTORIA_CHROMIUM_FLAGS || "--enable-unsafe-webgpu").split(/\s+/).filter(Boolean),
+          args: launchArgs,
         },
       },
     },
