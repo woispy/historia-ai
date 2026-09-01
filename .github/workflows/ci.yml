@@ -149,6 +149,8 @@ jobs:
         run: npm run test:runtime-engine
       - name: Run Phase G simulation foundation tests
         run: npm run test:phase-g-simulation-foundation
+      - name: Run action identity integrity tests
+        run: npm run test:action-identity-integrity
       - name: Build
         run: npm run build
       - name: Verify repository cleanliness after production build
