@@ -151,6 +151,10 @@ jobs:
         run: npm run test:phase-g-simulation-foundation
       - name: Run action identity integrity tests
         run: npm run test:action-identity-integrity
+      - name: Run Phase G save continuation tests
+        run: npm run test:phase-g-save-continuation
+      - name: Run Phase G save slot tests
+        run: npm run test:phase-g-save-slots
       - name: Build
         run: npm run build
       - name: Verify repository cleanliness after production build
