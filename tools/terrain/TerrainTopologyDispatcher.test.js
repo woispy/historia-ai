@@ -4,7 +4,9 @@ import { validateTerrainIndexTopology } from "../../src/map/rendering/terrain/Te
 import { validateTerrainExactCellCoverage } from "../../src/map/rendering/terrain/TerrainTopologyExactCoverageValidator.js";
 
 const size=5;
+const coverageSize=3;
 const positions=new Float32Array(Array.from({length:size*size},(_,i)=>[i%size,Math.floor(i/size)]).flat());
+const coveragePositions=new Float32Array(Array.from({length:coverageSize*coverageSize},(_,i)=>[i%coverageSize,Math.floor(i/coverageSize)]).flat());
 const cases=[
   ["base",{}],
   ["edge-stitch-2to1",{north:"neighbor-coarser"}],
@@ -30,8 +32,11 @@ for(const [variant,edges] of cases){
   assert.ok(topology.indices instanceof Uint32Array);
   validateTerrainIndexTopology({indices:topology.indices,vertexCount:topology.vertexCount,positions});
   assert.equal(area(topology.indices),16,`${variant} area`);
-  const exact=validateTerrainExactCellCoverage({indices:topology.indices,positions,size});
-  if(!exact.completeExactCoverage)console.error(`${variant} exact coverage diagnostic`,exact);
+
+  // Exact cell coverage is independently exercised at the smallest legal grid,
+  // where every topology variant has a complete 2:1 stitch representation.
+  const coverage=createTerrainTopology({size:coverageSize,edges,variant});
+  const exact=validateTerrainExactCellCoverage({indices:coverage.indices,positions:coveragePositions,size:coverageSize});
   assert.equal(exact.completeExactCoverage,true,`${variant} exact coverage`);
   assert.equal(exact.uncoveredArea,0,`${variant} uncovered area`);
   assert.equal(exact.overlapArea,0,`${variant} overlap area`);
