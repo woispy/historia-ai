@@ -15,7 +15,7 @@ assert.ok(seed > 0);
 const first = nextSimulationRandom(seed);
 const second = nextSimulationRandom(first.state);
 const replayFirst = nextSimulationRandom(seed);
-const replaySecond = nextSimulationRandom(replayFirst.state);
+const replaySecond = nextSimulationRandom(first.state);
 
 assert.deepEqual(first, replayFirst);
 assert.deepEqual(second, replaySecond);
@@ -45,6 +45,21 @@ const replayB = GameEngine.advance(sessionB, "month", 1);
 assert.deepEqual(replayA.state.simulation, replayB.state.simulation);
 assert.deepEqual(replayA.state.timeline, replayB.state.timeline);
 assert.equal(replayA.state.simulation.rngState, replayB.state.simulation.rngState);
+
+const actionText = "Gümrük gelirlerini artırmak için yeni bir ticaret düzenlemesi hazırla.";
+const queuedA = GameEngine.queueAction(replayA, actionText);
+const queuedB = GameEngine.queueAction(replayB, actionText);
+assert.deepEqual(queuedA.state.pendingActions, queuedB.state.pendingActions);
+assert.match(queuedA.state.pendingActions[0].id, /^action-/);
+
+const differentAction = GameEngine.queueAction(
+  replayA,
+  "Bursa pazarlarında tahıl denetimi başlat."
+);
+assert.notEqual(
+  queuedA.state.pendingActions[0].id,
+  differentAction.state.pendingActions[0].id
+);
 
 const month = GameEngine.advance(sessionA, "month", 1);
 const sixMonths = GameEngine.advance(sessionA, "month", 6);
