@@ -1,24 +1,13 @@
 {
   "id": "sogut",
   "name": "Söğüt",
-
   "owner": "ottomans",
-
-  "province": "sogut",
-
+  "province": "phrygia-sogut",
   "population": 3500,
-
   "prosperity": 45,
-
   "food": 80,
-
   "loyalty": 90,
-
   "buildings": [],
-
   "garrison": [],
-
-  "status": {
-    "underSiege": false
-  }
+  "status": { "underSiege": false }
 }
