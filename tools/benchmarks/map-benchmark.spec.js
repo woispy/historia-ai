@@ -7,9 +7,27 @@ const output = process.env.HISTORIA_BENCHMARK_OUTPUT || "artifacts/benchmark-res
 
 async function runBenchmark(page, backend, file) {
   await page.goto(`/benchmarks/map-benchmark.html?backend=${backend}&durationMs=${durationMs}`, { waitUntil: "load" });
+  const gpuInfo = await page.evaluate(() => {
+    const canvas = document.createElement("canvas");
+    const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
+    if (!gl) return { webgl: false, renderer: null, vendor: null, unmaskedRenderer: null, unmaskedVendor: null };
+    const debug = gl.getExtension("WEBGL_debug_renderer_info");
+    return {
+      webgl: true,
+      renderer: gl.getParameter(gl.RENDERER),
+      vendor: gl.getParameter(gl.VENDOR),
+      unmaskedRenderer: debug ? gl.getParameter(debug.UNMASKED_RENDERER_WEBGL) : null,
+      unmaskedVendor: debug ? gl.getParameter(debug.UNMASKED_VENDOR_WEBGL) : null,
+      webgpu: Boolean(navigator.gpu),
+    };
+  });
+  if (gpuInfo.unmaskedRenderer && /swiftshader|llvmpipe|software raster/i.test(gpuInfo.unmaskedRenderer)) {
+    throw new Error(`Software GPU detected; refusing performance result: ${gpuInfo.unmaskedRenderer}`);
+  }
   await page.waitForFunction(() => Boolean(window.__HISTORIA_BENCHMARK_RESULT__), null, { timeout: durationMs + 120000 });
   const result = await page.evaluate(() => window.__HISTORIA_BENCHMARK_RESULT__);
   if (result.error) throw new Error(result.error);
+  result.gpuInfo = gpuInfo;
   await fs.mkdir(path.dirname(file), { recursive: true });
   await fs.writeFile(file, JSON.stringify(result, null, 2));
   console.log(`HISTORIA_BENCHMARK_JSON ${JSON.stringify(result)}`);
