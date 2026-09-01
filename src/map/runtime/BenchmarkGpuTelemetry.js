@@ -52,23 +52,27 @@ export function createWebGpuBenchmarkTelemetry(device) {
       telemetry.timestampSamplesDropped += 1;
       return -1;
     }
-
     return nextQueryPair++;
+  }
+
+  function writeTimestamp(encoder, slot, phase) {
+    if (!querySet || slot < 0 || !encoder?.writeTimestamp) return false;
+    try {
+      encoder.writeTimestamp(querySet, slot * 2 + (phase === "end" ? 1 : 0));
+      return true;
+    } catch (error) {
+      telemetry.timestampError = String(error?.message || error);
+      return false;
+    }
   }
 
   function getTimestampWrites(slot, phase) {
     if (!querySet || slot < 0) return undefined;
     if (phase === "begin") {
-      return {
-        querySet,
-        beginningOfPassWriteIndex: slot * 2,
-      };
+      return { querySet, beginningOfPassWriteIndex: slot * 2 };
     }
     if (phase === "end") {
-      return {
-        querySet,
-        endOfPassWriteIndex: slot * 2 + 1,
-      };
+      return { querySet, endOfPassWriteIndex: slot * 2 + 1 };
     }
     throw new Error(`Unknown timestamp phase: ${phase}`);
   }
@@ -163,6 +167,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
   return {
     telemetry,
     beginFrame,
+    writeTimestamp,
     getTimestampWrites,
     finishFrame,
     collect,
