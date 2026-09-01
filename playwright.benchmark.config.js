@@ -1,13 +1,14 @@
 import { defineConfig } from "@playwright/test";
 
 const port = Number(process.env.HISTORIA_BENCHMARK_PORT || 4173);
+const angleBackend = process.env.HISTORIA_CHROMIUM_ANGLE || "d3d12";
 const defaultGpuFlags = [
   "--enable-unsafe-webgpu",
   "--enable-gpu",
   "--ignore-gpu-blocklist",
   "--enable-gpu-rasterization",
   "--enable-zero-copy",
-  "--use-angle=d3d11",
+  `--use-angle=${angleBackend}`,
   "--use-gpu-in-tests",
   "--enable-dawn-features=allow_unsafe_apis",
   "--disable-dawn-features=use_dxc",
