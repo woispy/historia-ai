@@ -1,9 +1,8 @@
 const MAX_QUERY_PAIRS = 2048;
 const QUERY_STRIDE = 256;
-const RAW_SAMPLE_LIMIT = 4;
+const TIMESTAMP_BATCH_FRAMES = 8;
 
 export function createWebGpuBenchmarkTelemetry(device) {
-  const adapterInfo = device?.adapterInfo ?? null;
   const telemetry = {
     gpuTiming: "unsupported",
     computePasses: 0,
@@ -17,19 +16,15 @@ export function createWebGpuBenchmarkTelemetry(device) {
     timestampSamplesZero: 0,
     timestampError: null,
     timestampRawSamples: [],
-    adapter: adapterInfo ? {
-      vendor: adapterInfo.vendor ?? null,
-      architecture: adapterInfo.architecture ?? null,
-      device: adapterInfo.device ?? null,
-      description: adapterInfo.description ?? null,
-      isFallbackAdapter: adapterInfo.isFallbackAdapter ?? null,
-    } : null,
+    adapter: readAdapterInfo(device),
   };
 
   let querySet = null;
   let resolveBuffer = null;
   let readbackBuffer = null;
   let nextQueryPair = 0;
+  let activeBatchSlot = -1;
+  let batchFrameCount = 0;
   const pendingSamples = new Set();
   const timestampSupported = Boolean(device?.features?.has?.("timestamp-query"));
 
@@ -51,31 +46,44 @@ export function createWebGpuBenchmarkTelemetry(device) {
   }
 
   function beginFrame(encoder) {
-    if (!querySet || nextQueryPair >= MAX_QUERY_PAIRS || typeof encoder?.writeTimestamp !== "function") {
-      if (querySet) telemetry.timestampSamplesDropped += 1;
-      return -1;
+    if (!querySet || typeof encoder?.writeTimestamp !== "function") return -1;
+
+    if (activeBatchSlot < 0) {
+      if (nextQueryPair >= MAX_QUERY_PAIRS) {
+        telemetry.timestampSamplesDropped += 1;
+        return -1;
+      }
+      activeBatchSlot = nextQueryPair++;
+      batchFrameCount = 0;
+      try {
+        encoder.writeTimestamp(querySet, activeBatchSlot * 2);
+      } catch (error) {
+        telemetry.gpuTiming = "unsupported";
+        telemetry.timestampError = String(error?.message || error);
+        activeBatchSlot = -1;
+        batchFrameCount = 0;
+        return -1;
+      }
     }
-    const slot = nextQueryPair++;
-    try {
-      encoder.writeTimestamp(querySet, slot * 2);
-      return slot;
-    } catch (error) {
-      telemetry.gpuTiming = "unsupported";
-      telemetry.timestampError = String(error?.message || error);
-      return -1;
-    }
+
+    batchFrameCount += 1;
+    return batchFrameCount >= TIMESTAMP_BATCH_FRAMES ? activeBatchSlot : -1;
   }
 
   function finishFrame(encoder, slot) {
-    if (!querySet || slot < 0) return;
+    if (!querySet || slot < 0 || slot !== activeBatchSlot) return;
     try {
       encoder.writeTimestamp(querySet, slot * 2 + 1);
       encoder.resolveQuerySet(querySet, slot * 2, 2, resolveBuffer, slot * QUERY_STRIDE);
       encoder.copyBufferToBuffer(resolveBuffer, slot * QUERY_STRIDE, readbackBuffer, slot * QUERY_STRIDE, 16);
       pendingSamples.add(slot);
+      activeBatchSlot = -1;
+      batchFrameCount = 0;
     } catch (error) {
       telemetry.gpuTiming = "unsupported";
       telemetry.timestampError = String(error?.message || error);
+      activeBatchSlot = -1;
+      batchFrameCount = 0;
     }
   }
 
@@ -89,18 +97,18 @@ export function createWebGpuBenchmarkTelemetry(device) {
         const base = (slot * QUERY_STRIDE) / 8;
         const begin = Number(data[base]);
         const end = Number(data[base + 1]);
-        if (telemetry.timestampRawSamples.length < RAW_SAMPLE_LIMIT) {
-          telemetry.timestampRawSamples.push({ slot, begin, end, deltaNs: end - begin });
+        const deltaNs = end - begin;
+        if (telemetry.timestampRawSamples.length < 4) {
+          telemetry.timestampRawSamples.push({ slot, begin, end, deltaNs });
         }
         if (!Number.isFinite(begin) || !Number.isFinite(end) || end < begin) {
           telemetry.timestampSamplesDropped += 1;
           continue;
         }
-        const deltaNs = end - begin;
         if (deltaNs <= 0) {
-          // A supported timestamp query that cannot distinguish the two samples
-          // has no measurable duration. Never turn that into a fabricated 0 ms
-          // GPU duration; the safe value is null.
+          // Chromium quantizes WebGPU timestamps for security. A zero delta can
+          // therefore mean that the measured GPU interval is below the browser's
+          // useful timing resolution; never convert it into a fabricated duration.
           telemetry.timestampSamplesZero += 1;
           continue;
         }
@@ -140,7 +148,8 @@ export function createWebGpuBenchmarkTelemetry(device) {
       timestampSamplesDropped: telemetry.timestampSamplesDropped,
       timestampSamplesZero: telemetry.timestampSamplesZero,
       timestampError: telemetry.timestampError,
-      timestampRawSamples: telemetry.timestampRawSamples,
+      timestampRawSamples: [...telemetry.timestampRawSamples],
+      timestampBatchFrames: TIMESTAMP_BATCH_FRAMES,
       adapter: telemetry.adapter,
     };
   }
@@ -153,6 +162,8 @@ export function createWebGpuBenchmarkTelemetry(device) {
     resolveBuffer = null;
     readbackBuffer = null;
     pendingSamples.clear();
+    activeBatchSlot = -1;
+    batchFrameCount = 0;
   }
 
   return {
@@ -170,6 +181,18 @@ export function createWebGpuBenchmarkTelemetry(device) {
     recordPickingDraw,
     recordPickingSubmit,
     dispose,
+  };
+}
+
+function readAdapterInfo(device) {
+  const info = device?.adapterInfo;
+  if (!info) return null;
+  return {
+    vendor: info.vendor || null,
+    architecture: info.architecture || null,
+    device: info.device || null,
+    description: info.description || null,
+    isFallbackAdapter: typeof info.isFallbackAdapter === "boolean" ? info.isFallbackAdapter : null,
   };
 }
 
