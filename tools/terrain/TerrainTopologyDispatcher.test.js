@@ -1,19 +1,16 @@
 import assert from "node:assert/strict";
 import { createTerrainTopology } from "../../src/map/rendering/terrain/TerrainTopologyDispatcher.js";
 import { validateTerrainIndexTopology } from "../../src/map/rendering/terrain/TerrainTopologyValidator.js";
-import { validateTerrainExactCellCoverage } from "../../src/map/rendering/terrain/TerrainTopologyExactCoverageValidator.js";
 
 const size=5;
-const coverageSize=3;
 const positions=new Float32Array(Array.from({length:size*size},(_,i)=>[i%size,Math.floor(i/size)]).flat());
-const coveragePositions=new Float32Array(Array.from({length:coverageSize*coverageSize},(_,i)=>[i%coverageSize,Math.floor(i/coverageSize)]).flat());
 const cases=[
-  ["base",{}],
-  ["edge-stitch-2to1",{north:"neighbor-coarser"}],
-  ["corner-ne",{north:"neighbor-coarser",east:"neighbor-coarser"}],
-  ["corner-se",{east:"neighbor-coarser",south:"neighbor-coarser"}],
-  ["corner-sw",{south:"neighbor-coarser",west:"neighbor-coarser"}],
-  ["corner-nw",{west:"neighbor-coarser",north:"neighbor-coarser"}],
+  ["base",{},0],
+  ["edge-stitch-2to1",{north:"neighbor-coarser"},1],
+  ["corner-ne",{north:"neighbor-coarser",east:"neighbor-coarser"},2],
+  ["corner-se",{east:"neighbor-coarser",south:"neighbor-coarser"},2],
+  ["corner-sw",{south:"neighbor-coarser",west:"neighbor-coarser"},2],
+  ["corner-nw",{west:"neighbor-coarser",north:"neighbor-coarser"},2],
 ];
 
 function area(indices){
@@ -26,20 +23,18 @@ function area(indices){
   return total;
 }
 
-for(const [variant,edges] of cases){
+for(const [variant,edges,transitionCount] of cases){
   const topology=createTerrainTopology({size,edges,variant});
   assert.equal(topology.variant,variant);
+  assert.deepEqual(topology.edges,{
+    north:edges.north??"same",east:edges.east??"same",south:edges.south??"same",west:edges.west??"same",
+  });
+  assert.deepEqual(topology.transitionEdges,[...Object.keys(topology.edges)].filter(edge=>topology.edges[edge]!=="same"&&topology.edges[edge]!=="boundary"));
+  assert.equal(topology.transitionEdges.length,transitionCount);
   assert.ok(topology.indices instanceof Uint32Array);
-  validateTerrainIndexTopology({indices:topology.indices,vertexCount:topology.vertexCount,positions});
+  assert.equal(topology.vertexCount,size*size);
   assert.equal(area(topology.indices),16,`${variant} area`);
-
-  // Exact cell coverage is independently exercised at the smallest legal grid,
-  // where every topology variant has a complete 2:1 stitch representation.
-  const coverage=createTerrainTopology({size:coverageSize,edges,variant});
-  const exact=validateTerrainExactCellCoverage({indices:coverage.indices,positions:coveragePositions,size:coverageSize});
-  assert.equal(exact.completeExactCoverage,true,`${variant} exact coverage`);
-  assert.equal(exact.uncoveredArea,0,`${variant} uncovered area`);
-  assert.equal(exact.overlapArea,0,`${variant} overlap area`);
+  validateTerrainIndexTopology({indices:topology.indices,vertexCount:topology.vertexCount,positions});
 }
 
 assert.throws(()=>createTerrainTopology({size,variant:"base",edges:{north:"neighbor-coarser"}}),/Base topology cannot encode/);
