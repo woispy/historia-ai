@@ -1,30 +1,40 @@
 import { useEffect, useRef } from "react";
 import { BinaryMapRenderer } from "./gpu/BinaryMapRenderer.js";
-import { buildMapBinFromProvinces } from "../runtime/BinaryMapAssetBuilder.js";
-import { BinaryMapAssetSource } from "../runtime/BinaryMapAssetSource.js";
+import { loadMapBin } from "../runtime/MapBinLoader.js";
 import { MapCameraRig } from "../runtime/MapCameraRig.js";
 import { MapRuntimeController } from "../runtime/MapRuntimeController.js";
 
-/** Thin React host. Rendering and interaction are entirely imperative. */
-export default function MapEngineV2({ provinces = [], camera = {}, selectedProvinceId = null, mapStyle = "detailed", onProvinceClick }) {
+/** Thin React host. Runtime assets are fetched as immutable binary data. */
+export default function MapEngineV2({ camera = {}, selectedProvinceId = null, onProvinceClick, assetUrl = "/assets/world.mapbin" }) {
   const canvasRef = useRef(null);
   const runtimeRef = useRef(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return undefined;
-    const buffer = buildMapBinFromProvinces(provinces, mapStyle);
-    const assetSource = BinaryMapAssetSource.fromArrayBuffer(buffer);
-    const cameraRig = new MapCameraRig({ minZoom: 1, maxZoom: 96 });
-    cameraRig.setState(camera);
-    const renderer = new BinaryMapRenderer(canvas);
-    if (!renderer.initialize({ assetSource })) { renderer.dispose(); return undefined; }
-    const runtime = new MapRuntimeController({ canvas, cameraRig, renderer, onProvinceClick });
-    runtime.setSelectedProvinceId(selectedProvinceId);
-    runtimeRef.current = runtime;
-    runtime.start();
-    return () => { runtime.dispose(); runtimeRef.current = null; };
-  }, [mapStyle, provinces]);
+    let cancelled = false;
+    let runtime = null;
+
+    loadMapBin(assetUrl).then((assetSource) => {
+      if (cancelled) return;
+      const cameraRig = new MapCameraRig({ minZoom: 1, maxZoom: 96 });
+      cameraRig.setState(camera);
+      const renderer = new BinaryMapRenderer(canvas);
+      if (!renderer.initialize({ assetSource })) { renderer.dispose(); return; }
+      runtime = new MapRuntimeController({ canvas, cameraRig, renderer, onProvinceClick });
+      runtime.setSelectedProvinceId(selectedProvinceId);
+      runtimeRef.current = runtime;
+      runtime.start();
+    }).catch((error) => {
+      if (!cancelled) console.error("Historia AI map asset load failed", error);
+    });
+
+    return () => {
+      cancelled = true;
+      runtime?.dispose();
+      runtimeRef.current = null;
+    };
+  }, [assetUrl]);
 
   useEffect(() => {
     const runtime = runtimeRef.current;
