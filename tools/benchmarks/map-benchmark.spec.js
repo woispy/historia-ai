@@ -5,6 +5,40 @@ import path from "node:path";
 const durationMs = Number(process.env.HISTORIA_BENCHMARK_DURATION_MS || 30000);
 const output = process.env.HISTORIA_BENCHMARK_OUTPUT || "artifacts/benchmark-result.json";
 
+async function collectWebGpuCapability(page) {
+  return page.evaluate(async () => {
+    const result = {
+      navigatorGpu: Boolean(navigator.gpu),
+      adapterAvailable: false,
+      adapter: null,
+      features: [],
+      timestampQuery: false,
+      error: null,
+    };
+    if (!navigator.gpu) return result;
+    try {
+      const adapter = await navigator.gpu.requestAdapter({ powerPreference: "high-performance" });
+      if (!adapter) return result;
+      result.adapterAvailable = true;
+      result.features = Array.from(adapter.features || []).sort();
+      result.timestampQuery = result.features.includes("timestamp-query");
+      const info = adapter.info || adapter.adapterInfo || null;
+      if (info) {
+        result.adapter = {
+          vendor: info.vendor || null,
+          architecture: info.architecture || null,
+          device: info.device || null,
+          description: info.description || null,
+          isFallbackAdapter: typeof info.isFallbackAdapter === "boolean" ? info.isFallbackAdapter : null,
+        };
+      }
+    } catch (error) {
+      result.error = String(error?.message || error);
+    }
+    return result;
+  });
+}
+
 async function runTimestampProbe(page) {
   return page.evaluate(async () => {
     const result = {
@@ -122,6 +156,7 @@ async function runBenchmark(page, backend, file) {
   if (gpuInfo.unmaskedRenderer && /swiftshader|llvmpipe|software raster/i.test(gpuInfo.unmaskedRenderer)) {
     throw new Error(`Software GPU detected; refusing performance result: ${gpuInfo.unmaskedRenderer}`);
   }
+  const webgpuCapability = await collectWebGpuCapability(page);
   await page.waitForFunction(() => Boolean(window.__HISTORIA_BENCHMARK_RESULT__), null, { timeout: durationMs + 120000 });
   const result = await page.evaluate(() => window.__HISTORIA_BENCHMARK_RESULT__);
   if (result.error) throw new Error(result.error);
@@ -134,6 +169,7 @@ async function runBenchmark(page, backend, file) {
     if (!result.gpu.gpuTiming || !["supported", "unsupported"].includes(result.gpu.gpuTiming)) throw new Error(`Invalid GPU timing state: ${result.gpu.gpuTiming}`);
   }
   result.gpuInfo = gpuInfo;
+  result.webgpuCapability = webgpuCapability;
   await fs.mkdir(path.dirname(file), { recursive: true });
   await fs.writeFile(file, JSON.stringify(result, null, 2));
   console.log(`HISTORIA_BENCHMARK_JSON ${JSON.stringify(result)}`);
@@ -147,6 +183,11 @@ test("Historia AI WebGPU timestamp probe", async ({ page }) => {
   await fs.writeFile(file, JSON.stringify(result, null, 2));
   console.log(`HISTORIA_TIMESTAMP_PROBE ${JSON.stringify(result)}`);
   test.info().annotations.push({ type: "gpu-timestamp-probe", description: JSON.stringify(result) });
+  if (process.env.HISTORIA_REQUIRE_GPU_TIMESTAMP === "1") {
+    if (!result.supported) throw new Error(`WebGPU timestamp-query unavailable: ${result.reason || "unknown reason"}`);
+    if (result.error) throw new Error(`WebGPU timestamp probe failed: ${result.error}`);
+    if (!(result.deltaNs > 0)) throw new Error(`WebGPU timestamp probe returned non-positive interval: ${result.deltaNs}`);
+  }
 });
 
 test("Historia AI 15k / 4K / 2x DPR benchmark", async ({ page }) => {
