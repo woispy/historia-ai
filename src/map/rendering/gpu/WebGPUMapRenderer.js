@@ -7,52 +7,19 @@ struct Camera { viewProj: mat4x4<f32>, zoom: f32, _pad: vec3<f32>, };
 @group(0) @binding(2) var<storage, read> bounds: array<f32>;
 @group(0) @binding(3) var<storage, read_write> indirect: array<u32>;
 @group(0) @binding(4) var<uniform> camera: Camera;
-
-fn visible(minX:f32,minY:f32,maxX:f32,maxY:f32)->bool {
-  let corners=array<vec2<f32>,4>(vec2(minX,minY),vec2(maxX,minY),vec2(minX,maxY),vec2(maxX,maxY));
-  for(var i=0u;i<4u;i=i+1u){
-    let c=camera.viewProj*vec4<f32>(corners[i],0.0,1.0);
-    if(c.x>=-c.w&&c.x<=c.w&&c.y>=-c.w&&c.y<=c.w&&c.z>=-c.w&&c.z<=c.w){return true;}
-  }
-  return false;
-}
-fn lodFor(tileIndex:u32)->u32 {
-  let base=tileIndex*4u;
-  if(camera.zoom>=64.0){return lods[base];}
-  if(camera.zoom>=16.0){return lods[base+1u];}
-  if(camera.zoom>=4.0){return lods[base+2u];}
-  return lods[base+3u];
-}
+fn visible(minX:f32,minY:f32,maxX:f32,maxY:f32)->bool { let corners=array<vec2<f32>,4>(vec2(minX,minY),vec2(maxX,minY),vec2(minX,maxY),vec2(maxX,maxY)); for(var i=0u;i<4u;i=i+1u){let c=camera.viewProj*vec4<f32>(corners[i],0.0,1.0);if(c.x>=-c.w&&c.x<=c.w&&c.y>=-c.w&&c.y<=c.w&&c.z>=-c.w&&c.z<=c.w){return true;}} return false; }
+fn lodFor(province:u32)->u32 { let base=province*12u; if(camera.zoom>=64.0){return lods[base];} if(camera.zoom>=16.0){return lods[base+4u];} if(camera.zoom>=4.0){return lods[base+8u];} return lods[base+8u]; }
 @compute @workgroup_size(64)
-fn cull(@builtin(global_invocation_id) id:vec3<u32>){
-  let i=id.x;
-  if(i>=arrayLength(&indirect)/4u){return;}
-  let t=i*6u; let p=tiles[t+2u]; let b=p*4u;
-  let v=visible(bounds[b],bounds[b+1u],bounds[b+2u],bounds[b+3u]);
-  let selectedOffset=lodFor(p); let o=i*4u;
-  indirect[o]=select(0u,tiles[t+1u],v);
-  indirect[o+1u]=1u;
-  indirect[o+2u]=select(0u,tiles[t]+selectedOffset,v);
-  indirect[o+3u]=0u;
-}
+fn cull(@builtin(global_invocation_id) id:vec3<u32>){let i=id.x;if(i>=arrayLength(&indirect)/4u){return;}let t=i*6u;let p=tiles[t+2u];let b=p*4u;let v=visible(bounds[b],bounds[b+1u],bounds[b+2u],bounds[b+3u]);let o=i*4u;let lodOffset=lodFor(p);indirect[o]=select(0u,tiles[t+1u],v);indirect[o+1u]=1u;indirect[o+2u]=select(0u,tiles[t]+lodOffset,v);indirect[o+3u]=0u;}
 `;
-
-const RENDER_WGSL = `
-struct Camera { viewProj: mat4x4<f32> };
-@group(0) @binding(0) var<uniform> camera: Camera;
-@vertex fn vs(@location(0) p:vec2<f32>)->@builtin(position) vec4<f32>{return camera.viewProj*vec4<f32>(p,0.0,1.0);}
-@fragment fn fs()->@location(0) vec4<f32>{return vec4<f32>(0.32,0.36,0.28,1.0);}
-`;
-const PICK_WGSL = `
-@vertex fn vs()->@builtin(position) vec4<f32>{return vec4<f32>(0.0,0.0,0.0,1.0);}
-@fragment fn fs()->@location(0) vec4<f32>{return vec4<f32>(0.0,0.0,0.0,1.0);}
-`;
+const RENDER_WGSL = `struct Camera { viewProj: mat4x4<f32> }; @group(0) @binding(0) var<uniform> camera: Camera; @vertex fn vs(@location(0) p:vec2<f32>)->@builtin(position) vec4<f32>{return camera.viewProj*vec4<f32>(p,0.0,1.0);} @fragment fn fs()->@location(0) vec4<f32>{return vec4<f32>(0.32,0.36,0.28,1.0);}`;
+const PICK_WGSL = `@vertex fn vs()->@builtin(position) vec4<f32>{return vec4<f32>(0.0,0.0,0.0,1.0);} @fragment fn fs()->@location(0) vec4<f32>{return vec4<f32>(0.0);}`;
 
 export class WebGPUMapRenderer extends MapRendererContract {
  constructor(canvas){super();this.canvas=canvas;this.device=null;this.context=null;this.format=null;this.cullPipeline=null;this.renderPipeline=null;this.cullBindGroup=null;this.renderBindGroup=null;this.buffers=null;this.assetSource=null;this.destroyed=false;this.frameRequest=0;this.camera={viewProj:new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]),zoom:1};this.selected=0;this.hovered=0;this.pickTexture=null;this.pickReadback=null;this.pickPending=false;this.lastPickId=null;}
  static isSupported(){return typeof navigator!=="undefined"&&Boolean(navigator.gpu);}
  async initialize({assetSource}={}){if(this.destroyed)throw new Error("Cannot initialize a disposed WebGPU renderer");if(!assetSource||!WebGPUMapRenderer.isSupported())return false;const adapter=await navigator.gpu.requestAdapter({powerPreference:"high-performance"});if(!adapter)return false;this.device=await adapter.requestDevice();this.context=this.canvas.getContext("webgpu");if(!this.context){this.dispose();return false;}this.format=navigator.gpu.getPreferredCanvasFormat();this.context.configure({device:this.device,format:this.format,alphaMode:"opaque"});this.assetSource=assetSource;this.buffers=this.createAssetBuffers(assetSource);this.createCullingPipeline();this.createRenderPipeline();this.createPickingResources();return true;}
- createAssetBuffers(source){const ids=this.makeBuffer(source.ids,GPUBufferUsage.STORAGE);const bd=new Float32Array(source.provinceCount*4);for(let i=0;i<source.provinceCount;i++)bd.set([source.minX[i],source.minY[i],source.maxX[i],source.maxY[i]],i*4);const bounds=this.makeBuffer(bd,GPUBufferUsage.STORAGE);const geometry=this.makeBuffer(source.geometry,GPUBufferUsage.VERTEX|GPUBufferUsage.STORAGE);const tiles=this.makeBuffer(source.tileIndex,GPUBufferUsage.STORAGE);const lodData=new Uint32Array(source.provinceCount*12);for(let i=0;i<source.provinceCount;i++){const r=source.getProvinceGeometryRange(i,0)??{tileOffset:0,tileCount:0};for(let l=0;l<3;l++){lodData[i*12+l*4]=r.tileOffset;lodData[i*12+l*4+1]=r.tileCount;lodData[i*12+l*4+2]=l;lodData[i*12+l*4+3]=0;}lodData[i*12+8]=r.tileOffset;lodData[i*12+9]=r.tileCount;}const lods=this.makeBuffer(lodData,GPUBufferUsage.STORAGE);const indirect=this.device.createBuffer({size:Math.max(16,source.tileCount*16),usage:GPUBufferUsage.STORAGE|GPUBufferUsage.INDIRECT|GPUBufferUsage.COPY_DST});return{ids,bounds,geometry,tiles,lods,indirect};}
+ createAssetBuffers(source){const ids=this.makeBuffer(source.ids,GPUBufferUsage.STORAGE);const bd=new Float32Array(source.provinceCount*4);for(let i=0;i<source.provinceCount;i++)bd.set([source.minX[i],source.minY[i],source.maxX[i],source.maxY[i]],i*4);const bounds=this.makeBuffer(bd,GPUBufferUsage.STORAGE);const geometry=this.makeBuffer(source.geometry,GPUBufferUsage.VERTEX|GPUBufferUsage.STORAGE);const tiles=this.makeBuffer(source.tileIndex,GPUBufferUsage.STORAGE);const lodData=new Uint32Array(source.provinceCount*12);for(let i=0;i<source.provinceCount;i++){const r=source.getProvinceGeometryRange(i,0)??{tileOffset:0,tileCount:0};for(let l=0;l<3;l++){const b=i*12+l*4;lodData[b]=r.tileOffset;lodData[b+1]=r.tileCount;lodData[b+2]=l;lodData[b+3]=0;}}const lods=this.makeBuffer(lodData,GPUBufferUsage.STORAGE);const indirect=this.device.createBuffer({size:Math.max(16,source.tileCount*16),usage:GPUBufferUsage.STORAGE|GPUBufferUsage.INDIRECT|GPUBufferUsage.COPY_DST});return{ids,bounds,geometry,tiles,lods,indirect};}
  makeBuffer(view,usage){const data=new Uint8Array(view.buffer,view.byteOffset,view.byteLength);const size=Math.max(4,Math.ceil(data.byteLength/4)*4);const b=this.device.createBuffer({size,usage:usage|GPUBufferUsage.COPY_DST});if(data.byteLength)this.device.queue.writeBuffer(b,0,data);return b;}
  createCullingPipeline(){const d=this.device;const module=d.createShaderModule({code:CULL_WGSL});this.buffers.camera=d.createBuffer({size:80,usage:GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST});const layout=d.createBindGroupLayout({entries:[{binding:0,visibility:GPUShaderStage.COMPUTE,buffer:{type:"read-only-storage"}},{binding:1,visibility:GPUShaderStage.COMPUTE,buffer:{type:"read-only-storage"}},{binding:2,visibility:GPUShaderStage.COMPUTE,buffer:{type:"read-only-storage"}},{binding:3,visibility:GPUShaderStage.COMPUTE,buffer:{type:"storage"}},{binding:4,visibility:GPUShaderStage.COMPUTE,buffer:{type:"uniform"}}]});this.cullPipeline=d.createComputePipeline({layout:d.createPipelineLayout({bindGroupLayouts:[layout]}),compute:{module,entryPoint:"cull"}});this.cullBindGroup=d.createBindGroup({layout,entries:[{binding:0,resource:{buffer:this.buffers.tiles}},{binding:1,resource:{buffer:this.buffers.lods}},{binding:2,resource:{buffer:this.buffers.bounds}},{binding:3,resource:{buffer:this.buffers.indirect}},{binding:4,resource:{buffer:this.buffers.camera}}]});}
  createRenderPipeline(){const d=this.device;const module=d.createShaderModule({code:RENDER_WGSL});this.buffers.renderCamera=d.createBuffer({size:64,usage:GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST});this.renderPipeline=d.createRenderPipeline({layout:"auto",vertex:{module,entryPoint:"vs",buffers:[{arrayStride:8,attributes:[{shaderLocation:0,offset:0,format:"float32x2"}]}]},fragment:{module,entryPoint:"fs",targets:[{format:this.format}]},primitive:{topology:"triangle-list"}});this.renderBindGroup=d.createBindGroup({layout:this.renderPipeline.getBindGroupLayout(0),entries:[{binding:0,resource:{buffer:this.buffers.renderCamera}}]});}
