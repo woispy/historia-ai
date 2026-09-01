@@ -44,33 +44,38 @@ export function createWebGpuBenchmarkTelemetry(device) {
     }
   }
 
-  function beginFrame(encoder) {
+  function beginFrame() {
     frameCounter += 1;
-    if (!querySet || typeof encoder?.writeTimestamp !== "function") return -1;
+    if (!querySet) return -1;
     if (frameCounter % TIMESTAMP_SAMPLE_INTERVAL_FRAMES !== 0) return -1;
     if (nextQueryPair >= MAX_QUERY_PAIRS) {
       telemetry.timestampSamplesDropped += 1;
       return -1;
     }
 
-    const slot = nextQueryPair++;
-    try {
-      // Keep both timestamps inside the same command encoder/submission. The
-      // measured interval is therefore the GPU work of this frame only, rather
-      // than an interval spanning several independently submitted frames.
-      encoder.writeTimestamp(querySet, slot * 2);
-      return slot;
-    } catch (error) {
-      telemetry.gpuTiming = "unsupported";
-      telemetry.timestampError = String(error?.message || error);
-      return -1;
+    return nextQueryPair++;
+  }
+
+  function getTimestampWrites(slot, phase) {
+    if (!querySet || slot < 0) return undefined;
+    if (phase === "begin") {
+      return {
+        querySet,
+        beginningOfPassWriteIndex: slot * 2,
+      };
     }
+    if (phase === "end") {
+      return {
+        querySet,
+        endOfPassWriteIndex: slot * 2 + 1,
+      };
+    }
+    throw new Error(`Unknown timestamp phase: ${phase}`);
   }
 
   function finishFrame(encoder, slot) {
     if (!querySet || slot < 0) return;
     try {
-      encoder.writeTimestamp(querySet, slot * 2 + 1);
       encoder.resolveQuerySet(querySet, slot * 2, 2, resolveBuffer, slot * QUERY_STRIDE);
       encoder.copyBufferToBuffer(resolveBuffer, slot * QUERY_STRIDE, readbackBuffer, slot * QUERY_STRIDE, 16);
       pendingSamples.add(slot);
@@ -99,8 +104,6 @@ export function createWebGpuBenchmarkTelemetry(device) {
           continue;
         }
         if (deltaNs <= 0) {
-          // Chromium can quantize WebGPU timestamps. A zero interval is retained
-          // as an explicit observation and is never converted into fake timing.
           telemetry.timestampSamplesZero += 1;
           continue;
         }
@@ -160,6 +163,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
   return {
     telemetry,
     beginFrame,
+    getTimestampWrites,
     finishFrame,
     collect,
     snapshot,
