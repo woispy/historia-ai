@@ -42,7 +42,16 @@ export function normalizeRandomState(value, fallback = 1) {
     return state >>> 0;
   }
 
-  return fallback >>> 0 || 1;
+  const normalizedFallback = Number(fallback);
+  if (
+    Number.isInteger(normalizedFallback) &&
+    normalizedFallback > 0 &&
+    normalizedFallback <= 0xffffffff
+  ) {
+    return normalizedFallback >>> 0;
+  }
+
+  return 1;
 }
 
 export function nextSimulationRandom(state) {
@@ -59,5 +68,7 @@ export function nextSimulationRandom(state) {
 }
 
 export function seedSimulationRandom(scenarioId, countryId) {
-  return createSimulationRandom(`${scenarioId ?? "scenario"}:${countryId ?? "observer"}`).getState();
+  return createSimulationRandom(
+    `${scenarioId ?? "scenario"}:${countryId ?? "observer"}`
+  ).getState();
 }
