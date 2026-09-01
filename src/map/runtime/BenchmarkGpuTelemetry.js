@@ -36,10 +36,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
 
   if (timestampSupported && typeof device.createQuerySet === "function") {
     try {
-      querySet = device.createQuerySet({
-        type: "timestamp",
-        count: MAX_QUERY_PAIRS * 2,
-      });
+      querySet = device.createQuerySet({ type: "timestamp", count: MAX_QUERY_PAIRS * 2 });
       resolveBuffer = device.createBuffer({
         size: MAX_QUERY_PAIRS * QUERY_STRIDE,
         usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
@@ -63,6 +60,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
     slots.set(slot, {
       slot,
       state: SLOT_STATES.PENDING_SUBMIT,
+      submitted: false,
       resolveOffset: slot * QUERY_STRIDE,
     });
     return slot;
@@ -84,40 +82,31 @@ export function createWebGpuBenchmarkTelemetry(device) {
   function getTimestampWrites(slot, phase) {
     const entry = slots.get(slot);
     if (!querySet || !entry || entry.state !== SLOT_STATES.PENDING_SUBMIT) return undefined;
-    if (phase === "begin") {
-      return { querySet, beginningOfPassWriteIndex: slot * 2 };
-    }
-    if (phase === "end") {
-      return { querySet, endOfPassWriteIndex: slot * 2 + 1 };
-    }
+    if (phase === "begin") return { querySet, beginningOfPassWriteIndex: slot * 2 };
+    if (phase === "end") return { querySet, endOfPassWriteIndex: slot * 2 + 1 };
     throw new Error(`Unknown timestamp phase: ${phase}`);
   }
 
   function finishFrame(encoder, slot) {
     const entry = slots.get(slot);
-    if (!querySet || !entry || entry.state !== SLOT_STATES.PENDING_SUBMIT) return;
+    if (!querySet || !entry || entry.state !== SLOT_STATES.PENDING_SUBMIT) return false;
 
     try {
-      encoder.resolveQuerySet(
-        querySet,
-        slot * 2,
-        2,
-        resolveBuffer,
-        entry.resolveOffset,
-      );
+      encoder.resolveQuerySet(querySet, slot * 2, 2, resolveBuffer, entry.resolveOffset);
+      entry.state = SLOT_STATES.RESOLVED;
+      return true;
     } catch (error) {
       entry.state = SLOT_STATES.COMPLETED;
       telemetry.timestampSamplesDropped += 1;
       telemetry.timestampError = String(error?.message || error);
+      return false;
     }
   }
 
   function recordSubmit() {
     telemetry.queueSubmits += 1;
     for (const entry of slots.values()) {
-      if (entry.state === SLOT_STATES.PENDING_SUBMIT) {
-        entry.state = SLOT_STATES.RESOLVED;
-      }
+      if (entry.state === SLOT_STATES.RESOLVED && !entry.submitted) entry.submitted = true;
     }
   }
 
@@ -126,13 +115,11 @@ export function createWebGpuBenchmarkTelemetry(device) {
     if (disposed || !resolveBuffer || !device?.queue?.onSubmittedWorkDone) return;
 
     const candidates = [...slots.values()].filter(
-      (entry) => entry.state === SLOT_STATES.RESOLVED,
+      (entry) => entry.state === SLOT_STATES.RESOLVED && entry.submitted,
     );
     if (!candidates.length) return;
 
-    for (const entry of candidates) {
-      entry.state = SLOT_STATES.READBACK_PENDING;
-    }
+    for (const entry of candidates) entry.state = SLOT_STATES.READBACK_PENDING;
 
     collectPromise = (async () => {
       let readbackBuffer = null;
@@ -171,12 +158,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
           const deltaNs = end - begin;
 
           if (telemetry.timestampRawSamples.length < 4) {
-            telemetry.timestampRawSamples.push({
-              slot: entry.slot,
-              begin,
-              end,
-              deltaNs,
-            });
+            telemetry.timestampRawSamples.push({ slot: entry.slot, begin, end, deltaNs });
           }
 
           if (!Number.isFinite(begin) || !Number.isFinite(end) || end < begin) {
@@ -193,15 +175,11 @@ export function createWebGpuBenchmarkTelemetry(device) {
         telemetry.gpuTiming = "unsupported";
         telemetry.timestampError = String(error?.message || error);
         for (const entry of candidates) {
-          if (entry.state === SLOT_STATES.READBACK_PENDING) {
-            entry.state = SLOT_STATES.RESOLVED;
-          }
+          if (entry.state === SLOT_STATES.READBACK_PENDING) entry.state = SLOT_STATES.RESOLVED;
         }
       } finally {
         if (mapped) {
-          try {
-            readbackBuffer?.unmap?.();
-          } catch {}
+          try { readbackBuffer?.unmap?.(); } catch {}
         }
         readbackBuffer?.destroy?.();
         collectPromise = null;
