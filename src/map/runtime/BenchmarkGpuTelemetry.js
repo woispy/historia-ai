@@ -21,7 +21,6 @@ export function createWebGpuBenchmarkTelemetry(device) {
 
   let querySet = null;
   let resolveBuffer = null;
-  let readbackBuffer = null;
   let nextQueryPair = 0;
   let frameCounter = 0;
   let collectPromise = null;
@@ -34,10 +33,6 @@ export function createWebGpuBenchmarkTelemetry(device) {
       resolveBuffer = device.createBuffer({
         size: MAX_QUERY_PAIRS * QUERY_STRIDE,
         usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
-      });
-      readbackBuffer = device.createBuffer({
-        size: MAX_QUERY_PAIRS * QUERY_STRIDE,
-        usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
       });
       telemetry.gpuTiming = "supported";
     } catch (error) {
@@ -82,7 +77,6 @@ export function createWebGpuBenchmarkTelemetry(device) {
     if (!querySet || slot < 0) return;
     try {
       encoder.resolveQuerySet(querySet, slot * 2, 2, resolveBuffer, slot * QUERY_STRIDE);
-      encoder.copyBufferToBuffer(resolveBuffer, slot * QUERY_STRIDE, readbackBuffer, slot * QUERY_STRIDE, 16);
       pendingSamples.add(slot);
     } catch (error) {
       telemetry.gpuTiming = "unsupported";
@@ -92,14 +86,31 @@ export function createWebGpuBenchmarkTelemetry(device) {
 
   async function collect() {
     if (collectPromise) return collectPromise;
-    if (!readbackBuffer || !pendingSamples.size) return;
+    if (!resolveBuffer || !pendingSamples.size) return;
 
     collectPromise = (async () => {
+      let readbackBuffer = null;
       try {
+        const slots = [...pendingSamples];
+        await device.queue.onSubmittedWorkDone();
+
+        const maxSlot = Math.max(...slots);
+        const readbackSize = Math.max(16, (maxSlot + 1) * QUERY_STRIDE);
+        readbackBuffer = device.createBuffer({
+          size: readbackSize,
+          usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+        });
+
+        const encoder = device.createCommandEncoder();
+        for (const slot of slots) {
+          encoder.copyBufferToBuffer(resolveBuffer, slot * QUERY_STRIDE, readbackBuffer, slot * QUERY_STRIDE, 16);
+        }
+        device.queue.submit([encoder.finish()]);
         await device.queue.onSubmittedWorkDone();
         await readbackBuffer.mapAsync(GPUMapMode.READ);
         const data = new BigUint64Array(readbackBuffer.getMappedRange());
-        for (const slot of pendingSamples) {
+
+        for (const slot of slots) {
           const base = (slot * QUERY_STRIDE) / 8;
           const begin = Number(data[base]);
           const end = Number(data[base + 1]);
@@ -117,16 +128,18 @@ export function createWebGpuBenchmarkTelemetry(device) {
           }
           telemetry.gpuSamples.push(deltaNs / 1e6);
         }
+
         readbackBuffer.unmap();
-        pendingSamples.clear();
+        for (const slot of slots) pendingSamples.delete(slot);
         if (!telemetry.gpuSamples.length && telemetry.timestampSamplesZero > 0 && !telemetry.timestampError) {
           telemetry.timestampError = "Timestamp query returned no positive measurable GPU interval";
         }
       } catch (error) {
         telemetry.gpuTiming = "unsupported";
         telemetry.timestampError = String(error?.message || error);
-        try { readbackBuffer.unmap(); } catch {}
+        try { readbackBuffer?.unmap?.(); } catch {}
       } finally {
+        readbackBuffer?.destroy?.();
         collectPromise = null;
       }
     })();
@@ -165,10 +178,8 @@ export function createWebGpuBenchmarkTelemetry(device) {
   function dispose() {
     querySet?.destroy?.();
     resolveBuffer?.destroy?.();
-    readbackBuffer?.destroy?.();
     querySet = null;
     resolveBuffer = null;
-    readbackBuffer = null;
     pendingSamples.clear();
     frameCounter = 0;
   }
