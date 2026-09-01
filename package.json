@@ -42,7 +42,6 @@
     "test:new-game": "node tools/tests/new-game-state.test.js",
     "test:new-game-startup": "node tools/tests/new-game-startup.test.js",
     "test:game-entry-handoff": "node tools/tests/game-entry-handoff.test.js",
-    "test:game-entry-handoff": "node tools/tests/game-entry-handoff.test.js",
     "test:browser-game-entry-handoff": "node tools/tests/browser-game-entry-handoff.test.js",
     "test:main-menu-entry": "node tools/tests/main-menu-entry.test.js",
     "test:scenario-loading": "node tools/tests/scenario-loading-contract.test.js",
