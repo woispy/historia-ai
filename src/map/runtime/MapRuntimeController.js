@@ -4,7 +4,6 @@ const DEFAULT_HOVER_EPSILON_PX = 0;
 
 /**
  * Imperative owner of map interaction and renderer lifecycle.
- *
  * React creates/destroys this object and may push coarse external state into
  * it. Pointer, wheel, resize and hover work stay here and never require a
  * React state update. Hover sampling is coalesced to at most one pick per
@@ -23,20 +22,14 @@ export class MapRuntimeController {
 
     this.destroyed = false;
     this.running = false;
-    this.pendingHover = null;
+    this.pendingHover = false;
+    this.hoverX = 0;
+    this.hoverY = 0;
+    this.lastQueuedHoverX = Number.NaN;
+    this.lastQueuedHoverY = Number.NaN;
     this.hoverFrameRequest = 0;
     this.resizeObserver = null;
-    this.drag = {
-      active: false,
-      pointerId: null,
-      moved: false,
-      lastX: 0,
-      lastY: 0,
-    };
-
-    // Reused for interaction bookkeeping; no per-hover object allocation is
-    // required after the pending sample is replaced below.
-    this._hoverPoint = { x: 0, y: 0 };
+    this.drag = { active: false, pointerId: null, moved: false, lastX: 0, lastY: 0 };
 
     this.handleWheel = this.handleWheel.bind(this);
     this.handlePointerDown = this.handlePointerDown.bind(this);
@@ -49,8 +42,8 @@ export class MapRuntimeController {
 
   start() {
     if (this.destroyed || this.running) return;
-
     this.running = true;
+
     this.canvas.addEventListener("wheel", this.handleWheel, { passive: false });
     this.canvas.addEventListener("pointerdown", this.handlePointerDown);
     this.canvas.addEventListener("pointermove", this.handlePointerMove);
@@ -62,14 +55,12 @@ export class MapRuntimeController {
       ? new ResizeObserver(this.handleResize)
       : null;
     this.resizeObserver?.observe(this.canvas);
-
     this.handleResize();
     this.renderer.start();
   }
 
   stop() {
     if (!this.running) return;
-
     this.running = false;
     this.cancelPendingHover();
     this.resizeObserver?.disconnect();
@@ -81,7 +72,6 @@ export class MapRuntimeController {
     this.canvas.removeEventListener("pointerup", this.handlePointerUp);
     this.canvas.removeEventListener("pointercancel", this.handlePointerCancel);
     this.canvas.removeEventListener("click", this.handleClick);
-
     this.renderer.stop();
   }
 
@@ -103,20 +93,19 @@ export class MapRuntimeController {
     const y = Number(clientY);
     if (!Number.isFinite(x) || !Number.isFinite(y)) return;
 
-    const previous = this.pendingHover;
     if (
-      previous &&
-      Math.abs(previous.x - x) <= this.hoverEpsilonPx &&
-      Math.abs(previous.y - y) <= this.hoverEpsilonPx
+      Number.isFinite(this.lastQueuedHoverX) &&
+      Math.abs(this.lastQueuedHoverX - x) <= this.hoverEpsilonPx &&
+      Math.abs(this.lastQueuedHoverY - y) <= this.hoverEpsilonPx
     ) {
       return;
     }
 
-    // Reuse one mutable point. The RAF callback copies primitive values before
-    // clearing it, so no object is allocated for every pointer event.
-    this._hoverPoint.x = x;
-    this._hoverPoint.y = y;
-    this.pendingHover = this._hoverPoint;
+    this.hoverX = x;
+    this.hoverY = y;
+    this.lastQueuedHoverX = x;
+    this.lastQueuedHoverY = y;
+    this.pendingHover = true;
 
     if (this.hoverFrameRequest) return;
 
@@ -124,10 +113,11 @@ export class MapRuntimeController {
       this.hoverFrameRequest = 0;
       if (this.destroyed || !this.running || !this.pendingHover) return;
 
-      const sample = this.pendingHover;
-      this.pendingHover = null;
+      const xSample = this.hoverX;
+      const ySample = this.hoverY;
+      this.pendingHover = false;
 
-      const provinceId = this.renderer.pick(sample.x, sample.y);
+      const provinceId = this.renderer.pick(xSample, ySample);
       const rasterId = provinceId ? this.renderer.lookupRasterId?.(provinceId) ?? 0 : 0;
       this.renderer.setHoveredRasterId(rasterId);
     });
@@ -138,7 +128,7 @@ export class MapRuntimeController {
       cancelAnimationFrame(this.hoverFrameRequest);
       this.hoverFrameRequest = 0;
     }
-    this.pendingHover = null;
+    this.pendingHover = false;
   }
 
   handleWheel(event) {
@@ -150,7 +140,6 @@ export class MapRuntimeController {
 
   handlePointerDown(event) {
     if (this.destroyed || event.button !== 0) return;
-
     this.cancelPendingHover();
     this.drag.active = true;
     this.drag.pointerId = event.pointerId;
@@ -168,7 +157,6 @@ export class MapRuntimeController {
       const dx = event.clientX - this.drag.lastX;
       const dy = event.clientY - this.drag.lastY;
       if (Math.abs(dx) + Math.abs(dy) > 2) this.drag.moved = true;
-
       this.drag.lastX = event.clientX;
       this.drag.lastY = event.clientY;
       this.cameraRig.panPixels(dx, dy, this.canvas.clientWidth, this.canvas.clientHeight);
@@ -214,7 +202,7 @@ export class MapRuntimeController {
     if (this.destroyed) return;
     this.stop();
     this.destroyed = true;
-    this.pendingHover = null;
+    this.pendingHover = false;
     this.cameraRig = null;
     this.onProvinceClick = null;
     this.renderer.dispose();
