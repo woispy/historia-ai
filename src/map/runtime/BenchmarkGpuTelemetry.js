@@ -3,7 +3,6 @@ const QUERY_VALUES_PER_SLOT = 2;
 const QUERY_BYTES_PER_SLOT = QUERY_VALUES_PER_SLOT * 8;
 const RESOLVE_STRIDE = 256;
 const RESOLVE_BUFFER_SIZE = RING_SLOT_COUNT * RESOLVE_STRIDE;
-const STAGING_BUFFER_SIZE = RESOLVE_STRIDE;
 const TIMESTAMP_SAMPLE_INTERVAL_FRAMES = 8;
 const SLOT_STATES = Object.freeze({
   FREE: "FREE",
@@ -59,7 +58,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
       });
       for (const slot of slots) {
         slot.stagingBuffer = device.createBuffer({
-          size: STAGING_BUFFER_SIZE,
+          size: QUERY_BYTES_PER_SLOT,
           usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
         });
       }
@@ -134,12 +133,22 @@ export function createWebGpuBenchmarkTelemetry(device) {
     }
 
     try {
+      // Keep resolveQuerySet and the readback copy in the same command
+      // submission. This avoids a driver/backend hazard where a resolved
+      // timestamp buffer can be observed as zero after a submission boundary.
       encoder.resolveQuerySet(
         querySet,
         slot.slot * QUERY_VALUES_PER_SLOT,
         QUERY_VALUES_PER_SLOT,
         resolveBuffer,
         slot.resolveOffset,
+      );
+      encoder.copyBufferToBuffer(
+        resolveBuffer,
+        slot.resolveOffset,
+        slot.stagingBuffer,
+        0,
+        QUERY_BYTES_PER_SLOT,
       );
       slot.state = SLOT_STATES.RESOLVED;
       return true;
@@ -171,22 +180,8 @@ export function createWebGpuBenchmarkTelemetry(device) {
 
     collectPromise = (async () => {
       try {
-        // First fence: the resolve writes from the render submission are complete.
-        await device.queue.onSubmittedWorkDone();
-
-        const copyEncoder = device.createCommandEncoder();
-        for (const slot of candidates) {
-          copyEncoder.copyBufferToBuffer(
-            resolveBuffer,
-            slot.resolveOffset,
-            slot.stagingBuffer,
-            0,
-            QUERY_BYTES_PER_SLOT,
-          );
-        }
-        device.queue.submit([copyEncoder.finish()]);
-
-        // Second fence: the staging copies are complete before mapAsync.
+        // The render/compute submission already contains both resolveQuerySet
+        // and copyBufferToBuffer. Fence that submission before any CPU map.
         await device.queue.onSubmittedWorkDone();
 
         for (const slot of candidates) {
@@ -196,18 +191,26 @@ export function createWebGpuBenchmarkTelemetry(device) {
             mapped = true;
             const mappedRange = slot.stagingBuffer.getMappedRange(0, QUERY_BYTES_PER_SLOT);
             const data = new BigUint64Array(mappedRange);
-            const begin = Number(data[0]);
-            const end = Number(data[1]);
-            const deltaNs = end - begin;
+            const begin = data[0];
+            const end = data[1];
+            const deltaTicks = end - begin;
+            const beginNumber = Number(begin);
+            const endNumber = Number(end);
+            const deltaNs = Number(deltaTicks);
 
             if (telemetry.timestampRawSamples.length < 4) {
-              telemetry.timestampRawSamples.push({ slot: slot.slot, begin, end, deltaNs });
+              telemetry.timestampRawSamples.push({
+                slot: slot.slot,
+                begin: beginNumber,
+                end: endNumber,
+                deltaNs,
+              });
             }
 
-            if (!Number.isFinite(begin) || !Number.isFinite(end) || end < begin) {
+            if (begin < 0n || end < 0n || end < begin || !Number.isFinite(deltaNs)) {
               telemetry.timestampSamplesDropped += 1;
               telemetry.timestampError = "Invalid WebGPU timestamp pair";
-            } else if (deltaNs <= 0) {
+            } else if (deltaTicks <= 0n) {
               telemetry.timestampSamplesDropped += 1;
               telemetry.timestampSamplesZero += 1;
             } else {
