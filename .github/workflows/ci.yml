@@ -145,6 +145,8 @@ jobs:
         run: npm run test:esm-import-contract
       - name: Run runtime engine tests
         run: npm run test:runtime-engine
+      - name: Run Phase F canonical world state tests
+        run: npm run test:phase-f-canonical-world-state
       - name: Build
         run: npm run build
       - name: Verify repository cleanliness after production build
