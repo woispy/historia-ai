@@ -13,6 +13,7 @@
     "benchmark:prepare": "node tools/benchmarks/generate-15k-mapbin.js",
     "benchmark": "node tools/benchmarks/run-browser-benchmark.js",
     "benchmark:soak": "node tools/benchmarks/run-browser-benchmark.js",
+    "benchmark:gpu-timestamp-calibration": "npx playwright test tools/benchmarks/gpu-timestamp-calibration.spec.js --config=playwright.benchmark.config.js",
     "test:historical-gis": "node tools/historical-gis/cli/test-1300.js",
     "test:physical-geography": "node tools/tests/physical-geography-1300.test.js",
     "test:hydrography-10m": "node tools/tests/hydrography-10m.test.js",
