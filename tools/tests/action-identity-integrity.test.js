@@ -25,7 +25,7 @@ assert.equal(requeued.state.actionSequence, 3);
 assert.equal(requeued.state.pendingActions.length, 2);
 assert.equal(requeued.state.pendingActions[0].id, second.state.pendingActions[1].id);
 assert.notEqual(requeued.state.pendingActions[1].id, second.state.pendingActions[1].id);
-assert.equal(requeued.state.pendingActions[1].sequence, 3);
+assert.equal(requeued.state.actionSequence, 3);
 
 const replay = GameEngine.queueAction(session, "Bursa pazarlarında tahıl denetimi başlat.");
 assert.equal(replay.state.actionSequence, 1);
