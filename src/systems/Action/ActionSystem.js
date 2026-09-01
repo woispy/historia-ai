@@ -5,10 +5,8 @@ function rebuildGameSession(gameSession, state) {
   return { ...gameSession, state };
 }
 
-function createDeterministicActionId(state, actionText) {
+function createDeterministicActionId(state, actionText, sequence) {
   const date = state?.time?.currentDate ?? {};
-  const actions = Array.isArray(state?.pendingActions) ? state.pendingActions : [];
-  const sequence = actions.length + 1;
   const normalizedText = String(actionText ?? "").trim();
 
   let hash = 2166136261;
@@ -56,9 +54,10 @@ export function queueAction(gameSession, actionText) {
 
   const state = gameSession.state;
   const normalizedText = actionText.trim();
+  const sequence = (Number.isInteger(state.actionSequence) ? state.actionSequence : 0) + 1;
   const interpretation = interpretAction(normalizedText);
   const action = {
-    id: createDeterministicActionId(state, normalizedText),
+    id: createDeterministicActionId(state, normalizedText, sequence),
     type: "player",
     source: "player",
     status: "pending",
@@ -71,6 +70,7 @@ export function queueAction(gameSession, actionText) {
 
   return rebuildGameSession(gameSession, {
     ...state,
+    actionSequence: sequence,
     pendingActions: [...state.pendingActions, action],
   });
 }
