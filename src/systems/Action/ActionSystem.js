@@ -5,6 +5,28 @@ function rebuildGameSession(gameSession, state) {
   return { ...gameSession, state };
 }
 
+function createDeterministicActionId(state, actionText, sequence) {
+  const date = state?.time?.currentDate ?? {};
+  const normalizedText = String(actionText ?? "").trim();
+
+  let hash = 2166136261;
+  for (let index = 0; index < normalizedText.length; index += 1) {
+    hash ^= normalizedText.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  const textHash = (hash >>> 0).toString(16).padStart(8, "0");
+  return [
+    "action",
+    date.year ?? 0,
+    date.month ?? 0,
+    date.day ?? 0,
+    state?.time?.turn ?? 0,
+    sequence,
+    textHash,
+  ].join("-");
+}
+
 export function advanceWeek(gameSession) {
   return processTurn(gameSession, "week", 1);
 }
@@ -31,21 +53,24 @@ export function queueAction(gameSession, actionText) {
   }
 
   const state = gameSession.state;
-  const interpretation = interpretAction(actionText);
+  const normalizedText = actionText.trim();
+  const sequence = (Number.isInteger(state.actionSequence) ? state.actionSequence : 0) + 1;
+  const interpretation = interpretAction(normalizedText);
   const action = {
-    id: crypto.randomUUID(),
+    id: createDeterministicActionId(state, normalizedText, sequence),
     type: "player",
     source: "player",
     status: "pending",
     createdAt: { ...state.time.currentDate },
     priority: 0,
-    text: actionText.trim(),
+    text: normalizedText,
     interpretation,
     payload: {},
   };
 
   return rebuildGameSession(gameSession, {
     ...state,
+    actionSequence: sequence,
     pendingActions: [...state.pendingActions, action],
   });
 }

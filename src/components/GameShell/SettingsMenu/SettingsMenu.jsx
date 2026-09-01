@@ -27,7 +27,6 @@ function SettingsMenu({
       onOpenChange?.(false);
       return;
     }
-
     setView("menu");
     onOpenChange?.(true);
   }
@@ -42,54 +41,36 @@ function SettingsMenu({
     closeMenu();
   }
 
-  function handleLoad() {
-    const loaded = onLoadGame?.();
+  function handleLoad(session) {
+    const loaded = onLoadGame?.(session);
     if (loaded) closeMenu();
   }
 
   return (
     <div className="settings-menu-container">
-      <button
-        type="button"
-        className={`menu-button${open ? " active" : ""}`}
-        onClick={toggleMenu}
-        aria-label="Oyun menüsü"
-        aria-expanded={open}
-      >
-        ⚙
-      </button>
+      <button type="button" className={`menu-button${open ? " active" : ""}`} onClick={toggleMenu} aria-label="Oyun menüsü" aria-expanded={open}>⚙</button>
 
       {open && view === "menu" && (
         <div className="game-menu-panel" role="menu" aria-label="Oyun menüsü">
           <button type="button" role="menuitem" onClick={handleSave}>Oyunu Kaydet</button>
-          <button type="button" role="menuitem" onClick={handleLoad}>Kaydı Yükle</button>
           <button type="button" role="menuitem" onClick={() => setView("records")}>Kayıtlar</button>
-
           <div className="game-menu-separator" />
-
           <button type="button" role="menuitem" onClick={() => setView("settings")}>Ayarlar</button>
           <button type="button" role="menuitem" disabled>Oyun Günlüğü</button>
           <button type="button" role="menuitem" disabled>Ansiklopedi</button>
-
           <div className="game-menu-separator" />
-
           <button type="button" role="menuitem" onClick={onMainMenu}>Ana Menü</button>
           <button type="button" role="menuitem" onClick={onExitGame}>Oyundan Çık</button>
         </div>
       )}
 
-      {open && view === "settings" && (
-        <SettingsPanel
-          settings={settings}
-          onChange={handleChange}
-          onBack={() => setView("menu")}
-        />
-      )}
-
+      {open && view === "settings" && <SettingsPanel settings={settings} onChange={handleChange} onBack={() => setView("menu")} />}
       {open && view === "records" && (
         <SaveRecordsPanel
           onBack={() => setView("menu")}
           onDelete={onDeleteSave}
+          onLoad={handleLoad}
+          allowSave
         />
       )}
     </div>
