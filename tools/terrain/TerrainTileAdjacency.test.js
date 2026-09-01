@@ -22,12 +22,10 @@ assert.deepEqual(adjacency[0].edgeSegments.east.map(r=>[r.overlapStart,r.overlap
 assert.deepEqual(adjacency[1].edgeSegments.west.map(r=>r.tileIndex),[0]);
 assert.deepEqual(adjacency[2].edgeSegments.west.map(r=>r.tileIndex),[0]);
 
-// Every detected shared frontier must be bidirectionally represented.
-assert.equal(adjacency[0].edgeSegments.east[0].tileIndex,0+1);
-assert.equal(adjacency[1].edgeSegments.west[0].tileIndex,0);
-assert.equal(adjacency[0].edgeSegments.east[1].tileIndex,2);
-assert.equal(adjacency[2].edgeSegments.west[0].tileIndex,0);
-assert.deepEqual(adjacency[0].edgeSegments.east.map(r=>r.tileIndex),[1,2]);
+// Every detected shared frontier must be represented from both tiles.
+for(const ref of adjacency[0].edgeSegments.east){
+  assert.ok(adjacency[ref.tileIndex].edgeSegments.west.some(reverse=>reverse.tileIndex===0));
+}
 assertTerrainAdjacencyBalance(adjacency);
 
 const planAdjacency=toTerrainDrawPlanAdjacency(adjacency[0],adjacency);
