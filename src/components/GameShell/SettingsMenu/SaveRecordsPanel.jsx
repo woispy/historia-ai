@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./SettingsMenu.css";
 
 import { deleteGameSlot, listSaveSlots, loadGameFromSlot, saveGameToSlot } from "../../../save";
 import { getCurrentGame } from "../../../game/currentGame";
@@ -38,9 +39,7 @@ function SaveRecordsPanel({ onBack, onDelete, onLoad, allowSave = true }) {
   const [selectedSlot, setSelectedSlot] = useState("1");
   const [error, setError] = useState("");
 
-  function refresh() {
-    setRecords(listSaveSlots());
-  }
+  function refresh() { setRecords(listSaveSlots()); }
 
   function saveToSelectedSlot() {
     setError("");
@@ -80,7 +79,6 @@ function SaveRecordsPanel({ onBack, onDelete, onLoad, allowSave = true }) {
         {onBack && <button type="button" className="settings-back-button" onClick={onBack}>←</button>}
         <h2>Kayıtlar</h2>
       </div>
-
       <div className="save-records-body">
         {allowSave && (
           <div className="save-slot-create">
@@ -91,17 +89,12 @@ function SaveRecordsPanel({ onBack, onDelete, onLoad, allowSave = true }) {
             <button type="button" onClick={saveToSelectedSlot}>Bu Yuvaya Kaydet</button>
           </div>
         )}
-
-        {recordBySlot.has("autosave") && (
-          <SaveRecordCard record={recordBySlot.get("autosave")} onLoad={loadSlot} onDelete={removeSlot} />
-        )}
-
+        {recordBySlot.has("autosave") && <SaveRecordCard record={recordBySlot.get("autosave")} onLoad={loadSlot} onDelete={removeSlot} />}
         {manualSlots.map((slotId) => (
           recordBySlot.has(slotId)
             ? <SaveRecordCard key={slotId} record={recordBySlot.get(slotId)} onLoad={loadSlot} onDelete={removeSlot} />
             : <div className="save-record-card" key={slotId}><strong>Kayıt {slotId}</strong><span>Boş kayıt yuvası</span></div>
         ))}
-
         {error && <p role="alert">{error}</p>}
       </div>
     </div>
