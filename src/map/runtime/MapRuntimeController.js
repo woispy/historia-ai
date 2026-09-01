@@ -2,13 +2,7 @@ import { assertRendererContract } from "../rendering/MapRendererContract.js";
 
 const DEFAULT_HOVER_EPSILON_PX = 0;
 
-/**
- * Imperative owner of map interaction and renderer lifecycle.
- * React creates/destroys this object and may push coarse external state into
- * it. Pointer, wheel, resize and hover work stay here and never require a
- * React state update. Hover sampling is coalesced to at most one pick per
- * animation frame.
- */
+/** Imperative owner of map interaction and renderer lifecycle. */
 export class MapRuntimeController {
   constructor({ canvas, cameraRig, renderer, onProvinceClick, hoverEpsilonPx = DEFAULT_HOVER_EPSILON_PX }) {
     if (!canvas) throw new TypeError("MapRuntimeController requires a canvas");
@@ -19,7 +13,6 @@ export class MapRuntimeController {
     this.renderer = assertRendererContract(renderer);
     this.onProvinceClick = onProvinceClick;
     this.hoverEpsilonPx = Math.max(0, Number(hoverEpsilonPx) || 0);
-
     this.destroyed = false;
     this.running = false;
     this.pendingHover = false;
@@ -43,17 +36,13 @@ export class MapRuntimeController {
   start() {
     if (this.destroyed || this.running) return;
     this.running = true;
-
     this.canvas.addEventListener("wheel", this.handleWheel, { passive: false });
     this.canvas.addEventListener("pointerdown", this.handlePointerDown);
     this.canvas.addEventListener("pointermove", this.handlePointerMove);
     this.canvas.addEventListener("pointerup", this.handlePointerUp);
     this.canvas.addEventListener("pointercancel", this.handlePointerCancel);
     this.canvas.addEventListener("click", this.handleClick);
-
-    this.resizeObserver = typeof ResizeObserver === "function"
-      ? new ResizeObserver(this.handleResize)
-      : null;
+    this.resizeObserver = typeof ResizeObserver === "function" ? new ResizeObserver(this.handleResize) : null;
     this.resizeObserver?.observe(this.canvas);
     this.handleResize();
     this.renderer.start();
@@ -65,7 +54,6 @@ export class MapRuntimeController {
     this.cancelPendingHover();
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
-
     this.canvas.removeEventListener("wheel", this.handleWheel);
     this.canvas.removeEventListener("pointerdown", this.handlePointerDown);
     this.canvas.removeEventListener("pointermove", this.handlePointerMove);
@@ -86,9 +74,12 @@ export class MapRuntimeController {
     this.renderer.setSelectedProvinceId(provinceId);
   }
 
+  setOnProvinceClick(callback) {
+    if (!this.destroyed) this.onProvinceClick = callback;
+  }
+
   queueHover(clientX, clientY) {
     if (this.destroyed || !this.running || this.drag.active) return;
-
     const x = Number(clientX);
     const y = Number(clientY);
     if (!Number.isFinite(x) || !Number.isFinite(y)) return;
@@ -97,26 +88,21 @@ export class MapRuntimeController {
       Number.isFinite(this.lastQueuedHoverX) &&
       Math.abs(this.lastQueuedHoverX - x) <= this.hoverEpsilonPx &&
       Math.abs(this.lastQueuedHoverY - y) <= this.hoverEpsilonPx
-    ) {
-      return;
-    }
+    ) return;
 
     this.hoverX = x;
     this.hoverY = y;
     this.lastQueuedHoverX = x;
     this.lastQueuedHoverY = y;
     this.pendingHover = true;
-
     if (this.hoverFrameRequest) return;
 
     this.hoverFrameRequest = requestAnimationFrame(() => {
       this.hoverFrameRequest = 0;
       if (this.destroyed || !this.running || !this.pendingHover) return;
-
       const xSample = this.hoverX;
       const ySample = this.hoverY;
       this.pendingHover = false;
-
       const provinceId = this.renderer.pick(xSample, ySample);
       const rasterId = provinceId ? this.renderer.lookupRasterId?.(provinceId) ?? 0 : 0;
       this.renderer.setHoveredRasterId(rasterId);
@@ -152,7 +138,6 @@ export class MapRuntimeController {
 
   handlePointerMove(event) {
     if (this.destroyed) return;
-
     if (this.drag.active && this.drag.pointerId === event.pointerId) {
       const dx = event.clientX - this.drag.lastX;
       const dy = event.clientY - this.drag.lastY;
@@ -163,7 +148,6 @@ export class MapRuntimeController {
       this.renderer.setCamera(this.cameraRig.snapshot());
       return;
     }
-
     this.queueHover(event.clientX, event.clientY);
   }
 
@@ -188,14 +172,12 @@ export class MapRuntimeController {
       this.drag.moved = false;
       return;
     }
-
     const provinceId = this.renderer.pick(event.clientX, event.clientY);
     if (provinceId) this.onProvinceClick?.(provinceId);
   }
 
   handleResize() {
-    if (this.destroyed) return;
-    this.renderer.resize(this.canvas.clientWidth, this.canvas.clientHeight);
+    if (!this.destroyed) this.renderer.resize(this.canvas.clientWidth, this.canvas.clientHeight);
   }
 
   dispose() {
