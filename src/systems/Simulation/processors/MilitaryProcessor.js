@@ -5,11 +5,11 @@ import { addTimelineEvent } from "../../Timeline/index.js";
 export function processMilitary(gameSession) {
   const state = getState(gameSession);
   const simulation = state.simulation ?? {};
-  const cityRepository = gameSession.world.repositories.cities;
+  const cityRepository = state.cities;
   let nextCities = cityRepository;
   const activeSieges = [];
   const resolvedSieges = [];
-  const playerCountryId = gameSession.player?.countryId;
+  const playerCountryId = state.playerCountryId ?? gameSession.player?.countryId;
 
   for (const city of Object.values(cityRepository.byId)) {
     if (!city.status?.underSiege) continue;
@@ -41,19 +41,9 @@ export function processMilitary(gameSession) {
     });
   }
 
-  let nextSession = {
-    ...gameSession,
-    world: {
-      ...gameSession.world,
-      repositories: {
-        ...gameSession.world.repositories,
-        cities: nextCities,
-      },
-    },
-  };
-
-  nextSession = updateState(nextSession, {
+  let nextSession = updateState(gameSession, {
     ...state,
+    cities: nextCities,
     simulation: {
       ...simulation,
       activeWars: simulation.activeWars ?? [],
