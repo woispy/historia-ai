@@ -5,10 +5,11 @@ import path from "node:path";
 const output = process.env.HISTORIA_BENCHMARK_OUTPUT || "artifacts/benchmark-result.json";
 
 const WORKLOADS = [
-  { workgroups: 1, iterations: 64 },
-  { workgroups: 64, iterations: 64 },
-  { workgroups: 256, iterations: 64 },
-  { workgroups: 1024, iterations: 256 },
+  { workgroups: 1, iterations: 1 },
+  { workgroups: 16, iterations: 1 },
+  { workgroups: 64, iterations: 1 },
+  { workgroups: 256, iterations: 1 },
+  { workgroups: 1024, iterations: 1 },
 ];
 
 async function calibrate(page) {
@@ -33,6 +34,7 @@ async function calibrate(page) {
 
     let adapter;
     let device;
+    let workload;
     try {
       adapter = await navigator.gpu.requestAdapter({ powerPreference: "high-performance" });
       if (!adapter) {
@@ -68,7 +70,7 @@ async function calibrate(page) {
       ` });
       const pipeline = device.createComputePipeline({ layout: "auto", compute: { module: shader, entryPoint: "main" } });
       const maxWorkgroups = Math.max(...workloads.map((w) => w.workgroups));
-      const workload = device.createBuffer({ size: Math.max(4, maxWorkgroups * 64 * 4), usage: GPUBufferUsage.STORAGE });
+      workload = device.createBuffer({ size: Math.max(4, maxWorkgroups * 64 * 4), usage: GPUBufferUsage.STORAGE });
       const bindGroup = device.createBindGroup({ layout: pipeline.getBindGroupLayout(0), entries: [{ binding: 0, resource: { buffer: workload } }] });
 
       for (const spec of workloads) {
@@ -109,7 +111,6 @@ async function calibrate(page) {
           readback.destroy();
         }
       }
-      workload.destroy();
 
       if (result.positiveSamples === 0) result.classification = "no-positive-interval";
       else if (result.zeroSamples > 0) result.classification = "quantized-or-below-resolution";
@@ -118,6 +119,7 @@ async function calibrate(page) {
       result.error = String(error?.message || error);
       result.classification = "probe-error";
     } finally {
+      workload?.destroy?.();
       device?.destroy?.();
     }
     return result;
