@@ -5,6 +5,7 @@ import { BinaryMapRenderer } from "/src/map/rendering/gpu/BinaryMapRenderer.js";
 import { WebGPUMapRenderer } from "/src/map/rendering/gpu/WebGPUMapRenderer.js";
 import { BenchmarkDiagnostics, BENCHMARK_TARGET } from "/src/map/runtime/BenchmarkDiagnostics.js";
 import { BenchmarkSoakRecorder } from "/src/map/runtime/BenchmarkSoakRecorder.js";
+import { installWebGpuBenchmarkTelemetry } from "/src/map/runtime/BenchmarkGpuTelemetry.js";
 
 const params = new URLSearchParams(location.search);
 const assetUrl = params.get("asset") || "/assets/stress-15k.mapbin";
@@ -16,6 +17,7 @@ const diagnostics = new BenchmarkDiagnostics();
 const soak = new BenchmarkSoakRecorder({ sampleIntervalMs: Number(params.get("sampleMs") || 1000) });
 let renderer;
 let runtime;
+let gpuTelemetry;
 let lastHover = 0;
 
 function resize() {
@@ -40,12 +42,19 @@ async function main() {
   }
   if (!renderer) throw new Error(`Requested backend is unavailable: ${backendPreference}`);
 
+  if (renderer instanceof WebGPUMapRenderer) {
+    gpuTelemetry = installWebGpuBenchmarkTelemetry(renderer);
+  }
+
   resize();
   runtime = new MapRuntimeController({ canvas, cameraRig, renderer });
   runtime.start();
   diagnostics.start();
   const benchmarkStart = performance.now();
-  const snapshot = () => diagnostics.summary(performance.now());
+  const snapshot = () => ({
+    ...diagnostics.summary(performance.now()),
+    gpu: gpuTelemetry?.snapshot() ?? null,
+  });
   soak.start(snapshot);
 
   let frameCount = 0;
@@ -57,7 +66,7 @@ async function main() {
       cameraRig.setState({ x: Math.sin(phase) * 45, y: Math.cos(phase * 0.7) * 20, zoom: 2 + (Math.sin(phase * 0.5) + 1) * 2 });
     }
     if (now - benchmarkStart < durationMs) requestAnimationFrame(frame);
-    else finish(now);
+    else void finish(now);
   };
 
   const hover = (now) => {
@@ -75,9 +84,10 @@ async function main() {
   requestAnimationFrame(hover);
 }
 
-function finish(now) {
-  soak.stop();
+async function finish(now) {
   runtime?.stop();
+  await gpuTelemetry?.collect();
+  soak.stop();
   const result = {
     ...diagnostics.summary(now),
     backend: renderer instanceof WebGPUMapRenderer ? "webgpu" : "webgl2",
@@ -86,6 +96,7 @@ function finish(now) {
     provinceCount: renderer.assetSource?.provinceCount ?? null,
     geometryPointCount: renderer.assetSource?.geometryPointCount ?? null,
     internalCanvas: { width: canvas.width, height: canvas.height },
+    gpu: gpuTelemetry?.snapshot() ?? null,
     soak: soak.summary(),
   };
   diagnosticsNode.textContent = JSON.stringify(result, null, 2);
