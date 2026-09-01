@@ -87,7 +87,11 @@ assert.deepEqual(runA.state.simulation, runB.state.simulation);
 // deterministic event semantics, not command/timeline identity. Identity
 // determinism is intentionally deferred to the later replay/command phase.
 const normalizeTimeline = (timeline) =>
-  timeline.map(({ id, ...entry }) => entry);
+  timeline.map((entry) => {
+    const normalized = { ...entry };
+    delete normalized.id;
+    return normalized;
+  });
 
 assert.deepEqual(
   normalizeTimeline(runA.state.timeline),
