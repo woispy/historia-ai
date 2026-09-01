@@ -24,6 +24,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
   let readbackBuffer = null;
   let nextQueryPair = 0;
   let frameCounter = 0;
+  let collectPromise = null;
   const pendingSamples = new Set();
   const timestampSupported = Boolean(device?.features?.has?.("timestamp-query"));
 
@@ -90,39 +91,47 @@ export function createWebGpuBenchmarkTelemetry(device) {
   }
 
   async function collect() {
+    if (collectPromise) return collectPromise;
     if (!readbackBuffer || !pendingSamples.size) return;
-    try {
-      await device.queue.onSubmittedWorkDone();
-      await readbackBuffer.mapAsync(GPUMapMode.READ);
-      const data = new BigUint64Array(readbackBuffer.getMappedRange());
-      for (const slot of pendingSamples) {
-        const base = (slot * QUERY_STRIDE) / 8;
-        const begin = Number(data[base]);
-        const end = Number(data[base + 1]);
-        const deltaNs = end - begin;
-        if (telemetry.timestampRawSamples.length < 4) {
-          telemetry.timestampRawSamples.push({ slot, begin, end, deltaNs });
+
+    collectPromise = (async () => {
+      try {
+        await device.queue.onSubmittedWorkDone();
+        await readbackBuffer.mapAsync(GPUMapMode.READ);
+        const data = new BigUint64Array(readbackBuffer.getMappedRange());
+        for (const slot of pendingSamples) {
+          const base = (slot * QUERY_STRIDE) / 8;
+          const begin = Number(data[base]);
+          const end = Number(data[base + 1]);
+          const deltaNs = end - begin;
+          if (telemetry.timestampRawSamples.length < 4) {
+            telemetry.timestampRawSamples.push({ slot, begin, end, deltaNs });
+          }
+          if (!Number.isFinite(begin) || !Number.isFinite(end) || end < begin) {
+            telemetry.timestampSamplesDropped += 1;
+            continue;
+          }
+          if (deltaNs <= 0) {
+            telemetry.timestampSamplesZero += 1;
+            continue;
+          }
+          telemetry.gpuSamples.push(deltaNs / 1e6);
         }
-        if (!Number.isFinite(begin) || !Number.isFinite(end) || end < begin) {
-          telemetry.timestampSamplesDropped += 1;
-          continue;
+        readbackBuffer.unmap();
+        pendingSamples.clear();
+        if (!telemetry.gpuSamples.length && telemetry.timestampSamplesZero > 0 && !telemetry.timestampError) {
+          telemetry.timestampError = "Timestamp query returned no positive measurable GPU interval";
         }
-        if (deltaNs <= 0) {
-          telemetry.timestampSamplesZero += 1;
-          continue;
-        }
-        telemetry.gpuSamples.push(deltaNs / 1e6);
+      } catch (error) {
+        telemetry.gpuTiming = "unsupported";
+        telemetry.timestampError = String(error?.message || error);
+        try { readbackBuffer.unmap(); } catch {}
+      } finally {
+        collectPromise = null;
       }
-      readbackBuffer.unmap();
-      pendingSamples.clear();
-      if (!telemetry.gpuSamples.length && telemetry.timestampSamplesZero > 0 && !telemetry.timestampError) {
-        telemetry.timestampError = "Timestamp query returned no positive measurable GPU interval";
-      }
-    } catch (error) {
-      telemetry.gpuTiming = "unsupported";
-      telemetry.timestampError = String(error?.message || error);
-      try { readbackBuffer.unmap(); } catch {}
-    }
+    })();
+
+    return collectPromise;
   }
 
   function recordComputePass() { telemetry.computePasses += 1; }
