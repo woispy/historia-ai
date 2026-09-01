@@ -193,6 +193,7 @@ async function runBenchmark(page, backend, file, metadata = {}) {
 }
 
 test("Historia AI WebGPU timestamp probe", async ({ page }) => {
+  await page.goto("/benchmarks/map-benchmark.html?backend=webgpu&durationMs=1", { waitUntil: "load" });
   const result = await runTimestampProbe(page);
   const file = output.replace(/\.json$/i, "-timestamp-probe.json");
   await fs.mkdir(path.dirname(file), { recursive: true });
