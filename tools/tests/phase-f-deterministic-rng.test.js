@@ -1,0 +1,87 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+import {
+  assertDeterministicRng,
+  createDeterministicRng,
+  nextDeterministicRandom,
+  randomInt,
+} from "../../src/systems/Simulation/DeterministicRng.js";
+import { createGame } from "../../src/bootstrap/GameBootstrap.js";
+import { GameEngine } from "../../src/engine/index.js";
+
+function sequence(seed, count) {
+  let rng = createDeterministicRng(seed);
+  const values = [];
+
+  for (let index = 0; index < count; index += 1) {
+    const next = nextDeterministicRandom(rng);
+    values.push(next.value);
+    rng = next.rng;
+  }
+
+  return { values, rng };
+}
+
+const first = sequence("phase-f-test-seed", 32);
+const second = sequence("phase-f-test-seed", 32);
+const different = sequence("phase-f-different-seed", 32);
+
+assert.deepEqual(first, second);
+assert.notDeepEqual(first.values, different.values);
+assert.equal(first.rng.calls, 32);
+assert.equal(assertDeterministicRng(first.rng), true);
+
+const restored = sequence("phase-f-test-seed", 8);
+const checkpoint = restored.rng;
+let resumed = checkpoint;
+const resumedValues = [];
+for (let index = 0; index < 24; index += 1) {
+  const next = nextDeterministicRandom(resumed);
+  resumedValues.push(next.value);
+  resumed = next.rng;
+}
+assert.deepEqual(resumedValues, first.values.slice(8));
+assert.equal(resumed.calls, 32);
+
+const bounded = randomInt(createDeterministicRng(7), 10, 20);
+assert.equal(Number.isInteger(bounded.value), true);
+assert.ok(bounded.value >= 10 && bounded.value <= 20);
+assert.equal(bounded.rng.calls, 1);
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const eventProcessorPath = path.join(
+  repoRoot,
+  "src/systems/Simulation/processors/EventProcessor.js",
+);
+const eventProcessorSource = fs.readFileSync(eventProcessorPath, "utf8");
+assert.equal(eventProcessorSource.includes("Math.random"), false);
+assert.equal(eventProcessorSource.includes("nextDeterministicRandom"), true);
+
+const sessionA = createGame({
+  scenarioId: "1300",
+  player: { countryId: "ottomans", character: { name: "F2 Determinism A" } },
+  settings: { randomSeed: "f2-runtime-seed" },
+});
+const sessionB = createGame({
+  scenarioId: "1300",
+  player: { countryId: "ottomans", character: { name: "F2 Determinism B" } },
+  settings: { randomSeed: "f2-runtime-seed" },
+});
+
+assert.deepEqual(sessionA.state.random, sessionB.state.random);
+
+let runA = sessionA;
+let runB = sessionB;
+for (let index = 0; index < 12; index += 1) {
+  runA = GameEngine.advance(runA, "week", 1);
+  runB = GameEngine.advance(runB, "week", 1);
+}
+
+assert.deepEqual(runA.state.random, runB.state.random);
+assert.deepEqual(runA.state.simulation, runB.state.simulation);
+assert.deepEqual(runA.state.timeline, runB.state.timeline);
+
+console.log("phase-f-deterministic-rng.test.js: all assertions passed");
