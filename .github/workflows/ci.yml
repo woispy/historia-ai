@@ -135,6 +135,10 @@ jobs:
         run: npm run test:water-engine-diagnostics
       - name: Run Phase E terrain geometry LOD contract tests
         run: npm run test:terrain-phase-e
+      - name: Run Phase E terrain adjacency contract tests
+        run: npm run test:terrain-adjacency
+      - name: Run Phase E terrain topology dispatcher acceptance tests
+        run: npm run test:terrain-topology-dispatcher
       - name: Run Phase E real DEM source tests
         run: npm run test:terrain-dem-source
       - name: Run Phase E DEM raster pipeline tests
