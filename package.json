@@ -37,6 +37,7 @@
     "test:scenario-loading": "node tools/tests/scenario-loading-contract.test.js",
     "test:province-selection": "node tools/tests/province-selection-contract.test.js",
     "test:runtime-engine": "node tools/tests/runtime-engine.test.js",
+    "test:phase-g-simulation-foundation": "node tools/tests/phase-g-simulation-foundation.test.js",
     "test:esm-import-contract": "node tools/tests/esm-import-contract.test.js",
     "test:cartography-visual": "node tools/tests/cartography-visual-regression.test.js",
     "test:map-rendering-contract": "node tools/tests/map-rendering-contract.test.js",
