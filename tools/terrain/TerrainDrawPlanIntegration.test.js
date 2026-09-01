@@ -1,0 +1,5 @@
+import assert from "node:assert/strict";
+import { deriveTerrainTileAdjacency, assertTerrainAdjacencyBalance, toTerrainDrawPlanAdjacency } from "./TerrainTileAdjacency.js";
+import { createTerrainDrawPlan } from "../../src/map/rendering/terrain/TerrainDrawPlan.js";
+const tiles=[{id:"1/0/0",lod:1,x:0,y:0,resident:true,bounds:{minX:0,maxX:1,minY:0,maxY:2}},{id:"2/2/0",lod:2,x:2,y:0,resident:true,bounds:{minX:1,maxX:1.5,minY:0,maxY:1}},{id:"2/2/2",lod:2,x:2,y:2,resident:false,bounds:{minX:1,maxX:1.5,minY:1,maxY:2}}];
+const derived=deriveTerrainTileAdjacency(tiles);assertTerrainAdjacencyBalance(derived);const adjacency=toTerrainDrawPlanAdjacency(derived[0],derived);const plan=createTerrainDrawPlan({tile:tiles[0],lod:tiles[0].lod,adjacency});assert.equal(plan.edges.east.mode,"neighbor-finer");assert.equal(plan.edges.east.neighborResident,true);assert.equal(plan.edges.west.mode,"boundary");assert.equal(plan.edges.east.topology,"edge-stitch-2to1");console.log("Phase E adjacency → draw-plan integration: PASS");
