@@ -22,8 +22,9 @@ const removed = GameEngine.removeAction(second, second.state.pendingActions[0].i
 const requeued = GameEngine.queueAction(removed, "Gümrük gelirlerini artırmak için yeni düzenleme hazırla.");
 
 assert.equal(requeued.state.actionSequence, 3);
-assert.equal(requeued.state.pendingActions.length, 1);
+assert.equal(requeued.state.pendingActions.length, 2);
 assert.notEqual(requeued.state.pendingActions[0].id, second.state.pendingActions[1].id);
+assert.equal(requeued.state.pendingActions[1].sequence, 3);
 
 const replay = GameEngine.queueAction(session, "Bursa pazarlarında tahıl denetimi başlat.");
 assert.equal(replay.state.actionSequence, 1);
