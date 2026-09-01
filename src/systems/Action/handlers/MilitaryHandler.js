@@ -1,11 +1,12 @@
 import { addTimelineEvent } from "../../Timeline/index.js";
+import { getRuntime, updateRuntime } from "../../../state/index.js";
 import { updateCity } from "../../../cities/CityRepository.js";
 
 export function handleMilitaryAction(gameSession, action) {
+  const runtime = getRuntime(gameSession);
   const intent = action.interpretation?.intent;
   const cityId = action.interpretation?.entities?.city;
-  const cityRepository = gameSession.world.repositories.cities;
-  const city = cityId ? cityRepository.byId[cityId] : null;
+  const city = cityId ? runtime.cities.byId[cityId] : null;
 
   if (!city) {
     return addTimelineEvent(gameSession, {
@@ -27,16 +28,12 @@ export function handleMilitaryAction(gameSession, action) {
       },
     };
 
-    const nextSession = {
-      ...gameSession,
-      world: {
-        ...gameSession.world,
-        repositories: {
-          ...gameSession.world.repositories,
-          cities: updateCity(cityRepository, nextCity),
-        },
-      },
+    const nextRuntime = {
+      ...runtime,
+      cities: updateCity(runtime.cities, nextCity),
     };
+
+    const nextSession = updateRuntime(gameSession, nextRuntime);
 
     return addTimelineEvent(nextSession, {
       category: "military",
