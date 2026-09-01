@@ -1,7 +1,9 @@
 const MAX_QUERY_PAIRS = 2048;
 const QUERY_STRIDE = 256;
+const RAW_SAMPLE_LIMIT = 4;
 
 export function createWebGpuBenchmarkTelemetry(device) {
+  const adapterInfo = device?.adapterInfo ?? null;
   const telemetry = {
     gpuTiming: "unsupported",
     computePasses: 0,
@@ -14,6 +16,14 @@ export function createWebGpuBenchmarkTelemetry(device) {
     timestampSamplesDropped: 0,
     timestampSamplesZero: 0,
     timestampError: null,
+    timestampRawSamples: [],
+    adapter: adapterInfo ? {
+      vendor: adapterInfo.vendor ?? null,
+      architecture: adapterInfo.architecture ?? null,
+      device: adapterInfo.device ?? null,
+      description: adapterInfo.description ?? null,
+      isFallbackAdapter: adapterInfo.isFallbackAdapter ?? null,
+    } : null,
   };
 
   let querySet = null;
@@ -79,6 +89,9 @@ export function createWebGpuBenchmarkTelemetry(device) {
         const base = (slot * QUERY_STRIDE) / 8;
         const begin = Number(data[base]);
         const end = Number(data[base + 1]);
+        if (telemetry.timestampRawSamples.length < RAW_SAMPLE_LIMIT) {
+          telemetry.timestampRawSamples.push({ slot, begin, end, deltaNs: end - begin });
+        }
         if (!Number.isFinite(begin) || !Number.isFinite(end) || end < begin) {
           telemetry.timestampSamplesDropped += 1;
           continue;
@@ -127,6 +140,8 @@ export function createWebGpuBenchmarkTelemetry(device) {
       timestampSamplesDropped: telemetry.timestampSamplesDropped,
       timestampSamplesZero: telemetry.timestampSamplesZero,
       timestampError: telemetry.timestampError,
+      timestampRawSamples: telemetry.timestampRawSamples,
+      adapter: telemetry.adapter,
     };
   }
 
