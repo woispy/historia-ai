@@ -1,18 +1,9 @@
-import { useMemo } from "react";
-import { useWorldMap } from "../hooks";
 import { CameraProvider, useCamera } from "../camera";
 import MapEngineV2 from "../rendering/MapEngineV2.jsx";
 
-function WorldMap({
-  runtime,
-  selectedProvinceId,
-  onProvinceClick,
-  settings = {},
-}) {
-  const { provinces } = useWorldMap(runtime);
+function WorldMap({ selectedProvinceId, onProvinceClick, settings = {} }) {
   const camera = useCamera();
   const cameraState = camera.camera;
-  const stableProvinces = useMemo(() => provinces, [provinces]);
 
   return (
     <CameraProvider value={camera}>
@@ -23,10 +14,8 @@ function WorldMap({
         style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}
       >
         <MapEngineV2
-          provinces={stableProvinces}
           camera={cameraState}
           selectedProvinceId={selectedProvinceId}
-          mapStyle={settings.mapStyle ?? "detailed"}
           onProvinceClick={onProvinceClick}
         />
       </main>
