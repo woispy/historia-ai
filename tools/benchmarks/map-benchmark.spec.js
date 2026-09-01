@@ -5,6 +5,65 @@ import path from "node:path";
 const durationMs = Number(process.env.HISTORIA_BENCHMARK_DURATION_MS || 30000);
 const output = process.env.HISTORIA_BENCHMARK_OUTPUT || "artifacts/benchmark-result.json";
 
+async function runTimestampProbe(page) {
+  await page.goto("/benchmarks/map-benchmark.html?backend=webgl2&durationMs=1", { waitUntil: "load" });
+  return page.evaluate(async () => {
+    if (!navigator.gpu) return { supported: false, reason: "navigator.gpu unavailable" };
+    const adapter = await navigator.gpu.requestAdapter({ powerPreference: "high-performance" });
+    if (!adapter) return { supported: false, reason: "no adapter" };
+    const features = Array.from(adapter.features || []);
+    const info = adapter.info || adapter.adapterInfo || null;
+    const result = {
+      supported: features.includes("timestamp-query"),
+      feature: features.includes("timestamp-query") ? "timestamp-query" : null,
+      adapter: info ? {
+        vendor: info.vendor || null,
+        architecture: info.architecture || null,
+        device: info.device || null,
+        description: info.description || null,
+        isFallbackAdapter: typeof info.isFallbackAdapter === "boolean" ? info.isFallbackAdapter : null,
+      } : null,
+      raw: null,
+      deltaNs: null,
+      error: null,
+    };
+    if (!result.supported) return result;
+
+    let device;
+    try {
+      device = await adapter.requestDevice({ requiredFeatures: ["timestamp-query"] });
+      const querySet = device.createQuerySet({ type: "timestamp", count: 2 });
+      const resolve = device.createBuffer({ size: 16, usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC });
+      const readback = device.createBuffer({ size: 16, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+      const encoder = device.createCommandEncoder();
+      encoder.writeTimestamp(querySet, 0);
+      const compute = encoder.beginComputePass();
+      compute.end();
+      encoder.writeTimestamp(querySet, 1);
+      encoder.resolveQuerySet(querySet, 0, 2, resolve, 0);
+      encoder.copyBufferToBuffer(resolve, 0, readback, 0, 16);
+      device.queue.submit([encoder.finish()]);
+      await device.queue.onSubmittedWorkDone();
+      await readback.mapAsync(GPUMapMode.READ);
+      const data = new BigUint64Array(readback.getMappedRange());
+      const begin = Number(data[0]);
+      const end = Number(data[1]);
+      const deltaNs = end - begin;
+      result.raw = { begin, end };
+      result.deltaNs = Number.isFinite(deltaNs) ? deltaNs : null;
+      readback.unmap();
+      querySet.destroy?.();
+      resolve.destroy?.();
+      readback.destroy?.();
+      device.destroy?.();
+    } catch (error) {
+      result.error = String(error?.message || error);
+      try { device?.destroy?.(); } catch {}
+    }
+    return result;
+  });
+}
+
 async function runBenchmark(page, backend, file) {
   await page.goto(`/benchmarks/map-benchmark.html?backend=${backend}&durationMs=${durationMs}`, { waitUntil: "load" });
   const gpuInfo = await page.evaluate(() => {
@@ -41,6 +100,17 @@ async function runBenchmark(page, backend, file) {
   console.log(`HISTORIA_BENCHMARK_JSON ${JSON.stringify(result)}`);
   return result;
 }
+
+test("Historia AI WebGPU timestamp probe", async ({ page }) => {
+  const result = await runTimestampProbe(page);
+  const file = output.replace(/\.json$/i, "-timestamp-probe.json");
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  await fs.writeFile(file, JSON.stringify(result, null, 2));
+  console.log(`HISTORIA_TIMESTAMP_PROBE ${JSON.stringify(result)}`);
+  if (!result.supported) throw new Error(`WebGPU timestamp-query unavailable: ${result.reason || "unknown reason"}`);
+  if (result.error) throw new Error(`WebGPU timestamp probe failed: ${result.error}`);
+  if (!(result.deltaNs > 0)) throw new Error(`WebGPU timestamp probe returned non-positive interval: ${result.deltaNs}`);
+});
 
 test("Historia AI 15k / 4K / 2x DPR benchmark", async ({ page }) => {
   await runBenchmark(page, "auto", output);
