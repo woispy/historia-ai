@@ -7,7 +7,6 @@ export class MapRuntimeController {
   constructor({ canvas, cameraRig, renderer, onProvinceClick, hoverEpsilonPx = DEFAULT_HOVER_EPSILON_PX }) {
     if (!canvas) throw new TypeError("MapRuntimeController requires a canvas");
     if (!cameraRig) throw new TypeError("MapRuntimeController requires a cameraRig");
-
     this.canvas = canvas;
     this.cameraRig = cameraRig;
     this.renderer = assertRendererContract(renderer);
@@ -70,8 +69,7 @@ export class MapRuntimeController {
   }
 
   setSelectedProvinceId(provinceId) {
-    if (this.destroyed) return;
-    this.renderer.setSelectedProvinceId(provinceId);
+    if (!this.destroyed) this.renderer.setSelectedProvinceId(provinceId);
   }
 
   setOnProvinceClick(callback) {
@@ -80,40 +78,27 @@ export class MapRuntimeController {
 
   queueHover(clientX, clientY) {
     if (this.destroyed || !this.running || this.drag.active) return;
-    const x = Number(clientX);
-    const y = Number(clientY);
+    const x = Number(clientX), y = Number(clientY);
     if (!Number.isFinite(x) || !Number.isFinite(y)) return;
-
-    if (
-      Number.isFinite(this.lastQueuedHoverX) &&
-      Math.abs(this.lastQueuedHoverX - x) <= this.hoverEpsilonPx &&
-      Math.abs(this.lastQueuedHoverY - y) <= this.hoverEpsilonPx
-    ) return;
-
+    if (Number.isFinite(this.lastQueuedHoverX) && Math.abs(this.lastQueuedHoverX - x) <= this.hoverEpsilonPx && Math.abs(this.lastQueuedHoverY - y) <= this.hoverEpsilonPx) return;
     this.hoverX = x;
     this.hoverY = y;
     this.lastQueuedHoverX = x;
     this.lastQueuedHoverY = y;
     this.pendingHover = true;
     if (this.hoverFrameRequest) return;
-
     this.hoverFrameRequest = requestAnimationFrame(() => {
       this.hoverFrameRequest = 0;
       if (this.destroyed || !this.running || !this.pendingHover) return;
-      const xSample = this.hoverX;
-      const ySample = this.hoverY;
+      const xSample = this.hoverX, ySample = this.hoverY;
       this.pendingHover = false;
-      const provinceId = this.renderer.pick(xSample, ySample);
-      const rasterId = provinceId ? this.renderer.lookupRasterId?.(provinceId) ?? 0 : 0;
-      this.renderer.setHoveredRasterId(rasterId);
+      this.renderer.setHoveredProvinceId(this.renderer.pick(xSample, ySample));
     });
   }
 
   cancelPendingHover() {
-    if (this.hoverFrameRequest) {
-      cancelAnimationFrame(this.hoverFrameRequest);
-      this.hoverFrameRequest = 0;
-    }
+    if (this.hoverFrameRequest) cancelAnimationFrame(this.hoverFrameRequest);
+    this.hoverFrameRequest = 0;
     this.pendingHover = false;
   }
 
@@ -139,8 +124,7 @@ export class MapRuntimeController {
   handlePointerMove(event) {
     if (this.destroyed) return;
     if (this.drag.active && this.drag.pointerId === event.pointerId) {
-      const dx = event.clientX - this.drag.lastX;
-      const dy = event.clientY - this.drag.lastY;
+      const dx = event.clientX - this.drag.lastX, dy = event.clientY - this.drag.lastY;
       if (Math.abs(dx) + Math.abs(dy) > 2) this.drag.moved = true;
       this.drag.lastX = event.clientX;
       this.drag.lastY = event.clientY;
