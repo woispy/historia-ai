@@ -1,4 +1,5 @@
 import { createGameTime } from "../systems/Time/index.js";
+import { seedSimulationRandom } from "../systems/Simulation/SimulationRandom.js";
 
 function parseStartDate(startDate) {
   if (!startDate) return undefined;
@@ -33,12 +34,15 @@ export function createRuntimeState({ startDate, scenario = null, player = {} } =
   const militaryPower = Number(
     country?.military?.power ?? country?.military?.strength ?? country?.manpower ?? 100
   ) || 100;
+  const simulationSeed = seedSimulationRandom(scenario?.id ?? "scenario", player?.countryId);
 
   return {
     time: createGameTime(parseStartDate(startDate)),
     timeline: [],
     pendingActions: [],
     simulation: {
+      simulationSeed,
+      rngState: simulationSeed,
       treasury,
       prestige: Number(country?.prestige ?? 40) || 40,
       stability: Number(country?.stability ?? 70) || 70,
