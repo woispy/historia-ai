@@ -8,10 +8,9 @@ function clamp(value, min, max) {
 export function processEconomy(gameSession) {
   const state = getState(gameSession);
   const simulation = state.simulation ?? {};
-  const playerCountryId = gameSession.player?.countryId;
-  const cities = Object.values(
-    gameSession.world.repositories.cities?.byId ?? {}
-  ).filter((city) => city.owner === playerCountryId);
+  const playerCountryId = state.playerCountryId ?? gameSession.player?.countryId;
+  const cities = Object.values(state.cities?.byId ?? {})
+    .filter((city) => city.owner === playerCountryId);
 
   const cityCount = Math.max(cities.length, 1);
   const prosperity = cities.reduce(
