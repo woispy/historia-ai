@@ -1,14 +1,14 @@
 import assert from "node:assert/strict";
 import { BinaryMapAssetSource } from "../../src/map/runtime/BinaryMapAssetSource.js";
-import { buildMapBinFromProvinces } from "../../src/map/runtime/BinaryMapAssetBuilder.js";
 import { ProvinceSoA } from "../../src/map/runtime/ProvinceSoA.js";
+import { encodeMapBin } from "../build/mapbin-encoder.js";
 
 const authoritative = [
   { province: { id: 101 }, country: { id: 7, color: "112233" }, geometry: { polygons: [[[10, 20], [14, 20], [12, 24]]] } },
   { province: { id: 202 }, country: { id: 8, color: "aabbcc" }, geometry: { polygons: [[[-5, -4], [-1, -4], [-1, 0], [-5, 0]]] } },
 ];
 
-const buffer = buildMapBinFromProvinces(authoritative);
+const buffer = encodeMapBin(authoritative);
 const source = BinaryMapAssetSource.fromArrayBuffer(buffer);
 assert.equal(source.provinceCount, authoritative.length);
 assert.equal(source.tileCount, authoritative.length);
@@ -23,14 +23,16 @@ assert.deepEqual(Array.from(source.tileRecord(1)), [3,4,1,0,0,0]);
 assert.deepEqual(Array.from(source.lodRecord(0)), [0,1,0,0]);
 assert.deepEqual(Array.from(source.lodRecord(1)), [1,1,0,0]);
 assert.equal(source.ids.buffer, buffer);
+assert.equal(source.owner.buffer, buffer);
+assert.equal(source.minX.buffer, buffer);
+assert.equal(source.centerX.buffer, buffer);
 assert.equal(source.geometry.buffer, buffer);
+assert.equal(source.tileIndex.buffer, buffer);
+assert.equal(source.lodRanges.buffer, buffer);
 assert.equal(source.palette.buffer, buffer);
 
 const soa = ProvinceSoA.fromBinary(buffer, source.header);
-assert.equal(soa.ids.buffer, buffer);
-assert.equal(soa.owner.buffer, buffer);
-assert.equal(soa.minX.buffer, buffer);
-assert.equal(soa.centerX.buffer, buffer);
+for (const field of ["ids","owner","minX","minY","maxX","maxY","centerX","centerY"]) assert.equal(soa[field].buffer, buffer);
 assert.equal(soa.ids[0], 101);
 assert.equal(soa.owner[1], 8);
 assert.equal(soa.minX[0], 10);
