@@ -151,6 +151,8 @@ jobs:
         run: npm run test:phase-f-canonical-world-state
       - name: Run Phase F deterministic RNG tests
         run: npm run test:phase-f-deterministic-rng
+      - name: Run Phase F canonical state binding tests
+        run: npm run test:phase-f-canonical-state-binding
       - name: Build
         run: npm run build
       - name: Verify repository cleanliness after production build
