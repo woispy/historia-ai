@@ -40,6 +40,7 @@ export function createRuntimeState({ startDate, scenario = null, player = {} } =
     time: createGameTime(parseStartDate(startDate)),
     timeline: [],
     pendingActions: [],
+    actionSequence: 0,
     simulation: {
       simulationSeed,
       rngState: simulationSeed,
