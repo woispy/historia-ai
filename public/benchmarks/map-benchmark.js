@@ -4,6 +4,7 @@ import { MapRuntimeController } from "/src/map/runtime/MapRuntimeController.js";
 import { BinaryMapRenderer } from "/src/map/rendering/gpu/BinaryMapRenderer.js";
 import { WebGPUMapRenderer } from "/src/map/rendering/gpu/WebGPUMapRenderer.js";
 import { BenchmarkDiagnostics, BENCHMARK_TARGET } from "/src/map/runtime/BenchmarkDiagnostics.js";
+import { BenchmarkSoakRecorder } from "/src/map/runtime/BenchmarkSoakRecorder.js";
 
 const params = new URLSearchParams(location.search);
 const assetUrl = params.get("asset") || "/assets/stress-15k.mapbin";
@@ -12,6 +13,7 @@ const durationMs = Number(params.get("durationMs") || 30000);
 const canvas = document.querySelector("#map");
 const diagnosticsNode = document.querySelector("#diagnostics");
 const diagnostics = new BenchmarkDiagnostics();
+const soak = new BenchmarkSoakRecorder({ sampleIntervalMs: Number(params.get("sampleMs") || 1000) });
 let renderer;
 let runtime;
 let lastHover = 0;
@@ -42,8 +44,10 @@ async function main() {
   runtime = new MapRuntimeController({ canvas, cameraRig, renderer });
   runtime.start();
   diagnostics.start();
-
   const benchmarkStart = performance.now();
+  const snapshot = () => diagnostics.summary(performance.now());
+  soak.start(snapshot);
+
   let frameCount = 0;
   const frame = (now) => {
     frameCount += 1;
@@ -72,6 +76,7 @@ async function main() {
 }
 
 function finish(now) {
+  soak.stop();
   runtime?.stop();
   const result = {
     ...diagnostics.summary(now),
@@ -81,6 +86,7 @@ function finish(now) {
     provinceCount: renderer.assetSource?.provinceCount ?? null,
     geometryPointCount: renderer.assetSource?.geometryPointCount ?? null,
     internalCanvas: { width: canvas.width, height: canvas.height },
+    soak: soak.summary(),
   };
   diagnosticsNode.textContent = JSON.stringify(result, null, 2);
   window.__HISTORIA_BENCHMARK_RESULT__ = result;
