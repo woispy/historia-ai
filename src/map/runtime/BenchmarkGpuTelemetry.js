@@ -44,6 +44,20 @@ export function createWebGpuBenchmarkTelemetry(device) {
     telemetry.timestampError = "WebGPU timestamp ring buffer exhausted";
     return -1;
   }
+  function getTimestampWrites(slotId, phase) {
+    const slot = slots[slotId];
+    if (!slot?.querySet || slot.state !== SLOT_STATES.RECORDING) return undefined;
+    const isBegin = phase === "begin";
+    const isEnd = phase === "end";
+    if (!isBegin && !isEnd) throw new Error(`Unknown timestamp phase: ${phase}`);
+    if (isBegin && slot.beginWritten) return undefined;
+    if (isEnd && (!slot.beginWritten || slot.endWritten)) return undefined;
+    if (isBegin) slot.beginWritten = true;
+    else slot.endWritten = true;
+    return isBegin
+      ? { querySet: slot.querySet, beginningOfPassWriteIndex: 0 }
+      : { querySet: slot.querySet, endOfPassWriteIndex: 1 };
+  }
   function writeTimestamp(encoder, slotId, phase) {
     const slot = slots[slotId];
     if (!slot?.querySet || slot.state !== SLOT_STATES.RECORDING || typeof encoder?.writeTimestamp !== "function") return false;
@@ -179,7 +193,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
     frameCounter = 0;
     nextRingSlot = 0;
   }
-  return { telemetry, beginFrame, writeTimestamp, finishFrame, collect, snapshot, recordComputePass, recordDispatch, recordRenderPass, recordDraw, recordSubmit, recordPickingRenderPass, recordPickingDraw, recordPickingSubmit, dispose };
+  return { telemetry, beginFrame, getTimestampWrites, writeTimestamp, finishFrame, collect, snapshot, recordComputePass, recordDispatch, recordRenderPass, recordDraw, recordSubmit, recordPickingRenderPass, recordPickingDraw, recordPickingSubmit, dispose };
 }
 function readAdapterInfo(device) { const info = device?.adapterInfo; if (!info) return null; return { vendor: info.vendor || null, architecture: info.architecture || null, device: info.device || null, description: info.description || null, isFallbackAdapter: typeof info.isFallbackAdapter === "boolean" ? info.isFallbackAdapter : null }; }
 function summarize(values) { const sorted = [...values].sort((a, b) => a - b); return { count: values.length, average: values.reduce((sum, value) => sum + value, 0) / values.length, p95: percentile(sorted, 0.95), p99: percentile(sorted, 0.99), max: sorted[sorted.length - 1], min: sorted[0] }; }
