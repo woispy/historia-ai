@@ -33,6 +33,7 @@ export function createRuntimeState({
   scenario = null,
   player = {},
   world = null,
+  randomSeed = null,
 } = {}) {
   if (!world) {
     throw new Error("World is required to create canonical runtime state.");
@@ -69,6 +70,7 @@ export function createRuntimeState({
     scenarioId: scenario?.id ?? null,
     playerCountryId: player?.countryId ?? null,
     playerCharacterId: player?.character?.id ?? null,
+    randomSeed: randomSeed ?? `${scenario?.id ?? "scenario"}:${player?.countryId ?? "country"}`,
     simulation,
   });
 }
