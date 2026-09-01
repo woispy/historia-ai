@@ -12,6 +12,8 @@
  * processors. Simulation processors replace records in this state instead.
  */
 
+import { createDeterministicRng, assertDeterministicRng } from "../systems/Simulation/DeterministicRng.js";
+
 function cloneValue(value) {
   if (value === undefined) return undefined;
   if (typeof structuredClone === "function") {
@@ -81,6 +83,7 @@ export function createWorldState({
   scenarioId = null,
   playerCountryId = null,
   playerCharacterId = null,
+  randomSeed = 1,
   simulation = {},
 } = {}) {
   if (!world) throw new Error("World is required to create WorldState.");
@@ -108,6 +111,7 @@ export function createWorldState({
     events: [],
     timeline: [],
     pendingActions: [],
+    random: createDeterministicRng(randomSeed),
     simulation: cloneValue(simulation),
   };
 
@@ -134,6 +138,8 @@ export function assertWorldState(state) {
   if (!state.geography || typeof state.geography !== "object") {
     throw new Error("WorldState requires canonical geography metadata.");
   }
+
+  assertDeterministicRng(state.random);
 
   return true;
 }
