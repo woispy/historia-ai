@@ -31,6 +31,7 @@ for(const [variant,edges] of cases){
   validateTerrainIndexTopology({indices:topology.indices,vertexCount:topology.vertexCount,positions});
   assert.equal(area(topology.indices),16,`${variant} area`);
   const exact=validateTerrainExactCellCoverage({indices:topology.indices,positions,size});
+  if(!exact.completeExactCoverage)console.error(`${variant} exact coverage diagnostic`,exact);
   assert.equal(exact.completeExactCoverage,true,`${variant} exact coverage`);
   assert.equal(exact.uncoveredArea,0,`${variant} uncovered area`);
   assert.equal(exact.overlapArea,0,`${variant} overlap area`);
