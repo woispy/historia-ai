@@ -6,7 +6,6 @@ export function installWebGpuBenchmarkTelemetry(renderer) {
   const device = renderer.device;
   const queue = device.queue;
   const telemetry = {
-    supported: true,
     gpuTiming: "unsupported",
     timestampPeriodNs: null,
     timestampPeriodSource: null,
@@ -20,12 +19,13 @@ export function installWebGpuBenchmarkTelemetry(renderer) {
     timestampSamplesDropped: 0,
   };
 
-  const timestampSupported = Boolean(device.features?.has?.("timestamp-query"));
+  let pickingActive = false;
   let querySet = null;
   let resolveBuffer = null;
   let readbackBuffer = null;
   let nextQueryPair = 0;
   const pendingSamples = new Map();
+  const timestampSupported = Boolean(device.features?.has?.("timestamp-query"));
 
   if (timestampSupported && typeof device.createQuerySet === "function") {
     try {
@@ -56,38 +56,33 @@ export function installWebGpuBenchmarkTelemetry(renderer) {
   const originalCreateCommandEncoder = device.createCommandEncoder.bind(device);
   const originalSubmit = queue.submit.bind(queue);
   const originalOnSubmittedWorkDone = queue.onSubmittedWorkDone?.bind(queue);
+  const originalPick = typeof renderer.pick === "function" ? renderer.pick.bind(renderer) : null;
 
   device.createCommandEncoder = (descriptor) => {
     const encoder = originalCreateCommandEncoder(descriptor);
-    let firstPass = true;
     let querySlot = -1;
-    let timestampedPass = false;
 
-    if (querySet && nextQueryPair < MAX_QUERY_PAIRS) {
+    if (querySet && nextQueryPair < MAX_QUERY_PAIRS && typeof encoder.writeTimestamp === "function") {
       querySlot = nextQueryPair++;
+      try {
+        encoder.writeTimestamp(querySet, querySlot * 2);
+      } catch (error) {
+        telemetry.gpuTiming = "unsupported";
+        telemetry.timestampError = String(error?.message || error);
+        querySlot = -1;
+      }
     } else if (querySet) {
       telemetry.timestampSamplesDropped += 1;
     }
 
     const beginPass = (kind, original, passDescriptor) => {
-      let descriptorWithTimestamp = passDescriptor;
-      if (querySet && querySlot >= 0 && firstPass) {
-        descriptorWithTimestamp = {
-          ...(passDescriptor || {}),
-          timestampWrites: {
-            querySet,
-            beginningOfPassWriteIndex: querySlot * 2,
-            endOfPassWriteIndex: querySlot * 2 + 1,
-          },
-        };
-        firstPass = false;
-        timestampedPass = true;
+      const pass = original(passDescriptor);
+      if (kind === "compute") {
+        telemetry.computePasses += 1;
+      } else {
+        telemetry.renderPasses += 1;
+        if (pickingActive) telemetry.picking.renderPasses += 1;
       }
-
-      const pass = original(descriptorWithTimestamp);
-      if (kind === "compute") telemetry.computePasses += 1;
-      else telemetry.renderPasses += 1;
-
       return new Proxy(pass, {
         get(target, property, receiver) {
           if (property === "dispatchWorkgroups" || property === "dispatchWorkgroupsIndirect") {
@@ -99,6 +94,7 @@ export function installWebGpuBenchmarkTelemetry(renderer) {
           if (property === "draw" || property === "drawIndexed" || property === "drawIndirect" || property === "drawIndexedIndirect") {
             return (...args) => {
               telemetry.drawCalls += 1;
+              if (pickingActive) telemetry.picking.drawCalls += 1;
               return target[property](...args);
             };
           }
@@ -109,15 +105,16 @@ export function installWebGpuBenchmarkTelemetry(renderer) {
 
     return new Proxy(encoder, {
       get(target, property, receiver) {
-        if (property === "beginComputePass") return (descriptor) => beginPass("compute", target.beginComputePass.bind(target), descriptor);
-        if (property === "beginRenderPass") return (descriptor) => beginPass("render", target.beginRenderPass.bind(target), descriptor);
+        if (property === "beginComputePass") return (passDescriptor) => beginPass("compute", target.beginComputePass.bind(target), passDescriptor);
+        if (property === "beginRenderPass") return (passDescriptor) => beginPass("render", target.beginRenderPass.bind(target), passDescriptor);
         if (property === "finish") {
           return (...args) => {
-            if (timestampedPass) {
+            if (querySet && querySlot >= 0) {
               try {
+                target.writeTimestamp(querySet, querySlot * 2 + 1);
                 target.resolveQuerySet(querySet, querySlot * 2, 2, resolveBuffer, querySlot * QUERY_STRIDE);
                 target.copyBufferToBuffer(resolveBuffer, querySlot * QUERY_STRIDE, readbackBuffer, querySlot * QUERY_STRIDE, 16);
-                pendingSamples.set(querySlot, { submittedAt: performance.now() });
+                pendingSamples.set(querySlot, true);
               } catch (error) {
                 telemetry.gpuTiming = "unsupported";
                 telemetry.timestampError = String(error?.message || error);
@@ -132,9 +129,22 @@ export function installWebGpuBenchmarkTelemetry(renderer) {
   };
 
   queue.submit = (commandBuffers) => {
-    telemetry.queueSubmits += commandBuffers?.length || 0;
+    const count = commandBuffers?.length || 0;
+    telemetry.queueSubmits += count;
+    if (pickingActive) telemetry.picking.queueSubmits += count;
     return originalSubmit(commandBuffers);
   };
+
+  if (originalPick) {
+    renderer.pick = (...args) => {
+      pickingActive = true;
+      try {
+        return originalPick(...args);
+      } finally {
+        pickingActive = false;
+      }
+    };
+  }
 
   const collect = async () => {
     if (!readbackBuffer || !pendingSamples.size || !originalOnSubmittedWorkDone) return;
@@ -142,9 +152,10 @@ export function installWebGpuBenchmarkTelemetry(renderer) {
       await originalOnSubmittedWorkDone();
       await readbackBuffer.mapAsync(GPUMapMode.READ);
       const data = new BigInt64Array(readbackBuffer.getMappedRange());
-      for (const [slot] of pendingSamples) {
-        const begin = Number(data[(slot * QUERY_STRIDE) / 8]);
-        const end = Number(data[(slot * QUERY_STRIDE) / 8 + 1]);
+      for (const slot of pendingSamples.keys()) {
+        const base = (slot * QUERY_STRIDE) / 8;
+        const begin = Number(data[base]);
+        const end = Number(data[base + 1]);
         if (Number.isFinite(begin) && Number.isFinite(end) && end >= begin) {
           telemetry.gpuSamples.push((end - begin) * telemetry.timestampPeriodNs / 1e6);
         }
@@ -158,24 +169,20 @@ export function installWebGpuBenchmarkTelemetry(renderer) {
     }
   };
 
-  const snapshot = () => {
-    const samples = [...telemetry.gpuSamples];
-    const stats = samples.length ? summarize(samples) : null;
-    return {
-      computePasses: telemetry.computePasses,
-      dispatchCalls: telemetry.dispatchCalls,
-      renderPasses: telemetry.renderPasses,
-      drawCalls: telemetry.drawCalls,
-      queueSubmits: telemetry.queueSubmits,
-      picking: { ...telemetry.picking },
-      gpuTiming: telemetry.gpuTiming,
-      gpuTimeMs: stats,
-      timestampPeriodNs: telemetry.timestampPeriodNs,
-      timestampPeriodSource: telemetry.timestampPeriodSource,
-      timestampSamplesDropped: telemetry.timestampSamplesDropped,
-      timestampError: telemetry.timestampError || null,
-    };
-  };
+  const snapshot = () => ({
+    computePasses: telemetry.computePasses,
+    dispatchCalls: telemetry.dispatchCalls,
+    renderPasses: telemetry.renderPasses,
+    drawCalls: telemetry.drawCalls,
+    queueSubmits: telemetry.queueSubmits,
+    picking: { ...telemetry.picking },
+    gpuTiming: telemetry.gpuTiming,
+    gpuTimeMs: telemetry.gpuSamples.length ? summarize(telemetry.gpuSamples) : null,
+    timestampPeriodNs: telemetry.timestampPeriodNs,
+    timestampPeriodSource: telemetry.timestampPeriodSource,
+    timestampSamplesDropped: telemetry.timestampSamplesDropped,
+    timestampError: telemetry.timestampError || null,
+  });
 
   renderer.__benchmarkGpuTelemetry = { telemetry, collect, snapshot };
   return renderer.__benchmarkGpuTelemetry;
@@ -183,10 +190,9 @@ export function installWebGpuBenchmarkTelemetry(renderer) {
 
 function summarize(values) {
   const sorted = [...values].sort((a, b) => a - b);
-  const average = values.reduce((sum, value) => sum + value, 0) / values.length;
   return {
     count: values.length,
-    average,
+    average: values.reduce((sum, value) => sum + value, 0) / values.length,
     p95: percentile(sorted, 0.95),
     p99: percentile(sorted, 0.99),
     max: sorted[sorted.length - 1],
