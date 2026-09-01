@@ -109,19 +109,20 @@ export function createWebGpuBenchmarkTelemetry(device) {
     for (const slot of slots) if (slot.state === SLOT_STATES.RESOLVED && !slot.submitted) slot.submitted = true;
   }
   async function collect() {
-    if (collectPromise || disposed || !device?.queue?.onSubmittedWorkDone) return collectPromise;
+    if (collectPromise || disposed) return collectPromise;
     const candidates = slots.filter(slot => slot.state === SLOT_STATES.RESOLVED && slot.submitted);
     if (!candidates.length) return;
     for (const slot of candidates) slot.state = SLOT_STATES.READBACK_PENDING;
     collectPromise = (async () => {
       try {
-        await device.queue.onSubmittedWorkDone();
         for (const slot of candidates) {
           let mapped = false;
           try {
+            // mapAsync guarantees ordering with work submitted before this call.
+            // Do not gate continuous telemetry on a separate queue-idle promise.
             await slot.stagingBuffer.mapAsync(GPUMapMode.READ, 0, QUERY_BYTES_PER_SLOT);
             mapped = true;
-            const data = new BigUint64Array(slot.stagingBuffer.getMappedRange(0, QUERY_BYTES_PER_SLOT));
+            const data = new BigUint64Array(slot.stagingBuffer.getMappedRange(0, QUERY_BYTES_PER_SLOT)).slice();
             const begin = data[0];
             const end = data[1];
             const deltaTicks = end - begin;
