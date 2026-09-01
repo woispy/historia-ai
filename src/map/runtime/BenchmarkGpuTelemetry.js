@@ -12,6 +12,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
     picking: { renderPasses: 0, drawCalls: 0, queueSubmits: 0 },
     gpuSamples: [],
     timestampSamplesDropped: 0,
+    timestampSamplesZero: 0,
     timestampError: null,
   };
 
@@ -78,13 +79,25 @@ export function createWebGpuBenchmarkTelemetry(device) {
         const base = (slot * QUERY_STRIDE) / 8;
         const begin = Number(data[base]);
         const end = Number(data[base + 1]);
-        if (Number.isFinite(begin) && Number.isFinite(end) && end >= begin) {
-          // WebGPU timestamp query values are expressed in nanoseconds.
-          telemetry.gpuSamples.push((end - begin) / 1e6);
+        if (!Number.isFinite(begin) || !Number.isFinite(end) || end < begin) {
+          telemetry.timestampSamplesDropped += 1;
+          continue;
         }
+        const deltaNs = end - begin;
+        if (deltaNs <= 0) {
+          // A supported timestamp query that cannot distinguish the two samples
+          // has no measurable duration. Never turn that into a fabricated 0 ms
+          // GPU duration; the safe value is null.
+          telemetry.timestampSamplesZero += 1;
+          continue;
+        }
+        telemetry.gpuSamples.push(deltaNs / 1e6);
       }
       readbackBuffer.unmap();
       pendingSamples.clear();
+      if (!telemetry.gpuSamples.length && telemetry.timestampSamplesZero > 0 && !telemetry.timestampError) {
+        telemetry.timestampError = "Timestamp query returned no positive measurable GPU interval";
+      }
     } catch (error) {
       telemetry.gpuTiming = "unsupported";
       telemetry.timestampError = String(error?.message || error);
@@ -112,6 +125,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
       gpuTiming: telemetry.gpuTiming,
       gpuTimeMs: telemetry.gpuSamples.length ? summarize(telemetry.gpuSamples) : null,
       timestampSamplesDropped: telemetry.timestampSamplesDropped,
+      timestampSamplesZero: telemetry.timestampSamplesZero,
       timestampError: telemetry.timestampError,
     };
   }
