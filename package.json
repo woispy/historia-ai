@@ -29,6 +29,9 @@
     "test:anatolia-historical-control": "node tools/tests/anatolia-historical-control.test.js",
     "test:cartography-2efgh": "node tools/tests/cartography-2efgh.test.js",
     "test:map-texture-atlas": "node tools/tests/map-texture-atlas.test.js",
+    "test:map-engine-v2-contract": "node tools/tests/map-engine-v2-contract.test.js",
+    "test:map-runtime-controller": "node tools/tests/map-runtime-controller.test.js",
+    "test:binary-map-asset": "node tools/tests/binary-map-asset.test.js",
     "test:new-game": "node tools/tests/new-game-state.test.js",
     "test:new-game-startup": "node tools/tests/new-game-startup.test.js",
     "test:game-entry-handoff": "node tools/tests/game-entry-handoff.test.js",
@@ -48,19 +51,6 @@
     "preview": "vite preview",
     "test:cartography-foundation": "node tools/tests/cartography-foundation.test.js"
   },
-  "dependencies": {
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
-    "react-router-dom": "^7.18.2"
-  },
-  "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.3",
-    "eslint": "^10.6.0",
-    "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-react-refresh": "^0.5.3",
-    "vite": "^8.1.1"
-  }
+  "dependencies": {"react":"^19.2.7","react-dom":"^19.2.7","react-router-dom":"^7.18.2"},
+  "devDependencies": {"@eslint/js":"^10.0.1","@types/react":"^19.2.17","@types/react-dom":"^19.2.3","@vitejs/plugin-react":"^6.0.3","eslint":"^10.6.0","eslint-plugin-react-hooks":"^7.1.1","eslint-plugin-react-refresh":"^0.5.3","vite":"^8.1.1"}
 }

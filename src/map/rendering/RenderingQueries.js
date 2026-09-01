@@ -1,39 +1,20 @@
-/**
- * ============================================================================
- * Historia AI
- * Rendering Queries
- * ============================================================================
- */
-
-export function getRendering(
-  repository
-) {
+/** Renderer state queries. */
+export function getRendering(repository) {
   return repository.rendering;
 }
 
-export function getRenderer(
-  repository
-) {
-  return (
-    repository.rendering
-      ?.renderer ?? "svg"
-  );
+export function getRenderer(repository) {
+  return repository.rendering?.renderer ?? "webgpu";
 }
 
-export function getRenderingLayers(
-  repository
-) {
-  return (
-    repository.rendering
-      ?.layers ?? []
-  );
+export function getFallbackRenderer(repository) {
+  return repository.rendering?.fallbackRenderer ?? "webgl2";
 }
 
-export function isDebugRendering(
-  repository
-) {
-  return (
-    repository.rendering
-      ?.debug ?? false
-  );
+export function getRenderingLayers(repository) {
+  return repository.rendering?.layers ?? [];
+}
+
+export function isDebugRendering(repository) {
+  return repository.rendering?.debug ?? false;
 }
