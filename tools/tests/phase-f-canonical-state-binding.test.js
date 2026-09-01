@@ -58,11 +58,12 @@ const constructionAction = {
   },
 };
 
+const beforeBuildingCount = (beforeStateCity.buildings ?? []).length;
 const afterConstruction = handleAction(constructionSession, constructionAction);
 const builtStateCity = afterConstruction.state.cities.byId[cityId];
 const builtWorldCity = afterConstruction.world.repositories.cities.byId[cityId];
 
-assert.equal(builtStateCity.buildings.length, beforeStateCity.buildings?.length ?? 0 + 1);
+assert.equal(builtStateCity.buildings.length, beforeBuildingCount + 1);
 assert.deepEqual(builtWorldCity, beforeWorldCity);
 assert.notDeepEqual(builtStateCity, beforeStateCity);
 
