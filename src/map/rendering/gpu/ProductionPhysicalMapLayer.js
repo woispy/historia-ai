@@ -2,187 +2,28 @@ import { WORLD_LAND_POLYGONS } from "../../physical/WorldPhysicalAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../data/AnatoliaPhysicalAtlasRuntime.js";
 import { triangulatePolygon } from "./BinaryMapRenderer.js";
 
-const VERTEX = `#version 300 es
-precision highp float;
-layout(location=0) in vec2 aPosition;
-uniform vec2 uCameraCenter; uniform float uZoom; uniform float uPitch; uniform float uYaw;
-void main(){vec2 p=aPosition-uCameraCenter;float y=radians(uYaw);float pch=radians(uPitch);vec2 r=vec2(p.x*cos(y)-p.y*sin(y),p.x*sin(y)+p.y*cos(y));r.y*=max(0.65,cos(pch));vec2 view=vec2(360.0,180.0)/max(uZoom,0.001);gl_Position=vec4(r/(view*0.5),0.0,1.0);}`;
-const FRAGMENT = `#version 300 es
-precision highp float;
-uniform vec4 uColor; out vec4 outColor;
-void main(){outColor=uColor;}`;
+const VERTEX=`#version 300 es
+precision highp float;layout(location=0) in vec2 aPosition;uniform vec2 uCameraCenter;uniform float uZoom;uniform float uPitch;uniform float uYaw;void main(){vec2 p=aPosition-uCameraCenter;float y=radians(uYaw);float pch=radians(uPitch);vec2 r=vec2(p.x*cos(y)-p.y*sin(y),p.x*sin(y)+p.y*cos(y));r.y*=max(0.65,cos(pch));vec2 view=vec2(360.0,180.0)/max(uZoom,0.001);gl_Position=vec4(r/(view*0.5),0.0,1.0);}`;
+const FRAGMENT=`#version 300 es
+precision highp float;uniform vec4 uColor;out vec4 outColor;void main(){outColor=uColor;}`;
+const WORLD_LAND=[0.16,0.20,0.17,1],LAKE=[0.10,0.31,0.37,0.92],RIVER=[0.30,0.61,0.66,0.86],RIVER_UNDER=[0.06,0.16,0.19,0.75],COAST=[0.58,0.70,0.67,0.72];
 
-const WORLD_LAND = [0.16, 0.20, 0.17, 1];
-const TERRAIN = [0.34, 0.30, 0.22, 0.16];
-const LAKE = [0.10, 0.31, 0.37, 0.92];
-const RIVER = [0.30, 0.61, 0.66, 0.86];
-const RIVER_UNDER = [0.06, 0.16, 0.19, 0.75];
-const MOUNTAIN = [0.34, 0.31, 0.25, 0.42];
-const COAST = [0.58, 0.70, 0.67, 0.72];
-
-export class ProductionPhysicalMapLayer {
-  constructor() {
-    this.state = null;
-    this.disposed = false;
-  }
-
-  initialize(gl) {
-    if (this.disposed) throw new Error("Cannot initialize disposed physical layer");
-    const program = link(gl, VERTEX, FRAGMENT);
-    this.state = {
-      gl,
-      program,
-      fill: createGeometry(gl, buildPolygonGeometry(WORLD_LAND_POLYGONS)),
-      coast: createGeometry(gl, buildLineGeometry(WORLD_LAND_POLYGONS)),
-      terrain: createGeometry(gl, buildPolygonGeometry((ANATOLIA_PHYSICAL_ATLAS_RUNTIME.terrainRegions ?? []).map((feature) => feature.coordinates))),
-      lakes: createGeometry(gl, buildPolygonGeometry((ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes ?? []).map((feature) => feature.coordinates))),
-      riversUnder: createGeometry(gl, buildLineGeometry(ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers ?? [], true)),
-      rivers: createGeometry(gl, buildLineGeometry(ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers ?? [])),
-      mountains: createGeometry(gl, buildLineGeometry(ANATOLIA_PHYSICAL_ATLAS_RUNTIME.mountainRanges ?? [])),
-      cameraCenter: gl.getUniformLocation(program, "uCameraCenter"),
-      zoom: gl.getUniformLocation(program, "uZoom"),
-      pitch: gl.getUniformLocation(program, "uPitch"),
-      yaw: gl.getUniformLocation(program, "uYaw"),
-      color: gl.getUniformLocation(program, "uColor"),
-    };
-    return true;
-  }
-
-  render(camera, width, height) {
-    if (this.disposed || !this.state) return;
-    const { gl } = this.state;
-    gl.viewport(0, 0, width, height);
-    gl.useProgram(this.state.program);
-    gl.uniform2f(this.state.cameraCenter, Number(camera?.x) || 0, Number(camera?.y) || 0);
-    gl.uniform1f(this.state.zoom, Number(camera?.zoom) || 1);
-    gl.uniform1f(this.state.pitch, Number(camera?.pitch) || 0);
-    gl.uniform1f(this.state.yaw, Number(camera?.yaw) || 0);
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-    drawGeometry(this.state, this.state.fill, WORLD_LAND);
-    drawGeometry(this.state, this.state.terrain, TERRAIN);
-    drawGeometry(this.state, this.state.lakes, LAKE);
-    drawGeometry(this.state, this.state.riversUnder, RIVER_UNDER);
-    drawGeometry(this.state, this.state.rivers, RIVER);
-    drawGeometry(this.state, this.state.mountains, MOUNTAIN);
-    drawGeometry(this.state, this.state.coast, COAST);
-
-    gl.disable(gl.BLEND);
-    gl.bindVertexArray(null);
-  }
-
-  dispose() {
-    if (this.disposed) return;
-    this.disposed = true;
-    const state = this.state;
-    this.state = null;
-    if (!state) return;
-    const { gl, program } = state;
-    gl.deleteProgram(program);
-    for (const key of ["fill", "coast", "terrain", "lakes", "riversUnder", "rivers", "mountains"]) destroyGeometry(gl, state[key]);
-  }
-}
-
-function buildPolygonGeometry(polygons) {
-  const vertices = [];
-  const indices = [];
-  for (const polygon of polygons ?? []) {
-    if (!Array.isArray(polygon) || polygon.length < 3) continue;
-    const triangles = triangulatePolygon(polygon);
-    if (!triangles.length) continue;
-    const base = vertices.length / 2;
-    for (const point of polygon) vertices.push(Number(point?.[0]), Number(point?.[1]));
-    for (const index of triangles) indices.push(base + index);
-  }
-  return { vertices: Float32Array.from(vertices), indices: Uint32Array.from(indices) };
-}
-
-function buildLineGeometry(features, simplified = false) {
-  const vertices = [];
-  for (const feature of features ?? []) {
-    const coordinates = feature?.coordinates ?? feature?.rings?.[0] ?? [];
-    if (!Array.isArray(coordinates) || coordinates.length < 2) continue;
-    const points = simplified ? simplifyLine(coordinates, 2) : coordinates;
-    for (let index = 1; index < points.length; index += 1) {
-      const a = points[index - 1];
-      const b = points[index];
-      if (!a || !b) continue;
-      vertices.push(Number(a[0]), Number(a[1]), Number(b[0]), Number(b[1]));
-    }
-  }
-  return { vertices: Float32Array.from(vertices), indices: null };
-}
-
-function simplifyLine(points, stride) {
-  if (points.length <= 2) return points;
-  const result = [points[0]];
-  for (let index = stride; index < points.length - 1; index += stride) result.push(points[index]);
-  result.push(points[points.length - 1]);
-  return result;
-}
-
-function createGeometry(gl, data) {
-  const vao = gl.createVertexArray();
-  const buffer = gl.createBuffer();
-  const indexBuffer = data.indices ? gl.createBuffer() : null;
-  if (!vao || !buffer || (data.indices && !indexBuffer)) throw new Error("Physical GPU geometry allocation failed");
-  gl.bindVertexArray(vao);
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, data.vertices, gl.STATIC_DRAW);
-  gl.enableVertexAttribArray(0);
-  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 8, 0);
-  if (indexBuffer) {
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, data.indices, gl.STATIC_DRAW);
-  }
-  gl.bindVertexArray(null);
-  gl.bindBuffer(gl.ARRAY_BUFFER, null);
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-  return { vao, buffer, indexBuffer, count: data.indices?.length ?? data.vertices.length / 2 };
-}
-
-function drawGeometry(state, geometry, color) {
-  if (!geometry?.count) return;
-  const { gl } = state;
-  gl.bindVertexArray(geometry.vao);
-  gl.uniform4fv(state.color, color);
-  if (geometry.indexBuffer) gl.drawElements(gl.TRIANGLES, geometry.count, gl.UNSIGNED_INT, 0);
-  else gl.drawArrays(gl.LINES, 0, geometry.count);
-}
-
-function destroyGeometry(gl, geometry) {
-  if (!geometry) return;
-  gl.deleteVertexArray(geometry.vao);
-  gl.deleteBuffer(geometry.buffer);
-  if (geometry.indexBuffer) gl.deleteBuffer(geometry.indexBuffer);
-}
-
-function link(gl, vertexSource, fragmentSource) {
-  const program = gl.createProgram();
-  const vertex = compile(gl, gl.VERTEX_SHADER, vertexSource);
-  const fragment = compile(gl, gl.FRAGMENT_SHADER, fragmentSource);
-  gl.attachShader(program, vertex);
-  gl.attachShader(program, fragment);
-  gl.linkProgram(program);
-  gl.deleteShader(vertex);
-  gl.deleteShader(fragment);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    const error = gl.getProgramInfoLog(program) || "Physical GPU program linking failed";
-    gl.deleteProgram(program);
-    throw new Error(error);
-  }
-  return program;
-}
-
-function compile(gl, type, source) {
-  const shader = gl.createShader(type);
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    const error = gl.getShaderInfoLog(shader) || "Physical GPU shader compilation failed";
-    gl.deleteShader(shader);
-    throw new Error(error);
-  }
-  return shader;
-}
+/**
+ * Physical geography compositor. Temporary terrain polygon and GL_LINES
+ * mountain presentation paths are intentionally removed: DEM terrain owns
+ * relief once a validated Phase E tile asset is available. Physical land,
+ * lakes, rivers and coastline remain authoritative and independent of provinces.
+ */
+export class ProductionPhysicalMapLayer{
+ constructor(){this.state=null;this.disposed=false;}
+ initialize(gl){if(this.disposed)throw new Error("Cannot initialize disposed physical layer");const program=link(gl,VERTEX,FRAGMENT);this.state={gl,program,fill:createGeometry(gl,buildPolygonGeometry(WORLD_LAND_POLYGONS)),coast:createGeometry(gl,buildLineGeometry(WORLD_LAND_POLYGONS)),lakes:createGeometry(gl,buildPolygonGeometry((ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes??[]).map(f=>f.coordinates))),riversUnder:createGeometry(gl,buildLineGeometry(ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers??[],true)),rivers:createGeometry(gl,buildLineGeometry(ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers??[])),cameraCenter:gl.getUniformLocation(program,"uCameraCenter"),zoom:gl.getUniformLocation(program,"uZoom"),pitch:gl.getUniformLocation(program,"uPitch"),yaw:gl.getUniformLocation(program,"uYaw"),color:gl.getUniformLocation(program,"uColor")};return true;}
+ render(camera,width,height){if(this.disposed||!this.state)return;const{gl}=this.state;gl.viewport(0,0,width,height);gl.useProgram(this.state.program);gl.uniform2f(this.state.cameraCenter,Number(camera?.x)||0,Number(camera?.y)||0);gl.uniform1f(this.state.zoom,Number(camera?.zoom)||1);gl.uniform1f(this.state.pitch,Number(camera?.pitch)||0);gl.uniform1f(this.state.yaw,Number(camera?.yaw)||0);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);drawGeometry(this.state,this.state.fill,WORLD_LAND);drawGeometry(this.state,this.state.lakes,LAKE);drawGeometry(this.state,this.state.riversUnder,RIVER_UNDER);drawGeometry(this.state,this.state.rivers,RIVER);drawGeometry(this.state,this.state.coast,COAST);gl.disable(gl.BLEND);gl.bindVertexArray(null);}
+ dispose(){if(this.disposed)return;this.disposed=true;const state=this.state;this.state=null;if(!state)return;state.gl.deleteProgram(state.program);for(const key of ["fill","coast","lakes","riversUnder","rivers"])destroyGeometry(state.gl,state[key]);}}
+function buildPolygonGeometry(polygons){const vertices=[],indices=[];for(const polygon of polygons??[]){if(!Array.isArray(polygon)||polygon.length<3)continue;const triangles=triangulatePolygon(polygon);if(!triangles.length)continue;const base=vertices.length/2;for(const point of polygon)vertices.push(Number(point?.[0]),Number(point?.[1]));for(const index of triangles)indices.push(base+index);}return{vertices:Float32Array.from(vertices),indices:Uint32Array.from(indices)};}
+function buildLineGeometry(features,simplified=false){const vertices=[];for(const feature of features??[]){const coordinates=feature?.coordinates??feature?.rings?.[0]??[];if(!Array.isArray(coordinates)||coordinates.length<2)continue;const points=simplified?simplifyLine(coordinates,2):coordinates;for(let i=1;i<points.length;i+=1){const a=points[i-1],b=points[i];if(!a||!b)continue;vertices.push(Number(a[0]),Number(a[1]),Number(b[0]),Number(b[1]));}}return{vertices:Float32Array.from(vertices),indices:null};}
+function simplifyLine(points,stride){if(points.length<=2)return points;const result=[points[0]];for(let i=stride;i<points.length-1;i+=stride)result.push(points[i]);result.push(points[points.length-1]);return result;}
+function createGeometry(gl,data){const vao=gl.createVertexArray(),buffer=gl.createBuffer(),indexBuffer=data.indices?gl.createBuffer():null;if(!vao||!buffer||(data.indices&&!indexBuffer))throw new Error("Physical GPU geometry allocation failed");gl.bindVertexArray(vao);gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,data.vertices,gl.STATIC_DRAW);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,2,gl.FLOAT,false,8,0);if(indexBuffer){gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,indexBuffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,data.indices,gl.STATIC_DRAW);}gl.bindVertexArray(null);gl.bindBuffer(gl.ARRAY_BUFFER,null);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,null);return{vao,buffer,indexBuffer,count:data.indices?.length??data.vertices.length/2};}
+function drawGeometry(state,geometry,color){if(!geometry?.count)return;const{gl}=state;gl.bindVertexArray(geometry.vao);gl.uniform4fv(state.color,color);if(geometry.indexBuffer)gl.drawElements(gl.TRIANGLES,geometry.count,gl.UNSIGNED_INT,0);else gl.drawArrays(gl.LINES,0,geometry.count);}
+function destroyGeometry(gl,geometry){if(!geometry)return;gl.deleteVertexArray(geometry.vao);gl.deleteBuffer(geometry.buffer);if(geometry.indexBuffer)gl.deleteBuffer(geometry.indexBuffer);}
+function link(gl,vertexSource,fragmentSource){const program=gl.createProgram(),vertex=compile(gl,gl.VERTEX_SHADER,vertexSource),fragment=compile(gl,gl.FRAGMENT_SHADER,fragmentSource);gl.attachShader(program,vertex);gl.attachShader(program,fragment);gl.linkProgram(program);gl.deleteShader(vertex);gl.deleteShader(fragment);if(!gl.getProgramParameter(program,gl.LINK_STATUS)){const error=gl.getProgramInfoLog(program)||"Physical GPU program linking failed";gl.deleteProgram(program);throw new Error(error);}return program;}
+function compile(gl,type,source){const shader=gl.createShader(type);gl.shaderSource(shader,source);gl.compileShader(shader);if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS)){const error=gl.getShaderInfoLog(shader)||"Physical GPU shader compilation failed";gl.deleteShader(shader);throw new Error(error);}return shader;}
