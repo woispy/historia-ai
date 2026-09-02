@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+  <body>
+    <script type="module">
+      import { createWebGpuBenchmarkTelemetry } from "/src/map/runtime/BenchmarkGpuTelemetry.js";
+
+      async function main() {
+        const result = { supported: false, adapter: null, cases: {}, error: null };
+        try {
+          if (!navigator.gpu) throw new Error("navigator.gpu unavailable");
+          const adapter = await navigator.gpu.requestAdapter({ powerPreference: "high-performance" });
+          if (!adapter) throw new Error("no adapter");
+          const info = adapter.info || adapter.adapterInfo || null;
+          result.adapter = info ? {
+            vendor: info.vendor || null,
+            architecture: info.architecture || null,
+            device: info.device || null,
+            description: info.description || null,
+            isFallbackAdapter: typeof info.isFallbackAdapter === "boolean" ? info.isFallbackAdapter : null,
+          } : null;
+          if (!adapter.features?.has?.("timestamp-query")) throw new Error("adapter lacks timestamp-query");
+          const device = await adapter.requestDevice({ requiredFeatures: ["timestamp-query"] });
+          result.supported = true;
+
+          const shader = device.createShaderModule({ code: `
+            @group(0) @binding(0) var<storage, read> tiles: array<u32>;
+            @group(0) @binding(1) var<storage, read> bounds: array<f32>;
+            @group(0) @binding(2) var<storage, read_write> indices: array<u32>;
+            @group(0) @binding(3) var<storage, read_write> provinceIds: array<u32>;
+            @group(0) @binding(4) var<storage, read_write> counter: atomic<u32>;
+            @compute @workgroup_size(64)
+            fn cull(@builtin(global_invocation_id) id: vec3<u32>) {
+              let tile = id.x;
+              if (tile >= arrayLength(&tiles) / 6u) { return; }
+              let t = tile * 6u;
+              let province = tiles[t + 2u];
+              let b = province * 4u;
+              let minX = bounds[b]; let minY = bounds[b + 1u];
+              let maxX = bounds[b + 2u]; let maxY = bounds[b + 3u];
+              if (maxX < minX || maxY < minY) { return; }
+              let dst = atomicAdd(&counter, 3u);
+              indices[dst] = tiles[t]; indices[dst + 1u] = tiles[t] + 1u; indices[dst + 2u] = tiles[t] + 2u;
+              provinceIds[dst] = province; provinceIds[dst + 1u] = province; provinceIds[dst + 2u] = province;
+            }
+          ` });
+          const pipeline = device.createComputePipeline({ layout: "auto", compute: { module: shader, entryPoint: "cull" } });
+          const tiles = device.createBuffer({ size: 15000 * 24, usage: GPUBufferUsage.STORAGE });
+          const bounds = device.createBuffer({ size: 15000 * 16, usage: GPUBufferUsage.STORAGE });
+          const indices = device.createBuffer({ size: 480000 * 3 * 4, usage: GPUBufferUsage.STORAGE });
+          const provinceIds = device.createBuffer({ size: 480000 * 3 * 4, usage: GPUBufferUsage.STORAGE });
+          const counter = device.createBuffer({ size: 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+          const computeBindGroup = device.createBindGroup({ layout: pipeline.getBindGroupLayout(0), entries: [
+            { binding: 0, resource: { buffer: tiles } },
+            { binding: 1, resource: { buffer: bounds } },
+            { binding: 2, resource: { buffer: indices } },
+            { binding: 3, resource: { buffer: provinceIds } },
+            { binding: 4, resource: { buffer: counter } },
+          ] });
+          const renderTexture = device.createTexture({ size: { width: 16, height: 16 }, format: "rgba8unorm", usage: GPUTextureUsage.RENDER_ATTACHMENT });
+          const renderModule = device.createShaderModule({ code: `
+            @vertex fn vs(@builtin(vertex_index) i:u32) -> @builtin(position) vec4<f32> {
+              let p = array<vec2<f32>,3>(vec2<f32>(-1.,-1.),vec2<f32>(3.,-1.),vec2<f32>(-1.,3.));
+              return vec4<f32>(p[i],0.,1.);
+            }
+            @fragment fn fs() -> @location(0) vec4<f32> { return vec4<f32>(0.1,0.2,0.3,1.); }
+          ` });
+          const renderPipeline = device.createRenderPipeline({ layout: "auto", vertex: { module: renderModule, entryPoint: "vs" }, fragment: { module: renderModule, entryPoint: "fs", targets: [{ format: "rgba8unorm" }] } });
+
+          async function runCase(name, timestampEndAfterRender) {
+            const telemetry = createWebGpuBenchmarkTelemetry(device);
+            for (let i = 0; i < 8; i += 1) {
+              const slot = telemetry.beginFrame();
+              const encoder = device.createCommandEncoder();
+              const began = slot >= 0 && telemetry.writeTimestamp(encoder, slot, "begin");
+              const compute = encoder.beginComputePass();
+              compute.setPipeline(pipeline);
+              compute.setBindGroup(0, computeBindGroup);
+              compute.dispatchWorkgroups(Math.ceil(15000 / 64));
+              compute.end();
+              if (!timestampEndAfterRender) {
+                telemetry.writeTimestamp(encoder, slot, "end");
+              }
+              const render = encoder.beginRenderPass({ colorAttachments: [{ view: renderTexture.createView(), loadOp: "clear", storeOp: "store", clearValue: { r: 0, g: 0, b: 0, a: 1 } }] });
+              render.setPipeline(renderPipeline);
+              render.draw(3);
+              render.end();
+              if (timestampEndAfterRender) {
+                telemetry.writeTimestamp(encoder, slot, "end");
+              }
+              const ready = began && telemetry.finishFrame(encoder, slot);
+              device.queue.submit([encoder.finish()]);
+              telemetry.recordSubmit(ready ? slot : -1);
+              await telemetry.collect();
+            }
+            await telemetry.collect();
+            const snapshot = telemetry.snapshot();
+            telemetry.dispose();
+            return snapshot;
+          }
+
+          result.cases.computeThenTimestampThenRender = await runCase("computeThenTimestampThenRender", false);
+          result.cases.computeThenRenderThenTimestamp = await runCase("computeThenRenderThenTimestamp", true);
+
+          for (const buffer of [tiles, bounds, indices, provinceIds, counter]) buffer.destroy();
+          renderTexture.destroy();
+          device.destroy();
+        } catch (error) {
+          result.error = String(error?.message || error);
+        }
+        document.body.textContent = JSON.stringify(result);
+      }
+
+      main();
+    </script>
+  </body>
+</html>
