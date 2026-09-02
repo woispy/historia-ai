@@ -36,8 +36,8 @@ const retracing = [
 ];
 const normalizedBuffer = encodeMapBin([{ province:{identity:{id:39}}, geometry:{polygons:[retracing]}}]);
 const normalizedSource = await loadMapBin("/assets/world.mapbin", async () => ({ ok:true, status:200, statusText:"OK", arrayBuffer:async()=>normalizedBuffer }));
-assert.ok(normalizedSource.tileCount >= 1);
-assert.ok(normalizedSource.geometryPointCount <= 4);
+assert.equal(normalizedSource.tileCount, 0);
+assert.equal(normalizedSource.geometryPointCount, 0);
 
 const nearDuplicateRetracing = retracing.map(([x,y], index) => {
   if (index === 9) return [x + 1e-10, y + 1e-10];
@@ -49,8 +49,8 @@ const nearDuplicateRetracing = retracing.map(([x,y], index) => {
 });
 const nearDuplicateBuffer = encodeMapBin([{ province:{identity:{id:40}}, geometry:{polygons:[nearDuplicateRetracing]}}]);
 const nearDuplicateSource = await loadMapBin("/assets/world.mapbin", async () => ({ ok:true, status:200, statusText:"OK", arrayBuffer:async()=>nearDuplicateBuffer }));
-assert.ok(nearDuplicateSource.tileCount >= 1);
-assert.ok(nearDuplicateSource.geometryPointCount <= 4);
+assert.equal(nearDuplicateSource.tileCount, 0);
+assert.equal(nearDuplicateSource.geometryPointCount, 0);
 
 await assert.rejects(() => loadMapBin("/assets/missing.mapbin", async () => ({ ok:false, status:404, statusText:"Not Found" })), /404/);
-console.log("MapBin loader contract passed: fetch -> ArrayBuffer -> zero-copy BinaryMapAssetSource, including degenerate and near-duplicate polygon normalization.");
+console.log("MapBin loader contract passed: fetch -> ArrayBuffer -> zero-copy BinaryMapAssetSource, including degenerate and near-duplicate polygon rejection.");
