@@ -4,6 +4,7 @@ import { createHistoricalAssetId, slug } from "./HistoricalAssetId.js";
 
 const HISTORICAL_1300_URL =
   "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1300.geojson";
+const POINT_EPSILON = 1e-9;
 
 function assertGeoJson(input) {
   if (
@@ -90,8 +91,8 @@ function signedArea(points) {
 }
 
 function samePoint(a, b) {
-  return Math.abs(a[0] - b[0]) <= 1e-12 &&
-    Math.abs(a[1] - b[1]) <= 1e-12;
+  return Math.abs(a[0] - b[0]) <= POINT_EPSILON &&
+    Math.abs(a[1] - b[1]) <= POINT_EPSILON;
 }
 
 function extractPolygons(geometry) {
