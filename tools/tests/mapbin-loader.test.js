@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { loadMapBin } from "../../src/map/runtime/MapBinLoader.js";
 import { encodeMapBin } from "../build/mapbin-encoder.js";
 
-const authoritative = [{ province:{id:77}, country:{id:3}, geometry:{polygons:[[[0,0],[2,0],[1,2]]]}}];
+const authoritative = [{ province:{identity:{id:77}}, country:{id:3}, geometry:{polygons:[[[0,0],[2,0],[1,2]]]}}];
 const buffer = encodeMapBin(authoritative);
 let requested = null;
 const source = await loadMapBin("/assets/world.mapbin", async (url, options) => {
@@ -16,7 +16,7 @@ assert.equal(source.ids.buffer, buffer);
 assert.equal(source.geometry.buffer, buffer);
 
 const retracing = [
-  [-156.3471221923828,71.33132934570312],
+  [-156.3471221923828,71.33132970376517],
   [-156.47401428222656,71.35443878173828],
   [-156.9047393798828,71.34585528515625],
   [-157.31787109375,71.15849304199219],
@@ -29,12 +29,12 @@ const retracing = [
   [-159.36935424804688,70.89875793457031],
   [-158.85516357421875,70.88426208496094],
   [-156.47401428222656,71.35443878173828],
-  [-156.3471221923828,71.33132934570312],
+  [-156.3471221923828,71.33132970376517],
   [-156.043212890625,71.22303009082031],
   [-156.043212890625,71.22303009082031],
-  [-156.3471221923828,71.33132934570312],
+  [-156.3471221923828,71.33132970376517],
 ];
-const normalizedBuffer = encodeMapBin([{ province:{id:39}, geometry:{polygons:[retracing]}}]);
+const normalizedBuffer = encodeMapBin([{ province:{identity:{id:39}}, geometry:{polygons:[retracing]}}]);
 const normalizedSource = await loadMapBin("/assets/world.mapbin", async () => ({ ok:true, status:200, statusText:"OK", arrayBuffer:async()=>normalizedBuffer }));
 assert.ok(normalizedSource.tileCount >= 1);
 assert.ok(normalizedSource.geometryPointCount <= 4);
@@ -47,7 +47,7 @@ const nearDuplicateRetracing = retracing.map(([x,y], index) => {
   if (index === 16) return [x + 1e-10, y + 1e-10];
   return [x,y];
 });
-const nearDuplicateBuffer = encodeMapBin([{ province:{id:40}, geometry:{polygons:[nearDuplicateRetracing]}}]);
+const nearDuplicateBuffer = encodeMapBin([{ province:{identity:{id:40}}, geometry:{polygons:[nearDuplicateRetracing]}}]);
 const nearDuplicateSource = await loadMapBin("/assets/world.mapbin", async () => ({ ok:true, status:200, statusText:"OK", arrayBuffer:async()=>nearDuplicateBuffer }));
 assert.ok(nearDuplicateSource.tileCount >= 1);
 assert.ok(nearDuplicateSource.geometryPointCount <= 4);
