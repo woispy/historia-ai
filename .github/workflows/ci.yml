@@ -25,6 +25,7 @@ on:
     branches:
       - main
       - master
+      - integration/phase-a-h-production
       - feat/living-game-foundation
       - feat/phase1-polish
       - feat/phase1-historical-gis-runtime
@@ -66,6 +67,8 @@ jobs:
         run: npm install --no-save --package-lock=false globals@17.8.0
       - name: Lint
         run: npm run lint
+      - name: Validate DEM codec/source contracts
+        run: npm run test:terrain-dem
       - name: Generate world physical geometry assets
         run: npm run build:assets
       - name: Verify repository cleanliness after physical assets
@@ -130,7 +133,7 @@ jobs:
         run: npm run test:browser-game-entry-handoff
       - name: Run main menu entry integration tests
         run: npm run test:main-menu-entry
-      - name: Run scenario loading contract tests
+      - name: Run scenario loading tests
         run: npm run test:scenario-loading
       - name: Run ESM import contract tests
         run: npm run test:esm-import-contract
