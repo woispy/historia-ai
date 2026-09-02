@@ -38,6 +38,42 @@ assert.notEqual(regions[0].assetId, regions[1].assetId);
 assert.equal(regions[0].sourceFeatureIndex, 0);
 assert.equal(regions[1].sourceFeatureIndex, 1);
 
+const degenerateRetracingFeature = {
+  type: "Feature",
+  properties: { NAME: "Degenerate Retracing Test" },
+  geometry: {
+    type: "Polygon",
+    coordinates: [[
+      [-156.3471221923828, 71.33132934570312],
+      [-156.47401428222656, 71.35443878173828],
+      [-156.9047393798828, 71.34585571289062],
+      [-157.31787109375, 71.15849304199219],
+      [-157.81193542480469, 70.97139739990234],
+      [-158.41685485839844, 70.90830993652344],
+      [-158.85516357421875, 70.88426208496094],
+      [-159.36935424804688, 70.89875793457031],
+      [-160.24032592773438, 70.85845947265625],
+      [-160.24032592773438, 70.85845947265625],
+      [-159.36935424804688, 70.89875793457031],
+      [-158.85516357421875, 70.88426208496094],
+      [-156.47401428222656, 71.35443878173828],
+      [-156.3471221923828, 71.33132934570312],
+      [-156.043212890625, 71.22303009033203],
+      [-156.043212890625, 71.22303009033203],
+      [-156.3471221923828, 71.33132934570312],
+    ]],
+  },
+};
+const degenerateRetracingRegion = normalizeHistoricalFeature(degenerateRetracingFeature, 12, 1300);
+assert.ok(degenerateRetracingRegion);
+assert.equal(degenerateRetracingRegion.polygons.length, 1);
+const normalizedDegenerateRing = degenerateRetracingRegion.polygons[0];
+assert.deepEqual(normalizedDegenerateRing, [
+  [-156.3471221923828, 71.33132934570312],
+  [-156.043212890625, 71.22303009033203],
+  [-156.3471221923828, 71.33132934570312],
+]);
+
 const province = buildHistoricalProvinceAsset(regions[0]);
 const geometry = buildHistoricalGeometryAsset(regions[0]);
 assert.equal(province.identity.id, geometry.identity.id);
