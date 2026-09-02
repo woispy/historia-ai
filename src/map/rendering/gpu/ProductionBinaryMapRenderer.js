@@ -1,4 +1,4 @@
-import { BinaryMapRenderer } from "./BinaryMapRenderer.js";
+import { BinaryMapRenderer, screenToWorld } from "./BinaryMapRenderer.js";
 import { pickProvinceFromBinaryAsset } from "./BinaryMapCpuPicker.js";
 
 /** Production adapter: preserve GPU picking while guaranteeing a geometry-backed CPU fallback. */
