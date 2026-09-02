@@ -4,12 +4,13 @@ import { CopernicusDemSource, copernicusSourceTileKeysForBounds, sampleCopernicu
 import { encodeTerrainTile } from "../../../src/map/rendering/terrain/TerrainAssetCodec.js";
 import { makeTerrainTileKey, terrainTileBounds } from "../../../src/map/rendering/terrain/TerrainTile.js";
 import { TERRAIN_LODS } from "../../../src/map/rendering/terrain/TerrainLod.js";
-import { WORLD_LAND_POLYGONS } from "../../../src/map/physical/WorldPhysicalAtlas.js";
+import { collectWorldLandPolygons } from "../../../src/map/physical/WorldLandMask.js";
 import { log, success } from "../shared/index.js";
 
 const DEFAULT_BBOX = [26, 35, 46, 43];
 const DEFAULT_MAX_ZOOM = 5;
 const DEFAULT_GRID = 129;
+const GEOMETRY_ASSET_DIR = path.resolve("src/world/map/assets/geometry");
 
 /** Build real terrain assets from Copernicus GLO-30 COG source without tile-local elevation normalization. */
 export async function runTerrainPipeline({ bbox = parseBbox(process.env.HISTORIA_DEM_BBOX), maxZoom = integerEnv("HISTORIA_DEM_MAX_ZOOM", DEFAULT_MAX_ZOOM), grid = integerEnv("HISTORIA_DEM_GRID", DEFAULT_GRID), outputDir = path.resolve("public/assets/terrain") } = {}) {
@@ -21,13 +22,15 @@ export async function runTerrainPipeline({ bbox = parseBbox(process.env.HISTORIA
   const source = await new CopernicusDemSource().initialize();
   const sourceTiles = copernicusSourceTileKeysForBounds(extent);
   log(`[Terrain Pipeline] DEM source coverage: ${sourceTiles.length} 1x1-degree tiles for bbox ${extent.join(",")}.`);
+  const landPolygons = loadPhysicalLandPolygons();
+  log(`[Terrain Pipeline] Physical land mask: ${landPolygons.length} polygons loaded from geometry assets.`);
   fs.mkdirSync(outputDir, { recursive: true });
   const tiles = tilesForExtent(extent, maxZoom), records = [];
   log(`[Terrain Pipeline] Planned ${tiles.length} terrain tiles across LOD 0-${maxZoom}.`);
   for (let index = 0; index < tiles.length; index += 1) {
     const tile = tiles[index], bounds = terrainTileBounds(tile);
     log(`[Terrain Pipeline] Processing tile ${index + 1}/${tiles.length} (LOD ${tile.level}, x=${tile.x}, y=${tile.y})...`);
-    const samples = await sampleTile(source, bounds, grid, extent);
+    const samples = await sampleTile(source, bounds, grid, extent, landPolygons);
     const encoded = encodeTerrainTile({ ...samples, bounds });
     const file = path.join(outputDir, "tiles", String(tile.level), String(tile.x), `${tile.y}.htrn`);
     fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, encoded);
@@ -40,7 +43,7 @@ export async function runTerrainPipeline({ bbox = parseBbox(process.env.HISTORIA
   success(`Terrain Pipeline generated ${records.length} HTRN tile assets.`); return manifest;
 }
 
-async function sampleTile(source, bounds, size, coverage) {
+async function sampleTile(source, bounds, size, coverage, landPolygons) {
   const heights = new Float32Array(size * size), demValidity = new Uint8Array(size * size), landMask = new Uint8Array(size * size), cache = new Map();
   for (let y = 0; y < size; y += 1) {
     const lat = bounds.maxY - (bounds.maxY - bounds.minY) * y / (size - 1);
@@ -51,7 +54,7 @@ async function sampleTile(source, bounds, size, coverage) {
       if (!cache.has(key)) cache.set(key, await source.readTile(keyLat, keyLon));
       const value = sampleCopernicusRaster(cache.get(key), lon, lat);
       if (Number.isFinite(value)) { heights[index] = value; demValidity[index] = 255; }
-      if (isPhysicalLand(lon, lat)) landMask[index] = 255;
+      if (isPhysicalLand(lon, lat, landPolygons)) landMask[index] = 255;
     }
   }
   const normals = new Int8Array(size * size * 3), splatRgba = new Uint8Array(size * size * 4), splatSnow = new Uint8Array(size * size);
@@ -65,7 +68,12 @@ async function sampleTile(source, bounds, size, coverage) {
   return { size, heights, normals, splatRgba, splatSnow, landMask, demValidity };
 }
 
-function isPhysicalLand(lon, lat) { return WORLD_LAND_POLYGONS.some((polygon) => pointInPolygon(lon, lat, polygon)); }
+function loadPhysicalLandPolygons() {
+  if (!fs.existsSync(GEOMETRY_ASSET_DIR)) return [];
+  const modules = Object.fromEntries(fs.readdirSync(GEOMETRY_ASSET_DIR).filter((file) => /^geometry_country_.*\.json$/.test(file)).map((file) => [file, JSON.parse(fs.readFileSync(path.join(GEOMETRY_ASSET_DIR, file), "utf8"))]));
+  return collectWorldLandPolygons(modules);
+}
+function isPhysicalLand(lon, lat, landPolygons) { return landPolygons.some((polygon) => pointInPolygon(lon, lat, polygon)); }
 function pointInPolygon(x, y, polygon) { if (!Array.isArray(polygon) || polygon.length < 3) return false; let inside = false; for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) { const xi=Number(polygon[i]?.[0]), yi=Number(polygon[i]?.[1]), xj=Number(polygon[j]?.[0]), yj=Number(polygon[j]?.[1]); const intersects=((yi>y)!==(yj>y)) && x < ((xj-xi)*(y-yi))/(yj-yi)+xi; if (intersects) inside=!inside; } return inside; }
 export function coordinateInCoverage(lon, lat, coverage) { return Number(lon) >= coverage[0] && Number(lon) <= coverage[2] && Number(lat) >= coverage[1] && Number(lat) <= coverage[3]; }
 function tilesForExtent(extent, maxZoom) { const result=[]; for(let level=0;level<=maxZoom;level+=1){const count=2**level,width=360/count,height=180/count,minX=Math.max(0,Math.floor((extent[0]+180)/width)),maxX=Math.min(count-1,Math.floor((extent[2]+180-1e-9)/width)),minY=Math.max(0,Math.floor((extent[1]+90)/height)),maxY=Math.min(count-1,Math.floor((extent[3]+90-1e-9)/height));for(let y=minY;y<=maxY;y+=1)for(let x=minX;x<=maxX;x+=1)result.push(makeTerrainTileKey(level,x,y));}return result; }
