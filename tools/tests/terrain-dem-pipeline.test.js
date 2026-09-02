@@ -1,0 +1,24 @@
+import assert from "node:assert/strict";
+import { encodeTerrainTile, decodeTerrainTile } from "../../src/map/rendering/terrain/TerrainAssetCodec.js";
+import { parseTileList, copernicusTileKey } from "../asset-builder/dem/CopernicusDemSource.js";
+import { TERRAIN_LODS } from "../../src/map/rendering/terrain/TerrainLod.js";
+
+const size = 3;
+const heights = Float32Array.from([0,0.2,0.4,0.1,0.5,0.8,0,0.6,1]);
+const normals = new Int8Array(size * size * 3); normals.fill(127);
+const splatRgba = new Uint8Array(size * size * 4); splatRgba.fill(255);
+const splatSnow = new Uint8Array(size * size); splatSnow.fill(0);
+const landMask = new Uint8Array(size * size); landMask.fill(255);
+const bytes = encodeTerrainTile({ size, heights, normals, splatRgba, splatSnow, landMask, bounds: { minX: 30, minY: 35, maxX: 40, maxY: 45 } });
+const decoded = decodeTerrainTile(bytes);
+assert.equal(decoded.version, 1);
+assert.equal(decoded.size, size);
+assert.deepEqual(Array.from(decoded.heights), Array.from(heights));
+assert.equal(decoded.bounds.minX, 30);
+assert.equal(decoded.bounds.maxY, 45);
+assert.equal(copernicusTileKey(38.2, 27.7), "Copernicus_DSM_COG_10_N38_00_E027_00_DEM");
+assert.equal(copernicusTileKey(-12.2, -7.7), "Copernicus_DSM_COG_10_S13_00_W008_00_DEM");
+const index = parseTileList("foo/Copernicus_DSM_COG_10_N38_00_E027_00_DEM/\nbar/Copernicus_DSM_COG_10_S13_00_W008_00_DEM/");
+assert.deepEqual(index, ["Copernicus_DSM_COG_10_N38_00_E027_00_DEM", "Copernicus_DSM_COG_10_S13_00_W008_00_DEM"]);
+assert.equal(TERRAIN_LODS.length, 5);
+console.log("terrain-dem-pipeline.test.js: PASS");
