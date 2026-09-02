@@ -5,6 +5,7 @@ import { createHistoricalAssetId, slug } from "./HistoricalAssetId.js";
 const HISTORICAL_1300_URL =
   "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1300.geojson";
 const POINT_EPSILON = 1e-9;
+const AREA_EPSILON = 1e-12;
 
 function assertGeoJson(input) {
   if (
@@ -38,10 +39,6 @@ function normalizeRing(ring) {
     points.pop();
   }
 
-  // Historical GIS sources can contain rings that retrace an earlier path.
-  // Ear clipping cannot triangulate such zero-area/self-retracing rings. When
-  // a vertex occurs again, erase the closed loop between its occurrences while
-  // preserving the remaining boundary.
   let changed = true;
   while (changed && points.length >= 3) {
     changed = false;
@@ -58,7 +55,7 @@ function normalizeRing(ring) {
   }
 
   removeAdjacentDuplicates(points);
-  if (points.length < 3 || Math.abs(signedArea(points)) <= 1e-12) return [];
+  if (points.length < 3 || Math.abs(signedArea(points)) <= AREA_EPSILON) return [];
 
   points.push([...points[0]]);
   return points;
