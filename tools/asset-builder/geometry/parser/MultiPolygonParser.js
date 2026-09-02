@@ -7,6 +7,8 @@
  * Parses GeoJSON MultiPolygon geometries.
  */
 
+const POINT_EPSILON = 1e-9;
+
 export function parseMultiPolygon(
   geometry
 ) {
@@ -88,6 +90,6 @@ function signedArea(points) {
 }
 
 function samePoint(a, b) {
-  return Math.abs(a[0] - b[0]) <= 1e-12 &&
-    Math.abs(a[1] - b[1]) <= 1e-12;
+  return Math.abs(a[0] - b[0]) <= POINT_EPSILON &&
+    Math.abs(a[1] - b[1]) <= POINT_EPSILON;
 }
