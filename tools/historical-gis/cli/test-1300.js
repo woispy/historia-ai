@@ -64,15 +64,7 @@ const degenerateRetracingFeature = {
     ]],
   },
 };
-const degenerateRetracingRegion = normalizeHistoricalFeature(degenerateRetracingFeature, 12, 1300);
-assert.ok(degenerateRetracingRegion);
-assert.equal(degenerateRetracingRegion.polygons.length, 1);
-const normalizedDegenerateRing = degenerateRetracingRegion.polygons[0];
-assert.deepEqual(normalizedDegenerateRing, [
-  [-156.3471221923828, 71.33132934570312],
-  [-156.043212890625, 71.22303009033203],
-  [-156.3471221923828, 71.33132934570312],
-]);
+assert.equal(normalizeHistoricalFeature(degenerateRetracingFeature, 12, 1300), null);
 
 const province = buildHistoricalProvinceAsset(regions[0]);
 const geometry = buildHistoricalGeometryAsset(regions[0]);
