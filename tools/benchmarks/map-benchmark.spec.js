@@ -194,10 +194,7 @@ async function runTelemetryIsolationMatrix(page) {
         const telemetryApi = createWebGpuBenchmarkTelemetry(device);
         let submitCount = 0;
         let frameCount = 0;
-        let lastError = null;
         try {
-          // The production telemetry samples every eighth frame. Preserve that
-          // cadence here so this test exercises the real module state machine.
           for (let i = 0; i < 8; i += 1) {
             frameCount += 1;
             const slot = telemetryApi.beginFrame();
@@ -229,21 +226,9 @@ async function runTelemetryIsolationMatrix(page) {
             await telemetryApi.collect();
           }
           await telemetryApi.collect();
-          return {
-            mode,
-            frameCount,
-            submitCount,
-            snapshot: telemetryApi.snapshot(),
-          };
+          return { mode, frameCount, submitCount, snapshot: telemetryApi.snapshot() };
         } catch (error) {
-          lastError = String(error?.message || error);
-          return {
-            mode,
-            frameCount,
-            submitCount,
-            error: lastError,
-            snapshot: telemetryApi.snapshot(),
-          };
+          return { mode, frameCount, submitCount, error: String(error?.message || error), snapshot: telemetryApi.snapshot() };
         } finally {
           telemetryApi.dispose();
         }
@@ -276,7 +261,7 @@ async function readSoftwareGpuError(page) {
 
 function isRecoverableAutoWebGpuFailure(error) {
   const message = String(error?.message || error || "");
-  return /dxil\\.dll|EnsureDXCLibraries|requestDevice.*OperationError|DynamicLib\\.Open|WebGPU backend failed to initialize|navigator\\.gpu unavailable|GPUAdapter/i.test(message);
+  return /dxil\.dll|EnsureDXCLibraries|requestDevice.*OperationError|DynamicLib\.Open|WebGPU backend failed to initialize|navigator\.gpu unavailable|GPUAdapter/i.test(message);
 }
 
 async function runBenchmark(page, backend, file, metadata = {}) {
