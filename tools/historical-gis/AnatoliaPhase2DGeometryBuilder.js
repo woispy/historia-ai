@@ -10,10 +10,10 @@ const COASTAL_TOLERANCE = 0.06;
 
 // Historical city anchors can legitimately sit inside a lake. They are not
 // physical-land anchors and must never be used as province polygon centres.
-// Keep the physical reconciliation anchors separate until they can be derived
+// Keep physical reconciliation anchors separate until they can be derived
 // from a higher-resolution authoritative shoreline dataset.
 const PHYSICAL_LAND_ANCHORS = Object.freeze({
-  "bithynia-nicaea": [29.72, 40.15],
+  "bithynia-nicaea": [29.72, 40.58],
   "pisidia-egirdir": [30.85, 37.98],
   "pisidia-beysehir": [31.72, 37.78],
 });
@@ -142,7 +142,11 @@ function addSite(sites, seen, point, provinceId, kind) {
 
 function addAnchorSites(sites, seen) {
   for (const province of ANATOLIA_PROVINCE_METADATA) {
-    addSite(sites, seen, province.centroid, province.id, "province-anchor");
+    const anchor = PHYSICAL_LAND_ANCHORS[province.id] ?? province.centroid;
+    const anchorPoint = province.terrain === "lake" && isUsableCartographicPoint(anchor)
+      ? anchor
+      : province.centroid;
+    addSite(sites, seen, anchorPoint, province.id, "province-anchor");
   }
 }
 
@@ -152,13 +156,14 @@ function addProvinceMicroSites(sites, seen) {
   let sequence = 0;
 
   for (const province of ANATOLIA_PROVINCE_METADATA) {
+    const centre = PHYSICAL_LAND_ANCHORS[province.id] ?? province.centroid;
     for (const radius of radii) {
       for (let direction = 0; direction < directions; direction += 1) {
         const angle = (direction / directions) * Math.PI * 2
           + deterministicJitter(sequence, province.centroid[0] * 100);
         const point = [
-          province.centroid[0] + Math.cos(angle) * radius,
-          province.centroid[1] + Math.sin(angle) * radius,
+          centre[0] + Math.cos(angle) * radius,
+          centre[1] + Math.sin(angle) * radius,
         ];
         if (isPoliticalCartographicPoint(point)) addSite(sites, seen, point, province.id, "province-micro-control");
         sequence += 1;
@@ -173,14 +178,15 @@ function addProvinceShapeSites(sites, seen) {
   let sequence = 0;
 
   for (const province of ANATOLIA_PROVINCE_METADATA) {
+    const centre = PHYSICAL_LAND_ANCHORS[province.id] ?? province.centroid;
     for (let ring = 0; ring < radii.length; ring += 1) {
       for (let direction = 0; direction < directions; direction += 1) {
         const angle = (direction / directions) * Math.PI * 2
           + deterministicJitter(sequence, province.centroid[0] * 100);
         const radius = radii[ring] * (1 + deterministicJitter(sequence + 11, province.centroid[1] * 100) * 0.18);
         const point = [
-          province.centroid[0] + Math.cos(angle) * radius,
-          province.centroid[1] + Math.sin(angle) * radius,
+          centre[0] + Math.cos(angle) * radius,
+          centre[1] + Math.sin(angle) * radius,
         ];
         if (isPoliticalCartographicPoint(point)) addSite(sites, seen, point, province.id, "province-shape-control");
         sequence += 1;
