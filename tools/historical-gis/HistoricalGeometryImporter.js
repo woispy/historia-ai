@@ -18,12 +18,61 @@ function assertGeoJson(input) {
 }
 
 function normalizeRing(ring) {
-  return ring
-    .filter((coordinate) => Array.isArray(coordinate) && coordinate.length >= 2)
-    .map(([longitude, latitude]) => [
-      Number(longitude),
-      Number(latitude),
-    ]);
+  const points = [];
+
+  for (const coordinate of ring) {
+    if (!Array.isArray(coordinate) || coordinate.length < 2) continue;
+
+    const longitude = Number(coordinate[0]);
+    const latitude = Number(coordinate[1]);
+    if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) continue;
+
+    const point = [longitude, latitude];
+    const previous = points[points.length - 1];
+    if (previous && samePoint(previous, point)) continue;
+    points.push(point);
+  }
+
+  if (points.length > 1 && samePoint(points[0], points[points.length - 1])) {
+    points.pop();
+  }
+
+  // Historical GIS sources can contain rings that retrace an earlier path.
+  // Ear clipping cannot triangulate such zero-area/self-retracing rings. When
+  // a vertex occurs again, erase the closed loop between its occurrences while
+  // preserving the remaining boundary. This is intentionally deterministic
+  // and only affects the malformed repeated-vertex segment.
+  let changed = true;
+  while (changed && points.length >= 3) {
+    changed = false;
+
+    for (let start = 0; start < points.length; start += 1) {
+      const repeated = findRepeatedPoint(points, start + 1);
+      if (repeated < 0) continue;
+
+      points.splice(start + 1, repeated - start - 1);
+      changed = true;
+      break;
+    }
+  }
+
+  if (points.length < 3) return [];
+
+  points.push([...points[0]]);
+  return points;
+}
+
+function findRepeatedPoint(points, start) {
+  for (let index = start; index < points.length; index += 1) {
+    if (samePoint(points[start - 1], points[index])) return index;
+  }
+
+  return -1;
+}
+
+function samePoint(a, b) {
+  return Math.abs(a[0] - b[0]) <= 1e-12 &&
+    Math.abs(a[1] - b[1]) <= 1e-12;
 }
 
 function extractPolygons(geometry) {
