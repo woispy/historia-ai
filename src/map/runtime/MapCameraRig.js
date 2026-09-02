@@ -13,8 +13,8 @@ export class MapCameraRig {
       x: 0,
       y: 0,
       zoom: 1,
-      pitch: options.pitch ?? 24,
-      yaw: options.yaw ?? 0,
+      pitch: Number.isFinite(Number(options.pitch)) ? Number(options.pitch) : 24,
+      yaw: Number.isFinite(Number(options.yaw)) ? Number(options.yaw) : 0,
     };
     this.velocity = { x: 0, y: 0, zoom: 0, pitch: 0, yaw: 0 };
     this.minZoom = options.minZoom ?? 1;
@@ -23,14 +23,16 @@ export class MapCameraRig {
     this.pitchMax = options.pitchMax ?? 42;
     this.yawMin = options.yawMin ?? -12;
     this.yawMax = options.yawMax ?? 12;
+    this.state.pitch = clamp(this.state.pitch, this.pitchMin, this.pitchMax);
+    this.state.yaw = clamp(this.state.yaw, this.yawMin, this.yawMax);
   }
 
   setState(next = {}) {
     this.state.x = Number.isFinite(Number(next.x)) ? Number(next.x) : this.state.x;
     this.state.y = Number.isFinite(Number(next.y)) ? Number(next.y) : this.state.y;
     this.state.zoom = clamp(Number(next.zoom) || this.state.zoom, this.minZoom, this.maxZoom);
-    this.state.pitch = clamp(Number(next.pitch) || this.state.pitch, this.pitchMin, this.pitchMax);
-    this.state.yaw = clamp(Number(next.yaw) || this.state.yaw, this.yawMin, this.yawMax);
+    if (Number.isFinite(Number(next.pitch))) this.state.pitch = clamp(Number(next.pitch), this.pitchMin, this.pitchMax);
+    if (Number.isFinite(Number(next.yaw))) this.state.yaw = clamp(Number(next.yaw), this.yawMin, this.yawMax);
   }
 
   beginDrag() {
@@ -49,8 +51,7 @@ export class MapCameraRig {
   }
 
   zoomBy(delta) {
-    const next = clamp(this.state.zoom * Math.exp(Number(delta) || 0), this.minZoom, this.maxZoom);
-    this.state.zoom = next;
+    this.state.zoom = clamp(this.state.zoom * Math.exp(Number(delta) || 0), this.minZoom, this.maxZoom);
   }
 
   rotateBy(deltaYaw, deltaPitch) {
