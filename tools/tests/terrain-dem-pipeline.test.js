@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { encodeTerrainTile, decodeTerrainTile } from "../../src/map/rendering/terrain/TerrainAssetCodec.js";
 import { parseTileList, copernicusTileKey } from "../asset-builder/dem/CopernicusDemSource.js";
+import { coordinateInCoverage } from "../asset-builder/pipelines/TerrainPipeline.js";
 import { TERRAIN_LODS } from "../../src/map/rendering/terrain/TerrainLod.js";
 
 const size = 3;
@@ -20,5 +21,11 @@ assert.equal(copernicusTileKey(38.2, 27.7), "Copernicus_DSM_COG_10_N38_00_E027_0
 assert.equal(copernicusTileKey(-12.2, -7.7), "Copernicus_DSM_COG_10_S13_00_W008_00_DEM");
 const index = parseTileList("foo/Copernicus_DSM_COG_10_N38_00_E027_00_DEM/\nbar/Copernicus_DSM_COG_10_S13_00_W008_00_DEM/");
 assert.deepEqual(index, ["Copernicus_DSM_COG_10_N38_00_E027_00_DEM", "Copernicus_DSM_COG_10_S13_00_W008_00_DEM"]);
+const coverage = [26, 35, 46, 43];
+assert.equal(coordinateInCoverage(26, 35, coverage), true);
+assert.equal(coordinateInCoverage(46, 43, coverage), true);
+assert.equal(coordinateInCoverage(25.999999, 40, coverage), false);
+assert.equal(coordinateInCoverage(40, 43.000001, coverage), false);
+assert.equal(coordinateInCoverage(109, 75, coverage), false);
 assert.equal(TERRAIN_LODS.length, 5);
 console.log("terrain-dem-pipeline.test.js: PASS");
