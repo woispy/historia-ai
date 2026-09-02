@@ -6,7 +6,7 @@ const durationMs = Number(process.env.HISTORIA_FRAME_PROFILING_DURATION_MS || 30
 const output = process.env.HISTORIA_FRAME_PROFILING_OUTPUT || "artifacts/frame-profiling-result.json";
 const mode = process.env.HISTORIA_BENCHMARK_MODE || "paced144";
 
- test("Historia AI frame/pass profiling", async ({ page }) => {
+test("Historia AI frame/pass profiling", async ({ page }) => {
   page.on("console", (msg) => console.log(`PAGE CONSOLE [${msg.type()}]: ${msg.text()}`));
   page.on("pageerror", (error) => console.log(`PAGE ERROR: ${error?.stack || error?.message || error}`));
   page.on("requestfailed", (request) => console.log(`PAGE REQUEST FAILED: ${request.method()} ${request.url()} :: ${request.failure()?.errorText || "unknown"}`));
@@ -27,6 +27,12 @@ const mode = process.env.HISTORIA_BENCHMARK_MODE || "paced144";
   if (result.benchmarkMode !== mode) throw new Error(`Frame profiling mode mismatch: expected ${mode}, got ${result.benchmarkMode}`);
   if (result.gpu.queueSubmits <= 0) throw new Error("Frame profiling missing GPU queue submissions");
   if (mode !== "isolatedPick" && result.gpu.drawCalls <= 0) throw new Error("Frame profiling missing GPU draw calls");
+  if (mode !== "isolatedPick" && !result.passProfiling?.supported) throw new Error("Frame profiling missing pass-level GPU timestamp support");
+  if (mode !== "isolatedPick" && result.passProfiling?.samples <= 0) throw new Error("Frame profiling produced no pass-level GPU samples");
+  if (mode !== "isolatedPick" && result.passProfiling?.dropped !== 0) throw new Error(`Frame profiling dropped pass samples: ${result.passProfiling?.dropped}`);
+  if (mode !== "isolatedPick" && !result.passProfiling?.passes?.cull) throw new Error("Frame profiling missing cull GPU timings");
+  if (mode !== "isolatedPick" && !result.passProfiling?.passes?.finalize) throw new Error("Frame profiling missing finalize GPU timings");
+  if (mode !== "isolatedPick" && !result.passProfiling?.passes?.draw) throw new Error("Frame profiling missing draw GPU timings");
   if (mode !== "paced144-no-picking" && result.picking.accepted <= 0) throw new Error("Frame profiling did not accept any picking operations");
   if (mode !== "paced144-no-picking" && result.picking.completed <= 0) throw new Error("Frame profiling did not observe any completed picking readbacks");
   if (mode !== "paced144-no-picking" && result.pickingPipeline?.commandEncodingAndSetupCpuMs?.count <= 0) throw new Error("Frame profiling missing picking command encoding timings");
