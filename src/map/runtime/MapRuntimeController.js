@@ -28,7 +28,6 @@ export class MapRuntimeController {
     this.handlePointerMove = this.handlePointerMove.bind(this);
     this.handlePointerUp = this.handlePointerUp.bind(this);
     this.handlePointerCancel = this.handlePointerCancel.bind(this);
-    this.handleClick = this.handleClick.bind(this);
     this.handleResize = this.handleResize.bind(this);
   }
 
@@ -40,7 +39,6 @@ export class MapRuntimeController {
     this.canvas.addEventListener("pointermove", this.handlePointerMove);
     this.canvas.addEventListener("pointerup", this.handlePointerUp);
     this.canvas.addEventListener("pointercancel", this.handlePointerCancel);
-    this.canvas.addEventListener("click", this.handleClick);
     this.resizeObserver = typeof ResizeObserver === "function" ? new ResizeObserver(this.handleResize) : null;
     this.resizeObserver?.observe(this.canvas);
     this.handleResize();
@@ -58,7 +56,6 @@ export class MapRuntimeController {
     this.canvas.removeEventListener("pointermove", this.handlePointerMove);
     this.canvas.removeEventListener("pointerup", this.handlePointerUp);
     this.canvas.removeEventListener("pointercancel", this.handlePointerCancel);
-    this.canvas.removeEventListener("click", this.handleClick);
     this.renderer.stop();
   }
 
@@ -137,9 +134,15 @@ export class MapRuntimeController {
 
   handlePointerUp(event) {
     if (!this.drag.active || this.drag.pointerId !== event.pointerId) return;
+    const moved = this.drag.moved;
     event.currentTarget.releasePointerCapture?.(event.pointerId);
     this.drag.active = false;
     this.drag.pointerId = null;
+    this.drag.moved = false;
+    if (moved || this.destroyed) return;
+    const provinceId = this.renderer.pick(event.clientX, event.clientY);
+    if (import.meta.env?.DEV) console.debug("[MapRuntimeController] province click", { clientX: event.clientX, clientY: event.clientY, provinceId });
+    if (provinceId !== null && provinceId !== undefined) this.onProvinceClick?.(provinceId);
   }
 
   handlePointerCancel(event) {
@@ -148,17 +151,6 @@ export class MapRuntimeController {
     this.drag.active = false;
     this.drag.pointerId = null;
     this.drag.moved = false;
-  }
-
-  handleClick(event) {
-    if (this.destroyed) return;
-    if (this.drag.moved) {
-      this.drag.moved = false;
-      return;
-    }
-    const provinceId = this.renderer.pick(event.clientX, event.clientY);
-    if (import.meta.env?.DEV) console.debug("[MapRuntimeController] province click", { clientX: event.clientX, clientY: event.clientY, provinceId });
-    if (provinceId) this.onProvinceClick?.(provinceId);
   }
 
   handleResize() {
