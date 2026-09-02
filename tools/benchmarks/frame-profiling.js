@@ -8,6 +8,9 @@ const params = new URLSearchParams(location.search);
 const durationMs = Number(params.get("durationMs") || 30000);
 const assetUrl = params.get("asset") || "/assets/stress-15k.mapbin";
 const pickIntervalMs = Math.max(16, Number(params.get("pickIntervalMs") || 16));
+const benchmarkMode = params.get("mode") || "paced144";
+const targetHz = 144;
+const targetFrameMs = 1000 / targetHz;
 const canvas = document.querySelector("#map");
 const diagnosticsNode = document.querySelector("#diagnostics");
 const profiler = new FramePassProfiler();
@@ -23,6 +26,8 @@ let benchmarkStart = 0;
 let lastHover = 0;
 let restoreQueueSubmit = null;
 let activePickProbe = null;
+let renderTimer = 0;
+let renderLoopActive = false;
 
 function pushMetric(list, value) {
   if (Number.isFinite(value) && value >= 0) list.push(value);
@@ -72,7 +77,7 @@ function wrapRenderer() {
 
     profiler.recordPickAccepted();
     const queue = renderer.device?.queue;
-    if (queue?.onSubmittedWorkDone) {
+    if (benchmarkMode === "isolatedPick" && queue?.onSubmittedWorkDone) {
       const queueDoneStart = performance.now();
       void queue.onSubmittedWorkDone().then(() => {
         probe.queueDoneAt = performance.now();
@@ -114,60 +119,107 @@ function wrapRenderer() {
   restoreQueueSubmit = () => { prototype.submit = originalSubmit; };
 }
 
-async function main() {
-  const asset = await loadMapBin(assetUrl);
-  if (!WebGPUMapRenderer.isSupported()) throw new Error("WebGPU unavailable");
+async function createRuntime(asset, { startRenderer = true } = {}) {
   renderer = new WebGPUMapRenderer(canvas);
   if (!(await renderer.initialize({ assetSource: asset }))) throw new Error("WebGPU renderer failed to initialize");
-
   canvas.style.width = "3840px";
   canvas.style.height = "2160px";
   renderer.resize(3840, 2160);
   wrapRenderer();
-
   const cameraRig = new MapCameraRig({ minZoom: 1, maxZoom: 96 });
   cameraRig.setState({ x: 0, y: 0, zoom: 2, pitch: 24, yaw: 0 });
   runtime = new MapRuntimeController({ canvas, cameraRig, renderer });
   profiler.start();
-  benchmarkStart = performance.now();
-  runtime.start();
+  if (startRenderer) runtime.start();
+  return cameraRig;
+}
 
+function driveCamera(cameraRig, now, start) {
+  const phase = (now - start) / 7000;
+  cameraRig.setState({ x: Math.sin(phase) * 45, y: Math.cos(phase * 0.7) * 20, zoom: 2 + (Math.sin(phase * 0.5) + 1) * 2 });
+}
+
+async function runUnconstrained(asset) {
+  const cameraRig = await createRuntime(asset);
+  const start = performance.now();
   const frame = (now) => {
     profiler.recordRaf(now);
-    if (now - benchmarkStart < durationMs) {
-      if (Math.round((now - benchmarkStart) / 16.667) % 2 === 0) {
-        const phase = (now - benchmarkStart) / 7000;
-        cameraRig.setState({ x: Math.sin(phase) * 45, y: Math.cos(phase * 0.7) * 20, zoom: 2 + (Math.sin(phase * 0.5) + 1) * 2 });
-      }
+    if (now - start < durationMs) {
+      driveCamera(cameraRig, now, start);
       requestAnimationFrame(frame);
     } else void finish(now);
   };
+  requestAnimationFrame(frame);
+}
 
-  const hover = (now) => {
-    if (now - lastHover >= pickIntervalMs && now - benchmarkStart < durationMs) {
-      lastHover = now;
-      const t = (now - benchmarkStart) / Math.max(1, durationMs);
+async function runPaced144(asset, { withPicking = true } = {}) {
+  const cameraRig = await createRuntime(asset, { startRenderer: false });
+  const start = performance.now();
+  let nextFrame = start;
+  let lastHoverAt = start;
+  renderLoopActive = true;
+
+  const tick = () => {
+    if (!renderLoopActive) return;
+    const now = performance.now();
+    if (now - start >= durationMs) {
+      renderLoopActive = false;
+      void finish(now);
+      return;
+    }
+    profiler.recordRaf(now);
+    driveCamera(cameraRig, now, start);
+    renderer.render();
+    nextFrame += targetFrameMs;
+    if (withPicking && now - lastHoverAt >= pickIntervalMs) {
+      lastHoverAt = now;
+      const t = (now - start) / Math.max(1, durationMs);
       const x = (Math.sin(t * Math.PI * 12) * 0.5 + 0.5) * 3840;
       const y = (Math.cos(t * Math.PI * 8) * 0.5 + 0.5) * 2160;
-      runtime.queueHover(x, y);
+      renderer.setHoveredProvinceId(renderer.pick(x, y));
     }
-    if (now - benchmarkStart < durationMs) requestAnimationFrame(hover);
+    renderTimer = Math.max(0, nextFrame - performance.now());
+    setTimeout(tick, renderTimer);
   };
+  tick();
+}
 
-  requestAnimationFrame(frame);
-  requestAnimationFrame(hover);
+async function runIsolatedPick(asset) {
+  await createRuntime(asset, { startRenderer: false });
+  const start = performance.now();
+  let accepted = 0;
+  let completed = 0;
+  const issuePick = () => {
+    if (performance.now() - start >= durationMs) {
+      void finish(performance.now());
+      return;
+    }
+    const x = 1920 + Math.sin(accepted * 0.37) * 1200;
+    const y = 1080 + Math.cos(accepted * 0.29) * 700;
+    const before = renderer.pickPending;
+    renderer.pick(x, y);
+    if (!before && renderer.pickPending) accepted += 1;
+    const check = () => {
+      if (!renderer.pickPending) { completed += 1; setTimeout(issuePick, pickIntervalMs); }
+      else setTimeout(check, 0);
+    };
+    setTimeout(check, 0);
+  };
+  issuePick();
 }
 
 async function finish(now) {
+  renderLoopActive = false;
+  if (renderTimer) clearTimeout(renderTimer);
   runtime?.stop();
   restoreQueueSubmit?.();
   restoreQueueSubmit = null;
-  await renderer.collectTelemetry?.();
-  const gpu = renderer.getTelemetrySnapshot?.() ?? null;
+  await renderer?.collectTelemetry?.();
+  const gpu = renderer?.getTelemetrySnapshot?.() ?? null;
   const profiling = profiler.summary(now);
   const result = {
     ...profiling,
-    benchmarkMode: "unconstrained",
+    benchmarkMode,
     pickingProbe: { intervalMs: pickIntervalMs, requestRateHz: 1000 / pickIntervalMs },
     pickingPipeline: {
       commandEncodingAndSetupCpuMs: summarize(pickingPipeline.commandEncodingAndSetupCpuMs),
@@ -175,11 +227,11 @@ async function finish(now) {
       queueWorkDoneMs: summarize(pickingPipeline.queueWorkDoneMs),
       readbackSyncMs: summarize(pickingPipeline.readbackSyncMs),
     },
-    target: { hz: 144, frameMs: 1000 / 144, viewport: "3840x2160", dpr: 2, internal: `${canvas.width}x${canvas.height}` },
+    target: { hz: targetHz, frameMs: targetFrameMs, viewport: "3840x2160", dpr: 2, internal: `${canvas.width}x${canvas.height}` },
     gpu: gpu ? { ...gpu, drawCalls: gpu.drawCalls, gpuTiming: gpu.gpuTiming, gpuTimingScope: gpu.gpuTimingScope, gpuTimeMs: gpu.gpuTimeMs, timestampSamplesDropped: gpu.timestampSamplesDropped, timestampSamplesZero: gpu.timestampSamplesZero, timestampError: gpu.timestampError } : null,
     assetUrl,
-    provinceCount: renderer.assetSource?.provinceCount ?? null,
-    geometryPointCount: renderer.assetSource?.geometryPointCount ?? null,
+    provinceCount: renderer?.assetSource?.provinceCount ?? null,
+    geometryPointCount: renderer?.assetSource?.geometryPointCount ?? null,
   };
   diagnosticsNode.textContent = JSON.stringify(result, null, 2);
   window.__HISTORIA_FRAME_PROFILING_RESULT__ = result;
@@ -187,7 +239,17 @@ async function finish(now) {
   console.log("HISTORIA_FRAME_PROFILING_RESULT", JSON.stringify(result));
 }
 
+async function main() {
+  const asset = await loadMapBin(assetUrl);
+  if (!WebGPUMapRenderer.isSupported()) throw new Error("WebGPU unavailable");
+  if (benchmarkMode === "unconstrained") return runUnconstrained(asset);
+  if (benchmarkMode === "isolatedPick") return runIsolatedPick(asset);
+  return runPaced144(asset, { withPicking: benchmarkMode !== "paced144-no-picking" });
+}
+
 main().catch((error) => {
+  renderLoopActive = false;
+  if (renderTimer) clearTimeout(renderTimer);
   restoreQueueSubmit?.();
   restoreQueueSubmit = null;
   const result = { error: String(error?.stack || error) };
