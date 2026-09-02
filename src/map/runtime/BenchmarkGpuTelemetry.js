@@ -33,7 +33,6 @@ export function createWebGpuBenchmarkTelemetry(device) {
       }
     }
   }
-
   function beginFrame() {
     frameCounter += 1;
     if (disposed || telemetry.gpuTiming !== "supported" || frameCounter % TIMESTAMP_SAMPLE_INTERVAL_FRAMES !== 0) return -1;
@@ -52,7 +51,6 @@ export function createWebGpuBenchmarkTelemetry(device) {
     telemetry.timestampError = "WebGPU timestamp ring buffer exhausted";
     return -1;
   }
-
   function getTimestampWrites(slotId, phase) {
     const slot = slots[slotId];
     if (!slot?.querySet || slot.state !== SLOT_STATES.RECORDING) return undefined;
@@ -67,7 +65,6 @@ export function createWebGpuBenchmarkTelemetry(device) {
       ? { querySet: slot.querySet, beginningOfPassWriteIndex: 0 }
       : { querySet: slot.querySet, endOfPassWriteIndex: 1 };
   }
-
   function writeTimestamp(encoder, slotId, phase) {
     const slot = slots[slotId];
     if (!slot?.querySet || slot.state !== SLOT_STATES.RECORDING || typeof encoder?.writeTimestamp !== "function") return false;
@@ -88,7 +85,6 @@ export function createWebGpuBenchmarkTelemetry(device) {
       return false;
     }
   }
-
   function finishFrame(encoder, slotId) {
     const slot = slots[slotId];
     if (!slot?.querySet || slot.state !== SLOT_STATES.RECORDING) return false;
@@ -110,7 +106,6 @@ export function createWebGpuBenchmarkTelemetry(device) {
       return false;
     }
   }
-
   function recordSubmit(slotId = -1) {
     telemetry.queueSubmits += 1;
     if (slotId >= 0) {
@@ -120,7 +115,6 @@ export function createWebGpuBenchmarkTelemetry(device) {
     }
     for (const slot of slots) if (slot.state === SLOT_STATES.RESOLVED && !slot.submitted) slot.submitted = true;
   }
-
   async function collect() {
     if (collectPromise || disposed) return collectPromise;
     const candidates = slots.filter(slot => slot.state === SLOT_STATES.RESOLVED && slot.submitted);
@@ -190,7 +184,6 @@ export function createWebGpuBenchmarkTelemetry(device) {
     })();
     return collectPromise;
   }
-
   function recordComputePass() { telemetry.computePasses += 1; }
   function recordDispatch() { telemetry.dispatchCalls += 1; }
   function recordRenderPass() { telemetry.renderPasses += 1; }
@@ -198,34 +191,13 @@ export function createWebGpuBenchmarkTelemetry(device) {
   function recordPickingRenderPass() { telemetry.picking.renderPasses += 1; }
   function recordPickingDraw() { telemetry.picking.drawCalls += 1; }
   function recordPickingSubmit() { telemetry.picking.queueSubmits += 1; }
-
   function snapshot() {
-    return {
-      computePasses: telemetry.computePasses,
-      dispatchCalls: telemetry.dispatchCalls,
-      renderPasses: telemetry.renderPasses,
-      drawCalls: telemetry.drawCalls,
-      queueSubmits: telemetry.queueSubmits,
-      picking: { ...telemetry.picking },
-      gpuTiming: telemetry.gpuTiming,
-      gpuTimingScope: telemetry.gpuTimingScope,
-      gpuTimeMs: telemetry.gpuSamples.length ? summarize(telemetry.gpuSamples) : null,
-      timestampSamplesDropped: telemetry.timestampSamplesDropped,
-      timestampSamplesZero: telemetry.timestampSamplesZero,
-      timestampError: telemetry.timestampError,
-      timestampRawSamples: [...telemetry.timestampRawSamples],
-      timestampSampleIntervalFrames: TIMESTAMP_SAMPLE_INTERVAL_FRAMES,
-      timestampRingSlotCount: RING_SLOT_COUNT,
-      adapter: telemetry.adapter,
-    };
+    return { computePasses: telemetry.computePasses, dispatchCalls: telemetry.dispatchCalls, renderPasses: telemetry.renderPasses, drawCalls: telemetry.drawCalls, queueSubmits: telemetry.queueSubmits, picking: { ...telemetry.picking }, gpuTiming: telemetry.gpuTiming, gpuTimingScope: telemetry.gpuTimingScope, gpuTimeMs: telemetry.gpuSamples.length ? summarize(telemetry.gpuSamples) : null, timestampSamplesDropped: telemetry.timestampSamplesDropped, timestampSamplesZero: telemetry.timestampSamplesZero, timestampError: telemetry.timestampError, timestampRawSamples: [...telemetry.timestampRawSamples], timestampSampleIntervalFrames: TIMESTAMP_SAMPLE_INTERVAL_FRAMES, timestampRingSlotCount: RING_SLOT_COUNT, adapter: telemetry.adapter };
   }
-
   function dispose() {
     disposed = true;
     for (const slot of slots) {
-      try {
-        slot.stagingBuffer?.unmap?.();
-      } catch {}
+      try { slot.stagingBuffer?.unmap?.(); } catch {}
       slot.stagingBuffer?.destroy?.();
       slot.resolveBuffer?.destroy?.();
       slot.querySet?.destroy?.();
@@ -238,36 +210,8 @@ export function createWebGpuBenchmarkTelemetry(device) {
     frameCounter = 0;
     nextRingSlot = 0;
   }
-
   return { telemetry, beginFrame, getTimestampWrites, writeTimestamp, finishFrame, collect, snapshot, recordComputePass, recordDispatch, recordRenderPass, recordDraw, recordSubmit, recordPickingRenderPass, recordPickingDraw, recordPickingSubmit, dispose };
 }
-
-function readAdapterInfo(device) {
-  const info = device?.adapterInfo;
-  if (!info) return null;
-  return {
-    vendor: info.vendor || null,
-    architecture: info.architecture || null,
-    device: info.device || null,
-    description: info.description || null,
-    isFallbackAdapter: typeof info.isFallbackAdapter === "boolean" ? info.isFallbackAdapter : null,
-  };
-}
-
-function summarize(values) {
-  const sorted = [...values].sort((a, b) => a - b);
-  return {
-    count: values.length,
-    average: values.reduce((sum, value) => sum + value, 0) / values.length,
-    p95: percentile(sorted, 0.95),
-    p99: percentile(sorted, 0.99),
-    max: sorted[sorted.length - 1],
-    min: sorted[0],
-  };
-}
-
-function percentile(sorted, quantile) {
-  if (!sorted.length) return null;
-  const index = Math.min(sorted.length - 1, Math.max(0, Math.ceil(quantile * sorted.length) - 1));
-  return sorted[index];
-}
+function readAdapterInfo(device) { const info = device?.adapterInfo; if (!info) return null; return { vendor: info.vendor || null, architecture: info.architecture || null, device: info.device || null, description: info.description || null, isFallbackAdapter: typeof info.isFallbackAdapter === "boolean" ? info.isFallbackAdapter : null }; }
+function summarize(values) { const sorted = [...values].sort((a, b) => a - b); return { count: values.length, average: values.reduce((sum, value) => sum + value, 0) / values.length, p95: percentile(sorted, 0.95), p99: percentile(sorted, 0.99), max: sorted[sorted.length - 1], min: sorted[0] }; }
+function percentile(sorted, quantile) { if (!sorted.length) return null; const index = Math.min(sorted.length - 1, Math.max(0, Math.ceil(quantile * sorted.length) - 1)); return sorted[index]; }
