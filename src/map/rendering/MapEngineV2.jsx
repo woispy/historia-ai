@@ -17,16 +17,9 @@ export default function MapEngineV2({ selectedProvinceId = null, onProvinceClick
 
     loadMapBin(assetUrl).then((assetSource) => {
       if (cancelled) return;
-      const cameraRig = new MapCameraRig({
-        minZoom: 1,
-        maxZoom: 96,
-        pitch: 0,
-        pitchMin: 0,
-        pitchMax: 0,
-        yaw: 0,
-        yawMin: 0,
-        yawMax: 0,
-      });
+      // Use the production frame-driven 2.5D rig defaults: pitch 10°..42°,
+      // yaw -12°..+12°, logarithmic zoom and inertial pan/rotation.
+      const cameraRig = new MapCameraRig({ minZoom: 1, maxZoom: 96 });
       const renderer = new ProductionBinaryMapRenderer(canvas);
       if (!renderer.initialize({ assetSource })) {
         renderer.dispose();
