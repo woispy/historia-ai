@@ -1,4 +1,4 @@
-import { decodeTerrainTile } from "../../../tools/asset-builder/dem/TerrainAssetCodec.js";
+import { decodeTerrainTile } from "./TerrainAssetCodec.js";
 
 export async function loadTerrainManifest(url = "/assets/terrain/manifest.json") {
   const response = await fetch(url, { cache: "no-cache" });
