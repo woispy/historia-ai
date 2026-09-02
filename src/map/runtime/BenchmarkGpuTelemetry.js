@@ -115,11 +115,14 @@ export function createWebGpuBenchmarkTelemetry(device) {
     for (const slot of candidates) slot.state = SLOT_STATES.READBACK_PENDING;
     collectPromise = (async () => {
       try {
+        // Chromium/D3D11 can expose timestamp-query while leaving a direct
+        // MAP_READ request pending until the queue has completed the submit.
+        // Keep the explicit completion barrier here; the standalone probe uses
+        // the same ordering and is the known-good reference on this backend.
+        await device.queue.onSubmittedWorkDone();
         for (const slot of candidates) {
           let mapped = false;
           try {
-            // mapAsync guarantees ordering with work submitted before this call.
-            // Do not gate continuous telemetry on a separate queue-idle promise.
             await slot.stagingBuffer.mapAsync(GPUMapMode.READ, 0, QUERY_BYTES_PER_SLOT);
             mapped = true;
             const data = new BigUint64Array(slot.stagingBuffer.getMappedRange(0, QUERY_BYTES_PER_SLOT)).slice();
