@@ -439,21 +439,6 @@ function createAnchorFallbackPolygon(centroid, _requiresLandSafe = false, physic
     }
   }
 
-  const shore = findNearestLakeShore(centroid);
-  if (shore) {
-    const outward = [shore.shore[0] - shore.lakeCenter[0], shore.shore[1] - shore.lakeCenter[1]];
-    const length = Math.hypot(outward[0], outward[1]) || 1;
-    const unit = [outward[0] / length, outward[1] / length];
-    for (const sign of [1, -1]) {
-      for (const distance of [0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.35, 0.5, 0.75]) {
-        addCandidate([
-          shore.shore[0] + unit[0] * distance * sign,
-          shore.shore[1] + unit[1] * distance * sign,
-        ], `lake-shore-sign${sign}-distance${distance}`);
-      }
-    }
-  }
-
   if (diagnostic) {
     console.log("[Phase2D][phrygia-uluborlu][candidate-summary]", {
       seedCount: seeds.length,
