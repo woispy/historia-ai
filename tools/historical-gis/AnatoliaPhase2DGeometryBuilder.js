@@ -370,57 +370,68 @@ function findNearestLakeShore(point) {
   return winner;
 }
 
-function createAnchorFallbackPolygon(centroid, requiresLandSafe = false, physicalLandAnchor = null) {
+function createAnchorFallbackPolygon(centroid, _requiresLandSafe = false, physicalLandAnchor = null) {
   const polygonRadii = [0.002, 0.001, 0.0005, 0.00025, 0.0001, 0.00005];
   const searchPasses = [
     { radialStep: 0.0025, maxRadius: 0.25, directions: 32 },
     { radialStep: 0.005, maxRadius: 0.75, directions: 32 },
     { radialStep: 0.01, maxRadius: 1.5, directions: 32 },
   ];
+  const candidateCenters = [];
+  const seen = new Set();
 
-  if (!requiresLandSafe) {
-    return buildFallbackPolygon(centroid, polygonRadii.slice(0, 2));
+  const addCandidate = (point) => {
+    if (!Array.isArray(point) || point.length < 2) return;
+    if (!isWithinAnatoliaEnvelope(point) || !isPhysicalLandPoint(point)) return;
+    const key = `${point[0].toFixed(6)}:${point[1].toFixed(6)}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    candidateCenters.push(point);
+  };
+
+  // Deterministic priority: explicit physical reconciliation anchor first,
+  // then the historical centroid, then an expanding physical-land search.
+  addCandidate(physicalLandAnchor);
+  addCandidate(centroid);
+
+  const seeds = candidateCenters.slice();
+  for (const seed of seeds) {
+    for (const search of searchPasses) {
+      for (let radius = search.radialStep; radius <= search.maxRadius; radius += search.radialStep) {
+        for (let direction = 0; direction < search.directions; direction += 1) {
+          const angle = (direction / search.directions) * Math.PI * 2;
+          addCandidate([
+            seed[0] + Math.cos(angle) * radius,
+            seed[1] + Math.sin(angle) * radius,
+          ]);
+        }
+      }
+    }
   }
 
-  const explicitAnchor = physicalLandAnchor ?? PHYSICAL_LAND_ANCHORS["bithynia-nicaea"];
-  if (explicitAnchor && isWithinAnatoliaEnvelope(explicitAnchor) && isUsableCartographicPoint(explicitAnchor)) {
-    const polygon = buildFallbackPolygon(explicitAnchor, polygonRadii);
-    if (polygon.length >= 3) return polygon;
-  }
-
+  // The shoreline is a deterministic physical feature rather than a
+  // lake-specific algorithm. Include its nearby land candidates in the same
+  // generic candidate stream so lake and non-lake provinces share one path.
   const shore = findNearestLakeShore(centroid);
   if (shore) {
     const outward = [shore.shore[0] - shore.lakeCenter[0], shore.shore[1] - shore.lakeCenter[1]];
     const length = Math.hypot(outward[0], outward[1]) || 1;
     const unit = [outward[0] / length, outward[1] / length];
-    const shoreDistances = [0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.35, 0.5, 0.75];
     for (const sign of [1, -1]) {
-      for (const distance of shoreDistances) {
-        const center = [
+      for (const distance of [0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.35, 0.5, 0.75]) {
+        addCandidate([
           shore.shore[0] + unit[0] * distance * sign,
           shore.shore[1] + unit[1] * distance * sign,
-        ];
-        if (!isWithinAnatoliaEnvelope(center) || !isUsableCartographicPoint(center)) continue;
-        const polygon = buildFallbackPolygon(center, polygonRadii);
-        if (polygon.length >= 3) return polygon;
+        ]);
       }
     }
   }
 
-  for (const search of searchPasses) {
-    for (let radius = 0; radius <= search.maxRadius; radius += search.radialStep) {
-      for (let direction = 0; direction < search.directions; direction += 1) {
-        const angle = (direction / search.directions) * Math.PI * 2;
-        const center = [
-          centroid[0] + Math.cos(angle) * radius,
-          centroid[1] + Math.sin(angle) * radius,
-        ];
-        if (!isWithinAnatoliaEnvelope(center) || !isUsableCartographicPoint(center)) continue;
-        const polygon = buildFallbackPolygon(center, polygonRadii);
-        if (polygon.length >= 3) return polygon;
-      }
-    }
+  for (const center of candidateCenters) {
+    const polygon = buildFallbackPolygon(center, polygonRadii);
+    if (polygon.length >= 3) return polygon;
   }
+
   return [];
 }
 
@@ -528,7 +539,7 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     if (!polygons.length) {
       const fallback = createAnchorFallbackPolygon(
         metadata.centroid,
-        metadata.terrain === "lake",
+        false,
         PHYSICAL_LAND_ANCHORS[metadata.id] ?? metadata.physicalLandAnchor ?? null,
       );
       if (fallback.length < 3) throw new Error(`Phase 2D produced no physically valid geometry for ${metadata.id}`);
