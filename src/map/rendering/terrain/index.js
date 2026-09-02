@@ -1,3 +1,5 @@
+export * from "./TerrainAssetCodec.js";
+export * from "./TerrainAssetLoader.js";
 export * from "./TerrainGeometry.js";
 export * from "./TerrainLod.js";
 export * from "./TerrainSeams.js";
