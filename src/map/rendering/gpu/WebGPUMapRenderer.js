@@ -6,12 +6,13 @@ const ID_CLEAR = "vec4<f32>(0.0,0.0,0.0,0.0)";
 
 const CULL_WGSL = `
 struct Camera { viewProj: mat4x4<f32>, zoom: f32, _pad: vec3<f32> };
-@group(0) @binding(0) var<storage, read> tiles: array<u32>;
-@group(0) @binding(1) var<storage, read> lods: array<u32>;
-@group(0) @binding(2) var<storage, read> bounds: array<f32>;
-@group(0) @binding(3) var<storage, read_write> indices: array<u32>;
-@group(0) @binding(4) var<storage, read_write> indexProvinceIds: array<u32>;
-@group(0) @binding(5) var<storage, read_write> counter: atomic<u32>;
+@group(0) @binding(0) var<uniform> camera: Camera;
+@group(0) @binding(1) var<storage, read> tiles: array<u32>;
+@group(0) @binding(2) var<storage, read> lods: array<u32>;
+@group(0) @binding(3) var<storage, read> bounds: array<f32>;
+@group(0) @binding(4) var<storage, read_write> indices: array<u32>;
+@group(0) @binding(5) var<storage, read_write> indexProvinceIds: array<u32>;
+@group(0) @binding(6) var<storage, read_write> counter: atomic<u32>;
 fn visible(minX:f32,minY:f32,maxX:f32,maxY:f32)->bool { let corners=array<vec2<f32>,4>(vec2(minX,minY),vec2(maxX,minY),vec2(minX,maxY),vec2(maxX,maxY)); for(var j=0u;j<4u;j=j+1u){ let c=camera.viewProj*vec4<f32>(corners[j],0.0,1.0); if(c.x>=-c.w&&c.x<=c.w&&c.y>=-c.w&&c.y<=c.w&&c.z>=-c.w&&c.z<=c.w){return true;} } return false; }
 fn lodRange(province:u32)->vec2<u32>{ let b=province*4u; return vec2(lods[b],lods[b+1u]); }
 @compute @workgroup_size(64)
@@ -26,6 +27,7 @@ fn finalize(){ indirect[0]=atomicLoad(&counter); indirect[1]=1u; indirect[2]=0u;
 `;
 
 const RENDER_WGSL = `
+enable primitive_index;
 struct Camera { viewProj: mat4x4<f32> };
 @group(0) @binding(0) var<uniform> camera: Camera;
 @group(0) @binding(1) var<storage, read> indexProvinceIds: array<u32>;
@@ -34,6 +36,7 @@ struct Camera { viewProj: mat4x4<f32> };
 `;
 
 const PICK_WGSL = `
+enable primitive_index;
 struct Camera { viewProj: mat4x4<f32>, pickNdc: vec2<f32>, _pad: vec2<f32> };
 @group(0) @binding(0) var<uniform> camera: Camera;
 @group(0) @binding(1) var<storage, read> indexProvinceIds: array<u32>;
@@ -48,7 +51,7 @@ export class WebGPUMapRenderer extends MapRendererContract {
   async initialize({assetSource}={}){if(this.destroyed)throw new Error("Cannot initialize a disposed WebGPU renderer");if(!assetSource||!WebGPUMapRenderer.isSupported())return false;const adapter=await navigator.gpu.requestAdapter({powerPreference:"high-performance"});if(!adapter)return false;this.adapter=adapter;const requiredFeatures=[];if(adapter.features?.has?.("timestamp-query"))requiredFeatures.push("timestamp-query");this.device=await adapter.requestDevice({requiredFeatures});this.telemetry=createWebGpuBenchmarkTelemetry(this.device);this.context=this.canvas.getContext("webgpu");if(!this.context){this.dispose();return false;}this.format=navigator.gpu.getPreferredCanvasFormat();this.context.configure({device:this.device,format:this.format,alphaMode:"opaque"});this.assetSource=assetSource;this.buffers=this.createAssetBuffers(assetSource);this.createCullingPipeline();this.createFinalizePipeline();this.createRenderPipeline();this.createPickingResources();this.createPickPipeline();return true;}
   createAssetBuffers(source){const ids=this.makeBuffer(source.ids,GPUBufferUsage.STORAGE);const bd=new Float32Array(source.provinceCount*4);for(let i=0;i<source.provinceCount;i++)bd.set([source.minX[i],source.minY[i],source.maxX[i],source.maxY[i]],i*4);const bounds=this.makeBuffer(bd,GPUBufferUsage.STORAGE);const geometry=this.makeBuffer(source.geometry,GPUBufferUsage.VERTEX);const tiles=this.makeBuffer(source.tileIndex,GPUBufferUsage.STORAGE);const lods=this.makeBuffer(source.lodRanges,GPUBufferUsage.STORAGE);const maxIndices=Math.max(3,source.geometryPointCount*3);const indices=this.device.createBuffer({size:maxIndices*4,usage:GPUBufferUsage.STORAGE|GPUBufferUsage.INDEX});const indexProvinceIds=this.device.createBuffer({size:maxIndices*4,usage:GPUBufferUsage.STORAGE});const counter=this.device.createBuffer({size:4,usage:GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_DST});const indirect=this.device.createBuffer({size:20,usage:GPUBufferUsage.STORAGE|GPUBufferUsage.INDIRECT|GPUBufferUsage.COPY_DST});return{ids,bounds,geometry,tiles,lods,indices,indexProvinceIds,counter,indirect};}
   makeBuffer(view,usage){const data=new Uint8Array(view.buffer,view.byteOffset,view.byteLength);const size=Math.max(4,Math.ceil(data.byteLength/4)*4);const b=this.device.createBuffer({size,usage:usage|GPUBufferUsage.COPY_DST});if(data.byteLength)this.device.queue.writeBuffer(b,0,data);return b;}
-  createCullingPipeline(){const d=this.device,module=d.createShaderModule({code:CULL_WGSL});this.buffers.camera=d.createBuffer({size:80,usage:GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST});const entries=[{binding:0,visibility:GPUShaderStage.COMPUTE,buffer:{type:"read-only-storage"}},{binding:1,visibility:GPUShaderStage.COMPUTE,buffer:{type:"read-only-storage"}},{binding:2,visibility:GPUShaderStage.COMPUTE,buffer:{type:"read-only-storage"}},{binding:3,visibility:GPUShaderStage.COMPUTE,buffer:{type:"storage"}},{binding:4,visibility:GPUShaderStage.COMPUTE,buffer:{type:"storage"}},{binding:5,visibility:GPUShaderStage.COMPUTE,buffer:{type:"storage"}}];const layout=d.createBindGroupLayout({entries});this.cullPipeline=d.createComputePipeline({layout:d.createPipelineLayout({bindGroupLayouts:[layout]}),compute:{module,entryPoint:"cull"}});this.cullBindGroup=d.createBindGroup({layout,entries:[{binding:0,resource:{buffer:this.buffers.tiles}},{binding:1,resource:{buffer:this.buffers.lods}},{binding:2,resource:{buffer:this.buffers.bounds}},{binding:3,resource:{buffer:this.buffers.indices}},{binding:4,resource:{buffer:this.buffers.indexProvinceIds}},{binding:5,resource:{buffer:this.buffers.counter}}]});}
+  createCullingPipeline(){const d=this.device,module=d.createShaderModule({code:CULL_WGSL});this.buffers.camera=d.createBuffer({size:80,usage:GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST});const entries=[{binding:0,visibility:GPUShaderStage.COMPUTE,buffer:{type:"uniform"}},{binding:1,visibility:GPUShaderStage.COMPUTE,buffer:{type:"read-only-storage"}},{binding:2,visibility:GPUShaderStage.COMPUTE,buffer:{type:"read-only-storage"}},{binding:3,visibility:GPUShaderStage.COMPUTE,buffer:{type:"read-only-storage"}},{binding:4,visibility:GPUShaderStage.COMPUTE,buffer:{type:"storage"}},{binding:5,visibility:GPUShaderStage.COMPUTE,buffer:{type:"storage"}},{binding:6,visibility:GPUShaderStage.COMPUTE,buffer:{type:"storage"}}];const layout=d.createBindGroupLayout({entries});this.cullPipeline=d.createComputePipeline({layout:d.createPipelineLayout({bindGroupLayouts:[layout]}),compute:{module,entryPoint:"cull"}});this.cullBindGroup=d.createBindGroup({layout,entries:[{binding:0,resource:{buffer:this.buffers.camera}},{binding:1,resource:{buffer:this.buffers.tiles}},{binding:2,resource:{buffer:this.buffers.lods}},{binding:3,resource:{buffer:this.buffers.bounds}},{binding:4,resource:{buffer:this.buffers.indices}},{binding:5,resource:{buffer:this.buffers.indexProvinceIds}},{binding:6,resource:{buffer:this.buffers.counter}}]});}
   createFinalizePipeline(){const d=this.device,module=d.createShaderModule({code:FINALIZE_WGSL}),layout=d.createBindGroupLayout({entries:[{binding:0,visibility:GPUShaderStage.COMPUTE,buffer:{type:"storage"}},{binding:1,visibility:GPUShaderStage.COMPUTE,buffer:{type:"storage"}}]});this.finalizePipeline=d.createComputePipeline({layout:d.createPipelineLayout({bindGroupLayouts:[layout]}),compute:{module,entryPoint:"finalize"}});this.finalizeBindGroup=d.createBindGroup({layout,entries:[{binding:0,resource:{buffer:this.buffers.counter}},{binding:1,resource:{buffer:this.buffers.indirect}}]});}
   createRenderPipeline(){const d=this.device,module=d.createShaderModule({code:RENDER_WGSL});this.buffers.renderCamera=d.createBuffer({size:64,usage:GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST});this.renderPipeline=d.createRenderPipeline({layout:"auto",vertex:{module,entryPoint:"vs",buffers:[{arrayStride:8,attributes:[{shaderLocation:0,offset:0,format:"float32x2"}]}]},fragment:{module,entryPoint:"fs",targets:[{format:this.format}]},primitive:{topology:"triangle-list"}});this.renderBindGroup=d.createBindGroup({layout:this.renderPipeline.getBindGroupLayout(0),entries:[{binding:0,resource:{buffer:this.buffers.renderCamera}},{binding:1,resource:{buffer:this.buffers.indexProvinceIds}}]});}
   createPickingResources(){this.pickTexture=this.device.createTexture({size:{width:1,height:1},format:"rgba8unorm",usage:GPUTextureUsage.RENDER_ATTACHMENT|GPUTextureUsage.COPY_SRC});this.pickReadback=this.device.createBuffer({size:256,usage:GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ});}
