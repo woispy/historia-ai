@@ -1,4 +1,4 @@
-const RING_SLOT_COUNT = 32;
+const RING_SLOT_COUNT = 8;
 const QUERY_VALUES_PER_SLOT = 2;
 const QUERY_BYTES_PER_SLOT = QUERY_VALUES_PER_SLOT * 8;
 const RESOLVE_BUFFER_SIZE = 256;
@@ -9,7 +9,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
   const telemetry = { gpuTiming: "unsupported", gpuTimingScope: "compute-cull-finalize", computePasses: 0, dispatchCalls: 0, renderPasses: 0, drawCalls: 0, queueSubmits: 0, picking: { renderPasses: 0, drawCalls: 0, queueSubmits: 0 }, gpuSamples: [], timestampSamplesDropped: 0, timestampSamplesZero: 0, timestampError: null, timestampRawSamples: [], adapter: readAdapterInfo(device) };
   let frameCounter = 0;
   let nextRingSlot = 0;
-  let collectPromise = null;
+  let collectScheduled = false;
   let disposed = false;
   const slots = Array.from({ length: RING_SLOT_COUNT }, (_, slot) => ({ slot, state: SLOT_STATES.FREE, submitted: false, beginWritten: false, endWritten: false, querySet: null, resolveBuffer: null, stagingBuffer: null }));
   const timestampSupported = Boolean(device?.features?.has?.("timestamp-query"));
@@ -23,10 +23,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
       telemetry.gpuTiming = "supported";
     } catch (error) {
       telemetry.timestampError = String(error?.message || error);
-      for (const slot of slots) {
-        slot.querySet?.destroy?.(); slot.resolveBuffer?.destroy?.(); slot.stagingBuffer?.destroy?.();
-        slot.querySet = null; slot.resolveBuffer = null; slot.stagingBuffer = null;
-      }
+      for (const slot of slots) { slot.querySet?.destroy?.(); slot.resolveBuffer?.destroy?.(); slot.stagingBuffer?.destroy?.(); slot.querySet = null; slot.resolveBuffer = null; slot.stagingBuffer = null; }
     }
   }
   function beginFrame() {
@@ -37,7 +34,10 @@ export function createWebGpuBenchmarkTelemetry(device) {
       const slot = slots[index];
       if (slot.state !== SLOT_STATES.FREE) continue;
       nextRingSlot = (index + 1) % RING_SLOT_COUNT;
-      slot.state = SLOT_STATES.RECORDING; slot.submitted = false; slot.beginWritten = false; slot.endWritten = false;
+      slot.state = SLOT_STATES.RECORDING;
+      slot.submitted = false;
+      slot.beginWritten = false;
+      slot.endWritten = false;
       return slot.slot;
     }
     telemetry.timestampSamplesDropped += 1;
@@ -47,17 +47,11 @@ export function createWebGpuBenchmarkTelemetry(device) {
   function writeTimestamp(encoder, slotId, phase) {
     const slot = slots[slotId];
     if (!slot?.querySet || slot.state !== SLOT_STATES.RECORDING || typeof encoder?.writeTimestamp !== "function") return false;
-    const isBegin = phase === "begin"; const isEnd = phase === "end";
-    if (!isBegin && !isEnd) throw new Error(`Unknown timestamp phase: ${phase}`);
-    if (isBegin && slot.beginWritten) return false;
-    if (isEnd && (!slot.beginWritten || slot.endWritten)) return false;
-    try {
-      encoder.writeTimestamp(slot.querySet, isEnd ? 1 : 0);
-      if (isBegin) slot.beginWritten = true; else slot.endWritten = true;
-      return true;
-    } catch (error) {
-      telemetry.timestampSamplesDropped += 1; telemetry.timestampError = String(error?.message || error); slot.state = SLOT_STATES.FREE; return false;
-    }
+    if (phase === "begin") { if (slot.beginWritten) return false; slot.beginWritten = true; }
+    else if (phase === "end") { if (!slot.beginWritten || slot.endWritten) return false; slot.endWritten = true; }
+    else throw new Error(`Unknown timestamp phase: ${phase}`);
+    try { encoder.writeTimestamp(slot.querySet, phase === "end" ? 1 : 0); return true; }
+    catch (error) { telemetry.timestampSamplesDropped += 1; telemetry.timestampError = String(error?.message || error); slot.state = SLOT_STATES.FREE; return false; }
   }
   function finishFrame(encoder, slotId) {
     const slot = slots[slotId];
@@ -66,43 +60,39 @@ export function createWebGpuBenchmarkTelemetry(device) {
     try { encoder.resolveQuerySet(slot.querySet, 0, QUERY_VALUES_PER_SLOT, slot.resolveBuffer, 0); encoder.copyBufferToBuffer(slot.resolveBuffer, 0, slot.stagingBuffer, 0, QUERY_BYTES_PER_SLOT); slot.state = SLOT_STATES.RESOLVED; return true; }
     catch (error) { telemetry.timestampSamplesDropped += 1; telemetry.timestampError = String(error?.message || error); slot.state = SLOT_STATES.FREE; return false; }
   }
-  function recordSubmit(slotId = -1) {
-    telemetry.queueSubmits += 1;
-    if (slotId >= 0) { const slot = slots[slotId]; if (slot?.state === SLOT_STATES.RESOLVED) slot.submitted = true; return; }
-    for (const slot of slots) if (slot.state === SLOT_STATES.RESOLVED && !slot.submitted) slot.submitted = true;
+  function recordSubmit(slotId = -1) { telemetry.queueSubmits += 1; if (slotId >= 0) { const slot = slots[slotId]; if (slot?.state === SLOT_STATES.RESOLVED) slot.submitted = true; } }
+  function scheduleCollect() {
+    if (disposed || collectScheduled) return;
+    if (!slots.some(slot => slot.state === SLOT_STATES.RESOLVED && slot.submitted)) return;
+    collectScheduled = true;
+    queueMicrotask(() => { void collectReady(); });
   }
-  async function collect() {
-    if (collectPromise || disposed) return collectPromise;
-    const candidates = slots.filter(slot => slot.state === SLOT_STATES.RESOLVED && slot.submitted);
-    if (!candidates.length) return;
-    for (const slot of candidates) slot.state = SLOT_STATES.READBACK_PENDING;
-    collectPromise = (async () => {
-      try {
-        await device.queue.onSubmittedWorkDone();
-        for (const slot of candidates) {
-          let mapped = false;
-          try {
-            await slot.stagingBuffer.mapAsync(GPUMapMode.READ, 0, QUERY_BYTES_PER_SLOT); mapped = true;
-            const data = new BigUint64Array(slot.stagingBuffer.getMappedRange(0, QUERY_BYTES_PER_SLOT)).slice();
-            const begin = data[0]; const end = data[1]; const deltaTicks = end - begin;
-            const deltaNs = Number(deltaTicks); const beginNumber = Number(begin); const endNumber = Number(end);
-            if (telemetry.timestampRawSamples.length < 8) telemetry.timestampRawSamples.push({ slot: slot.slot, begin: beginNumber, end: endNumber, deltaNs });
-            if (end < begin || !Number.isFinite(deltaNs)) { telemetry.timestampSamplesDropped += 1; telemetry.timestampError = "Invalid WebGPU timestamp pair"; }
-            else if (deltaTicks <= 0n) { telemetry.timestampSamplesDropped += 1; telemetry.timestampSamplesZero += 1; }
-            else telemetry.gpuSamples.push(deltaNs / 1e6);
-          } catch (error) { telemetry.timestampSamplesDropped += 1; telemetry.timestampError = String(error?.message || error); }
-          finally {
-            if (mapped) try { slot.stagingBuffer.unmap(); } catch (error) { telemetry.timestampError = String(error?.message || error); }
-            slot.state = SLOT_STATES.FREE; slot.submitted = false; slot.beginWritten = false; slot.endWritten = false;
-          }
-        }
-      } catch (error) {
-        telemetry.timestampSamplesDropped += candidates.length; telemetry.timestampError = String(error?.message || error);
-        for (const slot of candidates) { try { slot.stagingBuffer?.unmap?.(); } catch {} slot.state = SLOT_STATES.FREE; slot.submitted = false; slot.beginWritten = false; slot.endWritten = false; }
-      } finally { collectPromise = null; }
-    })();
-    return collectPromise;
+  async function collectReady() {
+    try {
+      await device.queue.onSubmittedWorkDone();
+      for (const slot of slots) {
+        if (slot.state !== SLOT_STATES.RESOLVED || !slot.submitted) continue;
+        slot.state = SLOT_STATES.READBACK_PENDING;
+        let mapped = false;
+        try {
+          await slot.stagingBuffer.mapAsync(GPUMapMode.READ, 0, QUERY_BYTES_PER_SLOT);
+          mapped = true;
+          const data = new BigUint64Array(slot.stagingBuffer.getMappedRange(0, QUERY_BYTES_PER_SLOT)).slice();
+          const begin = data[0], end = data[1], deltaTicks = end - begin;
+          const beginNumber = Number(begin), endNumber = Number(end), deltaNs = Number(deltaTicks);
+          if (telemetry.timestampRawSamples.length < 8) telemetry.timestampRawSamples.push({ slot: slot.slot, begin: beginNumber, end: endNumber, deltaNs });
+          if (end < begin || !Number.isFinite(deltaNs)) { telemetry.timestampSamplesDropped += 1; telemetry.timestampError = "Invalid WebGPU timestamp pair"; }
+          else if (deltaTicks <= 0n) { telemetry.timestampSamplesDropped += 1; telemetry.timestampSamplesZero += 1; }
+          else telemetry.gpuSamples.push(deltaNs / 1e6);
+        } catch (error) { telemetry.timestampSamplesDropped += 1; telemetry.timestampError = String(error?.message || error); }
+        finally { if (mapped) try { slot.stagingBuffer.unmap(); } catch {} slot.state = SLOT_STATES.FREE; slot.submitted = false; slot.beginWritten = false; slot.endWritten = false; }
+      }
+    } finally {
+      collectScheduled = false;
+      if (slots.some(slot => slot.state === SLOT_STATES.RESOLVED && slot.submitted)) scheduleCollect();
+    }
   }
+  function collect() { scheduleCollect(); }
   function recordComputePass() { telemetry.computePasses += 1; }
   function recordDispatch() { telemetry.dispatchCalls += 1; }
   function recordRenderPass() { telemetry.renderPasses += 1; }
@@ -111,7 +101,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
   function recordPickingDraw() { telemetry.picking.drawCalls += 1; }
   function recordPickingSubmit() { telemetry.picking.queueSubmits += 1; }
   function snapshot() { return { computePasses: telemetry.computePasses, dispatchCalls: telemetry.dispatchCalls, renderPasses: telemetry.renderPasses, drawCalls: telemetry.drawCalls, queueSubmits: telemetry.queueSubmits, picking: { ...telemetry.picking }, gpuTiming: telemetry.gpuTiming, gpuTimingScope: telemetry.gpuTimingScope, gpuTimeMs: telemetry.gpuSamples.length ? summarize(telemetry.gpuSamples) : null, timestampSamplesDropped: telemetry.timestampSamplesDropped, timestampSamplesZero: telemetry.timestampSamplesZero, timestampError: telemetry.timestampError, timestampRawSamples: [...telemetry.timestampRawSamples], timestampSampleIntervalFrames: TIMESTAMP_SAMPLE_INTERVAL_FRAMES, timestampRingSlotCount: RING_SLOT_COUNT, adapter: telemetry.adapter }; }
-  function dispose() { disposed = true; for (const slot of slots) { try { slot.stagingBuffer?.unmap?.(); } catch {} slot.stagingBuffer?.destroy?.(); slot.resolveBuffer?.destroy?.(); slot.querySet?.destroy?.(); slot.stagingBuffer = null; slot.resolveBuffer = null; slot.querySet = null; slot.state = SLOT_STATES.FREE; } collectPromise = null; frameCounter = 0; nextRingSlot = 0; }
+  function dispose() { disposed = true; for (const slot of slots) { try { slot.stagingBuffer?.unmap?.(); } catch {} slot.stagingBuffer?.destroy?.(); slot.resolveBuffer?.destroy?.(); slot.querySet?.destroy?.(); slot.stagingBuffer = null; slot.resolveBuffer = null; slot.querySet = null; slot.state = SLOT_STATES.FREE; } collectScheduled = false; frameCounter = 0; nextRingSlot = 0; }
   return { telemetry, beginFrame, writeTimestamp, finishFrame, collect, snapshot, recordComputePass, recordDispatch, recordRenderPass, recordDraw, recordSubmit, recordPickingRenderPass, recordPickingDraw, recordPickingSubmit, dispose };
 }
 function readAdapterInfo(device) { const info = device?.adapterInfo; if (!info) return null; return { vendor: info.vendor || null, architecture: info.architecture || null, device: info.device || null, description: info.description || null, isFallbackAdapter: typeof info.isFallbackAdapter === "boolean" ? info.isFallbackAdapter : null }; }
