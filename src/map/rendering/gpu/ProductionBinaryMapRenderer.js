@@ -2,7 +2,7 @@ import { BinaryMapRenderer, screenToWorld } from "./BinaryMapRenderer.js";
 
 /** Production adapter: use the renderer's authoritative triangle geometry for deterministic province selection. */
 export class ProductionBinaryMapRenderer extends BinaryMapRenderer {
-  pick(x, y) {
+  pick(x, y, { diagnostic = false } = {}) {
     if (this.disposed || !this.state) return null;
     const rect = this.canvas.getBoundingClientRect();
     if (!rect.width || !rect.height) return null;
@@ -15,7 +15,7 @@ export class ProductionBinaryMapRenderer extends BinaryMapRenderer {
     if (!world) return null;
 
     const provinceId = pickProvinceFromTriangles(this.state, world[0], world[1]);
-    if (import.meta.env?.DEV) {
+    if (diagnostic && import.meta.env?.DEV) {
       const bounds = geometryBounds(this.state.assetSource.geometry);
       console.info("[ProductionBinaryMapRenderer] pick diagnostic", {
         clientX: x,
