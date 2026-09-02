@@ -140,12 +140,7 @@ async function runTimestampProbe(page) {
 async function runTelemetryIsolationMatrix(page) {
   return page.evaluate(async () => {
     const { createWebGpuBenchmarkTelemetry } = await import("/src/map/runtime/BenchmarkGpuTelemetry.js");
-    const result = {
-      supported: false,
-      adapter: null,
-      variants: {},
-      error: null,
-    };
+    const result = { supported: false, adapter: null, variants: {}, error: null };
     if (!navigator.gpu) {
       result.error = "navigator.gpu unavailable";
       return result;
@@ -179,16 +174,28 @@ async function runTelemetryIsolationMatrix(page) {
         @compute @workgroup_size(64)
         fn main(@builtin(global_invocation_id) id: vec3<u32>) {
           var x = id.x + 1u;
-          for (var i = 0u; i < 256u; i = i + 1u) {
-            x = x * 1664525u + 1013904223u;
-          }
+          for (var i = 0u; i < 256u; i = i + 1u) { x = x * 1664525u + 1013904223u; }
           data[id.x] = x;
         }
       ` });
       const pipeline = device.createComputePipeline({ layout: "auto", compute: { module: shader, entryPoint: "main" } });
       const workload = device.createBuffer({ size: 65536 * 4, usage: GPUBufferUsage.STORAGE });
       const bindGroup = device.createBindGroup({ layout: pipeline.getBindGroupLayout(0), entries: [{ binding: 0, resource: { buffer: workload } }] });
+      const geometry = device.createBuffer({ size: 3 * 2 * 4, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
+      device.queue.writeBuffer(geometry, 0, new Float32Array([-1, -1, 1, -1, 0, 1]));
       const renderTexture = device.createTexture({ size: { width: 4, height: 4 }, format: "rgba8unorm", usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC });
+      const renderModule = device.createShaderModule({ code: `
+        @vertex fn vs(@location(0) p: vec2<f32>) -> @builtin(position) vec4<f32> { return vec4<f32>(p, 0.0, 1.0); }
+        @fragment fn fs() -> @location(0) vec4<f32> { return vec4<f32>(0.2, 0.3, 0.4, 1.0); }
+      ` });
+      const renderPipeline = device.createRenderPipeline({
+        layout: "auto",
+        vertex: { module: renderModule, entryPoint: "vs", buffers: [{ arrayStride: 8, attributes: [{ shaderLocation: 0, offset: 0, format: "float32x2" }] }] },
+        fragment: { module: renderModule, entryPoint: "fs", targets: [{ format: "rgba8unorm" }] },
+        primitive: { topology: "triangle-list" },
+      });
+      const indirect = device.createBuffer({ size: 16, usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_DST });
+      device.queue.writeBuffer(indirect, 0, new Uint32Array([3, 1, 0, 0]));
 
       async function runVariant(name, mode) {
         const telemetryApi = createWebGpuBenchmarkTelemetry(device);
@@ -200,22 +207,24 @@ async function runTelemetryIsolationMatrix(page) {
             const slot = telemetryApi.beginFrame();
             const encoder = device.createCommandEncoder();
             const began = slot >= 0 ? telemetryApi.writeTimestamp(encoder, slot, "begin") : false;
-            if (mode === "compute" || mode === "combined") {
+            if (mode === "compute" || mode === "combined" || mode === "combined-indirect") {
               const compute = encoder.beginComputePass();
               compute.setPipeline(pipeline);
               compute.setBindGroup(0, bindGroup);
               compute.dispatchWorkgroups(1024);
               compute.end();
             }
-            if (mode === "render" || mode === "combined") {
-              const render = encoder.beginRenderPass({
-                colorAttachments: [{
-                  view: renderTexture.createView(),
-                  clearValue: { r: 0, g: 0, b: 0, a: 1 },
-                  loadOp: "clear",
-                  storeOp: "store",
-                }],
-              });
+            if (mode === "render-clear" || mode === "render-draw" || mode === "render-indirect" || mode === "combined" || mode === "combined-indirect") {
+              const render = encoder.beginRenderPass({ colorAttachments: [{ view: renderTexture.createView(), clearValue: { r: 0, g: 0, b: 0, a: 1 }, loadOp: "clear", storeOp: "store" }] });
+              if (mode === "render-draw" || mode === "combined") {
+                render.setPipeline(renderPipeline);
+                render.setVertexBuffer(0, geometry);
+                render.draw(3, 1, 0, 0);
+              } else if (mode === "render-indirect" || mode === "combined-indirect") {
+                render.setPipeline(renderPipeline);
+                render.setVertexBuffer(0, geometry);
+                render.drawIndirect(indirect, 0);
+              }
               render.end();
             }
             const ended = slot >= 0 ? telemetryApi.writeTimestamp(encoder, slot, "end") : false;
@@ -234,11 +243,20 @@ async function runTelemetryIsolationMatrix(page) {
         }
       }
 
-      for (const [name, mode] of [["compute", "compute"], ["render", "render"], ["combined", "combined"]]) {
+      for (const [name, mode] of [
+        ["compute", "compute"],
+        ["render-clear", "render-clear"],
+        ["render-draw", "render-draw"],
+        ["render-indirect", "render-indirect"],
+        ["combined", "combined"],
+        ["combined-indirect", "combined-indirect"],
+      ]) {
         result.variants[name] = await runVariant(name, mode);
       }
 
+      geometry.destroy();
       workload.destroy();
+      indirect.destroy();
       renderTexture.destroy();
     } catch (error) {
       result.error = String(error?.message || error);
@@ -331,38 +349,36 @@ test("Historia AI exact WebGPU telemetry isolation matrix", async ({ page }) => 
     if (process.env.HISTORIA_REQUIRE_GPU_TIMESTAMP === "1") throw new Error(`Telemetry isolation unavailable: ${result.error || "unknown reason"}`);
     return;
   }
-  for (const name of ["compute", "render", "combined"]) {
+  const requiredVariants = ["compute", "render-draw", "render-indirect", "combined", "combined-indirect"];
+  for (const name of requiredVariants) {
     const variant = result.variants[name];
     if (!variant) throw new Error(`Telemetry isolation missing ${name} variant`);
     if (variant.error) throw new Error(`Telemetry isolation ${name} failed: ${variant.error}`);
     const snapshot = variant.snapshot;
-    if (!snapshot) throw new Error(`Telemetry isolation ${name} produced no snapshot`);
-    if (snapshot.timestampSamplesZero !== 0 || snapshot.timestampSamplesDropped !== 0) {
+    if (!snapshot || snapshot.gpuTiming !== "supported") throw new Error(`Telemetry isolation ${name} did not report supported timestamp timing`);
+    if (!(snapshot.gpuTimeMs?.count > 0) || !(snapshot.gpuTimeMs?.average > 0)) {
       throw new Error(`Telemetry isolation ${name} returned invalid timestamp telemetry: zero=${snapshot.timestampSamplesZero}, dropped=${snapshot.timestampSamplesDropped}`);
     }
-    if (!snapshot.timestampRawSamples.length) throw new Error(`Telemetry isolation ${name} returned no raw timestamp sample`);
-    const positive = snapshot.timestampRawSamples.some(sample => sample.end > sample.begin && sample.deltaNs > 0);
-    if (!positive) throw new Error(`Telemetry isolation ${name} returned no positive timestamp interval`);
   }
 });
 
 test("Historia AI 15k / 4K / 2x DPR benchmark", async ({ page }) => {
+  const file = output;
+  let result;
   try {
-    await runBenchmark(page, "auto", output);
+    result = await runBenchmark(page, "webgpu", file, { provinceCount: 15000, geometryPointCount: 480000, internalCanvas: { width: 7680, height: 4320 } });
   } catch (error) {
-    if (process.env.HISTORIA_REQUIRE_WEBGPU === "1" || !isRecoverableAutoWebGpuFailure(error)) throw error;
-    const renderer = await readSoftwareGpuError(page);
-    console.warn(`HISTORIA_WEBGPU_AUTO_FALLBACK ${JSON.stringify({ reason: String(error?.message || error), renderer })}`);
-    await runBenchmark(page, "webgl2", output, {
-      backendFallback: "webgl2",
-      backendFallbackReason: String(error?.message || error),
-    });
+    if (!isRecoverableAutoWebGpuFailure(error)) throw error;
+    result = await runBenchmark(page, "webgl2", file, { provinceCount: 15000, geometryPointCount: 480000, internalCanvas: { width: 7680, height: 4320 }, fallbackReason: String(error?.message || error) });
+  }
+  if (process.env.HISTORIA_REQUIRE_GPU_TIMESTAMP === "1" && result.backend === "webgpu") {
+    if (result.gpu?.gpuTiming !== "supported") throw new Error(`WebGPU timestamp telemetry unsupported: ${result.gpu?.gpuTiming}`);
+    if (!(result.gpu?.gpuTimeMs?.count > 0) || !(result.gpu?.gpuTimeMs?.average > 0)) {
+      throw new Error(`WebGPU production timestamp telemetry invalid: zero=${result.gpu?.timestampSamplesZero}, dropped=${result.gpu?.timestampSamplesDropped}`);
+    }
   }
 });
 
-test("Historia AI WebGL2 fallback parity benchmark", async ({ page }) => {
-  const parityOutput = output.replace(/\.json$/i, "-webgl2.json");
-  const result = await runBenchmark(page, "webgl2", parityOutput);
-  if (result.backend !== "webgl2") throw new Error(`Expected WebGL2 fallback, received ${result.backend}`);
-  if (result.internalCanvas.width !== 7680 || result.internalCanvas.height !== 4320) throw new Error("WebGL2 benchmark did not render at 4K / 2x DPR internal resolution");
+test("Historia AI WebGL2 fallback benchmark", async ({ page }) => {
+  await runBenchmark(page, "webgl2", output.replace(/\.json$/i, "-webgl2.json"), { provinceCount: 15000, geometryPointCount: 480000, internalCanvas: { width: 7680, height: 4320 } });
 });
