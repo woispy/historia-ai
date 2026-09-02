@@ -6,8 +6,30 @@ const durationMs = Number(process.env.HISTORIA_FRAME_PROFILING_DURATION_MS || 30
 const output = process.env.HISTORIA_FRAME_PROFILING_OUTPUT || "artifacts/frame-profiling-result.json";
 
 test("Historia AI frame/pass profiling", async ({ page }) => {
+  page.on("console", (msg) => {
+    console.log(`PAGE CONSOLE [${msg.type()}]: ${msg.text()}`);
+  });
+  page.on("pageerror", (error) => {
+    console.log(`PAGE ERROR: ${error?.stack || error?.message || error}`);
+  });
+  page.on("requestfailed", (request) => {
+    console.log(`PAGE REQUEST FAILED: ${request.method()} ${request.url()} :: ${request.failure()?.errorText || "unknown"}`);
+  });
+
   await page.goto(`/benchmarks/frame-profiling.html?durationMs=${durationMs}`, { waitUntil: "load" });
-  await page.waitForFunction(() => Boolean(window.__HISTORIA_FRAME_PROFILING_RESULT__), null, { timeout: durationMs + 120000 });
+
+  try {
+    await page.waitForFunction(() => Boolean(window.__HISTORIA_FRAME_PROFILING_RESULT__), null, { timeout: durationMs + 120000 });
+  } catch (error) {
+    const state = await page.evaluate(() => ({
+      readyState: document.readyState,
+      result: window.__HISTORIA_FRAME_PROFILING_RESULT__ ?? null,
+      diagnostics: document.querySelector("#diagnostics")?.textContent ?? null,
+    }));
+    console.log(`FRAME_PROFILING_TIMEOUT_STATE ${JSON.stringify(state)}`);
+    throw error;
+  }
+
   const result = await page.evaluate(() => window.__HISTORIA_FRAME_PROFILING_RESULT__);
   if (result.error) throw new Error(result.error);
   if (!result.gpu) throw new Error("Frame profiling missing WebGPU telemetry");
