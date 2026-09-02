@@ -69,6 +69,8 @@ jobs:
         run: npm run lint
       - name: Validate DEM codec/source contracts
         run: npm run test:terrain-dem
+      - name: Validate Phase A-H legacy cleanliness
+        run: npm run test:phase-ah-legacy-cleanliness
       - name: Generate world physical geometry assets
         run: npm run build:assets
       - name: Verify repository cleanliness after physical assets
@@ -99,7 +101,7 @@ jobs:
         run: npm run test:historical-political-map-v1
       - name: Run historical Anatolia control tests
         run: npm run test:anatolia-historical-control
-      - name: Run city label scale regression tests
+      - name: Run city label scale tests
         run: npm run test:city-label-scale
       - name: Run Phase 2 province topology tests
         run: npm run test:province-topology
