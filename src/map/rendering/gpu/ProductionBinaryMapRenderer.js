@@ -1,7 +1,28 @@
 import { BinaryMapRenderer, screenToWorld } from "./BinaryMapRenderer.js";
+import { ProductionPhysicalMapLayer } from "./ProductionPhysicalMapLayer.js";
 
-/** Production adapter: use the renderer's authoritative triangle geometry for deterministic province selection. */
+/** Production renderer: political provinces remain authoritative while physical geography is drawn underneath. */
 export class ProductionBinaryMapRenderer extends BinaryMapRenderer {
+  initialize(options) {
+    const initialized = super.initialize(options);
+    if (!initialized) return false;
+    try {
+      this.physicalLayer = new ProductionPhysicalMapLayer();
+      this.physicalLayer.initialize(this.state.gl);
+      this.beforePoliticalDraw = (state, camera, width, height) => {
+        void state;
+        this.physicalLayer?.render(camera, width, height);
+      };
+      return true;
+    } catch (error) {
+      this.physicalLayer?.dispose();
+      this.physicalLayer = null;
+      this.beforePoliticalDraw = null;
+      super.dispose();
+      throw error;
+    }
+  }
+
   pick(x, y, { diagnostic = false } = {}) {
     if (this.disposed || !this.state) return null;
     const rect = this.canvas.getBoundingClientRect();
@@ -30,6 +51,13 @@ export class ProductionBinaryMapRenderer extends BinaryMapRenderer {
       });
     }
     return provinceId;
+  }
+
+  dispose() {
+    this.beforePoliticalDraw = null;
+    this.physicalLayer?.dispose();
+    this.physicalLayer = null;
+    super.dispose();
   }
 }
 
