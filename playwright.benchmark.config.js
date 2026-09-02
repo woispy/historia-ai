@@ -1,3 +1,4 @@
+/* global process */
 import { defineConfig } from "@playwright/test";
 
 const port = Number(process.env.HISTORIA_BENCHMARK_PORT || 4173);
@@ -28,23 +29,17 @@ export default defineConfig({
   workers: 1,
   timeout: Number(process.env.HISTORIA_BENCHMARK_TIMEOUT_MS || 45 * 60 * 1000),
   reporter: "line",
-  projects: [
-    {
-      name: "chromium",
-      use: {
-        browserName: "chromium",
-        headless: process.env.HISTORIA_BENCHMARK_HEADED !== "1",
-        viewport: { width: 3840, height: 2160 },
-        deviceScaleFactor: 2,
-        launchOptions: {
-          args: launchArgs,
-        },
-      },
+  projects: [{
+    name: "chromium",
+    use: {
+      browserName: "chromium",
+      headless: process.env.HISTORIA_BENCHMARK_HEADED !== "1",
+      viewport: { width: 3840, height: 2160 },
+      deviceScaleFactor: 2,
+      launchOptions: { args: launchArgs },
     },
-  ],
-  use: {
-    baseURL: `http://127.0.0.1:${port}`,
-  },
+  }],
+  use: { baseURL: `http://127.0.0.1:${port}` },
   webServer: {
     command: `npx vite --host 127.0.0.1 --port ${port} --strictPort`,
     url: `http://127.0.0.1:${port}/benchmarks/map-benchmark.html`,
