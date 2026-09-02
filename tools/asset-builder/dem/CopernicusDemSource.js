@@ -78,6 +78,16 @@ export function copernicusTileKey(lat, lon) {
   return `Copernicus_DSM_COG_10_${ns}_00_${ew}_00_DEM`;
 }
 
+/** Return the complete 1x1-degree Copernicus source coverage intersecting a [minLon,minLat,maxLon,maxLat] extent. */
+export function copernicusSourceTileKeysForBounds(bounds) {
+  const [minLon, minLat, maxLon, maxLat] = bounds;
+  const keys = [];
+  for (let lat = Math.floor(minLat); lat < Math.ceil(maxLat); lat += 1) {
+    for (let lon = Math.floor(minLon); lon < Math.ceil(maxLon); lon += 1) keys.push(copernicusTileKey(lat, lon));
+  }
+  return keys;
+}
+
 export function parseTileList(text) {
   const result = [];
   for (const line of String(text).split(/\r?\n/)) {
