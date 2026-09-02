@@ -1,8 +1,8 @@
-const RING_SLOT_COUNT = 8;
+const RING_SLOT_COUNT = 64;
 const QUERY_VALUES_PER_SLOT = 2;
 const QUERY_BYTES_PER_SLOT = QUERY_VALUES_PER_SLOT * 8;
 const RESOLVE_BUFFER_SIZE = 256;
-const TIMESTAMP_SAMPLE_INTERVAL_FRAMES = 8;
+const TIMESTAMP_SAMPLE_INTERVAL_FRAMES = 256;
 const SLOT_STATES = Object.freeze({ FREE: "FREE", RECORDING: "RECORDING", RESOLVED: "RESOLVED", READBACK_PENDING: "READBACK_PENDING" });
 
 export function createWebGpuBenchmarkTelemetry(device) {
@@ -47,11 +47,19 @@ export function createWebGpuBenchmarkTelemetry(device) {
   function writeTimestamp(encoder, slotId, phase) {
     const slot = slots[slotId];
     if (!slot?.querySet || slot.state !== SLOT_STATES.RECORDING || typeof encoder?.writeTimestamp !== "function") return false;
-    if (phase === "begin") { if (slot.beginWritten) return false; slot.beginWritten = true; }
-    else if (phase === "end") { if (!slot.beginWritten || slot.endWritten) return false; slot.endWritten = true; }
+    if (phase === "begin") { if (slot.beginWritten) return false; }
+    else if (phase === "end") { if (!slot.beginWritten || slot.endWritten) return false; }
     else throw new Error(`Unknown timestamp phase: ${phase}`);
-    try { encoder.writeTimestamp(slot.querySet, phase === "end" ? 1 : 0); return true; }
-    catch (error) { telemetry.timestampSamplesDropped += 1; telemetry.timestampError = String(error?.message || error); slot.state = SLOT_STATES.FREE; return false; }
+    try {
+      encoder.writeTimestamp(slot.querySet, phase === "end" ? 1 : 0);
+      if (phase === "begin") slot.beginWritten = true; else slot.endWritten = true;
+      return true;
+    } catch (error) {
+      telemetry.timestampSamplesDropped += 1;
+      telemetry.timestampError = String(error?.message || error);
+      slot.state = SLOT_STATES.FREE;
+      return false;
+    }
   }
   function finishFrame(encoder, slotId) {
     const slot = slots[slotId];
@@ -60,7 +68,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
     try { encoder.resolveQuerySet(slot.querySet, 0, QUERY_VALUES_PER_SLOT, slot.resolveBuffer, 0); encoder.copyBufferToBuffer(slot.resolveBuffer, 0, slot.stagingBuffer, 0, QUERY_BYTES_PER_SLOT); slot.state = SLOT_STATES.RESOLVED; return true; }
     catch (error) { telemetry.timestampSamplesDropped += 1; telemetry.timestampError = String(error?.message || error); slot.state = SLOT_STATES.FREE; return false; }
   }
-  function recordSubmit(slotId = -1) { telemetry.queueSubmits += 1; if (slotId >= 0) { const slot = slots[slotId]; if (slot?.state === SLOT_STATES.RESOLVED) slot.submitted = true; } }
+  function recordSubmit(slotId = -1) { telemetry.queueSubmits += 1; if (slotId >= 0) { const slot = slots[slotId]; if (slot?.state === SLOT_STATES.RESOLVED) slot.submitted = true; scheduleCollect(); } }
   function scheduleCollect() {
     if (disposed || collectScheduled) return;
     if (!slots.some(slot => slot.state === SLOT_STATES.RESOLVED && slot.submitted)) return;
