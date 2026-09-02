@@ -30,7 +30,7 @@ const RENDER_WGSL = `
 struct Camera { viewProj: mat4x4<f32> };
 @group(0) @binding(0) var<uniform> camera: Camera;
 @group(0) @binding(1) var<storage, read> indexProvinceIds: array<u32>;
-struct VsOut { @builtin(position) position: vec4<f32>, @location(0) provinceId: u32 };
+struct VsOut { @builtin(position) position: vec4<f32>, @location(0) @interpolate(flat) provinceId: u32 };
 @vertex fn vs(@location(0) p:vec2<f32>, @builtin(vertex_index) vertexIndex:u32)->VsOut{ var out:VsOut; out.position=camera.viewProj*vec4<f32>(p,0.0,1.0); out.provinceId=indexProvinceIds[vertexIndex]; return out; }
 @fragment fn fs(in:VsOut)->@location(0) vec4<f32>{let x=f32(in.provinceId);return vec4<f32>(0.18+fract(x*0.103),0.22+fract(x*0.067),0.28+fract(x*0.043),1.0);}
 `;
@@ -40,7 +40,7 @@ struct Camera { viewProj: mat4x4<f32>, pickNdc: vec2<f32>, _pad: vec2<f32> };
 @group(0) @binding(0) var<uniform> camera: Camera;
 @group(0) @binding(1) var<storage, read> indexProvinceIds: array<u32>;
 fn encode(id:u32)->vec4<f32>{return vec4<f32>(f32(id&255u),f32((id>>8u)&255u),f32((id>>16u)&255u),255.0)*${ID_SCALE};}
-struct VsOut { @builtin(position) position: vec4<f32>, @location(0) provinceId: u32 };
+struct VsOut { @builtin(position) position: vec4<f32>, @location(0) @interpolate(flat) provinceId: u32 };
 @vertex fn vs(@location(0) p:vec2<f32>, @builtin(vertex_index) vertexIndex:u32)->VsOut{ var out:VsOut; var c=camera.viewProj*vec4<f32>(p,0.0,1.0); c.xy=c.xy-camera.pickNdc*c.w; out.position=c; out.provinceId=indexProvinceIds[vertexIndex]; return out; }
 @fragment fn fs(in:VsOut)->@location(0) vec4<f32>{return encode(in.provinceId);}
 `;
