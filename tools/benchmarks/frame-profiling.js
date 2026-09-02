@@ -7,6 +7,7 @@ import FramePassProfiler from "/src/map/runtime/FramePassProfiler.js";
 const params = new URLSearchParams(location.search);
 const durationMs = Number(params.get("durationMs") || 30000);
 const assetUrl = params.get("asset") || "/assets/stress-15k.mapbin";
+const pickIntervalMs = Math.max(16, Number(params.get("pickIntervalMs") || 16));
 const canvas = document.querySelector("#map");
 const diagnosticsNode = document.querySelector("#diagnostics");
 const profiler = new FramePassProfiler();
@@ -34,7 +35,7 @@ function summarize(values) {
   return {
     count: sorted.length,
     average: sorted.reduce((sum, value) => sum + value, 0) / sorted.length,
-    p50: percentile(0.50),
+    p50: percentile(0.5),
     p95: percentile(0.95),
     p99: percentile(0.99),
     max: sorted[sorted.length - 1],
@@ -46,11 +47,8 @@ function wrapRenderer() {
   const originalRender = renderer.render.bind(renderer);
   renderer.render = (...args) => {
     const start = performance.now();
-    try {
-      return originalRender(...args);
-    } finally {
-      profiler.recordRender(performance.now() - start);
-    }
+    try { return originalRender(...args); }
+    finally { profiler.recordRender(performance.now() - start); }
   };
 
   const originalPick = renderer.pick.bind(renderer);
@@ -62,9 +60,8 @@ function wrapRenderer() {
     }
 
     const start = performance.now();
-    const probe = { start, submitCpuMs: null, submitReturnedAt: null };
+    const probe = { start, submitCpuMs: null, submitReturnedAt: null, queueDoneAt: null };
     activePickProbe = probe;
-
     const result = originalPick(...args);
     const accepted = Boolean(renderer.pickPending);
     if (probe.submitReturnedAt !== null) {
@@ -74,13 +71,12 @@ function wrapRenderer() {
     if (!accepted) return result;
 
     profiler.recordPickAccepted();
-
     const queue = renderer.device?.queue;
     if (queue?.onSubmittedWorkDone) {
       const queueDoneStart = performance.now();
       void queue.onSubmittedWorkDone().then(() => {
-        probe.queueWorkDoneAt = performance.now();
-        pushMetric(pickingPipeline.queueWorkDoneMs, probe.queueWorkDoneAt - queueDoneStart);
+        probe.queueDoneAt = performance.now();
+        pushMetric(pickingPipeline.queueWorkDoneMs, probe.queueDoneAt - queueDoneStart);
       }).catch(() => {});
     }
 
@@ -88,9 +84,7 @@ function wrapRenderer() {
       if (!renderer.pickPending) {
         const completedAt = performance.now();
         profiler.recordPickCompleted(completedAt - start);
-        if (probe.queueWorkDoneAt !== undefined) {
-          pushMetric(pickingPipeline.readbackSyncMs, Math.max(0, completedAt - probe.queueWorkDoneAt));
-        }
+        if (probe.queueDoneAt !== null) pushMetric(pickingPipeline.readbackSyncMs, Math.max(0, completedAt - probe.queueDoneAt));
         return;
       }
       setTimeout(waitForCompletion, 0);
@@ -106,9 +100,8 @@ function wrapRenderer() {
   prototype.submit = function profiledSubmit(...args) {
     if (this !== queue) return originalSubmit.apply(this, args);
     const start = performance.now();
-    try {
-      return originalSubmit.apply(this, args);
-    } finally {
+    try { return originalSubmit.apply(this, args); }
+    finally {
       const elapsed = performance.now() - start;
       profiler.recordQueueSubmit(elapsed);
       if (activePickProbe) {
@@ -147,13 +140,11 @@ async function main() {
         cameraRig.setState({ x: Math.sin(phase) * 45, y: Math.cos(phase * 0.7) * 20, zoom: 2 + (Math.sin(phase * 0.5) + 1) * 2 });
       }
       requestAnimationFrame(frame);
-    } else {
-      void finish(now);
-    }
+    } else void finish(now);
   };
 
   const hover = (now) => {
-    if (now - lastHover >= 8 && now - benchmarkStart < durationMs) {
+    if (now - lastHover >= pickIntervalMs && now - benchmarkStart < durationMs) {
       lastHover = now;
       const t = (now - benchmarkStart) / Math.max(1, durationMs);
       const x = (Math.sin(t * Math.PI * 12) * 0.5 + 0.5) * 3840;
@@ -177,6 +168,7 @@ async function finish(now) {
   const result = {
     ...profiling,
     benchmarkMode: "unconstrained",
+    pickingProbe: { intervalMs: pickIntervalMs, requestRateHz: 1000 / pickIntervalMs },
     pickingPipeline: {
       commandEncodingAndSetupCpuMs: summarize(pickingPipeline.commandEncodingAndSetupCpuMs),
       queueSubmitCpuMs: summarize(pickingPipeline.queueSubmitCpuMs),
@@ -184,16 +176,7 @@ async function finish(now) {
       readbackSyncMs: summarize(pickingPipeline.readbackSyncMs),
     },
     target: { hz: 144, frameMs: 1000 / 144, viewport: "3840x2160", dpr: 2, internal: `${canvas.width}x${canvas.height}` },
-    gpu: gpu ? {
-      ...gpu,
-      drawCalls: gpu.drawCalls,
-      gpuTiming: gpu.gpuTiming,
-      gpuTimingScope: gpu.gpuTimingScope,
-      gpuTimeMs: gpu.gpuTimeMs,
-      timestampSamplesDropped: gpu.timestampSamplesDropped,
-      timestampSamplesZero: gpu.timestampSamplesZero,
-      timestampError: gpu.timestampError,
-    } : null,
+    gpu: gpu ? { ...gpu, drawCalls: gpu.drawCalls, gpuTiming: gpu.gpuTiming, gpuTimingScope: gpu.gpuTimingScope, gpuTimeMs: gpu.gpuTimeMs, timestampSamplesDropped: gpu.timestampSamplesDropped, timestampSamplesZero: gpu.timestampSamplesZero, timestampError: gpu.timestampError } : null,
     assetUrl,
     provinceCount: renderer.assetSource?.provinceCount ?? null,
     geometryPointCount: renderer.assetSource?.geometryPointCount ?? null,
