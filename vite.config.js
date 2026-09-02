@@ -1,5 +1,53 @@
 import { defineConfig } from 'vite'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
+
+function benchmarkHtmlPlugin() {
+  const root = path.dirname(fileURLToPath(import.meta.url))
+  const benchmarkDir = path.join(root, 'tools', 'benchmarks')
+
+  const serveBenchmarkHtml = (middlewares) => {
+    middlewares.use((request, response, next) => {
+      const pathname = request.url?.split('?', 1)[0] || ''
+
+      if (!pathname.startsWith('/benchmarks/') || !pathname.endsWith('.html')) {
+        next()
+        return
+      }
+
+      const fileName = pathname.slice('/benchmarks/'.length)
+      const filePath = path.resolve(benchmarkDir, fileName)
+      const relative = path.relative(benchmarkDir, filePath)
+
+      if (
+        relative.startsWith('..') ||
+        path.isAbsolute(relative) ||
+        !fs.existsSync(filePath)
+      ) {
+        next()
+        return
+      }
+
+      response.statusCode = 200
+      response.setHeader('Content-Type', 'text/html; charset=utf-8')
+      response.end(fs.readFileSync(filePath, 'utf8'))
+    })
+  }
+
+  return {
+    name: 'historia-ai-benchmark-html',
+
+    configureServer(server) {
+      serveBenchmarkHtml(server.middlewares)
+    },
+
+    configurePreviewServer(server) {
+      serveBenchmarkHtml(server.middlewares)
+    },
+  }
+}
 
 function aiApiPlugin() {
   return {
@@ -73,5 +121,5 @@ async function handleAIRequest(request, response) {
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), aiApiPlugin()],
+  plugins: [benchmarkHtmlPlugin(), react(), aiApiPlugin()],
 })
