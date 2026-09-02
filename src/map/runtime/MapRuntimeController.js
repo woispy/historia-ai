@@ -1,6 +1,7 @@
 import { assertRendererContract } from "../rendering/MapRendererContract.js";
 
 const DEFAULT_HOVER_EPSILON_PX = 0;
+const CLICK_SLOP_PX = 3;
 
 /** Imperative owner of map interaction and renderer lifecycle. */
 export class MapRuntimeController {
@@ -122,9 +123,9 @@ export class MapRuntimeController {
     if (this.destroyed) return;
     if (this.drag.active && this.drag.pointerId === event.pointerId) {
       const dx = event.clientX - this.drag.lastX, dy = event.clientY - this.drag.lastY;
-      if (Math.abs(dx) + Math.abs(dy) > 2) this.drag.moved = true;
       this.drag.lastX = event.clientX;
       this.drag.lastY = event.clientY;
+      if (Math.abs(dx) + Math.abs(dy) > CLICK_SLOP_PX) this.drag.moved = true;
       this.cameraRig.panPixels(dx, dy, this.canvas.clientWidth, this.canvas.clientHeight);
       this.renderer.setCamera(this.cameraRig.snapshot());
       return;
@@ -135,13 +136,16 @@ export class MapRuntimeController {
   handlePointerUp(event) {
     if (!this.drag.active || this.drag.pointerId !== event.pointerId) return;
     const moved = this.drag.moved;
+    const clickX = event.clientX;
+    const clickY = event.clientY;
     event.currentTarget.releasePointerCapture?.(event.pointerId);
     this.drag.active = false;
     this.drag.pointerId = null;
     this.drag.moved = false;
+
     if (moved || this.destroyed) return;
-    const provinceId = this.renderer.pick(event.clientX, event.clientY);
-    if (import.meta.env?.DEV) console.debug("[MapRuntimeController] province click", { clientX: event.clientX, clientY: event.clientY, provinceId });
+    const provinceId = this.renderer.pick(clickX, clickY);
+    if (import.meta.env?.DEV) console.debug("[MapRuntimeController] province click", { clientX: clickX, clientY: clickY, provinceId });
     if (provinceId !== null && provinceId !== undefined) this.onProvinceClick?.(provinceId);
   }
 
