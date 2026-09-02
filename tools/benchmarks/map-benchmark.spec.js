@@ -137,6 +137,133 @@ async function runTimestampProbe(page) {
   });
 }
 
+async function runTelemetryIsolationMatrix(page) {
+  return page.evaluate(async () => {
+    const { createWebGpuBenchmarkTelemetry } = await import("/src/map/runtime/BenchmarkGpuTelemetry.js");
+    const result = {
+      supported: false,
+      adapter: null,
+      variants: {},
+      error: null,
+    };
+    if (!navigator.gpu) {
+      result.error = "navigator.gpu unavailable";
+      return result;
+    }
+
+    let adapter;
+    let device;
+    try {
+      adapter = await navigator.gpu.requestAdapter({ powerPreference: "high-performance" });
+      if (!adapter) {
+        result.error = "no adapter";
+        return result;
+      }
+      const info = adapter.info || adapter.adapterInfo || null;
+      result.adapter = info ? {
+        vendor: info.vendor || null,
+        architecture: info.architecture || null,
+        device: info.device || null,
+        description: info.description || null,
+        isFallbackAdapter: typeof info.isFallbackAdapter === "boolean" ? info.isFallbackAdapter : null,
+      } : null;
+      if (!adapter.features?.has?.("timestamp-query")) {
+        result.error = "adapter lacks timestamp-query";
+        return result;
+      }
+      device = await adapter.requestDevice({ requiredFeatures: ["timestamp-query"] });
+      result.supported = true;
+
+      const shader = device.createShaderModule({ code: `
+        @group(0) @binding(0) var<storage, read_write> data: array<u32>;
+        @compute @workgroup_size(64)
+        fn main(@builtin(global_invocation_id) id: vec3<u32>) {
+          var x = id.x + 1u;
+          for (var i = 0u; i < 256u; i = i + 1u) {
+            x = x * 1664525u + 1013904223u;
+          }
+          data[id.x] = x;
+        }
+      ` });
+      const pipeline = device.createComputePipeline({ layout: "auto", compute: { module: shader, entryPoint: "main" } });
+      const workload = device.createBuffer({ size: 65536 * 4, usage: GPUBufferUsage.STORAGE });
+      const bindGroup = device.createBindGroup({ layout: pipeline.getBindGroupLayout(0), entries: [{ binding: 0, resource: { buffer: workload } }] });
+      const renderTexture = device.createTexture({ size: { width: 4, height: 4 }, format: "rgba8unorm", usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC });
+
+      async function runVariant(name, mode) {
+        const telemetryApi = createWebGpuBenchmarkTelemetry(device);
+        let submitCount = 0;
+        let frameCount = 0;
+        let lastError = null;
+        try {
+          // The production telemetry samples every eighth frame. Preserve that
+          // cadence here so this test exercises the real module state machine.
+          for (let i = 0; i < 8; i += 1) {
+            frameCount += 1;
+            const slot = telemetryApi.beginFrame();
+            const encoder = device.createCommandEncoder();
+            const began = slot >= 0 ? telemetryApi.writeTimestamp(encoder, slot, "begin") : false;
+            if (mode === "compute" || mode === "combined") {
+              const compute = encoder.beginComputePass();
+              compute.setPipeline(pipeline);
+              compute.setBindGroup(0, bindGroup);
+              compute.dispatchWorkgroups(1024);
+              compute.end();
+            }
+            if (mode === "render" || mode === "combined") {
+              const render = encoder.beginRenderPass({
+                colorAttachments: [{
+                  view: renderTexture.createView(),
+                  clearValue: { r: 0, g: 0, b: 0, a: 1 },
+                  loadOp: "clear",
+                  storeOp: "store",
+                }],
+              });
+              render.end();
+            }
+            const ended = slot >= 0 ? telemetryApi.writeTimestamp(encoder, slot, "end") : false;
+            const ready = slot >= 0 && began && ended ? telemetryApi.finishFrame(encoder, slot) : false;
+            device.queue.submit([encoder.finish()]);
+            submitCount += 1;
+            telemetryApi.recordSubmit(ready ? slot : -1);
+            await telemetryApi.collect();
+          }
+          await telemetryApi.collect();
+          return {
+            mode,
+            frameCount,
+            submitCount,
+            snapshot: telemetryApi.snapshot(),
+          };
+        } catch (error) {
+          lastError = String(error?.message || error);
+          return {
+            mode,
+            frameCount,
+            submitCount,
+            error: lastError,
+            snapshot: telemetryApi.snapshot(),
+          };
+        } finally {
+          telemetryApi.dispose();
+        }
+      }
+
+      for (const [name, mode] of [["compute", "compute"], ["render", "render"], ["combined", "combined"]]) {
+        result.variants[name] = await runVariant(name, mode);
+      }
+
+      workload.destroy();
+      renderTexture.destroy();
+    } catch (error) {
+      result.error = String(error?.message || error);
+    } finally {
+      device?.destroy?.();
+    }
+    return result;
+  });
+}
+
 async function readSoftwareGpuError(page) {
   return page.evaluate(() => {
     const canvas = document.createElement("canvas");
@@ -149,7 +276,7 @@ async function readSoftwareGpuError(page) {
 
 function isRecoverableAutoWebGpuFailure(error) {
   const message = String(error?.message || error || "");
-  return /dxil\.dll|EnsureDXCLibraries|requestDevice.*OperationError|DynamicLib\.Open|WebGPU backend failed to initialize|navigator\.gpu unavailable|GPUAdapter/i.test(message);
+  return /dxil\\.dll|EnsureDXCLibraries|requestDevice.*OperationError|DynamicLib\\.Open|WebGPU backend failed to initialize|navigator\\.gpu unavailable|GPUAdapter/i.test(message);
 }
 
 async function runBenchmark(page, backend, file, metadata = {}) {
@@ -204,6 +331,33 @@ test("Historia AI WebGPU timestamp probe", async ({ page }) => {
     if (!result.supported) throw new Error(`WebGPU timestamp-query unavailable: ${result.reason || "unknown reason"}`);
     if (result.error) throw new Error(`WebGPU timestamp probe failed: ${result.error}`);
     if (!(result.deltaNs > 0)) throw new Error(`WebGPU timestamp probe returned non-positive interval: ${result.deltaNs}`);
+  }
+});
+
+test("Historia AI exact WebGPU telemetry isolation matrix", async ({ page }) => {
+  await page.goto("/benchmarks/map-benchmark.html?backend=webgpu&durationMs=1", { waitUntil: "load" });
+  const result = await runTelemetryIsolationMatrix(page);
+  const file = output.replace(/\.json$/i, "-telemetry-isolation.json");
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  await fs.writeFile(file, JSON.stringify(result, null, 2));
+  console.log(`HISTORIA_TELEMETRY_ISOLATION ${JSON.stringify(result)}`);
+  test.info().annotations.push({ type: "gpu-telemetry-isolation", description: JSON.stringify(result) });
+  if (!result.supported) {
+    if (process.env.HISTORIA_REQUIRE_GPU_TIMESTAMP === "1") throw new Error(`Telemetry isolation unavailable: ${result.error || "unknown reason"}`);
+    return;
+  }
+  for (const name of ["compute", "render", "combined"]) {
+    const variant = result.variants[name];
+    if (!variant) throw new Error(`Telemetry isolation missing ${name} variant`);
+    if (variant.error) throw new Error(`Telemetry isolation ${name} failed: ${variant.error}`);
+    const snapshot = variant.snapshot;
+    if (!snapshot) throw new Error(`Telemetry isolation ${name} produced no snapshot`);
+    if (snapshot.timestampSamplesZero !== 0 || snapshot.timestampSamplesDropped !== 0) {
+      throw new Error(`Telemetry isolation ${name} returned invalid timestamp telemetry: zero=${snapshot.timestampSamplesZero}, dropped=${snapshot.timestampSamplesDropped}`);
+    }
+    if (!snapshot.timestampRawSamples.length) throw new Error(`Telemetry isolation ${name} returned no raw timestamp sample`);
+    const positive = snapshot.timestampRawSamples.some(sample => sample.end > sample.begin && sample.deltaNs > 0);
+    if (!positive) throw new Error(`Telemetry isolation ${name} returned no positive timestamp interval`);
   }
 });
 
