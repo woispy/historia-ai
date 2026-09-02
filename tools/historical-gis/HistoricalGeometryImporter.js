@@ -40,8 +40,7 @@ function normalizeRing(ring) {
   // Historical GIS sources can contain rings that retrace an earlier path.
   // Ear clipping cannot triangulate such zero-area/self-retracing rings. When
   // a vertex occurs again, erase the closed loop between its occurrences while
-  // preserving the remaining boundary. This is intentionally deterministic
-  // and only affects the malformed repeated-vertex segment.
+  // preserving the remaining boundary.
   let changed = true;
   while (changed && points.length >= 3) {
     changed = false;
@@ -51,12 +50,14 @@ function normalizeRing(ring) {
       if (repeated < 0) continue;
 
       points.splice(start + 1, repeated - start - 1);
+      removeAdjacentDuplicates(points);
       changed = true;
       break;
     }
   }
 
-  if (points.length < 3) return [];
+  removeAdjacentDuplicates(points);
+  if (points.length < 3 || Math.abs(signedArea(points)) <= 1e-12) return [];
 
   points.push([...points[0]]);
   return points;
@@ -68,6 +69,24 @@ function findRepeatedPoint(points, start) {
   }
 
   return -1;
+}
+
+function removeAdjacentDuplicates(points) {
+  for (let index = points.length - 1; index > 0; index -= 1) {
+    if (samePoint(points[index - 1], points[index])) points.splice(index, 1);
+  }
+}
+
+function signedArea(points) {
+  let area = 0;
+
+  for (let index = 0; index < points.length; index += 1) {
+    const a = points[index];
+    const b = points[(index + 1) % points.length];
+    area += a[0] * b[1] - b[0] * a[1];
+  }
+
+  return area * 0.5;
 }
 
 function samePoint(a, b) {
