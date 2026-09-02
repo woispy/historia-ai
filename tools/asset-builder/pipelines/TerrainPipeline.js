@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { CopernicusDemSource, sampleCopernicusRaster } from "../dem/CopernicusDemSource.js";
+import { CopernicusDemSource, copernicusSourceTileKeysForBounds, sampleCopernicusRaster } from "../dem/CopernicusDemSource.js";
 import { encodeTerrainTile } from "../../../src/map/rendering/terrain/TerrainAssetCodec.js";
 import { makeTerrainTileKey, terrainTileBounds } from "../../../src/map/rendering/terrain/TerrainTile.js";
 import { TERRAIN_LODS } from "../../../src/map/rendering/terrain/TerrainLod.js";
@@ -18,6 +18,8 @@ export async function runTerrainPipeline({ bbox = parseBbox(process.env.HISTORIA
   if (grid < 2) throw new Error("HISTORIA_DEM_GRID must be >= 2.");
   log(`Terrain Pipeline: Copernicus GLO-30, bbox=${extent.join(",")}, maxZoom=${maxZoom}, grid=${grid}`);
   const source = await new CopernicusDemSource().initialize();
+  const sourceTiles = copernicusSourceTileKeysForBounds(extent);
+  log(`[Terrain Pipeline] DEM source coverage: ${sourceTiles.length} 1x1-degree tiles for bbox ${extent.join(",")}.`);
   fs.mkdirSync(outputDir, { recursive: true });
   const tiles = tilesForExtent(extent, maxZoom), records = [];
   log(`[Terrain Pipeline] Planned ${tiles.length} terrain tiles across LOD 0-${maxZoom}.`);
