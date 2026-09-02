@@ -4,6 +4,7 @@ const HEADER_BYTES = 64;
 const PROVINCE_FIELDS = 8;
 const TILE_STRIDE = 6;
 const LOD_STRIDE = 4;
+const POINT_EPSILON = 1e-9;
 
 export function encodeMapBin(entries = []) {
   const n = entries.length;
@@ -47,7 +48,7 @@ function normalizePolygon(polygon){const points=[];for(const point of polygon??[
 function findRepeatedPoint(points,start){for(let index=start;index<points.length;index+=1){if(samePoint(points[start-1],points[index]))return index;}return -1;}
 function removeAdjacentDuplicates(points){for(let index=points.length-1;index>0;index-=1){if(samePoint(points[index-1],points[index]))points.splice(index,1);}}
 function signedArea(points){let area=0;for(let index=0;index<points.length;index+=1){const a=points[index],b=points[(index+1)%points.length];area+=a[0]*b[1]-b[0]*a[1];}return area*0.5;}
-function samePoint(a,b){return Math.abs(a[0]-b[0])<=1e-12&&Math.abs(a[1]-b[1])<=1e-12;}
+function samePoint(a,b){return Math.abs(a[0]-b[0])<=POINT_EPSILON&&Math.abs(a[1]-b[1])<=POINT_EPSILON;}
 function bounds(points){if(!points.length)return{minX:0,minY:0,maxX:0,maxY:0};let minX=points[0][0],minY=points[0][1],maxX=minX,maxY=minY;for(const[x,y]of points){minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);}return{minX,minY,maxX,maxY};}
 function numericId(value,fallback){const n=Number(value);return Number.isFinite(n)&&n>=0?n>>>0:fallback;}
 function color(value){const h=String(value??"6f765f").replace(/^#/,'');if(!/^[0-9a-f]{6}$/i.test(h))return[111,118,95,255];return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16),255];}
