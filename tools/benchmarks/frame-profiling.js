@@ -14,6 +14,7 @@ let renderer;
 let runtime;
 let benchmarkStart = 0;
 let lastHover = 0;
+let restoreQueueSubmit = null;
 
 function wrapRenderer() {
   const originalRender = renderer.render.bind(renderer);
@@ -49,16 +50,19 @@ function wrapRenderer() {
   };
 
   const queue = renderer.device?.queue;
-  if (!queue) throw new Error("Frame profiler requires WebGPU queue access");
-  const originalSubmit = queue.submit.bind(queue);
-  queue.submit = (...args) => {
+  if (!queue || !globalThis.GPUQueue?.prototype?.submit) throw new Error("Frame profiler requires WebGPU queue access");
+  const prototype = globalThis.GPUQueue.prototype;
+  const originalSubmit = prototype.submit;
+  prototype.submit = function profiledSubmit(...args) {
+    if (this !== queue) return originalSubmit.apply(this, args);
     const start = performance.now();
     try {
-      return originalSubmit(...args);
+      return originalSubmit.apply(this, args);
     } finally {
       profiler.recordQueueSubmit(performance.now() - start);
     }
   };
+  restoreQueueSubmit = () => { prototype.submit = originalSubmit; };
 }
 
 async function main() {
@@ -109,6 +113,8 @@ async function main() {
 
 async function finish(now) {
   runtime?.stop();
+  restoreQueueSubmit?.();
+  restoreQueueSubmit = null;
   await renderer.collectTelemetry?.();
   const gpu = renderer.getTelemetrySnapshot?.() ?? null;
   const profiling = profiler.summary(now);
@@ -136,6 +142,8 @@ async function finish(now) {
 }
 
 main().catch((error) => {
+  restoreQueueSubmit?.();
+  restoreQueueSubmit = null;
   const result = { error: String(error?.stack || error) };
   diagnosticsNode.textContent = JSON.stringify(result, null, 2);
   window.__HISTORIA_FRAME_PROFILING_RESULT__ = result;
