@@ -4,7 +4,7 @@ export async function loadTerrainManifest(url = "/assets/terrain/manifest.json")
   const response = await fetch(url, { cache: "no-cache" });
   if (!response.ok) throw new Error(`Terrain manifest request failed: ${response.status}`);
   const manifest = await response.json();
-  if (!manifest || manifest.version !== 1 || !Array.isArray(manifest.tiles)) throw new Error("Invalid terrain manifest.");
+  if (!manifest || manifest.version !== 2 || manifest.format !== "HTRN-v2" || !Array.isArray(manifest.tiles)) throw new Error("Invalid terrain manifest.");
   return manifest;
 }
 
