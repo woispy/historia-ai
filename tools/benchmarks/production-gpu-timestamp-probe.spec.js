@@ -1,11 +1,114 @@
 import { test } from "@playwright/test";
 
-const probeUrl = "/benchmarks/production-gpu-timestamp-probe.html";
-
 test("Historia AI production-like GPU timestamp regression probe", async ({ page }) => {
-  await page.goto(probeUrl, { waitUntil: "load" });
-  await page.waitForFunction(() => document.body.textContent && document.body.textContent.trim().startsWith("{"), null, { timeout: 30000 });
-  const result = await page.evaluate(() => JSON.parse(document.body.textContent));
+  await page.goto("/benchmarks/map-benchmark.html?backend=webgpu&durationMs=1", { waitUntil: "load" });
+
+  const result = await page.evaluate(async () => {
+    const output = { supported: false, adapter: null, cases: {}, error: null };
+    let device;
+    try {
+      if (!navigator.gpu) throw new Error("navigator.gpu unavailable");
+      const adapter = await navigator.gpu.requestAdapter({ powerPreference: "high-performance" });
+      if (!adapter) throw new Error("no adapter");
+      const info = adapter.info || adapter.adapterInfo || null;
+      output.adapter = info ? {
+        vendor: info.vendor || null,
+        architecture: info.architecture || null,
+        device: info.device || null,
+        description: info.description || null,
+        isFallbackAdapter: typeof info.isFallbackAdapter === "boolean" ? info.isFallbackAdapter : null,
+      } : null;
+      if (!adapter.features?.has?.("timestamp-query")) throw new Error("adapter lacks timestamp-query");
+      device = await adapter.requestDevice({ requiredFeatures: ["timestamp-query"] });
+      output.supported = true;
+
+      const { createWebGpuBenchmarkTelemetry } = await import("/src/map/runtime/BenchmarkGpuTelemetry.js");
+      const shader = device.createShaderModule({ code: `
+        @group(0) @binding(0) var<storage, read> tiles: array<u32>;
+        @group(0) @binding(1) var<storage, read> bounds: array<f32>;
+        @group(0) @binding(2) var<storage, read_write> indices: array<u32>;
+        @group(0) @binding(3) var<storage, read_write> provinceIds: array<u32>;
+        @group(0) @binding(4) var<storage, read_write> counter: atomic<u32>;
+        @compute @workgroup_size(64)
+        fn cull(@builtin(global_invocation_id) id: vec3<u32>) {
+          let tile = id.x;
+          if (tile >= arrayLength(&tiles) / 6u) { return; }
+          let t = tile * 6u;
+          let province = tiles[t + 2u];
+          let b = province * 4u;
+          let minX = bounds[b]; let minY = bounds[b + 1u];
+          let maxX = bounds[b + 2u]; let maxY = bounds[b + 3u];
+          if (maxX < minX || maxY < minY) { return; }
+          let dst = atomicAdd(&counter, 3u);
+          indices[dst] = tiles[t]; indices[dst + 1u] = tiles[t] + 1u; indices[dst + 2u] = tiles[t] + 2u;
+          provinceIds[dst] = province; provinceIds[dst + 1u] = province; provinceIds[dst + 2u] = province;
+        }
+      ` });
+      const pipeline = device.createComputePipeline({ layout: "auto", compute: { module: shader, entryPoint: "cull" } });
+      const tiles = device.createBuffer({ size: 15000 * 24, usage: GPUBufferUsage.STORAGE });
+      const bounds = device.createBuffer({ size: 15000 * 16, usage: GPUBufferUsage.STORAGE });
+      const indices = device.createBuffer({ size: 480000 * 3 * 4, usage: GPUBufferUsage.STORAGE });
+      const provinceIds = device.createBuffer({ size: 480000 * 3 * 4, usage: GPUBufferUsage.STORAGE });
+      const counter = device.createBuffer({ size: 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+      const bindGroup = device.createBindGroup({ layout: pipeline.getBindGroupLayout(0), entries: [
+        { binding: 0, resource: { buffer: tiles } },
+        { binding: 1, resource: { buffer: bounds } },
+        { binding: 2, resource: { buffer: indices } },
+        { binding: 3, resource: { buffer: provinceIds } },
+        { binding: 4, resource: { buffer: counter } },
+      ] });
+      const renderTexture = device.createTexture({ size: { width: 16, height: 16 }, format: "rgba8unorm", usage: GPUTextureUsage.RENDER_ATTACHMENT });
+      const renderModule = device.createShaderModule({ code: `
+        @vertex fn vs(@builtin(vertex_index) i:u32) -> @builtin(position) vec4<f32> {
+          let p = array<vec2<f32>,3>(vec2<f32>(-1.,-1.),vec2<f32>(3.,-1.),vec2<f32>(-1.,3.));
+          return vec4<f32>(p[i],0.,1.);
+        }
+        @fragment fn fs() -> @location(0) vec4<f32> { return vec4<f32>(0.1,0.2,0.3,1.); }
+      ` });
+      const renderPipeline = device.createRenderPipeline({ layout: "auto", vertex: { module: renderModule, entryPoint: "vs" }, fragment: { module: renderModule, entryPoint: "fs", targets: [{ format: "rgba8unorm" }] } });
+
+      async function runCase(timestampEndAfterRender) {
+        const telemetry = createWebGpuBenchmarkTelemetry(device);
+        try {
+          for (let i = 0; i < 8; i += 1) {
+            const slot = telemetry.beginFrame();
+            const encoder = device.createCommandEncoder();
+            const began = slot >= 0 && telemetry.writeTimestamp(encoder, slot, "begin");
+            const compute = encoder.beginComputePass();
+            compute.setPipeline(pipeline);
+            compute.setBindGroup(0, bindGroup);
+            compute.dispatchWorkgroups(Math.ceil(15000 / 64));
+            compute.end();
+            if (!timestampEndAfterRender) telemetry.writeTimestamp(encoder, slot, "end");
+            const render = encoder.beginRenderPass({ colorAttachments: [{ view: renderTexture.createView(), loadOp: "clear", storeOp: "store", clearValue: { r: 0, g: 0, b: 0, a: 1 } }] });
+            render.setPipeline(renderPipeline);
+            render.draw(3);
+            render.end();
+            if (timestampEndAfterRender) telemetry.writeTimestamp(encoder, slot, "end");
+            const ready = began && telemetry.finishFrame(encoder, slot);
+            device.queue.submit([encoder.finish()]);
+            telemetry.recordSubmit(ready ? slot : -1);
+            await telemetry.collect();
+          }
+          await telemetry.collect();
+          return telemetry.snapshot();
+        } finally {
+          telemetry.dispose();
+        }
+      }
+
+      output.cases.computeThenTimestampThenRender = await runCase(false);
+      output.cases.computeThenRenderThenTimestamp = await runCase(true);
+
+      for (const buffer of [tiles, bounds, indices, provinceIds, counter]) buffer.destroy();
+      renderTexture.destroy();
+    } catch (error) {
+      output.error = String(error?.message || error);
+    } finally {
+      device?.destroy?.();
+    }
+    return output;
+  });
 
   console.log(`HISTORIA_PRODUCTION_GPU_TIMESTAMP ${JSON.stringify(result)}`);
   test.info().annotations.push({ type: "gpu-production-timestamp", description: JSON.stringify(result) });
@@ -13,8 +116,7 @@ test("Historia AI production-like GPU timestamp regression probe", async ({ page
   if (!result.supported) throw new Error(`Production-like GPU timestamp probe unavailable: ${result.error || "unknown reason"}`);
   if (result.error) throw new Error(`Production-like GPU timestamp probe failed: ${result.error}`);
 
-  const cases = ["computeThenTimestampThenRender", "computeThenRenderThenTimestamp"];
-  for (const name of cases) {
+  for (const name of ["computeThenTimestampThenRender", "computeThenRenderThenTimestamp"]) {
     const snapshot = result.cases?.[name];
     if (!snapshot) throw new Error(`Production-like timestamp probe missing case: ${name}`);
     if (snapshot.timestampSamplesZero !== 0 || snapshot.timestampSamplesDropped !== 0) {
