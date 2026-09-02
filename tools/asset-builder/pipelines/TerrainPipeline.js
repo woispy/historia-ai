@@ -20,11 +20,18 @@ export async function runTerrainPipeline({ bbox = parseBbox(process.env.HISTORIA
   const source = await new CopernicusDemSource().initialize();
   fs.mkdirSync(outputDir, { recursive: true });
   const tiles = tilesForExtent(extent, maxZoom), records = [];
-  for (const tile of tiles) {
-    const bounds = terrainTileBounds(tile), samples = await sampleTile(source, bounds, grid), encoded = encodeTerrainTile({ ...samples, bounds });
+  log(`[Terrain Pipeline] Planned ${tiles.length} terrain tiles across LOD 0-${maxZoom}.`);
+  for (let index = 0; index < tiles.length; index += 1) {
+    const tile = tiles[index];
+    const bounds = terrainTileBounds(tile);
+    log(`[Terrain Pipeline] Processing tile ${index + 1}/${tiles.length} (LOD ${tile.level}, x=${tile.x}, y=${tile.y})...`);
+    const samples = await sampleTile(source, bounds, grid);
+    const encoded = encodeTerrainTile({ ...samples, bounds });
     const file = path.join(outputDir, "tiles", String(tile.level), String(tile.x), `${tile.y}.htrn`);
-    fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, encoded);
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, encoded);
     records.push({ id: tile.id, level: tile.level, x: tile.x, y: tile.y, bounds, asset: `/assets/terrain/tiles/${tile.level}/${tile.x}/${tile.y}.htrn`, grid });
+    log(`[Terrain Pipeline] Completed tile ${index + 1}/${tiles.length} (LOD ${tile.level}) -> ${path.relative(process.cwd(), file)}.`);
   }
   const manifest = { version: 1, source: { provider: "Copernicus DEM", product: "GLO-30 Public", release: "2021 AWS public mirror", bucket: "copernicus-dem-30m" }, coverage: { minX: extent[0], minY: extent[1], maxX: extent[2], maxY: extent[3] }, maxZoom, lods: TERRAIN_LODS, tiles: records, generatedAt: new Date().toISOString(), format: "HTRN-v1" };
   fs.writeFileSync(path.join(outputDir, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
