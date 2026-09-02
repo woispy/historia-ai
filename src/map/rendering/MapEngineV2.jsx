@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { BinaryMapRenderer } from "./gpu/BinaryMapRenderer.js";
+import { ProductionBinaryMapRenderer } from "./gpu/ProductionBinaryMapRenderer.js";
 import { loadMapBin } from "../runtime/MapBinLoader.js";
 import { MapCameraRig } from "../runtime/MapCameraRig.js";
 import { MapRuntimeController } from "../runtime/MapRuntimeController.js";
@@ -27,7 +27,7 @@ export default function MapEngineV2({ selectedProvinceId = null, onProvinceClick
         yawMin: 0,
         yawMax: 0,
       });
-      const renderer = new BinaryMapRenderer(canvas);
+      const renderer = new ProductionBinaryMapRenderer(canvas);
       if (!renderer.initialize({ assetSource })) {
         renderer.dispose();
         return;
