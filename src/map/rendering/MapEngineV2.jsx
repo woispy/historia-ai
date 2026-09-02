@@ -9,6 +9,8 @@ export default function MapEngineV2({ camera = {}, selectedProvinceId = null, on
   const canvasRef = useRef(null);
   const runtimeRef = useRef(null);
 
+  const productionCamera = { ...camera, pitch: 0, yaw: 0 };
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return undefined;
@@ -17,8 +19,8 @@ export default function MapEngineV2({ camera = {}, selectedProvinceId = null, on
 
     loadMapBin(assetUrl).then((assetSource) => {
       if (cancelled) return;
-      const cameraRig = new MapCameraRig({ minZoom: 1, maxZoom: 96 });
-      cameraRig.setState(camera);
+      const cameraRig = new MapCameraRig({ minZoom: 1, maxZoom: 96, pitch: 0, pitchMin: 0, pitchMax: 0, yaw: 0, yawMin: 0, yawMax: 0 });
+      cameraRig.setState(productionCamera);
       const renderer = new BinaryMapRenderer(canvas);
       if (!renderer.initialize({ assetSource })) { renderer.dispose(); return; }
       runtime = new MapRuntimeController({ canvas, cameraRig, renderer, onProvinceClick });
@@ -39,7 +41,7 @@ export default function MapEngineV2({ camera = {}, selectedProvinceId = null, on
   useEffect(() => {
     const runtime = runtimeRef.current;
     if (!runtime) return;
-    runtime.setExternalCamera(camera);
+    runtime.setExternalCamera(productionCamera);
     runtime.setSelectedProvinceId(selectedProvinceId);
     runtime.setOnProvinceClick(onProvinceClick);
   }, [camera, selectedProvinceId, onProvinceClick]);
