@@ -8,6 +8,7 @@
  */
 
 const POINT_EPSILON = 1e-9;
+const AREA_EPSILON = 1e-12;
 
 export function parseMultiPolygon(
   geometry
@@ -16,10 +17,12 @@ export function parseMultiPolygon(
     type: "MultiPolygon",
 
     polygons:
-      geometry.coordinates.map(
-        (polygon) =>
-          normalizeLinearRing(polygon[0] ?? [])
-      ),
+      geometry.coordinates
+        .map(
+          (polygon) =>
+            normalizeLinearRing(polygon[0] ?? [])
+        )
+        .filter((ring) => ring.length >= 3),
   };
 }
 
@@ -57,7 +60,7 @@ function normalizeLinearRing(ring) {
   }
 
   removeAdjacentDuplicates(points);
-  if (points.length < 3 || Math.abs(signedArea(points)) <= 1e-12) return [];
+  if (points.length < 3 || Math.abs(signedArea(points)) <= AREA_EPSILON) return [];
 
   points.push([...points[0]]);
   return points;
