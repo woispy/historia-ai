@@ -16,12 +16,17 @@ export class CopernicusDemSource {
   async initialize() {
     fs.mkdirSync(this.cacheDir, { recursive: true });
     const indexPath = path.join(this.cacheDir, "tileList.txt");
-    let text;
-    if (fs.existsSync(indexPath)) {
-      text = fs.readFileSync(indexPath, "utf8");
-    } else {
-      text = await downloadText(this.tileListUrl);
-      fs.writeFileSync(indexPath, text);
+    let text = null;
+    if (fs.existsSync(indexPath)) text = fs.readFileSync(indexPath, "utf8");
+    if (text == null) {
+      try {
+        text = await downloadText(this.tileListUrl);
+        fs.writeFileSync(indexPath, text);
+      } catch (error) {
+        // The source remains usable without the optional public tile index.
+        text = "";
+        if (process.env.CI) throw error;
+      }
     }
     const parsed = parseTileList(text);
     this.tileIndex = parsed.length ? new Set(parsed) : null;
@@ -34,9 +39,10 @@ export class CopernicusDemSource {
   }
 
   async readTile(lat, lon) {
-    if (!this.tileIndex) await this.initialize();
+    if (!this.tileIndex && this.tileIndex !== null) await this.initialize();
     const key = copernicusTileKey(lat, lon);
     if (this.loaded.has(key)) return this.loaded.get(key);
+    if (this.tileIndex && !this.tileIndex.has(key)) return null;
 
     const fileName = `${key}.tif`;
     const localPath = path.join(this.cacheDir, fileName);
