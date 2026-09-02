@@ -74,12 +74,12 @@ for (const geometry of result.geometries) {
   }
 }
 
-// Regression coverage for the lake-city reconciliation path. These are
-// intentionally south/off-lake physical-land points, not the historical city
-// anchors themselves. The builder must keep the historical city in its own
-// data layer while resolving a valid physical-land fallback.
+// Regression coverage for the lake-city reconciliation path. The historical
+// city centroids remain in province metadata; the geometry builder resolves
+// lake-terrain provinces to explicit physical-land anchors used only for
+// cartographic construction.
 for (const [provinceId, anchor] of [
-  ["bithynia-nicaea", [29.72, 40.15]],
+  ["bithynia-nicaea", [29.72, 40.58]],
   ["pisidia-egirdir", [30.85, 37.98]],
   ["pisidia-beysehir", [31.72, 37.78]],
 ]) {
