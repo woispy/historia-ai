@@ -11,9 +11,11 @@ export class CopernicusDemSource {
     this.tileListUrl = tileListUrl;
     this.tileIndex = null;
     this.loaded = new Map();
+    this.initialized = false;
   }
 
   async initialize() {
+    if (this.initialized) return this;
     fs.mkdirSync(this.cacheDir, { recursive: true });
     const indexPath = path.join(this.cacheDir, "tileList.txt");
     let text = null;
@@ -23,13 +25,13 @@ export class CopernicusDemSource {
         text = await downloadText(this.tileListUrl);
         fs.writeFileSync(indexPath, text);
       } catch (error) {
-        // The source remains usable without the optional public tile index.
         text = "";
         if (process.env.CI) throw error;
       }
     }
     const parsed = parseTileList(text);
     this.tileIndex = parsed.length ? new Set(parsed) : null;
+    this.initialized = true;
     return this;
   }
 
@@ -39,7 +41,7 @@ export class CopernicusDemSource {
   }
 
   async readTile(lat, lon) {
-    if (!this.tileIndex && this.tileIndex !== null) await this.initialize();
+    if (!this.initialized) await this.initialize();
     const key = copernicusTileKey(lat, lon);
     if (this.loaded.has(key)) return this.loaded.get(key);
     if (this.tileIndex && !this.tileIndex.has(key)) return null;
@@ -49,13 +51,16 @@ export class CopernicusDemSource {
     let bytes;
     if (fs.existsSync(localPath)) {
       bytes = fs.readFileSync(localPath);
+      console.log(`[Terrain Pipeline] DEM cache hit: ${key}`);
     } else {
       const url = `${COPERNICUS_GLO30_BUCKET}/${key}/${fileName}`;
+      console.log(`[Terrain Pipeline] Downloading DEM tile: ${key}`);
       const response = await fetch(url);
       if (!response.ok) return null;
       bytes = new Uint8Array(await response.arrayBuffer());
       if (!bytes.length) return null;
       fs.writeFileSync(localPath, bytes);
+      console.log(`[Terrain Pipeline] Downloaded DEM tile: ${key} (${bytes.byteLength} bytes)`);
     }
 
     const raster = decodeCopernicusGeoTiff(bytes);
