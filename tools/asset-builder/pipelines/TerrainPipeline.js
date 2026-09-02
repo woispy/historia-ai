@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { CopernicusDemSource, sampleCopernicusRaster } from "../dem/CopernicusDemSource.js";
-import { encodeTerrainTile } from "../dem/TerrainAssetCodec.js";
+import { encodeTerrainTile } from "../../../src/map/rendering/terrain/TerrainAssetCodec.js";
 import { makeTerrainTileKey, terrainTileBounds } from "../../../src/map/rendering/terrain/TerrainTile.js";
 import { TERRAIN_LODS } from "../../../src/map/rendering/terrain/TerrainLod.js";
 import { log, success } from "../shared/index.js";
@@ -30,12 +30,7 @@ export async function runTerrainPipeline({ bbox = parseBbox(process.env.HISTORIA
     fs.writeFileSync(file, encoded);
     records.push({ id: tile.id, level: tile.level, x: tile.x, y: tile.y, bounds, asset: `/assets/terrain/tiles/${tile.level}/${tile.x}/${tile.y}.htrn`, grid });
   }
-  const manifest = {
-    version: 1,
-    source: { provider: "Copernicus DEM", product: "GLO-30 Public", release: "2021 AWS public mirror", bucket: "copernicus-dem-30m" },
-    coverage: { minX: extent[0], minY: extent[1], maxX: extent[2], maxY: extent[3] },
-    maxZoom, lods: TERRAIN_LODS, tiles: records, generatedAt: new Date().toISOString(), format: "HTRN-v1",
-  };
+  const manifest = { version: 1, source: { provider: "Copernicus DEM", product: "GLO-30 Public", release: "2021 AWS public mirror", bucket: "copernicus-dem-30m" }, coverage: { minX: extent[0], minY: extent[1], maxX: extent[2], maxY: extent[3] }, maxZoom, lods: TERRAIN_LODS, tiles: records, generatedAt: new Date().toISOString(), format: "HTRN-v1" };
   fs.writeFileSync(path.join(outputDir, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
   fs.writeFileSync(path.join(outputDir, "ATTRIBUTION.txt"), "Terrain elevation: Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved.\nAdapted by Historia AI into HTRN runtime terrain assets.\n");
   success(`Terrain Pipeline generated ${records.length} HTRN tile assets.`);
@@ -51,8 +46,7 @@ async function sampleTile(source, bounds, size) {
       const lon = bounds.minX + (bounds.maxX - bounds.minX) * x / (size - 1);
       const keyLat = Math.floor(lat === bounds.maxY ? lat - 1e-9 : lat), keyLon = Math.floor(lon === bounds.maxX ? lon - 1e-9 : lon), key = `${keyLat}/${keyLon}`;
       if (!cache.has(key)) cache.set(key, await source.readTile(keyLat, keyLon));
-      const value = sampleCopernicusRaster(cache.get(key), lon, lat);
-      const height = Number.isFinite(value) ? value : 0;
+      const value = sampleCopernicusRaster(cache.get(key), lon, lat), height = Number.isFinite(value) ? value : 0;
       heights[y * size + x] = height;
       if (Number.isFinite(value)) { valid[y * size + x] = 255; min = Math.min(min, height); max = Math.max(max, height); }
     }
