@@ -14,7 +14,22 @@ export class ProductionBinaryMapRenderer extends BinaryMapRenderer {
     const world = screenToWorld(localX, localY, this.camera);
     if (!world) return null;
 
-    return pickProvinceFromTriangles(this.state, world[0], world[1]);
+    const provinceId = pickProvinceFromTriangles(this.state, world[0], world[1]);
+    if (import.meta.env?.DEV) {
+      const bounds = geometryBounds(this.state.assetSource.geometry);
+      console.info("[ProductionBinaryMapRenderer] pick diagnostic", {
+        clientX: x,
+        clientY: y,
+        rect: { left: rect.left, top: rect.top, width: rect.width, height: rect.height },
+        local: { x: localX, y: localY },
+        camera: { ...this.camera },
+        world: { x: world[0], y: world[1] },
+        provinceId,
+        geometryBounds: bounds,
+        drawCount: this.state.draws.length,
+      });
+    }
+    return provinceId;
   }
 }
 
@@ -50,6 +65,22 @@ function pointInTriangle(px, py, geometry, ia, ib, ic) {
   const hasNegative = ab < -1e-10 || bc < -1e-10 || ca < -1e-10;
   const hasPositive = ab > 1e-10 || bc > 1e-10 || ca > 1e-10;
   return !(hasNegative && hasPositive);
+}
+
+function geometryBounds(geometry) {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (let i = 0; i < geometry.length; i += 2) {
+    const x = geometry[i];
+    const y = geometry[i + 1];
+    if (x < minX) minX = x;
+    if (y < minY) minY = y;
+    if (x > maxX) maxX = x;
+    if (y > maxY) maxY = y;
+  }
+  return { minX, minY, maxX, maxY };
 }
 
 export { screenToWorld } from "./BinaryMapRenderer.js";
