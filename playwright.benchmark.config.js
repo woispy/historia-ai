@@ -22,7 +22,7 @@ const launchArgs = process.env.HISTORIA_CHROMIUM_FLAGS
 
 export default defineConfig({
   testDir: "./tools/benchmarks",
-  testMatch: /map-benchmark\.spec\.js$/,
+  testMatch: /(?:map-benchmark|production-gpu-timestamp-probe)\.spec\.js$/,
   workers: 1,
   timeout: Number(process.env.HISTORIA_BENCHMARK_TIMEOUT_MS || 45 * 60 * 1000),
   reporter: "line",
