@@ -15,6 +15,8 @@ const defaultGpuFlags = [
   "--enable-webgpu-developer-features",
   "--use-webgpu-power-preference=default-high-performance",
   "--disable-software-rasterizer",
+  "--disable-frame-rate-limit",
+  "--no-vsync",
 ];
 const launchArgs = process.env.HISTORIA_CHROMIUM_FLAGS
   ? process.env.HISTORIA_CHROMIUM_FLAGS.split(/\s+/).filter(Boolean)

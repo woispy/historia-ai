@@ -37,6 +37,9 @@ test("Historia AI frame/pass profiling", async ({ page }) => {
   if (result.gpu.queueSubmits <= 0) throw new Error("Frame profiling missing GPU queue submissions");
   if (result.picking.accepted <= 0) throw new Error("Frame profiling did not accept any picking operations");
   if (result.picking.completed <= 0) throw new Error("Frame profiling did not observe any completed picking readbacks");
+  if (result.pickingPipeline?.commandEncodingAndSetupCpuMs?.count <= 0) throw new Error("Frame profiling missing picking command encoding timings");
+  if (result.pickingPipeline?.queueSubmitCpuMs?.count <= 0) throw new Error("Frame profiling missing picking queue-submit timings");
+  if (result.pickingPipeline?.queueWorkDoneMs?.count <= 0) throw new Error("Frame profiling missing picking queue completion timings");
   await fs.mkdir(path.dirname(output), { recursive: true });
   await fs.writeFile(output, JSON.stringify(result, null, 2));
   console.log(`HISTORIA_FRAME_PROFILING_JSON ${JSON.stringify(result)}`);
