@@ -11,7 +11,7 @@ uniform vec4 uColor;uniform vec4 uSelected;uniform vec4 uHovered;uniform float u
 void main(){vec4 c=uColor;if(abs(uProvinceId-uSelectedId)<0.5)c=mix(c,uSelected,0.68);else if(abs(uProvinceId-uHoveredId)<0.5)c=mix(c,uHovered,0.42);outColor=c;}`;
 const PICK_FRAGMENT = `#version 300 es
 precision highp float;
-uniform float uProvinceId;out vec4 outColor;vec4 encode(float id){float r=mod(id,256.0);float g=mod(floor(id/256.0),256.0);float b=mod(floor(id/65536.0),256.0);return vec4(r,g,b,255.0)/255.0;}void main(){outColor=encode(uProvinceId);}`;
+uniform float uProvinceId;out vec4 outColor;vec4 encode(float id){float r=mod(id,256.0);float g=mod(floor(id/256.0),256.0);float b=mod(floor(id/65536.0),256.0);return vec4(r,g,b,255.0)/255.0;}`;
 
 export class BinaryMapRenderer extends MapRendererContract {
   constructor(canvas){super();this.canvas=canvas;this.state=null;this.camera={x:0,y:0,zoom:1,pitch:24,yaw:0};this.selected=0;this.hovered=0;this.frame=0;this.frameRequest=0;this.pickPixel=new Uint8Array(4);this.disposed=false;}
@@ -39,7 +39,7 @@ function normalizePolygon(polygon){const points=[];for(const point of polygon??[
 function signedArea(points){let area=0;for(let i=0;i<points.length;i+=1){const a=points[i],b=points[(i+1)%points.length];area+=a[0]*b[1]-b[0]*a[1];}return area*0.5;}
 function cross(a,b,c){return(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);}
 function isConvex(a,b,c,orientation){return cross(a,b,c)*orientation>1e-12;}
-function pointInTriangle(p,a,b,c){const ab=cross(a,b,p),bc=cross(b,c,p),ca=cross(c,a,p);const hasNegative=ab<-1e-12||bc<-1e-12||ca<-1e-12;const hasPositive=ab>1e-12||bc>1e-12||ca>1e-12;return!(hasNegative&&hasPositive);}
+function pointInTriangle(p,a,b,c){const ab=cross(a,b,p),bc=cross(b,c,p),ca=cross(c,a,p);const hasNegative=ab<-1e-12||bc<-1e-12||ca<-1e-12;const hasPositive=ab>1e-12||bc>1e-12||ca>1e-12;return!(hasNegative&&hasPositive)&&Math.abs(ab)>1e-12&&Math.abs(bc)>1e-12&&Math.abs(ca)>1e-12;}
 function samePoint(a,b){return Math.abs(a[0]-b[0])<=1e-12&&Math.abs(a[1]-b[1])<=1e-12;}
 function link(gl,v,f){const p=gl.createProgram(),vs=shader(gl,gl.VERTEX_SHADER,v),fs=shader(gl,gl.FRAGMENT_SHADER,f);if(!p||!vs||!fs)throw new Error("GPU program allocation failed");gl.attachShader(p,vs);gl.attachShader(p,fs);gl.linkProgram(p);gl.deleteShader(vs);gl.deleteShader(fs);if(!gl.getProgramParameter(p,gl.LINK_STATUS)){const e=gl.getProgramInfoLog(p)||"GPU program linking failed";gl.deleteProgram(p);throw new Error(e);}return p;}
 function shader(gl,t,s){const x=gl.createShader(t);if(!x)throw new Error("GPU shader allocation failed");gl.shaderSource(x,s);gl.compileShader(x);if(!gl.getShaderParameter(x,gl.COMPILE_STATUS)){const e=gl.getShaderInfoLog(x)||"GPU shader compilation failed";gl.deleteShader(x);throw new Error(e);}return x;}
