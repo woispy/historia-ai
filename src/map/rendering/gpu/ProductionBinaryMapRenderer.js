@@ -1,12 +1,9 @@
 import { BinaryMapRenderer, screenToWorld } from "./BinaryMapRenderer.js";
 import { pickProvinceFromBinaryAsset } from "./BinaryMapCpuPicker.js";
 
-/** Production adapter: preserve GPU picking while guaranteeing a geometry-backed CPU fallback. */
+/** Production adapter: use binary geometry picking for deterministic province selection. */
 export class ProductionBinaryMapRenderer extends BinaryMapRenderer {
   pick(x, y) {
-    const gpuProvinceId = super.pick(x, y);
-    if (gpuProvinceId !== null && gpuProvinceId !== undefined) return gpuProvinceId;
-
     if (this.disposed || !this.state) return null;
     const rect = this.canvas.getBoundingClientRect();
     if (!rect.width || !rect.height) return null;
