@@ -7,6 +7,7 @@ const SITE_EPSILON = 1e-6;
 const COAST_SAMPLE_STEP = 0.12;
 const EDGE_SAMPLE_STEP = 0.03;
 const COASTAL_TOLERANCE = 0.06;
+const PHASE_2D_DIAGNOSTIC_PROVINCE_ID = "phrygia-uluborlu";
 
 // Historical city anchors can legitimately sit inside a lake. They are not
 // physical-land anchors and must never be used as province polygon centres.
@@ -27,7 +28,7 @@ function distanceSquared(a, b) {
 function pointInPolygon(point, polygon) {
   let inside = false;
   const [x, y] = point;
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i += 1) {
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
     const [xi, yi] = polygon[i];
     const [xj, yj] = polygon[j];
     const intersects = yi > y !== yj > y
@@ -337,7 +338,7 @@ function polygonCentroid(polygon) {
   return [sum[0] / polygon.length, sum[1] / polygon.length];
 }
 
-function buildFallbackPolygon(center, polygonRadii) {
+function buildFallbackPolygon(center, polygonRadii, diagnostic = false) {
   for (const polygonRadius of polygonRadii) {
     const polygon = Array.from({ length: 6 }, (_, index) => {
       const polygonAngle = (index / 6) * Math.PI * 2;
@@ -346,31 +347,42 @@ function buildFallbackPolygon(center, polygonRadii) {
         center[1] + Math.sin(polygonAngle) * polygonRadius,
       ];
     });
+
+    if (diagnostic) {
+      const vertexResults = polygon.map((point) => isPhysicalLandPoint(point));
+      const edgeFailures = [];
+      for (let edgeIndex = 0; edgeIndex < polygon.length; edgeIndex += 1) {
+        const start = polygon[edgeIndex];
+        const end = polygon[(edgeIndex + 1) % polygon.length];
+        const length = Math.sqrt(distanceSquared(start, end));
+        const samples = Math.max(1, Math.ceil(length / EDGE_SAMPLE_STEP));
+        for (let sample = 1; sample < samples; sample += 1) {
+          const fraction = sample / samples;
+          const point = [
+            start[0] + (end[0] - start[0]) * fraction,
+            start[1] + (end[1] - start[1]) * fraction,
+          ];
+          if (!isPhysicalLandPoint(point)) {
+            edgeFailures.push({ edgeIndex, sampleIndex: sample, sampleCount: samples, point, isPhysicalLandPoint: false });
+            break;
+          }
+        }
+      }
+      console.log("[Phase2D][phrygia-uluborlu][fallback-radius]", {
+        center,
+        radius: polygonRadius,
+        vertexResults,
+        edgeFailures,
+        polygonAccepted: isPhysicalLandPolygon(polygon),
+      });
+    }
+
     if (isPhysicalLandPolygon(polygon)) return polygon;
   }
   return [];
 }
 
-function findNearestLakeShore(point) {
-  let winner = null;
-  let bestDistance = Number.POSITIVE_INFINITY;
-
-  for (const lake of ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes) {
-    const coordinates = lake.coordinates;
-    if (!Array.isArray(coordinates) || coordinates.length < 2) continue;
-    for (let index = 0; index < coordinates.length - 1; index += 1) {
-      const shore = closestPointOnSegment(point, coordinates[index], coordinates[index + 1]);
-      const distance = distanceSquared(point, shore);
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        winner = { shore, lakeCenter: polygonCentroid(coordinates) };
-      }
-    }
-  }
-  return winner;
-}
-
-function createAnchorFallbackPolygon(centroid, _requiresLandSafe = false, physicalLandAnchor = null) {
+function createAnchorFallbackPolygon(centroid, _requiresLandSafe = false, physicalLandAnchor = null, diagnostic = false) {
   const polygonRadii = [0.002, 0.001, 0.0005, 0.00025, 0.0001, 0.00005];
   const searchPasses = [
     { radialStep: 0.0025, maxRadius: 0.25, directions: 32 },
@@ -380,25 +392,39 @@ function createAnchorFallbackPolygon(centroid, _requiresLandSafe = false, physic
   const candidateCenters = [];
   const seen = new Set();
 
-  const addCandidate = (point) => {
-    if (!Array.isArray(point) || point.length < 2) return;
-    if (!isWithinAnatoliaEnvelope(point) || !isPhysicalLandPoint(point)) return;
+  const addCandidate = (point, source = "candidate") => {
+    if (!Array.isArray(point) || point.length < 2) {
+      if (diagnostic) console.log("[Phase2D][phrygia-uluborlu][candidate]", { source, point, accepted: false, reason: "invalid-point" });
+      return;
+    }
+    const withinEnvelope = isWithinAnatoliaEnvelope(point);
+    const physicalLand = isPhysicalLandPoint(point);
+    if (!withinEnvelope || !physicalLand) {
+      if (diagnostic) console.log("[Phase2D][phrygia-uluborlu][candidate]", {
+        source,
+        point,
+        accepted: false,
+        isWithinAnatoliaEnvelope: withinEnvelope,
+        isPhysicalLandPoint: physicalLand,
+        reason: !withinEnvelope ? "outside-anatolia-envelope" : "not-physical-land",
+      });
+      return;
+    }
     const key = `${point[0].toFixed(6)}:${point[1].toFixed(6)}`;
-    if (seen.has(key)) return;
+    if (seen.has(key)) {
+      if (diagnostic) console.log("[Phase2D][phrygia-uluborlu][candidate]", { source, point, accepted: false, reason: "duplicate" });
+      return;
+    }
     seen.add(key);
     candidateCenters.push(point);
+    if (diagnostic) console.log("[Phase2D][phrygia-uluborlu][candidate]", { source, point, accepted: true, isPhysicalLandPoint: true });
   };
 
-  // Deterministic priority: explicit physical reconciliation anchor first,
-  // then the historical centroid, then an expanding physical-land search.
   const seeds = [physicalLandAnchor, centroid].filter(
     (point) => Array.isArray(point) && point.length >= 2,
   );
-  for (const seed of seeds) addCandidate(seed);
+  for (const seed of seeds) addCandidate(seed, seed === physicalLandAnchor ? "physical-land-anchor" : "historical-centroid");
 
-  // Search from the original seeds even when those seeds are not themselves
-  // physical land. A historical city can be in water, and the whole purpose
-  // of this fallback is to reconcile that coordinate to nearby physical land.
   for (const seed of seeds) {
     for (const search of searchPasses) {
       for (let radius = search.radialStep; radius <= search.maxRadius; radius += search.radialStep) {
@@ -407,15 +433,12 @@ function createAnchorFallbackPolygon(centroid, _requiresLandSafe = false, physic
           addCandidate([
             seed[0] + Math.cos(angle) * radius,
             seed[1] + Math.sin(angle) * radius,
-          ]);
+          ], `radial-${search.radialStep}/${search.maxRadius}-r${radius.toFixed(4)}-d${direction}`);
         }
       }
     }
   }
 
-  // The shoreline is a deterministic physical feature rather than a
-  // lake-specific algorithm. Include its nearby land candidates in the same
-  // generic candidate stream so lake and non-lake provinces share one path.
   const shore = findNearestLakeShore(centroid);
   if (shore) {
     const outward = [shore.shore[0] - shore.lakeCenter[0], shore.shore[1] - shore.lakeCenter[1]];
@@ -426,13 +449,21 @@ function createAnchorFallbackPolygon(centroid, _requiresLandSafe = false, physic
         addCandidate([
           shore.shore[0] + unit[0] * distance * sign,
           shore.shore[1] + unit[1] * distance * sign,
-        ]);
+        ], `lake-shore-sign${sign}-distance${distance}`);
       }
     }
   }
 
+  if (diagnostic) {
+    console.log("[Phase2D][phrygia-uluborlu][candidate-summary]", {
+      seedCount: seeds.length,
+      candidateCenterCount: candidateCenters.length,
+      candidateCenters,
+    });
+  }
+
   for (const center of candidateCenters) {
-    const polygon = buildFallbackPolygon(center, polygonRadii);
+    const polygon = buildFallbackPolygon(center, polygonRadii, diagnostic);
     if (polygon.length >= 3) return polygon;
   }
 
@@ -545,6 +576,7 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
         metadata.centroid,
         false,
         PHYSICAL_LAND_ANCHORS[metadata.id] ?? metadata.physicalLandAnchor ?? null,
+        metadata.id === PHASE_2D_DIAGNOSTIC_PROVINCE_ID,
       );
       if (fallback.length < 3) throw new Error(`Phase 2D produced no physically valid geometry for ${metadata.id}`);
       polygons = [roundPolygon(fallback)];
