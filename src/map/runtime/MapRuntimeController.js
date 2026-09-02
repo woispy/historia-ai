@@ -157,6 +157,7 @@ export class MapRuntimeController {
       return;
     }
     const provinceId = this.renderer.pick(event.clientX, event.clientY);
+    if (import.meta.env?.DEV) console.debug("[MapRuntimeController] province click", { clientX: event.clientX, clientY: event.clientY, provinceId });
     if (provinceId) this.onProvinceClick?.(provinceId);
   }
 
