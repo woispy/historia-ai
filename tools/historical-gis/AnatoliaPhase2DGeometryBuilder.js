@@ -391,10 +391,14 @@ function createAnchorFallbackPolygon(centroid, _requiresLandSafe = false, physic
 
   // Deterministic priority: explicit physical reconciliation anchor first,
   // then the historical centroid, then an expanding physical-land search.
-  addCandidate(physicalLandAnchor);
-  addCandidate(centroid);
+  const seeds = [physicalLandAnchor, centroid].filter(
+    (point) => Array.isArray(point) && point.length >= 2,
+  );
+  for (const seed of seeds) addCandidate(seed);
 
-  const seeds = candidateCenters.slice();
+  // Search from the original seeds even when those seeds are not themselves
+  // physical land. A historical city can be in water, and the whole purpose
+  // of this fallback is to reconcile that coordinate to nearby physical land.
   for (const seed of seeds) {
     for (const search of searchPasses) {
       for (let radius = search.radialStep; radius <= search.maxRadius; radius += search.radialStep) {
