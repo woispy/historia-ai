@@ -3,21 +3,27 @@ const DEFAULT_NEAR = 0.25;
 const DEFAULT_FAR = 1200;
 const WORLD_CAMERA_DISTANCE = 430;
 
-/** Build a column-major perspective MVP for the finite Historia world. */
+/**
+ * Build a column-major perspective MVP for the finite Historia world.
+ *
+ * Camera pitch is defined as 2.5D tilt away from top-down (0 = top-down).
+ * MapCameraRig clamps it to 10..42 degrees, so the camera must stay above the
+ * world plane and orbit toward the horizon only as the tilt increases.
+ */
 export function buildTerrainMvp(camera = {}, width = 1, height = 1) {
   const zoom = Math.max(1, Number(camera.zoom) || 1);
   const aspect = Math.max(1e-6, Number(width) || 1) / Math.max(1, Number(height) || 1);
-  const pitch = clamp(Number(camera.pitch) || 0, -89, 89) * Math.PI / 180;
+  const tilt = clamp(Number(camera.pitch) || 0, 0, 89) * Math.PI / 180;
   const yaw = Number(camera.yaw) || 0;
   const cx = Number(camera.x) || 0;
   const cy = Number(camera.y) || 0;
   const distance = WORLD_CAMERA_DISTANCE / zoom;
-  const horizontalDistance = distance * Math.cos(pitch);
+  const horizontalDistance = distance * Math.sin(tilt);
   const yawRadians = yaw * Math.PI / 180;
   const cameraPosition = [
     cx + Math.sin(yawRadians) * horizontalDistance,
     cy - Math.cos(yawRadians) * horizontalDistance,
-    Math.max(0.5, distance * Math.sin(pitch)),
+    Math.max(0.5, distance * Math.cos(tilt)),
   ];
   const target = [cx, cy, 0];
   const view = lookAt(cameraPosition, target, [0, 0, 1]);
