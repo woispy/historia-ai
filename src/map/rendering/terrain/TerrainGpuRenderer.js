@@ -15,14 +15,12 @@ layout(location=2) in vec2 aUv;
 out vec2 vUv;
 out vec2 vWorld;
 out float vHeight;
-uniform vec4 uTileBounds;
 uniform vec4 uDataBounds;
 uniform mat4 uMvp;
 uniform float uHeightScale;
 void main(){
-  vec2 world=mix(uTileBounds.xy,uTileBounds.zw,aPosition);
-  vec2 dataSize=max(uDataBounds.zw-uDataBounds.xy,vec2(0.000001));
-  vUv=(world-uDataBounds.xy)/dataSize;
+  vec2 world=mix(uDataBounds.xy,uDataBounds.zw,aPosition);
+  vUv=aUv;
   vWorld=world;
   vHeight=clamp(aHeight,-500.0,9000.0);
   gl_Position=uMvp*vec4(world,vHeight*clamp(uHeightScale,0.0,0.001),1.0);
@@ -76,7 +74,6 @@ export class TerrainGpuRenderer {
     this.debuggedTileRanges = new Set();
     this.disposed = false;
     this.uniforms = {
-      tileBounds: gl.getUniformLocation(this.program, "uTileBounds"),
       dataBounds: gl.getUniformLocation(this.program, "uDataBounds"),
       mvp: gl.getUniformLocation(this.program, "uMvp"),
       heightScale: gl.getUniformLocation(this.program, "uHeightScale"),
@@ -163,7 +160,6 @@ export class TerrainGpuRenderer {
         console.debug("[TerrainGpuRenderer] tile height range", { tileId, minHeight: tile.minHeight, maxHeight: tile.maxHeight, bounds: tile.bounds, dataBounds: tile.dataBounds });
         this.debuggedTileRanges.add(tileId);
       }
-      gl.uniform4f(this.uniforms.tileBounds, tile.bounds.minX, tile.bounds.minY, tile.bounds.maxX, tile.bounds.maxY);
       gl.uniform4f(this.uniforms.dataBounds, tile.dataBounds.minX, tile.dataBounds.minY, tile.dataBounds.maxX, tile.dataBounds.maxY);
       gl.bindVertexArray(tile.vao);
       for (let unit = 0; unit < tile.textures.length; unit += 1) {
