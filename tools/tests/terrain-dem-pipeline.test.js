@@ -3,7 +3,8 @@ import { encodeTerrainTile, decodeTerrainTile } from "../../src/map/rendering/te
 import { buildTerrainGridMesh } from "../../src/map/rendering/terrain/TerrainGeometry.js";
 import { buildTerrainMvp } from "../../src/map/rendering/terrain/TerrainCameraMath.js";
 import { parseTileList, copernicusSourceTileKeysForBounds, copernicusTileKey } from "../asset-builder/dem/CopernicusDemSource.js";
-import { coordinateInCoverage } from "../asset-builder/pipelines/TerrainPipeline.js";
+import { coordinateInCoverage, terrainTileBoundsForCoverage } from "../asset-builder/pipelines/TerrainPipeline.js";
+import { makeTerrainTileKey } from "../../src/map/rendering/terrain/TerrainTile.js";
 import { TERRAIN_LODS } from "../../src/map/rendering/terrain/TerrainLod.js";
 
 const size = 3;
@@ -42,5 +43,11 @@ assert.equal(coordinateInCoverage(46, 43, coverage), true);
 assert.equal(coordinateInCoverage(25.999999, 40, coverage), false);
 assert.equal(coordinateInCoverage(40, 43.000001, coverage), false);
 assert.equal(coordinateInCoverage(109, 75, coverage), false);
+const clippedLod0 = terrainTileBoundsForCoverage(makeTerrainTileKey(0, 0, 0), coverage);
+assert.deepEqual(clippedLod0, { minX: 26, minY: 35, maxX: 46, maxY: 43 });
+const clippedLod3 = terrainTileBoundsForCoverage(makeTerrainTileKey(3, 4, 2), coverage);
+assert.ok(clippedLod3.minX >= coverage[0] && clippedLod3.maxX <= coverage[2]);
+assert.ok(clippedLod3.minY >= coverage[1] && clippedLod3.maxY <= coverage[3]);
+assert.ok(clippedLod3.minX < clippedLod3.maxX && clippedLod3.minY < clippedLod3.maxY);
 assert.equal(TERRAIN_LODS.length, 5);
 console.log("terrain-dem-pipeline.test.js: PASS");
