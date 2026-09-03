@@ -13,9 +13,10 @@ export function buildTerrainMvp(camera = {}, width = 1, height = 1) {
   const cy = Number(camera.y) || 0;
   const distance = WORLD_CAMERA_DISTANCE / zoom;
   const horizontalDistance = distance * Math.cos(pitch);
+  const yawRadians = yaw * Math.PI / 180;
   const cameraPosition = [
-    cx + Math.sin(yaw * Math.PI / 180) * horizontalDistance,
-    cy - Math.cos(yaw * Math.PI / 180) * horizontalDistance,
+    cx + Math.sin(yawRadians) * horizontalDistance,
+    cy - Math.cos(yawRadians) * horizontalDistance,
     Math.max(0.5, distance * Math.sin(pitch)),
   ];
   const target = [cx, cy, 0];
@@ -49,20 +50,6 @@ function lookAt(eye, target, up) {
     right[2], trueUp[2], -forward[2], 0,
     -dot(right, eye), -dot(trueUp, eye), dot(forward, eye), 1,
   ]);
-}
-
-function translationMatrix(x, y, z) {
-  return new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, x,y,z,1]);
-}
-
-function rotationX(angle) {
-  const c = Math.cos(angle), s = Math.sin(angle);
-  return new Float32Array([1,0,0,0, 0,c,s,0, 0,-s,c,0, 0,0,0,1]);
-}
-
-function rotationZ(angle) {
-  const c = Math.cos(angle), s = Math.sin(angle);
-  return new Float32Array([c,s,0,0, -s,c,0,0, 0,0,1,0, 0,0,0,1]);
 }
 
 function multiply(a, b) {
