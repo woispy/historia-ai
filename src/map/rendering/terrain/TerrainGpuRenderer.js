@@ -12,8 +12,8 @@ precision highp float;
 layout(location=0) in vec2 aPosition;
 layout(location=1) in float aHeight;
 layout(location=2) in vec2 aUv;
-out vec2 vUv;
-out float vHeight;
+layout(location=0) out vec2 vUv;
+layout(location=1) out float vHeight;
 uniform vec4 uTileBounds;
 uniform mat4 uMvp;
 uniform float uHeightScale;
@@ -25,10 +25,12 @@ void main(){
 }`;
 const FRAGMENT = `#version 300 es
 precision highp float;
-in vec2 vUv; in float vHeight;
+precision highp sampler2D;
+layout(location=0) in vec2 vUv;
+layout(location=1) in float vHeight;
 uniform sampler2D uBaseColor; uniform sampler2D uNormal; uniform sampler2D uSplatRgba; uniform sampler2D uSplatSnow; uniform sampler2D uLandMask; uniform sampler2D uDemValidity;
 uniform float uRoughness; uniform float uAmbient; uniform float uSunStrength; uniform float uNormalStrength; uniform vec3 uSunDirection;
-out vec4 outColor;
+layout(location=0) out vec4 outColor;
 void main(){
   if(texture(uLandMask,vUv).r<0.5 || texture(uDemValidity,vUv).r<0.5) discard;
   vec4 splat=texture(uSplatRgba,vUv); float snow=texture(uSplatSnow,vUv).r;
@@ -70,4 +72,4 @@ function createTexture(gl,data,width,height,internalFormat,format,type){const te
 function createSolidTexture(gl,rgba){return createTexture(gl,new Uint8Array(rgba),1,1,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE);}
 function createNormalTexture(gl,asset){const rgba=new Uint8Array(asset.size*asset.size*4);for(let i=0;i<asset.size*asset.size;i+=1){rgba[i*4]=asset.normals[i*3]+128;rgba[i*4+1]=asset.normals[i*3+1]+128;rgba[i*4+2]=asset.normals[i*3+2]+128;rgba[i*4+3]=255;}return createTexture(gl,rgba,asset.size,asset.size,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE);}
 function compileShader(gl,type,source){const shader=gl.createShader(type);gl.shaderSource(shader,source);gl.compileShader(shader);if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS)){const error=gl.getShaderInfoLog(shader)||"unknown terrain shader error";gl.deleteShader(shader);throw new Error(error);}return shader;}
-function createProgram(gl){const vertex=compileShader(gl,gl.VERTEX_SHADER,VERTEX),fragment=compileShader(gl,gl.FRAGMENT_SHADER,FRAGMENT),program=gl.createProgram();gl.attachShader(program,vertex);gl.attachShader(program,fragment);gl.deleteShader(vertex);gl.deleteShader(fragment);if(!gl.getProgramParameter(program,gl.LINK_STATUS)){const error=gl.getProgramInfoLog(program)||"Terrain program link failed";gl.deleteProgram(program);throw new Error(error);}return program;}
+function createProgram(gl){const vertex=compileShader(gl,gl.VERTEX_SHADER,VERTEX),fragment=compileShader(gl,gl.FRAGMENT_SHADER,FRAGMENT),program=gl.createProgram();gl.attachShader(program,vertex);gl.attachShader(program,fragment);gl.linkProgram(program);gl.deleteShader(vertex);gl.deleteShader(fragment);if(!gl.getProgramParameter(program,gl.LINK_STATUS)){const error=gl.getProgramInfoLog(program)||"Terrain program link failed";gl.deleteProgram(program);throw new Error(error);}return program;}
