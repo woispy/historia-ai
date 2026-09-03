@@ -65,12 +65,20 @@ export function terrainTileSampleBoundsForCoverage(tile, coverage) {
   return Object.freeze(result);
 }
 
+/** Return the world coordinate represented by a raster-grid vertex; Y increases south-to-north to match runtime mesh space. */
+export function terrainSampleCoordinate(bounds, x, y, size) {
+  if (!Number.isInteger(size) || size < 2 || !Number.isInteger(x) || !Number.isInteger(y) || x < 0 || x >= size || y < 0 || y >= size) throw new Error("Invalid terrain sample grid coordinate.");
+  return {
+    lon: bounds.minX + (bounds.maxX - bounds.minX) * x / (size - 1),
+    lat: bounds.minY + (bounds.maxY - bounds.minY) * y / (size - 1),
+  };
+}
+
 async function sampleTile(source, bounds, size, coverage, landPolygons) {
   const heights = new Float32Array(size * size), demValidity = new Uint8Array(size * size), landMask = new Uint8Array(size * size), cache = new Map();
   for (let y = 0; y < size; y += 1) {
-    const lat = bounds.maxY - (bounds.maxY - bounds.minY) * y / (size - 1);
     for (let x = 0; x < size; x += 1) {
-      const lon = bounds.minX + (bounds.maxX - bounds.minX) * x / (size - 1), index = y * size + x;
+      const { lon, lat } = terrainSampleCoordinate(bounds, x, y, size), index = y * size + x;
       if (!coordinateInCoverage(lon, lat, coverage)) continue;
       const keyLat = Math.floor(lat === coverage[3] ? lat - 1e-9 : lat), keyLon = Math.floor(lon === coverage[2] ? lon - 1e-9 : lon), key = `${keyLat}/${keyLon}`;
       if (!cache.has(key)) cache.set(key, await source.readTile(keyLat, keyLon));
@@ -92,7 +100,7 @@ async function sampleTile(source, bounds, size, coverage, landPolygons) {
 
 function loadPhysicalLandPolygons() {
   if (!fs.existsSync(GEOMETRY_ASSET_DIR)) return [];
-  const modules = Object.fromEntries(fs.readdirSync(GEOMETRY_ASSET_DIR).filter((file) => /^geometry_country_.*\.json$/.test(file)).map((file) => [file, JSON.parse(fs.readFileSync(path.join(GEOMETRY_ASSET_DIR, file), "utf8"))]));
+  const modules = Object.fromEntries(fs.readdirSync(GEOMETRY_ASSET_DIR).filter((file) => /^geometry_country_.*\.json$/.test(file)).map((file) => [file, JSON.parse(fs.readFileSync(path.join(GEOMETRY_ASSET_DIR, file), "utf8")]));
   return collectWorldLandPolygons(modules);
 }
 function isPhysicalLand(lon, lat, landPolygons) { return landPolygons.some((polygon) => pointInPolygon(lon, lat, polygon)); }
