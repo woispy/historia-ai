@@ -28,30 +28,41 @@ export async function runTerrainPipeline({ bbox = parseBbox(process.env.HISTORIA
   const tiles = tilesForExtent(extent, maxZoom), records = [];
   log(`[Terrain Pipeline] Planned ${tiles.length} terrain tiles across LOD 0-${maxZoom}.`);
   for (let index = 0; index < tiles.length; index += 1) {
-    const tile = tiles[index], bounds = terrainTileBoundsForCoverage(tile, extent);
+    const tile = tiles[index];
+    const bounds = terrainTileBoundsForCoverage(tile, extent);
+    const dataBounds = terrainTileSampleBoundsForCoverage(tile, extent);
     log(`[Terrain Pipeline] Processing tile ${index + 1}/${tiles.length} (LOD ${tile.level}, x=${tile.x}, y=${tile.y})...`);
-    const samples = await sampleTile(source, bounds, grid, extent, landPolygons);
+    const samples = await sampleTile(source, dataBounds, grid, extent, landPolygons);
     const encoded = encodeTerrainTile({ ...samples, bounds });
     const file = path.join(outputDir, "tiles", String(tile.level), String(tile.x), `${tile.y}.htrn`);
-    fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, encoded);
-    records.push({ id: tile.id, level: tile.level, x: tile.x, y: tile.y, bounds, asset: `/assets/terrain/tiles/${tile.level}/${tile.x}/${tile.y}.htrn`, grid });
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, encoded);
+    records.push({ id: tile.id, level: tile.level, x: tile.x, y: tile.y, bounds, dataBounds, asset: `/assets/terrain/tiles/${tile.level}/${tile.x}/${tile.y}.htrn`, grid });
     log(`[Terrain Pipeline] Completed tile ${index + 1}/${tiles.length} (LOD ${tile.level}) -> ${path.relative(process.cwd(), file)}.`);
   }
   const manifest = { version: 2, source: { provider: "Copernicus DEM", product: "GLO-30 Public", release: "2021 AWS public mirror", bucket: "copernicus-dem-30m" }, coverage: { minX: extent[0], minY: extent[1], maxX: extent[2], maxY: extent[3] }, maxZoom, lods: TERRAIN_LODS, elevation: { unit: "meters", scaleToWorld: 0.001 }, tiles: records, generatedAt: new Date().toISOString(), format: "HTRN-v2" };
   fs.writeFileSync(path.join(outputDir, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
   fs.writeFileSync(path.join(outputDir, "ATTRIBUTION.txt"), "Terrain elevation: Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved.\nAdapted by Historia AI into HTRN runtime terrain assets.\n");
-  success(`Terrain Pipeline generated ${records.length} HTRN tile assets.`); return manifest;
+  success(`Terrain Pipeline generated ${records.length} HTRN tile assets.`);
+  return manifest;
 }
 
-/** Clip each global quadtree tile to the authoritative DEM coverage before encoding world-space positions. */
-export function terrainTileBoundsForCoverage(tile, coverage) {
+/** Return the canonical, untrimmed quadtree world bounds used by runtime terrain projection. */
+export function terrainTileBoundsForCoverage(tile) {
+  return terrainTileBounds(tile);
+}
+
+/** Return the DEM texture sampling rectangle for a tile, clipped to configured source coverage. */
+export function terrainTileSampleBoundsForCoverage(tile, coverage) {
   const bounds = terrainTileBounds(tile);
-  return Object.freeze({
+  const result = {
     minX: Math.max(bounds.minX, coverage[0]),
     minY: Math.max(bounds.minY, coverage[1]),
     maxX: Math.min(bounds.maxX, coverage[2]),
     maxY: Math.min(bounds.maxY, coverage[3]),
-  });
+  };
+  if (!(result.minX < result.maxX && result.minY < result.maxY)) throw new Error(`Terrain tile ${tile.id} does not intersect DEM coverage.`);
+  return Object.freeze(result);
 }
 
 async function sampleTile(source, bounds, size, coverage, landPolygons) {
