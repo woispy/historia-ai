@@ -5,6 +5,9 @@ export async function loadTerrainManifest(url = "/assets/terrain/manifest.json")
   if (!response.ok) throw new Error(`Terrain manifest request failed: ${response.status}`);
   const manifest = await response.json();
   if (!manifest || manifest.version !== 2 || manifest.format !== "HTRN-v2" || !Array.isArray(manifest.tiles)) throw new Error("Invalid terrain manifest.");
+  for (const record of manifest.tiles) {
+    if (!record?.id || !record.asset || !finiteBounds(record.bounds) || !finiteBounds(record.dataBounds)) throw new Error(`Invalid terrain bounds contract for tile ${record?.id ?? "unknown"}.`);
+  }
   return manifest;
 }
 
@@ -13,4 +16,8 @@ export async function loadTerrainTileAsset(record) {
   const response = await fetch(record.asset, { cache: "force-cache" });
   if (!response.ok) throw new Error(`Terrain tile request failed: ${response.status} (${record.id}).`);
   return decodeTerrainTile(await response.arrayBuffer());
+}
+
+function finiteBounds(bounds) {
+  return Boolean(bounds && ["minX", "minY", "maxX", "maxY"].every((key) => Number.isFinite(bounds[key])) && bounds.minX < bounds.maxX && bounds.minY < bounds.maxY && bounds.minX >= -180 && bounds.maxX <= 180 && bounds.minY >= -90 && bounds.maxY <= 90);
 }
