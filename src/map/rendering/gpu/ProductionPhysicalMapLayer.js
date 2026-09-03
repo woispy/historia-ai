@@ -11,17 +11,16 @@ precision highp float;layout(location=0) in vec2 aPosition;uniform mat4 uMvp;uni
 const FRAGMENT=`#version 300 es
 precision highp float;uniform vec4 uColor;out vec4 outColor;void main(){outColor=uColor;}`;
 const WORLD_LAND=[0.16,0.20,0.17,1],LAKE=[0.10,0.31,0.37,0.92],RIVER=[0.30,0.61,0.66,0.86],RIVER_UNDER=[0.06,0.16,0.19,0.75],COAST=[0.58,0.70,0.67,0.72];
-const PHYSICAL_ELEVATION_OFFSETS=Object.freeze({land:0,lake:0.02,riverUnder:0.025,river:0.03,coast:0.04});
+const PHYSICAL_ELEVATION_OFFSETS=Object.freeze({land:0,lake:0.02,riverUnder:0.02,river:0.03,coast:0.04});
 
 /** Physical geography compositor. Land is the mask authority; terrain is a DEM-driven relief pass above it. */
 export class ProductionPhysicalMapLayer{
  constructor(){this.state=null;this.terrain=null;this.terrainManifest=null;this.terrainById=new Map();this.terrainPending=new Map();this.disposed=false;}
  initialize(gl,{terrainManifestUrl="/assets/terrain/manifest.json"}={}){if(this.disposed)throw new Error("Cannot initialize disposed physical layer");const program=link(gl,VERTEX,FRAGMENT);this.terrain=new TerrainGpuRenderer(gl);this.state={gl,program,fill:createGeometry(gl,buildPolygonGeometry(WORLD_LAND_POLYGONS)),coast:createGeometry(gl,buildLineGeometry(WORLD_LAND_POLYGONS)),lakes:createGeometry(gl,buildPolygonGeometry((ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes??[]).map(f=>f.coordinates))),riversUnder:createGeometry(gl,buildLineGeometry(ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers??[],true)),rivers:createGeometry(gl,buildLineGeometry(ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers??[])),uniforms:{color:gl.getUniformLocation(program,"uColor"),mvp:gl.getUniformLocation(program,"uMvp"),elevationOffset:gl.getUniformLocation(program,"uElevationOffset")}};this.terrainManifestPromise=loadTerrainManifest(terrainManifestUrl).then((manifest)=>{if(!this.disposed)this.terrainManifest=manifest;}).catch((error)=>{if(!this.disposed&&import.meta.env?.DEV)console.warn("[Terrain] DEM manifest unavailable",error);});return true;}
  render(camera,width,height){if(this.disposed||!this.state)return;const{gl}=this.state;const mvp=buildTerrainMvp(camera,width,height);gl.viewport(0,0,width,height);gl.clear(gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.BLEND);
-   // The physical land fill is a color underlay only. It must never occlude negative-elevation DEM samples.
    gl.depthMask(false);
    this.bindPhysicalProgram(mvp);drawGeometry(this.state,this.state.fill,WORLD_LAND,PHYSICAL_ELEVATION_OFFSETS.land);
-   // Terrain becomes the authoritative depth surface and writes depth for subsequent physical overlays.
+   this.updateTerrainStreaming(camera);
    gl.depthMask(true);
    this.terrain?.draw(camera,width,height);
    this.bindPhysicalProgram(mvp);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthFunc(gl.LEQUAL);gl.depthMask(false);
