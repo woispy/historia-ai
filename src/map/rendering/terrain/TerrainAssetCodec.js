@@ -24,9 +24,10 @@ export function encodeTerrainTile({ size, heights, normals, splatRgba, splatSnow
   if (!(landMask instanceof Uint8Array) || landMask.length !== expected) throw new Error("Invalid terrain physical-land mask buffer.");
   if (!(demValidity instanceof Uint8Array) || demValidity.length !== expected) throw new Error("Invalid terrain DEM-validity buffer.");
   if (!bounds || !["minX", "minY", "maxX", "maxY"].every((key) => Number.isFinite(bounds[key]))) throw new Error("Invalid terrain bounds.");
-  const safeHeights = sanitizeTerrainHeights(heights);
+  const safeHeights = sanitizeTerrainHeights(heights), safeDemValidity = new Uint8Array(demValidity);
+  for (let index = 0; index < expected; index += 1) if (safeHeights[index] !== heights[index]) safeDemValidity[index] = 0;
   const headerBytes = 56;
-  const lengths = [safeHeights.byteLength, normals.byteLength, splatRgba.byteLength, splatSnow.byteLength, landMask.byteLength, demValidity.byteLength];
+  const lengths = [safeHeights.byteLength, normals.byteLength, splatRgba.byteLength, splatSnow.byteLength, landMask.byteLength, safeDemValidity.byteLength];
   const output = new ArrayBuffer(headerBytes + lengths.reduce((sum, value) => sum + value, 0));
   const bytes = new Uint8Array(output);
   bytes.set(MAGIC, 0);
@@ -37,7 +38,7 @@ export function encodeTerrainTile({ size, heights, normals, splatRgba, splatSnow
   for (const value of [bounds.minX, bounds.minY, bounds.maxX, bounds.maxY, minHeight(safeHeights), maxHeight(safeHeights)]) { view.setFloat32(cursor, value, true); cursor += 4; }
   for (const length of lengths) { view.setUint32(cursor, length, true); cursor += 4; }
   let payloadCursor = headerBytes;
-  for (const typed of [safeHeights, normals, splatRgba, splatSnow, landMask, demValidity]) {
+  for (const typed of [safeHeights, normals, splatRgba, splatSnow, landMask, safeDemValidity]) {
     bytes.set(new Uint8Array(typed.buffer, typed.byteOffset, typed.byteLength), payloadCursor);
     payloadCursor += typed.byteLength;
   }
@@ -63,11 +64,12 @@ export function decodeTerrainTile(buffer) {
   const slices = lengths.map((length) => { const start = offset; offset += length; return bytes.subarray(start, offset); });
   const heightBytes = slices[0];
   if (heightBytes.byteLength % 4 !== 0) throw new Error("HTRN height payload has invalid byte length.");
-  const heights = sanitizeTerrainHeights(new Float32Array(heightBytes.buffer, heightBytes.byteOffset, heightBytes.byteLength / 4));
+  const rawHeights = new Float32Array(heightBytes.buffer, heightBytes.byteOffset, heightBytes.byteLength / 4), heights = sanitizeTerrainHeights(rawHeights), safeDemValidity = new Uint8Array(slices[5]);
+  for (let index = 0; index < heights.length; index += 1) if (heights[index] !== rawHeights[index]) safeDemValidity[index] = 0;
   return Object.freeze({ version, size, bounds: Object.freeze({ ...bounds, minHeight: minHeight(heights), maxHeight: maxHeight(heights) }),
     heights,
     normals: new Int8Array(slices[1].buffer, slices[1].byteOffset, slices[1].byteLength),
-    splatRgba: slices[2], splatSnow: slices[3], landMask: slices[4], demValidity: slices[5],
+    splatRgba: slices[2], splatSnow: slices[3], landMask: slices[4], demValidity: safeDemValidity,
   });
 }
 
