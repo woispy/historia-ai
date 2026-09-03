@@ -35,10 +35,11 @@ export function buildWorldPath(polygons = []) {
 function splitAntimeridianPolygon(polygon) {
   const points = unwrapLongitudes(polygon);
   if (points.length < 3) return [];
-  const minX = Math.min(...points.map(([x]) => x));
-  const maxX = Math.max(...points.map(([x]) => x));
-  if (maxX - minX <= 180) return [points.map(([x, y]) => [normalizeLongitude(x), y])];
 
+  // Always clip the unwrapped ring into the canonical [-180, 180] domain.
+  // A ring such as 170..190 has a span < 180 after unwrapping, but normalizing
+  // 190 -> -170 without clipping creates a false 340-degree edge and produces
+  // giant triangles when the polygon is triangulated in world space.
   const pieces = [];
   for (const shift of [-360, 0, 360]) {
     const shifted = points.map(([x, y]) => [x + shift, y]);
