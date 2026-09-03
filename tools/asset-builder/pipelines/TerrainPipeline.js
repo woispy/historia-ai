@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { CopernicusDemSource, copernicusSourceTileKeysForBounds, sampleCopernicusRaster } from "../dem/CopernicusDemSource.js";
-import { encodeTerrainTile } from "../../../src/map/rendering/terrain/TerrainAssetCodec.js";
+import { encodeTerrainTile, sanitizeTerrainHeight } from "../../../src/map/rendering/terrain/TerrainAssetCodec.js";
 import { makeTerrainTileKey, terrainTileBounds } from "../../../src/map/rendering/terrain/TerrainTile.js";
 import { TERRAIN_LODS } from "../../../src/map/rendering/terrain/TerrainLod.js";
 import { collectWorldLandPolygons } from "../../../src/map/physical/WorldLandMask.js";
@@ -63,8 +63,8 @@ async function sampleTile(source, bounds, size, coverage, landPolygons) {
       if (!coordinateInCoverage(lon, lat, coverage)) continue;
       const keyLat = Math.floor(lat === coverage[3] ? lat - 1e-9 : lat), keyLon = Math.floor(lon === coverage[2] ? lon - 1e-9 : lon), key = `${keyLat}/${keyLon}`;
       if (!cache.has(key)) cache.set(key, await source.readTile(keyLat, keyLon));
-      const value = sampleCopernicusRaster(cache.get(key), lon, lat);
-      if (Number.isFinite(value)) { heights[index] = value; demValidity[index] = 255; }
+      const value = sampleCopernicusRaster(cache.get(key), lon, lat), safeValue = sanitizeTerrainHeight(value);
+      if (safeValue === value) { heights[index] = safeValue; demValidity[index] = 255; }
       if (isPhysicalLand(lon, lat, landPolygons)) landMask[index] = 255;
     }
   }
@@ -85,7 +85,7 @@ function loadPhysicalLandPolygons() {
   return collectWorldLandPolygons(modules);
 }
 function isPhysicalLand(lon, lat, landPolygons) { return landPolygons.some((polygon) => pointInPolygon(lon, lat, polygon)); }
-function pointInPolygon(x, y, polygon) { if (!Array.isArray(polygon) || polygon.length < 3) return false; let inside = false; for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) { const xi=Number(polygon[i]?.[0]), yi=Number(polygon[i]?.[1]), xj=Number(polygon[j]?.[0]), yj=Number(polygon[j]?.[1]); const intersects=((yi>y)!==(yj>y)) && x < ((xj-xi)*(y-yi))/(yj-yi)+xi; if (intersects) inside=!inside; } return inside; }
+function pointInPolygon(x, y, polygon) { if (!Array.isArray(polygon) || polygon.length < 3) return false; let inside = false; for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) { const xi=Number(polygon[i]?.[0]), yi=Number(polygon[i]?.[1]), xj=Number(polygon[j]?.[0]), yj=Number(polygon[j]?.[1]); const intersects=((yi>y)!==(yj>y)) && x < ((xj-xi)*(y-yj))/(yj-yi)+xi; if (intersects) inside=!inside; } return inside; }
 export function coordinateInCoverage(lon, lat, coverage) { return Number(lon) >= coverage[0] && Number(lon) <= coverage[2] && Number(lat) >= coverage[1] && Number(lat) <= coverage[3]; }
 function tilesForExtent(extent, maxZoom) { const result=[]; for(let level=0;level<=maxZoom;level+=1){const count=2**level,width=360/count,height=180/count,minX=Math.max(0,Math.floor((extent[0]+180)/width)),maxX=Math.min(count-1,Math.floor((extent[2]+180-1e-9)/width)),minY=Math.max(0,Math.floor((extent[1]+90)/height)),maxY=Math.min(count-1,Math.floor((extent[3]+90-1e-9)/height));for(let y=minY;y<=maxY;y+=1)for(let x=minX;x<=maxX;x+=1)result.push(makeTerrainTileKey(level,x,y));}return result; }
 function parseBbox(value) { if (!value) return DEFAULT_BBOX; const parts=String(value).split(",").map(Number); return parts.length===4&&parts.every(Number.isFinite)?parts:DEFAULT_BBOX; }
