@@ -6,6 +6,7 @@ import { parseTileList, copernicusSourceTileKeysForBounds, copernicusTileKey } f
 import { coordinateInCoverage, terrainTileBoundsForCoverage } from "../asset-builder/pipelines/TerrainPipeline.js";
 import { makeTerrainTileKey } from "../../src/map/rendering/terrain/TerrainTile.js";
 import { TERRAIN_LODS } from "../../src/map/rendering/terrain/TerrainLod.js";
+import { collectWorldLandPolygons } from "../../src/map/physical/WorldLandMask.js";
 
 const size = 3;
 const heights = Float32Array.from([0,200,400,100,500,800,0,600,1000]);
@@ -50,5 +51,11 @@ assert.deepEqual(clippedLod3, { minX: 26, minY: 35, maxX: 45, maxY: 43 });
 assert.ok(clippedLod3.minX >= coverage[0] && clippedLod3.maxX <= coverage[2]);
 assert.ok(clippedLod3.minY >= coverage[1] && clippedLod3.maxY <= coverage[3]);
 assert.ok(clippedLod3.minX < clippedLod3.maxX && clippedLod3.minY < clippedLod3.maxY);
+const datelinePieces = collectWorldLandPolygons({ synthetic: { id: "geometry_country_dateline", name: "Dateline", polygons: [[[170, 10], [190, 10], [190, 20], [170, 20]]] } });
+assert.equal(datelinePieces.length, 2);
+for (const polygon of datelinePieces) {
+  assert.ok(polygon.every(([x]) => x >= -180 && x <= 180));
+  assert.ok(Math.abs(Math.max(...polygon.map(([x]) => x)) - Math.min(...polygon.map(([x]) => x))) <= 180);
+}
 assert.equal(TERRAIN_LODS.length, 5);
 console.log("terrain-dem-pipeline.test.js: PASS");
