@@ -28,7 +28,7 @@ export async function runTerrainPipeline({ bbox = parseBbox(process.env.HISTORIA
   const tiles = tilesForExtent(extent, maxZoom), records = [];
   log(`[Terrain Pipeline] Planned ${tiles.length} terrain tiles across LOD 0-${maxZoom}.`);
   for (let index = 0; index < tiles.length; index += 1) {
-    const tile = tiles[index], bounds = terrainTileBounds(tile);
+    const tile = tiles[index], bounds = terrainTileBoundsForCoverage(tile, extent);
     log(`[Terrain Pipeline] Processing tile ${index + 1}/${tiles.length} (LOD ${tile.level}, x=${tile.x}, y=${tile.y})...`);
     const samples = await sampleTile(source, bounds, grid, extent, landPolygons);
     const encoded = encodeTerrainTile({ ...samples, bounds });
@@ -41,6 +41,17 @@ export async function runTerrainPipeline({ bbox = parseBbox(process.env.HISTORIA
   fs.writeFileSync(path.join(outputDir, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
   fs.writeFileSync(path.join(outputDir, "ATTRIBUTION.txt"), "Terrain elevation: Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved.\nAdapted by Historia AI into HTRN runtime terrain assets.\n");
   success(`Terrain Pipeline generated ${records.length} HTRN tile assets.`); return manifest;
+}
+
+/** Clip each global quadtree tile to the authoritative DEM coverage before encoding world-space positions. */
+export function terrainTileBoundsForCoverage(tile, coverage) {
+  const bounds = terrainTileBounds(tile);
+  return Object.freeze({
+    minX: Math.max(bounds.minX, coverage[0]),
+    minY: Math.max(bounds.minY, coverage[1]),
+    maxX: Math.min(bounds.maxX, coverage[2]),
+    maxY: Math.min(bounds.maxY, coverage[3]),
+  });
 }
 
 async function sampleTile(source, bounds, size, coverage, landPolygons) {
