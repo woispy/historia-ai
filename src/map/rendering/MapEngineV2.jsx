@@ -8,7 +8,9 @@ import { MapRuntimeController } from "../runtime/MapRuntimeController.js";
 export default function MapEngineV2({ selectedProvinceId = null, onProvinceClick, assetUrl = "/assets/world.mapbin" }) {
   const canvasRef = useRef(null);
   const runtimeRef = useRef(null);
+  const selectedProvinceIdRef = useRef(selectedProvinceId);
   const onProvinceClickRef = useRef(onProvinceClick);
+  selectedProvinceIdRef.current = selectedProvinceId;
   onProvinceClickRef.current = onProvinceClick;
 
   useEffect(() => {
@@ -33,7 +35,7 @@ export default function MapEngineV2({ selectedProvinceId = null, onProvinceClick
         renderer,
         onProvinceClick: (...args) => onProvinceClickRef.current?.(...args),
       });
-      runtime.setSelectedProvinceId(selectedProvinceId);
+      runtime.setSelectedProvinceId(selectedProvinceIdRef.current);
       runtimeRef.current = runtime;
       runtime.start();
     }).catch((error) => {
@@ -45,7 +47,7 @@ export default function MapEngineV2({ selectedProvinceId = null, onProvinceClick
       runtime?.dispose();
       runtimeRef.current = null;
     };
-  }, [assetUrl, selectedProvinceId]);
+  }, [assetUrl]);
 
   useEffect(() => {
     const runtime = runtimeRef.current;
