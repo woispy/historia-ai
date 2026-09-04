@@ -1,7 +1,7 @@
 import { TERRAIN_BINARY_VERSION, decodeTerrainTile } from "./TerrainAssetCodec.js";
 
-const TERRAIN_MANIFEST_VERSION = 2;
-const TERRAIN_MANIFEST_FORMAT = "HTRN-v2";
+const TERRAIN_MANIFEST_VERSION = 3;
+const TERRAIN_MANIFEST_FORMAT = "HTRN-v3";
 
 export async function loadTerrainManifest(url = "/assets/terrain/manifest.json") {
   const response = await fetch(url, { cache: "no-cache" });
@@ -16,13 +16,13 @@ export async function loadTerrainManifest(url = "/assets/terrain/manifest.json")
 
 export async function loadTerrainTileAsset(record, manifest = null) {
   if (!record?.asset) throw new Error("Terrain tile record is missing its asset URL.");
-  const fingerprint = manifest?.generatedAt ? `?v=${encodeURIComponent(manifest.generatedAt)}` : "";
-  const response = await fetch(`${record.asset}${record.asset.includes("?") ? "&" : "?"}htrn=${TERRAIN_BINARY_VERSION}${fingerprint ? `&v=${encodeURIComponent(manifest.generatedAt)}` : ""}`, { cache: "force-cache" });
+  const response = await fetch(`${record.asset}${record.asset.includes("?") ? "&" : "?"}htrn=${TERRAIN_BINARY_VERSION}${manifest?.generatedAt ? `&v=${encodeURIComponent(manifest.generatedAt)}` : ""}`, { cache: "force-cache" });
   if (!response.ok) throw new Error(`Terrain tile request failed: ${response.status} (${record.id}).`);
   const asset = decodeTerrainTile(await response.arrayBuffer());
   if (asset.version !== TERRAIN_BINARY_VERSION) throw new Error(`Unsupported HTRN terrain asset version: ${asset.version} (${record.id}).`);
   if (asset.size !== record.grid) throw new Error(`HTRN grid mismatch for ${record.id}: ${asset.size} !== ${record.grid}.`);
   if (!sameBounds(asset.bounds, record.bounds)) throw new Error(`HTRN bounds mismatch for ${record.id}.`);
+  if (!(asset.demValidity instanceof Uint8Array) || asset.demValidity.length !== asset.size * asset.size) throw new Error(`HTRN DEM validity mask mismatch for ${record.id}.`);
   return asset;
 }
 
