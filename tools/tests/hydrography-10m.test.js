@@ -4,6 +4,7 @@ import { pointInPolygon } from "../../src/map/rendering/physical/PhysicalGeometr
 
 const atlas = ANATOLIA_PHYSICAL_ATLAS_RUNTIME;
 const hydrography = atlas.hydrography;
+const BBOX = [24.0, 34.0, 45.2, 43.2];
 
 assert.equal(hydrography.projection, "EPSG:4326");
 assert.match(hydrography.source, /Natural Earth 10m/);
@@ -22,6 +23,13 @@ for (const river of atlas.rivers) {
   assert.equal(river.geometrySource, "natural-earth-10m");
   assert.ok(Array.isArray(river.coordinates) && river.coordinates.length >= 2, `${river.name} must retain a line geometry.`);
   assert.ok(Array.isArray(river.bounds) && river.bounds.length === 4);
+  for (const [index, point] of river.coordinates.entries()) {
+    assert.ok(Number.isFinite(point?.[0]) && Number.isFinite(point?.[1]), `${river.name} point ${index} must be finite.`);
+    assert.ok(point[0] >= BBOX[0] - 1e-9 && point[0] <= BBOX[2] + 1e-9, `${river.name} point ${index} exceeds longitude bbox.`);
+    assert.ok(point[1] >= BBOX[1] - 1e-9 && point[1] <= BBOX[3] + 1e-9, `${river.name} point ${index} exceeds latitude bbox.`);
+  }
+  assert.ok(river.bounds[0] >= BBOX[0] - 1e-9 && river.bounds[2] <= BBOX[2] + 1e-9, `${river.name} bounds must be clipped to the physical atlas bbox.`);
+  assert.ok(river.bounds[1] >= BBOX[1] - 1e-9 && river.bounds[3] <= BBOX[3] + 1e-9, `${river.name} bounds must be clipped to the physical atlas bbox.`);
 }
 
 function normalized(value) {
@@ -69,4 +77,4 @@ assert.ok(van, "Van Gölü must be represented by Natural Earth 10m geometry.");
 const sakaryaSegments = atlas.rivers.filter((river) => normalized(`${river.name} ${river.nameEn}`).includes("sakarya"));
 assert.ok(sakaryaSegments.some((river) => river.coordinates.length >= 20), "Sakarya must retain a genuinely sampled river centerline.");
 
-console.log(`Natural Earth 10m hydrography passed: ${atlas.lakes.length} lake polygons, ${atlas.rivers.length} river segments.`);
+console.log(`Natural Earth 10m hydrography passed: ${atlas.lakes.length} lake polygons, ${atlas.rivers.length} river segments; all river coordinates clipped to bbox.`);
