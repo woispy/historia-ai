@@ -1,5 +1,6 @@
 import { BinaryMapRenderer, screenToWorld } from "./BinaryMapRenderer.js";
 import { ProductionPhysicalMapLayer } from "./ProductionPhysicalMapLayer.js";
+import { installMapRenderDiagnostics, isMapRenderPassEnabled } from "./MapRenderDiagnostics.js";
 
 /** Production renderer: political provinces remain authoritative while physical geography is drawn underneath. */
 export class ProductionBinaryMapRenderer extends BinaryMapRenderer {
@@ -7,6 +8,7 @@ export class ProductionBinaryMapRenderer extends BinaryMapRenderer {
     const initialized = super.initialize(options);
     if (!initialized) return false;
     try {
+      installMapRenderDiagnostics();
       this.physicalLayer = new ProductionPhysicalMapLayer();
       this.physicalLayer.initialize(this.state.gl);
       this.beforePoliticalDraw = (state, camera, width, height) => {
@@ -21,6 +23,19 @@ export class ProductionBinaryMapRenderer extends BinaryMapRenderer {
       super.dispose();
       throw error;
     }
+  }
+
+  render(...args) {
+    if (this.state && !isMapRenderPassEnabled("renderPoliticalProvinces")) {
+      const draws = this.state.draws;
+      this.state.draws = [];
+      try {
+        return super.render(...args);
+      } finally {
+        this.state.draws = draws;
+      }
+    }
+    return super.render(...args);
   }
 
   pick(x, y, { diagnostic = false } = {}) {
