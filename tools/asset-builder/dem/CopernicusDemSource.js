@@ -4,6 +4,7 @@ import { decodeCopernicusGeoTiff, isValidDemPixel } from "./GeoTiffDecoder.js";
 
 export const COPERNICUS_GLO30_BUCKET = "https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com";
 export const COPERNICUS_GLO30_TILE_LIST_URL = `${COPERNICUS_GLO30_BUCKET}/tileList.txt`;
+export const COPERNICUS_TILE_BOUNDARY_EPSILON = 1e-7;
 
 export class CopernicusDemSource {
   constructor({ cacheDir = path.resolve(".cache/historia/copernicus-glo30"), tileListUrl = COPERNICUS_GLO30_TILE_LIST_URL } = {}) {
@@ -64,15 +65,30 @@ export class CopernicusDemSource {
     }
 
     const raster = decodeCopernicusGeoTiff(bytes);
-    const entry = { key, raster };
+    const spatial = validateCopernicusTileGeoreference(key, raster);
+    if (!spatial.georefMatchesTile) {
+      throw new Error(`[Terrain Spatial] GeoTIFF georeference mismatch for ${key}: ${JSON.stringify(spatial)}`);
+    }
+    const entry = { key, raster, spatial };
     this.loaded.set(key, entry);
     return entry;
   }
 }
 
+/**
+ * Map a WGS84 sample coordinate to the Copernicus 1-degree source cell.
+ * Copernicus GLO-30 Public removes shared south/east rows/columns, so an
+ * exact integer boundary belongs to the tile immediately south/west.
+ */
+export function copernicusTileCoordinate(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) throw new Error(`Invalid Copernicus coordinate: ${value}`);
+  return Math.floor(numeric - COPERNICUS_TILE_BOUNDARY_EPSILON);
+}
+
 export function copernicusTileKey(lat, lon) {
-  const north = Math.floor(Number(lat));
-  const east = Math.floor(Number(lon));
+  const north = copernicusTileCoordinate(lat);
+  const east = copernicusTileCoordinate(lon);
   const ns = north >= 0 ? `N${pad2(north)}` : `S${pad2(Math.abs(north))}`;
   const ew = east >= 0 ? `E${pad3(east)}` : `W${pad3(Math.abs(east))}`;
   return `Copernicus_DSM_COG_10_${ns}_00_${ew}_00_DEM`;
@@ -83,7 +99,7 @@ export function copernicusSourceTileKeysForBounds(bounds) {
   const [minLon, minLat, maxLon, maxLat] = bounds;
   const keys = [];
   for (let lat = Math.floor(minLat); lat < Math.ceil(maxLat); lat += 1) {
-    for (let lon = Math.floor(minLon); lon < Math.ceil(maxLon); lon += 1) keys.push(copernicusTileKey(lat, lon));
+    for (let lon = Math.floor(minLon); lon < Math.ceil(maxLon); lon += 1) keys.push(copernicusTileKey(lat + COPERNICUS_TILE_BOUNDARY_EPSILON, lon + COPERNICUS_TILE_BOUNDARY_EPSILON));
   }
   return keys;
 }
@@ -131,6 +147,25 @@ export function sampleCopernicusRasterTrace(entry, lon, lat) {
     totalWeight += sample.weight;
   }
   return { entryKey:entry.key, lon:Number(lon), lat:Number(lat), width, height, georeference, axisConvention: scaleY > 0 ? "north-up (modelY decreases with raster row)" : "south-up (modelY increases with raster row)", px, py, inRaster:true, x0, y0, x1, y1, fx, fy, corners:samples.map(({px:pxValue,py:pyValue,value,weight})=>({px:pxValue,py:pyValue,value:Number.isFinite(value)?value:null,valid:isValidDemPixel(value,nodata),weight})), value:totalWeight>0?weightedSum/totalWeight:null };
+}
+
+export function validateCopernicusTileGeoreference(key, raster, tolerance = 1e-6) {
+  const match = String(key).match(/_10_([NS])(\d{2})_00_([EW])(\d{3})_00_DEM$/);
+  if (!match) throw new Error(`Invalid Copernicus tile key: ${key}`);
+  const tileLat = Number(match[2]) * (match[1] === "N" ? 1 : -1);
+  const tileLon = Number(match[4]) * (match[3] === "E" ? 1 : -1);
+  const expectedOriginX = tileLon;
+  const expectedOriginY = tileLat + 1;
+  const originX = Number(raster?.georeference?.originX);
+  const originY = Number(raster?.georeference?.originY);
+  const scaleX = Number(raster?.georeference?.scaleX);
+  const scaleY = Number(raster?.georeference?.scaleY);
+  const width = Number(raster?.width);
+  const height = Number(raster?.height);
+  const pixelSpanX = Math.abs(scaleX) * Math.max(0, width - 1);
+  const pixelSpanY = Math.abs(scaleY) * Math.max(0, height - 1);
+  const georefMatchesTile = Number.isFinite(originX) && Number.isFinite(originY) && Number.isFinite(scaleX) && Number.isFinite(scaleY) && scaleX > 0 && scaleY > 0 && Math.abs(originX - expectedOriginX) <= tolerance && Math.abs(originY - expectedOriginY) <= tolerance && pixelSpanX <= 1 + tolerance && pixelSpanY <= 1 + tolerance && pixelSpanX >= 0.99 && pixelSpanY >= 0.99;
+  return { georefMatchesTile, tile:{ lat:tileLat, lon:tileLon }, expected:{ originX:expectedOriginX, originY:expectedOriginY }, actual:{ originX, originY, scaleX, scaleY, width, height }, pixelSpan:{ x:pixelSpanX, y:pixelSpanY } };
 }
 
 async function downloadText(url) {
