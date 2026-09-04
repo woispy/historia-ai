@@ -108,14 +108,25 @@ async function sampleTile(source, bounds, size, coverage, landPolygons) {
 }
 
 function logTerrainTelemetry(tile, bounds, samples, encoded) {
-  const decoded = decodeTerrainTile(encoded), uploadStats = measureArrayStats(samples.heights), decodedStats = measureArrayStats(decoded.heights), encodedStats = measureEncodedHeightRange(encoded), neighborDeltaCount = countLargeNeighborDeltas(decoded.heights, decoded.size, LARGE_NEIGHBOR_DELTA_METERS);
-  log(`[Terrain Telemetry] tile=${tile.id} dataBounds=${JSON.stringify(bounds)}`);
-  log(`[Terrain Telemetry] Copernicus Raw DEM`, samples.sourceStats);
-  log(`[Terrain Telemetry] Sampled DEM`, samples.sampledStats);
-  log(`[Terrain Telemetry] HTRN Encoded`, encodedStats);
-  log(`[Terrain Telemetry] HTRN Decoded`, decodedStats);
-  log(`[Terrain Telemetry] GPU Upload Array`, uploadStats);
-  log(`[Terrain Telemetry] Neighbor delta > ${LARGE_NEIGHBOR_DELTA_METERS}m`, { count: neighborDeltaCount, thresholdMeters: LARGE_NEIGHBOR_DELTA_METERS });
+  const decoded = decodeTerrainTile(encoded);
+  const uploadStats = measureArrayStats(samples.heights);
+  const decodedStats = measureArrayStats(decoded.heights);
+  const encodedStats = measureEncodedHeightRange(encoded);
+  const roundTrip = measureRoundTrip(samples.heights, decoded.heights);
+  const neighborDeltaCount = countLargeNeighborDeltas(decoded.heights, decoded.size, LARGE_NEIGHBOR_DELTA_METERS);
+  const rawStats = aggregateSourceStats(samples.sourceStats);
+  const telemetry = {
+    tile: tile.id,
+    dataBounds: bounds,
+    rawDem: rawStats,
+    sampledDem: normalizeStats(samples.sampledStats),
+    htrnEncoded: encodedStats,
+    htrnDecoded: decodedStats,
+    gpuUploadArray: uploadStats,
+    neighborDeltaOver1000m: { count: neighborDeltaCount, thresholdMeters: LARGE_NEIGHBOR_DELTA_METERS },
+    htrnRoundTrip: roundTrip,
+  };
+  log(`[Terrain Telemetry] ${JSON.stringify(telemetry)}`);
 }
 
 function createStats() { return { min: Infinity, max: -Infinity, finiteCount: 0, invalidCount: 0 }; }
@@ -123,6 +134,8 @@ function updateStats(stats, value, invalid) { if (!Number.isFinite(value)) { sta
 function measureArrayStats(values) { const stats=createStats(); for(const value of values) updateStats(stats,value,false); return normalizeStats(stats); }
 function normalizeStats(stats) { return { min:Number.isFinite(stats.min)?stats.min:0, max:Number.isFinite(stats.max)?stats.max:0, finiteCount:stats.finiteCount, invalidCount:stats.invalidCount }; }
 function measureEncodedHeightRange(encoded) { const decoded=decodeTerrainTile(encoded); return { min:decoded.bounds.minHeight, max:decoded.bounds.maxHeight, byteLength:encoded.byteLength, version:decoded.version, grid:decoded.size }; }
+function aggregateSourceStats(sourceStats) { const aggregate=createStats(); for(const source of sourceStats){if(!source)continue; aggregate.min=Math.min(aggregate.min,Number(source.min)); aggregate.max=Math.max(aggregate.max,Number(source.max)); aggregate.finiteCount+=Number(source.finiteCount)||0; aggregate.invalidCount+=Number(source.invalidCount)||0;} return normalizeStats(aggregate); }
+function measureRoundTrip(source, decoded) { let mismatchCount=0, maxAbsError=0; for(let i=0;i<source.length;i+=1){const a=source[i],b=decoded[i],error=Math.abs(a-b);if(error>0)mismatchCount+=1;if(error>maxAbsError)maxAbsError=error;} return { mismatchCount, maxAbsErrorMeters:maxAbsError }; }
 function countLargeNeighborDeltas(values,size,threshold) { let count=0; for(let y=0;y<size;y+=1)for(let x=0;x<size;x+=1){const current=values[y*size+x];if(x+1<size&&Math.abs(current-values[y*size+x+1])>threshold)count+=1;if(y+1<size&&Math.abs(current-values[(y+1)*size+x])>threshold)count+=1;}return count; }
 
 function loadPhysicalLandPolygons() {
@@ -131,7 +144,7 @@ function loadPhysicalLandPolygons() {
   return collectWorldLandPolygons(modules);
 }
 function isPhysicalLand(lon, lat, landPolygons) { return landPolygons.some((polygon) => pointInPolygon(lon, lat, polygon)); }
-function pointInPolygon(x, y, polygon) { if (!Array.isArray(polygon) || polygon.length < 3) return false; let inside = false; for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) { const xi=Number(polygon[i]?.[0]), yi=Number(polygon[i]?.[1]), xj=Number(polygon[j]?.[0]), yj=Number(polygon[j]?.[1]); const intersects=((yi>y)!=(yj>y)) && x < ((xj-xi)*(y-yi))/(yj-yi)+xi; if (intersects) inside=!inside; } return inside; }
+function pointInPolygon(x, y, polygon) { if (!Array.isArray(polygon) || polygon.length < 3) return false; let inside = false; for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) { const xi=Number(polygon[i]?.[0]), yi=Number(polygon[i]?.[1]), xj=Number(polygon[j]?.[0]), yj=Number(polygon[j]?.[1]); const intersects=((yi>y)!=(yj>y)) && x < ((xj-xi)*(y-yj))/(yj-yi)+xi; if (intersects) inside=!inside; } return inside; }
 export function coordinateInCoverage(lon, lat, coverage) { return Number(lon) >= coverage[0] && Number(lon) <= coverage[2] && Number(lat) >= coverage[1] && Number(lat) <= coverage[3]; }
 function tilesForExtent(extent, maxZoom) { const result=[]; for(let level=0;level<=maxZoom;level+=1){const count=2**level,width=360/count,height=180/count,minX=Math.max(0,Math.floor((extent[0]+180)/width)),maxX=Math.min(count-1,Math.floor((extent[2]+180-1e-9)/width)),minY=Math.max(0,Math.floor((extent[1]+90)/height)),maxY=Math.min(count-1,Math.floor((extent[3]+90-1e-9)/height));for(let y=minY;y<=maxY;y+=1)for(let x=minX;x<=maxX;x+=1)result.push(makeTerrainTileKey(level,x,y));}return result; }
 function parseBbox(value) { if (!value) return DEFAULT_BBOX; const parts=String(value).split(",").map(Number); return parts.length===4&&parts.every(Number.isFinite)?parts:DEFAULT_BBOX; }
