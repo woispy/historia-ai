@@ -35,18 +35,15 @@ export function decodeCopernicusGeoTiff(buffer) {
     if (tileWidth) { const rows=Math.ceil(height/tileLength), cols=Math.ceil(width/tileWidth); if(blockOffsets.length<rows*cols)throw new Error("GeoTIFF tile index is incomplete."); for(let ty=0;ty<rows;ty+=1)for(let tx=0;tx<cols;tx+=1){const block=decodeBlock(bytes,blockOffsets[ty*cols+tx],blockByteCounts[ty*cols+tx],compression,predictor,tileWidth,tileLength,littleEndian);copyBlock(data,width,height,block,tileWidth,tileLength,tx*tileWidth,ty*tileLength);}} else {const strips=Math.ceil(height/rowsPerStrip);if(blockOffsets.length<strips)throw new Error("GeoTIFF strip index is incomplete.");for(let strip=0;strip<strips;strip+=1){const rows=Math.min(rowsPerStrip,height-strip*rowsPerStrip),block=decodeBlock(bytes,blockOffsets[strip],blockByteCounts[strip],compression,predictor,width,rows,littleEndian);copyBlock(data,width,height,block,width,rows,0,strip*rowsPerStrip);}}
     const stats = measureDemStats(data, nodata);
     sanitizeDemRaster(data, Number.isFinite(Number(nodata)) ? Number(nodata) : null);
-    return Object.freeze({width,height,data,nodata:Number.isFinite(Number(nodata))?Number(nodata):null,compression,predictor,georeference:Object.freeze({originX:Number(tiepoint[3]??0),originY:Number(tiepoint[4]??0),scaleX:Number(pixelScale[0]??1),scaleY:Number(pixelScale[1]??1)}),stats:Object.freeze(stats)});
+    return Object.freeze({width,height,data,nodata:Number.isFinite(Number(nodata))?Number(nodata):null,compression,predictor,georeference:Object.freeze({originX:Number(tiepoint[3]??0),originY:Number(tiepoint[4]??0),scaleX:Number(pixelScale[0]??1),scaleY:Number(pixelScale[1]??1),tiepoint:Object.freeze(tiepoint.slice(0,6).map(Number)),pixelScale:Object.freeze(pixelScale.slice(0,3).map(Number))}),stats:Object.freeze(stats)});
   } finally { fieldReaderContext = null; }
 }
 
 export function measureDemStats(values, nodata = null) {
   let min=Infinity, max=-Infinity, finiteCount=0, invalidCount=0;
   for (const value of values) {
-    const finite=Number.isFinite(value);
-    if (!finite) { invalidCount += 1; continue; }
+    if (!Number.isFinite(value) || (nodata !== null && Math.abs(value-nodata)<=1e-6) || value<DEM_MIN_METERS || value>DEM_MAX_METERS) { invalidCount += 1; continue; }
     finiteCount += 1; min=Math.min(min,value); max=Math.max(max,value);
-    if (nodata !== null && Math.abs(value-nodata)<=1e-6) invalidCount += 1;
-    else if (value<DEM_MIN_METERS || value>DEM_MAX_METERS) invalidCount += 1;
   }
   return { min:Number.isFinite(min)?min:0, max:Number.isFinite(max)?max:0, finiteCount, invalidCount };
 }
