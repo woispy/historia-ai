@@ -94,7 +94,10 @@ export class TerrainGpuRenderer {
   uploadTile(tileId, asset, tileBounds = asset?.bounds, dataBounds = asset?.dataBounds) {
     if (this.disposed) throw new Error("Cannot upload into a disposed terrain renderer.");
     this.removeTile(tileId);
-    const mesh = buildTerrainGridMesh({ heights: asset.heights, size: asset.size, skirtDepth: 50 });
+    // Streaming currently renders exactly one terrain LOD level at a time. Do not
+    // generate per-tile skirts until mixed-LOD seam ownership exists; otherwise
+    // duplicated lowered edges can become visible as long radial strips.
+    const mesh = buildTerrainGridMesh({ heights: asset.heights, size: asset.size, skirtDepth: 0 });
     const bounds = normalizeTerrainBounds(tileBounds);
     const samplingBounds = normalizeTerrainBounds(dataBounds ?? tileBounds);
     const heightRange = measureHeightRange(mesh.vertexHeights);
@@ -109,128 +112,30 @@ export class TerrainGpuRenderer {
     gl.bindBuffer(gl.ARRAY_BUFFER, position);
     gl.bufferData(gl.ARRAY_BUFFER, mesh.positions, gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0);
-    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 8, 0);
-    gl.bindBuffer(gl.ARRAY_BUFFER, height);
-    gl.bufferData(gl.ARRAY_BUFFER, mesh.vertexHeights, gl.STATIC_DRAW);
+    gl.vertexAttribPointer(0,2,gl.FLOAT,false,8,0);
+    gl.bindBuffer(gl.ARRAY_BUFFER,height);
+    gl.bufferData(gl.ARRAY_BUFFER,mesh.vertexHeights,gl.STATIC_DRAW);
     gl.enableVertexAttribArray(1);
-    gl.vertexAttribPointer(1, 1, gl.FLOAT, false, 4, 0);
-    gl.bindBuffer(gl.ARRAY_BUFFER, uv);
-    gl.bufferData(gl.ARRAY_BUFFER, mesh.uvs, gl.STATIC_DRAW);
+    gl.vertexAttribPointer(1,1,gl.FLOAT,false,4,0);
+    gl.bindBuffer(gl.ARRAY_BUFFER,uv);
+    gl.bufferData(gl.ARRAY_BUFFER,mesh.uvs,gl.STATIC_DRAW);
     gl.enableVertexAttribArray(2);
-    gl.vertexAttribPointer(2, 2, gl.FLOAT, false, 8, 0);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, mesh.indices, gl.STATIC_DRAW);
+    gl.vertexAttribPointer(2,2,gl.FLOAT,false,8,0);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,index);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,mesh.indices,gl.STATIC_DRAW);
     gl.bindVertexArray(null);
-    const textures = [
-      createSolidTexture(gl, [255, 255, 255, 255]),
-      createNormalTexture(gl, asset),
-      createTexture(gl, asset.splatRgba, asset.size, asset.size, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE),
-      createTexture(gl, asset.splatSnow, asset.size, asset.size, gl.R8, gl.RED, gl.UNSIGNED_BYTE),
-      createTexture(gl, asset.landMask, asset.size, asset.size, gl.R8, gl.RED, gl.UNSIGNED_BYTE),
-      createTexture(gl, asset.demValidity, asset.size, asset.size, gl.R8, gl.RED, gl.UNSIGNED_BYTE),
-    ];
-    this.tiles.set(tileId, { vao, buffers: [position, height, uv, index], textures, count: mesh.indices.length, bounds, dataBounds: samplingBounds, minHeight: heightRange.min, maxHeight: heightRange.max });
+    const textures=[createSolidTexture(gl,[255,255,255,255]),createNormalTexture(gl,asset),createTexture(gl,asset.splatRgba,asset.size,asset.size,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE),createTexture(gl,asset.splatSnow,asset.size,asset.size,gl.R8,gl.RED,gl.UNSIGNED_BYTE),createTexture(gl,asset.landMask,asset.size,asset.size,gl.R8,gl.RED,gl.UNSIGNED_BYTE),createTexture(gl,asset.demValidity,asset.size,asset.size,gl.R8,gl.RED,gl.UNSIGNED_BYTE)];
+    this.tiles.set(tileId,{vao,buffers:[position,height,uv,index],textures,count:mesh.indices.length,bounds,dataBounds:samplingBounds,minHeight:heightRange.min,maxHeight:heightRange.max,skirtDepth:mesh.skirtDepth});
   }
 
-  removeTile(tileId) {
-    const tile = this.tiles.get(tileId);
-    if (!tile) return;
-    const { gl } = this;
-    gl.deleteVertexArray(tile.vao);
-    for (const buffer of tile.buffers) gl.deleteBuffer(buffer);
-    for (const texture of tile.textures) gl.deleteTexture(texture);
-    this.tiles.delete(tileId);
-    this.debuggedTileRanges.delete(tileId);
-  }
-
-  draw(camera = {}, width = 1, height = 1) {
-    if (this.disposed || !this.tiles.size) return 0;
-    const { gl } = this;
-    gl.useProgram(this.program);
-    gl.uniformMatrix4fv(this.uniforms.mvp, false, buildTerrainMvp(camera, width, height));
-    gl.uniform1f(this.uniforms.heightScale, Math.min(Math.max(Number(this.material.heightScale) || 0, 0), HEIGHT_SCALE_MAX));
-    gl.uniform1f(this.uniforms.roughness, this.material.roughness);
-    gl.uniform1f(this.uniforms.ambient, this.material.ambient);
-    gl.uniform1f(this.uniforms.sunStrength, this.material.sunStrength);
-    gl.uniform1f(this.uniforms.normalStrength, this.material.normalStrength);
-    gl.uniform3fv(this.uniforms.sunDirection, this.material.sunDirection);
-    let triangles = 0;
-    for (const [tileId, tile] of this.tiles) {
-      if (!this.debuggedTileRanges.has(tileId)) {
-        console.debug("[TerrainGpuRenderer] tile height range", { tileId, minHeight: tile.minHeight, maxHeight: tile.maxHeight, bounds: tile.bounds, dataBounds: tile.dataBounds });
-        this.debuggedTileRanges.add(tileId);
-      }
-      gl.uniform4f(this.uniforms.dataBounds, tile.dataBounds.minX, tile.dataBounds.minY, tile.dataBounds.maxX, tile.dataBounds.maxY);
-      gl.bindVertexArray(tile.vao);
-      for (let unit = 0; unit < tile.textures.length; unit += 1) {
-        gl.activeTexture(gl.TEXTURE0 + unit);
-        gl.bindTexture(gl.TEXTURE_2D, tile.textures[unit]);
-      }
-      gl.uniform1i(this.uniforms.baseColor, 0);
-      gl.uniform1i(this.uniforms.normal, 1);
-      gl.uniform1i(this.uniforms.splatRgba, 2);
-      gl.uniform1i(this.uniforms.splatSnow, 3);
-      gl.uniform1i(this.uniforms.landMask, 4);
-      gl.uniform1i(this.uniforms.demValidity, 5);
-      gl.drawElements(gl.TRIANGLES, tile.count, gl.UNSIGNED_INT, 0);
-      triangles += tile.count / 3;
-    }
-    gl.bindVertexArray(null);
-    return triangles;
-  }
-
-  dispose() {
-    if (this.disposed) return;
-    this.disposed = true;
-    for (const id of [...this.tiles.keys()]) this.removeTile(id);
-    this.gl.deleteProgram(this.program);
-  }
+  removeTile(tileId){const tile=this.tiles.get(tileId);if(!tile)return;const{gl}=this;gl.deleteVertexArray(tile.vao);for(const buffer of tile.buffers)gl.deleteBuffer(buffer);for(const texture of tile.textures)gl.deleteTexture(texture);this.tiles.delete(tileId);this.debuggedTileRanges.delete(tileId);}
+  draw(camera={},width=1,height=1){if(this.disposed||!this.tiles.size)return 0;const{gl}=this;gl.useProgram(this.program);gl.uniformMatrix4fv(this.uniforms.mvp,false,buildTerrainMvp(camera,width,height));gl.uniform1f(this.uniforms.heightScale,Math.min(Math.max(Number(this.material.heightScale)||0,0),HEIGHT_SCALE_MAX));gl.uniform1f(this.uniforms.roughness,this.material.roughness);gl.uniform1f(this.uniforms.ambient,this.material.ambient);gl.uniform1f(this.uniforms.sunStrength,this.material.sunStrength);gl.uniform1f(this.uniforms.normalStrength,this.material.normalStrength);gl.uniform3fv(this.uniforms.sunDirection,this.material.sunDirection);let triangles=0;for(const[tileId,tile]of this.tiles){if(!this.debuggedTileRanges.has(tileId)){console.debug("[TerrainGpuRenderer] tile height range",{tileId,minHeight:tile.minHeight,maxHeight:tile.maxHeight,bounds:tile.bounds,dataBounds:tile.dataBounds,skirtDepth:tile.skirtDepth});this.debuggedTileRanges.add(tileId);}gl.uniform4f(this.uniforms.dataBounds,tile.dataBounds.minX,tile.dataBounds.minY,tile.dataBounds.maxX,tile.dataBounds.maxY);gl.bindVertexArray(tile.vao);for(let unit=0;unit<tile.textures.length;unit+=1){gl.activeTexture(gl.TEXTURE0+unit);gl.bindTexture(gl.TEXTURE_2D,tile.textures[unit]);}gl.uniform1i(this.uniforms.baseColor,0);gl.uniform1i(this.uniforms.normal,1);gl.uniform1i(this.uniforms.splatRgba,2);gl.uniform1i(this.uniforms.splatSnow,3);gl.uniform1i(this.uniforms.landMask,4);gl.uniform1i(this.uniforms.demValidity,5);gl.drawElements(gl.TRIANGLES,tile.count,gl.UNSIGNED_INT,0);triangles+=tile.count/3;}gl.bindVertexArray(null);return triangles;}
+  dispose(){if(this.disposed)return;this.disposed=true;for(const id of [...this.tiles.keys()])this.removeTile(id);this.gl.deleteProgram(this.program);}
 }
-
-function normalizeTerrainBounds(bounds) {
-  if (!bounds || !["minX", "minY", "maxX", "maxY"].every((key) => Number.isFinite(bounds[key]))) throw new Error("Terrain tile bounds must be finite.");
-  const minX = Math.max(WORLD_BOUNDS.minX, Math.min(WORLD_BOUNDS.maxX, bounds.minX));
-  const maxX = Math.max(WORLD_BOUNDS.minX, Math.min(WORLD_BOUNDS.maxX, bounds.maxX));
-  const minY = Math.max(WORLD_BOUNDS.minY, Math.min(WORLD_BOUNDS.maxY, bounds.minY));
-  const maxY = Math.max(WORLD_BOUNDS.minY, Math.min(WORLD_BOUNDS.maxY, bounds.maxY));
-  if (!(minX < maxX && minY < maxY)) throw new Error("Terrain tile bounds are outside the canonical world extent.");
-  return Object.freeze({ minX, minY, maxX, maxY });
-}
-
-function measureHeightRange(values) {
-  let min = Infinity, max = -Infinity;
-  for (const value of values) {
-    if (!Number.isFinite(value) || value < HEIGHT_MIN_METERS || value > HEIGHT_MAX_METERS) throw new Error("Terrain mesh contains an unsafe height value.");
-    min = Math.min(min, value); max = Math.max(max, value);
-  }
-  return { min, max };
-}
-
-function createTexture(gl, data, width, height, internalFormat, format, type) {
-  const texture = gl.createTexture();
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-  gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data);
-  return texture;
-}
-function createSolidTexture(gl, rgba) { return createTexture(gl, new Uint8Array(rgba), 1, 1, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE); }
-function createNormalTexture(gl, asset) {
-  const rgba = new Uint8Array(asset.size * asset.size * 4);
-  for (let i = 0; i < asset.size * asset.size; i += 1) { rgba[i * 4] = asset.normals[i * 3] + 128; rgba[i * 4 + 1] = asset.normals[i * 3 + 1] + 128; rgba[i * 4 + 2] = asset.normals[i * 3 + 2] + 128; rgba[i * 4 + 3] = 255; }
-  return createTexture(gl, rgba, asset.size, asset.size, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE);
-}
-function compileShader(gl, type, source) {
-  const shader = gl.createShader(type); gl.shaderSource(shader, source); gl.compileShader(shader);
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) { const error = gl.getShaderInfoLog(shader) || "unknown terrain shader error"; gl.deleteShader(shader); throw new Error(error); }
-  return shader;
-}
-function createProgram(gl) {
-  const vertex = compileShader(gl, gl.VERTEX_SHADER, VERTEX), fragment = compileShader(gl, gl.FRAGMENT_SHADER, FRAGMENT), program = gl.createProgram();
-  gl.attachShader(program, vertex); gl.attachShader(program, fragment); gl.linkProgram(program); gl.deleteShader(vertex); gl.deleteShader(fragment);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) { const error = gl.getProgramInfoLog(program) || "Terrain program link failed"; gl.deleteProgram(program); throw new Error(error); }
-  return program;
-}
+function normalizeTerrainBounds(bounds){if(!bounds||!["minX","minY","maxX","maxY"].every((key)=>Number.isFinite(bounds[key])))throw new Error("Terrain tile bounds must be finite.");const minX=Math.max(WORLD_BOUNDS.minX,Math.min(WORLD_BOUNDS.maxX,bounds.minX)),maxX=Math.max(WORLD_BOUNDS.minX,Math.min(WORLD_BOUNDS.maxX,bounds.maxX)),minY=Math.max(WORLD_BOUNDS.minY,Math.min(WORLD_BOUNDS.maxY,bounds.minY)),maxY=Math.max(WORLD_BOUNDS.minY,Math.min(WORLD_BOUNDS.maxY,bounds.maxY));if(!(minX<maxX&&minY<maxY))throw new Error("Terrain tile bounds are outside the canonical world extent.");return Object.freeze({minX,minY,maxX,maxY});}
+function measureHeightRange(values){let min=Infinity,max=-Infinity;for(const value of values){if(!Number.isFinite(value)||value<HEIGHT_MIN_METERS||value>HEIGHT_MAX_METERS)throw new Error("Terrain mesh contains an unsafe height value.");min=Math.min(min,value);max=Math.max(max,value);}return{min,max};}
+function createTexture(gl,data,width,height,internalFormat,format,type){const texture=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,texture);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);gl.texImage2D(gl.TEXTURE_2D,0,internalFormat,width,height,0,format,type,data);return texture;}
+function createSolidTexture(gl,rgba){return createTexture(gl,new Uint8Array(rgba),1,1,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE);}
+function createNormalTexture(gl,asset){const rgba=new Uint8Array(asset.size*asset.size*4);for(let i=0;i<asset.size*asset.size;i+=1){rgba[i*4]=asset.normals[i*3]+128;rgba[i*4+1]=asset.normals[i*3+1]+128;rgba[i*4+2]=asset.normals[i*3+2]+128;rgba[i*4+3]=255;}return createTexture(gl,rgba,asset.size,asset.size,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE);}
+function compileShader(gl,type,source){const shader=gl.createShader(type);gl.shaderSource(shader,source);gl.compileShader(shader);if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS)){const error=gl.getShaderInfoLog(shader)||"unknown terrain shader error";gl.deleteShader(shader);throw new Error(error);}return shader;}
+function createProgram(gl){const vertex=compileShader(gl,gl.VERTEX_SHADER,VERTEX),fragment=compileShader(gl,gl.FRAGMENT_SHADER,FRAGMENT),program=gl.createProgram();gl.attachShader(program,vertex);gl.attachShader(program,fragment);gl.linkProgram(program);gl.deleteShader(vertex);gl.deleteShader(fragment);if(!gl.getProgramParameter(program,gl.LINK_STATUS)){const error=gl.getProgramInfoLog(program)||"Terrain program link failed";gl.deleteProgram(program);throw new Error(error);}return program;}
