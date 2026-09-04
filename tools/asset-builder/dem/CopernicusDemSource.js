@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { decodeCopernicusGeoTiff } from "./GeoTiffDecoder.js";
+import { decodeCopernicusGeoTiff, isValidDemPixel } from "./GeoTiffDecoder.js";
 
 export const COPERNICUS_GLO30_BUCKET = "https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com";
 export const COPERNICUS_GLO30_TILE_LIST_URL = `${COPERNICUS_GLO30_BUCKET}/tileList.txt`;
@@ -97,6 +97,7 @@ export function parseTileList(text) {
   return result;
 }
 
+/** Sample a Copernicus raster using valid-only bilinear weighting; invalid neighbors contribute zero weight. */
 export function sampleCopernicusRaster(entry, lon, lat) {
   if (!entry?.raster) return null;
   const { width, height, data, nodata, georeference } = entry.raster;
@@ -105,17 +106,21 @@ export function sampleCopernicusRaster(entry, lon, lat) {
   if (px < 0 || py < 0 || px > width - 1 || py > height - 1) return null;
   const x0 = Math.floor(px), y0 = Math.floor(py), x1 = Math.min(width - 1, x0 + 1), y1 = Math.min(height - 1, y0 + 1);
   const fx = px - x0, fy = py - y0;
-  const values = [data[y0 * width + x0], data[y0 * width + x1], data[y1 * width + x0], data[y1 * width + x1]];
-  const valid = values.filter((value) => Number.isFinite(value) && (nodata === null || Math.abs(value - nodata) > 1e-6));
-  if (!valid.length) return null;
-  const fallback = valid[0];
-  const a = validValue(values[0], fallback, nodata), b = validValue(values[1], fallback, nodata);
-  const c = validValue(values[2], fallback, nodata), d = validValue(values[3], fallback, nodata);
-  return a * (1 - fx) * (1 - fy) + b * fx * (1 - fy) + c * (1 - fx) * fy + d * fx * fy;
-}
-
-function validValue(value, fallback, nodata) {
-  return Number.isFinite(value) && (nodata === null || Math.abs(value - nodata) > 1e-6) ? value : fallback;
+  const samples = [
+    [data[y0 * width + x0], (1 - fx) * (1 - fy)],
+    [data[y0 * width + x1], fx * (1 - fy)],
+    [data[y1 * width + x0], (1 - fx) * fy],
+    [data[y1 * width + x1], fx * fy],
+  ];
+  let weightedSum = 0;
+  let totalWeight = 0;
+  for (const [value, weight] of samples) {
+    if (!isValidDemPixel(value, nodata) || weight <= 0) continue;
+    weightedSum += value * weight;
+    totalWeight += weight;
+  }
+  if (totalWeight <= 0) return null;
+  return weightedSum / totalWeight;
 }
 
 async function downloadText(url) {
