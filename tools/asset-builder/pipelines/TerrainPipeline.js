@@ -127,7 +127,7 @@ function countLargeNeighborDeltas(values,size,threshold) { let count=0; for(let 
 
 function loadPhysicalLandPolygons() {
   if (!fs.existsSync(GEOMETRY_ASSET_DIR)) return [];
-  const modules = Object.fromEntries(fs.readdirSync(GEOMETRY_ASSET_DIR).filter((file) => /^geometry_country_.*\.json$/.test(file)).map((file) => [file, JSON.parse(fs.readFileSync(path.join(GEOMETRY_ASSET_DIR, file), "utf8")]));
+  const modules = Object.fromEntries(fs.readdirSync(GEOMETRY_ASSET_DIR).filter((file) => /^geometry_country_.*\.json$/.test(file)).map((file) => [file, JSON.parse(fs.readFileSync(path.join(GEOMETRY_ASSET_DIR, file), "utf8"))]));
   return collectWorldLandPolygons(modules);
 }
 function isPhysicalLand(lon, lat, landPolygons) { return landPolygons.some((polygon) => pointInPolygon(lon, lat, polygon)); }
