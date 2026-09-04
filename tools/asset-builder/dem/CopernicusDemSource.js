@@ -127,10 +127,11 @@ export function sampleCopernicusRasterTrace(entry, lon, lat) {
   const scaleY = Number(georeference?.scaleY);
   const originX = Number(georeference?.originX);
   const originY = Number(georeference?.originY);
+  const georefMatchesTile = entry.spatial?.georefMatchesTile ?? null;
   if (!Number.isFinite(scaleX) || scaleX === 0 || !Number.isFinite(scaleY) || scaleY === 0) return null;
   const px = (Number(lon) - originX) / scaleX;
   const py = (originY - Number(lat)) / scaleY;
-  if (px < 0 || py < 0 || px > width - 1 || py > height - 1) return { entryKey: entry.key, lon:Number(lon), lat:Number(lat), width, height, georeference, axisConvention: scaleY > 0 ? "north-up (modelY decreases with raster row)" : "south-up (modelY increases with raster row)", px, py, inRaster:false, value:null, corners:[] };
+  if (px < 0 || py < 0 || px > width - 1 || py > height - 1) return { entryKey: entry.key, georefMatchesTile, lon:Number(lon), lat:Number(lat), width, height, georeference, axisConvention: scaleY > 0 ? "north-up (modelY decreases with raster row)" : "south-up (modelY increases with raster row)", px, py, inRaster:false, value:null, corners:[] };
   const x0 = Math.floor(px), y0 = Math.floor(py), x1 = Math.min(width - 1, x0 + 1), y1 = Math.min(height - 1, y0 + 1);
   const fx = px - x0, fy = py - y0;
   const samples = [
@@ -146,7 +147,7 @@ export function sampleCopernicusRasterTrace(entry, lon, lat) {
     weightedSum += sample.value * sample.weight;
     totalWeight += sample.weight;
   }
-  return { entryKey:entry.key, lon:Number(lon), lat:Number(lat), width, height, georeference, axisConvention: scaleY > 0 ? "north-up (modelY decreases with raster row)" : "south-up (modelY increases with raster row)", px, py, inRaster:true, x0, y0, x1, y1, fx, fy, corners:samples.map(({px:pxValue,py:pyValue,value,weight})=>({px:pxValue,py:pyValue,value:Number.isFinite(value)?value:null,valid:isValidDemPixel(value,nodata),weight})), value:totalWeight>0?weightedSum/totalWeight:null };
+  return { entryKey:entry.key, georefMatchesTile, lon:Number(lon), lat:Number(lat), width, height, georeference, axisConvention: scaleY > 0 ? "north-up (modelY decreases with raster row)" : "south-up (modelY increases with raster row)", px, py, inRaster:true, x0, y0, x1, y1, fx, fy, corners:samples.map(({px:pxValue,py:pyValue,value,weight})=>({px:pxValue,py:pyValue,value:Number.isFinite(value)?value:null,valid:isValidDemPixel(value,nodata),weight})), value:totalWeight>0?weightedSum/totalWeight:null };
 }
 
 export function validateCopernicusTileGeoreference(key, raster, tolerance = 1e-6) {
