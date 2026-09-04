@@ -1,9 +1,22 @@
 import { inflateSync, inflateRawSync } from "node:zlib";
 
 const TYPE_SIZES = Object.freeze({1:1,2:1,3:2,4:4,5:8,6:1,7:1,8:2,9:4,10:8,11:4,12:8});
-const DEM_MIN_METERS = -500;
-const DEM_MAX_METERS = 9000;
+export const DEM_MIN_METERS = -500;
+export const DEM_MAX_METERS = 9000;
 let fieldReaderContext = null;
+
+export function isValidDemPixel(value, nodata = null) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && (nodata === null || Math.abs(numeric - nodata) > 1e-6) && numeric >= DEM_MIN_METERS && numeric <= DEM_MAX_METERS;
+}
+
+export function sanitizeDemRaster(values, nodata = null) {
+  const sanitized = values instanceof Float32Array ? values : Float32Array.from(values);
+  for (let i = 0; i < sanitized.length; i += 1) {
+    if (!isValidDemPixel(sanitized[i], nodata)) sanitized[i] = Number.NaN;
+  }
+  return sanitized;
+}
 
 export function decodeCopernicusGeoTiff(buffer) {
   const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer), view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength), littleEndian = readByteOrder(view);
@@ -18,9 +31,10 @@ export function decodeCopernicusGeoTiff(buffer) {
     if (![1,3].includes(predictor)) throw new Error(`Unsupported GeoTIFF predictor: ${predictor}.`);
     const offsetTag = tileWidth ? 324 : 273, countTag = tileWidth ? 325 : 279, blockOffsets = numericArrayTag(tags, offsetTag), blockByteCounts = numericArrayTag(tags, countTag);
     if (!blockOffsets.length || blockOffsets.length !== blockByteCounts.length) throw new Error("GeoTIFF block offsets/counts are missing or inconsistent.");
-    const data = new Float32Array(width * height); data.fill(Number.isFinite(Number(nodata)) ? Number(nodata) : 0);
+    const data = new Float32Array(width * height); data.fill(Number.isFinite(Number(nodata)) ? Number(nodata) : Number.NaN);
     if (tileWidth) { const rows=Math.ceil(height/tileLength), cols=Math.ceil(width/tileWidth); if(blockOffsets.length<rows*cols)throw new Error("GeoTIFF tile index is incomplete."); for(let ty=0;ty<rows;ty+=1)for(let tx=0;tx<cols;tx+=1){const block=decodeBlock(bytes,blockOffsets[ty*cols+tx],blockByteCounts[ty*cols+tx],compression,predictor,tileWidth,tileLength,littleEndian);copyBlock(data,width,height,block,tileWidth,tileLength,tx*tileWidth,ty*tileLength);}} else {const strips=Math.ceil(height/rowsPerStrip);if(blockOffsets.length<strips)throw new Error("GeoTIFF strip index is incomplete.");for(let strip=0;strip<strips;strip+=1){const rows=Math.min(rowsPerStrip,height-strip*rowsPerStrip),block=decodeBlock(bytes,blockOffsets[strip],blockByteCounts[strip],compression,predictor,width,rows,littleEndian);copyBlock(data,width,height,block,width,rows,0,strip*rowsPerStrip);}}
     const stats = measureDemStats(data, nodata);
+    sanitizeDemRaster(data, Number.isFinite(Number(nodata)) ? Number(nodata) : null);
     return Object.freeze({width,height,data,nodata:Number.isFinite(Number(nodata))?Number(nodata):null,compression,predictor,georeference:Object.freeze({originX:Number(tiepoint[3]??0),originY:Number(tiepoint[4]??0),scaleX:Number(pixelScale[0]??1),scaleY:Number(pixelScale[1]??1)}),stats:Object.freeze(stats)});
   } finally { fieldReaderContext = null; }
 }
