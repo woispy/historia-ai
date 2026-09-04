@@ -97,7 +97,7 @@ export function parseTileList(text) {
   return result;
 }
 
-/** Sample a Copernicus raster using its signed GeoTIFF Y scale; invalid neighbors contribute zero weight. */
+/** Sample a Copernicus raster using the GeoTIFF signed Y scale; north-up uses positive scale, south-up uses negative scale. */
 export function sampleCopernicusRaster(entry, lon, lat) {
   if (!entry?.raster) return null;
   const { width, height, data, nodata, georeference } = entry.raster;
@@ -105,7 +105,7 @@ export function sampleCopernicusRaster(entry, lon, lat) {
   const scaleY = Number(georeference?.scaleY);
   if (!Number.isFinite(scaleX) || scaleX === 0 || !Number.isFinite(scaleY) || scaleY === 0) return null;
   const px = (Number(lon) - Number(georeference.originX)) / scaleX;
-  const py = (Number(lat) - Number(georeference.originY)) / scaleY;
+  const py = (Number(georeference.originY) - Number(lat)) / scaleY;
   if (px < 0 || py < 0 || px > width - 1 || py > height - 1) return null;
   const x0 = Math.floor(px), y0 = Math.floor(py), x1 = Math.min(width - 1, x0 + 1), y1 = Math.min(height - 1, y0 + 1);
   const fx = px - x0, fy = py - y0;
