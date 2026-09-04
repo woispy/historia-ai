@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { encodeTerrainTile, decodeTerrainTile, TERRAIN_HEIGHT_MIN_METERS, TERRAIN_HEIGHT_MAX_METERS } from "../../src/map/rendering/terrain/TerrainAssetCodec.js";
+import { encodeTerrainTile, decodeTerrainTile, TERRAIN_BINARY_VERSION, packTerrainValidityMask, unpackTerrainValidityMask, TERRAIN_HEIGHT_MIN_METERS, TERRAIN_HEIGHT_MAX_METERS } from "../../src/map/rendering/terrain/TerrainAssetCodec.js";
 import { buildTerrainGridMesh, TERRAIN_MAX_SKIRT_DEPTH_METERS } from "../../src/map/rendering/terrain/TerrainGeometry.js";
 import { buildTerrainMvp } from "../../src/map/rendering/terrain/TerrainCameraMath.js";
 import { parseTileList, copernicusSourceTileKeysForBounds, copernicusTileKey, sampleCopernicusRaster } from "../asset-builder/dem/CopernicusDemSource.js";
@@ -18,16 +18,29 @@ const landMask = new Uint8Array(size * size); landMask.fill(255);
 const demValidity = new Uint8Array(size * size); demValidity.fill(255);
 const bytes = encodeTerrainTile({ size, heights, normals, splatRgba, splatSnow, landMask, demValidity, bounds: { minX: 30, minY: 35, maxX: 40, maxY: 45 } });
 const decoded = decodeTerrainTile(bytes);
-assert.equal(decoded.version, 2);
+assert.equal(TERRAIN_BINARY_VERSION, 3);
+assert.equal(decoded.version, TERRAIN_BINARY_VERSION);
 assert.equal(decoded.size, size);
 assert.deepEqual(Array.from(decoded.heights), Array.from(heights));
 assert.deepEqual(Array.from(decoded.demValidity), Array.from(demValidity));
+assert.equal(bytes.length < 56 + heights.byteLength + normals.byteLength + splatRgba.byteLength + splatSnow.byteLength + landMask.byteLength + demValidity.byteLength, true);
+const mixedValidity = Uint8Array.from([255,0,255,0,255,0,255,0,255]);
+const packed = packTerrainValidityMask(mixedValidity);
+assert.equal(packed.length, 2);
+assert.deepEqual(Array.from(unpackTerrainValidityMask(packed, mixedValidity.length)), Array.from(mixedValidity));
 assert.equal(decoded.bounds.minX, 30);
 assert.equal(decoded.bounds.maxY, 45);
-const mesh = buildTerrainGridMesh({ heights, size, skirtDepth: 50 });
+const mesh = buildTerrainGridMesh({ heights, validity: demValidity, size, skirtDepth: 50 });
 assert.equal(mesh.vertexHeights.length, size * size + (size - 1) * 8);
 assert.equal(mesh.indices.length, (size - 1) * (size - 1) * 6 + (size - 1) * 4 * 6);
 assert.equal(mesh.vertexHeights[size * size], heights[0] - 50);
+const invalidCenter = Uint8Array.from([255,255,255,255,0,255,255,255,255]);
+const culledMesh = buildTerrainGridMesh({ heights, validity: invalidCenter, size, skirtDepth: 0 });
+assert.equal(culledMesh.indices.length, 0);
+assert.equal(culledMesh.vertexValidity[4], 0);
+const invalidCorner = Uint8Array.from([0,255,255,255,255,255,255,255,255]);
+const cornerMesh = buildTerrainGridMesh({ heights, validity: invalidCorner, size, skirtDepth: 0 });
+assert.equal(cornerMesh.indices.length, 15);
 const unsafeHeights = Float32Array.from([Number.NaN, Number.POSITIVE_INFINITY, -501, 9001, 123]);
 const unsafeMesh = buildTerrainGridMesh({ heights: unsafeHeights, size: 2, skirtDepth: TERRAIN_MAX_SKIRT_DEPTH_METERS * 4 });
 assert.deepEqual(Array.from(unsafeMesh.vertexHeights.slice(0, 4)), [0, 0, 0, 123]);
@@ -69,10 +82,7 @@ assert.ok(lod3Sample.minY >= coverage[1] && lod3Sample.maxY <= coverage[3]);
 assert.ok(lod3Sample.minX < lod3Sample.maxX && lod3Sample.minY < lod3Sample.maxY);
 const datelinePieces = collectWorldLandPolygons({ synthetic: { id: "geometry_country_dateline", name: "Dateline", polygons: [[[170, 10], [190, 10], [190, 20], [170, 20]]] } });
 assert.equal(datelinePieces.length, 2);
-for (const polygon of datelinePieces) {
-  assert.ok(polygon.every(([x]) => x >= -180 && x <= 180));
-  assert.ok(Math.abs(Math.max(...polygon.map(([x]) => x)) - Math.min(...polygon.map(([x]) => x))) <= 180);
-}
+for (const polygon of datelinePieces) { assert.ok(polygon.every(([x]) => x >= -180 && x <= 180)); assert.ok(Math.abs(Math.max(...polygon.map(([x]) => x)) - Math.min(...polygon.map(([x]) => x))) <= 180); }
 const demStats = measureDemStats(Float32Array.from([0, 400, 420, -9999, Number.NaN, 9200]), -9999);
 assert.deepEqual(demStats, { min: -9999, max: 9200, finiteCount: 5, invalidCount: 3 });
 assert.equal(isValidDemPixel(0), true);
@@ -88,18 +98,11 @@ assert.ok(Number.isNaN(sanitized[2]));
 assert.ok(Number.isNaN(sanitized[3]));
 assert.ok(Number.isNaN(sanitized[4]));
 assert.ok(Number.isNaN(sanitized[5]));
-const syntheticRaster = {
-  width: 2,
-  height: 2,
-  data: Float32Array.from([100, Number.NaN, 300, 500]),
-  nodata: null,
-  georeference: { originX: 0, originY: 2, scaleX: 1, scaleY: 1 },
-};
+const syntheticRaster = { width: 2, height: 2, data: Float32Array.from([100, Number.NaN, 300, 500]), nodata: null, georeference: { originX: 0, originY: 2, scaleX: 1, scaleY: 1 } };
 assert.equal(sampleCopernicusRaster({ raster: syntheticRaster }, 0.5, 1.5), 300);
-const noValidRaster = {
-  ...syntheticRaster,
-  data: Float32Array.from([Number.NaN, Number.NaN, Number.NaN, Number.NaN]),
-};
+const southUpRaster = { ...syntheticRaster, georeference: { originX: 0, originY: 0, scaleX: 1, scaleY: -1 } };
+assert.equal(sampleCopernicusRaster({ raster: southUpRaster }, 0.5, 0.5), 300);
+const noValidRaster = { ...syntheticRaster, data: Float32Array.from([Number.NaN, Number.NaN, Number.NaN, Number.NaN]) };
 assert.equal(sampleCopernicusRaster({ raster: noValidRaster }, 0.5, 1.5), null);
 assert.equal(TERRAIN_LODS.length, 5);
 console.log("terrain-dem-pipeline.test.js: PASS");
