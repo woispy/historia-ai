@@ -5,7 +5,6 @@ const PROVINCE_FIELD_COUNT = 8;
 const TILE_STRIDE = 6;
 const LOD_STRIDE = 4;
 const CITY_STRIDE = 6;
-const HEADER = Object.freeze({ magic:0, version:4, flags:6, provinceCount:8, tileCount:12, geometryPointCount:16, lodRangeCount:20, cityCount:24, provinceOffset:28, tileOffset:32, geometryOffset:36, lodOffset:40, cityOffset:44, paletteOffset:48, paletteByteLength:52, totalByteLength:56 });
 
 /** Immutable zero-copy view over a versioned .mapbin ArrayBuffer. */
 export class BinaryMapAssetSource {
