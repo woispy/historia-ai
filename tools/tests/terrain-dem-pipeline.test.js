@@ -48,9 +48,9 @@ for (let index = 0; index < cornerIndices.length; index += 3) {
   assert.notEqual(cornerIndices[index + 1], 0);
   assert.notEqual(cornerIndices[index + 2], 0);
 }
-const unsafeHeights = Float32Array.from([Number.NaN, Number.POSITIVE_INFINITY, -501, 9001, 123]);
-const unsafeMesh = buildTerrainGridMesh({ heights: unsafeHeights, size: 2, skirtDepth: TERRAIN_MAX_SKIRT_DEPTH_METERS * 4 });
-assert.deepEqual(Array.from(unsafeMesh.vertexHeights.slice(0, 4)), [0, 0, 0, 123]);
+const unsafeHeights = Float32Array.from([Number.NaN, Number.POSITIVE_INFINITY, -501, 9001, 123, 456, 789, 321, 654]);
+const unsafeMesh = buildTerrainGridMesh({ heights: unsafeHeights, size: 3, skirtDepth: TERRAIN_MAX_SKIRT_DEPTH_METERS * 4 });
+assert.deepEqual(Array.from(unsafeMesh.vertexHeights.slice(0, 9)), [0, 0, 0, 0, 123, 456, 789, 321, 654]);
 assert.ok(unsafeMesh.vertexHeights.every((value) => Number.isFinite(value) && value >= TERRAIN_HEIGHT_MIN_METERS - TERRAIN_MAX_SKIRT_DEPTH_METERS && value <= TERRAIN_HEIGHT_MAX_METERS));
 assert.equal(unsafeMesh.skirtDepth, TERRAIN_MAX_SKIRT_DEPTH_METERS);
 assert.ok(buildTerrainMvp({ x: 0, y: 0, zoom: 2, pitch: 24, yaw: 8 }, 1920, 1080).every(Number.isFinite));
