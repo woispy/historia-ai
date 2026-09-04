@@ -18,8 +18,6 @@ const profiler = new FramePassProfiler();
 const pickingPipeline = { commandEncodingAndSetupCpuMs: [], queueSubmitCpuMs: [], queueWorkDoneMs: [], readbackSyncMs: [] };
 let renderer;
 let runtime;
-let benchmarkStart = 0;
-let lastHover = 0;
 let restoreQueueSubmit = null;
 let activePickProbe = null;
 let renderTimer = 0;
