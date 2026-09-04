@@ -46,7 +46,7 @@ export async function runTerrainPipeline({ bbox = parseBbox(process.env.HISTORIA
     records.push({ id: tile.id, level: tile.level, x: tile.x, y: tile.y, bounds, dataBounds, asset: `/assets/terrain/tiles/${tile.level}/${tile.x}/${tile.y}.htrn`, grid });
     log(`[Terrain Pipeline] Completed tile ${index + 1}/${tiles.length} (LOD ${tile.level}) -> ${path.relative(process.cwd(), file)}.`);
   }
-  const manifest = { version: 2, source: { provider: "Copernicus DEM", product: "GLO-30 Public", release: "2021 AWS public mirror", bucket: "copernicus-dem-30m" }, coverage: { minX: extent[0], minY: extent[1], maxX: extent[2], maxY: extent[3] }, maxZoom, lods: TERRAIN_LODS, elevation: { unit: "meters", scaleToWorld: 0.001 }, tiles: records, generatedAt: new Date().toISOString(), format: "HTRN-v2" };
+  const manifest = { version: 3, source: { provider: "Copernicus DEM", product: "GLO-30 Public", release: "2021 AWS public mirror", bucket: "copernicus-dem-30m" }, coverage: { minX: extent[0], minY: extent[1], maxX: extent[2], maxY: extent[3] }, maxZoom, lods: TERRAIN_LODS, elevation: { unit: "meters", scaleToWorld: 0.001 }, tiles: records, generatedAt: new Date().toISOString(), format: "HTRN-v3" };
   fs.writeFileSync(path.join(outputDir, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
   fs.writeFileSync(path.join(outputDir, "ATTRIBUTION.txt"), "Terrain elevation: Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved.\nAdapted by Historia AI into HTRN runtime terrain assets.\n");
   success(`Terrain Pipeline generated ${records.length} HTRN tile assets.`);
@@ -54,19 +54,12 @@ export async function runTerrainPipeline({ bbox = parseBbox(process.env.HISTORIA
 }
 
 /** Return the canonical, untrimmed quadtree world bounds used by runtime terrain projection. */
-export function terrainTileBoundsForCoverage(tile) {
-  return terrainTileBounds(tile);
-}
+export function terrainTileBoundsForCoverage(tile) { return terrainTileBounds(tile); }
 
 /** Return the DEM texture sampling rectangle for a tile, clipped to configured source coverage. */
 export function terrainTileSampleBoundsForCoverage(tile, coverage) {
   const bounds = terrainTileBounds(tile);
-  const result = {
-    minX: Math.max(bounds.minX, coverage[0]),
-    minY: Math.max(bounds.minY, coverage[1]),
-    maxX: Math.min(bounds.maxX, coverage[2]),
-    maxY: Math.min(bounds.maxY, coverage[3]),
-  };
+  const result = { minX: Math.max(bounds.minX, coverage[0]), minY: Math.max(bounds.minY, coverage[1]), maxX: Math.min(bounds.maxX, coverage[2]), maxY: Math.min(bounds.maxY, coverage[3]) };
   if (!(result.minX < result.maxX && result.minY < result.maxY)) throw new Error(`Terrain tile ${tile.id} does not intersect DEM coverage.`);
   return Object.freeze(result);
 }
@@ -74,27 +67,22 @@ export function terrainTileSampleBoundsForCoverage(tile, coverage) {
 /** Return the world coordinate represented by a raster-grid vertex; Y increases south-to-north to match runtime mesh space. */
 export function terrainSampleCoordinate(bounds, x, y, size) {
   if (!Number.isInteger(size) || size < 2 || !Number.isInteger(x) || !Number.isInteger(y) || x < 0 || x >= size || y < 0 || y >= size) throw new Error("Invalid terrain sample grid coordinate.");
-  return {
-    lon: bounds.minX + (bounds.maxX - bounds.minX) * x / (size - 1),
-    lat: bounds.minY + (bounds.maxY - bounds.minY) * y / (size - 1),
-  };
+  return { lon: bounds.minX + (bounds.maxX - bounds.minX) * x / (size - 1), lat: bounds.minY + (bounds.maxY - bounds.minY) * y / (size - 1) };
 }
 
 async function sampleTile(source, bounds, size, coverage, landPolygons) {
   const heights = new Float32Array(size * size), demValidity = new Uint8Array(size * size), landMask = new Uint8Array(size * size), cache = new Map();
   const sampledStats = createStats();
-  for (let y = 0; y < size; y += 1) {
-    for (let x = 0; x < size; x += 1) {
-      const { lon, lat } = terrainSampleCoordinate(bounds, x, y, size), index = y * size + x;
-      if (!coordinateInCoverage(lon, lat, coverage)) { sampledStats.invalidCount += 1; continue; }
-      const keyLat = Math.floor(lat === coverage[3] ? lat - 1e-9 : lat), keyLon = Math.floor(lon === coverage[2] ? lon - 1e-9 : lon), key = `${keyLat}/${keyLon}`;
-      if (!cache.has(key)) cache.set(key, await source.readTile(keyLat, keyLon));
-      const value = sampleCopernicusRaster(cache.get(key), lon, lat);
-      updateStats(sampledStats, value, value == null || !Number.isFinite(value) || value < HEIGHT_MIN_METERS || value > HEIGHT_MAX_METERS);
-      const safeValue = sanitizeTerrainHeight(value);
-      if (safeValue === value) { heights[index] = safeValue; demValidity[index] = 255; }
-      if (isPhysicalLand(lon, lat, landPolygons)) landMask[index] = 255;
-    }
+  for (let y = 0; y < size; y += 1) for (let x = 0; x < size; x += 1) {
+    const { lon, lat } = terrainSampleCoordinate(bounds, x, y, size), index = y * size + x;
+    if (!coordinateInCoverage(lon, lat, coverage)) { sampledStats.invalidCount += 1; continue; }
+    const keyLat = Math.floor(lat === coverage[3] ? lat - 1e-9 : lat), keyLon = Math.floor(lon === coverage[2] ? lon - 1e-9 : lon), key = `${keyLat}/${keyLon}`;
+    if (!cache.has(key)) cache.set(key, await source.readTile(keyLat, keyLon));
+    const value = sampleCopernicusRaster(cache.get(key), lon, lat);
+    updateStats(sampledStats, value, value == null || !Number.isFinite(value) || value < HEIGHT_MIN_METERS || value > HEIGHT_MAX_METERS);
+    const safeValue = sanitizeTerrainHeight(value);
+    if (safeValue === value) { heights[index] = safeValue; demValidity[index] = 255; }
+    if (isPhysicalLand(lon, lat, landPolygons)) landMask[index] = 255;
   }
   const normals = new Int8Array(size * size * 3), splatRgba = new Uint8Array(size * size * 4), splatSnow = new Uint8Array(size * size);
   for (let y = 0; y < size; y += 1) for (let x = 0; x < size; x += 1) {
@@ -108,27 +96,10 @@ async function sampleTile(source, bounds, size, coverage, landPolygons) {
 }
 
 function logTerrainTelemetry(tile, bounds, samples, encoded) {
-  const decoded = decodeTerrainTile(encoded);
-  const uploadStats = measureArrayStats(samples.heights);
-  const decodedStats = measureArrayStats(decoded.heights);
-  const encodedStats = measureEncodedHeightRange(encoded);
-  const roundTrip = measureRoundTrip(samples.heights, decoded.heights);
-  const neighborDeltaCount = countLargeNeighborDeltas(decoded.heights, decoded.size, LARGE_NEIGHBOR_DELTA_METERS);
-  const rawStats = aggregateSourceStats(samples.sourceStats);
-  const telemetry = {
-    tile: tile.id,
-    dataBounds: bounds,
-    rawDem: rawStats,
-    sampledDem: normalizeStats(samples.sampledStats),
-    htrnEncoded: encodedStats,
-    htrnDecoded: decodedStats,
-    gpuUploadArray: uploadStats,
-    neighborDeltaOver1000m: { count: neighborDeltaCount, thresholdMeters: LARGE_NEIGHBOR_DELTA_METERS },
-    htrnRoundTrip: roundTrip,
-  };
+  const decoded = decodeTerrainTile(encoded), uploadStats = measureArrayStats(samples.heights), decodedStats = measureArrayStats(decoded.heights), encodedStats = measureEncodedHeightRange(encoded), roundTrip = measureRoundTrip(samples.heights, decoded.heights), neighborDeltaCount = countLargeNeighborDeltas(decoded.heights, decoded.size, LARGE_NEIGHBOR_DELTA_METERS), rawStats = aggregateSourceStats(samples.sourceStats);
+  const telemetry = { tile: tile.id, dataBounds: bounds, rawDem: rawStats, sampledDem: normalizeStats(samples.sampledStats), htrnEncoded: encodedStats, htrnDecoded: decodedStats, gpuUploadArray: uploadStats, neighborDeltaOver1000m: { count: neighborDeltaCount, thresholdMeters: LARGE_NEIGHBOR_DELTA_METERS }, htrnRoundTrip: roundTrip };
   log(`[Terrain Telemetry] ${JSON.stringify(telemetry)}`);
 }
-
 function createStats() { return { min: Infinity, max: -Infinity, finiteCount: 0, invalidCount: 0 }; }
 function updateStats(stats, value, invalid) { if (!Number.isFinite(value)) { stats.invalidCount += 1; return; } stats.finiteCount += 1; stats.min=Math.min(stats.min,value); stats.max=Math.max(stats.max,value); if (invalid) stats.invalidCount += 1; }
 function measureArrayStats(values) { const stats=createStats(); for(const value of values) updateStats(stats,value,false); return normalizeStats(stats); }
@@ -137,12 +108,7 @@ function measureEncodedHeightRange(encoded) { const decoded=decodeTerrainTile(en
 function aggregateSourceStats(sourceStats) { const aggregate=createStats(); for(const source of sourceStats){if(!source)continue; aggregate.min=Math.min(aggregate.min,Number(source.min)); aggregate.max=Math.max(aggregate.max,Number(source.max)); aggregate.finiteCount+=Number(source.finiteCount)||0; aggregate.invalidCount+=Number(source.invalidCount)||0;} return normalizeStats(aggregate); }
 function measureRoundTrip(source, decoded) { let mismatchCount=0, maxAbsError=0; for(let i=0;i<source.length;i+=1){const a=source[i],b=decoded[i],error=Math.abs(a-b);if(error>0)mismatchCount+=1;if(error>maxAbsError)maxAbsError=error;} return { mismatchCount, maxAbsErrorMeters:maxAbsError }; }
 function countLargeNeighborDeltas(values,size,threshold) { let count=0; for(let y=0;y<size;y+=1)for(let x=0;x<size;x+=1){const current=values[y*size+x];if(x+1<size&&Math.abs(current-values[y*size+x+1])>threshold)count+=1;if(y+1<size&&Math.abs(current-values[(y+1)*size+x])>threshold)count+=1;}return count; }
-
-function loadPhysicalLandPolygons() {
-  if (!fs.existsSync(GEOMETRY_ASSET_DIR)) return [];
-  const modules = Object.fromEntries(fs.readdirSync(GEOMETRY_ASSET_DIR).filter((file) => /^geometry_country_.*\.json$/.test(file)).map((file) => [file, JSON.parse(fs.readFileSync(path.join(GEOMETRY_ASSET_DIR, file), "utf8"))]));
-  return collectWorldLandPolygons(modules);
-}
+function loadPhysicalLandPolygons() { if (!fs.existsSync(GEOMETRY_ASSET_DIR)) return []; const modules = Object.fromEntries(fs.readdirSync(GEOMETRY_ASSET_DIR).filter((file) => /^geometry_country_.*\.json$/.test(file)).map((file) => [file, JSON.parse(fs.readFileSync(path.join(GEOMETRY_ASSET_DIR, file), "utf8"))])); return collectWorldLandPolygons(modules); }
 function isPhysicalLand(lon, lat, landPolygons) { return landPolygons.some((polygon) => pointInPolygon(lon, lat, polygon)); }
 function pointInPolygon(x, y, polygon) { if (!Array.isArray(polygon) || polygon.length < 3) return false; let inside = false; for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) { const xi=Number(polygon[i]?.[0]), yi=Number(polygon[i]?.[1]), xj=Number(polygon[j]?.[0]), yj=Number(polygon[j]?.[1]); const intersects=((yi>y)!=(yj>y)) && x < ((xj-xi)*(y-yi))/(yj-yi)+xi; if (intersects) inside=!inside; } return inside; }
 export function coordinateInCoverage(lon, lat, coverage) { return Number(lon) >= coverage[0] && Number(lon) <= coverage[2] && Number(lat) >= coverage[1] && Number(lat) <= coverage[3]; }
