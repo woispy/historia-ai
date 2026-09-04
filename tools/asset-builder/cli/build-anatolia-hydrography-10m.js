@@ -38,6 +38,68 @@ function intersectsBbox(bounds) {
   return !(bounds.maxX < BBOX[0] || bounds.minX > BBOX[2] || bounds.maxY < BBOX[1] || bounds.minY > BBOX[3]);
 }
 
+/** Clip a polyline to BBOX and return independent inside pieces. */
+export function clipLineStringToBbox(coordinates, bbox = BBOX) {
+  if (!Array.isArray(coordinates) || coordinates.length < 2) return [];
+  const pieces = [];
+  let current = [];
+  for (let index = 1; index < coordinates.length; index += 1) {
+    const a = coordinates[index - 1];
+    const b = coordinates[index];
+    if (!Array.isArray(a) || !Array.isArray(b)) continue;
+    const clipped = clipSegmentToBbox(Number(a[0]), Number(a[1]), Number(b[0]), Number(b[1]), bbox);
+    if (!clipped) {
+      if (current.length >= 2) pieces.push(current);
+      current = [];
+      continue;
+    }
+    const start = [clipped[0], clipped[1]];
+    const end = [clipped[2], clipped[3]];
+    if (!current.length) current.push(start);
+    else if (!sameCoordinate(current[current.length - 1], start)) {
+      if (current.length >= 2) pieces.push(current);
+      current = [start];
+    }
+    if (!sameCoordinate(current[current.length - 1], end)) current.push(end);
+  }
+  if (current.length >= 2) pieces.push(current);
+  return pieces;
+}
+
+function clipSegmentToBbox(x0, y0, x1, y1, bbox) {
+  if (![x0, y0, x1, y1].every(Number.isFinite)) return null;
+  const [minX, minY, maxX, maxY] = bbox;
+  let t0 = 0;
+  let t1 = 1;
+  const dx = x1 - x0;
+  const dy = y1 - y0;
+  const tests = [
+    [-dx, x0 - minX],
+    [dx, maxX - x0],
+    [-dy, y0 - minY],
+    [dy, maxY - y0],
+  ];
+  for (const [p, q] of tests) {
+    if (Math.abs(p) <= 1e-12) {
+      if (q < 0) return null;
+      continue;
+    }
+    const r = q / p;
+    if (p < 0) {
+      if (r > t1) return null;
+      t0 = Math.max(t0, r);
+    } else {
+      if (r < t0) return null;
+      t1 = Math.min(t1, r);
+    }
+  }
+  return [x0 + t0 * dx, y0 + t0 * dy, x0 + t1 * dx, y0 + t1 * dy];
+}
+
+function sameCoordinate(a, b) {
+  return Math.abs(a[0] - b[0]) <= 1e-10 && Math.abs(a[1] - b[1]) <= 1e-10;
+}
+
 function featureName(properties, index) {
   return String(
     properties?.name
@@ -87,16 +149,21 @@ function addGeometry(geometry, properties, index, kind, output, sourceLayer) {
     for (const [segmentIndex, coordinates] of lines.entries()) {
       const bounds = boundsForCoordinates(coordinates);
       if (!intersectsBbox(bounds) || coordinates.length < 2) continue;
-      output.push({
-        id: `river-${sourceLayer}-${index}-${segmentIndex}`,
-        name,
-        nameEn,
-        rank,
-        coordinates,
-        bounds: [bounds.minX, bounds.minY, bounds.maxX, bounds.maxY],
-        sourceLayer,
-        geometrySource: "natural-earth-10m",
-      });
+      const clippedPieces = clipLineStringToBbox(coordinates);
+      for (const [pieceIndex, clippedCoordinates] of clippedPieces.entries()) {
+        if (clippedCoordinates.length < 2) continue;
+        const clippedBounds = boundsForCoordinates(clippedCoordinates);
+        output.push({
+          id: `river-${sourceLayer}-${index}-${segmentIndex}-${pieceIndex}`,
+          name,
+          nameEn,
+          rank,
+          coordinates: clippedCoordinates,
+          bounds: [clippedBounds.minX, clippedBounds.minY, clippedBounds.maxX, clippedBounds.maxY],
+          sourceLayer,
+          geometrySource: "natural-earth-10m",
+        });
+      }
     }
     return;
   }
