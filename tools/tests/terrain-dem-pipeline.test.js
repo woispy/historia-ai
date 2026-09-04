@@ -34,10 +34,10 @@ const mesh = buildTerrainGridMesh({ heights, validity: demValidity, size, skirtD
 assert.equal(mesh.vertexHeights.length, size * size + (size - 1) * 8);
 assert.equal(mesh.indices.length, (size - 1) * (size - 1) * 6 + (size - 1) * 4 * 6);
 assert.equal(mesh.vertexHeights[size * size], heights[0] - 50);
-const invalidCenter = Uint8Array.from([255,255,255,255,0,255,255,255,255]);
-const culledMesh = buildTerrainGridMesh({ heights, validity: invalidCenter, size, skirtDepth: 0 });
+const allInvalid = new Uint8Array(size * size);
+const culledMesh = buildTerrainGridMesh({ heights, validity: allInvalid, size, skirtDepth: 0 });
 assert.equal(culledMesh.indices.length, 0);
-assert.equal(culledMesh.vertexValidity[4], 0);
+assert.equal(culledMesh.vertexValidity.every((value) => value === 0), true);
 const invalidCorner = Uint8Array.from([0,255,255,255,255,255,255,255,255]);
 const cornerMesh = buildTerrainGridMesh({ heights, validity: invalidCorner, size, skirtDepth: 0 });
 assert.equal(cornerMesh.indices.length, 15);
