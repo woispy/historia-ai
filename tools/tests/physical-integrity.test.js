@@ -28,6 +28,22 @@ function orientation(a, b, c) {
   return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
 }
 
+function pointOnSegment(point, start, end) {
+  const epsilon = 1e-9;
+  if (Math.abs(orientation(start, end, point)) > epsilon) return false;
+  return point[0] >= Math.min(start[0], end[0]) - epsilon
+    && point[0] <= Math.max(start[0], end[0]) + epsilon
+    && point[1] >= Math.min(start[1], end[1]) - epsilon
+    && point[1] <= Math.max(start[1], end[1]) + epsilon;
+}
+
+function pointOnPolygonBoundary(point, polygon) {
+  for (let index = 0; index < polygon.length; index += 1) {
+    if (pointOnSegment(point, polygon[index], polygon[(index + 1) % polygon.length])) return true;
+  }
+  return false;
+}
+
 function pointInPolygon(point, polygon) {
   let inside = false;
   for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index += 1) {
@@ -39,6 +55,10 @@ function pointInPolygon(point, polygon) {
     if (crosses) inside = !inside;
   }
   return inside;
+}
+
+function pointStrictlyInPolygon(point, polygon) {
+  return !pointOnPolygonBoundary(point, polygon) && pointInPolygon(point, polygon);
 }
 
 function segmentIntersection(a, b, c, d) {
@@ -82,7 +102,8 @@ function polygonsOverlapPositiveArea(left, right) {
     }
   }
 
-  return pointInPolygon(left[0], right) || pointInPolygon(right[0], left);
+  return left.some((point) => pointStrictlyInPolygon(point, right))
+    || right.some((point) => pointStrictlyInPolygon(point, left));
 }
 
 function edgeKey(a, b) {
