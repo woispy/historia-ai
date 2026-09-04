@@ -66,7 +66,7 @@ assert.deepEqual(lod3Sample, { minX: 26, minY: 35, maxX: 45, maxY: 43 });
 assert.ok(lod3Sample.minX >= coverage[0] && lod3Sample.maxX <= coverage[2]);
 assert.ok(lod3Sample.minY >= coverage[1] && lod3Sample.maxY <= coverage[3]);
 assert.ok(lod3Sample.minX < lod3Sample.maxX && lod3Sample.minY < lod3Sample.maxY);
-const datelinePieces = collectWorldLandPolygons({ synthetic: { id: "geometry_country_dateline", name: "Dateline", polygons: [[[170, 10], [190, 10], [190, 20], [170, 20]]] });
+const datelinePieces = collectWorldLandPolygons({ synthetic: { id: "geometry_country_dateline", name: "Dateline", polygons: [[[170, 10], [190, 10], [190, 20], [170, 20]]] } });
 assert.equal(datelinePieces.length, 2);
 for (const polygon of datelinePieces) {
   assert.ok(polygon.every(([x]) => x >= -180 && x <= 180));
