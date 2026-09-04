@@ -1,3 +1,4 @@
+/* eslint-disable no-loss-of-precision -- fixtures preserve source GIS coordinates exactly. */
 import assert from "node:assert/strict";
 import { loadMapBin } from "../../src/map/runtime/MapBinLoader.js";
 import { encodeMapBin } from "../build/mapbin-encoder.js";
