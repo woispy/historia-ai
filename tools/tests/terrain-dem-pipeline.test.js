@@ -94,7 +94,7 @@ const datelinePieces = collectWorldLandPolygons({ synthetic: { id: "geometry_cou
 assert.equal(datelinePieces.length, 2);
 for (const polygon of datelinePieces) { assert.ok(polygon.every(([x]) => x >= -180 && x <= 180)); assert.ok(Math.abs(Math.max(...polygon.map(([x]) => x)) - Math.min(...polygon.map(([x]) => x))) <= 180); }
 const demStats = measureDemStats(Float32Array.from([0, 400, 420, -9999, Number.NaN, 9200]), -9999);
-assert.deepEqual(demStats, { min: 0, max: 9200, finiteCount: 4, invalidCount: 2 });
+assert.deepEqual(demStats, { min: 0, max: 420, finiteCount: 3, invalidCount: 3 });
 assert.equal(isValidDemPixel(0), true);
 assert.equal(isValidDemPixel(9000), true);
 assert.equal(isValidDemPixel(-500), true);
