@@ -97,33 +97,40 @@ export function parseTileList(text) {
   return result;
 }
 
-/** Sample a Copernicus raster using the GeoTIFF signed Y scale; north-up uses positive scale, south-up uses negative scale. */
+/** Sample a Copernicus raster using the GeoTIFF north-up/south-up signed Y convention. */
 export function sampleCopernicusRaster(entry, lon, lat) {
+  const trace = sampleCopernicusRasterTrace(entry, lon, lat);
+  return trace?.value ?? null;
+}
+
+/** Return the interpolation and GeoTIFF coordinate mapping used for a DEM sample without changing sampling behavior. */
+export function sampleCopernicusRasterTrace(entry, lon, lat) {
   if (!entry?.raster) return null;
   const { width, height, data, nodata, georeference } = entry.raster;
   const scaleX = Number(georeference?.scaleX);
   const scaleY = Number(georeference?.scaleY);
+  const originX = Number(georeference?.originX);
+  const originY = Number(georeference?.originY);
   if (!Number.isFinite(scaleX) || scaleX === 0 || !Number.isFinite(scaleY) || scaleY === 0) return null;
-  const px = (Number(lon) - Number(georeference.originX)) / scaleX;
-  const py = (Number(georeference.originY) - Number(lat)) / scaleY;
-  if (px < 0 || py < 0 || px > width - 1 || py > height - 1) return null;
+  const px = (Number(lon) - originX) / scaleX;
+  const py = (originY - Number(lat)) / scaleY;
+  if (px < 0 || py < 0 || px > width - 1 || py > height - 1) return { entryKey: entry.key, lon:Number(lon), lat:Number(lat), width, height, georeference, axisConvention: scaleY > 0 ? "north-up (modelY decreases with raster row)" : "south-up (modelY increases with raster row)", px, py, inRaster:false, value:null, corners:[] };
   const x0 = Math.floor(px), y0 = Math.floor(py), x1 = Math.min(width - 1, x0 + 1), y1 = Math.min(height - 1, y0 + 1);
   const fx = px - x0, fy = py - y0;
   const samples = [
-    [data[y0 * width + x0], (1 - fx) * (1 - fy)],
-    [data[y0 * width + x1], fx * (1 - fy)],
-    [data[y1 * width + x0], (1 - fx) * fy],
-    [data[y1 * width + x1], fx * fy],
+    { px:x0, py:y0, value:data[y0 * width + x0], weight:(1 - fx) * (1 - fy) },
+    { px:x1, py:y0, value:data[y0 * width + x1], weight:fx * (1 - fy) },
+    { px:x0, py:y1, value:data[y1 * width + x0], weight:(1 - fx) * fy },
+    { px:x1, py:y1, value:data[y1 * width + x1], weight:fx * fy },
   ];
   let weightedSum = 0;
   let totalWeight = 0;
-  for (const [value, weight] of samples) {
-    if (!isValidDemPixel(value, nodata) || weight <= 0) continue;
-    weightedSum += value * weight;
-    totalWeight += weight;
+  for (const sample of samples) {
+    if (!isValidDemPixel(sample.value, nodata) || sample.weight <= 0) continue;
+    weightedSum += sample.value * sample.weight;
+    totalWeight += sample.weight;
   }
-  if (totalWeight <= 0) return null;
-  return weightedSum / totalWeight;
+  return { entryKey:entry.key, lon:Number(lon), lat:Number(lat), width, height, georeference, axisConvention: scaleY > 0 ? "north-up (modelY decreases with raster row)" : "south-up (modelY increases with raster row)", px, py, inRaster:true, x0, y0, x1, y1, fx, fy, corners:samples.map(({px:pxValue,py:pyValue,value,weight})=>({px:pxValue,py:pyValue,value:Number.isFinite(value)?value:null,valid:isValidDemPixel(value,nodata),weight})), value:totalWeight>0?weightedSum/totalWeight:null };
 }
 
 async function downloadText(url) {
