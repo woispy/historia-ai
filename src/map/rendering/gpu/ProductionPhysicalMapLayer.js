@@ -5,6 +5,7 @@ import { TerrainGpuRenderer } from "../terrain/TerrainGpuRenderer.js";
 import { loadTerrainManifest, loadTerrainTileAsset } from "../terrain/TerrainAssetLoader.js";
 import { planTerrainStreaming } from "../terrain/TerrainStreaming.js";
 import { buildTerrainMvp } from "../terrain/TerrainCameraMath.js";
+import { installMapRenderDiagnostics, isMapRenderPassEnabled } from "./MapRenderDiagnostics.js";
 
 const VERTEX=`#version 300 es
 precision highp float;layout(location=0) in vec2 aPosition;uniform mat4 uMvp;uniform float uElevationOffset;void main(){gl_Position=uMvp*vec4(aPosition,uElevationOffset,1.0);}`;
@@ -16,15 +17,21 @@ const PHYSICAL_ELEVATION_OFFSETS=Object.freeze({land:0,lake:0.02,riverUnder:0.02
 /** Physical geography compositor. Land is the mask authority; terrain is a DEM-driven relief pass above it. */
 export class ProductionPhysicalMapLayer{
  constructor(){this.state=null;this.terrain=null;this.terrainManifest=null;this.terrainById=new Map();this.terrainPending=new Map();this.disposed=false;}
- initialize(gl,{terrainManifestUrl="/assets/terrain/manifest.json"}={}){if(this.disposed)throw new Error("Cannot initialize disposed physical layer");const program=link(gl,VERTEX,FRAGMENT);this.terrain=new TerrainGpuRenderer(gl);this.state={gl,program,fill:createGeometry(gl,buildPolygonGeometry(WORLD_LAND_POLYGONS)),coast:createGeometry(gl,buildLineGeometry(WORLD_LAND_POLYGONS)),lakes:createGeometry(gl,buildPolygonGeometry((ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes??[]).map(f=>f.coordinates))),riversUnder:createGeometry(gl,buildLineGeometry(ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers??[],true)),rivers:createGeometry(gl,buildLineGeometry(ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers??[])),uniforms:{color:gl.getUniformLocation(program,"uColor"),mvp:gl.getUniformLocation(program,"uMvp"),elevationOffset:gl.getUniformLocation(program,"uElevationOffset")}};this.terrainManifestPromise=loadTerrainManifest(terrainManifestUrl).then((manifest)=>{if(!this.disposed)this.terrainManifest=manifest;}).catch((error)=>{if(!this.disposed&&import.meta.env?.DEV)console.warn("[Terrain] DEM manifest unavailable",error);});return true;}
+ initialize(gl,{terrainManifestUrl="/assets/terrain/manifest.json"}={}){if(this.disposed)throw new Error("Cannot initialize disposed physical layer");installMapRenderDiagnostics();const program=link(gl,VERTEX,FRAGMENT);this.terrain=new TerrainGpuRenderer(gl);this.state={gl,program,fill:createGeometry(gl,buildPolygonGeometry(WORLD_LAND_POLYGONS)),coast:createGeometry(gl,buildLineGeometry(WORLD_LAND_POLYGONS)),lakes:createGeometry(gl,buildPolygonGeometry((ANATOLIA_PHYSICAL_ATLAS_RUNTIME.lakes??[]).map(f=>f.coordinates))),riversUnder:createGeometry(gl,buildLineGeometry(ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers??[],true)),rivers:createGeometry(gl,buildLineGeometry(ANATOLIA_PHYSICAL_ATLAS_RUNTIME.rivers??[])),uniforms:{color:gl.getUniformLocation(program,"uColor"),mvp:gl.getUniformLocation(program,"uMvp"),elevationOffset:gl.getUniformLocation(program,"uElevationOffset")}};this.terrainManifestPromise=loadTerrainManifest(terrainManifestUrl).then((manifest)=>{if(!this.disposed)this.terrainManifest=manifest;}).catch((error)=>{if(!this.disposed&&import.meta.env?.DEV)console.warn("[Terrain] DEM manifest unavailable",error);});return true;}
  render(camera,width,height){if(this.disposed||!this.state)return;const{gl}=this.state;const mvp=buildTerrainMvp(camera,width,height);gl.viewport(0,0,width,height);gl.clear(gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.BLEND);
    gl.depthMask(false);
-   this.bindPhysicalProgram(mvp);drawGeometry(this.state,this.state.fill,WORLD_LAND,PHYSICAL_ELEVATION_OFFSETS.land);
-   this.updateTerrainStreaming(camera);
-   gl.depthMask(true);
-   this.terrain?.draw(camera,width,height);
+   if(isMapRenderPassEnabled("renderPhysicalLand")){
+     this.bindPhysicalProgram(mvp);drawGeometry(this.state,this.state.fill,WORLD_LAND,PHYSICAL_ELEVATION_OFFSETS.land);
+   }
+   if(isMapRenderPassEnabled("renderTerrain")){
+     this.updateTerrainStreaming(camera);
+     gl.depthMask(true);
+     this.terrain?.draw(camera,width,height);
+   }
    this.bindPhysicalProgram(mvp);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthFunc(gl.LEQUAL);gl.depthMask(false);
-   drawGeometry(this.state,this.state.lakes,LAKE,PHYSICAL_ELEVATION_OFFSETS.lake);drawGeometry(this.state,this.state.riversUnder,RIVER_UNDER,PHYSICAL_ELEVATION_OFFSETS.riverUnder);drawGeometry(this.state,this.state.rivers,RIVER,PHYSICAL_ELEVATION_OFFSETS.river);drawGeometry(this.state,this.state.coast,COAST,PHYSICAL_ELEVATION_OFFSETS.coast);
+   if(isMapRenderPassEnabled("renderWaterAndCoast")){
+     drawGeometry(this.state,this.state.lakes,LAKE,PHYSICAL_ELEVATION_OFFSETS.lake);drawGeometry(this.state,this.state.riversUnder,RIVER_UNDER,PHYSICAL_ELEVATION_OFFSETS.riverUnder);drawGeometry(this.state,this.state.rivers,RIVER,PHYSICAL_ELEVATION_OFFSETS.river);drawGeometry(this.state,this.state.coast,COAST,PHYSICAL_ELEVATION_OFFSETS.coast);
+   }
    gl.depthMask(true);gl.disable(gl.BLEND);gl.bindVertexArray(null);
  }
  bindPhysicalProgram(mvp){const{gl,program,uniforms}=this.state;gl.useProgram(program);gl.uniformMatrix4fv(uniforms.mvp,false,mvp);}
