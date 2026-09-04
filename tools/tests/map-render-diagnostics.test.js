@@ -8,11 +8,15 @@ const rendererPath = path.join(root, "src/map/rendering/gpu/ProductionBinaryMapR
 const physicalPath = path.join(root, "src/map/rendering/gpu/ProductionPhysicalMapLayer.js");
 const diagnosticsPath = path.join(root, "src/map/rendering/gpu/MapRenderDiagnostics.js");
 const terrainPath = path.join(root, "src/map/rendering/terrain/TerrainGpuRenderer.js");
+const demDecoderPath = path.join(root, "tools/asset-builder/dem/GeoTiffDecoder.js");
+const terrainPipelinePath = path.join(root, "tools/asset-builder/pipelines/TerrainPipeline.js");
 
 const renderer = fs.readFileSync(rendererPath, "utf8");
 const physical = fs.readFileSync(physicalPath, "utf8");
 const diagnostics = fs.readFileSync(diagnosticsPath, "utf8");
 const terrain = fs.readFileSync(terrainPath, "utf8");
+const demDecoder = fs.readFileSync(demDecoderPath, "utf8");
+const terrainPipeline = fs.readFileSync(terrainPipelinePath, "utf8");
 
 assert.match(renderer, /MapRenderDiagnostics\.js/);
 assert.match(renderer, /renderPoliticalProvinces/);
@@ -32,10 +36,22 @@ assert.match(diagnostics, /togglePass/);
 assert.match(diagnostics, /PASS_ALIASES/);
 assert.match(diagnostics, /terrainOnly/);
 assert.match(diagnostics, /toggleTerrain/);
-assert.match(terrain, /skirtDepth:0/);
+assert.match(terrain, /skirtDepth: 0/);
 assert.match(terrain, /HEIGHT_MIN_METERS = -500/);
 assert.match(terrain, /HEIGHT_MAX_METERS = 9000/);
 assert.match(terrain, /HEIGHT_SCALE_MAX = 0\.001/);
+assert.match(terrain, /terrain upload telemetry/);
+assert.match(terrain, /neighborDeltaOver1000m/);
+assert.match(terrain, /measureHeightStats/);
+assert.match(demDecoder, /export function measureDemStats/);
+assert.match(demDecoder, /predictor,georeference/);
+assert.match(terrainPipeline, /TELEMETRY_TILE_ID/);
+assert.match(terrainPipeline, /Copernicus Raw DEM/);
+assert.match(terrainPipeline, /Sampled DEM/);
+assert.match(terrainPipeline, /HTRN Encoded/);
+assert.match(terrainPipeline, /HTRN Decoded/);
+assert.match(terrainPipeline, /GPU Upload Array/);
+assert.match(terrainPipeline, /Neighbor delta >/);
 
 // The production WebGL2 context must own a depth buffer because the physical
 // compositor explicitly enables DEPTH_TEST and writes/reads the depth buffer.
@@ -43,4 +59,4 @@ const binaryRendererPath = path.join(root, "src/map/rendering/gpu/BinaryMapRende
 const binaryRenderer = fs.readFileSync(binaryRendererPath, "utf8");
 assert.match(binaryRenderer, /getContext\("webgl2",\{[^}]*depth:true/s);
 
-console.log("Map render diagnostics + depth context + terrain seam contracts: PASS");
+console.log("Map render diagnostics + depth context + terrain telemetry contracts: PASS");
