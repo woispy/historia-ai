@@ -67,6 +67,8 @@ jobs:
         run: npm install --no-save --package-lock=false globals@17.8.0
       - name: Lint
         run: npm run lint
+      - name: Validate map render diagnostics and depth context contracts
+        run: npm run test:map-render-diagnostics
       - name: Validate DEM codec/source contracts
         run: npm run test:terrain-dem
       - name: Validate Phase A-H legacy cleanliness
