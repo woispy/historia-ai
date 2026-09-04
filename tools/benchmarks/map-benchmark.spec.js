@@ -126,7 +126,7 @@ async function runTimestampProbe(page) {
     } catch (error) {
       result.error = String(error?.message || error);
     } finally {
-      try { readback?.unmap?.(); } catch {}
+      try { readback?.unmap?.(); } catch (error) { void error; }
       querySet?.destroy?.();
       resolve?.destroy?.();
       readback?.destroy?.();
@@ -264,16 +264,6 @@ async function runTelemetryIsolationMatrix(page) {
       device?.destroy?.();
     }
     return result;
-  });
-}
-
-async function readSoftwareGpuError(page) {
-  return page.evaluate(() => {
-    const canvas = document.createElement("canvas");
-    const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
-    if (!gl) return null;
-    const debug = gl.getExtension("WEBGL_debug_renderer_info");
-    return debug ? String(gl.getParameter(debug.UNMASKED_RENDERER_WEBGL) || "") : String(gl.getParameter(gl.RENDERER) || "");
   });
 }
 
