@@ -6,6 +6,7 @@ const WORLD_BOUNDS = Object.freeze({ minX: -180, minY: -90, maxX: 180, maxY: 90 
 const HEIGHT_MIN_METERS = -500;
 const HEIGHT_MAX_METERS = 9000;
 const HEIGHT_SCALE_MAX = 0.001;
+const LARGE_NEIGHBOR_DELTA_METERS = 1000;
 
 const VERTEX = `#version 300 es
 precision highp float;
@@ -101,6 +102,9 @@ export class TerrainGpuRenderer {
     const bounds = normalizeTerrainBounds(tileBounds);
     const samplingBounds = normalizeTerrainBounds(dataBounds ?? tileBounds);
     const heightRange = measureHeightRange(mesh.vertexHeights);
+    const uploadStats = measureHeightStats(asset.heights);
+    const neighborDeltaCount = countLargeNeighborDeltas(asset.heights, asset.size, LARGE_NEIGHBOR_DELTA_METERS);
+    console.debug("[TerrainGpuRenderer] terrain upload telemetry", { tileId, version: asset.version, grid: asset.size, minHeight: uploadStats.min, maxHeight: uploadStats.max, finiteCount: uploadStats.finiteCount, invalidCount: uploadStats.invalidCount, neighborDeltaOver1000m: neighborDeltaCount, dataBounds: samplingBounds });
     const { gl } = this;
     const vao = gl.createVertexArray();
     const position = gl.createBuffer();
@@ -134,6 +138,8 @@ export class TerrainGpuRenderer {
 }
 function normalizeTerrainBounds(bounds){if(!bounds||!["minX","minY","maxX","maxY"].every((key)=>Number.isFinite(bounds[key])))throw new Error("Terrain tile bounds must be finite.");const minX=Math.max(WORLD_BOUNDS.minX,Math.min(WORLD_BOUNDS.maxX,bounds.minX)),maxX=Math.max(WORLD_BOUNDS.minX,Math.min(WORLD_BOUNDS.maxX,bounds.maxX)),minY=Math.max(WORLD_BOUNDS.minY,Math.min(WORLD_BOUNDS.maxY,bounds.minY)),maxY=Math.max(WORLD_BOUNDS.minY,Math.min(WORLD_BOUNDS.maxY,bounds.maxY));if(!(minX<maxX&&minY<maxY))throw new Error("Terrain tile bounds are outside the canonical world extent.");return Object.freeze({minX,minY,maxX,maxY});}
 function measureHeightRange(values){let min=Infinity,max=-Infinity;for(const value of values){if(!Number.isFinite(value)||value<HEIGHT_MIN_METERS||value>HEIGHT_MAX_METERS)throw new Error("Terrain mesh contains an unsafe height value.");min=Math.min(min,value);max=Math.max(max,value);}return{min,max};}
+function measureHeightStats(values){let min=Infinity,max=-Infinity,finiteCount=0,invalidCount=0;for(const value of values){if(!Number.isFinite(value)){invalidCount+=1;continue;}finiteCount+=1;min=Math.min(min,value);max=Math.max(max,value);if(value<HEIGHT_MIN_METERS||value>HEIGHT_MAX_METERS)invalidCount+=1;}return{min:Number.isFinite(min)?min:0,max:Number.isFinite(max)?max:0,finiteCount,invalidCount};}
+function countLargeNeighborDeltas(values,size,threshold){let count=0;for(let y=0;y<size;y+=1)for(let x=0;x<size;x+=1){const current=values[y*size+x];if(x+1<size&&Math.abs(current-values[y*size+x+1])>threshold)count+=1;if(y+1<size&&Math.abs(current-values[(y+1)*size+x])>threshold)count+=1;}return count;}
 function createTexture(gl,data,width,height,internalFormat,format,type){const texture=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,texture);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);gl.texImage2D(gl.TEXTURE_2D,0,internalFormat,width,height,0,format,type,data);return texture;}
 function createSolidTexture(gl,rgba){return createTexture(gl,new Uint8Array(rgba),1,1,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE);}
 function createNormalTexture(gl,asset){const rgba=new Uint8Array(asset.size*asset.size*4);for(let i=0;i<asset.size*asset.size;i+=1){rgba[i*4]=asset.normals[i*3]+128;rgba[i*4+1]=asset.normals[i*3+1]+128;rgba[i*4+2]=asset.normals[i*3+2]+128;rgba[i*4+3]=255;}return createTexture(gl,rgba,asset.size,asset.size,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE);}
