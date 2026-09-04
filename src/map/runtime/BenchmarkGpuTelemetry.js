@@ -93,7 +93,15 @@ export function createWebGpuBenchmarkTelemetry(device) {
           else if (deltaTicks <= 0n) { telemetry.timestampSamplesDropped += 1; telemetry.timestampSamplesZero += 1; }
           else telemetry.gpuSamples.push(deltaNs / 1e6);
         } catch (error) { telemetry.timestampSamplesDropped += 1; telemetry.timestampError = String(error?.message || error); }
-        finally { if (mapped) try { slot.stagingBuffer.unmap(); } catch {} slot.state = SLOT_STATES.FREE; slot.submitted = false; slot.beginWritten = false; slot.endWritten = false; }
+        finally {
+          if (mapped) {
+            try { slot.stagingBuffer.unmap(); } catch (error) { void error; }
+          }
+          slot.state = SLOT_STATES.FREE;
+          slot.submitted = false;
+          slot.beginWritten = false;
+          slot.endWritten = false;
+        }
       }
     } finally {
       collectScheduled = false;
@@ -109,7 +117,7 @@ export function createWebGpuBenchmarkTelemetry(device) {
   function recordPickingDraw() { telemetry.picking.drawCalls += 1; }
   function recordPickingSubmit() { telemetry.picking.queueSubmits += 1; }
   function snapshot() { return { computePasses: telemetry.computePasses, dispatchCalls: telemetry.dispatchCalls, renderPasses: telemetry.renderPasses, drawCalls: telemetry.drawCalls, queueSubmits: telemetry.queueSubmits, picking: { ...telemetry.picking }, gpuTiming: telemetry.gpuTiming, gpuTimingScope: telemetry.gpuTimingScope, gpuTimeMs: telemetry.gpuSamples.length ? summarize(telemetry.gpuSamples) : null, timestampSamplesDropped: telemetry.timestampSamplesDropped, timestampSamplesZero: telemetry.timestampSamplesZero, timestampError: telemetry.timestampError, timestampRawSamples: [...telemetry.timestampRawSamples], timestampSampleIntervalFrames: TIMESTAMP_SAMPLE_INTERVAL_FRAMES, timestampRingSlotCount: RING_SLOT_COUNT, adapter: telemetry.adapter }; }
-  function dispose() { disposed = true; for (const slot of slots) { try { slot.stagingBuffer?.unmap?.(); } catch {} slot.stagingBuffer?.destroy?.(); slot.resolveBuffer?.destroy?.(); slot.querySet?.destroy?.(); slot.stagingBuffer = null; slot.resolveBuffer = null; slot.querySet = null; slot.state = SLOT_STATES.FREE; } collectScheduled = false; frameCounter = 0; nextRingSlot = 0; }
+  function dispose() { disposed = true; for (const slot of slots) { try { slot.stagingBuffer?.unmap?.(); } catch (error) { void error; } slot.stagingBuffer?.destroy?.(); slot.resolveBuffer?.destroy?.(); slot.querySet?.destroy?.(); slot.stagingBuffer = null; slot.resolveBuffer = null; slot.querySet = null; slot.state = SLOT_STATES.FREE; } collectScheduled = false; frameCounter = 0; nextRingSlot = 0; }
   return { telemetry, beginFrame, writeTimestamp, finishFrame, collect, snapshot, recordComputePass, recordDispatch, recordRenderPass, recordDraw, recordSubmit, recordPickingRenderPass, recordPickingDraw, recordPickingSubmit, dispose };
 }
 function readAdapterInfo(device) { const info = device?.adapterInfo; if (!info) return null; return { vendor: info.vendor || null, architecture: info.architecture || null, device: info.device || null, description: info.description || null, isFallbackAdapter: typeof info.isFallbackAdapter === "boolean" ? info.isFallbackAdapter : null }; }
