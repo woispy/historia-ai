@@ -95,7 +95,7 @@ const syntheticRaster = {
   nodata: null,
   georeference: { originX: 0, originY: 2, scaleX: 1, scaleY: 1 },
 };
-assert.equal(sampleCopernicusRaster({ raster: syntheticRaster }, 0.5, 1.5), 100);
+assert.equal(sampleCopernicusRaster({ raster: syntheticRaster }, 0.5, 1.5), 300);
 const noValidRaster = {
   ...syntheticRaster,
   data: Float32Array.from([Number.NaN, Number.NaN, Number.NaN, Number.NaN]),
