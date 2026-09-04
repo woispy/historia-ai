@@ -3,6 +3,7 @@ import { encodeTerrainTile, decodeTerrainTile, TERRAIN_HEIGHT_MIN_METERS, TERRAI
 import { buildTerrainGridMesh, TERRAIN_MAX_SKIRT_DEPTH_METERS } from "../../src/map/rendering/terrain/TerrainGeometry.js";
 import { buildTerrainMvp } from "../../src/map/rendering/terrain/TerrainCameraMath.js";
 import { parseTileList, copernicusSourceTileKeysForBounds, copernicusTileKey } from "../asset-builder/dem/CopernicusDemSource.js";
+import { decodeCopernicusGeoTiff, measureDemStats } from "../asset-builder/dem/GeoTiffDecoder.js";
 import { coordinateInCoverage, terrainSampleCoordinate, terrainTileBoundsForCoverage, terrainTileSampleBoundsForCoverage } from "../asset-builder/pipelines/TerrainPipeline.js";
 import { makeTerrainTileKey, terrainTileBounds } from "../../src/map/rendering/terrain/TerrainTile.js";
 import { TERRAIN_LODS } from "../../src/map/rendering/terrain/TerrainLod.js";
@@ -72,5 +73,7 @@ for (const polygon of datelinePieces) {
   assert.ok(polygon.every(([x]) => x >= -180 && x <= 180));
   assert.ok(Math.abs(Math.max(...polygon.map(([x]) => x)) - Math.min(...polygon.map(([x]) => x))) <= 180);
 }
+const demStats = measureDemStats(Float32Array.from([0, 400, 420, -9999, Number.NaN, 9200]), -9999);
+assert.deepEqual(demStats, { min: -9999, max: 9200, finiteCount: 5, invalidCount: 3 });
 assert.equal(TERRAIN_LODS.length, 5);
 console.log("terrain-dem-pipeline.test.js: PASS");
