@@ -10,7 +10,6 @@ export function createBenchmarkPassProfiler(device, { sampleIntervalFrames = DEF
   if (!supported) return { supported: false, beginOperation() {}, endOperation() {}, notifySubmit() {}, async collect() {}, snapshot() { return { supported: false, sampleIntervalFrames, samples: 0, dropped: 0, error: null, passes: {} }; }, dispose() {} };
 
   let frameCounter = 0;
-  let activeOperation = null;
   let currentSample = null;
   let collectScheduled = false;
   let disposed = false;
@@ -22,12 +21,10 @@ export function createBenchmarkPassProfiler(device, { sampleIntervalFrames = DEF
   function beginOperation(operation) {
     if (disposed) return;
     frameCounter += 1;
-    activeOperation = operation;
     currentSample = frameCounter % sampleIntervalFrames === 0 ? createSample(operation) : null;
   }
 
   function endOperation() {
-    activeOperation = null;
     currentSample = null;
   }
 
@@ -158,7 +155,6 @@ export function createBenchmarkPassProfiler(device, { sampleIntervalFrames = DEF
   function dispose() {
     if (disposed) return;
     disposed = true;
-    activeOperation = null;
     currentSample = null;
     prototype.beginComputePass = originalBeginComputePass;
     prototype.beginRenderPass = originalBeginRenderPass;
