@@ -41,7 +41,13 @@ assert.equal(culledMesh.vertexValidity.every((value) => value === 0), true);
 const invalidCorner = Uint8Array.from([0,255,255,255,255,255,255,255,255]);
 const cornerMesh = buildTerrainGridMesh({ heights, validity: invalidCorner, size, skirtDepth: 0 });
 assert.equal(cornerMesh.indices.length, 21);
-assert.ok(!Array.from(cornerMesh.indices).some((index) => index === 0));
+const cornerIndices = Array.from(cornerMesh.indices);
+assert.ok(cornerIndices.length % 3 === 0);
+for (let index = 0; index < cornerIndices.length; index += 3) {
+  assert.notEqual(cornerIndices[index], 0);
+  assert.notEqual(cornerIndices[index + 1], 0);
+  assert.notEqual(cornerIndices[index + 2], 0);
+}
 const unsafeHeights = Float32Array.from([Number.NaN, Number.POSITIVE_INFINITY, -501, 9001, 123]);
 const unsafeMesh = buildTerrainGridMesh({ heights: unsafeHeights, size: 2, skirtDepth: TERRAIN_MAX_SKIRT_DEPTH_METERS * 4 });
 assert.deepEqual(Array.from(unsafeMesh.vertexHeights.slice(0, 4)), [0, 0, 0, 123]);
