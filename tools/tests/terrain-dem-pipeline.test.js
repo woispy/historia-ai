@@ -3,7 +3,7 @@ import { encodeTerrainTile, decodeTerrainTile, TERRAIN_BINARY_VERSION, packTerra
 import { buildTerrainGridMesh, TERRAIN_MAX_SKIRT_DEPTH_METERS } from "../../src/map/rendering/terrain/TerrainGeometry.js";
 import { buildTerrainMvp } from "../../src/map/rendering/terrain/TerrainCameraMath.js";
 import { parseTileList, copernicusSourceTileKeysForBounds, copernicusTileKey, sampleCopernicusRaster } from "../asset-builder/dem/CopernicusDemSource.js";
-import { decodeCopernicusGeoTiff, isValidDemPixel, measureDemStats, sanitizeDemRaster } from "../asset-builder/dem/GeoTiffDecoder.js";
+import { isValidDemPixel, measureDemStats, sanitizeDemRaster } from "../asset-builder/dem/GeoTiffDecoder.js";
 import { coordinateInCoverage, terrainSampleCoordinate, terrainTileBoundsForCoverage, terrainTileSampleBoundsForCoverage } from "../asset-builder/pipelines/TerrainPipeline.js";
 import { makeTerrainTileKey, terrainTileBounds } from "../../src/map/rendering/terrain/TerrainTile.js";
 import { TERRAIN_LODS } from "../../src/map/rendering/terrain/TerrainLod.js";
