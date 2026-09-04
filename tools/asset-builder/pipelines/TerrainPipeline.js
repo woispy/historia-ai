@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { CopernicusDemSource, copernicusSourceTileKeysForBounds, sampleCopernicusRaster } from "../dem/CopernicusDemSource.js";
+import { CopernicusDemSource, copernicusSourceTileKeysForBounds, sampleCopernicusRaster, sampleCopernicusRasterTrace } from "../dem/CopernicusDemSource.js";
 import { decodeTerrainTile, encodeTerrainTile, sanitizeTerrainHeight } from "../../../src/map/rendering/terrain/TerrainAssetCodec.js";
 import { makeTerrainTileKey, terrainTileBounds } from "../../../src/map/rendering/terrain/TerrainTile.js";
 import { TERRAIN_LODS } from "../../../src/map/rendering/terrain/TerrainLod.js";
@@ -92,13 +92,32 @@ async function sampleTile(source, bounds, size, coverage, landPolygons) {
     const elevation = Math.max(0, Math.min(1, heights[i] / 5000)), slope = Math.min(1, Math.hypot(nx, ny) / nz), desert = Math.max(0, (0.42-elevation)*1.5)*(1-slope*0.35), forest = Math.max(0, 0.75-Math.abs(elevation-0.35)*2.2)*(1-slope), steppe = Math.max(0, 1-Math.abs(elevation-0.28)*2.4), rock = Math.min(1, slope*1.7+Math.max(0,elevation-0.72)*2), snow = Math.max(0,(elevation-0.84)*5), total = Math.max(1e-6,desert+forest+steppe+rock+snow), base=i*4;
     splatRgba[base]=Math.round(desert/total*255); splatRgba[base+1]=Math.round(forest/total*255); splatRgba[base+2]=Math.round(steppe/total*255); splatRgba[base+3]=Math.round(rock/total*255); splatSnow[i]=Math.round(snow/total*255);
   }
-  return { size, heights, normals, splatRgba, splatSnow, landMask, demValidity, sampledStats, sourceStats: [...cache.values()].filter(Boolean).map(({ key, raster }) => ({ key, ...raster.stats })) };
+  return { size, heights, normals, splatRgba, splatSnow, landMask, demValidity, sampledStats, sourceStats: [...cache.values()].filter(Boolean).map(({ key, raster }) => ({ key, ...raster.stats })), spatialDiagnostic: buildSpatialDiagnostic(cache, bounds, size, demValidity) };
 }
+
+function buildSpatialDiagnostic(cache, bounds, size, demValidity) {
+  const rowDistribution = Array.from({ length:size }, (_, y) => countValidRow(demValidity, size, y));
+  const columnDistribution = Array.from({ length:size }, (_, x) => countValidColumn(demValidity, size, x));
+  const traceGrid = [[0,0],[Math.floor((size-1)/2),Math.floor((size-1)/2)],[size-1,size-1],[Math.floor((size-1)/2),0],[0,Math.floor((size-1)/2)],[size-1,Math.floor((size-1)/2)],[Math.floor((size-1)/2),size-1],[Math.floor((size-1)*0.2),Math.floor((size-1)*0.5)],[Math.floor((size-1)*0.7),Math.floor((size-1)*0.5)]];
+  const traces = [];
+  for (const [x,y] of traceGrid) {
+    const { lon, lat } = terrainSampleCoordinate(bounds, x, y, size);
+    const keyLat = Math.floor(lat === bounds.maxY ? lat - 1e-9 : lat), keyLon = Math.floor(lon === bounds.maxX ? lon - 1e-9 : lon), key = `${keyLat}/${keyLon}`;
+    const trace = sampleCopernicusRasterTrace(cache.get(key), lon, lat);
+    traces.push({ grid:[x,y], world:[lon,lat], sourceTile:key, trace });
+  }
+  return { validCount:demValidity.reduce((sum,value)=>sum+(value?1:0),0), invalidCount:demValidity.reduce((sum,value)=>sum+(value?0:1),0), rowDistribution, columnDistribution, traces };
+}
+function countValidRow(mask,size,y){let count=0;for(let x=0;x<size;x+=1)if(mask[y*size+x])count+=1;return count;}
+function countValidColumn(mask,size,x){let count=0;for(let y=0;y<size;y+=1)if(mask[y*size+x])count+=1;return count;}
 
 function logTerrainTelemetry(tile, bounds, samples, encoded) {
   const decoded = decodeTerrainTile(encoded), uploadStats = measureArrayStats(samples.heights), decodedStats = measureArrayStats(decoded.heights), encodedStats = measureEncodedHeightRange(encoded), roundTrip = measureRoundTrip(samples.heights, decoded.heights), neighborDeltaCount = countLargeNeighborDeltas(decoded.heights, decoded.size, LARGE_NEIGHBOR_DELTA_METERS), rawStats = aggregateSourceStats(samples.sourceStats);
-  const telemetry = { tile: tile.id, dataBounds: bounds, rawDem: rawStats, sampledDem: normalizeStats(samples.sampledStats), htrnEncoded: encodedStats, htrnDecoded: decodedStats, gpuUploadArray: uploadStats, neighborDeltaOver1000m: { count: neighborDeltaCount, thresholdMeters: LARGE_NEIGHBOR_DELTA_METERS }, htrnRoundTrip: roundTrip };
+  const telemetry = { tile: tile.id, dataBounds: bounds, rawDem: rawStats, sampledDem: normalizeStats(samples.sampledStats), validity: { validCount:samples.spatialDiagnostic.validCount, invalidCount:samples.spatialDiagnostic.invalidCount, validRatio:samples.spatialDiagnostic.validCount/(samples.spatialDiagnostic.validCount+samples.spatialDiagnostic.invalidCount) }, htrnEncoded: encodedStats, htrnDecoded: decodedStats, gpuUploadArray: uploadStats, neighborDeltaOver1000m: { count: neighborDeltaCount, thresholdMeters: LARGE_NEIGHBOR_DELTA_METERS }, htrnRoundTrip: roundTrip };
   log(`[Terrain Telemetry] ${JSON.stringify(telemetry)}`);
+  log(`[Terrain Spatial] validRowDistribution=${JSON.stringify(samples.spatialDiagnostic.rowDistribution)}`);
+  log(`[Terrain Spatial] validColumnDistribution=${JSON.stringify(samples.spatialDiagnostic.columnDistribution)}`);
+  for (const trace of samples.spatialDiagnostic.traces) log(`[Terrain Spatial Trace] ${JSON.stringify(trace)}`);
 }
 function createStats() { return { min: Infinity, max: -Infinity, finiteCount: 0, invalidCount: 0 }; }
 function updateStats(stats, value, invalid) { if (!Number.isFinite(value)) { stats.invalidCount += 1; return; } stats.finiteCount += 1; stats.min=Math.min(stats.min,value); stats.max=Math.max(stats.max,value); if (invalid) stats.invalidCount += 1; }
