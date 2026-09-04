@@ -4,7 +4,6 @@ const HEADER_BYTES = 64;
 const PROVINCE_FIELDS = 8;
 const TILE_STRIDE = 6;
 const LOD_STRIDE = 4;
-const LOD_LEVEL_COUNT = 5;
 const POINT_EPSILON = 1e-9;
 const AREA_EPSILON = 1e-12;
 
@@ -33,8 +32,7 @@ export function encodeMapBin(entries = []) {
     const b = bounds(points);
     minX[i]=b.minX; minY[i]=b.minY; maxX[i]=b.maxX; maxY[i]=b.maxY;
     centerX[i]=(b.minX+b.maxX)*0.5; centerY[i]=(b.minY+b.maxY)*0.5;
-    const tileCount = tiles.length / TILE_STRIDE - provinceTilesStart;
-    for (let level=0; level<LOD_LEVEL_COUNT; level+=1) lod.push(provinceTilesStart,tileCount,level,level);
+    lod.push(provinceTilesStart, tiles.length / TILE_STRIDE - provinceTilesStart, 0, 0);
   }
 
   const palette = new Uint8Array(Math.max(4,(n+1)*4));
