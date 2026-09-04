@@ -1,3 +1,4 @@
+/* eslint-disable no-loss-of-precision -- fixtures preserve source GIS coordinates exactly. */
 import assert from "node:assert/strict";
 
 import { normalizeHistoricalFeature } from "../HistoricalGeometryImporter.js";
@@ -58,8 +59,8 @@ const degenerateRetracingFeature = {
       [-158.85516357421875, 70.88426208496094],
       [-156.47401428222656, 71.35443878173828],
       [-156.3471221923828, 71.33132934570312],
-      [-156.043212890625, 71.22303009033203],
-      [-156.043212890625, 71.22303009033203],
+      [-156.043212890625, 71.22303009082031],
+      [-156.043212890625, 71.22303009082031],
       [-156.3471221923828, 71.33132934570312],
     ]],
   },
