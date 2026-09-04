@@ -2,7 +2,7 @@ import { sanitizeTerrainHeights, TERRAIN_HEIGHT_MIN_METERS } from "./TerrainAsse
 
 export const TERRAIN_MAX_SKIRT_DEPTH_METERS = 100;
 
-/** Build a terrain tile mesh with duplicated boundary vertices lowered by a bounded skirt depth in meters. */
+/** Build a terrain tile mesh with optional duplicated boundary vertices lowered by a bounded skirt depth. */
 export function buildTerrainGridMesh({ heights, size, skirtDepth = 50 }) {
   if (!Number.isInteger(size) || size < 2) throw new Error("Terrain grid size must be an integer >= 2.");
   if (!(heights instanceof Float32Array) || heights.length !== size * size) throw new Error("Terrain heights must be a Float32Array matching the grid size.");
@@ -21,21 +21,24 @@ export function buildTerrainGridMesh({ heights, size, skirtDepth = 50 }) {
     const nx = left - right, ny = down - up, nz = 2, length = Math.hypot(nx, ny, nz) || 1, p = i * 3;
     normals[p] = nx / length; normals[p + 1] = ny / length; normals[p + 2] = nz / length;
   }
-  const indices = new Uint32Array((size - 1) * (size - 1) * 6 + (size - 1) * 4 * 6);
+  const skirtSegments = safeSkirtDepth > 0 ? (size - 1) * 4 : 0;
+  const indices = new Uint32Array((size - 1) * (size - 1) * 6 + skirtSegments * 6);
   let cursor = 0;
   for (let y = 0; y < size - 1; y += 1) for (let x = 0; x < size - 1; x += 1) {
     const a = y * size + x, b = a + 1, c = a + size, d = c + 1;
     indices[cursor++] = a; indices[cursor++] = c; indices[cursor++] = b; indices[cursor++] = b; indices[cursor++] = c; indices[cursor++] = d;
   }
-  let nextVertex = baseVertexCount;
-  const edges = [];
-  for (let x = 0; x < size - 1; x += 1) edges.push([x, x + 1]);
-  for (let y = 0; y < size - 1; y += 1) edges.push([y * size + (size - 1), (y + 1) * size + (size - 1)]);
-  for (let x = size - 1; x > 0; x -= 1) edges.push([(size - 1) * size + x, (size - 1) * size + x - 1]);
-  for (let y = size - 1; y > 0; y -= 1) edges.push([y * size, (y - 1) * size]);
-  for (const [a, b] of edges) {
-    const skirtA = copySkirtVertex(a, nextVertex++), skirtB = copySkirtVertex(b, nextVertex++);
-    indices[cursor++] = a; indices[cursor++] = skirtA; indices[cursor++] = b; indices[cursor++] = b; indices[cursor++] = skirtA; indices[cursor++] = skirtB;
+  if (safeSkirtDepth > 0) {
+    let nextVertex = baseVertexCount;
+    const edges = [];
+    for (let x = 0; x < size - 1; x += 1) edges.push([x, x + 1]);
+    for (let y = 0; y < size - 1; y += 1) edges.push([y * size + (size - 1), (y + 1) * size + (size - 1)]);
+    for (let x = size - 1; x > 0; x -= 1) edges.push([(size - 1) * size + x, (size - 1) * size + x - 1]);
+    for (let y = size - 1; y > 0; y -= 1) edges.push([y * size, (y - 1) * size]);
+    for (const [a, b] of edges) {
+      const skirtA = copySkirtVertex(a, nextVertex++), skirtB = copySkirtVertex(b, nextVertex++);
+      indices[cursor++] = a; indices[cursor++] = skirtA; indices[cursor++] = b; indices[cursor++] = b; indices[cursor++] = skirtA; indices[cursor++] = skirtB;
+    }
   }
   return Object.freeze({ positions, vertexHeights, uvs, normals, indices, skirtDepth: safeSkirtDepth });
 
