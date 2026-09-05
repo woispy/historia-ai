@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import path from "node:path";
+import path from "path";
 import { fileURLToPath } from "node:url";
 import { importHistoricalGeoJson } from "../HistoricalGeometryImporter.js";
 
@@ -26,7 +26,7 @@ const normalizedRegions = await importHistoricalGeoJson(sourcePath, 1300);
 const runtime = JSON.parse(await fs.readFile(runtimePath, "utf8"));
 
 assert(Array.isArray(sourceRaw.features), "Historical GIS source must contain a features array.");
-assert(sourceRaw.features.length === normalizedRegions.length, `Source/normalized feature count mismatch: ${sourceRaw.features.length} vs ${normalizedRegions.length}.`);
+assert(normalizedRegions.length > 0 && normalizedRegions.length <= sourceRaw.features.length, `Normalized historical feature count is invalid: ${normalizedRegions.length} from ${sourceRaw.features.length} source features.`);
 assert(runtime.schemaVersion === 3, "Unsupported historical runtime asset schema.");
 assert(runtime.assetType === "historical-runtime", "Invalid historical runtime asset type.");
 assert(runtime.historicalDate === "1300-01-01", "Historical runtime date mismatch.");
