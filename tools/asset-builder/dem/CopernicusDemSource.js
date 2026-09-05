@@ -76,19 +76,30 @@ export class CopernicusDemSource {
 }
 
 /**
- * Map a WGS84 sample coordinate to the Copernicus 1-degree source cell.
- * Copernicus GLO-30 Public removes shared south/east rows/columns, so an
- * exact integer boundary belongs to the tile immediately south/west.
+ * Map a WGS84 longitude to the Copernicus 1-degree source cell.
+ * Easting is the center of the left-most pixel, so an exact integer
+ * longitude belongs to the tile on the east side of that boundary.
  */
-export function copernicusTileCoordinate(value) {
+export function copernicusTileLongitudeCoordinate(value) {
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) throw new Error(`Invalid Copernicus coordinate: ${value}`);
-  return Math.floor(numeric - COPERNICUS_TILE_BOUNDARY_EPSILON);
+  return Math.floor(numeric + COPERNICUS_TILE_BOUNDARY_EPSILON);
+}
+
+/**
+ * Map a WGS84 latitude to the Copernicus 1-degree source cell.
+ * The COG removes the original south-most row, so an exact integer
+ * latitude belongs to the tile immediately south of that boundary.
+ */
+export function copernicusTileLatitudeCoordinate(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) throw new Error(`Invalid Copernicus coordinate: ${value}`);
+  return Math.ceil(numeric - COPERNICUS_TILE_BOUNDARY_EPSILON) - 1;
 }
 
 export function copernicusTileKey(lat, lon) {
-  const north = copernicusTileCoordinate(lat);
-  const east = copernicusTileCoordinate(lon);
+  const north = copernicusTileLatitudeCoordinate(lat);
+  const east = copernicusTileLongitudeCoordinate(lon);
   const ns = north >= 0 ? `N${pad2(north)}` : `S${pad2(Math.abs(north))}`;
   const ew = east >= 0 ? `E${pad3(east)}` : `W${pad3(Math.abs(east))}`;
   return `Copernicus_DSM_COG_10_${ns}_00_${ew}_00_DEM`;
