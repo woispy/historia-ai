@@ -32,7 +32,7 @@ struct Camera { viewProj: mat4x4<f32> };
 @group(0) @binding(1) var<storage, read> indexProvinceIds: array<u32>;
 struct VsOut { @builtin(position) position: vec4<f32>, @location(0) @interpolate(flat) provinceId: u32 };
 @vertex fn vs(@location(0) p:vec2<f32>, @builtin(vertex_index) vertexIndex:u32)->VsOut{ var out:VsOut; out.position=camera.viewProj*vec4<f32>(p,0.0,1.0); out.provinceId=indexProvinceIds[vertexIndex]; return out; }
-@fragment fn fs(in:VsOut)->@location(0) vec4<f32>{let x=f32(in.provinceId);return vec4<f32>(0.18+fract(x*0.103),0.22+fract(x*0.067),0.28+fract(x*0.043),1.0);}
+@fragment fn fs(in:VsOut, @builtin(primitive_index) primitiveIndex:u32)->@location(0) vec4<f32>{let x=f32(in.provinceId)+f32(primitiveIndex)*0.0;return vec4<f32>(0.18+fract(x*0.103),0.22+fract(x*0.067),0.28+fract(x*0.043),1.0);}
 `;
 
 const PICK_WGSL = `
@@ -44,6 +44,8 @@ struct VsOut { @builtin(position) position: vec4<f32>, @location(0) @interpolate
 @vertex fn vs(@location(0) p:vec2<f32>, @builtin(vertex_index) vertexIndex:u32)->VsOut{ var out:VsOut; var c=camera.viewProj*vec4<f32>(p,0.0,1.0); c.xy=c.xy-camera.pickNdc*c.w; out.position=c; out.provinceId=indexProvinceIds[vertexIndex]; return out; }
 @fragment fn fs(in:VsOut)->@location(0) vec4<f32>{return encode(in.provinceId);}
 `;
+
+export { CULL_WGSL, FINALIZE_WGSL, RENDER_WGSL, PICK_WGSL };
 
 export class WebGPUMapRenderer extends MapRendererContract {
   constructor(canvas){super();this.canvas=canvas;this.device=null;this.context=null;this.format=null;this.adapter=null;this.cullPipeline=null;this.finalizePipeline=null;this.renderPipeline=null;this.pickPipeline=null;this.cullBindGroup=null;this.finalizeBindGroup=null;this.renderBindGroup=null;this.pickBindGroup=null;this.buffers=null;this.assetSource=null;this.destroyed=false;this.running=false;this.frameRequest=0;this.camera={viewProj:new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]),zoom:1};this.selected=0;this.hovered=0;this.pickTexture=null;this.pickReadback=null;this.pickPending=false;this.lastPickId=null;this.telemetry=null;}
