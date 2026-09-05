@@ -151,3 +151,5 @@ jobs:
         run: |
           git status --short
           git ls-files --others --exclude-standard
+
+# Validation trigger: rerun the full production gate chain on the current integration HEAD.
