@@ -67,7 +67,7 @@ for (const province of runtime.provinces) {
     sourceDerivedCount += 1;
     assert(historical.sourceFeatureId, `Province ${id} is missing sourceFeatureId.`);
     assert(Number.isInteger(historical.sourceFeatureIndex), `Province ${id} is missing sourceFeatureIndex.`);
-    assert(historical.sourceFeatureIndex >= 0 && historical.sourceFeatureIndex < normalizedRegions.length, `Province ${id} has an invalid sourceFeatureIndex.`);
+    assert(historical.sourceFeatureIndex >= 0 && historical.sourceFeatureIndex < sourceRaw.features.length, `Province ${id} has an invalid sourceFeatureIndex.`);
     assert(!sourceFeatureIndices.has(historical.sourceFeatureIndex), `Duplicate sourceFeatureIndex: ${historical.sourceFeatureIndex}.`);
     sourceFeatureIndices.add(historical.sourceFeatureIndex);
   }
