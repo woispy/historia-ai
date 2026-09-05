@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import path from "path";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { importHistoricalGeoJson } from "../HistoricalGeometryImporter.js";
 
