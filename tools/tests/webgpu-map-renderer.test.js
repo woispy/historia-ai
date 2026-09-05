@@ -17,7 +17,7 @@ assert.match(FINALIZE_WGSL, /atomicLoad\(&counter\)/);
 assert.match(FINALIZE_WGSL, /indirect\[0\]/);
 assert.match(RENDER_WGSL, /@builtin\(primitive_index\)/);
 assert.match(PICK_WGSL, /pickNdc/);
-assert.match(PICK_WGSL, /encode\(indexProvinceIds/);
+assert.match(PICK_WGSL, /encode\(in\.provinceId\)/);
 assert.match(PICK_WGSL, /@fragment/);
 
 assert.equal(WebGPUMapRenderer.isSupported(), false);
