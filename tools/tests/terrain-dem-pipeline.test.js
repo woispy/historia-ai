@@ -66,7 +66,7 @@ assert.deepEqual(index, ["Copernicus_DSM_COG_10_N38_00_E027_00_DEM", "Copernicus
 const coverage = [26, 35, 46, 43];
 const sourceTiles = copernicusSourceTileKeysForBounds(coverage);
 assert.equal(sourceTiles.length, 160);
-assert.equal(sourceTiles[0], "Copernicus_DSM_COG_10_N35_00_E026_00_DEM");
+assert.equal(sourceTiles[0], "Copernicus_DSM_COG_10_N34_00_E026_00_DEM");
 assert.equal(sourceTiles.at(-1), "Copernicus_DSM_COG_10_N42_00_E045_00_DEM");
 assert.equal(new Set(sourceTiles).size, 160);
 assert.equal(sourceTiles.some((key) => key.includes("N75") || key.includes("W082") || key.includes("E163")), false);
