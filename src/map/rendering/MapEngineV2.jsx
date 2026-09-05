@@ -10,8 +10,11 @@ export default function MapEngineV2({ selectedProvinceId = null, onProvinceClick
   const runtimeRef = useRef(null);
   const selectedProvinceIdRef = useRef(selectedProvinceId);
   const onProvinceClickRef = useRef(onProvinceClick);
-  selectedProvinceIdRef.current = selectedProvinceId;
-  onProvinceClickRef.current = onProvinceClick;
+
+  useEffect(() => {
+    selectedProvinceIdRef.current = selectedProvinceId;
+    onProvinceClickRef.current = onProvinceClick;
+  }, [selectedProvinceId, onProvinceClick]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
