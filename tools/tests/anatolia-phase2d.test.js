@@ -74,18 +74,16 @@ for (const geometry of result.geometries) {
   }
 }
 
-// Regression coverage for the lake-city reconciliation path. The historical
-// city centroids remain in province metadata; the geometry builder resolves
-// lake-terrain provinces to explicit physical-land anchors used only for
-// cartographic construction.
-for (const [provinceId, anchor] of [
-  ["bithynia-nicaea", [29.72, 40.58]],
-  ["pisidia-egirdir", [30.85, 37.98]],
-  ["pisidia-beysehir", [31.72, 37.78]],
-]) {
+// Regression coverage for lake-city reconciliation: generated province
+// geometry, rather than the historical city coordinate itself, is the
+// physical-land invariant. Historical city anchors may legitimately lie on
+// water and are kept separate from cartographic construction anchors.
+for (const provinceId of ["bithynia-nicaea", "pisidia-egirdir", "pisidia-beysehir"]) {
+  const geometry = result.geometries.find((candidate) => candidate.identity.provinceId === provinceId);
+  assert.ok(geometry, `Missing ${provinceId} physical reconciliation geometry.`);
   assert.ok(
-    isPhysicalLandPoint(anchor),
-    `${provinceId} physical reconciliation anchor must remain on physical land: ${anchor.join(",")}`,
+    geometry.polygons.every((polygon) => isPhysicalLandPoint(polygonCentroid(polygon))),
+    `${provinceId} generated geometry must remain on physical land`,
   );
 }
 
