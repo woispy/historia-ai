@@ -5,6 +5,8 @@ import { decodeCopernicusGeoTiff, isValidDemPixel } from "./GeoTiffDecoder.js";
 export const COPERNICUS_GLO30_BUCKET = "https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com";
 export const COPERNICUS_GLO30_TILE_LIST_URL = `${COPERNICUS_GLO30_BUCKET}/tileList.txt`;
 export const COPERNICUS_TILE_BOUNDARY_EPSILON = 1e-7;
+const COPERNICUS_DOWNLOAD_ATTEMPTS = 3;
+const COPERNICUS_DOWNLOAD_RETRY_DELAY_MS = 1000;
 
 export class CopernicusDemSource {
   constructor({ cacheDir = path.resolve(".cache/historia/copernicus-glo30"), tileListUrl = COPERNICUS_GLO30_TILE_LIST_URL } = {}) {
@@ -56,9 +58,7 @@ export class CopernicusDemSource {
     } else {
       const url = `${COPERNICUS_GLO30_BUCKET}/${key}/${fileName}`;
       console.log(`[Terrain Pipeline] Downloading DEM tile: ${key}`);
-      const response = await fetch(url);
-      if (!response.ok) return null;
-      bytes = new Uint8Array(await response.arrayBuffer());
+      bytes = await downloadBinary(url, key);
       if (!bytes.length) return null;
       fs.writeFileSync(localPath, bytes);
       console.log(`[Terrain Pipeline] Downloaded DEM tile: ${key} (${bytes.byteLength} bytes)`);
@@ -173,6 +173,32 @@ async function downloadText(url) {
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Copernicus request failed: ${response.status} ${response.statusText}`);
   return response.text();
+}
+
+async function downloadBinary(url, key) {
+  let lastError;
+  for (let attempt = 1; attempt <= COPERNICUS_DOWNLOAD_ATTEMPTS; attempt += 1) {
+    try {
+      const response = await fetch(url, { redirect: "follow", headers: { "user-agent": "Historia-AI/terrain-builder" } });
+      if (!response.ok) {
+        const error = new Error(`Copernicus request failed for ${key}: ${response.status} ${response.statusText}`);
+        if (response.status >= 400 && response.status < 500 && response.status !== 429) throw error;
+        lastError = error;
+      } else {
+        const bytes = new Uint8Array(await response.arrayBuffer());
+        if (!bytes.length) throw new Error(`Copernicus request returned an empty DEM tile for ${key}.`);
+        return bytes;
+      }
+    } catch (error) {
+      if (error.message.startsWith("Copernicus request failed for ") && /: 4\d\d /.test(error.message) && !error.message.includes(": 429 ")) throw error;
+      lastError = error;
+    }
+    if (attempt < COPERNICUS_DOWNLOAD_ATTEMPTS) {
+      console.warn(`[Terrain Pipeline] DEM download retry ${attempt + 1}/${COPERNICUS_DOWNLOAD_ATTEMPTS}: ${key}`);
+      await new Promise((resolve) => setTimeout(resolve, COPERNICUS_DOWNLOAD_RETRY_DELAY_MS * attempt));
+    }
+  }
+  throw lastError ?? new Error(`Copernicus download failed for ${key}.`);
 }
 
 function pad2(value) { return String(value).padStart(2, "0"); }
