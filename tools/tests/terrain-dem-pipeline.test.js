@@ -6,7 +6,6 @@ import { parseTileList, copernicusSourceTileKeysForBounds, copernicusTileKey, co
 import { isValidDemPixel, measureDemStats, sanitizeDemRaster } from "../asset-builder/dem/GeoTiffDecoder.js";
 import { coordinateInCoverage, terrainSampleCoordinate, terrainTileBoundsForCoverage, terrainTileSampleBoundsForCoverage } from "../asset-builder/pipelines/TerrainPipeline.js";
 import { makeTerrainTileKey, terrainTileBounds } from "../../src/map/rendering/terrain/TerrainTile.js";
-import { TERRAIN_LODS } from "../../src/map/rendering/terrain/TerrainLod.js";
 import { collectWorldLandPolygons } from "../../src/map/physical/WorldLandMask.js";
 
 const size = 3;
@@ -120,4 +119,3 @@ const syntheticRaster = { width: 2, height: 2, data: Float32Array.from([100, Num
 const southUpRaster = { ...syntheticRaster, georeference: { originX: 0, originY: 0, scaleX: 1, scaleY: -1 } };
 assert.equal(sampleCopernicusRaster({ raster: syntheticRaster }, 0.5, 1.5), 300);
 assert.equal(sampleCopernicusRaster({ raster: southUpRaster }, 0.5, 0.5), 300);
-const noValidRaster = { ...syntheticRaster, data: Float32Array.from([Number.NaN, Number.NaN, Number.NaN, Number.NaN]) };
