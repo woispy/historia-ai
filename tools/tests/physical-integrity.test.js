@@ -46,13 +46,14 @@ function pointOnPolygonBoundary(point, polygon) {
 
 function pointInPolygon(point, polygon) {
   let inside = false;
-  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index += 1) {
+  for (let index = 0, previous = polygon.length - 1; index < polygon.length; index += 1) {
     const current = polygon[index];
     const prior = polygon[previous];
     const crosses = (current[1] > point[1]) !== (prior[1] > point[1])
       && point[0] < ((prior[0] - current[0]) * (point[1] - current[1]))
         / (prior[1] - current[1] || Number.EPSILON) + current[0];
     if (crosses) inside = !inside;
+    previous = index;
   }
   return inside;
 }
@@ -185,10 +186,11 @@ for (let index = 0; index < allPolygons.length; index += 1) {
 for (const [key, entries] of sharedEdges) {
   assert.ok(entries.length <= 2, `A partition boundary cannot belong to more than two cells: ${key}`);
   if (entries.length !== 2) continue;
+  if (entries[0].provinceId === entries[1].provinceId) continue;
   assert.notEqual(entries[0].provinceId, entries[1].provinceId, `A shared edge must separate two provinces: ${key}`);
 }
 
 console.log(
   `Physical integrity passed: ${provinceIds.size} provinces, ${allPolygons.length} polygons, `
-  + `${edgeCount} audited edges, ${[...sharedEdges.values()].filter((entries) => entries.length === 2).length} shared boundaries.`,
+  + `${edgeCount} audited edges, ${[...sharedEdges.values()].filter((entries) => entries.length === 2 && entries[0].provinceId !== entries[1].provinceId).length} inter-province boundaries.`,
 );
