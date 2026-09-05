@@ -52,7 +52,7 @@ assert.match(terrainPipeline, /sampledDem/);
 assert.match(terrainPipeline, /htrnEncoded/);
 assert.match(terrainPipeline, /htrnDecoded/);
 assert.match(terrainPipeline, /gpuUploadArray/);
-assert.match(terrainPipeline, /Neighbor delta >/);
+assert.match(terrainPipeline, /neighborDeltaOver1000m/);
 
 // The production WebGL2 context must own a depth buffer because the physical
 // compositor explicitly enables DEPTH_TEST and writes/reads the depth buffer.
