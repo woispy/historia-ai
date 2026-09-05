@@ -27,6 +27,7 @@ fn finalize(){ indirect[0]=atomicLoad(&counter); indirect[1]=1u; indirect[2]=0u;
 `;
 
 const RENDER_WGSL = `
+enable primitive_index;
 struct Camera { viewProj: mat4x4<f32> };
 @group(0) @binding(0) var<uniform> camera: Camera;
 @group(0) @binding(1) var<storage, read> indexProvinceIds: array<u32>;
