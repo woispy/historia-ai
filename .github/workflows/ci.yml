@@ -62,7 +62,7 @@ jobs:
           node-version: 22
           cache: npm
       - name: Install dependencies
-        run: npm ci --include=dev --no-audit --no-fund
+        run: npm install --include=dev --no-audit --no-fund --package-lock=false
       - name: Ensure ESLint runtime dependencies
         run: npm install --no-save --package-lock=false globals@17.8.0
       - name: Lint
