@@ -49,9 +49,9 @@ assert.match(terrainPipeline, /TELEMETRY_TILE_ID/);
 assert.match(terrainPipeline, /Copernicus GLO-30/);
 assert.match(terrainPipeline, /rawDem/);
 assert.match(terrainPipeline, /sampledDem/);
-assert.match(terrainPipeline, /HTRN Encoded/);
-assert.match(terrainPipeline, /HTRN Decoded/);
-assert.match(terrainPipeline, /GPU Upload Array/);
+assert.match(terrainPipeline, /htrnEncoded/);
+assert.match(terrainPipeline, /htrnDecoded/);
+assert.match(terrainPipeline, /gpuUploadArray/);
 assert.match(terrainPipeline, /Neighbor delta >/);
 
 // The production WebGL2 context must own a depth buffer because the physical
