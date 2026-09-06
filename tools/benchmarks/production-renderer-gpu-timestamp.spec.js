@@ -37,7 +37,9 @@ test("Historia AI exact production renderer GPU timestamp diagnostic", async ({ 
       renderer.resize(64, 64);
       renderer.setCamera({ viewProj: new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]), zoom: 2 });
 
-      for (let i = 0; i < 8; i += 1) {
+      const sampleIntervalFrames = renderer.getTelemetrySnapshot()?.timestampSampleIntervalFrames ?? 256;
+      const frameCount = sampleIntervalFrames + 8;
+      for (let i = 0; i < frameCount; i += 1) {
         renderer.device.pushErrorScope("validation");
         renderer.render();
         await renderer.device.queue.onSubmittedWorkDone();
