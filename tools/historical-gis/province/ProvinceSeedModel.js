@@ -41,6 +41,13 @@ function normalizeLongitude(value) {
   return ((lon + 180) % 360 + 360) % 360 - 180;
 }
 
+function canonicalizeCoordinate(value, precision = 7) {
+  const number = finite(value, "coordinate");
+  const factor = 10 ** precision;
+  const rounded = Math.round((number + Number.EPSILON) * factor) / factor;
+  return Object.is(rounded, -0) ? 0 : rounded;
+}
+
 function validateConfidence(confidence) {
   const result = {
     existence: unitInterval(confidence?.existence ?? 0, "confidence.existence"),
@@ -68,9 +75,9 @@ export function validateProvinceSeed(seed) {
   const level = seed.identity?.type ?? "province";
   if (!SEED_LEVELS.includes(level)) throw new Error(`Unsupported seed level: ${level}`);
 
-  const lat = finite(seed.position?.lat, "seed.position.lat");
+  const lat = canonicalizeCoordinate(seed.position?.lat);
   if (lat < -90 || lat > 90) throw new Error("seed.position.lat must be in [-90, 90]");
-  const lon = normalizeLongitude(seed.position?.lon);
+  const lon = canonicalizeCoordinate(normalizeLongitude(seed.position?.lon));
   const historical = seed.historical ?? {};
   const confidence = validateConfidence(historical.confidence ?? historical);
 
