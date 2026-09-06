@@ -26,12 +26,6 @@ function canonicalizeNumber(value, name, precision) {
   return Object.is(rounded, -0) ? 0 : rounded;
 }
 
-function unitInterval(value, name) {
-  const number = finite(value, name);
-  if (number < 0 || number > 1) throw new Error(`${name} must be in [0, 1]`);
-  return number;
-}
-
 function canonicalizeUnitInterval(value, name) {
   const number = canonicalizeNumber(value, name, 6);
   if (number < 0 || number > 1) throw new Error(`${name} must be in [0, 1]`);
