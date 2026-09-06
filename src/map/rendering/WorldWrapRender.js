@@ -3,6 +3,7 @@ import {
   WORLD_MIN_X,
   WORLD_WIDTH,
   getWorldCopyOffset,
+  normalizeLongitude,
 } from "../camera/WorldWrap.js";
 
 /**
@@ -27,10 +28,4 @@ export function getVisibleWorldCopyOffsets(cameraX, zoom = 1) {
   return offsets.length ? offsets : [0];
 }
 
-export function worldToCanonicalLongitude(worldX) {
-  const numeric = Number(worldX);
-  if (!Number.isFinite(numeric)) return WORLD_MIN_X;
-  let longitude = (numeric - WORLD_MIN_X) % WORLD_WIDTH;
-  if (longitude < 0) longitude += WORLD_WIDTH;
-  return longitude + WORLD_MIN_X;
-}
+export { normalizeLongitude as worldToCanonicalLongitude };
