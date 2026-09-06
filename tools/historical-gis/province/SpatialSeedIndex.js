@@ -34,6 +34,11 @@ function longitudeDelta(fromLon, toLon) {
   return Object.is(delta, -0) ? 0 : delta;
 }
 
+function seamAwareTieDelta(queryLon, seedLon) {
+  if (queryLon === WORLD_MIN_LON || queryLon === WORLD_MAX_LON) return seedLon - queryLon;
+  return longitudeDelta(queryLon, seedLon);
+}
+
 function distanceSquared(aLon, aLat, bLon, bLat) {
   const dxRaw = Math.abs(aLon - bLon);
   const dx = Math.min(dxRaw, WORLD_WIDTH - dxRaw);
@@ -139,7 +144,8 @@ export class SpatialHashSeedIndex {
   }
 
   queryRadius(lon, lat, radius) {
-    const qLon = canonicalLongitude(lon);
+    const rawLon = finite(lon, "longitude");
+    const qLon = canonicalLongitude(rawLon);
     const qLat = latitude(lat);
     const r = Math.max(0, finite(radius, "radius"));
     const ids = new Set();
@@ -152,7 +158,7 @@ export class SpatialHashSeedIndex {
       .map((seed) => ({
         seed,
         distanceSquared: distanceSquared(qLon, qLat, seed.position.lon, seed.position.lat),
-        longitudeDelta: longitudeDelta(qLon, seed.position.lon),
+        longitudeDelta: seamAwareTieDelta(rawLon, seed.position.lon),
       }))
       .filter((entry) => entry.distanceSquared <= r * r + EPSILON)
       .sort((a, b) => a.distanceSquared - b.distanceSquared || a.longitudeDelta - b.longitudeDelta || a.seed.id.localeCompare(b.seed.id))
@@ -183,8 +189,8 @@ export class SpatialHashSeedIndex {
       .map((id) => this.seeds.get(id)?.seed)
       .filter(Boolean)
       .filter((seed) => {
-        const lon = seed.position.lon;
-        const inLon = intervals.some(([a, b]) => lon >= a - EPSILON && lon <= b + EPSILON);
+        const seedLon = seed.position.lon;
+        const inLon = intervals.some(([a, b]) => seedLon >= a - EPSILON && seedLon <= b + EPSILON);
         return inLon && seed.position.lat >= normalized.minLat - EPSILON && seed.position.lat <= normalized.maxLat + EPSILON;
       })
       .sort((a, b) => a.id.localeCompare(b.id));
