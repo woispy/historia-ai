@@ -120,6 +120,8 @@ jobs:
         run: npm run test:province-topology
       - name: Run authoritative province generation contracts
         run: npm run test:province-generation-contracts
+      - name: Run spatial seed index contracts
+        run: npm run test:spatial-seed-index
       - name: Run Phase 2B Anatolia reconstruction tests
         run: npm run test:anatolia-phase2b
       - name: Run Phase 2C Anatolia refinement tests
