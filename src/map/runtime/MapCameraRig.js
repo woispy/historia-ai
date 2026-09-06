@@ -5,6 +5,8 @@
  * remain in the renderer domain so pointer motion never forces a UI render.
  */
 
+import { normalizeLongitude } from "../camera/WorldWrap.js";
+
 const WORLD = Object.freeze({ minX: -180, maxX: 180, minY: -90, maxY: 90 });
 
 export class MapCameraRig {
@@ -28,7 +30,7 @@ export class MapCameraRig {
   }
 
   setState(next = {}) {
-    this.state.x = Number.isFinite(Number(next.x)) ? Number(next.x) : this.state.x;
+    this.state.x = Number.isFinite(Number(next.x)) ? normalizeLongitude(next.x) : this.state.x;
     this.state.y = Number.isFinite(Number(next.y)) ? Number(next.y) : this.state.y;
     this.state.zoom = clamp(Number(next.zoom) || this.state.zoom, this.minZoom, this.maxZoom);
     if (Number.isFinite(Number(next.pitch))) this.state.pitch = clamp(Number(next.pitch), this.pitchMin, this.pitchMax);
@@ -46,7 +48,7 @@ export class MapCameraRig {
     const scaleY = 180 / (Math.max(1, viewportHeight) * zoom);
     this.velocity.x = -dx * scaleX;
     this.velocity.y = dy * scaleY;
-    this.state.x = clamp(this.state.x + this.velocity.x, WORLD.minX + 1, WORLD.maxX - 1);
+    this.state.x = normalizeLongitude(this.state.x + this.velocity.x);
     this.state.y = clamp(this.state.y + this.velocity.y, WORLD.minY + 1, WORLD.maxY - 1);
   }
 
@@ -63,7 +65,7 @@ export class MapCameraRig {
     const dt = Math.min(0.05, Math.max(0, Number(dtSeconds) || 0));
     const damping = Math.exp(-8 * dt);
     if (Math.abs(this.velocity.x) > 0.00001 || Math.abs(this.velocity.y) > 0.00001) {
-      this.state.x = clamp(this.state.x + this.velocity.x * dt * 60, WORLD.minX + 1, WORLD.maxX - 1);
+      this.state.x = normalizeLongitude(this.state.x + this.velocity.x * dt * 60);
       this.state.y = clamp(this.state.y + this.velocity.y * dt * 60, WORLD.minY + 1, WORLD.maxY - 1);
     }
     this.velocity.x *= damping;
