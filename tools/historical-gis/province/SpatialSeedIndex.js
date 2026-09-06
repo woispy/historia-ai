@@ -29,6 +29,11 @@ function latitude(lat) {
   return value;
 }
 
+function longitudeDelta(fromLon, toLon) {
+  const delta = ((toLon - fromLon + 180) % WORLD_WIDTH + WORLD_WIDTH) % WORLD_WIDTH - 180;
+  return Object.is(delta, -0) ? 0 : delta;
+}
+
 function distanceSquared(aLon, aLat, bLon, bLat) {
   const dxRaw = Math.abs(aLon - bLon);
   const dx = Math.min(dxRaw, WORLD_WIDTH - dxRaw);
@@ -144,9 +149,13 @@ export class SpatialHashSeedIndex {
     return [...ids]
       .map((id) => this.seeds.get(id)?.seed)
       .filter(Boolean)
-      .map((seed) => ({ seed, distanceSquared: distanceSquared(qLon, qLat, seed.position.lon, seed.position.lat) }))
+      .map((seed) => ({
+        seed,
+        distanceSquared: distanceSquared(qLon, qLat, seed.position.lon, seed.position.lat),
+        longitudeDelta: longitudeDelta(qLon, seed.position.lon),
+      }))
       .filter((entry) => entry.distanceSquared <= r * r + EPSILON)
-      .sort((a, b) => a.distanceSquared - b.distanceSquared || a.seed.id.localeCompare(b.seed.id))
+      .sort((a, b) => a.distanceSquared - b.distanceSquared || a.longitudeDelta - b.longitudeDelta || a.seed.id.localeCompare(b.seed.id))
       .map((entry) => entry.seed);
   }
 
