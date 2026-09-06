@@ -1,10 +1,10 @@
 /**
  * Historia AI — Least Cost Path Solver
  *
- * Deterministic grid-aware A*. Falls back to Dijkstra when minimumCost is 0.
+ * Deterministic grid-aware A*. With minimumCost=0 it is Dijkstra-equivalent.
  * The heuristic is admissible when minimumCost is a proven lower bound for
- * the per-distance traversal resistance. Hard constraints are delegated to
- * the graph's blocked-node predicate and are never converted into fake costs.
+ * traversal resistance per unit distance. Hard constraints stay blocked;
+ * they are never disguised as a very large soft cost.
  */
 
 function finite(value, name) {
@@ -21,7 +21,6 @@ function nonNegative(value, name) {
 
 class MinHeap {
   constructor() { this.items = []; }
-
   push(item) {
     const a = this.items;
     a.push(item);
@@ -33,10 +32,9 @@ class MinHeap {
       i = p;
     }
   }
-
   pop() {
     const a = this.items;
-    if (a.length === 0) return null;
+    if (!a.length) return null;
     const root = a[0];
     const last = a.pop();
     if (a.length) {
@@ -55,7 +53,6 @@ class MinHeap {
     }
     return root;
   }
-
   get size() { return this.items.length; }
 }
 
@@ -91,7 +88,7 @@ export class LeastCostPathSolver {
     const source = resolveNode(this.graph, start, "start");
     const target = resolveNode(this.graph, end, "end");
     if (this.graph.isBlocked?.(source) || this.graph.isBlocked?.(target)) {
-      return { path: null, cost: Infinity, reason: "hard-constraint" };
+      return { path: null, cost: Infinity, reason: "hard-constraint", iterations: 0 };
     }
     if (source.id === target.id) return { path: [source], cost: 0, iterations: 0 };
 
@@ -110,7 +107,7 @@ export class LeastCostPathSolver {
       closed.add(current.id);
 
       if (current.id === target.id) {
-        return { path: reconstructPath(cameFrom, current.node), cost: current.g, iterations };
+        return { path: reconstructPath(this.graph, cameFrom, current.node), cost: current.g, iterations };
       }
 
       for (const neighbour of this.graph.neighbours(current.node)) {
@@ -128,13 +125,12 @@ export class LeastCostPathSolver {
   }
 }
 
-function reconstructPath(cameFrom, target) {
+function reconstructPath(graph, cameFrom, target) {
   const path = [target];
   let cursor = target.id;
   while (cameFrom.has(cursor)) {
     cursor = cameFrom.get(cursor);
-    const [x, y] = cursor.split(",").map(Number);
-    path.push({ ...target, x, y, id: cursor });
+    path.push(graph.nodeFromId(cursor));
   }
   path.reverse();
   return path;
