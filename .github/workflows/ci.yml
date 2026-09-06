@@ -130,6 +130,8 @@ jobs:
         run: npm run test:p3-authoritative-arcs
       - name: Run P3.9.1 directed face ring + topology contracts
         run: npm run test:p3-authoritative-face-rings
+      - name: Run P3 multi-solver Arc assembly + P4.2 invariants
+        run: npm run test:p3-multi-arc-graph-assembly
       - name: Run Phase 2B Anatolia reconstruction tests
         run: npm run test:anatolia-phase2b
       - name: Run Phase 2C Anatolia refinement tests
