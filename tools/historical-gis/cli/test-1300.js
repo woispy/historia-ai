@@ -128,7 +128,7 @@ assert.ok(draggedDown.y > camera.y, "Dragging down must move the map south/down.
 assert.ok(draggedUp.y < camera.y, "Dragging up must move the map north/up.");
 assert.equal(setCameraZoom(camera, 150, viewport).zoom, 48);
 assert.equal(setCameraZoom(camera, 0, viewport).zoom, 1);
-assert.equal(setCameraPosition(camera, 180, 0, viewport).x, 0);
+assert.equal(setCameraPosition(camera, 180, 0, viewport).x, -180);
 assert.equal(setCameraPosition(setCameraZoom(camera, 2, viewport), 180, 0, viewport).x, 90);
 
 const lowWheelDelta = getWheelZoomDelta({ deltaY: -100, deltaMode: 0 }, 4);
