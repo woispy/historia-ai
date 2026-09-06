@@ -7,36 +7,11 @@
  */
 
 export const SEED_EVIDENCE_LEVELS = Object.freeze([
-  "primary",
-  "secondary",
-  "archaeological",
-  "cartographic",
-  "inferred",
-  "procedural",
+  "primary", "secondary", "archaeological", "cartographic", "inferred", "procedural",
 ]);
-
-export const SEED_LEVELS = Object.freeze([
-  "region",
-  "duchy",
-  "province",
-]);
-
-export const BOUNDARY_MODES = Object.freeze([
-  "hard",
-  "soft",
-  "inferred",
-  "procedural",
-]);
-
-export const TERRAIN_TYPES = Object.freeze([
-  "land",
-  "lowland",
-  "valley",
-  "highland",
-  "mountain",
-  "desert",
-  "deep_water",
-]);
+export const SEED_LEVELS = Object.freeze(["region", "duchy", "province"]);
+export const BOUNDARY_MODES = Object.freeze(["hard", "soft", "inferred", "procedural"]);
+export const TERRAIN_TYPES = Object.freeze(["land", "lowland", "valley", "highland", "mountain", "desert", "deep_water"]);
 
 function finite(value, name) {
   const number = Number(value);
@@ -57,9 +32,7 @@ function integer(value, name) {
 }
 
 function assertString(value, name) {
-  if (typeof value !== "string" || !value.trim()) {
-    throw new Error(`${name} must be a non-empty string`);
-  }
+  if (typeof value !== "string" || !value.trim()) throw new Error(`${name} must be a non-empty string`);
   return value;
 }
 
@@ -78,11 +51,8 @@ function validateConfidence(confidence) {
   };
   result.overall = unitInterval(
     confidence?.overall ?? (
-      result.existence * 0.25
-      + result.location * 0.25
-      + result.extent * 0.15
-      + result.boundary * 0.2
-      + result.ownership * 0.15
+      result.existence * 0.25 + result.location * 0.25 + result.extent * 0.15
+      + result.boundary * 0.2 + result.ownership * 0.15
     ),
     "confidence.overall",
   );
@@ -100,7 +70,6 @@ export function validateProvinceSeed(seed) {
 
   const lat = finite(seed.position?.lat, "seed.position.lat");
   if (lat < -90 || lat > 90) throw new Error("seed.position.lat must be in [-90, 90]");
-
   const lon = normalizeLongitude(seed.position?.lon);
   const historical = seed.historical ?? {};
   const confidence = validateConfidence(historical.confidence ?? historical);
@@ -111,12 +80,8 @@ export function validateProvinceSeed(seed) {
   }
 
   const parentId = seed.hierarchy?.parentId ?? null;
-  if (parentId !== null) assertString(String(parentId), "hierarchy.parentId");
-
   const boundaryMode = seed.constraints?.boundaryMode ?? "procedural";
-  if (!BOUNDARY_MODES.includes(boundaryMode)) {
-    throw new Error(`Unsupported boundary mode: ${boundaryMode}`);
-  }
+  if (!BOUNDARY_MODES.includes(boundaryMode)) throw new Error(`Unsupported boundary mode: ${boundaryMode}`);
 
   return {
     ...seed,
@@ -132,8 +97,8 @@ export function validateProvinceSeed(seed) {
     },
     hierarchy: {
       ...seed.hierarchy,
-      parentId,
-      ancestry: Array.isArray(seed.hierarchy?.ancestry) ? [...seed.hierarchy.ancestry] : [],
+      parentId: parentId == null ? null : String(parentId),
+      ancestry: Array.isArray(seed.hierarchy?.ancestry) ? seed.hierarchy.ancestry.map(String) : [],
     },
     constraints: {
       ...seed.constraints,
@@ -155,7 +120,6 @@ export function validateProvinceSeedSet(seeds = []) {
   const ids = new Set();
   const keys = new Set();
   const normalized = [];
-
   for (const seed of seeds) {
     const item = validateProvinceSeed(seed);
     if (ids.has(item.id)) throw new Error(`Duplicate seed id: ${item.id}`);
@@ -164,10 +128,17 @@ export function validateProvinceSeedSet(seeds = []) {
     keys.add(item.identity.key);
     normalized.push(item);
   }
-
   return normalized.sort((a, b) => a.id.localeCompare(b.id));
 }
 
+function canonicalize(value) {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalize(value[key])]));
+  }
+  return value;
+}
+
 export function serializeProvinceSeeds(seeds) {
-  return JSON.stringify(validateProvinceSeedSet(seeds));
+  return JSON.stringify(canonicalize(validateProvinceSeedSet(seeds)));
 }
