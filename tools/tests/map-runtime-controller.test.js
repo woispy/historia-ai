@@ -12,12 +12,13 @@ class MockCanvas {
 }
 
 class MockCameraRig {
-  constructor() { this.state = { x: 0, y: 0, zoom: 1, pitch: 24, yaw: 0 }; }
+  constructor() { this.state = { x: 0, renderX: 0, y: 0, zoom: 1, pitch: 24, yaw: 0 }; this.ticks=[]; }
   setState(next = {}) { this.state = { ...this.state, ...next }; }
   snapshot() { return { ...this.state }; }
   beginDrag() {}
   panPixels() {}
   zoomBy() {}
+  tick(dt) { this.ticks.push(dt); this.state.renderX += 10 * dt; this.state.x = this.state.renderX >= 180 ? this.state.renderX - 360 : this.state.renderX; return this.snapshot(); }
 }
 
 class MockRenderer extends MapRendererContract {
@@ -40,7 +41,7 @@ let rafCallbacks = new Map();
 let rafId = 0;
 globalThis.requestAnimationFrame = (callback) => { const id=++rafId; rafCallbacks.set(id,callback); return id; };
 globalThis.cancelAnimationFrame = (id) => rafCallbacks.delete(id);
-const flushRaf = () => { const callbacks=[...rafCallbacks.values()]; rafCallbacks.clear(); callbacks.forEach((callback)=>callback()); };
+const flushRaf = (timestamp = 0) => { const callbacks=[...rafCallbacks.values()]; rafCallbacks.clear(); callbacks.forEach((callback)=>callback(timestamp)); };
 
 try {
   const canvas=new MockCanvas(), renderer=new MockRenderer(), rig=new MockCameraRig();
@@ -53,17 +54,27 @@ try {
   assert.equal(renderer.starts,1);
   assert.equal(renderer.resizes,1);
 
+  flushRaf(1000);
+  assert.equal(rig.ticks.length,1);
+  assert.equal(rig.ticks[0],0);
+  assert.equal(renderer.cameras.at(-1).renderX,0);
+
+  flushRaf(1016.6666667);
+  assert.equal(rig.ticks.length,2);
+  assert.ok(Math.abs(rig.ticks[1] - 1 / 60) < 1e-6);
+  assert.ok(renderer.cameras.at(-1).renderX > 0);
+
   controller.queueHover(10,20);
   controller.queueHover(30,40);
   controller.queueHover(50,60);
   assert.equal(renderer.picks.length,0);
-  flushRaf();
+  flushRaf(1033.3333334);
   assert.deepEqual(renderer.picks,[[50,60]]);
   assert.deepEqual(renderer.hovered,["province-7"]);
 
   controller.queueHover(70,80);
   controller.queueHover(90,100);
-  flushRaf();
+  flushRaf(1050);
   assert.deepEqual(renderer.picks,[[50,60],[90,100]]);
 
   controller.setExternalCamera({ zoom:4 });
@@ -72,6 +83,7 @@ try {
   controller.setOnProvinceClick(() => {});
   controller.stop();
   assert.equal(renderer.stops,1);
+  assert.equal(controller.frameRequest,0);
   controller.dispose();
   assert.equal(renderer.disposals,1);
   assert.equal(controller.destroyed,true);
@@ -80,4 +92,4 @@ try {
   globalThis.cancelAnimationFrame=originalCancelRaf;
 }
 
-console.log("Map runtime controller passed: imperative lifecycle, one hover pick per RAF frame, latest-sample wins, and explicit disposal.");
+console.log("Map runtime controller passed: imperative lifecycle, frame-driven camera ticking, one hover pick per RAF frame, latest-sample wins, and explicit disposal.");
