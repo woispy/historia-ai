@@ -19,7 +19,7 @@ export class CopernicusDemCostSampler {
     this.mountainElevationMeters = finite(mountainElevationMeters, "mountainElevationMeters");
     this.mountainSlopeDegrees = finite(mountainSlopeDegrees, "mountainSlopeDegrees");
     if ([this.slopeSampleDegrees, this.ridgeProminenceMeters, this.mountainElevationMeters, this.mountainSlopeDegrees].some((value) => value <= 0)) throw new Error("DEM sampler thresholds must be > 0");
-    this.entries = new Map(); this.sampleCache = new Map();
+    this.entries = new Map(); this.sampleCache = new Map(); this.elevationCache = new Map();
   }
 
   async initialize() {
@@ -39,9 +39,9 @@ export class CopernicusDemCostSampler {
   sample(node) {
     const lon = finite(node?.lon, "node.lon"); const lat = finite(node?.lat, "node.lat"); const cacheKey = node?.id ?? `${lon}:${lat}`;
     if (this.sampleCache.has(cacheKey)) return this.sampleCache.get(cacheKey);
-    const center = this.#elevation(lon, lat); if (center == null) return this.#cache(cacheKey, nullCostSample());
+    const center = this.elevation(lon, lat); if (center == null) return this.#cache(cacheKey, nullCostSample());
     const delta = this.slopeSampleDegrees;
-    const west = this.#elevation(lon - delta, lat), east = this.#elevation(lon + delta, lat), south = this.#elevation(lon, lat - delta), north = this.#elevation(lon, lat + delta);
+    const west = this.elevation(lon - delta, lat), east = this.elevation(lon + delta, lat), south = this.elevation(lon, lat - delta), north = this.elevation(lon, lat + delta);
     const neighbours = [west, east, south, north].filter((value) => value != null); if (neighbours.length < 2) return this.#cache(cacheKey, nullCostSample());
     const metresLon = Math.max(1, delta * 111000 * Math.cos(lat * Math.PI / 180)), metresLat = Math.max(1, delta * 111000);
     const dzdx = west != null && east != null ? (east - west) / (2 * metresLon) : 0, dzdy = south != null && north != null ? (north - south) / (2 * metresLat) : 0;
@@ -50,6 +50,16 @@ export class CopernicusDemCostSampler {
     const ridgeAffinity = clamp01((center - meanNeighbour) / this.ridgeProminenceMeters);
     const mountainResistance = clamp01(Math.max(Math.max(0, center) / this.mountainElevationMeters, slopeDegrees / this.mountainSlopeDegrees));
     return this.#cache(cacheKey, adaptDemSample({ slopeDegrees, ridgeAffinity, mountainResistance }));
+  }
+
+  elevation(lonOrNode, maybeLat) {
+    const lon = finite(typeof lonOrNode === "object" ? lonOrNode?.lon : lonOrNode, "lon");
+    const lat = finite(typeof lonOrNode === "object" ? lonOrNode?.lat : maybeLat, "lat");
+    const cacheKey = `${lon}:${lat}`;
+    if (this.elevationCache.has(cacheKey)) return this.elevationCache.get(cacheKey);
+    const value = this.#elevation(lon, lat);
+    this.elevationCache.set(cacheKey, value);
+    return value;
   }
 
   #cache(key, value) { this.sampleCache.set(key, value); return value; }
