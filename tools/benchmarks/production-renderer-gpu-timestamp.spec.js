@@ -63,5 +63,15 @@ test("Historia AI exact production renderer GPU timestamp diagnostic", async ({ 
   test.info().annotations.push({ type: "production-renderer-gpu-timestamp", description: JSON.stringify(result) });
 
   if (result.initializationError) throw new Error(result.initializationError);
+  if (!result.initialized) throw new Error("Production renderer failed to initialize");
   if (!result.snapshot) throw new Error("Production renderer returned no telemetry snapshot");
+  if (result.uncaptured.length > 0) throw new Error(`Production renderer emitted GPU errors: ${result.uncaptured.join(" | ")}`);
+
+  const gpu = result.snapshot;
+  if (gpu.gpuTiming !== "supported") throw new Error(`GPU timestamp timing is not supported: ${gpu.gpuTiming}`);
+  if (!gpu.gpuTimeMs || gpu.gpuTimeMs.count < 1) throw new Error("Production renderer produced no GPU timestamp samples");
+  if (!(gpu.gpuTimeMs.average > 0)) throw new Error(`Production renderer GPU time is not positive: ${gpu.gpuTimeMs.average}`);
+  if (gpu.timestampSamplesDropped !== 0) throw new Error(`Production renderer dropped GPU timestamp samples: ${gpu.timestampSamplesDropped}`);
+  if (gpu.timestampSamplesZero !== 0) throw new Error(`Production renderer produced zero GPU timestamp samples: ${gpu.timestampSamplesZero}`);
+  if (gpu.timestampError) throw new Error(`Production renderer GPU timestamp error: ${gpu.timestampError}`);
 });
