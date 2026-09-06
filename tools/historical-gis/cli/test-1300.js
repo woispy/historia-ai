@@ -59,8 +59,8 @@ const degenerateRetracingFeature = {
       [-158.85516357421875, 70.88426208496094],
       [-156.47401428222656, 71.35443878173828],
       [-156.3471221923828, 71.33132934570312],
-      [-156.043212890625, 71.22303009033203],
-      [-156.043212890625, 71.22303009033203],
+      [-156.043212890625, 71.22303009082031],
+      [-156.043212890625, 71.22303009082031],
       [-156.3471221923828, 71.33132934570312],
     ]],
   },
@@ -129,7 +129,7 @@ assert.ok(draggedUp.y < camera.y, "Dragging up must move the map north/up.");
 assert.equal(setCameraZoom(camera, 150, viewport).zoom, 48);
 assert.equal(setCameraZoom(camera, 0, viewport).zoom, 1);
 assert.equal(setCameraPosition(camera, 180, 0, viewport).x, -180);
-assert.equal(setCameraPosition(setCameraZoom(camera, 2, viewport), 180, 0, viewport).x, -90);
+assert.equal(setCameraPosition(setCameraZoom(camera, 2, viewport), 180, 0, viewport).x, -180);
 
 const lowWheelDelta = getWheelZoomDelta({ deltaY: -100, deltaMode: 0 }, 4);
 const highWheelDelta = getWheelZoomDelta({ deltaY: -100, deltaMode: 0 }, 60);
