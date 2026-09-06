@@ -3,7 +3,7 @@ import { assertRendererContract } from "../rendering/MapRendererContract.js";
 const DEFAULT_HOVER_EPSILON_PX = 0;
 const CLICK_SLOP_PX = 3;
 
-/** Imperative owner of map interaction and renderer lifecycle. */
+/** Imperative owner of map interaction, camera ticking and renderer lifecycle. */
 export class MapRuntimeController {
   constructor({ canvas, cameraRig, renderer, onProvinceClick, hoverEpsilonPx = DEFAULT_HOVER_EPSILON_PX }) {
     if (!canvas) throw new TypeError("MapRuntimeController requires a canvas");
@@ -21,8 +21,10 @@ export class MapRuntimeController {
     this.lastQueuedHoverX = Number.NaN;
     this.lastQueuedHoverY = Number.NaN;
     this.hoverFrameRequest = 0;
+    this.frameRequest = 0;
+    this.lastFrameTime = null;
     this.resizeObserver = null;
-    this.drag = { active: false, pointerId: null, moved: false, lastX: 0, lastY: 0 };
+    this.drag = { active: false, pointerId: null, moved: false, lastX: 0, lastY: 0, clickEligible: false };
 
     this.handleWheel = this.handleWheel.bind(this);
     this.handlePointerDown = this.handlePointerDown.bind(this);
@@ -31,11 +33,13 @@ export class MapRuntimeController {
     this.handlePointerCancel = this.handlePointerCancel.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.handleResize = this.handleResize.bind(this);
+    this.handleFrame = this.handleFrame.bind(this);
   }
 
   start() {
     if (this.destroyed || this.running) return;
     this.running = true;
+    this.lastFrameTime = null;
     this.canvas.addEventListener("wheel", this.handleWheel, { passive: false });
     this.canvas.addEventListener("pointerdown", this.handlePointerDown);
     this.canvas.addEventListener("pointermove", this.handlePointerMove);
@@ -45,12 +49,18 @@ export class MapRuntimeController {
     this.resizeObserver = typeof ResizeObserver === "function" ? new ResizeObserver(this.handleResize) : null;
     this.resizeObserver?.observe(this.canvas);
     this.handleResize();
+    // Schedule the runtime tick before the renderer loop so the next render
+    // observes the freshly integrated camera state on the same RAF turn.
+    this.frameRequest = requestAnimationFrame(this.handleFrame);
     this.renderer.start();
   }
 
   stop() {
     if (!this.running) return;
     this.running = false;
+    if (this.frameRequest) cancelAnimationFrame(this.frameRequest);
+    this.frameRequest = 0;
+    this.lastFrameTime = null;
     this.cancelPendingHover();
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
@@ -61,6 +71,22 @@ export class MapRuntimeController {
     this.canvas.removeEventListener("pointercancel", this.handlePointerCancel);
     this.canvas.removeEventListener("click", this.handleClick);
     this.renderer.stop();
+  }
+
+  handleFrame(timestamp) {
+    if (this.destroyed || !this.running) {
+      this.frameRequest = 0;
+      return;
+    }
+
+    const now = Number(timestamp);
+    const dt = Number.isFinite(now) && Number.isFinite(this.lastFrameTime)
+      ? Math.max(0, Math.min(0.05, (now - this.lastFrameTime) / 1000))
+      : 0;
+    if (Number.isFinite(now)) this.lastFrameTime = now;
+
+    this.renderer.setCamera(this.cameraRig.tick(dt));
+    this.frameRequest = requestAnimationFrame(this.handleFrame);
   }
 
   setExternalCamera(camera) {
@@ -118,6 +144,7 @@ export class MapRuntimeController {
     this.drag.moved = false;
     this.drag.lastX = event.clientX;
     this.drag.lastY = event.clientY;
+    this.drag.clickEligible = false;
     this.cameraRig.beginDrag();
     event.currentTarget.setPointerCapture?.(event.pointerId);
   }
