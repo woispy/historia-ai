@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
@@ -14,13 +15,17 @@ import { validateArcGeometry } from "../historical-gis/province/GeometryValidati
 const GRID_WIDTH = 120;
 const GRID_HEIGHT = 80;
 const GRID_BOUNDS = Object.freeze({ minLon: 26, maxLon: 44.8, minLat: 36, maxLat: 42.4 });
-const RIVER_CORRIDORS = Object.freeze([
-  [[30.25, 40.10], [31.20, 40.05], [32.10, 39.85], [33.10, 39.70]], // Sakarya corridor
-  [[34.00, 40.20], [34.60, 39.80], [35.30, 39.45], [36.20, 39.00], [37.00, 38.80]], // Kızılırmak corridor
-  [[36.00, 40.90], [36.45, 40.55], [36.60, 40.10], [36.70, 39.60]], // Yeşilırmak corridor
-  [[29.20, 38.80], [28.60, 38.55], [28.00, 38.35], [27.45, 38.20]], // Gediz corridor
-  [[30.10, 37.90], [29.55, 37.65], [28.95, 37.45], [28.30, 37.25]], // Büyük Menderes corridor
-]);
+const HYDROGRAPHY_PATH = "src/map/data/generated/anatolia-hydrography-10m.json";
+const HYDROGRAPHY = JSON.parse(await readFile(HYDROGRAPHY_PATH, "utf8"));
+const MAJOR_RIVERS = HYDROGRAPHY.rivers
+  .filter((river) => river.canonicalId && Number(river.rank) <= 3)
+  .map((river) => river.coordinates)
+  .filter((coordinates) => Array.isArray(coordinates) && coordinates.length >= 2);
+
+assert.equal(HYDROGRAPHY.projection, "EPSG:4326");
+assert.ok(HYDROGRAPHY.rivers.length > 0, "generated Natural Earth hydrography must contain river segments");
+assert.ok(HYDROGRAPHY.lakes.length > 0, "generated Natural Earth hydrography must contain lake polygons");
+assert.ok(MAJOR_RIVERS.length >= 3, "major Anatolian river identities must survive hydrography generation");
 
 function distancePointToSegment(point, a, b) {
   const dx = b[0] - a[0];
@@ -44,7 +49,7 @@ function distanceToAtlasRanges(lon, lat) {
 }
 
 function distanceToRivers(lon, lat) {
-  return distanceToPolylines(lon, lat, RIVER_CORRIDORS);
+  return distanceToPolylines(lon, lat, MAJOR_RIVERS);
 }
 
 function makeSeeds() {
@@ -110,7 +115,7 @@ assert.equal(index.size, seeds.length);
 
 const field = createCostField({
   weights: { slope: 1.1, ridge: 1.4, mountain: 2.2, river: 2.0, lake: 1.5, coast: 0.35 },
-  metadata: { source: "AnatoliaPhysicalAtlas v2 + pinned hydrography stress corridors", epoch: 1300 },
+  metadata: { source: "AnatoliaPhysicalAtlas v2 + generated Natural Earth 10m hydrography", epoch: 1300 },
 });
 
 const graph = new CompositeCostGraph({
@@ -155,9 +160,8 @@ for (const seed of seeds) {
     assert.ok(result.cost >= 0 && Number.isFinite(result.cost));
     assert.ok(result.path.length >= 2);
 
-    // This is an engine stress edge, not yet a claim about the historical
-    // province border. The authoritative registry is deliberately exercised
-    // here to catch node/arc identity instability before face generation.
+    // Stress edge only: this is deliberately not a historical province border.
+    // It exercises authoritative node/arc identity before face generation.
     const registration = registerSolverPath(registry, {
       result,
       leftFace: `stress:${seed.id}`,
@@ -192,4 +196,4 @@ assert.ok(mountainSample.mountain >= 0 && plateauSample.mountain >= 0);
 assert.ok(Number.isFinite(field.evaluate(mountainSample).total));
 assert.ok(Number.isFinite(field.evaluate(plateauSample).total));
 
-console.log(`Anatolia seed + physical-cost stress: PASS (${seeds.length} seeds, ${candidatePairs} candidate pairs, ${solved} solved, ${failed} failed, ${registry.nodes.size} nodes, ${registry.arcs.size} arcs)`);
+console.log(`Anatolia seed + physical-cost stress: PASS (${seeds.length} seeds, ${candidatePairs} candidate pairs, ${solved} solved, ${failed} failed, ${registry.nodes.size} nodes, ${registry.arcs.size} arcs, ${MAJOR_RIVERS.length} major river segments)`);
