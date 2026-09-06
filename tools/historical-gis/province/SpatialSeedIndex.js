@@ -46,6 +46,11 @@ function distanceSquared(aLon, aLat, bLon, bLat) {
   return dx * dx + dy * dy;
 }
 
+function compareDistance(a, b) {
+  const delta = a - b;
+  return Math.abs(delta) <= EPSILON ? 0 : delta;
+}
+
 function cellKey(x, y) {
   return `${x}:${y}`;
 }
@@ -161,7 +166,7 @@ export class SpatialHashSeedIndex {
         longitudeDelta: seamAwareTieDelta(rawLon, seed.position.lon),
       }))
       .filter((entry) => entry.distanceSquared <= r * r + EPSILON)
-      .sort((a, b) => a.distanceSquared - b.distanceSquared || a.longitudeDelta - b.longitudeDelta || a.seed.id.localeCompare(b.seed.id))
+      .sort((a, b) => compareDistance(a.distanceSquared, b.distanceSquared) || a.longitudeDelta - b.longitudeDelta || a.seed.id.localeCompare(b.seed.id))
       .map((entry) => entry.seed);
   }
 
