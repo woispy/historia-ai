@@ -12,8 +12,14 @@ for (const seed of seeds) index.insert(seed);
 assert.equal(index.size, 3);
 assert.equal(canonicalSeedLongitude(181), -179);
 assert.equal(canonicalSeedLongitude(-181), 179);
+
+// The canonical coordinate is identical at ±180, but an exact seam query
+// preserves its requested side as the deterministic tie-break direction.
 assert.deepEqual(index.queryRadius(180, 40, 1).map((seed) => seed.id), ["east", "west"]);
 assert.deepEqual(index.queryRadius(-180, 40, 1).map((seed) => seed.id), ["west", "east"]);
+assert.equal(index.nearest(180, 40)?.id, "east");
+assert.equal(index.nearest(-180, 40)?.id, "west");
+
 assert.deepEqual(index.queryBounds({ minLon: 179, maxLon: -179, minLat: 39, maxLat: 41 }).map((seed) => seed.id), ["east", "west"]);
 assert.equal(index.nearest(179.8, 40)?.id, "east");
 assert.equal(index.nearest(-179.8, 40)?.id, "west");
