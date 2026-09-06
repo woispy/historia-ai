@@ -90,16 +90,15 @@ test("position and focus use the same canonical longitude rule", () => {
 test("production camera rig wraps drag and inertial longitude", () => {
   const rig = new MapCameraRig({ minZoom: 1, maxZoom: 96 });
   rig.setState({ x: 179 });
-  rig.panPixels(-1280, 0, 1280, 720);
-  assert.equal(rig.snapshot().x, -1);
+  rig.panPixels(-8, 0, 1280, 720);
+  assert.equal(rig.snapshot().x, -178.75);
 
   rig.setState({ x: -179 });
-  rig.panPixels(1280, 0, 1280, 720);
-  assert.equal(rig.snapshot().x, 1);
+  rig.panPixels(8, 0, 1280, 720);
+  assert.equal(rig.snapshot().x, 178.75);
 
   rig.setState({ x: 179 });
-  rig.panPixels(-2560, 0, 1280, 720);
-  assert.equal(rig.snapshot().x, -1);
+  rig.panPixels(-8, 0, 1280, 720);
   rig.tick(1 / 60);
   assert.ok(rig.snapshot().x >= WORLD_MIN_X && rig.snapshot().x < WORLD_MAX_X);
 });
