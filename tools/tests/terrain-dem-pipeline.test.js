@@ -5,6 +5,7 @@ import { buildTerrainMvp } from "../../src/map/rendering/terrain/TerrainCameraMa
 import { parseTileList, copernicusSourceTileKeysForBounds, copernicusTileKey, copernicusTileLatitudeCoordinate, copernicusTileLongitudeCoordinate, sampleCopernicusRaster, validateCopernicusTileGeoreference } from "../asset-builder/dem/CopernicusDemSource.js";
 import { isValidDemPixel, measureDemStats, sanitizeDemRaster } from "../asset-builder/dem/GeoTiffDecoder.js";
 import { coordinateInCoverage, terrainDemSourceTileCoordinates, terrainSampleCoordinate, terrainTileBoundsForCoverage, terrainTileSampleBoundsForCoverage } from "../asset-builder/pipelines/TerrainPipeline.js";
+import { buildLineGeometry } from "../../src/map/rendering/gpu/ProductionPhysicalMapLayer.js";
 import { makeTerrainTileKey, terrainTileBounds } from "../../src/map/rendering/terrain/TerrainTile.js";
 import { collectWorldLandPolygons } from "../../src/map/physical/WorldLandMask.js";
 
@@ -84,6 +85,10 @@ assert.equal(interiorSample.lat, 35.0625);
 assert.equal(interiorSample.lon, 36.25);
 assert.equal(interiorSample.key, "Copernicus_DSM_COG_10_N35_00_E036_00_DEM");
 assert.equal(terrainDemSourceTileCoordinates(35, 36.25).key, "Copernicus_DSM_COG_10_N34_00_E036_00_DEM");
+const openRiver = buildLineGeometry([{ coordinates: [[30, 40], [31, 41], [32, 42], [33, 43]] }]);
+assert.deepEqual(Array.from(openRiver.vertices), [30,40,31,41,31,41,32,42,32,42,33,43]);
+const closedCoast = buildLineGeometry([{ coordinates: [[30, 40], [31, 41], [32, 42], [33, 43]] }], false, true);
+assert.deepEqual(Array.from(closedCoast.vertices), [30,40,31,41,31,41,32,42,32,42,33,43,33,43,30,40]);
 const lod0 = makeTerrainTileKey(0, 0, 0);
 assert.deepEqual(terrainTileBoundsForCoverage(lod0, coverage), terrainTileBounds(lod0));
 assert.deepEqual(terrainTileBoundsForCoverage(lod0, coverage), { minX: -180, minY: -90, maxX: 180, maxY: 90 });
