@@ -19,9 +19,10 @@ function solveCorridor(nodeIds) {
     blocked: (node) => !allowed.has(node.id),
   });
   const solver = new LeastCostPathSolver({ graph, minimumCost: 1 });
-  const start = graph.nodeFromId(nodeIds[0]);
-  const end = graph.nodeFromId(nodeIds.at(-1));
-  return solver.solve({ start, end });
+  return solver.solve({
+    start: graph.nodeFromId(nodeIds[0]),
+    end: graph.nodeFromId(nodeIds.at(-1)),
+  });
 }
 
 function pathFor(nodeIds) {
@@ -81,11 +82,11 @@ const full = {
       id: world,
       outerRing: [
         { arcId: aBottom.arc.id, forward: false },
-        { arcId: bBottom.arc.id, forward: false },
-        { arcId: bRight.arc.id, forward: false },
-        { arcId: bTop.arc.id, forward: false },
-        { arcId: aTop.arc.id, forward: false },
         { arcId: aLeft.arc.id, forward: false },
+        { arcId: aTop.arc.id, forward: false },
+        { arcId: bTop.arc.id, forward: false },
+        { arcId: bRight.arc.id, forward: false },
+        { arcId: bBottom.arc.id, forward: false },
       ],
     },
   },
