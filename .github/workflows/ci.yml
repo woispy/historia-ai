@@ -69,6 +69,8 @@ jobs:
         run: npm run lint
       - name: Validate map render diagnostics and depth context contracts
         run: npm run test:map-render-diagnostics
+      - name: Validate camera world-wrap continuity
+        run: npm run test:camera-world-wrap
       - name: Validate DEM codec/source contracts
         run: npm run test:terrain-dem
       - name: Validate terrain LOD and streaming contracts
