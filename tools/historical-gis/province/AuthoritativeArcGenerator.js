@@ -31,7 +31,6 @@ function positiveFinite(value, name) {
 function canonicalLongitude(lon) {
   let value = finite(lon, "longitude");
   value = ((value + HALF_WORLD) % WORLD_WIDTH + WORLD_WIDTH) % WORLD_WIDTH - HALF_WORLD;
-  if (value === HALF_WORLD) return -HALF_WORLD;
   return Object.is(value, -0) ? 0 : value;
 }
 
@@ -54,12 +53,11 @@ function normalizePoint(point, index) {
 }
 
 function dedupePath(path, tolerance) {
+  if (!Array.isArray(path)) throw new Error("path must be an array");
   const result = [];
   for (const point of path) {
     const normalized = normalizePoint(point, result.length);
-    if (!result.length || distance(result[result.length - 1], normalized) > tolerance) {
-      result.push(normalized);
-    }
+    if (!result.length || distance(result[result.length - 1], normalized) > tolerance) result.push(normalized);
   }
   if (result.length < 2) throw new Error("Authoritative arc path must contain at least two distinct points");
   return result;
@@ -83,9 +81,7 @@ function samePoint(a, b, tolerance) {
 
 function sameGeometry(a, b, tolerance) {
   if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i += 1) {
-    if (!samePoint(a[i], b[i], tolerance)) return false;
-  }
+  for (let i = 0; i < a.length; i += 1) if (!samePoint(a[i], b[i], tolerance)) return false;
   return true;
 }
 
@@ -93,12 +89,8 @@ function reversed(path) {
   return [...path].reverse();
 }
 
-function canonicalNodeKey(point, tolerance) {
-  return pointKey(point, tolerance);
-}
-
 function nodeIdFor(point, tolerance) {
-  return `n:${canonicalNodeKey(point, tolerance)}`;
+  return `n:${pointKey(point, tolerance)}`;
 }
 
 function arcIdFor(geometry, tolerance) {
@@ -107,15 +99,7 @@ function arcIdFor(geometry, tolerance) {
   return `arc:${forward < reverse ? forward : reverse}`;
 }
 
-function sideSet(arc) {
-  return new Set([arc.leftFace, arc.rightFace]);
-}
-
-/**
- * Mutable build-time registry. It is deliberately independent from rendering
- * and from polygon generation, so the resulting graph can become the source
- * of truth for P4 topology and later mapbin serialization.
- */
+/** Build-time registry for authoritative shared geometry. */
 export class AuthoritativeArcRegistry {
   constructor({ tolerance = DEFAULT_TOLERANCE } = {}) {
     this.tolerance = positiveFinite(tolerance, "tolerance");
@@ -127,13 +111,7 @@ export class AuthoritativeArcRegistry {
     const normalized = normalizePoint(point, 0);
     const id = nodeIdFor(normalized, this.tolerance);
     if (!this.nodes.has(id)) {
-      this.nodes.set(id, {
-        id,
-        kind,
-        position: normalized,
-        incidentArcs: [],
-        incidentFaces: [],
-      });
+      this.nodes.set(id, { id, kind, position: normalized, incidentArcs: [], incidentFaces: [] });
     }
     return this.nodes.get(id);
   }
@@ -155,16 +133,12 @@ export class AuthoritativeArcRegistry {
       const sameReverse = existing.startNode === endNode.id && existing.endNode === startNode.id;
       if (!sameForward && !sameReverse) throw new Error(`Arc ${id} endpoint identity collision`);
       const expectedGeometry = sameForward ? geometry : reversed(geometry);
-      if (!sameGeometry(existing.geometry, expectedGeometry, this.tolerance)) {
-        throw new Error(`Arc ${id} geometry collision exceeds tolerance`);
-      }
-      if (existing.leftFace !== left || existing.rightFace !== right) {
-        const existingSides = sideSet(existing);
-        if (existingSides.has(left) || existingSides.has(right)) {
-          throw new Error(`Arc ${id} would assign a face to more than one side`);
-        }
-        throw new Error(`Arc ${id} already has two incident faces`);
-      }
+      if (!sameGeometry(existing.geometry, expectedGeometry, this.tolerance)) throw new Error(`Arc ${id} geometry collision exceeds tolerance`);
+      const sameSides = existing.leftFace === left && existing.rightFace === right;
+      const reversedSides = existing.leftFace === right && existing.rightFace === left;
+      if (!sameSides && !reversedSides) throw new Error(`Arc ${id} already has two incident faces`);
+      if (sameSides && !sameForward) throw new Error(`Arc ${id} requested reverse geometry with unchanged face sides`);
+      if (reversedSides && !sameReverse) throw new Error(`Arc ${id} requested forward geometry with reversed face sides`);
       return { arc: existing, forward: sameForward, reused: true };
     }
 
@@ -173,16 +147,7 @@ export class AuthoritativeArcRegistry {
       if (confidence < 0 || confidence > 1) throw new Error("confidence must be in [0, 1]");
     }
 
-    const arc = {
-      id,
-      kind,
-      startNode: startNode.id,
-      endNode: endNode.id,
-      leftFace: left,
-      rightFace: right,
-      geometry,
-      confidence,
-    };
+    const arc = { id, kind, startNode: startNode.id, endNode: endNode.id, leftFace: left, rightFace: right, geometry, confidence };
     this.arcs.set(id, arc);
     this.#attach(startNode, arc, left, right);
     this.#attach(endNode, arc, left, right);
@@ -191,46 +156,24 @@ export class AuthoritativeArcRegistry {
 
   #attach(node, arc, leftFace, rightFace) {
     if (!node.incidentArcs.includes(arc.id)) node.incidentArcs.push(arc.id);
-    for (const faceId of [leftFace, rightFace]) {
-      if (!node.incidentFaces.includes(faceId)) node.incidentFaces.push(faceId);
-    }
+    for (const faceId of [leftFace, rightFace]) if (!node.incidentFaces.includes(faceId)) node.incidentFaces.push(faceId);
     node.incidentArcs.sort();
     node.incidentFaces.sort();
   }
 
   toTopology() {
-    const nodes = Object.fromEntries([...this.nodes.entries()].map(([id, node]) => [id, {
-      ...node,
-      incidentArcs: [...node.incidentArcs],
-      incidentFaces: [...node.incidentFaces],
-    }]));
-    const arcs = Object.fromEntries([...this.arcs.entries()].map(([id, arc]) => [id, {
-      ...arc,
-      geometry: arc.geometry.map((point) => ({ ...point })),
-    }]));
-    return { nodes, arcs };
+    return {
+      nodes: Object.fromEntries([...this.nodes].map(([id, node]) => [id, { ...node, incidentArcs: [...node.incidentArcs], incidentFaces: [...node.incidentFaces] }])),
+      arcs: Object.fromEntries([...this.arcs].map(([id, arc]) => [id, { ...arc, geometry: arc.geometry.map((point) => ({ ...point })) }])),
+    };
   }
 }
 
-/**
- * Register one solver result. The solver may return graph nodes carrying lon/
- * lat or plain {lon,lat} coordinates. A failed solver result is rejected and
- * never mutates the authoritative registry.
- */
-export function registerSolverPath(registry, {
-  result,
-  leftFace,
-  rightFace,
-  kind = "province",
-  confidence = null,
-  nodeKind = "triple-point",
-} = {}) {
+/** Register a successful solver result; failed searches never mutate topology. */
+export function registerSolverPath(registry, { result, leftFace, rightFace, kind = "province", confidence = null, nodeKind = "triple-point" } = {}) {
   if (!registry || typeof registry.register !== "function") throw new Error("registry must be an AuthoritativeArcRegistry");
-  if (!result || !Array.isArray(result.path) || result.path.length < 2) {
-    throw new Error(`Cannot register solver result: ${result?.reason ?? "missing path"}`);
-  }
-  const path = result.path.map((node) => ({ lon: node.lon, lat: node.lat }));
-  return registry.register({ path, leftFace, rightFace, kind, confidence, nodeKind });
+  if (!result || !Array.isArray(result.path) || result.path.length < 2) throw new Error(`Cannot register solver result: ${result?.reason ?? "missing path"}`);
+  return registry.register({ path: result.path.map((node) => ({ lon: node.lon, lat: node.lat })), leftFace, rightFace, kind, confidence, nodeKind });
 }
 
 export const authoritativeArcGeometryKey = geometryKey;
