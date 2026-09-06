@@ -20,6 +20,7 @@ import {
 } from "../../src/map/camera/CameraActions.js";
 import { createCameraModel } from "../../src/map/camera/CameraModel.js";
 import { MapCameraRig } from "../../src/map/runtime/MapCameraRig.js";
+import { BinaryMapRenderer } from "../../src/map/rendering/gpu/BinaryMapRenderer.js";
 import {
   getViewportBounds,
   isGeometryVisible,
@@ -126,6 +127,15 @@ test("camera rig tick advances inertia using unwrapped render longitude", () => 
   assert.ok(afterTick.renderX > beforeTick.renderX);
   assert.ok(afterTick.x >= WORLD_MIN_X && afterTick.x < WORLD_MAX_X);
   assert.equal(afterTick.x, normalizeLongitude(afterTick.renderX));
+});
+
+test("WebGL renderer consumes renderX for view transforms while retaining canonical x", () => {
+  const renderer = new BinaryMapRenderer({});
+  renderer.setCamera({ x: -179, renderX: 181, zoom: 4 });
+
+  assert.equal(renderer.camera.x, 181);
+  assert.equal(renderer.camera.renderX, 181);
+  assert.equal(renderer.camera.zoom, 4);
 });
 
 test("viewport culling preserves geometry across the antimeridian", () => {
