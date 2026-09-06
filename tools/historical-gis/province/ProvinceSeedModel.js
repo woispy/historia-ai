@@ -19,8 +19,21 @@ function finite(value, name) {
   return number;
 }
 
+function canonicalizeNumber(value, name, precision) {
+  const number = finite(value, name);
+  const factor = 10 ** precision;
+  const rounded = Math.round((number + Number.EPSILON) * factor) / factor;
+  return Object.is(rounded, -0) ? 0 : rounded;
+}
+
 function unitInterval(value, name) {
   const number = finite(value, name);
+  if (number < 0 || number > 1) throw new Error(`${name} must be in [0, 1]`);
+  return number;
+}
+
+function canonicalizeUnitInterval(value, name) {
+  const number = canonicalizeNumber(value, name, 6);
   if (number < 0 || number > 1) throw new Error(`${name} must be in [0, 1]`);
   return number;
 }
@@ -42,21 +55,18 @@ function normalizeLongitude(value) {
 }
 
 function canonicalizeCoordinate(value, precision = 7) {
-  const number = finite(value, "coordinate");
-  const factor = 10 ** precision;
-  const rounded = Math.round((number + Number.EPSILON) * factor) / factor;
-  return Object.is(rounded, -0) ? 0 : rounded;
+  return canonicalizeNumber(value, "coordinate", precision);
 }
 
 function validateConfidence(confidence) {
   const result = {
-    existence: unitInterval(confidence?.existence ?? 0, "confidence.existence"),
-    location: unitInterval(confidence?.location ?? 0, "confidence.location"),
-    extent: unitInterval(confidence?.extent ?? 0, "confidence.extent"),
-    boundary: unitInterval(confidence?.boundary ?? 0, "confidence.boundary"),
-    ownership: unitInterval(confidence?.ownership ?? 0, "confidence.ownership"),
+    existence: canonicalizeUnitInterval(confidence?.existence ?? 0, "confidence.existence"),
+    location: canonicalizeUnitInterval(confidence?.location ?? 0, "confidence.location"),
+    extent: canonicalizeUnitInterval(confidence?.extent ?? 0, "confidence.extent"),
+    boundary: canonicalizeUnitInterval(confidence?.boundary ?? 0, "confidence.boundary"),
+    ownership: canonicalizeUnitInterval(confidence?.ownership ?? 0, "confidence.ownership"),
   };
-  result.overall = unitInterval(
+  result.overall = canonicalizeUnitInterval(
     confidence?.overall ?? (
       result.existence * 0.25 + result.location * 0.25 + result.extent * 0.15
       + result.boundary * 0.2 + result.ownership * 0.15
@@ -90,6 +100,16 @@ export function validateProvinceSeed(seed) {
   const boundaryMode = seed.constraints?.boundaryMode ?? "procedural";
   if (!BOUNDARY_MODES.includes(boundaryMode)) throw new Error(`Unsupported boundary mode: ${boundaryMode}`);
 
+  const physical = seed.constraints?.physical ?? {};
+  const canonicalPhysical = {
+    landOnly: physical.landOnly ?? true,
+    avoidWater: physical.avoidWater ?? true,
+    riverCrossingCost: canonicalizeNumber(physical.riverCrossingCost ?? 3.5, "riverCrossingCost", 6),
+    mountainCrossingCost: canonicalizeNumber(physical.mountainCrossingCost ?? 5, "mountainCrossingCost", 6),
+    ridgeAffinity: canonicalizeNumber(physical.ridgeAffinity ?? 8, "ridgeAffinity", 6),
+    coastAffinity: canonicalizeNumber(physical.coastAffinity ?? 2, "coastAffinity", 6),
+  };
+
   return {
     ...seed,
     id: String(seed.id),
@@ -110,14 +130,7 @@ export function validateProvinceSeed(seed) {
     constraints: {
       ...seed.constraints,
       boundaryMode,
-      physical: {
-        landOnly: seed.constraints?.physical?.landOnly ?? true,
-        avoidWater: seed.constraints?.physical?.avoidWater ?? true,
-        riverCrossingCost: finite(seed.constraints?.physical?.riverCrossingCost ?? 3.5, "riverCrossingCost"),
-        mountainCrossingCost: finite(seed.constraints?.physical?.mountainCrossingCost ?? 5, "mountainCrossingCost"),
-        ridgeAffinity: finite(seed.constraints?.physical?.ridgeAffinity ?? 8, "ridgeAffinity"),
-        coastAffinity: finite(seed.constraints?.physical?.coastAffinity ?? 2, "coastAffinity"),
-      },
+      physical: canonicalPhysical,
     },
   };
 }
