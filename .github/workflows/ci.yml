@@ -122,6 +122,10 @@ jobs:
         run: npm run test:province-generation-contracts
       - name: Run spatial seed index contracts
         run: npm run test:spatial-seed-index
+      - name: Run P3 cost field contracts
+        run: npm run test:p3-cost-field
+      - name: Run P3 composite graph and least-cost path contracts
+        run: npm run test:p3-cost-path
       - name: Run Phase 2B Anatolia reconstruction tests
         run: npm run test:anatolia-phase2b
       - name: Run Phase 2C Anatolia refinement tests
