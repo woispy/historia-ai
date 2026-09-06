@@ -202,7 +202,9 @@ async function runTelemetryIsolationMatrix(page) {
         let submitCount = 0;
         let frameCount = 0;
         try {
-          for (let i = 0; i < 8; i += 1) {
+          const sampleIntervalFrames = telemetryApi.snapshot().timestampSampleIntervalFrames ?? 256;
+          const frameCountTarget = sampleIntervalFrames + 8;
+          for (let i = 0; i < frameCountTarget; i += 1) {
             frameCount += 1;
             const slot = telemetryApi.beginFrame();
             const encoder = device.createCommandEncoder();
