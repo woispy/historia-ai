@@ -33,31 +33,28 @@ function pathFor(nodeIds) {
 const registry = new AuthoritativeArcRegistry({ tolerance: 1e-9 });
 const world = "world";
 
-// Two adjacent faces, seven shared-authority boundary arcs and two degree-3 junctions.
+// Two adjacent faces, seven authoritative boundary arcs and two degree-3 junctions.
 const bottomA = pathFor(["0,0", "1,0", "2,0"]);
 const rightA = pathFor(["2,0", "2,1", "2,2"]);
 const topA = pathFor(["2,2", "1,2", "0,2"]);
 const leftA = pathFor(["0,2", "0,1", "0,0"]);
-
 const bottomB = pathFor(["2,0", "3,0", "4,0"]);
 const rightB = pathFor(["4,0", "4,1", "4,2"]);
 const topB = pathFor(["4,2", "3,2", "2,2"]);
-const sharedAtoB = rightA;
 
-const aBottom = registry.register({ result: bottomA, leftFace: "A", rightFace: world, nodeKind: "corner" });
-const aRight = registry.register({ result: sharedAtoB, leftFace: "A", rightFace: "B", nodeKind: "triple-point" });
-const aTop = registry.register({ result: topA, leftFace: "A", rightFace: world, nodeKind: "corner" });
-const aLeft = registry.register({ result: leftA, leftFace: "A", rightFace: world, nodeKind: "corner" });
-
-const bBottom = registry.register({ result: bottomB, leftFace: "B", rightFace: world, nodeKind: "corner" });
-const bRight = registry.register({ result: rightB, leftFace: "B", rightFace: world, nodeKind: "corner" });
+const aBottom = registry.register({ path: bottomA.path, leftFace: "A", rightFace: world, nodeKind: "corner" });
+const aRight = registry.register({ path: rightA.path, leftFace: "A", rightFace: "B", nodeKind: "triple-point" });
+const aTop = registry.register({ path: topA.path, leftFace: "A", rightFace: world, nodeKind: "corner" });
+const aLeft = registry.register({ path: leftA.path, leftFace: "A", rightFace: world, nodeKind: "corner" });
+const bBottom = registry.register({ path: bottomB.path, leftFace: "B", rightFace: world, nodeKind: "corner" });
+const bRight = registry.register({ path: rightB.path, leftFace: "B", rightFace: world, nodeKind: "corner" });
 const bSharedReverse = registry.register({
-  result: { ...sharedAtoB, path: [...sharedAtoB.path].reverse() },
+  path: [...rightA.path].reverse(),
   leftFace: "B",
   rightFace: "A",
   nodeKind: "triple-point",
 });
-const bTop = registry.register({ result: topB, leftFace: "B", rightFace: world, nodeKind: "corner" });
+const bTop = registry.register({ path: topB.path, leftFace: "B", rightFace: world, nodeKind: "corner" });
 
 assert.equal(aRight.arc.id, bSharedReverse.arc.id, "shared boundary must reuse one authoritative Arc");
 assert.equal(aRight.forward, true);
@@ -106,7 +103,7 @@ assert.equal(planarEulerCharacteristic(full), 2);
 
 // Mutation guard: a reverse path with unchanged face sides must be rejected.
 assert.throws(() => registry.register({
-  result: { ...bottomA, path: [...bottomA.path].reverse() },
+  path: [...bottomA.path].reverse(),
   leftFace: "A",
   rightFace: world,
   nodeKind: "corner",
