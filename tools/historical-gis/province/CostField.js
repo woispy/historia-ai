@@ -1,9 +1,9 @@
 /**
  * Historia AI — Cost Field
  *
- * P3 foundation. This module defines a deterministic, composable physical
- * resistance field. It does not fetch DEM/GIS data and it does not generate
- * province geometry; adapters provide normalized samples to the field.
+ * P3 foundation. Defines a deterministic, composable physical resistance
+ * field. GIS/DEM data stays outside this module; adapters provide normalized
+ * samples to the field.
  */
 
 export const COST_CHANNELS = Object.freeze([
@@ -41,6 +41,13 @@ function channelValues(values = {}) {
     channel,
     nonNegative(values[channel] ?? 0, `cost.${channel}`),
   ]));
+}
+
+/** Shortest wrapped longitudinal delta in degrees. */
+export function wrappedLongitudeDelta(fromLon, toLon) {
+  const from = finite(fromLon, "fromLon");
+  const to = finite(toLon, "toLon");
+  return ((to - from + 540) % 360) - 180;
 }
 
 export function createCostField({ weights = DEFAULT_WEIGHTS, sample = null, metadata = {} } = {}) {
@@ -81,7 +88,7 @@ export function costAlongPath(points, sampler, options = {}) {
     const b = points[index];
     const sample = sampler(a, b, index - 1);
     const evaluation = field.evaluate(sample);
-    const dx = finite(b.lon, "point.lon") - finite(a.lon, "point.lon");
+    const dx = wrappedLongitudeDelta(a.lon, b.lon);
     const dy = finite(b.lat, "point.lat") - finite(a.lat, "point.lat");
     const length = Math.hypot(dx, dy);
     const cost = evaluation.total * length;
