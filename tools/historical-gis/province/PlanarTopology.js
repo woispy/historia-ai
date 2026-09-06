@@ -7,22 +7,11 @@
  */
 
 export const ARC_KINDS = Object.freeze([
-  "province",
-  "duchy",
-  "region",
-  "coast",
-  "river",
-  "lake",
-  "world",
+  "province", "duchy", "region", "coast", "river", "lake", "world",
 ]);
 
 export const NODE_KINDS = Object.freeze([
-  "corner",
-  "triple-point",
-  "coast-junction",
-  "river-junction",
-  "region-junction",
-  "world-boundary",
+  "corner", "triple-point", "coast-junction", "river-junction", "region-junction", "world-boundary",
 ]);
 
 function finite(value, name) {
@@ -61,22 +50,15 @@ export function createTopologyArc(arc) {
   const id = assertId(arc?.id, "arc.id");
   const kind = arc?.kind ?? "province";
   if (!ARC_KINDS.includes(kind)) throw new Error(`Unsupported arc kind: ${kind}`);
-  if (assertId(arc.startNode, "arc.startNode") === assertId(arc.endNode, "arc.endNode")) {
-    throw new Error(`Arc ${id} cannot start and end at the same node`);
-  }
+  const startNode = assertId(arc.startNode, "arc.startNode");
+  const endNode = assertId(arc.endNode, "arc.endNode");
+  if (startNode === endNode) throw new Error(`Arc ${id} cannot start and end at the same node`);
   const leftFace = assertId(arc.leftFace, "arc.leftFace");
   const rightFace = assertId(arc.rightFace, "arc.rightFace");
-  if (leftFace === rightFace && kind !== "world") {
-    throw new Error(`Arc ${id} cannot have the same left/right face`);
-  }
+  if (leftFace === rightFace && kind !== "world") throw new Error(`Arc ${id} cannot have the same left/right face`);
 
   return {
-    id,
-    kind,
-    startNode: assertId(arc.startNode, "arc.startNode"),
-    endNode: assertId(arc.endNode, "arc.endNode"),
-    leftFace,
-    rightFace,
+    id, kind, startNode, endNode, leftFace, rightFace,
     geometry: Array.isArray(arc.geometry)
       ? arc.geometry.map((point) => validatePosition(point, `arc ${id} geometry`))
       : [],
@@ -97,6 +79,17 @@ export function createTopologyFace(face) {
   };
 }
 
+function validateFaceRingContinuity(face, arcs, ring, label, errors) {
+  for (let index = 0; index < ring.length; index += 1) {
+    const current = arcs[ring[index]];
+    const next = arcs[ring[(index + 1) % ring.length]];
+    if (!current || !next) continue;
+    if (current.endNode !== next.startNode) {
+      errors.push(`Face ${face.id} ${label} is not a continuous directed ring at ${ring[index]} → ${ring[(index + 1) % ring.length]}`);
+    }
+  }
+}
+
 export function validatePlanarTopology(topology) {
   const errors = [];
   const nodes = topology?.nodes ?? {};
@@ -111,30 +104,24 @@ export function validatePlanarTopology(topology) {
   }
 
   for (const [id, face] of Object.entries(faces)) {
-    if (face.outerRing.length < 3) errors.push(`Face ${id} has an invalid outer ring`);
-    for (const arcId of face.outerRing) {
+    const ring = face.outerRing ?? [];
+    if (ring.length < 3) errors.push(`Face ${id} has an invalid outer ring`);
+    for (const arcId of ring) {
       if (!arcs[arcId]) {
         errors.push(`Face ${id} references missing arc ${arcId}`);
         continue;
       }
       if (arcs[arcId].leftFace !== id) errors.push(`Face ${id} outer ring arc ${arcId} must have face on left side`);
     }
+    validateFaceRingContinuity(face, arcs, ring, "outerRing", errors);
   }
 
   for (const [id, node] of Object.entries(nodes)) {
-    if (node.incidentArcs.length < 3 && node.kind !== "world-boundary") {
-      errors.push(`Node ${id} must have degree >= 3`);
-    }
+    const boundaryNode = node.kind === "corner" || node.kind === "world-boundary";
+    if (node.incidentArcs.length < 3 && !boundaryNode) errors.push(`Interior node ${id} must have degree >= 3`);
     for (const arcId of node.incidentArcs) {
       if (!arcs[arcId]) errors.push(`Node ${id} references missing arc ${arcId}`);
     }
-  }
-
-  const undirectedEdges = new Set();
-  for (const arc of Object.values(arcs)) {
-    const key = [arc.startNode, arc.endNode].sort().join("|");
-    if (undirectedEdges.has(key)) errors.push(`Duplicate planar edge between ${arc.startNode} and ${arc.endNode}`);
-    undirectedEdges.add(key);
   }
 
   return { valid: errors.length === 0, errors };
@@ -142,8 +129,7 @@ export function validatePlanarTopology(topology) {
 
 /** Euler characteristic for a connected planar subdivision with no holes. */
 export function planarEulerCharacteristic(topology) {
-  const vertexCount = Object.keys(topology?.nodes ?? {}).length;
-  const edgeCount = Object.keys(topology?.arcs ?? {}).length;
-  const faceCount = Object.keys(topology?.faces ?? {}).length;
-  return vertexCount - edgeCount + faceCount;
+  return Object.keys(topology?.nodes ?? {}).length
+    - Object.keys(topology?.arcs ?? {}).length
+    + Object.keys(topology?.faces ?? {}).length;
 }
