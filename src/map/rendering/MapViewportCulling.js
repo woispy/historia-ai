@@ -71,6 +71,9 @@ export function getGeometryBounds(geometry) {
 function wrappedRanges(bounds) {
   const minX = bounds.minX;
   const maxX = bounds.maxX;
+  if (maxX - minX >= WORLD_WIDTH) {
+    return [{ minX: WORLD_MIN_X, maxX: WORLD_MAX_X }];
+  }
   if (minX >= WORLD_MIN_X && maxX <= WORLD_MAX_X) {
     return [{ minX, maxX }];
   }
