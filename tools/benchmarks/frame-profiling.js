@@ -115,7 +115,13 @@ async function createRuntime(asset, { startRenderer = true } = {}) {
 }
 
 function driveCamera(cameraRig, now, start) {
-  const phase = (now - start) / 7000;
+  const elapsed = now - start;
+  if (benchmarkMode === "paced144-wrap") {
+    const cycle = (elapsed / 14000) * 720 - 360;
+    cameraRig.setState({ x: cycle, y: Math.cos(elapsed / 7000) * 20, zoom: 2 + (Math.sin(elapsed / 14000) + 1) * 2 });
+    return;
+  }
+  const phase = elapsed / 7000;
   cameraRig.setState({ x: Math.sin(phase) * 45, y: Math.cos(phase * 0.7) * 20, zoom: 2 + (Math.sin(phase * 0.5) + 1) * 2 });
 }
 
