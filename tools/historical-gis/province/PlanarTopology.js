@@ -1,9 +1,9 @@
 /**
  * Historia AI — Authoritative Planar Topology
  *
- * Build-time topology primitives. Faces reference directed arcs; arcs reference
- * nodes and their two incident faces. Province polygons are derived views, not
- * the source of truth.
+ * Build-time topology primitives. A Face owns a cyclic list of directed
+ * half-edge references. An Arc is the canonical shared border geometry and
+ * carries the two incident faces. Province polygons are derived views.
  */
 
 export const ARC_KINDS = Object.freeze([
@@ -31,6 +31,11 @@ function validatePosition(position, name) {
   if (lat < -90 || lat > 90) throw new Error(`${name}.lat must be in [-90, 90]`);
   if (lon < -180 || lon >= 180) throw new Error(`${name}.lon must be in [-180, 180)`);
   return { lon, lat };
+}
+
+function normalizeRingEntry(entry) {
+  if (typeof entry === "string") return { arcId: entry, forward: true };
+  return { arcId: assertId(entry?.arcId, "face ring arcId"), forward: entry?.forward !== false };
 }
 
 export function createTopologyNode(node) {
@@ -68,26 +73,21 @@ export function createTopologyArc(arc) {
 
 export function createTopologyFace(face) {
   const id = assertId(face?.id, "face.id");
-  const outerRing = (face?.outerRing ?? []).map(String);
+  const outerRing = (face?.outerRing ?? []).map(normalizeRingEntry);
   if (outerRing.length < 3) throw new Error(`Face ${id} needs at least 3 directed arcs`);
   return {
     id,
     seedId: face?.seedId == null ? null : String(face.seedId),
     parentFaceId: face?.parentFaceId == null ? null : String(face.parentFaceId),
     outerRing,
-    holes: (face?.holes ?? []).map((ring) => ring.map(String)),
+    holes: (face?.holes ?? []).map((ring) => ring.map(normalizeRingEntry)),
   };
 }
 
-function validateFaceRingContinuity(face, arcs, ring, label, errors) {
-  for (let index = 0; index < ring.length; index += 1) {
-    const current = arcs[ring[index]];
-    const next = arcs[ring[(index + 1) % ring.length]];
-    if (!current || !next) continue;
-    if (current.endNode !== next.startNode) {
-      errors.push(`Face ${face.id} ${label} is not a continuous directed ring at ${ring[index]} → ${ring[(index + 1) % ring.length]}`);
-    }
-  }
+function endpointsForReference(arc, forward) {
+  return forward
+    ? { start: arc.startNode, end: arc.endNode }
+    : { start: arc.endNode, end: arc.startNode };
 }
 
 export function validatePlanarTopology(topology) {
@@ -106,14 +106,25 @@ export function validatePlanarTopology(topology) {
   for (const [id, face] of Object.entries(faces)) {
     const ring = face.outerRing ?? [];
     if (ring.length < 3) errors.push(`Face ${id} has an invalid outer ring`);
-    for (const arcId of ring) {
-      if (!arcs[arcId]) {
-        errors.push(`Face ${id} references missing arc ${arcId}`);
+    for (let index = 0; index < ring.length; index += 1) {
+      const current = ring[index];
+      const next = ring[(index + 1) % ring.length];
+      const currentArc = arcs[current.arcId];
+      const nextArc = arcs[next.arcId];
+      if (!currentArc) {
+        errors.push(`Face ${id} references missing arc ${current.arcId}`);
         continue;
       }
-      if (arcs[arcId].leftFace !== id) errors.push(`Face ${id} outer ring arc ${arcId} must have face on left side`);
+      if (currentArc.leftFace !== id && currentArc.rightFace !== id) {
+        errors.push(`Face ${id} is not incident to arc ${current.arcId}`);
+      }
+      if (!nextArc) continue;
+      const currentEnd = endpointsForReference(currentArc, current.forward).end;
+      const nextStart = endpointsForReference(nextArc, next.forward).start;
+      if (currentEnd !== nextStart) {
+        errors.push(`Face ${id} ring is not continuous between ${current.arcId} and ${next.arcId}`);
+      }
     }
-    validateFaceRingContinuity(face, arcs, ring, "outerRing", errors);
   }
 
   for (const [id, node] of Object.entries(nodes)) {
