@@ -60,4 +60,10 @@ const binaryRendererPath = path.join(root, "src/map/rendering/gpu/BinaryMapRende
 const binaryRenderer = fs.readFileSync(binaryRendererPath, "utf8");
 assert.match(binaryRenderer, /getContext\("webgl2",\{[^}]*depth:true/s);
 
-console.log("Map render diagnostics + depth context + terrain telemetry contracts: PASS");
+// Political provinces are a 2D ownership overlay and must not be depth-occluded
+// by positive DEM relief from the preceding physical pass. The physical pass
+// intentionally leaves DEPTH_TEST enabled, so the final political pass must
+// explicitly isolate itself from that depth state.
+assert.match(binaryRenderer, /beforePoliticalDraw\?\.\(this\.state,this\.camera,this\.canvas\.width,this\.canvas\.height\);gl\.disable\(gl\.DEPTH_TEST\);gl\.depthMask\(false\);draw\(/);
+
+console.log("Map render diagnostics + depth context + political depth isolation + terrain telemetry contracts: PASS");
