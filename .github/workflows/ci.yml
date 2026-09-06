@@ -134,6 +134,8 @@ jobs:
         run: npm run test:p3-multi-arc-graph-assembly
       - name: Run geometric winding + self-intersection guardrails
         run: npm run test:geometry-topology-guardrails
+      - name: Run Anatolia seed + physical-cost stress
+        run: npm run test:anatolia-seed-physical-cost-stress
       - name: Run Phase 2B Anatolia reconstruction tests
         run: npm run test:anatolia-phase2b
       - name: Run Phase 2C Anatolia refinement tests
