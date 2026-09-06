@@ -1,8 +1,10 @@
 /**
  * Frame-driven 2.5D camera rig.
  *
- * React receives coarse camera snapshots; animation, inertia and angle clamps
- * remain in the renderer domain so pointer motion never forces a UI render.
+ * The rig keeps canonical longitude for data/lookup consumers while retaining
+ * an unwrapped render longitude so horizontal traversal never jumps at the
+ * antimeridian. React receives coarse camera snapshots; animation, inertia
+ * and angle clamps remain in the renderer/runtime domain.
  */
 
 import { normalizeLongitude } from "../camera/WorldWrap.js";
@@ -11,8 +13,14 @@ const WORLD = Object.freeze({ minX: -180, maxX: 180, minY: -90, maxY: 90 });
 
 export class MapCameraRig {
   constructor(options = {}) {
+    const initialRenderX = Number.isFinite(Number(options.renderX))
+      ? Number(options.renderX)
+      : Number.isFinite(Number(options.x))
+        ? Number(options.x)
+        : 0;
     this.state = {
-      x: 0,
+      x: normalizeLongitude(initialRenderX),
+      renderX: initialRenderX,
       y: 0,
       zoom: 1,
       pitch: Number.isFinite(Number(options.pitch)) ? Number(options.pitch) : 24,
@@ -30,7 +38,15 @@ export class MapCameraRig {
   }
 
   setState(next = {}) {
-    this.state.x = Number.isFinite(Number(next.x)) ? normalizeLongitude(next.x) : this.state.x;
+    const hasRenderX = Number.isFinite(Number(next.renderX));
+    const hasX = Number.isFinite(Number(next.x));
+    if (hasRenderX) {
+      this.state.renderX = Number(next.renderX);
+      this.state.x = normalizeLongitude(this.state.renderX);
+    } else if (hasX) {
+      this.state.renderX = Number(next.x);
+      this.state.x = normalizeLongitude(this.state.renderX);
+    }
     this.state.y = Number.isFinite(Number(next.y)) ? Number(next.y) : this.state.y;
     this.state.zoom = clamp(Number(next.zoom) || this.state.zoom, this.minZoom, this.maxZoom);
     if (Number.isFinite(Number(next.pitch))) this.state.pitch = clamp(Number(next.pitch), this.pitchMin, this.pitchMax);
@@ -48,7 +64,8 @@ export class MapCameraRig {
     const scaleY = 180 / (Math.max(1, viewportHeight) * zoom);
     this.velocity.x = -dx * scaleX;
     this.velocity.y = dy * scaleY;
-    this.state.x = normalizeLongitude(this.state.x + this.velocity.x);
+    this.state.renderX += this.velocity.x;
+    this.state.x = normalizeLongitude(this.state.renderX);
     this.state.y = clamp(this.state.y + this.velocity.y, WORLD.minY + 1, WORLD.maxY - 1);
   }
 
@@ -65,7 +82,8 @@ export class MapCameraRig {
     const dt = Math.min(0.05, Math.max(0, Number(dtSeconds) || 0));
     const damping = Math.exp(-8 * dt);
     if (Math.abs(this.velocity.x) > 0.00001 || Math.abs(this.velocity.y) > 0.00001) {
-      this.state.x = normalizeLongitude(this.state.x + this.velocity.x * dt * 60);
+      this.state.renderX += this.velocity.x * dt * 60;
+      this.state.x = normalizeLongitude(this.state.renderX);
       this.state.y = clamp(this.state.y + this.velocity.y * dt * 60, WORLD.minY + 1, WORLD.maxY - 1);
     }
     this.velocity.x *= damping;
