@@ -16,8 +16,8 @@ export function getVisibleWorldCopyOffsets(cameraX, zoom = 1) {
   const halfViewWidth = WORLD_WIDTH / (2 * safeZoom);
   const minVisible = safeCenter - halfViewWidth;
   const maxVisible = safeCenter + halfViewWidth;
-  const firstCopy = Math.ceil((minVisible - WORLD_MAX_X) / WORLD_WIDTH);
-  const lastCopy = Math.floor((maxVisible - WORLD_MIN_X) / WORLD_WIDTH);
+  const firstCopy = Math.floor((minVisible - WORLD_MAX_X) / WORLD_WIDTH) + 1;
+  const lastCopy = Math.ceil((maxVisible - WORLD_MIN_X) / WORLD_WIDTH) - 1;
   const offsets = [];
 
   for (let copyIndex = firstCopy; copyIndex <= lastCopy; copyIndex += 1) {
