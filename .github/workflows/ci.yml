@@ -79,6 +79,8 @@ jobs:
         run: node tools/tests/terrain-streaming-wrap.test.js
       - name: Validate world-copy visibility and canonical identity
         run: node tools/tests/world-wrap-copy-regression.test.js
+      - name: Validate world-wrap layer synchronization
+        run: node tools/tests/world-wrap-synchronization.test.js
       - name: Validate Phase A-H legacy cleanliness
         run: npm run test:phase-ah-legacy-cleanliness
       - name: Generate world physical geometry assets
