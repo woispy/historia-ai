@@ -7,6 +7,8 @@ import { SpatialSeedIndex } from "../historical-gis/province/SpatialSeedIndex.js
 import { createCostField } from "../historical-gis/province/CostField.js";
 import { adaptHydrographySample, composeCostSamples } from "../historical-gis/province/CostAdapters.js";
 import { CopernicusDemCostSampler } from "../historical-gis/province/CopernicusDemCostSampler.js";
+import { RidgeWatershedAnalyzer, measureRidgeAlignment } from "../historical-gis/province/TerrainRidgeAnalysis.js";
+import { refineLeastCostPath, comparePathResolution } from "../historical-gis/province/AdaptivePathRefiner.js";
 import { CompositeCostGraph } from "../historical-gis/province/CompositeCostGraph.js";
 import { LeastCostPathSolver } from "../historical-gis/province/LeastCostPathSolver.js";
 import { AuthoritativeArcRegistry, registerSolverPath } from "../historical-gis/province/AuthoritativeArcGenerator.js";
@@ -79,37 +81,50 @@ assert.equal(index.size, seeds.length);
 const demSampler = await new CopernicusDemCostSampler({ bounds: GRID_BOUNDS }).initialize();
 assert.ok(demSampler.entries.size >= 100, `expected broad Copernicus source coverage, got ${demSampler.entries.size}`);
 
+const ridgeAnalyzer = new RidgeWatershedAnalyzer({
+  elevationAt: (node) => demSampler.elevation(node),
+  stepDegrees: 0.01,
+  ridgeProminenceMeters: 120,
+});
+
 const field = createCostField({
   weights: { slope: 1.1, ridge: 1.4, mountain: 2.2, river: 2.0, lake: 1.5, coast: 0.35 },
-  metadata: { source: "Copernicus GLO-30 + generated Natural Earth 10m hydrography", epoch: 1300 },
+  metadata: { source: "Copernicus GLO-30 + generated Natural Earth 10m hydrography + local ridge/divide morphology", epoch: 1300 },
 });
 
 function physicalSample(node) {
   const dem = demSampler.sample(node);
+  const ridge = ridgeAnalyzer.analyze(node);
   const riverDistance = distanceToRivers(node.lon, node.lat);
   const hydro = adaptHydrographySample({ riverPenalty: Math.max(0, 1 - riverDistance / 0.12) });
-  return composeCostSamples(dem, hydro);
+  return composeCostSamples(dem, hydro, { ridge: ridge.ridgeCost });
 }
 
-const graph = new CompositeCostGraph({
-  width: GRID_WIDTH,
-  height: GRID_HEIGHT,
-  bounds: GRID_BOUNDS,
-  sampleCell: physicalSample,
-  transitionCost: (from, to, fromSample, toSample) => field.evaluate({
-    slope: (fromSample.slope + toSample.slope) / 2,
-    ridge: (fromSample.ridge + toSample.ridge) / 2,
-    mountain: (fromSample.mountain + toSample.mountain) / 2,
-    river: (fromSample.river + toSample.river) / 2,
-    lake: (fromSample.lake + toSample.lake) / 2,
-    coast: (fromSample.coast + toSample.coast) / 2,
-  }).total + 0.05,
-  blocked: (node) => node.lat < 36.05 || node.lat > 42.35,
-});
+function buildGraph({ bounds = GRID_BOUNDS, width = GRID_WIDTH, height = GRID_HEIGHT } = {}) {
+  return new CompositeCostGraph({
+    width,
+    height,
+    bounds,
+    sampleCell: physicalSample,
+    transitionCost: (from, to, fromSample, toSample) => field.evaluate({
+      slope: (fromSample.slope + toSample.slope) / 2,
+      ridge: (fromSample.ridge + toSample.ridge) / 2,
+      mountain: (fromSample.mountain + toSample.mountain) / 2,
+      river: (fromSample.river + toSample.river) / 2,
+      lake: (fromSample.lake + toSample.lake) / 2,
+      coast: (fromSample.coast + toSample.coast) / 2,
+    }).total + 0.05,
+    blocked: (node) => node.lat < 36.05 || node.lat > 42.35,
+  });
+}
 
-const solver = new LeastCostPathSolver({ graph, minimumCost: 0.05, maxIterations: 200000 });
+function buildSolver(graph) { return new LeastCostPathSolver({ graph, minimumCost: 0.05, maxIterations: 200000 }); }
+
+const graph = buildGraph();
+const solver = buildSolver(graph);
 const registry = new AuthoritativeArcRegistry({ tolerance: 1e-6 });
 const diagnostics = [];
+const adaptiveDiagnostics = [];
 let solved = 0;
 let failed = 0;
 let candidatePairs = 0;
@@ -132,6 +147,36 @@ for (const seed of seeds) {
     solved += 1;
     assert.ok(Number.isFinite(result.cost) && result.cost >= 0);
     assert.ok(result.path.length >= 2);
+
+    if (adaptiveDiagnostics.length < 8) {
+      const coarseQuality = measureRidgeAlignment(result.path, ridgeAnalyzer);
+      try {
+        const refinement = refineLeastCostPath({
+          coarseGraph: graph,
+          coarseResult: result,
+          refinementFactor: 4,
+          corridorPaddingCells: 2,
+          graphFactory: ({ bounds, width, height }) => buildGraph({ bounds, width, height }),
+          solverFactory: (fineGraph) => buildSolver(fineGraph),
+        });
+        if (refinement.refined?.path) {
+          const refinedQuality = measureRidgeAlignment(refinement.refined.path, ridgeAnalyzer);
+          const resolution = comparePathResolution(result, refinement.refined);
+          adaptiveDiagnostics.push({
+            seed: seed.id,
+            neighbour: neighbour.id,
+            coarseQuality,
+            refinedQuality,
+            resolution,
+          });
+          assert.ok(refinement.width >= graph.width || refinement.height >= graph.height || refinement.bounds.maxLon - refinement.bounds.minLon < graph.bounds.maxLon - graph.bounds.minLon);
+          assert.ok(Number.isFinite(refinedQuality.ridgeAlignmentScore));
+        }
+      } catch (error) {
+        adaptiveDiagnostics.push({ seed: seed.id, neighbour: neighbour.id, refinement: "no-solution", reason: error.message });
+      }
+    }
+
     const registration = registerSolverPath(registry, { result, leftFace: `stress:${seed.id}`, rightFace: `stress:${neighbour.id}`, kind: "stress-edge", confidence: 0.5, nodeKind: "corner" });
     assert.ok(registration.arc);
     assert.ok(validateArcGeometry(registration.arc).valid);
@@ -142,6 +187,7 @@ assert.ok(candidatePairs >= 20, `expected broad regional adjacency coverage, got
 assert.ok(solved >= Math.floor(candidatePairs * 0.75), `least-cost solver success rate too low: ${solved}/${candidatePairs}; diagnostics=${JSON.stringify(diagnostics.slice(0, 8))}`);
 assert.ok(registry.nodes.size > 20, "authoritative registry should receive a regional node population");
 assert.ok(registry.arcs.size > 15, "authoritative registry should receive a regional arc population");
+assert.ok(adaptiveDiagnostics.some((entry) => entry.refinedQuality), "targeted adaptive refinement must produce at least one measurable refined path");
 
 for (const arc of Object.values(registry.toTopology().arcs)) {
   assert.ok(arc.geometry.length >= 2);
@@ -156,4 +202,11 @@ for (const sample of samples) {
 }
 assert.ok(new Set(samples.map((sample) => `${sample.slope}:${sample.ridge}:${sample.mountain}`)).size > 1, "Copernicus DEM sampling must produce spatially varying terrain costs");
 
-console.log(`Anatolia seed + physical-cost stress: PASS (${seeds.length} seeds, ${demSampler.entries.size} Copernicus tiles, ${candidatePairs} candidate pairs, ${solved} solved, ${failed} failed, ${registry.nodes.size} nodes, ${registry.arcs.size} arcs, ${MAJOR_RIVERS.length} major river segments)`);
+const ridgeSamples = sampleNodes.map((node) => ridgeAnalyzer.analyze(node));
+assert.ok(ridgeSamples.every((sample) => sample.sampleCount >= 4));
+assert.ok(ridgeSamples.every((sample) => sample.ridgeAffinity >= 0 && sample.ridgeAffinity <= 1));
+assert.ok(new Set(ridgeSamples.map((sample) => sample.ridgeAffinity)).size > 1, "ridge/divide morphology must vary spatially");
+
+const qualitySummary = adaptiveDiagnostics.filter((entry) => entry.refinedQuality);
+console.log(`Anatolia seed + physical-cost + adaptive-ridge stress: PASS (${seeds.length} seeds, ${demSampler.entries.size} Copernicus tiles, ${candidatePairs} candidate pairs, ${solved} solved, ${failed} failed, ${registry.nodes.size} nodes, ${registry.arcs.size} arcs, ${MAJOR_RIVERS.length} major river segments, ${qualitySummary.length} adaptive refinements)`);
+if (qualitySummary.length) console.log(`Ridge alignment metrics: ${JSON.stringify(qualitySummary.slice(0, 4))}`);
