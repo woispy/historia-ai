@@ -19,6 +19,7 @@ import {
   setCameraPosition,
 } from "../../src/map/camera/CameraActions.js";
 import { createCameraModel } from "../../src/map/camera/CameraModel.js";
+import { MapCameraRig } from "../../src/map/runtime/MapCameraRig.js";
 import {
   getViewportBounds,
   isGeometryVisible,
@@ -84,6 +85,23 @@ test("position and focus use the same canonical longitude rule", () => {
   assert.equal(positioned.x, -180);
   assert.equal(focused.x, 179);
   assert.equal(focused.target, "province-a");
+});
+
+test("production camera rig wraps drag and inertial longitude", () => {
+  const rig = new MapCameraRig({ minZoom: 1, maxZoom: 96 });
+  rig.setState({ x: 179 });
+  rig.panPixels(-1280, 0, 1280, 720);
+  assert.equal(rig.snapshot().x, -1);
+
+  rig.setState({ x: -179 });
+  rig.panPixels(1280, 0, 1280, 720);
+  assert.equal(rig.snapshot().x, 1);
+
+  rig.setState({ x: 179 });
+  rig.panPixels(-2560, 0, 1280, 720);
+  assert.equal(rig.snapshot().x, -1);
+  rig.tick(1 / 60);
+  assert.ok(rig.snapshot().x >= WORLD_MIN_X && rig.snapshot().x < WORLD_MAX_X);
 });
 
 test("viewport culling preserves geometry across the antimeridian", () => {
