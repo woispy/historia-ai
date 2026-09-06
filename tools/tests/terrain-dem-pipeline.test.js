@@ -4,7 +4,7 @@ import { buildTerrainGridMesh, TERRAIN_MAX_SKIRT_DEPTH_METERS } from "../../src/
 import { buildTerrainMvp } from "../../src/map/rendering/terrain/TerrainCameraMath.js";
 import { parseTileList, copernicusSourceTileKeysForBounds, copernicusTileKey, copernicusTileLatitudeCoordinate, copernicusTileLongitudeCoordinate, sampleCopernicusRaster, validateCopernicusTileGeoreference } from "../asset-builder/dem/CopernicusDemSource.js";
 import { isValidDemPixel, measureDemStats, sanitizeDemRaster } from "../asset-builder/dem/GeoTiffDecoder.js";
-import { coordinateInCoverage, terrainSampleCoordinate, terrainTileBoundsForCoverage, terrainTileSampleBoundsForCoverage } from "../asset-builder/pipelines/TerrainPipeline.js";
+import { coordinateInCoverage, terrainDemSourceTileCoordinates, terrainSampleCoordinate, terrainTileBoundsForCoverage, terrainTileSampleBoundsForCoverage } from "../asset-builder/pipelines/TerrainPipeline.js";
 import { makeTerrainTileKey, terrainTileBounds } from "../../src/map/rendering/terrain/TerrainTile.js";
 import { collectWorldLandPolygons } from "../../src/map/physical/WorldLandMask.js";
 
@@ -79,6 +79,11 @@ const sampleBounds = { minX: 26, minY: 35, maxX: 46, maxY: 43 };
 assert.deepEqual(terrainSampleCoordinate(sampleBounds, 0, 0, 3), { lon: 26, lat: 35 });
 assert.deepEqual(terrainSampleCoordinate(sampleBounds, 2, 2, 3), { lon: 46, lat: 43 });
 assert.deepEqual(terrainSampleCoordinate(sampleBounds, 1, 1, 3), { lon: 36, lat: 39 });
+const interiorSample = terrainDemSourceTileCoordinates(35.0625, 36.25);
+assert.equal(interiorSample.lat, 35.0625);
+assert.equal(interiorSample.lon, 36.25);
+assert.equal(interiorSample.key, "Copernicus_DSM_COG_10_N35_00_E036_00_DEM");
+assert.equal(terrainDemSourceTileCoordinates(35, 36.25).key, "Copernicus_DSM_COG_10_N34_00_E036_00_DEM");
 const lod0 = makeTerrainTileKey(0, 0, 0);
 assert.deepEqual(terrainTileBoundsForCoverage(lod0, coverage), terrainTileBounds(lod0));
 assert.deepEqual(terrainTileBoundsForCoverage(lod0, coverage), { minX: -180, minY: -90, maxX: 180, maxY: 90 });
