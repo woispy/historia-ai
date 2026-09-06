@@ -19,8 +19,8 @@ on:
       - feat/phase2d-anatolia-province-geometry
       - feat/phase2efgh-cartography
       - feat/cartography-visual-refinement
-      - feat/cartography-foundation-v2
       - feat/map-gpu-texture-architecture
+      - feat/cartography-foundation-v2
   push:
     branches:
       - main
@@ -44,7 +44,6 @@ on:
       - feat/phase2efgh-cartography
       - feat/cartography-visual-refinement
       - feat/map-gpu-texture-architecture
-      - feat/cartography-foundation-v2
       - feat/phase3-runtime-engine
       - feat/runtime-province-selection
       - feat/historical-map-clean-foundation
@@ -119,6 +118,8 @@ jobs:
         run: npm run test:city-label-scale
       - name: Run Phase 2 province topology tests
         run: npm run test:province-topology
+      - name: Run authoritative province generation contracts
+        run: npm run test:province-generation-contracts
       - name: Run Phase 2B Anatolia reconstruction tests
         run: npm run test:anatolia-phase2b
       - name: Run Phase 2C Anatolia refinement tests
