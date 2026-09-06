@@ -1,19 +1,22 @@
 import { MapRendererContract } from "../MapRendererContract.js";
-import { createWebGpuBenchmarkTelemetry } from "./BenchmarkGpuTelemetry.js";
+import { createWebGpuBenchmarkTelemetry } from "../../runtime/BenchmarkGpuTelemetry.js";
 
 const ID_SCALE = 1 / 255;
+const ID_CLEAR = "vec4<f32>(0.0,0.0,0.0,0.0)";
 
 const CULL_WGSL = `
-struct Camera { viewProj: mat4x4<f32>, zoom: f32 };
+struct Camera { viewProj: mat4x4<f32>, zoom: f32, _pad: vec3<f32> };
 @group(0) @binding(0) var<uniform> camera: Camera;
-@group(0) @binding(1) var<storage, read> tileIndex: array<u32>;
-@group(0) @binding(2) var<storage, read> lodRanges: array<u32>;
+@group(0) @binding(1) var<storage, read> tiles: array<u32>;
+@group(0) @binding(2) var<storage, read> lods: array<u32>;
 @group(0) @binding(3) var<storage, read> bounds: array<f32>;
 @group(0) @binding(4) var<storage, read_write> indices: array<u32>;
-@group(0) @binding(5) var<storage, read_write> provinceIds: array<u32>;
+@group(0) @binding(5) var<storage, read_write> indexProvinceIds: array<u32>;
 @group(0) @binding(6) var<storage, read_write> counter: atomic<u32>;
+fn visible(minX:f32,minY:f32,maxX:f32,maxY:f32)->bool { let corners=array<vec2<f32>,4>(vec2(minX,minY),vec2(maxX,minY),vec2(minX,maxY),vec2(maxX,maxY)); for(var j=0u;j<4u;j=j+1u){ let c=camera.viewProj*vec4<f32>(corners[j],0.0,1.0); if(c.x>=-c.w&&c.x<=c.w&&c.y>=-c.w&&c.y<=c.w&&c.z>=-c.w&&c.z<=c.w){return true;} } return false; }
+fn lodRange(province:u32)->vec2<u32>{ let b=province*4u; return vec2(lods[b],lods[b+1u]); }
 @compute @workgroup_size(64)
-fn cull(@builtin(global_invocation_id) gid: vec3<u32>){ let i=gid.x; if(i>=arrayLength(&tileIndex)){return;} let b=i*4u; let minX=bounds[b]; let minY=bounds[b+1u]; let maxX=bounds[b+2u]; let maxY=bounds[b+3u]; let p0=atomicAdd(&counter,3u); indices[p0]=tileIndex[i]*3u; indices[p0+1u]=tileIndex[i]*3u+1u; indices[p0+2u]=tileIndex[i]*3u+2u; provinceIds[p0]=i; provinceIds[p0+1u]=i; provinceIds[p0+2u]=i; }
+fn cull(@builtin(global_invocation_id) id:vec3<u32>) { let tileIndex=id.x; if(tileIndex>=arrayLength(&tiles)/6u){return;} let t=tileIndex*6u; let province=tiles[t+2u]; let b=province*4u; if(!visible(bounds[b],bounds[b+1u],bounds[b+2u],bounds[b+3u])){return;} let range=lodRange(province); if(tileIndex<range.x||tileIndex>=range.x+range.y){return;} let pointOffset=tiles[t]; let pointCount=tiles[t+1u]; if(pointCount<3u){return;} for(var k=1u;k+1u<pointCount;k=k+1u){ let dst=atomicAdd(&counter,3u); indices[dst]=pointOffset; indices[dst+1u]=pointOffset+k; indices[dst+2u]=pointOffset+k+1u; indexProvinceIds[dst]=province; indexProvinceIds[dst+1u]=province; indexProvinceIds[dst+2u]=province; } }
 `;
 
 const FINALIZE_WGSL = `
