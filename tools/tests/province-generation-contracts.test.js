@@ -36,15 +36,14 @@ const wrapped = validateProvinceSeed({
   position: { lon: 181, lat: 40 },
 });
 assert.equal(wrapped.position.lon, -179);
-
 assert.throws(() => validateProvinceSeed({ ...seed, position: { lon: 10, lat: 91 } }));
 assert.throws(() => validateProvinceSeedSet([seed, seed]));
 assert.equal(typeof serializeProvinceSeeds([seed]), "string");
 
 const nodes = {
-  a: createTopologyNode({ id: "a", kind: "corner", position: { lon: 0, lat: 0 }, incidentArcs: ["ab", "ca"] }),
-  b: createTopologyNode({ id: "b", kind: "corner", position: { lon: 1, lat: 0 }, incidentArcs: ["bc", "ab"] }),
-  c: createTopologyNode({ id: "c", kind: "corner", position: { lon: 0, lat: 1 }, incidentArcs: ["ca", "bc"] }),
+  a: createTopologyNode({ id: "a", kind: "corner", position: { lon: 0, lat: 0 }, incidentArcs: ["ab", "ca"], incidentFaces: ["f", "outside"] }),
+  b: createTopologyNode({ id: "b", kind: "corner", position: { lon: 1, lat: 0 }, incidentArcs: ["bc", "ab"], incidentFaces: ["f", "outside"] }),
+  c: createTopologyNode({ id: "c", kind: "corner", position: { lon: 0, lat: 1 }, incidentArcs: ["ca", "bc"], incidentFaces: ["f", "outside"] }),
 };
 const arcs = {
   ab: createTopologyArc({ id: "ab", startNode: "a", endNode: "b", leftFace: "f", rightFace: "outside", geometry: [{ lon: 0, lat: 0 }, { lon: 1, lat: 0 }] }),
@@ -60,13 +59,38 @@ const faces = {
   ] }),
 };
 const topology = { nodes, arcs, faces };
-assert.equal(validatePlanarTopology(topology).valid, true);
-assert.equal(planarEulerCharacteristic(topology), 1);
 
-const broken = {
+const valid = validatePlanarTopology(topology);
+assert.equal(valid.valid, true, valid.errors.join("; "));
+assert.equal(valid.componentCount, 1);
+assert.equal(planarEulerCharacteristic(topology), 2);
+
+const brokenRing = {
   ...topology,
   faces: { ...faces, f: { ...faces.f, outerRing: ["ab", "ca", "bc"] } },
 };
-assert.equal(validatePlanarTopology(broken).valid, false);
+assert.equal(validatePlanarTopology(brokenRing).valid, false);
+
+const wrongIncidence = {
+  ...topology,
+  nodes: { ...nodes, a: { ...nodes.a, incidentFaces: ["f"] } },
+};
+assert.equal(validatePlanarTopology(wrongIncidence).valid, false);
+
+const wrongDirection = {
+  ...topology,
+  faces: { ...faces, outside: { ...faces.outside, outerRing: [
+    { arcId: "ca", forward: true },
+    { arcId: "bc", forward: false },
+    { arcId: "ab", forward: false },
+  ] } },
+};
+assert.equal(validatePlanarTopology(wrongDirection).valid, false);
+
+const orphanNode = {
+  ...topology,
+  nodes: { ...nodes, orphan: createTopologyNode({ id: "orphan", kind: "corner", position: { lon: 5, lat: 5 } }) },
+};
+assert.equal(validatePlanarTopology(orphanNode).valid, false);
 
 console.log("Province generation contracts: PASS");
