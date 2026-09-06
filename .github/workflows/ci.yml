@@ -136,6 +136,8 @@ jobs:
         run: npm run test:geometry-topology-guardrails
       - name: Run Anatolia seed + physical-cost stress
         run: npm run test:anatolia-seed-physical-cost-stress
+      - name: Run adaptive ridge boundary quality
+        run: npm run test:adaptive-ridge-boundary-quality
       - name: Run Phase 2B Anatolia reconstruction tests
         run: npm run test:anatolia-phase2b
       - name: Run Phase 2C Anatolia refinement tests
