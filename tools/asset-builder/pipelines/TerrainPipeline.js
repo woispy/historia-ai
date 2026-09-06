@@ -70,15 +70,18 @@ export function terrainSampleCoordinate(bounds, x, y, size) {
   return { lon: bounds.minX + (bounds.maxX - bounds.minX) * x / (size - 1), lat: bounds.minY + (bounds.maxY - bounds.minY) * y / (size - 1) };
 }
 
+/** Resolve the exact source coordinate and canonical Copernicus cache key for one DEM sample. */
+export function terrainDemSourceTileCoordinates(lat, lon) { return { lat: Number(lat), lon: Number(lon), key: copernicusTileKey(lat, lon) }; }
+
 async function sampleTile(source, bounds, size, coverage, landPolygons) {
   const heights = new Float32Array(size * size), demValidity = new Uint8Array(size * size), landMask = new Uint8Array(size * size), cache = new Map();
   const sampledStats = createStats();
   for (let y = 0; y < size; y += 1) for (let x = 0; x < size; x += 1) {
     const { lon, lat } = terrainSampleCoordinate(bounds, x, y, size), index = y * size + x;
     if (!coordinateInCoverage(lon, lat, coverage)) { sampledStats.invalidCount += 1; continue; }
-    const key = copernicusTileKey(lat, lon);
-    if (!cache.has(key)) cache.set(key, await source.readTile(lat, lon));
-    const value = sampleCopernicusRaster(cache.get(key), lon, lat);
+    const sourceCoordinate = terrainDemSourceTileCoordinates(lat, lon);
+    if (!cache.has(sourceCoordinate.key)) cache.set(sourceCoordinate.key, await source.readTile(sourceCoordinate.lat, sourceCoordinate.lon));
+    const value = sampleCopernicusRaster(cache.get(sourceCoordinate.key), lon, lat);
     updateStats(sampledStats, value, value == null || !Number.isFinite(value) || value < HEIGHT_MIN_METERS || value > HEIGHT_MAX_METERS);
     const safeValue = sanitizeTerrainHeight(value);
     if (safeValue === value) { heights[index] = safeValue; demValidity[index] = 255; }
@@ -102,7 +105,7 @@ function buildSpatialDiagnostic(cache, bounds, size, demValidity) {
   const traces = [];
   for (const [x,y] of traceGrid) {
     const { lon, lat } = terrainSampleCoordinate(bounds, x, y, size);
-    const key = copernicusTileKey(lat, lon);
+    const key = terrainDemSourceTileCoordinates(lat, lon).key;
     const trace = sampleCopernicusRasterTrace(cache.get(key), lon, lat);
     traces.push({ grid:[x,y], world:[lon,lat], sourceTile:key, trace });
   }
@@ -127,7 +130,7 @@ function measureEncodedHeightRange(encoded) { const decoded=decodeTerrainTile(en
 function aggregateSourceStats(sourceStats) { const aggregate=createStats(); for(const source of sourceStats){if(!source)continue; aggregate.min=Math.min(aggregate.min,Number(source.min)); aggregate.max=Math.max(aggregate.max,Number(source.max)); aggregate.finiteCount+=Number(source.finiteCount)||0; aggregate.invalidCount+=Number(source.invalidCount)||0;} return normalizeStats(aggregate); }
 function measureRoundTrip(source, decoded) { let mismatchCount=0, maxAbsError=0; for(let i=0;i<source.length;i+=1){const a=source[i],b=decoded[i],error=Math.abs(a-b);if(error>0)mismatchCount+=1;if(error>maxAbsError)maxAbsError=error;} return { mismatchCount, maxAbsErrorMeters:maxAbsError }; }
 function countLargeNeighborDeltas(values,size,threshold) { let count=0; for(let y=0;y<size;y+=1)for(let x=0;x<size;x+=1){const current=values[y*size+x];if(x+1<size&&Math.abs(current-values[y*size+x+1])>threshold)count+=1;if(y+1<size&&Math.abs(current-values[(y+1)*size+x])>threshold)count+=1;}return count; }
-function loadPhysicalLandPolygons() { if (!fs.existsSync(GEOMETRY_ASSET_DIR)) return []; const modules = Object.fromEntries(fs.readdirSync(GEOMETRY_ASSET_DIR).filter((file) => /^geometry_country_.*\.json$/.test(file)).map((file) => [file, JSON.parse(fs.readFileSync(path.join(GEOMETRY_ASSET_DIR, file), "utf8")])); return collectWorldLandPolygons(modules); }
+function loadPhysicalLandPolygons() { if (!fs.existsSync(GEOMETRY_ASSET_DIR)) return []; const modules = Object.fromEntries(fs.readdirSync(GEOMETRY_ASSET_DIR).filter((file) => /^geometry_country_.*\.json$/.test(file)).map((file) => [file, JSON.parse(fs.readFileSync(path.join(GEOMETRY_ASSET_DIR, file), "utf8"))])); return collectWorldLandPolygons(modules); }
 function isPhysicalLand(lon, lat, landPolygons) { return landPolygons.some((polygon) => pointInPolygon(lon, lat, polygon)); }
 function pointInPolygon(x, y, polygon) { if (!Array.isArray(polygon) || polygon.length < 3) return false; let inside = false; for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) { const xi=Number(polygon[i]?.[0]), yi=Number(polygon[i]?.[1]), xj=Number(polygon[j]?.[0]), yj=Number(polygon[j]?.[1]); const intersects=((yi>y)!=(yj>y)) && x < ((xj-xi)*(y-yi))/(yj-yi)+xi; if (intersects) inside=!inside; } return inside; }
 export function coordinateInCoverage(lon, lat, coverage) { return Number(lon) >= coverage[0] && Number(lon) <= coverage[2] && Number(lat) >= coverage[1] && Number(lat) <= coverage[3]; }
