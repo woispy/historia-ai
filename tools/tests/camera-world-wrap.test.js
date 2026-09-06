@@ -114,17 +114,19 @@ test("production camera rig keeps render longitude unwrapped across the antimeri
 test("production camera rig can traverse 360, 720, and 1080 degrees without render jumps", () => {
   const rig = new MapCameraRig({ minZoom: 1, maxZoom: 96 });
   rig.setState({ x: 179 });
-  rig.panPixels(-180, 0, 360, 720);
+
+  // At zoom 1, a 360px horizontal gesture equals one 360-degree world width.
+  rig.panPixels(-360, 0, 360, 720);
   const oneWorld = rig.snapshot();
   assert.equal(oneWorld.renderX, 539);
   assert.equal(oneWorld.x, 179);
 
-  rig.panPixels(-180, 0, 360, 720);
+  rig.panPixels(-360, 0, 360, 720);
   const twoWorlds = rig.snapshot();
   assert.equal(twoWorlds.renderX, 899);
   assert.equal(twoWorlds.x, 179);
 
-  rig.panPixels(-180, 0, 360, 720);
+  rig.panPixels(-360, 0, 360, 720);
   const threeWorlds = rig.snapshot();
   assert.equal(threeWorlds.renderX, 1259);
   assert.equal(threeWorlds.x, 179);
