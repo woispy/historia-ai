@@ -229,13 +229,13 @@ export function validatePlanarTopology(topology) {
   }
 
   // 4. Orphan detection: every topology primitive must participate in the graph.
-  for (const [id, node] of Object.entries(nodes)) {
+  for (const [id] of Object.entries(nodes)) {
     if ((actualNodeArcs.get(id)?.size ?? 0) === 0) addError(errors, `Orphan node ${id}`);
   }
   for (const [id, uses] of faceSideUse) {
     if (uses.left === 0 && uses.right === 0) addError(errors, `Orphan arc ${id}`);
   }
-  for (const [id, face] of Object.entries(faces)) {
+  for (const [id] of Object.entries(faces)) {
     if ((actualFaceArcs.get(id)?.length ?? 0) === 0) addError(errors, `Orphan face ${id}`);
   }
 
