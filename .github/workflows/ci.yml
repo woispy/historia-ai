@@ -128,6 +128,8 @@ jobs:
         run: npm run test:p3-cost-path
       - name: Run P3.9 authoritative arc contracts
         run: npm run test:p3-authoritative-arcs
+      - name: Run P3.9.1 directed face ring + topology contracts
+        run: npm run test:p3-authoritative-face-rings
       - name: Run Phase 2B Anatolia reconstruction tests
         run: npm run test:anatolia-phase2b
       - name: Run Phase 2C Anatolia refinement tests
