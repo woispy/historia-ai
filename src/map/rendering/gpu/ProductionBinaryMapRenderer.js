@@ -1,6 +1,7 @@
 import { BinaryMapRenderer, screenToWorld } from "./BinaryMapRenderer.js";
 import { ProductionPhysicalMapLayer } from "./ProductionPhysicalMapLayer.js";
 import { installMapRenderDiagnostics, isMapRenderPassEnabled } from "./MapRenderDiagnostics.js";
+import { normalizeLongitude } from "../../camera/WorldWrap.js";
 
 /** Production renderer: political provinces remain authoritative while physical geography is drawn underneath. */
 export class ProductionBinaryMapRenderer extends BinaryMapRenderer {
@@ -50,7 +51,8 @@ export class ProductionBinaryMapRenderer extends BinaryMapRenderer {
     const world = screenToWorld(localX, localY, this.camera);
     if (!world) return null;
 
-    const provinceId = pickProvinceFromTriangles(this.state, world[0], world[1]);
+    const canonicalWorldX = normalizeLongitude(world[0]);
+    const provinceId = pickProvinceFromTriangles(this.state, canonicalWorldX, world[1]);
     if (diagnostic && import.meta.env?.DEV) {
       const bounds = geometryBounds(this.state.assetSource.geometry);
       console.info("[ProductionBinaryMapRenderer] pick diagnostic", {
@@ -60,6 +62,7 @@ export class ProductionBinaryMapRenderer extends BinaryMapRenderer {
         local: { x: localX, y: localY },
         camera: { ...this.camera },
         world: { x: world[0], y: world[1] },
+        canonicalWorld: { x: canonicalWorldX, y: world[1] },
         provinceId,
         geometryBounds: bounds,
         drawCount: this.state.draws.length,
