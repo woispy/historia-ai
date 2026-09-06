@@ -5,10 +5,11 @@ import { validatePlanarTopology, planarEulerCharacteristic } from "../historical
 
 const registry = new AuthoritativeArcRegistry({ tolerance: 1e-6 });
 const outside = "world";
-const a = registry.register({ path: [{ lon: 0, lat: 0 }, { lon: 1, lat: 0 }], leftFace: "A", rightFace: outside });
-const b = registry.register({ path: [{ lon: 1, lat: 0 }, { lon: 1, lat: 1 }], leftFace: "A", rightFace: outside });
-const c = registry.register({ path: [{ lon: 1, lat: 1 }, { lon: 0, lat: 1 }], leftFace: "A", rightFace: outside });
-const d = registry.register({ path: [{ lon: 0, lat: 1 }, { lon: 0, lat: 0 }], leftFace: "A", rightFace: outside });
+const options = { nodeKind: "corner" };
+const a = registry.register({ path: [{ lon: 0, lat: 0 }, { lon: 1, lat: 0 }], leftFace: "A", rightFace: outside, ...options });
+const b = registry.register({ path: [{ lon: 1, lat: 0 }, { lon: 1, lat: 1 }], leftFace: "A", rightFace: outside, ...options });
+const c = registry.register({ path: [{ lon: 1, lat: 1 }, { lon: 0, lat: 1 }], leftFace: "A", rightFace: outside, ...options });
+const d = registry.register({ path: [{ lon: 0, lat: 1 }, { lon: 0, lat: 0 }], leftFace: "A", rightFace: outside, ...options });
 const topology = registry.toTopology();
 const face = assembleFaceRing(topology.arcs, { id: "A", outerRing: [a, b, c, d] });
 assert.equal(face.outerRing.length, 4);
@@ -17,7 +18,7 @@ assert.equal(face.outerRing.every((entry) => entry.forward), true);
 const wrong = [{ arcId: a.arc.id, forward: true }, { arcId: c.arc.id, forward: true }, { arcId: b.arc.id, forward: true }];
 assert.throws(() => assembleDirectedRing(topology.arcs, wrong), /discontinuous/);
 
-const reversed = registry.register({ path: [{ lon: 1, lat: 0 }, { lon: 0, lat: 0 }], leftFace: outside, rightFace: "A" });
+const reversed = registry.register({ path: [{ lon: 1, lat: 0 }, { lon: 0, lat: 0 }], leftFace: outside, rightFace: "A", ...options });
 assert.equal(reversed.arc.id, a.arc.id);
 assert.equal(reversed.forward, false);
 
