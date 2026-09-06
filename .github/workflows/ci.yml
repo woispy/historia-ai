@@ -77,6 +77,8 @@ jobs:
         run: npm run test:terrain-phase-e
       - name: Validate terrain world-wrap streaming
         run: node tools/tests/terrain-streaming-wrap.test.js
+      - name: Validate world-copy visibility and canonical identity
+        run: node tools/tests/world-wrap-copy-regression.test.js
       - name: Validate Phase A-H legacy cleanliness
         run: npm run test:phase-ah-legacy-cleanliness
       - name: Generate world physical geometry assets
