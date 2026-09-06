@@ -62,7 +62,7 @@ test("render longitude canonicalization preserves the same physical point", () =
   assert.equal(worldToCanonicalLongitude(541), -179);
 });
 
-test("camera movement wraps horizontally without weakening vertical bounds", () => {
+test("legacy camera actions remain canonical for data-facing camera state", () => {
   const camera = createCameraModel();
   const viewport = { width: 1920, height: 1080 };
   const movedRight = moveCamera({ ...camera, x: 179.5 }, 20, 0, viewport);
@@ -87,20 +87,45 @@ test("position and focus use the same canonical longitude rule", () => {
   assert.equal(focused.target, "province-a");
 });
 
-test("production camera rig wraps drag and inertial longitude", () => {
+test("production camera rig keeps render longitude unwrapped across the antimeridian", () => {
   const rig = new MapCameraRig({ minZoom: 1, maxZoom: 96 });
   rig.setState({ x: 179 });
   rig.panPixels(-8, 0, 1280, 720);
-  assert.equal(rig.snapshot().x, -178.75);
+
+  const crossedEast = rig.snapshot();
+  assert.equal(crossedEast.renderX, 181.25);
+  assert.equal(crossedEast.x, -178.75);
 
   rig.setState({ x: -179 });
   rig.panPixels(8, 0, 1280, 720);
-  assert.equal(rig.snapshot().x, 178.75);
 
+  const crossedWest = rig.snapshot();
+  assert.equal(crossedWest.renderX, -181.25);
+  assert.equal(crossedWest.x, 178.75);
+});
+
+test("production camera rig can traverse multiple world widths without a render jump", () => {
+  const rig = new MapCameraRig({ minZoom: 1, maxZoom: 96 });
+  rig.setState({ x: 179 });
+  rig.panPixels(-360, 0, 360, 720);
+  rig.tick(1 / 60);
+  const snapshot = rig.snapshot();
+
+  assert.equal(snapshot.renderX, 899);
+  assert.equal(snapshot.x, 179);
+  assert.equal(snapshot.renderX - 179, 720);
+});
+
+test("camera rig tick advances inertia using unwrapped render longitude", () => {
+  const rig = new MapCameraRig({ minZoom: 1, maxZoom: 96 });
   rig.setState({ x: 179 });
   rig.panPixels(-8, 0, 1280, 720);
-  rig.tick(1 / 60);
-  assert.ok(rig.snapshot().x >= WORLD_MIN_X && rig.snapshot().x < WORLD_MAX_X);
+  const beforeTick = rig.snapshot();
+  const afterTick = rig.tick(1 / 60);
+
+  assert.ok(afterTick.renderX > beforeTick.renderX);
+  assert.ok(afterTick.x >= WORLD_MIN_X && afterTick.x < WORLD_MAX_X);
+  assert.equal(afterTick.x, normalizeLongitude(afterTick.renderX));
 });
 
 test("viewport culling preserves geometry across the antimeridian", () => {
