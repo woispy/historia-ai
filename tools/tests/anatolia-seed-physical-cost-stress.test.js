@@ -2,11 +2,11 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
-import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { validateProvinceSeedSet } from "../historical-gis/province/ProvinceSeedModel.js";
 import { SpatialSeedIndex } from "../historical-gis/province/SpatialSeedIndex.js";
 import { createCostField } from "../historical-gis/province/CostField.js";
-import { adaptDemSample, adaptHydrographySample, composeCostSamples } from "../historical-gis/province/CostAdapters.js";
+import { adaptHydrographySample, composeCostSamples } from "../historical-gis/province/CostAdapters.js";
+import { CopernicusDemCostSampler } from "../historical-gis/province/CopernicusDemCostSampler.js";
 import { CompositeCostGraph } from "../historical-gis/province/CompositeCostGraph.js";
 import { LeastCostPathSolver } from "../historical-gis/province/LeastCostPathSolver.js";
 import { AuthoritativeArcRegistry, registerSolverPath } from "../historical-gis/province/AuthoritativeArcGenerator.js";
@@ -28,28 +28,16 @@ assert.ok(HYDROGRAPHY.lakes.length > 0, "generated Natural Earth hydrography mus
 assert.ok(MAJOR_RIVERS.length >= 3, "major Anatolian river identities must survive hydrography generation");
 
 function distancePointToSegment(point, a, b) {
-  const dx = b[0] - a[0];
-  const dy = b[1] - a[1];
-  const lengthSquared = dx * dx + dy * dy;
+  const dx = b[0] - a[0], dy = b[1] - a[1], lengthSquared = dx * dx + dy * dy;
   if (lengthSquared === 0) return Math.hypot(point[0] - a[0], point[1] - a[1]);
   const t = Math.max(0, Math.min(1, ((point[0] - a[0]) * dx + (point[1] - a[1]) * dy) / lengthSquared));
   return Math.hypot(point[0] - (a[0] + t * dx), point[1] - (a[1] + t * dy));
 }
 
-function distanceToPolylines(lon, lat, polylines) {
-  let best = Infinity;
-  for (const line of polylines) {
-    for (let i = 1; i < line.length; i += 1) best = Math.min(best, distancePointToSegment([lon, lat], line[i - 1], line[i]));
-  }
-  return best;
-}
-
-function distanceToAtlasRanges(lon, lat) {
-  return distanceToPolylines(lon, lat, ANATOLIA_PHYSICAL_ATLAS.mountainRanges.map((range) => range.coordinates));
-}
-
 function distanceToRivers(lon, lat) {
-  return distanceToPolylines(lon, lat, MAJOR_RIVERS);
+  let best = Infinity;
+  for (const line of MAJOR_RIVERS) for (let i = 1; i < line.length; i += 1) best = Math.min(best, distancePointToSegment([lon, lat], line[i - 1], line[i]));
+  return best;
 }
 
 function makeSeeds() {
@@ -70,33 +58,8 @@ function makeSeeds() {
       },
     },
     hierarchy: { parentId: item.regionId, ancestry: [item.regionId] },
-    constraints: {
-      boundaryMode: item.borderConfidence === "high" ? "soft" : "inferred",
-      physical: {
-        landOnly: true,
-        avoidWater: true,
-        riverCrossingCost: 3.5,
-        mountainCrossingCost: 5,
-        ridgeAffinity: 8,
-        coastAffinity: 2,
-      },
-    },
+    constraints: { boundaryMode: item.borderConfidence === "high" ? "soft" : "inferred", physical: { landOnly: true, avoidWater: true, riverCrossingCost: 3.5, mountainCrossingCost: 5, ridgeAffinity: 8, coastAffinity: 2 } },
   })));
-}
-
-function makePhysicalSample(node) {
-  const mountainDistance = distanceToAtlasRanges(node.lon, node.lat);
-  const riverDistance = distanceToRivers(node.lon, node.lat);
-  const mountainResistance = Math.max(0, 1 - mountainDistance / 0.65);
-  const ridgeAffinity = Math.max(0, 1 - Math.abs(mountainDistance - 0.18) / 0.22);
-  const riverPenalty = Math.max(0, 1 - riverDistance / 0.12);
-  const dem = adaptDemSample({
-    slopeNormalized: Math.min(1, mountainResistance * 0.9),
-    ridgeAffinity,
-    mountainResistance,
-  });
-  const hydro = adaptHydrographySample({ riverPenalty });
-  return composeCostSamples(dem, hydro);
 }
 
 function nearestGraphNode(graph, seed) {
@@ -113,16 +76,26 @@ const index = new SpatialSeedIndex({ cellSize: 1 });
 for (const seed of seeds) index.insert(seed);
 assert.equal(index.size, seeds.length);
 
+const demSampler = await new CopernicusDemCostSampler({ bounds: GRID_BOUNDS }).initialize();
+assert.ok(demSampler.entries.size >= 100, `expected broad Copernicus source coverage, got ${demSampler.entries.size}`);
+
 const field = createCostField({
   weights: { slope: 1.1, ridge: 1.4, mountain: 2.2, river: 2.0, lake: 1.5, coast: 0.35 },
-  metadata: { source: "AnatoliaPhysicalAtlas v2 + generated Natural Earth 10m hydrography", epoch: 1300 },
+  metadata: { source: "Copernicus GLO-30 + generated Natural Earth 10m hydrography", epoch: 1300 },
 });
+
+function physicalSample(node) {
+  const dem = demSampler.sample(node);
+  const riverDistance = distanceToRivers(node.lon, node.lat);
+  const hydro = adaptHydrographySample({ riverPenalty: Math.max(0, 1 - riverDistance / 0.12) });
+  return composeCostSamples(dem, hydro);
+}
 
 const graph = new CompositeCostGraph({
   width: GRID_WIDTH,
   height: GRID_HEIGHT,
   bounds: GRID_BOUNDS,
-  sampleCell: makePhysicalSample,
+  sampleCell: physicalSample,
   transitionCost: (from, to, fromSample, toSample) => field.evaluate({
     slope: (fromSample.slope + toSample.slope) / 2,
     ridge: (fromSample.ridge + toSample.ridge) / 2,
@@ -131,7 +104,7 @@ const graph = new CompositeCostGraph({
     lake: (fromSample.lake + toSample.lake) / 2,
     coast: (fromSample.coast + toSample.coast) / 2,
   }).total + 0.05,
-  blocked: (node) => node.lat < 36.05 || node.lat > 42.25,
+  blocked: (node) => node.lat < 36.05 || node.lat > 42.35,
 });
 
 const solver = new LeastCostPathSolver({ graph, minimumCost: 0.05, maxIterations: 200000 });
@@ -157,19 +130,9 @@ for (const seed of seeds) {
       continue;
     }
     solved += 1;
-    assert.ok(result.cost >= 0 && Number.isFinite(result.cost));
+    assert.ok(Number.isFinite(result.cost) && result.cost >= 0);
     assert.ok(result.path.length >= 2);
-
-    // Stress edge only: this is deliberately not a historical province border.
-    // It exercises authoritative node/arc identity before face generation.
-    const registration = registerSolverPath(registry, {
-      result,
-      leftFace: `stress:${seed.id}`,
-      rightFace: `stress:${neighbour.id}`,
-      kind: "stress-edge",
-      confidence: 0.5,
-      nodeKind: "corner",
-    });
+    const registration = registerSolverPath(registry, { result, leftFace: `stress:${seed.id}`, rightFace: `stress:${neighbour.id}`, kind: "stress-edge", confidence: 0.5, nodeKind: "corner" });
     assert.ok(registration.arc);
     assert.ok(validateArcGeometry(registration.arc).valid);
   }
@@ -180,20 +143,17 @@ assert.ok(solved >= Math.floor(candidatePairs * 0.75), `least-cost solver succes
 assert.ok(registry.nodes.size > 20, "authoritative registry should receive a regional node population");
 assert.ok(registry.arcs.size > 15, "authoritative registry should receive a regional arc population");
 
-const topology = registry.toTopology();
-for (const arc of Object.values(topology.arcs)) {
+for (const arc of Object.values(registry.toTopology().arcs)) {
   assert.ok(arc.geometry.length >= 2);
   assert.notEqual(arc.startNode, arc.endNode);
   assert.ok(validateArcGeometry(arc).valid);
 }
 
-const highMountainSeed = seeds.find((seed) => seed.id === "bithynia-prusa");
-const plateauSeed = seeds.find((seed) => seed.id === "galatia-ankara");
-assert.ok(highMountainSeed && plateauSeed);
-const mountainSample = makePhysicalSample({ lon: highMountainSeed.position.lon, lat: highMountainSeed.position.lat });
-const plateauSample = makePhysicalSample({ lon: plateauSeed.position.lon, lat: plateauSeed.position.lat });
-assert.ok(mountainSample.mountain >= 0 && plateauSample.mountain >= 0);
-assert.ok(Number.isFinite(field.evaluate(mountainSample).total));
-assert.ok(Number.isFinite(field.evaluate(plateauSample).total));
+const sampleNodes = [seeds[0], seeds[Math.floor(seeds.length / 2)], seeds.at(-1)].map((seed) => nearestGraphNode(graph, seed));
+const samples = sampleNodes.map((node) => demSampler.sample(node));
+for (const sample of samples) {
+  assert.ok(Object.values(sample).every((value) => Number.isFinite(value) && value >= 0 && value <= 1));
+}
+assert.ok(new Set(samples.map((sample) => `${sample.slope}:${sample.ridge}:${sample.mountain}`)).size > 1, "Copernicus DEM sampling must produce spatially varying terrain costs");
 
-console.log(`Anatolia seed + physical-cost stress: PASS (${seeds.length} seeds, ${candidatePairs} candidate pairs, ${solved} solved, ${failed} failed, ${registry.nodes.size} nodes, ${registry.arcs.size} arcs, ${MAJOR_RIVERS.length} major river segments)`);
+console.log(`Anatolia seed + physical-cost stress: PASS (${seeds.length} seeds, ${demSampler.entries.size} Copernicus tiles, ${candidatePairs} candidate pairs, ${solved} solved, ${failed} failed, ${registry.nodes.size} nodes, ${registry.arcs.size} arcs, ${MAJOR_RIVERS.length} major river segments)`);
