@@ -129,7 +129,7 @@ test("camera rig tick advances inertia using unwrapped render longitude", () => 
   assert.equal(afterTick.x, normalizeLongitude(afterTick.renderX));
 });
 
-test("WebGL renderer consumes renderX for view transforms while retaining canonical x", () => {
+test("renderer treats renderX as its internal render-space camera coordinate", () => {
   const renderer = new BinaryMapRenderer({});
   renderer.setCamera({ x: -179, renderX: 181, zoom: 4 });
 
