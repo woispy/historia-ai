@@ -1,5 +1,7 @@
 /** Historia AI — P3.9.1 Directed Face Ring Assembly. */
 
+import { validateRingGeometry } from "./GeometryValidation.js";
+
 function assertId(value, name) {
   if (value === null || value === undefined || value === "") throw new Error(`${name} is required`);
   return String(value);
@@ -14,7 +16,7 @@ function normalizeEntry(entry) {
   return { arcId: assertId(entry?.arcId, "ring arcId"), forward: entry?.forward !== false };
 }
 
-export function assembleDirectedRing(arcs, entries, { requireClosed = true } = {}) {
+export function assembleDirectedRing(arcs, entries, { requireClosed = true, expectedWinding = null, geometryEpsilon = 1e-9 } = {}) {
   if (!arcs || typeof arcs !== "object") throw new Error("arcs must be an object or map-like object");
   if (!Array.isArray(entries) || entries.length < 3) throw new Error("A face ring needs at least 3 arcs");
   const get = (id) => (arcs instanceof Map ? arcs.get(id) : arcs[id]);
@@ -37,17 +39,21 @@ export function assembleDirectedRing(arcs, entries, { requireClosed = true } = {
   if (requireClosed && endpoints(get(ring.at(-1).arcId), ring.at(-1).forward).end !== endpoints(get(ring[0].arcId), ring[0].forward).start) {
     throw new Error("Directed ring is not closed");
   }
+  if (expectedWinding) {
+    const geometry = validateRingGeometry(arcs, ring, { epsilon: geometryEpsilon, expectedWinding });
+    if (!geometry.valid) throw new Error(geometry.errors.join("; "));
+  }
   return ring.map((entry) => ({ ...entry }));
 }
 
-export function assembleFaceRing(arcs, { id, seedId = null, parentFaceId = null, outerRing, holes = [] } = {}) {
+export function assembleFaceRing(arcs, { id, seedId = null, parentFaceId = null, outerRing, holes = [], expectedOuterWinding = null, expectedHoleWinding = null, geometryEpsilon = 1e-9 } = {}) {
   const faceId = assertId(id, "face.id");
   return {
     id: faceId,
     seedId: seedId == null ? null : String(seedId),
     parentFaceId: parentFaceId == null ? null : String(parentFaceId),
-    outerRing: assembleDirectedRing(arcs, outerRing),
-    holes: holes.map((ring) => assembleDirectedRing(arcs, ring)),
+    outerRing: assembleDirectedRing(arcs, outerRing, { expectedWinding: expectedOuterWinding, geometryEpsilon }),
+    holes: holes.map((ring) => assembleDirectedRing(arcs, ring, { expectedWinding: expectedHoleWinding, geometryEpsilon })),
   };
 }
 
