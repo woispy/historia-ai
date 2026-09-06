@@ -1,9 +1,9 @@
 /**
  * Historia AI — Camera Model
  *
- * The world view is a single finite map. Horizontal wrapping is disabled so
- * the renderer, political texture and physical coastline can never diverge
- * into multiple visible map copies at world zoom.
+ * The camera uses canonical geographic coordinates. Horizontal position is
+ * periodic across the [-180, 180) longitude interval; vertical position stays
+ * constrained to the finite world extent.
  */
 export function createCameraModel() {
   return Object.freeze({
