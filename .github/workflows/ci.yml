@@ -85,6 +85,8 @@ jobs:
         run: npm run validate:historical-gis:1300
       - name: Run historical GIS identity tests
         run: npm run test:historical-gis
+      - name: Run river open-polyline regression
+        run: node tools/tests/river-geometry.test.js
       - name: Run physical geography tests
         run: npm run test:physical-geography
       - name: Run Natural Earth 10m hydrography tests
