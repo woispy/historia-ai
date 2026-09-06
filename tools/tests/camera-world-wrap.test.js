@@ -56,6 +56,12 @@ test("periodic render selection adds only the adjacent copy at the antimeridian"
   assert.deepEqual(getVisibleWorldCopyOffsets(-179, 1), [-360, 0]);
 });
 
+test("periodic render selection remains bounded during deep unwrapped traversal", () => {
+  assert.deepEqual(getVisibleWorldCopyOffsets(540, 1), [360, 720]);
+  assert.deepEqual(getVisibleWorldCopyOffsets(900, 1), [720, 1080]);
+  assert.deepEqual(getVisibleWorldCopyOffsets(1260, 1), [1080, 1440]);
+});
+
 test("render longitude canonicalization preserves the same physical point", () => {
   assert.equal(worldToCanonicalLongitude(-180), -180);
   assert.equal(worldToCanonicalLongitude(180), -180);
@@ -105,16 +111,25 @@ test("production camera rig keeps render longitude unwrapped across the antimeri
   assert.equal(crossedWest.x, 178.75);
 });
 
-test("production camera rig can traverse multiple world widths without a render jump", () => {
+test("production camera rig can traverse 360, 720, and 1080 degrees without render jumps", () => {
   const rig = new MapCameraRig({ minZoom: 1, maxZoom: 96 });
   rig.setState({ x: 179 });
-  rig.panPixels(-360, 0, 360, 720);
-  rig.tick(1 / 60);
-  const snapshot = rig.snapshot();
+  rig.panPixels(-180, 0, 360, 720);
+  const oneWorld = rig.snapshot();
+  assert.equal(oneWorld.renderX, 539);
+  assert.equal(oneWorld.x, 179);
 
-  assert.equal(snapshot.renderX, 899);
-  assert.equal(snapshot.x, 179);
-  assert.equal(snapshot.renderX - 179, 720);
+  rig.panPixels(-180, 0, 360, 720);
+  const twoWorlds = rig.snapshot();
+  assert.equal(twoWorlds.renderX, 899);
+  assert.equal(twoWorlds.x, 179);
+
+  rig.panPixels(-180, 0, 360, 720);
+  const threeWorlds = rig.snapshot();
+  assert.equal(threeWorlds.renderX, 1259);
+  assert.equal(threeWorlds.x, 179);
+  assert.equal(threeWorlds.renderX - oneWorld.renderX, 720);
+  assert.equal(threeWorlds.renderX - 179, 1080);
 });
 
 test("camera rig tick advances inertia using unwrapped render longitude", () => {
