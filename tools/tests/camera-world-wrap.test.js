@@ -10,6 +10,10 @@ import {
   WORLD_WIDTH,
 } from "../../src/map/camera/WorldWrap.js";
 import {
+  getVisibleWorldCopyOffsets,
+  worldToCanonicalLongitude,
+} from "../../src/map/rendering/WorldWrapRender.js";
+import {
   focusCamera,
   moveCamera,
   setCameraPosition,
@@ -34,6 +38,23 @@ test("world copy offsets are exact multiples of one world width", () => {
   assert.equal(getWorldCopyOffset(1), 360);
   assert.equal(getNearestWorldCopyOffset(179, -179), -360);
   assert.equal(getNearestWorldCopyOffset(-179, 179), 360);
+});
+
+test("periodic render selection keeps one copy at world center", () => {
+  assert.deepEqual(getVisibleWorldCopyOffsets(0, 1), [0]);
+  assert.deepEqual(getVisibleWorldCopyOffsets(0, 2), [0]);
+});
+
+test("periodic render selection adds only the adjacent copy at the antimeridian", () => {
+  assert.deepEqual(getVisibleWorldCopyOffsets(179, 1), [0, 360]);
+  assert.deepEqual(getVisibleWorldCopyOffsets(-179, 1), [-360, 0]);
+});
+
+test("render longitude canonicalization preserves the same physical point", () => {
+  assert.equal(worldToCanonicalLongitude(-180), -180);
+  assert.equal(worldToCanonicalLongitude(180), -180);
+  assert.equal(worldToCanonicalLongitude(540), -180);
+  assert.equal(worldToCanonicalLongitude(541), -179);
 });
 
 test("camera movement wraps horizontally without weakening vertical bounds", () => {
