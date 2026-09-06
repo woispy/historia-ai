@@ -6,12 +6,6 @@
  * high-resolution graph from becoming the default cost of every solve.
  */
 
-function finite(value, name) {
-  const number = Number(value);
-  if (!Number.isFinite(number)) throw new Error(`${name} must be finite`);
-  return number;
-}
-
 function positiveInteger(value, name) {
   const number = Number(value);
   if (!Number.isInteger(number) || number <= 0) throw new Error(`${name} must be a positive integer`);
