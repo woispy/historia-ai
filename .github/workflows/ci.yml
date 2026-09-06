@@ -73,6 +73,8 @@ jobs:
         run: npm run test:terrain-dem
       - name: Validate terrain LOD and streaming contracts
         run: npm run test:terrain-phase-e
+      - name: Validate terrain world-wrap streaming
+        run: node tools/tests/terrain-streaming-wrap.test.js
       - name: Validate Phase A-H legacy cleanliness
         run: npm run test:phase-ah-legacy-cleanliness
       - name: Generate world physical geometry assets
