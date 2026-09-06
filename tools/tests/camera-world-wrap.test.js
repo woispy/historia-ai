@@ -19,6 +19,10 @@ import {
   setCameraPosition,
 } from "../../src/map/camera/CameraActions.js";
 import { createCameraModel } from "../../src/map/camera/CameraModel.js";
+import {
+  getViewportBounds,
+  isGeometryVisible,
+} from "../../src/map/rendering/MapViewportCulling.js";
 
 test("canonical longitude stays in [-180, 180)", () => {
   assert.equal(normalizeLongitude(WORLD_MIN_X), WORLD_MIN_X);
@@ -80,4 +84,16 @@ test("position and focus use the same canonical longitude rule", () => {
   assert.equal(positioned.x, -180);
   assert.equal(focused.x, 179);
   assert.equal(focused.target, "province-a");
+});
+
+test("viewport culling preserves geometry across the antimeridian", () => {
+  const viewport = getViewportBounds({ x: 179, y: 0, zoom: 4 }, 0);
+  assert.equal(isGeometryVisible({ minX: -179.5, maxX: -178.5, minY: -1, maxY: 1 }, viewport), true);
+  assert.equal(isGeometryVisible({ minX: 0, maxX: 1, minY: -1, maxY: 1 }, viewport), false);
+});
+
+test("viewport culling does not reject a full-world horizontal span", () => {
+  const viewport = getViewportBounds({ x: 0, y: 0, zoom: 0.5 }, 0);
+  assert.ok(viewport.maxX - viewport.minX >= WORLD_WIDTH);
+  assert.equal(isGeometryVisible({ minX: 0, maxX: 1, minY: -1, maxY: 1 }, viewport), true);
 });
