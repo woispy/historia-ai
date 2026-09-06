@@ -1,3 +1,10 @@
+import {
+  WORLD_MAX_X,
+  WORLD_MIN_X,
+  WORLD_WIDTH,
+  normalizeLongitude,
+} from "../camera/WorldWrap.js";
+
 /**
  * World-space viewport culling helpers.
  *
@@ -7,17 +14,7 @@
  * the total number of provinces.
  */
 
-const WORLD_MIN_X = -180;
-const WORLD_MAX_X = 180;
-const WORLD_WIDTH = 360;
 const WORLD_HEIGHT = 180;
-
-function normalizeLongitude(value) {
-  let longitude = Number(value) || 0;
-  while (longitude > WORLD_MAX_X) longitude -= WORLD_WIDTH;
-  while (longitude < WORLD_MIN_X) longitude += WORLD_WIDTH;
-  return longitude;
-}
 
 export function getViewportBounds(camera = {}, padding = 0.08) {
   const zoom = Math.max(0.001, Number(camera.zoom) || 1);
