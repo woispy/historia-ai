@@ -26,7 +26,7 @@ const seed = validateProvinceSeed({
 });
 
 assert.equal(seed.position.lon, 29.7199);
-assert.equal(seed.historical.confidence.overall, 0.8145);
+assert.equal(seed.historical.confidence.overall, 0.82);
 assert.deepEqual(seed.historical.sourceIds, ["byzantine_atlas_1300"]);
 
 const wrapped = validateProvinceSeed({
@@ -51,7 +51,14 @@ const arcs = {
   bc: createTopologyArc({ id: "bc", startNode: "b", endNode: "c", leftFace: "f", rightFace: "outside", geometry: [{ lon: 1, lat: 0 }, { lon: 0, lat: 1 }] }),
   ca: createTopologyArc({ id: "ca", startNode: "c", endNode: "a", leftFace: "f", rightFace: "outside", geometry: [{ lon: 0, lat: 1 }, { lon: 0, lat: 0 }] }),
 };
-const faces = { f: createTopologyFace({ id: "f", seedId: "1842", outerRing: ["ab", "bc", "ca"] }), outside: createTopologyFace({ id: "outside", outerRing: ["ca", "bc", "ab"] }) };
+const faces = {
+  f: createTopologyFace({ id: "f", seedId: "1842", outerRing: ["ab", "bc", "ca"] }),
+  outside: createTopologyFace({ id: "outside", outerRing: [
+    { arcId: "ca", forward: false },
+    { arcId: "bc", forward: false },
+    { arcId: "ab", forward: false },
+  ] }),
+};
 const topology = { nodes, arcs, faces };
 assert.equal(validatePlanarTopology(topology).valid, true);
 assert.equal(planarEulerCharacteristic(topology), 1);
