@@ -34,9 +34,20 @@ function longitudeDelta(fromLon, toLon) {
   return Object.is(delta, -0) ? 0 : delta;
 }
 
-function seamAwareTieDelta(queryLon, seedLon) {
-  if (queryLon === WORLD_MIN_LON || queryLon === WORLD_MAX_LON) return seedLon - queryLon;
-  return longitudeDelta(queryLon, seedLon);
+function seamAwareTieBreak(queryLon, seedLon) {
+  const canonicalQuery = canonicalLongitude(queryLon);
+  if (canonicalQuery === WORLD_MIN_LON) {
+    // +180 and -180 are the same canonical point, but an explicit query-side
+    // rule is required when two candidates are equidistant across the seam.
+    // Positive raw representatives select the eastern hemisphere; negative
+    // representatives select the western hemisphere. A seed exactly on the
+    // canonical seam remains neutral and is ordered before either side.
+    if (seedLon === WORLD_MIN_LON) return 0;
+    const eastQuery = queryLon >= WORLD_MAX_LON;
+    const preferredHemisphere = eastQuery ? seedLon > WORLD_MIN_LON : seedLon < WORLD_MAX_LON;
+    return preferredHemisphere ? 0 : 1;
+  }
+  return longitudeDelta(canonicalQuery, seedLon);
 }
 
 function distanceSquared(aLon, aLat, bLon, bLat) {
@@ -163,7 +174,7 @@ export class SpatialHashSeedIndex {
       .map((seed) => ({
         seed,
         distanceSquared: distanceSquared(qLon, qLat, seed.position.lon, seed.position.lat),
-        longitudeDelta: seamAwareTieDelta(rawLon, seed.position.lon),
+        longitudeDelta: seamAwareTieBreak(rawLon, seed.position.lon),
       }))
       .filter((entry) => entry.distanceSquared <= r * r + EPSILON)
       .sort((a, b) => compareDistance(a.distanceSquared, b.distanceSquared) || a.longitudeDelta - b.longitudeDelta || a.seed.id.localeCompare(b.seed.id))
@@ -202,10 +213,10 @@ export class SpatialHashSeedIndex {
   }
 
   nearest(lon, lat, { maxRadius = WORLD_WIDTH } = {}) {
-    const qLon = canonicalLongitude(lon);
+    const rawLon = finite(lon, "longitude");
     const qLat = latitude(lat);
     const radius = Math.max(0, finite(maxRadius, "maxRadius"));
-    const results = this.queryRadius(qLon, qLat, radius);
+    const results = this.queryRadius(rawLon, qLat, radius);
     return results[0] ?? null;
   }
 }
