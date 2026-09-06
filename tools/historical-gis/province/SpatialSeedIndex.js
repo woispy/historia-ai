@@ -37,15 +37,16 @@ function longitudeDelta(fromLon, toLon) {
 function seamAwareTieBreak(queryLon, seedLon) {
   const canonicalQuery = canonicalLongitude(queryLon);
   if (canonicalQuery === WORLD_MIN_LON) {
-    // +180 and -180 are the same canonical point, but an explicit query-side
-    // rule is required when two candidates are equidistant across the seam.
-    // Positive raw representatives select the eastern hemisphere; negative
-    // representatives select the western hemisphere. A seed exactly on the
-    // canonical seam remains neutral and is ordered before either side.
+    // ±180° is one canonical seam. For equal circular distances, preserve
+    // the query's explicit representative as a deterministic direction:
+    // +180° prefers the eastern hemisphere, -180° prefers the western one.
+    // A seed exactly on the canonical seam is neutral; distance remains the
+    // primary key and the seed id remains the final deterministic fallback.
     if (seedLon === WORLD_MIN_LON) return 0;
     const eastQuery = queryLon >= WORLD_MAX_LON;
-    const preferredHemisphere = eastQuery ? seedLon > WORLD_MIN_LON : seedLon < WORLD_MAX_LON;
-    return preferredHemisphere ? 0 : 1;
+    const preferredHemisphere = eastQuery ? seedLon > 0 : seedLon < 0;
+    if (preferredHemisphere) return 0;
+    return 1;
   }
   return longitudeDelta(canonicalQuery, seedLon);
 }
