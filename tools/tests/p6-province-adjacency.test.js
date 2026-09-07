@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { appendFileSync } from "node:fs";
 
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 import { validateProvinceSeedSet } from "../historical-gis/province/ProvinceSeedModel.js";
@@ -64,17 +65,14 @@ for (const edge of graph.edges) {
 }
 const degreeValues = [...degreeByNode.values()];
 const medianDistance = percentile(edgeDistances, 0.5);
-const medianDegree = percentile(degreeValues, 0.5);
-const degreeP90 = percentile(degreeValues, 0.9);
-
-// Diagnostic-only robust outlier detector. It does not fail CI and does not
-// assert that an edge is historically wrong; P6.2 will perform physical and
-// historical pruning. Connectivity-MST edges outside the local radius are
-// surfaced explicitly because they are the highest-risk candidates.
-const distanceMedian = medianDistance;
-const absoluteDeviations = edgeDistances.map((distance) => Math.abs(distance - distanceMedian));
+const absoluteDeviations = edgeDistances.map((distance) => Math.abs(distance - medianDistance));
 const mad = percentile(absoluteDeviations, 0.5);
-const robustOutlierThreshold = mad > 1e-9 ? distanceMedian + 3 * mad : null;
+const robustOutlierThreshold = mad > 1e-9 ? medianDistance + 3 * mad : null;
+
+// Diagnostic-only robust outlier detector. It never fails CI and does not
+// claim historical wrongness. P6.2 will prune candidates against physical
+// and historical constraints. MST edges outside the local radius are exposed
+// explicitly because they are the highest-risk candidates.
 const suspiciousEdges = graph.edges
   .filter((edge) => {
     const exceedsRadius = edge.distanceKm > graph.diagnostics.maxRadiusKm + 1e-9;
@@ -118,14 +116,14 @@ const summary = {
   crossParentEdgeCount: graph.diagnostics.crossParentEdgeCount,
   distanceKm: {
     min: round(percentile(edgeDistances, 0)),
-    median: round(percentile(edgeDistances, 0.5)),
+    median: round(medianDistance),
     p90: round(percentile(edgeDistances, 0.9)),
     max: round(percentile(edgeDistances, 1)),
   },
   degree: {
     min: round(percentile(degreeValues, 0)),
-    median: round(medianDegree),
-    p90: round(degreeP90),
+    median: round(percentile(degreeValues, 0.5)),
+    p90: round(percentile(degreeValues, 0.9)),
     max: round(percentile(degreeValues, 1)),
   },
   robustDistanceOutlierThresholdKm: round(robustOutlierThreshold),
@@ -134,7 +132,8 @@ const summary = {
   sampleEdges,
 };
 
-console.log(`P6.1 ANATOLIA ADJACENCY GRAPH TELEMETRY: ${JSON.stringify(summary)}`);
+const telemetry = `P6.1 ANATOLIA ADJACENCY GRAPH TELEMETRY: ${JSON.stringify(summary)}`;
+console.log(telemetry);
 
 if (process.env.GITHUB_STEP_SUMMARY) {
   const lines = [
@@ -146,7 +145,8 @@ if (process.env.GITHUB_STEP_SUMMARY) {
     `- Hierarchy: same-parent ${summary.sameParentEdgeCount}, cross-parent ${summary.crossParentEdgeCount}`,
     `- Distance km: min ${summary.distanceKm.min}, median ${summary.distanceKm.median}, P90 ${summary.distanceKm.p90}, max ${summary.distanceKm.max}`,
     `- Degree: min ${summary.degree.min}, median ${summary.degree.median}, P90 ${summary.degree.p90}, max ${summary.degree.max}`,
-    `- Diagnostic suspicious candidates: **${summary.suspiciousEdgeCount}**`,
+    `- Robust diagnostic outlier threshold: ${summary.robustDistanceOutlierThresholdKm ?? "n/a"} km`,
+    `- Suspicious candidates: **${summary.suspiciousEdgeCount}**`,
     "",
     "### Suspicious candidates",
     "",
@@ -154,5 +154,5 @@ if (process.env.GITHUB_STEP_SUMMARY) {
     "| --- | --- | --- | ---: | --- | --- | --- |",
     ...suspiciousEdges.map((edge) => `| ${edge.id} | ${edge.source} | ${edge.target} | ${edge.distanceKm} | ${edge.hierarchyRelation} | ${edge.discovery} | ${edge.reason} |`),
   ];
-  process.stdout.write(lines.join("\n") + "\n");
+  appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join("\n") + "\n", "utf8");
 }
