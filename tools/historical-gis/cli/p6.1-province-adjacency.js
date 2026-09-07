@@ -56,14 +56,21 @@ const components = buildComponents(graph.seeds, graph.mstEdges);
 const outsideLandSeeds = graph.seeds
   .filter((seed) => !pointInLand(seed.point, ANATOLIA_PHYSICAL_ATLAS.landPolygons))
   .map(({ id, point }) => ({ id, point }));
-const longPhysicalMstEdges = graph.mstEdges
-  .filter((edge) => edge.physicalReachable && edge.distanceKm >= 300)
-  .map(({ from, to, distanceKm, reasons }) => ({
-    from,
-    to,
-    distanceKm: Number(distanceKm.toFixed(3)),
-    reasons,
-  }));
+
+// This is deliberately independent of the MST. A long physical corridor is
+// diagnostic evidence about the coarse land atlas, not an adjacency rejection.
+const longPhysicalCandidateEdges = summary.longPhysicalCandidateEdges;
+
+// Every candidate edge must carry exactly one evidence class. This guards the
+// provenance contract without claiming that any class is authoritative.
+const evidenceClassCount = summary.historicalOnlyEdges.length
+  + summary.physicalOnlyEdges.length
+  + summary.dualEvidenceEdges.length;
+const evidenceClassSet = new Set(graph.edges.map((edge) => edge.evidenceClass));
+const expectedEvidenceClasses = new Set(["historical-only", "physical-only", "dual-evidence"]);
+const evidenceClassesAreValid = evidenceClassSet.size === expectedEvidenceClasses.size
+  && [...expectedEvidenceClasses].every((value) => evidenceClassSet.has(value))
+  && evidenceClassCount === graph.edges.length;
 
 // Always emit the diagnostic payload before any acceptance assertion so a
 // failing candidate graph remains inspectable in CI.
@@ -73,7 +80,12 @@ console.log(`P6.1 mstComponentCount=${components.length}`);
 console.log(`P6.1 mstComponents=${JSON.stringify(components)}`);
 console.log(`P6.1 seedPointsOutsideLandMask=${outsideLandSeeds.length}`);
 console.log(`P6.1 seedPointsOutsideLandMaskDetails=${JSON.stringify(outsideLandSeeds)}`);
-console.log(`P6.1 longPhysicalMstEdges>=300km=${JSON.stringify(longPhysicalMstEdges)}`);
+console.log(`P6.1 dataQualityDebt.outsideLandMaskSeedCount=${outsideLandSeeds.length}`);
+console.log(`P6.1 dataQualityDebt.outsideLandMaskSeedIds=${JSON.stringify(outsideLandSeeds.map(({ id }) => id))}`);
+console.log(`P6.1 longPhysicalCandidateEdges>=300km=${JSON.stringify(longPhysicalCandidateEdges)}`);
+console.log(`P6.1 evidenceClassPartitionCount=${summary.evidenceClassPartitionCount}`);
+console.log(`P6.1 evidenceClassesAreValid=${evidenceClassesAreValid}`);
+console.log("P6.1 physicalReachable means land-corridor evidence only; it is not province boundary adjacency.");
 console.log("P6.1 graph is a candidate/diagnostic graph; it is not yet authoritative province adjacency.");
 
 if (summary.seedCount !== ANATOLIA_PROVINCE_METADATA.length) {
@@ -84,4 +96,7 @@ if (!graph.mstConnected) {
 }
 if (summary.isolatedSeedCount !== 0) {
   throw new Error(`P6.1 contains ${summary.isolatedSeedCount} isolated seeds.`);
+}
+if (!evidenceClassesAreValid) {
+  throw new Error("P6.1 edge provenance classification is not an exhaustive three-class partition.");
 }
