@@ -16,7 +16,7 @@ const arcs = {
   ac: { id: "ac", kind: "province", startNode: "c", endNode: "a", leftFace: "f3", rightFace: "f4", geometry: [{ lon: 0.5, lat: 1 }, { lon: 0, lat: 0 }] },
   ad: { id: "ad", kind: "province", startNode: "a", endNode: "d", leftFace: "f3", rightFace: "f1", geometry: [{ lon: 0, lat: 0 }, { lon: 0.5, lat: 0.35 }] },
   bd: { id: "bd", kind: "province", startNode: "d", endNode: "b", leftFace: "f2", rightFace: "f1", geometry: [{ lon: 0.5, lat: 0.35 }, { lon: 1, lat: 0 }] },
-  cd: { id: "cd", kind: "province", startNode: "c", endNode: "d", leftFace: "f3", rightFace: "f2", geometry: [{ lon: 0.5, lat: 1 }, { lon: 0.5, lat: 0.35 }] },
+  cd: { id: "cd", kind: "province", startNode: "c", endNode: "d", leftFace: "f2", rightFace: "f3", geometry: [{ lon: 0.5, lat: 1 }, { lon: 0.5, lat: 0.35 }] },
 };
 
 const result = assembleFullFaces({ topology: { nodes, arcs } });
