@@ -13,7 +13,12 @@ function endpoints(arc, forward) {
 
 function normalizeEntry(entry) {
   if (typeof entry === "string") return { arcId: entry, forward: true };
-  return { arcId: assertId(entry?.arcId, "ring arcId"), forward: entry?.forward !== false };
+  // AuthoritativeArcRegistry.register() returns { arc, forward, ... } while
+  // persisted/topology rings use { arcId, forward }. Accept both forms so the
+  // assembler can consume the authoritative registry result without requiring
+  // callers to perform a lossy/manual projection first.
+  const arcId = entry?.arcId ?? entry?.arc?.id;
+  return { arcId: assertId(arcId, "ring arcId"), forward: entry?.forward !== false };
 }
 
 export function assembleDirectedRing(arcs, entries, { requireClosed = true, expectedWinding = null, geometryEpsilon = 1e-9 } = {}) {
