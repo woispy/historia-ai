@@ -6,7 +6,7 @@ import { validateProvinceSeedSet } from "../historical-gis/province/ProvinceSeed
 import { SpatialHashSeedIndex } from "../historical-gis/province/SpatialSeedIndex.js";
 import { createCostField } from "../historical-gis/province/CostField.js";
 import { adaptHydrographySample, composeCostSamples } from "../historical-gis/province/CostAdapters.js";
-import { CopernicusDemCostSampler } from "../historical-gis/province/CopernicusDemCostSampler.js";
+import { CopernicusDemCostSampler, copernicusDemSamplerDefaults } from "../historical-gis/province/CopernicusDemCostSampler.js";
 import { RidgeWatershedAnalyzer, measureRidgeAlignment } from "../historical-gis/province/TerrainRidgeAnalysis.js";
 import { refineLeastCostPath, comparePathResolution } from "../historical-gis/province/AdaptivePathRefiner.js";
 import { CompositeCostGraph } from "../historical-gis/province/CompositeCostGraph.js";
@@ -195,15 +195,72 @@ for (const arc of Object.values(registry.toTopology().arcs)) {
   assert.ok(validateArcGeometry(arc).valid);
 }
 
-const sampleSeeds = [seeds[0], seeds[Math.floor(seeds.length / 2)], seeds.at(-1)];
+const sampleSeeds = seeds.filter((seed) => {
+  const text = `${seed.id} ${seed.identity?.name ?? ""}`.toLowerCase();
+  return text.includes("nicaea") || text.includes("birgi") || text.includes("trebizond");
+});
+const targetNames = ["Bithynia–Nicaea", "Lydia–Birgi", "Pontus–Trebizond"];
+assert.equal(sampleSeeds.length, 3, `diagnostic probe must resolve exactly the three target seeds; found=${JSON.stringify(sampleSeeds.map((seed) => ({ id: seed.id, name: seed.identity?.name })))}`);
+
+function probeDemMath(node) {
+  const delta = copernicusDemSamplerDefaults.slopeSampleDegrees;
+  const centerElevation = demSampler.elevation(node.lon, node.lat);
+  const neighborElevations = {
+    N: demSampler.elevation(node.lon, node.lat + delta),
+    S: demSampler.elevation(node.lon, node.lat - delta),
+    E: demSampler.elevation(node.lon + delta, node.lat),
+    W: demSampler.elevation(node.lon - delta, node.lat),
+  };
+  const { N, S, E, W } = neighborElevations;
+  const metresLon = Math.max(1, delta * 111000 * Math.cos(node.lat * Math.PI / 180));
+  const metresLat = Math.max(1, delta * 111000);
+  const dzdx = W != null && E != null ? (E - W) / (2 * metresLon) : 0;
+  const dzdy = S != null && N != null ? (N - S) / (2 * metresLat) : 0;
+  const slopeDegrees = Math.atan(Math.hypot(dzdx, dzdy)) * 180 / Math.PI;
+  const validNeighbours = [N, S, E, W].filter((value) => value != null);
+  const meanNeighbour = validNeighbours.reduce((sum, value) => sum + value, 0) / validNeighbours.length;
+  const tpi = centerElevation - meanNeighbour;
+  const rawSlope = slopeDegrees / 45;
+  const rawRidgeAffinity = tpi / copernicusDemSamplerDefaults.ridgeProminenceMeters;
+  const rawMountainResistance = Math.max(
+    Math.max(0, centerElevation) / copernicusDemSamplerDefaults.mountainElevationMeters,
+    slopeDegrees / copernicusDemSamplerDefaults.mountainSlopeDegrees,
+  );
+  const dem = demSampler.sample(node);
+  return {
+    centerElevation,
+    neighborElevations,
+    dzdx,
+    dzdy,
+    slopeDegrees,
+    meanNeighbour,
+    tpi,
+    preClamp: {
+      slope: rawSlope,
+      ridgeAffinity: rawRidgeAffinity,
+      mountainResistance: rawMountainResistance,
+    },
+    postClamp: dem,
+  };
+}
+
 const sampleNodes = sampleSeeds.map((seed) => nearestGraphNode(graph, seed));
+const diagnosticProbe = sampleSeeds.map((seed, index) => ({
+  target: targetNames.find((name) => name.toLowerCase().includes(seed.identity.name.split("–").at(-1).toLowerCase())) ?? seed.identity.name,
+  id: seed.id,
+  seed: seed.position,
+  node: sampleNodes[index],
+  dem: probeDemMath(sampleNodes[index]),
+}));
+console.log(`Copernicus DEM diagnostic probe: ${JSON.stringify(diagnosticProbe)}`);
+
 const samples = sampleNodes.map((node) => demSampler.sample(node));
 for (const sample of samples) {
   assert.ok(Object.values(sample).every((value) => Number.isFinite(value) && value >= 0 && value <= 1));
 }
 const demCostSignatures = samples.map((sample) => `${sample.slope}:${sample.ridge}:${sample.mountain}`);
 console.log(`Copernicus DEM quality probe: ${JSON.stringify(sampleSeeds.map((seed, index) => ({ id: seed.id, seed: seed.position, node: sampleNodes[index], dem: samples[index], signature: demCostSignatures[index] })))}`);
-assert.ok(new Set(demCostSignatures).size > 1, `Copernicus DEM sampling must produce spatially varying terrain costs; probe=${JSON.stringify(sampleSeeds.map((seed, index) => ({ id: seed.id, node: sampleNodes[index], dem: samples[index] })))}`);
+assert.ok(new Set(demCostSignatures).size > 1, `Copernicus DEM sampling must produce spatially varying terrain costs; probe=${JSON.stringify(diagnosticProbe)}`);
 
 const ridgeSamples = sampleNodes.map((node) => ridgeAnalyzer.analyze(node));
 assert.ok(ridgeSamples.every((sample) => sample.sampleCount >= 4));
