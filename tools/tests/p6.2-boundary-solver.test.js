@@ -34,8 +34,10 @@ assert.deepEqual(diagnostic.sourceAvailability, {
 assert.equal(diagnostic.edges.length, 3);
 assert.equal(diagnostic.edges.some((edge) => edge.evidenceClass === P62_EVIDENCE_CLASSES.MIXED), true);
 assert.equal(diagnostic.edges.every((edge) => edge.features.elevationRange?.relief >= 0), true);
-
-assertP62AuthoritativeReady(diagnostic);
+assert.throws(
+  () => assertP62AuthoritativeReady(diagnostic),
+  /requires an explicitly READY authoritative result/,
+);
 
 const locked = createP62BoundaryEvidence({
   seeds,
