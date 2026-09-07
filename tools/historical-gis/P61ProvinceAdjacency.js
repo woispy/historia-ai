@@ -1,5 +1,8 @@
+import { ANATOLIA_ADJACENCY_HINTS } from "../../src/map/data/AnatoliaProvinceRefinement.js";
+
 const EARTH_RADIUS_KM = 6371.0088;
 const LOCAL_NEIGHBOR_COUNT = 6;
+const HISTORICAL_HINT_REASON = "historical-adjacency-hint";
 
 function haversineKm(a, b) {
   const toRad = (value) => (value * Math.PI) / 180;
@@ -54,28 +57,39 @@ function pairKey(a, b) {
   return a < b ? `${a}|${b}` : `${b}|${a}`;
 }
 
-function buildCandidates(seeds, landPolygons) {
+function buildCandidates(seeds, landPolygons, adjacencyHints) {
   const edgeMap = new Map();
   const add = (left, right, reason) => {
     if (left.id === right.id) return;
     const key = pairKey(left.id, right.id);
-    const distanceKm = haversineKm(left.point, right.point);
     const existing = edgeMap.get(key);
-    const physicalReachable = segmentIsLandReachable(left.point, right.point, landPolygons);
     const edge = existing ?? {
       key,
       from: left.id < right.id ? left.id : right.id,
       to: left.id < right.id ? right.id : left.id,
       fromParentId: left.id < right.id ? left.parentId : right.parentId,
       toParentId: left.id < right.id ? right.parentId : left.parentId,
-      distanceKm,
-      physicalReachable,
+      distanceKm: haversineKm(left.point, right.point),
+      physicalReachable: segmentIsLandReachable(left.point, right.point, landPolygons),
       reasons: new Set(),
     };
     edge.reasons.add(reason);
-    edge.physicalReachable = edge.physicalReachable && physicalReachable;
     edgeMap.set(key, edge);
   };
+
+  const seedById = new Map(seeds.map((seed) => [seed.id, seed]));
+
+  // Existing historical adjacency hints are evidence, not authoritative
+  // topology. They are deliberately retained as a separate reason so later
+  // phases can score, challenge, or replace them with source-derived borders.
+  for (const [seedId, neighborIds] of Object.entries(adjacencyHints)) {
+    const seed = seedById.get(seedId);
+    if (!seed) continue;
+    for (const neighborId of neighborIds) {
+      const neighbor = seedById.get(neighborId);
+      if (neighbor) add(seed, neighbor, HISTORICAL_HINT_REASON);
+    }
+  }
 
   for (const seed of seeds) {
     const nearest = seeds
@@ -118,7 +132,11 @@ function buildMst(seeds, edges) {
   };
 
   const mst = [];
-  for (const edge of [...edges].filter((item) => item.physicalReachable).sort((a, b) => a.distanceKm - b.distanceKm || a.key.localeCompare(b.key))) {
+  const connectivityEdges = edges
+    .filter((edge) => edge.physicalReachable || edge.reasons.includes(HISTORICAL_HINT_REASON))
+    .sort((a, b) => a.distanceKm - b.distanceKm || a.key.localeCompare(b.key));
+
+  for (const edge of connectivityEdges) {
     if (union(edge.from, edge.to)) mst.push({ ...edge, mst: true });
     if (mst.length === Math.max(0, seeds.length - 1)) break;
   }
@@ -135,14 +153,17 @@ function percentile(values, fraction) {
   return sorted[lower] + (sorted[upper] - sorted[lower]) * (index - lower);
 }
 
-export function buildP61Adjacency(metadata, { landPolygons = [] } = {}) {
+export function buildP61Adjacency(metadata, {
+  landPolygons = [],
+  adjacencyHints = ANATOLIA_ADJACENCY_HINTS,
+} = {}) {
   const seeds = normalizeMetadata(metadata);
-  const edges = buildCandidates(seeds, landPolygons);
+  const edges = buildCandidates(seeds, landPolygons, adjacencyHints);
   const mstEdges = buildMst(seeds, edges);
   const mstKeys = new Set(mstEdges.map((edge) => edge.key));
 
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     phase: "P6.1",
     authoritative: false,
     seeds,
@@ -152,8 +173,9 @@ export function buildP61Adjacency(metadata, { landPolygons = [] } = {}) {
     algorithm: {
       localNeighborCount: LOCAL_NEIGHBOR_COUNT,
       localSelection: "six-nearest historical/physical candidates per seed",
+      historicalEvidence: "existing ANATOLIA_ADJACENCY_HINTS retained as non-authoritative candidate evidence",
       physicalReachability: "great-circle distance with sampled straight geographic segment; land atlas only",
-      mst: "Kruskal over physically reachable candidate edges; diagnostic/connectivity fallback only",
+      mst: "Kruskal over physical or explicit historical candidate edges; diagnostic/connectivity fallback only",
       fixedMaxDistanceKm: null,
     },
     diagnostics: {
@@ -176,6 +198,7 @@ export function summarizeP61Graph(graph) {
   const sameParentEdgeCount = edges.filter((edge) => edge.fromParentId && edge.fromParentId === edge.toParentId).length;
   const crossParentEdgeCount = edges.length - sameParentEdgeCount;
   const physicallyReachable = edges.filter((edge) => edge.physicalReachable);
+  const historicalHintEdges = edges.filter((edge) => edge.reasons.includes(HISTORICAL_HINT_REASON));
   const suspiciousEdges = edges.filter((edge) => !edge.physicalReachable);
   const longestEdges = [...edges].sort((a, b) => b.distanceKm - a.distanceKm || a.key.localeCompare(b.key)).slice(0, 10);
   const mstDistances = (graph?.mstEdges ?? []).map((edge) => edge.distanceKm);
@@ -187,6 +210,8 @@ export function summarizeP61Graph(graph) {
     connectivityEdgeCount: graph?.mstEdges?.length ?? 0,
     sameParentEdgeCount,
     crossParentEdgeCount,
+    historicalHintEdgeCount: historicalHintEdges.length,
+    historicalHintOnlyEdgeCount: historicalHintEdges.filter((edge) => !edge.physicalReachable).length,
     minDistance: distances.length ? Math.min(...distances) : 0,
     medianDistance: percentile(distances, 0.5),
     p90Distance: percentile(distances, 0.9),
@@ -216,10 +241,12 @@ export function formatP61Telemetry(summary) {
     `P6.1 connectivityEdgeCount=${summary.connectivityEdgeCount}`,
     `P6.1 sameParentEdgeCount=${summary.sameParentEdgeCount}`,
     `P6.1 crossParentEdgeCount=${summary.crossParentEdgeCount}`,
+    `P6.1 historicalHintEdgeCount=${summary.historicalHintEdgeCount}`,
+    `P6.1 historicalHintOnlyEdgeCount=${summary.historicalHintOnlyEdgeCount}`,
     `P6.1 distanceKm min=${summary.minDistance.toFixed(3)} median=${summary.medianDistance.toFixed(3)} p90=${summary.p90Distance.toFixed(3)} max=${summary.maxDistance.toFixed(3)}`,
     `P6.1 degree min=${summary.degreeMin} median=${summary.degreeMedian.toFixed(3)} p90=${summary.degreeP90.toFixed(3)} max=${summary.degreeMax} isolated=${summary.isolatedSeedCount}`,
     `P6.1 suspiciousEdges=${summary.suspiciousEdgeCount}`,
-    `P6.1 mstEdges=${JSON.stringify(summary.mstEdges.map(({ from, to, distanceKm }) => ({ from, to, distanceKm: Number(distanceKm.toFixed(3)) })))}`,
+    `P6.1 mstEdges=${JSON.stringify(summary.mstEdges.map(({ from, to, distanceKm, reasons }) => ({ from, to, distanceKm: Number(distanceKm.toFixed(3)), reasons })))}`,
     `P6.1 longestEdges=${JSON.stringify(summary.longestEdges.map(({ from, to, distanceKm, reasons, physicalReachable }) => ({ from, to, distanceKm: Number(distanceKm.toFixed(3)), reasons, physicalReachable })))}`,
   ].join("\n");
 }
