@@ -20,6 +20,7 @@ assert.equal(graph.edges.every((edge) => edge.from !== edge.to), true);
 assert.equal(graph.edges.every((edge) => edge.physicalReachable === true), true);
 assert.equal(summary.degreeMin >= 1, true);
 assert.equal(summary.degreeMax >= summary.degreeMin, true);
-assert.equal(summary.mstEdgeCount, summary.seedCount - 1);
+assert.equal(summary.connectivityEdgeCount, summary.seedCount - 1);
+assert.equal(graph.mstConnected, true);
 
 console.log("P6.1 province adjacency graph tests passed.");
