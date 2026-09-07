@@ -70,7 +70,9 @@ const faceA = assembleFaceRing(topology.arcs, {
 });
 const faceB = assembleFaceRing(topology.arcs, {
   id: "B",
-  outerRing: [bBottom, bRight, bSharedReverse, bTop],
+  // A directed ring is an ordered traversal, not an unordered arc bag.
+  // Follow the connected endpoints: bottom -> right -> top -> shared reverse.
+  outerRing: [bBottom, bRight, bTop, bSharedReverse],
 });
 
 const full = {
