@@ -206,6 +206,8 @@ export function assertP62AuthoritativeReady(result) {
   if (!result.sourceAvailability.dem) throw new Error("P6.2 authoritative mode requires a DEM sampler");
   if (!result.sourceAvailability.ridge) throw new Error("P6.2 authoritative mode requires ridge evidence");
   if (!result.sourceAvailability.river) throw new Error("P6.2 authoritative mode requires river evidence");
-  if (result.status === P62_STATUS.LOCKED) throw new Error(`P6.2 is locked: ${result.lockReason}`);
+  if (result.status !== P62_STATUS.READY || result.authoritative !== true) {
+    throw new Error("P6.2 authoritative mode requires an explicitly READY authoritative result");
+  }
   return true;
 }
