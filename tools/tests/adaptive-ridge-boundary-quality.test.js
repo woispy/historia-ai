@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { appendFile, readFile } from "node:fs/promises";
 
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 import { validateProvinceSeedSet } from "../historical-gis/province/ProvinceSeedModel.js";
@@ -243,6 +243,30 @@ const baseline = {
 
 console.log(`ADAPTIVE_RIDGE_BASELINE_TELEMETRY ${JSON.stringify(baseline)}`);
 console.log(`ADAPTIVE_RIDGE_BASELINE_SAMPLES ${JSON.stringify(pairs)}`);
+
+if (process.env.GITHUB_STEP_SUMMARY) {
+  const lines = [
+    "## Adaptive Ridge Baseline Telemetry",
+    "",
+    "| Metric | Value |",
+    "|---|---:|",
+    `| Sample pairs | ${baseline.samplePairs} |`,
+    `| Refined pairs | ${baseline.refinedPairs} |`,
+    `| Node density multiplier mean | ${baseline.coarseVsRefined.nodeDensityMultiplierMean} |`,
+    `| Cost delta P10 / P50 / P90 | ${baseline.coarseVsRefined.costDeltaP10} / ${baseline.coarseVsRefined.costDeltaP50} / ${baseline.coarseVsRefined.costDeltaP90} |`,
+    `| Ridge alignment mean | ${baseline.ridgeAlignment.mean} |`,
+    `| Ridge alignment P10 / P50 / P90 | ${baseline.ridgeAlignment.P10} / ${baseline.ridgeAlignment.P50} / ${baseline.ridgeAlignment.P90} |`,
+    `| Endpoint displacement mean / P90 (deg) | ${baseline.pathStability.endpointDisplacementMeanDegrees} / ${baseline.pathStability.endpointDisplacementP90Degrees} |`,
+    `| Path length delta mean (deg) | ${baseline.pathStability.pathLengthDeltaMeanDegrees} |`,
+    `| Degenerate path ratio | ${baseline.degeneratePathRatio} |`,
+    `| Ridge cost inverse mean | ${baseline.physicalAlignment.ridgeAffinityMean} |`,
+    `| River proximity mean (deg) | ${baseline.physicalAlignment.riverProximityMeanDegrees} |`,
+    `| Mountain resistance mean | ${baseline.physicalAlignment.mountainResistanceMean} |`,
+    "",
+    "Baseline only: no quality thresholds are applied.",
+  ];
+  await appendFile(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n")}\n`, "utf8");
+}
 
 // Baseline phase deliberately has no quality thresholds. Thresholds are added only
 // after this telemetry has been reviewed and converted into an explicit contract.
