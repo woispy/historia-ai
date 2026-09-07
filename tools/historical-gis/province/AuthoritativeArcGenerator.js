@@ -90,7 +90,8 @@ function reversed(path) {
 }
 
 function nodeIdFor(point, tolerance) {
-  return `n:${pointKey(point, tolerance)}`;
+  const normalized = normalizePoint(point, 0);
+  return `n:${pointKey(normalized, tolerance)}`;
 }
 
 function arcIdFor(geometry, tolerance) {
