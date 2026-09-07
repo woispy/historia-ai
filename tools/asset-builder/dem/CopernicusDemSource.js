@@ -8,6 +8,15 @@ export const COPERNICUS_TILE_BOUNDARY_EPSILON = 1e-7;
 const COPERNICUS_DOWNLOAD_ATTEMPTS = 3;
 const COPERNICUS_DOWNLOAD_RETRY_DELAY_MS = 1000;
 
+// Run #2670 diagnostic scope: deliberately limited to the three failing Anatolia
+// probe locations. This is telemetry only; it must never alter raster sampling.
+const RASTER_TRACE_PROBE_TARGETS = Object.freeze([
+  { name: "Bithynia–Nicaea", lon: 29.72, lat: 40.43 },
+  { name: "Lydia–Birgi", lon: 28.06, lat: 38.25 },
+  { name: "Pontus–Trebizond", lon: 39.72, lat: 41.00 },
+]);
+const RASTER_TRACE_PROBE_TOLERANCE_DEGREES = 0.08;
+
 export class CopernicusDemSource {
   constructor({ cacheDir = path.resolve(".cache/historia/copernicus-glo30"), tileListUrl = COPERNICUS_GLO30_TILE_LIST_URL } = {}) {
     this.cacheDir = cacheDir;
@@ -142,14 +151,28 @@ export function sampleCopernicusRasterTrace(entry, lon, lat) {
   if (!Number.isFinite(scaleX) || scaleX === 0 || !Number.isFinite(scaleY) || scaleY === 0) return null;
   const px = (Number(lon) - originX) / scaleX;
   const py = (originY - Number(lat)) / scaleY;
-  if (px < 0 || py < 0 || px > width - 1 || py > height - 1) return { entryKey: entry.key, georefMatchesTile, lon:Number(lon), lat:Number(lat), width, height, georeference, axisConvention: scaleY > 0 ? "north-up (modelY decreases with raster row)" : "south-up (modelY increases with raster row)", px, py, inRaster:false, value:null, corners:[] };
+  const probeTarget = findRasterTraceProbeTarget(Number(lon), Number(lat));
+  if (px < 0 || py < 0 || px > width - 1 || py > height - 1) {
+    if (probeTarget) console.log(`[Terrain Raster Trace] ${JSON.stringify({
+      target: probeTarget.name,
+      entryKey: entry.key,
+      lon: Number(lon), lat: Number(lat),
+      tile: copernicusTileKey(lat, lon),
+      originX, originY, scaleX, scaleY,
+      px, py,
+      inRaster: false,
+      bounds: { width, height },
+      nullTrigger: "outside-raster-bounds",
+    })}`);
+    return { entryKey: entry.key, georefMatchesTile, lon:Number(lon), lat:Number(lat), width, height, georeference, axisConvention: scaleY > 0 ? "north-up (modelY decreases with raster row)" : "south-up (modelY increases with raster row)", px, py, inRaster:false, value:null, corners:[] };
+  }
   const x0 = Math.floor(px), y0 = Math.floor(py), x1 = Math.min(width - 1, x0 + 1), y1 = Math.min(height - 1, y0 + 1);
   const fx = px - x0, fy = py - y0;
   const samples = [
-    { px:x0, py:y0, value:data[y0 * width + x0], weight:(1 - fx) * (1 - fy) },
-    { px:x1, py:y0, value:data[y0 * width + x1], weight:fx * (1 - fy) },
-    { px:x0, py:y1, value:data[y1 * width + x0], weight:(1 - fx) * fy },
-    { px:x1, py:y1, value:data[y1 * width + x1], weight:fx * fy },
+    { label:"top-left", px:x0, py:y0, value:data[y0 * width + x0], weight:(1 - fx) * (1 - fy) },
+    { label:"top-right", px:x1, py:y0, value:data[y0 * width + x1], weight:fx * (1 - fy) },
+    { label:"bottom-left", px:x0, py:y1, value:data[y1 * width + x0], weight:(1 - fx) * fy },
+    { label:"bottom-right", px:x1, py:y1, value:data[y1 * width + x1], weight:fx * fy },
   ];
   let weightedSum = 0;
   let totalWeight = 0;
@@ -158,7 +181,47 @@ export function sampleCopernicusRasterTrace(entry, lon, lat) {
     weightedSum += sample.value * sample.weight;
     totalWeight += sample.weight;
   }
-  return { entryKey:entry.key, georefMatchesTile, lon:Number(lon), lat:Number(lat), width, height, georeference, axisConvention: scaleY > 0 ? "north-up (modelY decreases with raster row)" : "south-up (modelY increases with raster row)", px, py, inRaster:true, x0, y0, x1, y1, fx, fy, corners:samples.map(({px:pxValue,py:pyValue,value,weight})=>({px:pxValue,py:pyValue,value:Number.isFinite(value)?value:null,valid:isValidDemPixel(value,nodata),weight})), value:totalWeight>0?weightedSum/totalWeight:null };
+  const value = totalWeight > 0 ? weightedSum / totalWeight : null;
+  if (probeTarget) {
+    const validWeightedSamples = samples.filter((sample) => isValidDemPixel(sample.value, nodata) && sample.weight > 0);
+    const nullTrigger = value == null
+      ? (validWeightedSamples.length === 0 ? "no-valid-weighted-pixels" : "unexpected-zero-total-weight")
+      : (validWeightedSamples.length < 4 ? "partial-valid-pixel-interpolation" : "none");
+    console.log(`[Terrain Raster Trace] ${JSON.stringify({
+      target: probeTarget.name,
+      entryKey: entry.key,
+      tile: copernicusTileKey(lat, lon),
+      lon: Number(lon), lat: Number(lat),
+      georefMatchesTile,
+      originX, originY, scaleX, scaleY,
+      axisConvention: scaleY > 0 ? "north-up (modelY decreases with raster row)" : "south-up (modelY increases with raster row)",
+      width, height,
+      px, py,
+      bounds: { x0, y0, x1, y1 },
+      weights: { u: fx, v: fy },
+      corners: samples.map(({ label, px:pxValue, py:pyValue, value:sampleValue, weight }) => ({
+        position: label,
+        x: pxValue,
+        y: pyValue,
+        value: Number.isFinite(sampleValue) ? sampleValue : null,
+        isValid: isValidDemPixel(sampleValue, nodata),
+        weight,
+      })),
+      nodata: Number.isFinite(nodata) ? nodata : null,
+      validWeightedPixelCount: validWeightedSamples.length,
+      totalWeight,
+      weightedSum,
+      interpolatedValue: value,
+      nullTrigger,
+      interpolationPolicy: "valid-pixels-only weighted average; no nearest-valid fallback",
+    })}`);
+  }
+  return { entryKey:entry.key, georefMatchesTile, lon:Number(lon), lat:Number(lat), width, height, georeference, axisConvention: scaleY > 0 ? "north-up (modelY decreases with raster row)" : "south-up (modelY increases with raster row)", px, py, inRaster:true, x0, y0, x1, y1, fx, fy, corners:samples.map(({px:pxValue,py:pyValue,value,weight})=>({px:pxValue,py:pyValue,value:Number.isFinite(value)?value:null,valid:isValidDemPixel(value,nodata),weight})), value };
+}
+
+function findRasterTraceProbeTarget(lon, lat) {
+  if (process.env.CI !== "true" && process.env.CI !== "1") return null;
+  return RASTER_TRACE_PROBE_TARGETS.find((target) => Math.hypot(lon - target.lon, lat - target.lat) <= RASTER_TRACE_PROBE_TOLERANCE_DEGREES) ?? null;
 }
 
 export function validateCopernicusTileGeoreference(key, raster, tolerance = 1e-6) {
