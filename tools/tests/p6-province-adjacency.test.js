@@ -42,6 +42,58 @@ assert.ok(graph.diagnostics.sameParentEdgeCount > 0, "same-region candidate rela
 assert.ok(graph.diagnostics.crossParentEdgeCount > 0, "cross-region candidate relationships must exist");
 assert.ok(graph.edges.every((edge) => edge.distanceKm <= 350 || edge.discovery === "connectivity-mst"));
 
+function percentile(values, p) {
+  if (values.length === 0) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  const index = (sorted.length - 1) * p;
+  const lower = Math.floor(index);
+  const upper = Math.ceil(index);
+  if (lower === upper) return sorted[lower];
+  return sorted[lower] + (sorted[upper] - sorted[lower]) * (index - lower);
+}
+
+function round(value, digits = 2) {
+  return value == null ? null : Number(value.toFixed(digits));
+}
+
+const edgeDistances = graph.edges.map((edge) => edge.distanceKm);
+const degreeByNode = new Map(graph.nodes.map((node) => [node.id, 0]));
+for (const edge of graph.edges) {
+  degreeByNode.set(edge.source, degreeByNode.get(edge.source) + 1);
+  degreeByNode.set(edge.target, degreeByNode.get(edge.target) + 1);
+}
+const degreeValues = [...degreeByNode.values()];
+const medianDistance = percentile(edgeDistances, 0.5);
+const medianDegree = percentile(degreeValues, 0.5);
+const degreeP90 = percentile(degreeValues, 0.9);
+
+// Diagnostic-only robust outlier detector. It does not fail CI and does not
+// assert that an edge is historically wrong; P6.2 will perform physical and
+// historical pruning. Connectivity-MST edges outside the local radius are
+// surfaced explicitly because they are the highest-risk candidates.
+const distanceMedian = medianDistance;
+const absoluteDeviations = edgeDistances.map((distance) => Math.abs(distance - distanceMedian));
+const mad = percentile(absoluteDeviations, 0.5);
+const robustOutlierThreshold = mad > 1e-9 ? distanceMedian + 3 * mad : null;
+const suspiciousEdges = graph.edges
+  .filter((edge) => {
+    const exceedsRadius = edge.distanceKm > graph.diagnostics.maxRadiusKm + 1e-9;
+    const robustOutlier = robustOutlierThreshold != null && edge.distanceKm > robustOutlierThreshold;
+    return exceedsRadius || robustOutlier;
+  })
+  .sort((a, b) => (b.distanceKm - a.distanceKm) || a.id.localeCompare(b.id))
+  .map((edge) => ({
+    id: edge.id,
+    source: edge.source,
+    target: edge.target,
+    distanceKm: round(edge.distanceKm),
+    hierarchyRelation: edge.hierarchyRelation,
+    discovery: edge.discovery,
+    reason: edge.distanceKm > graph.diagnostics.maxRadiusKm + 1e-9
+      ? "outside-local-radius"
+      : "robust-distance-outlier",
+  }));
+
 const sampleEdges = graph.edges
   .slice()
   .sort((a, b) => (a.distanceKm - b.distanceKm) || a.id.localeCompare(b.id))
@@ -50,7 +102,7 @@ const sampleEdges = graph.edges
     id: edge.id,
     source: edge.source,
     target: edge.target,
-    distanceKm: Number(edge.distanceKm.toFixed(2)),
+    distanceKm: round(edge.distanceKm),
     hierarchyRelation: edge.hierarchyRelation,
     discovery: edge.discovery,
   }));
@@ -64,7 +116,43 @@ const summary = {
   connectivityEdgeCount: graph.diagnostics.connectivityEdgeCount,
   sameParentEdgeCount: graph.diagnostics.sameParentEdgeCount,
   crossParentEdgeCount: graph.diagnostics.crossParentEdgeCount,
+  distanceKm: {
+    min: round(percentile(edgeDistances, 0)),
+    median: round(percentile(edgeDistances, 0.5)),
+    p90: round(percentile(edgeDistances, 0.9)),
+    max: round(percentile(edgeDistances, 1)),
+  },
+  degree: {
+    min: round(percentile(degreeValues, 0)),
+    median: round(medianDegree),
+    p90: round(degreeP90),
+    max: round(percentile(degreeValues, 1)),
+  },
+  robustDistanceOutlierThresholdKm: round(robustOutlierThreshold),
+  suspiciousEdgeCount: suspiciousEdges.length,
+  suspiciousEdges,
   sampleEdges,
 };
 
-console.log(`P6.1 ANATOLIA ADJACENCY GRAPH: ${JSON.stringify(summary)}`);
+console.log(`P6.1 ANATOLIA ADJACENCY GRAPH TELEMETRY: ${JSON.stringify(summary)}`);
+
+if (process.env.GITHUB_STEP_SUMMARY) {
+  const lines = [
+    "## P6.1 Anatolia Adjacency Graph Telemetry",
+    "",
+    `- Authoritative: \`${graph.authoritative}\``,
+    `- Seeds: **${summary.seedCount}**`,
+    `- Edges: **${summary.edgeCount}** (local ${summary.localEdgeCount}, connectivity ${summary.connectivityEdgeCount})`,
+    `- Hierarchy: same-parent ${summary.sameParentEdgeCount}, cross-parent ${summary.crossParentEdgeCount}`,
+    `- Distance km: min ${summary.distanceKm.min}, median ${summary.distanceKm.median}, P90 ${summary.distanceKm.p90}, max ${summary.distanceKm.max}`,
+    `- Degree: min ${summary.degree.min}, median ${summary.degree.median}, P90 ${summary.degree.p90}, max ${summary.degree.max}`,
+    `- Diagnostic suspicious candidates: **${summary.suspiciousEdgeCount}**`,
+    "",
+    "### Suspicious candidates",
+    "",
+    "| Edge | Source | Target | km | Relation | Discovery | Reason |",
+    "| --- | --- | --- | ---: | --- | --- | --- |",
+    ...suspiciousEdges.map((edge) => `| ${edge.id} | ${edge.source} | ${edge.target} | ${edge.distanceKm} | ${edge.hierarchyRelation} | ${edge.discovery} | ${edge.reason} |`),
+  ];
+  process.stdout.write(lines.join("\n") + "\n");
+}
