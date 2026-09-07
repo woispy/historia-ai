@@ -34,7 +34,7 @@
     "test:p3-multi-arc-graph-assembly": "node tools/tests/p3-multi-arc-graph-assembly.test.js",
     "test:geometry-topology-guardrails": "node tools/tests/geometry-topology-guardrails.test.js",
     "test:anatolia-seed-physical-cost-stress": "node tools/tests/anatolia-seed-physical-cost-stress.test.js",
-    "test:adaptive-ridge-boundary-quality": "node tools/tests/anatolia-seed-physical-cost-stress.test.js",
+    "test:adaptive-ridge-boundary-quality": "node tools/tests/adaptive-ridge-boundary-quality.test.js",
     "test:anatolia-phase2b": "node tools/tests/anatolia-phase2b.test.js",
     "test:anatolia-phase2c": "node tools/tests/anatolia-phase2c.test.js",
     "test:anatolia-phase2d": "node tools/tests/anatolia-phase2d.test.js",
