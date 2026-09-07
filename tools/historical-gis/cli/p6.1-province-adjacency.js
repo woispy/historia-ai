@@ -7,6 +7,12 @@ const graph = buildP61Adjacency(ANATOLIA_PROVINCE_METADATA, {
 });
 const summary = summarizeP61Graph(graph);
 
+// Always emit the diagnostic payload before any acceptance assertion so a
+// failing candidate graph remains inspectable in CI.
+console.log(formatP61Telemetry(summary));
+console.log(`P6.1 mstConnected=${graph.mstConnected}`);
+console.log("P6.1 graph is a candidate/diagnostic graph; it is not yet authoritative province adjacency.");
+
 if (summary.seedCount !== ANATOLIA_PROVINCE_METADATA.length) {
   throw new Error(`P6.1 seed count mismatch: expected ${ANATOLIA_PROVINCE_METADATA.length}, got ${summary.seedCount}`);
 }
@@ -16,7 +22,3 @@ if (!graph.mstConnected) {
 if (summary.isolatedSeedCount !== 0) {
   throw new Error(`P6.1 contains ${summary.isolatedSeedCount} isolated seeds.`);
 }
-
-console.log(formatP61Telemetry(summary));
-console.log(`P6.1 mstConnected=${graph.mstConnected}`);
-console.log("P6.1 graph is a candidate/diagnostic graph; it is not yet authoritative province adjacency.");
