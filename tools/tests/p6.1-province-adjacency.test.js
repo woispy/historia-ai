@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import { buildP61Adjacency, summarizeP61Graph } from "../historical-gis/P61ProvinceAdjacency.js";
 
+// Pure physical fixture: every seed belongs to a distinct parent so the
+// historical-parent-local evidence path cannot contaminate this assertion.
 const metadata = [
-  { id: "a", regionId: "west", centroid: [0, 0] },
-  { id: "b", regionId: "west", centroid: [1, 0] },
-  { id: "c", regionId: "west", centroid: [0, 1] },
-  { id: "d", regionId: "east", centroid: [10, 0] },
+  { id: "a", regionId: "region-a", centroid: [0, 0] },
+  { id: "b", regionId: "region-b", centroid: [1, 0] },
+  { id: "c", regionId: "region-c", centroid: [0, 1] },
+  { id: "d", regionId: "region-d", centroid: [10, 0] },
 ];
 
 const landPolygons = [[[-1, -1], [11, -1], [11, 2], [-1, 2]]];
