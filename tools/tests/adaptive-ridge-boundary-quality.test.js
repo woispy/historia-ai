@@ -151,7 +151,7 @@ for (const seed of seeds) {
     if (!result.path) continue;
 
     const coarseQuality = measureRidgeAlignment(result.path, ridgeAnalyzer);
-    let refinement = null;
+    let refinement;
     try {
       refinement = refineLeastCostPath({
         coarseGraph: graph,
