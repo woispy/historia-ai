@@ -48,6 +48,7 @@ on:
       - feat/runtime-province-selection
       - feat/historical-map-clean-foundation
       - feat/historical-political-map-v1
+      - feat/p6.1-real-anatolia-adjacency
 
 concurrency:
   group: historia-ai-ci-${{ github.workflow }}-${{ github.ref }}
@@ -111,6 +112,8 @@ jobs:
         run: npm run test:anatolia-phase2c
       - name: Run Phase 2D Anatolia geometry tests
         run: npm run test:anatolia-phase2d
+      - name: Run P6.1 real Anatolia adjacency diagnostics
+        run: npm run test:p6-province-adjacency
       - name: Run Phase 2F physical integrity tests
         run: npm run test:physical-integrity
       - name: Run Phase 2E-2H cartography tests
