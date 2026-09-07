@@ -111,9 +111,15 @@ export class AuthoritativeArcRegistry {
   ensureNode(point, { kind = "triple-point" } = {}) {
     const normalized = normalizePoint(point, 0);
     const id = nodeIdFor(normalized, this.tolerance);
-    if (!this.nodes.has(id)) {
-      this.nodes.set(id, { id, kind, position: normalized, incidentArcs: [], incidentFaces: [] });
+    const existing = this.nodes.get(id);
+    if (existing) {
+      // A node can first be encountered as a corner and later be proven to be
+      // a shared junction by another authoritative Arc. Preserve the canonical
+      // identity while promoting its semantic kind; never downgrade a junction.
+      if (kind === "triple-point" && existing.kind !== "triple-point") existing.kind = "triple-point";
+      return existing;
     }
+    this.nodes.set(id, { id, kind, position: normalized, incidentArcs: [], incidentFaces: [] });
     return this.nodes.get(id);
   }
 
