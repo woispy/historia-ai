@@ -138,6 +138,8 @@ jobs:
         run: npm run test:geometry-topology-guardrails
       - name: Run P5 full face assembly + honest Euler diagnostics
         run: npm run test:p5-full-face-assembly
+      - name: Run P6.1 province adjacency graph
+        run: npm run test:p6-province-adjacency
       - name: Run Anatolia seed + physical-cost stress
         run: npm run test:anatolia-seed-physical-cost-stress
       - name: Run adaptive ridge boundary quality
