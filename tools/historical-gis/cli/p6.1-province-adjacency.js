@@ -7,6 +7,23 @@ const graph = buildP61Adjacency(ANATOLIA_PROVINCE_METADATA, {
 });
 const summary = summarizeP61Graph(graph);
 
+function pointInPolygon(point, polygon) {
+  let inside = false;
+  const [x, y] = point;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i, i += 1) {
+    const [xi, yi] = polygon[i];
+    const [xj, yj] = polygon[j];
+    const intersects = yi > y !== yj > y
+      && x < ((xj - xi) * (y - yi)) / (yj - yi || Number.EPSILON) + xi;
+    if (intersects) inside = !inside;
+  }
+  return inside;
+}
+
+function pointInLand(point, landPolygons) {
+  return landPolygons.some((polygon) => pointInPolygon(point, polygon));
+}
+
 function buildComponents(seeds, edges) {
   const adjacency = new Map(seeds.map((seed) => [seed.id, []]));
   for (const edge of edges) {
@@ -36,6 +53,9 @@ function buildComponents(seeds, edges) {
 }
 
 const components = buildComponents(graph.seeds, graph.mstEdges);
+const outsideLandSeeds = graph.seeds
+  .filter((seed) => !pointInLand(seed.point, ANATOLIA_PHYSICAL_ATLAS.landPolygons))
+  .map(({ id, point }) => ({ id, point }));
 const longPhysicalMstEdges = graph.mstEdges
   .filter((edge) => edge.physicalReachable && edge.distanceKm >= 300)
   .map(({ from, to, distanceKm, reasons }) => ({
@@ -51,6 +71,8 @@ console.log(formatP61Telemetry(summary));
 console.log(`P6.1 mstConnected=${graph.mstConnected}`);
 console.log(`P6.1 mstComponentCount=${components.length}`);
 console.log(`P6.1 mstComponents=${JSON.stringify(components)}`);
+console.log(`P6.1 seedPointsOutsideLandMask=${outsideLandSeeds.length}`);
+console.log(`P6.1 seedPointsOutsideLandMaskDetails=${JSON.stringify(outsideLandSeeds)}`);
 console.log(`P6.1 longPhysicalMstEdges>=300km=${JSON.stringify(longPhysicalMstEdges)}`);
 console.log("P6.1 graph is a candidate/diagnostic graph; it is not yet authoritative province adjacency.");
 
