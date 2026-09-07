@@ -7,7 +7,6 @@ import { buildP61Adjacency, formatP61Telemetry, summarizeP61Graph } from "../P61
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const runtimePath = path.join(root, "src/world/map/assets/historical/1300/runtime.json");
-const outputPath = path.join(root, "tmp/p6.1-province-adjacency.json");
 
 const runtime = JSON.parse(await fs.readFile(runtimePath, "utf8"));
 const runtimeIds = new Set((runtime.provinces ?? []).map((province) => province?.identity?.id));
@@ -30,10 +29,6 @@ if (summary.isolatedSeedCount !== 0) {
   throw new Error(`P6.1 contains ${summary.isolatedSeedCount} isolated seeds.`);
 }
 
-await fs.mkdir(path.dirname(outputPath), { recursive: true });
-await fs.writeFile(outputPath, `${JSON.stringify({ ...graph, summary }, null, 2)}\n`, "utf8");
-
 console.log(formatP61Telemetry(summary));
 console.log(`P6.1 mstConnected=${graph.mstConnected}`);
-console.log(`P6.1 output=${outputPath}`);
 console.log("P6.1 graph is a candidate/diagnostic graph; it is not yet authoritative province adjacency.");
