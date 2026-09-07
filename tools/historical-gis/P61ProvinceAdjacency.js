@@ -63,7 +63,8 @@ function pairKey(a, b) {
 }
 
 function classifyEvidence(edge) {
-  const hasHistoricalEvidence = edge.reasons.includes(HISTORICAL_HINT_REASON);
+  const reasons = edge.reasons instanceof Set ? edge.reasons : new Set(edge.reasons ?? []);
+  const hasHistoricalEvidence = reasons.has(HISTORICAL_HINT_REASON);
   if (hasHistoricalEvidence && edge.physicalReachable) return EVIDENCE_CLASSES.DUAL;
   if (hasHistoricalEvidence) return EVIDENCE_CLASSES.HISTORICAL_ONLY;
   return EVIDENCE_CLASSES.PHYSICAL_ONLY;
@@ -119,11 +120,14 @@ function buildCandidates(seeds, landPolygons, adjacencyHints) {
   }
 
   return [...edgeMap.values()]
-    .map((edge) => ({
-      ...edge,
-      reasons: [...edge.reasons].sort(),
-      evidenceClass: classifyEvidence(edge),
-    }))
+    .map((edge) => {
+      const reasons = [...edge.reasons].sort();
+      return {
+        ...edge,
+        reasons,
+        evidenceClass: classifyEvidence({ ...edge, reasons }),
+      };
+    })
     .sort((a, b) => a.distanceKm - b.distanceKm || a.key.localeCompare(b.key));
 }
 
