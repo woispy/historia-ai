@@ -49,6 +49,7 @@ on:
       - feat/historical-map-clean-foundation
       - feat/historical-political-map-v1
       - feat/p6.1-real-anatolia-adjacency
+      - feat/p6.2-boundary-solver-foundation
 
 concurrency:
   group: historia-ai-ci-${{ github.workflow }}-${{ github.ref }}
@@ -72,6 +73,8 @@ jobs:
           node --input-type=module -e "import('globals').catch(() => process.exit(1))" || npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund globals@17.8.0
       - name: Run P6.1 candidate adjacency telemetry
         run: npm run test:p6-province-adjacency
+      - name: Run P6.2 boundary solver foundation tests
+        run: npm run test:p6.2-boundary-solver
       - name: Lint
         run: npm run lint
       - name: Generate world physical geometry assets
