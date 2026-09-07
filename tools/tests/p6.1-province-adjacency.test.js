@@ -18,9 +18,44 @@ assert.equal(summary.isolatedSeedCount, 0);
 assert.equal(graph.edges.every((edge) => edge.distanceKm > 0), true);
 assert.equal(graph.edges.every((edge) => edge.from !== edge.to), true);
 assert.equal(graph.edges.every((edge) => edge.physicalReachable === true), true);
+assert.equal(graph.edges.every((edge) => edge.evidenceClass === "physical-only"), true);
+assert.equal(summary.physicalOnlyEdgeCount, summary.edgeCount);
+assert.equal(summary.historicalOnlyEdges.length, 0);
+assert.equal(summary.dualEvidenceEdgeCount, 0);
+assert.equal(summary.evidenceClassPartitionCount, summary.edgeCount);
 assert.equal(summary.degreeMin >= 1, true);
 assert.equal(summary.degreeMax >= summary.degreeMin, true);
 assert.equal(summary.connectivityEdgeCount, summary.seedCount - 1);
 assert.equal(graph.mstConnected, true);
+
+const provenanceLandPolygons = [[[-1, -1], [2, -1], [2, 2], [-1, 2]]];
+const provenanceGraph = buildP61Adjacency(metadata, {
+  landPolygons: provenanceLandPolygons,
+  adjacencyHints: {
+    a: ["d"],
+    b: ["c"],
+  },
+});
+const provenanceSummary = summarizeP61Graph(provenanceGraph);
+
+assert.equal(provenanceGraph.mstConnected, true);
+assert.equal(provenanceSummary.historicalOnlyEdges.length > 0, true);
+assert.equal(provenanceSummary.dualEvidenceEdgeCount > 0, true);
+assert.equal(provenanceSummary.physicalOnlyEdgeCount > 0, true);
+assert.equal(provenanceSummary.evidenceClassPartitionCount, provenanceSummary.edgeCount);
+assert.equal(
+  provenanceGraph.edges.every((edge) => ["historical-only", "physical-only", "dual-evidence"].includes(edge.evidenceClass)),
+  true,
+);
+assert.equal(
+  provenanceGraph.edges.filter((edge) => edge.evidenceClass === "historical-only")
+    .every((edge) => edge.reasons.includes("historical-adjacency-hint") && !edge.physicalReachable),
+  true,
+);
+assert.equal(
+  provenanceGraph.edges.filter((edge) => edge.evidenceClass === "dual-evidence")
+    .every((edge) => edge.reasons.includes("historical-adjacency-hint") && edge.physicalReachable),
+  true,
+);
 
 console.log("P6.1 province adjacency graph tests passed.");
