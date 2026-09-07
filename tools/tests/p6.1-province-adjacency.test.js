@@ -9,7 +9,7 @@ const metadata = [
 ];
 
 const landPolygons = [[[-1, -1], [11, -1], [11, 2], [-1, 2]]];
-const graph = buildP61Adjacency(metadata, { landPolygons });
+const graph = buildP61Adjacency(metadata, { landPolygons, adjacencyHints: {} });
 const summary = summarizeP61Graph(graph);
 
 assert.equal(summary.seedCount, 4);
