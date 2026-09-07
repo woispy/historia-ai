@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 import { validateProvinceSeedSet } from "../historical-gis/province/ProvinceSeedModel.js";
-import { SpatialSeedIndex } from "../historical-gis/province/SpatialSeedIndex.js";
+import { SpatialHashSeedIndex } from "../historical-gis/province/SpatialSeedIndex.js";
 import { createCostField } from "../historical-gis/province/CostField.js";
 import { adaptHydrographySample, composeCostSamples } from "../historical-gis/province/CostAdapters.js";
 import { CopernicusDemCostSampler } from "../historical-gis/province/CopernicusDemCostSampler.js";
@@ -74,7 +74,7 @@ const seeds = makeSeeds();
 assert.equal(seeds.length, ANATOLIA_PROVINCE_METADATA.length, "the full curated 1300 Anatolia seed set must be exercised");
 assert.ok(seeds.length >= 30, "stress harness requires a genuinely regional seed population");
 
-const index = new SpatialSeedIndex({ cellSize: 1 });
+const index = new SpatialHashSeedIndex({ cellSize: 1 });
 for (const seed of seeds) index.insert(seed);
 assert.equal(index.size, seeds.length);
 
