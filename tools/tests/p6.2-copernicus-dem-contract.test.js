@@ -33,6 +33,11 @@ assert.equal(P62_COPERNICUS_GLO30_CONTRACT.tileExtent, "1x1-degree-latitude-long
 
 assert.throws(
   () => validateCopernicusGlo30Manifest({ ...validManifest, tiles: [{ ...validManifest.tiles[0], sha256: null }] }),
+  /must be a non-empty string/,
+);
+
+assert.throws(
+  () => validateCopernicusGlo30Manifest({ ...validManifest, tiles: [{ ...validManifest.tiles[0], sha256: "not-a-sha256" }] }),
   /valid SHA-256 checksum/,
 );
 
