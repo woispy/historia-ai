@@ -72,6 +72,8 @@ jobs:
         run: npm run test:camera-world-wrap
       - name: Validate DEM codec/source contracts
         run: npm run test:terrain-dem
+      - name: Validate GeoTIFF Predictor=3 row decoding
+        run: npm run test:geo-tiff-predictor
       - name: Validate terrain LOD and streaming contracts
         run: npm run test:terrain-phase-e
       - name: Validate terrain world-wrap streaming
