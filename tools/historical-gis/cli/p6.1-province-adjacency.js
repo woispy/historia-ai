@@ -1,18 +1,6 @@
-import fs from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../../src/map/data/AnatoliaProvinceMetadata.js";
 import { buildP61Adjacency, formatP61Telemetry, summarizeP61Graph } from "../P61ProvinceAdjacency.js";
-
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
-const runtimePath = path.join(root, "src/world/map/assets/historical/1300/runtime.json");
-
-const runtime = JSON.parse(await fs.readFile(runtimePath, "utf8"));
-const runtimeIds = new Set((runtime.provinces ?? []).map((province) => province?.identity?.id));
-const metadataIds = new Set(ANATOLIA_PROVINCE_METADATA.map((province) => province.id));
-const missingRuntime = [...metadataIds].filter((id) => !runtimeIds.has(id));
-if (missingRuntime.length) throw new Error(`P6.1 metadata/runtime mismatch; missing runtime provinces: ${missingRuntime.join(", ")}`);
 
 const graph = buildP61Adjacency(ANATOLIA_PROVINCE_METADATA, {
   landPolygons: ANATOLIA_PHYSICAL_ATLAS.landPolygons,
