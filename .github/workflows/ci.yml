@@ -73,6 +73,8 @@ jobs:
           node --input-type=module -e "import('globals').catch(() => process.exit(1))" || npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund globals@17.8.0
       - name: Run P6.1 candidate adjacency telemetry
         run: npm run test:p6-province-adjacency
+      - name: Run P6.2 Copernicus GLO-30 acquisition contract
+        run: npm run test:p6.2-copernicus-dem-contract
       - name: Run P6.2 boundary solver foundation tests
         run: npm run test:p6.2-boundary-solver
       - name: Lint
