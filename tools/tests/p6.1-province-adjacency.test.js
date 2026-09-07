@@ -28,8 +28,16 @@ assert.equal(summary.degreeMax >= summary.degreeMin, true);
 assert.equal(summary.connectivityEdgeCount, summary.seedCount - 1);
 assert.equal(graph.mstConnected, true);
 
+// The provenance fixture deliberately contains all three evidence classes:
+// - a-d: historical-only (explicit historical hint, physically unreachable)
+// - b-c: dual-evidence (historical hint + physical corridor)
+// - a-e / b-e / c-e: physical-only (cross-parent physical candidates without a hint)
+const provenanceMetadata = [
+  ...metadata,
+  { id: "e", regionId: "east", centroid: [1.5, 0] },
+];
 const provenanceLandPolygons = [[[-1, -1], [2, -1], [2, 2], [-1, 2]]];
-const provenanceGraph = buildP61Adjacency(metadata, {
+const provenanceGraph = buildP61Adjacency(provenanceMetadata, {
   landPolygons: provenanceLandPolygons,
   adjacencyHints: {
     a: ["d"],
