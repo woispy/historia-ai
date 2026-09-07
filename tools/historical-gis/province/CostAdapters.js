@@ -37,6 +37,12 @@ export function normalizeCostChannels(values = {}) {
  * DEM adapter. slope is normalized from degrees unless slopeNormalized is
  * supplied. ridgeAffinity represents how strongly the cell belongs to a
  * watershed/ridge corridor; ridge cost is inverted so high affinity is cheap.
+ *
+ * DEM is the complete terrain adapter, so it returns the terrain channels.
+ * Hydrography adapters below intentionally return sparse channel maps: an
+ * absent channel means "no opinion", whereas an explicit zero means a caller
+ * deliberately supplied a zero value. This prevents composing hydrography
+ * data from erasing valid DEM slope/mountain values.
  */
 export function adaptDemSample({ slopeDegrees = 0, slopeNormalized, ridgeAffinity = 0, mountainResistance = 0 } = {}) {
   const slope = slopeNormalized == null
@@ -51,11 +57,11 @@ export function adaptDemSample({ slopeDegrees = 0, slopeNormalized, ridgeAffinit
 
 /** Hydrography adapter. riverPenalty is a normalized crossing resistance. */
 export function adaptHydrographySample({ riverPenalty = 0, lakePenalty = 0, coastPenalty = 0 } = {}) {
-  return normalizeCostChannels({
-    river: riverPenalty,
-    lake: lakePenalty,
-    coast: coastPenalty,
-  });
+  return {
+    river: clamp01(riverPenalty, "riverPenalty"),
+    lake: clamp01(lakePenalty, "lakePenalty"),
+    coast: clamp01(coastPenalty, "coastPenalty"),
+  };
 }
 
 /**
@@ -71,7 +77,7 @@ export function adaptRiverDirectionalSample({
   crossingCost = 1,
 } = {}) {
   const base = clamp01(basePenalty, "basePenalty");
-  if (!riverNormal || !direction) return normalizeCostChannels({ river: base });
+  if (!riverNormal || !direction) return { river: base };
 
   const nx = finite(riverNormal.x, "riverNormal.x");
   const ny = finite(riverNormal.y, "riverNormal.y");
@@ -79,11 +85,11 @@ export function adaptRiverDirectionalSample({
   const dy = finite(direction.y, "direction.y");
   const normalLength = Math.hypot(nx, ny);
   const directionLength = Math.hypot(dx, dy);
-  if (normalLength === 0 || directionLength === 0) return normalizeCostChannels({ river: base });
+  if (normalLength === 0 || directionLength === 0) return { river: base };
 
   const alignment = Math.abs((nx * dx + ny * dy) / (normalLength * directionLength));
   const directional = parallelCost + (crossingCost - parallelCost) * alignment;
-  return normalizeCostChannels({ river: Math.max(base, directional) });
+  return { river: Math.max(base, clamp01(directional, "directionalRiverCost")) };
 }
 
 /** Merge independently supplied adapters; later values overwrite earlier ones. */
