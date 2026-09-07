@@ -195,12 +195,15 @@ for (const arc of Object.values(registry.toTopology().arcs)) {
   assert.ok(validateArcGeometry(arc).valid);
 }
 
-const sampleNodes = [seeds[0], seeds[Math.floor(seeds.length / 2)], seeds.at(-1)].map((seed) => nearestGraphNode(graph, seed));
+const sampleSeeds = [seeds[0], seeds[Math.floor(seeds.length / 2)], seeds.at(-1)];
+const sampleNodes = sampleSeeds.map((seed) => nearestGraphNode(graph, seed));
 const samples = sampleNodes.map((node) => demSampler.sample(node));
 for (const sample of samples) {
   assert.ok(Object.values(sample).every((value) => Number.isFinite(value) && value >= 0 && value <= 1));
 }
-assert.ok(new Set(samples.map((sample) => `${sample.slope}:${sample.ridge}:${sample.mountain}`)).size > 1, "Copernicus DEM sampling must produce spatially varying terrain costs");
+const demCostSignatures = samples.map((sample) => `${sample.slope}:${sample.ridge}:${sample.mountain}`);
+console.log(`Copernicus DEM quality probe: ${JSON.stringify(sampleSeeds.map((seed, index) => ({ id: seed.id, seed: seed.position, node: sampleNodes[index], dem: samples[index], signature: demCostSignatures[index] })))}`);
+assert.ok(new Set(demCostSignatures).size > 1, `Copernicus DEM sampling must produce spatially varying terrain costs; probe=${JSON.stringify(sampleSeeds.map((seed, index) => ({ id: seed.id, node: sampleNodes[index], dem: samples[index] })))}`);
 
 const ridgeSamples = sampleNodes.map((node) => ridgeAnalyzer.analyze(node));
 assert.ok(ridgeSamples.every((sample) => sample.sampleCount >= 4));
