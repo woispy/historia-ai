@@ -219,3 +219,79 @@ export function buildP61Adjacency(metadata, {
     },
   };
 }
+
+export function summarizeP61Graph(graph) {
+  const degreeBySeed = new Map(graph.seeds.map((seed) => [seed.id, 0]));
+  for (const edge of graph.edges) {
+    degreeBySeed.set(edge.from, (degreeBySeed.get(edge.from) ?? 0) + 1);
+    degreeBySeed.set(edge.to, (degreeBySeed.get(edge.to) ?? 0) + 1);
+  }
+  const degrees = [...degreeBySeed.values()];
+  const distances = graph.edges.map((edge) => edge.distanceKm);
+  const physicalDistances = graph.edges
+    .filter((edge) => edge.physicalReachable)
+    .map((edge) => edge.distanceKm);
+  const historicalOnlyEdges = graph.edges.filter((edge) => edge.evidenceClass === EVIDENCE_CLASSES.HISTORICAL_ONLY).map(edgeView);
+  const physicalOnlyEdges = graph.edges.filter((edge) => edge.evidenceClass === EVIDENCE_CLASSES.PHYSICAL_ONLY).map(edgeView);
+  const dualEvidenceEdges = graph.edges.filter((edge) => edge.evidenceClass === EVIDENCE_CLASSES.DUAL).map(edgeView);
+  const longPhysicalCandidateEdges = graph.edges
+    .filter((edge) => edge.physicalReachable && edge.distanceKm >= 300)
+    .map(edgeView);
+
+  return {
+    schemaVersion: graph.schemaVersion,
+    phase: graph.phase,
+    authoritative: graph.authoritative,
+    seedCount: graph.seeds.length,
+    edgeCount: graph.edges.length,
+    connectivityEdgeCount: graph.mstEdges.length,
+    isolatedSeedCount: degrees.filter((degree) => degree === 0).length,
+    degreeMin: degrees.length ? Math.min(...degrees) : 0,
+    degreeMedian: percentile(degrees, 0.5),
+    degreeP90: percentile(degrees, 0.9),
+    degreeMax: degrees.length ? Math.max(...degrees) : 0,
+    minDistanceKm: distances.length ? Math.min(...distances) : 0,
+    medianDistanceKm: percentile(distances, 0.5),
+    p90DistanceKm: percentile(distances, 0.9),
+    maxDistanceKm: distances.length ? Math.max(...distances) : 0,
+    physicallyReachableEdgeCount: physicalDistances.length,
+    historicalHintEdgeCount: graph.edges.filter((edge) => edge.reasons.includes(HISTORICAL_HINT_REASON)).length,
+    historicalParentLocalEdgeCount: graph.edges.filter((edge) => edge.reasons.includes(HISTORICAL_PARENT_LOCAL_REASON)).length,
+    historicalOnlyEdgeCount: historicalOnlyEdges.length,
+    physicalOnlyEdgeCount: physicalOnlyEdges.length,
+    dualEvidenceEdgeCount: dualEvidenceEdges.length,
+    evidenceClassPartitionCount: historicalOnlyEdges.length + physicalOnlyEdges.length + dualEvidenceEdges.length,
+    historicalOnlyEdges,
+    physicalOnlyEdges,
+    dualEvidenceEdges,
+    longPhysicalCandidateEdgeCount: longPhysicalCandidateEdges.length,
+    longPhysicalCandidateEdges,
+  };
+}
+
+export function formatP61Telemetry(summary) {
+  const lines = [
+    `P6.1 seedCount=${summary.seedCount}`,
+    `P6.1 edgeCount=${summary.edgeCount}`,
+    `P6.1 connectivityEdgeCount=${summary.connectivityEdgeCount}`,
+    `P6.1 isolatedSeedCount=${summary.isolatedSeedCount}`,
+    `P6.1 degreeMin=${summary.degreeMin}`,
+    `P6.1 degreeMedian=${Number(summary.degreeMedian.toFixed(3))}`,
+    `P6.1 degreeP90=${Number(summary.degreeP90.toFixed(3))}`,
+    `P6.1 degreeMax=${summary.degreeMax}`,
+    `P6.1 minDistanceKm=${Number(summary.minDistanceKm.toFixed(3))}`,
+    `P6.1 medianDistanceKm=${Number(summary.medianDistanceKm.toFixed(3))}`,
+    `P6.1 p90DistanceKm=${Number(summary.p90DistanceKm.toFixed(3))}`,
+    `P6.1 maxDistanceKm=${Number(summary.maxDistanceKm.toFixed(3))}`,
+    `P6.1 physicallyReachableEdgeCount=${summary.physicallyReachableEdgeCount}`,
+    `P6.1 historicalHintEdgeCount=${summary.historicalHintEdgeCount}`,
+    `P6.1 historicalParentLocalEdgeCount=${summary.historicalParentLocalEdgeCount}`,
+    `P6.1 historicalOnlyEdgeCount=${summary.historicalOnlyEdgeCount}`,
+    `P6.1 physicalOnlyEdgeCount=${summary.physicalOnlyEdgeCount}`,
+    `P6.1 dualEvidenceEdgeCount=${summary.dualEvidenceEdgeCount}`,
+    `P6.1 evidenceClassPartitionCount=${summary.evidenceClassPartitionCount}`,
+    `P6.1 longPhysicalCandidateEdgeCount=${summary.longPhysicalCandidateEdgeCount}`,
+    `P6.1 longPhysicalCandidateEdges=${JSON.stringify(summary.longPhysicalCandidateEdges)}`,
+  ];
+  return lines.join("\n");
+}
