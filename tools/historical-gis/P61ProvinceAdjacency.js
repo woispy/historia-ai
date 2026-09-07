@@ -1,6 +1,5 @@
 const EARTH_RADIUS_KM = 6371.0088;
 const LOCAL_NEIGHBOR_COUNT = 6;
-const LAND_SAMPLE_STEP_DEG = 0.05;
 
 function haversineKm(a, b) {
   const toRad = (value) => (value * Math.PI) / 180;
