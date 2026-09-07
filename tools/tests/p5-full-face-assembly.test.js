@@ -39,7 +39,7 @@ const openArcs = { ...arcs };
 delete openArcs.cd;
 assert.throws(
   () => assembleFullFaces({ topology: { nodes, arcs: openArcs } }),
-  /open boundary|ambiguous boundary continuation|f[34]/i,
+  /fewer than three incident boundary arcs|open boundary|ambiguous boundary continuation|f[34]/i,
 );
 
 console.log("P5 full face assembly and honest Euler contracts passed.");
