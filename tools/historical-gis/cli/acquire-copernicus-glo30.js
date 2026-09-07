@@ -12,6 +12,7 @@ const TOKEN_URL = "https://identity.dataspace.copernicus.eu/auth/realms/CDSE/pro
 const DATASET = "COP-DEM_GLO-30-DGED/2024_1";
 const PRODUCT_TYPE = "SAR_DGE_30_A4AD";
 const OUTPUT_DIR = path.resolve("data/build/physical/copernicus-glo30/2024_1");
+const MANIFEST_PATH = path.resolve("src/world/map/source/physical/copernicus-glo30.manifest.json");
 
 function parseArgs(argv) {
   const args = new Set(argv.slice(2));
@@ -100,7 +101,7 @@ async function findDemNode(productId, token, nodes = null, prefix = []) {
   for (const node of children) {
     const current = [...prefix, node.Name];
     if (node.ChildrenNumber > 0) {
-      const nested = await findDemNode(productId, token, await listNodes(productId, token, node.Id), current);
+      const nested = await findDemNode(productId, token, await listNodes(productId, token, node.Name), current);
       if (nested) return nested;
     } else if (/\.tif(f)?$/i.test(node.Name) && /(^|[_-])DEM([_.-]|$)/i.test(node.Name)) {
       return { node, path: current };
@@ -116,12 +117,29 @@ async function downloadNode(productId, nodePath, token, destination) {
   const response = await fetch(url, { headers: { Authorization: `Bearer ${token}` }, redirect: "follow" });
   if (!response.ok) throw new Error(`CDSE DEM node download failed: HTTP ${response.status}`);
   const bytes = Buffer.from(await response.arrayBuffer());
+  if (bytes.length < 4 || !((bytes[0] === 0x49 && bytes[1] === 0x49 && bytes[2] === 0x2a && bytes[3] === 0x00)
+    || (bytes[0] === 0x4d && bytes[1] === 0x4d && bytes[2] === 0x00 && bytes[3] === 0x2a))) {
+    throw new Error(`P6.2-A downloaded node is not a TIFF payload: ${destination}`);
+  }
   await fs.writeFile(destination, bytes);
   return bytes.length;
 }
 
 function sha256File(buffer) {
   return crypto.createHash("sha256").update(buffer).digest("hex");
+}
+
+function assertCatalogIntegrity(results, expectedIds) {
+  if (results.length !== expectedIds.length) {
+    throw new Error(`P6.2-A catalog result count mismatch: expected ${expectedIds.length}, got ${results.length}.`);
+  }
+  const missing = results.filter((item) => item.status !== "catalogued").map((item) => item.id);
+  if (missing.length) {
+    throw new Error(`P6.2-A fail-closed: ${missing.length} required GLO-30 tiles are missing from catalog: ${missing.join(", ")}`);
+  }
+  if (new Set(results.map((item) => item.id)).size !== expectedIds.length) {
+    throw new Error("P6.2-A catalog result IDs are not unique.");
+  }
 }
 
 async function main() {
@@ -140,13 +158,19 @@ async function main() {
       throw new Error(`P6.2-A expected exactly one pinned ${DATASET} product for ${gridId}; found ${products.length}.`);
     }
     const product = products[0];
+    const dataset = getAttribute(product, "dataset");
+    const productType = getAttribute(product, "productType");
+    const productGridId = getAttribute(product, "gridId");
+    if (dataset !== DATASET || productType !== PRODUCT_TYPE || productGridId !== gridId) {
+      throw new Error(`P6.2-A catalog metadata mismatch for ${gridId}.`);
+    }
     results.push({
       id: gridId,
       status: "catalogued",
       productId: product.Id,
       productName: product.Name,
-      dataset: getAttribute(product, "dataset"),
-      productType: getAttribute(product, "productType"),
+      dataset,
+      productType,
       locations: product.Locations ?? [],
       checksum: product.Checksum ?? [],
     });
@@ -158,12 +182,16 @@ async function main() {
   console.log(`P6.2-A catalog discovery: ${results.filter((item) => item.status === "catalogued").length}/${results.length} tiles catalogued`);
   console.log(`catalogResults=${catalogPath}`);
 
-  if (catalogOnly) return;
+  if (catalogOnly) {
+    assertCatalogIntegrity(results, ids);
+    return;
+  }
   if (!download) throw new Error("No download requested. Use --catalog-only or explicitly pass --download.");
 
+  assertCatalogIntegrity(results, ids);
   const token = await getToken();
   const promoted = [];
-  for (const item of results.filter((entry) => entry.status === "catalogued")) {
+  for (const item of results) {
     const demNode = await findDemNode(item.productId, token);
     if (!demNode) throw new Error(`P6.2-A could not locate DEM GeoTIFF inside product ${item.productId} (${item.id}).`);
     const destination = path.join(OUTPUT_DIR, `${item.id}.tif`);
@@ -183,20 +211,25 @@ async function main() {
   }
 
   if (!promote) {
-    console.log(`downloaded=${promoted.length}; manifest promotion skipped (pass --promote to write the promotion candidate).`);
+    console.log(`downloaded=${promoted.length}; manifest promotion skipped (pass --promote to update the authoritative source manifest).`);
     return;
+  }
+
+  if (promoted.length !== ids.length) {
+    throw new Error(`P6.2-A fail-closed promotion: expected ${ids.length} downloaded tiles, got ${promoted.length}.`);
   }
 
   const promotedManifest = {
     ...manifest,
     acquisition: {
-      aoi: aoi,
+      aoi,
       verifiedAt: new Date().toISOString(),
       source: "CDSE OData authenticated download",
     },
     tiles: promoted,
   };
-  await fs.writeFile(path.join(OUTPUT_DIR, "copernicus-glo30.promoted.json"), `${JSON.stringify(promotedManifest, null, 2)}\n`);
+  await fs.writeFile(MANIFEST_PATH, `${JSON.stringify(promotedManifest, null, 2)}\n`);
+  console.log(`promotedManifest=${MANIFEST_PATH}`);
   console.log(`promotedManifestTiles=${promoted.length}`);
 }
 
