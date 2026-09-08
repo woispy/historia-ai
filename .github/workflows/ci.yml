@@ -77,6 +77,8 @@ jobs:
         run: npm run test:p6.2-copernicus-dem-contract
       - name: Run P6.2 GeoTIFF semantic validator
         run: npm run test:p6.2-geotiff-validator
+      - name: Run P6.2 WGS84 elevation sampler
+        run: npm run test:p6.2-wgs84-elevation-sampler
       - name: Run P6.2 boundary solver foundation tests
         run: npm run test:p6.2-boundary-solver
       - name: Lint
