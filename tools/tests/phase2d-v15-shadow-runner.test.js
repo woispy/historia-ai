@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import { buildAnatoliaPhase2DAssets } from "../historical-gis/AnatoliaPhase2DGeometryBuilder.js";
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
@@ -211,6 +212,32 @@ function semanticPolygonEqual(a, b, epsilon = 1e-7) {
   }
   const topologyBreaks = diffs.filter((item) => item.topology === "candidate-normalization-failed").length;
   const authorityViolations = diffs.filter((item) => item.authority !== false).length;
+
+  const forensicSnapshot = {
+    contract: V15_SHADOW_CONTRACT,
+    PA05: "EXECUTED",
+    PA10: "EXECUTED",
+    PA11: "EXECUTED",
+    shadowDiffCount: diffs.length,
+    topologyBreaks,
+    authorityViolations,
+    semanticEqualCount: diffs.filter((item) => item.semanticEqual).length,
+    maxAreaDelta: diffs.some((item) => typeof item.areaDelta === "number")
+      ? Math.max(...diffs.filter((item) => typeof item.areaDelta === "number").map((item) => Math.abs(item.areaDelta)))
+      : null,
+    maxCoordinateDelta: diffs.some((item) => typeof item.coordinateDeltaMax === "number")
+      ? Math.max(...diffs.filter((item) => typeof item.coordinateDeltaMax === "number").map((item) => item.coordinateDeltaMax))
+      : null,
+    diffs,
+  };
+  fs.mkdirSync("artifacts/phase2.8-c", { recursive: true });
+  fs.writeFileSync(
+    "artifacts/phase2.8-c/v15-shadow-forensics.json",
+    `${JSON.stringify(forensicSnapshot, null, 2)}\n`,
+    "utf8",
+  );
+  console.log(`V15 shadow forensic snapshot: topologyBreaks=${topologyBreaks}, candidate-normalization-failed=${topologyBreaks}, shadowDiffCount=${diffs.length}`);
+
   assert.equal(topologyBreaks, 0, `V15 shadow topology failures: ${topologyBreaks}`);
   assert.equal(authorityViolations, 0, `V15 shadow authority violations: ${authorityViolations}`);
   console.log(JSON.stringify({
