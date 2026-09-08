@@ -14,7 +14,7 @@ function signedArea(polygon) {
   let sum = 0;
   for (let index = 0; index < polygon.length; index += 1) {
     const next = polygon[(index + 1) % polygon.length];
-    sum += polygon[index][0] * next[1] - next[0] * polygon[index][1];
+    sum += polygon[index][0] * next[1] - next[0] * next[1];
   }
   return sum / 2;
 }
@@ -145,16 +145,19 @@ function semanticPolygonEqual(a, b, epsilon = 1e-7) {
   }
 }
 
-// PA-10 — pathological edge: every sampled point is invalid and boundary resolution cannot recover it.
+// PA-10 — pathological edge: force recursive subdivision with a segment-relative interior resolver.
 {
   const pathologicalAuthority = {
     isPhysicalGeometryBoundaryPoint: () => false,
-    resolvePhysicalGeometryBoundaryPoint: () => [0.1234567, 0.7654321],
+    resolvePhysicalGeometryBoundaryPoint: ([x, y]) => {
+      const bias = 0.1234567;
+      return [x + (1 - x) * bias, y + (1 - y) * bias];
+    },
   };
   const result = repairPhysicalEdgeCandidate([0, 0], [1, 1], pathologicalAuthority);
   assert.equal(result.points, null);
   assert.equal(result.authoritative, false);
-  assert.ok(result.diagnostics.maxDepthObserved <= V15_SHADOW_CONTRACT.MAX_EDGE_REPAIR_DEPTH);
+  assert.equal(result.diagnostics.maxDepthObserved, V15_SHADOW_CONTRACT.MAX_EDGE_REPAIR_DEPTH);
   assert.equal(result.diagnostics.terminationReason, "max-depth");
   assert.ok(result.diagnostics.sampleCount >= V15_SHADOW_CONTRACT.FINAL_EDGE_SAMPLE_COUNT);
   assert.ok(result.diagnostics.recursionCalls > 0);
