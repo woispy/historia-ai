@@ -48,6 +48,7 @@
     "test:p6.2-geotiff-validator": "node tools/tests/p6.2-geotiff-validator.test.js",
     "test:p6.2-wgs84-elevation-sampler": "node tools/tests/p6.2-wgs84-elevation-sampler.test.js",
     "test:p6.2-river-evidence-adapter": "node tools/tests/p6.2-river-evidence-adapter.test.js",
+    "test:p6.2-river-evidence-integration": "node tools/tests/p6.2-river-evidence-integration.test.js",
     "test:p6.2-copernicus-glo30-acquisition-script": "node tools/historical-gis/cli/acquire-copernicus-glo30.js --catalog-only",
     "test:p6.2-boundary-solver": "node tools/tests/p6.2-boundary-solver.test.js",
     "validate:historical-gis:1300": "node tools/historical-gis/cli/validate-1300.js",
