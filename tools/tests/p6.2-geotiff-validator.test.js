@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { validateCopernicusGlo30GeoTiff } from "../historical-gis/P62GeoTiffValidator.js";
 
 function makeFixture({ horizontalCrs = 4326, verticalCrs = 3855, rasterType = 2, sampleFormat = 3, width = 3601, height = 3601, nodata = "" } = {}) {
-  const entryCount = 9;
+  const entryCount = nodata ? 10 : 9;
   const ifdOffset = 8;
   const ifdSize = 2 + entryCount * 12 + 4;
   let cursor = ifdOffset + ifdSize;
@@ -37,7 +37,7 @@ function makeFixture({ horizontalCrs = 4326, verticalCrs = 3855, rasterType = 2,
     2054, 0, 1, 9102,
     4096, 0, 1, verticalCrs,
   ]);
-  const nodataOffset = ascii(nodata);
+  const nodataOffset = nodata ? ascii(nodata) : null;
 
   const buffer = Buffer.alloc(cursor);
   buffer.write("II", 0, "ascii");
@@ -56,6 +56,7 @@ function makeFixture({ horizontalCrs = 4326, verticalCrs = 3855, rasterType = 2,
     [33922, 12, 6, tiepointOffset],
     [34735, 3, 24, geoKeys],
   ];
+  if (nodata) entries.push([42113, 2, nodata.length + 1, nodataOffset]);
 
   for (let index = 0; index < entries.length; index += 1) {
     const [tag, type, count, value] = entries[index];
@@ -66,15 +67,6 @@ function makeFixture({ horizontalCrs = 4326, verticalCrs = 3855, rasterType = 2,
     if (type === 3 && count === 1) buffer.writeUInt16LE(value, offset + 8);
     else if (type === 4 && count === 1) buffer.writeUInt32LE(value, offset + 8);
     else buffer.writeUInt32LE(value, offset + 8);
-  }
-
-  // GDAL_NODATA is optional for GLO-30; include it only when requested.
-  if (nodata) {
-    const nodataEntryOffset = ifdOffset + 2 + 8 * 12;
-    buffer.writeUInt16LE(42113, nodataEntryOffset);
-    buffer.writeUInt16LE(2, nodataEntryOffset + 2);
-    buffer.writeUInt32LE(nodata.length + 1, nodataEntryOffset + 4);
-    buffer.writeUInt32LE(nodataOffset, nodataEntryOffset + 8);
   }
 
   for (const item of external) item.buffer.copy(buffer, item.offset);
