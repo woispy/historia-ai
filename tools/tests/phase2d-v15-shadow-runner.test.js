@@ -130,6 +130,92 @@ function semanticPolygonEqual(a, b, epsilon = 1e-7) {
   return false;
 }
 
+function normalizeWithForensics(provinceId, polygon) {
+  const normalized = [];
+  const diagnostics = { edgeCount: polygon.length, repairedEdges: 0, failedEdges: 0, authoritative: false };
+  const failures = [];
+
+  for (let index = 0; index < polygon.length; index += 1) {
+    const start = polygon[index];
+    const end = polygon[(index + 1) % polygon.length];
+    const resolvedStart = authority.isPhysicalLandPoint(start) ? [...start] : authority.resolvePhysicalGeometryBoundaryPoint(start);
+    const resolvedEnd = authority.isPhysicalLandPoint(end) ? [...end] : authority.resolvePhysicalGeometryBoundaryPoint(end);
+    if (!resolvedStart || !resolvedEnd) {
+      diagnostics.failedEdges += 1;
+      failures.push({
+        provinceId,
+        edgeIndex: index,
+        start,
+        end,
+        resolvedStart,
+        resolvedEnd,
+        endpointRecovery: { start: resolvedStart ? "resolved" : "failed", end: resolvedEnd ? "resolved" : "failed" },
+        repairResult: null,
+        terminationReason: null,
+        maxDepthObserved: null,
+        sampleCount: null,
+        recursionCalls: null,
+        failureStage: !resolvedStart ? "start-endpoint-recovery" : "end-endpoint-recovery",
+      });
+      return { polygon: null, diagnostics, failures };
+    }
+
+    const repaired = repairPhysicalEdgeCandidate(resolvedStart, resolvedEnd, authority);
+    if (!repaired.points) {
+      diagnostics.failedEdges += 1;
+      failures.push({
+        provinceId,
+        edgeIndex: index,
+        start,
+        end,
+        resolvedStart,
+        resolvedEnd,
+        endpointRecovery: { start: "resolved", end: "resolved" },
+        repairResult: "failed",
+        terminationReason: repaired.diagnostics.terminationReason,
+        maxDepthObserved: repaired.diagnostics.maxDepthObserved,
+        sampleCount: repaired.diagnostics.sampleCount,
+        recursionCalls: repaired.diagnostics.recursionCalls,
+        failureStage: `edge-repair:${repaired.diagnostics.terminationReason ?? "unknown"}`,
+      });
+      return { polygon: null, diagnostics, failures };
+    }
+    if (repaired.points.length > 2) diagnostics.repairedEdges += 1;
+    normalized.push(...repaired.points.slice(0, -1));
+  }
+
+  const deduplicated = [];
+  for (const point of normalized) {
+    const last = deduplicated[deduplicated.length - 1];
+    if (!last || last[0] !== point[0] || last[1] !== point[1]) deduplicated.push(point);
+  }
+  if (deduplicated.length > 1) {
+    const first = deduplicated[0];
+    const last = deduplicated[deduplicated.length - 1];
+    if (first[0] === last[0] && first[1] === last[1]) deduplicated.pop();
+  }
+  if (deduplicated.length < 3 || Math.abs(signedArea(deduplicated)) < 0.00005) {
+    diagnostics.failedEdges += 1;
+    failures.push({
+      provinceId,
+      edgeIndex: null,
+      start: null,
+      end: null,
+      resolvedStart: null,
+      resolvedEnd: null,
+      endpointRecovery: null,
+      repairResult: "failed",
+      terminationReason: null,
+      maxDepthObserved: null,
+      sampleCount: null,
+      recursionCalls: null,
+      failureStage: "post-normalization-degenerate-or-min-area",
+    });
+    return { polygon: null, diagnostics, failures };
+  }
+  return { polygon: deduplicated, diagnostics, failures };
+}
+
 // PA-05 — actual bounded candidate recovery execution.
 {
   const source = ANATOLIA_PROVINCE_METADATA.find((item) => !authority.isPhysicalLandPoint(item.centroid));
@@ -189,10 +275,12 @@ function semanticPolygonEqual(a, b, epsilon = 1e-7) {
 // Shadow comparison: canonical polygon vs V15 candidate normalization.
 {
   const diffs = [];
+  const failureStages = [];
   for (const { provinceId, polygon } of canonicalPolygons()) {
-    const candidate = normalizePhysicalBoundaryCandidate(polygon, authority);
+    const candidate = normalizeWithForensics(provinceId, polygon);
     if (!candidate.polygon) {
-      diffs.push({ provinceId, topology: "candidate-normalization-failed" });
+      diffs.push({ provinceId, topology: "candidate-normalization-failed", diagnostics: candidate.diagnostics, failures: candidate.failures });
+      failureStages.push(...candidate.failures);
       continue;
     }
     const canonical = canonicalMetrics(polygon);
@@ -208,10 +296,11 @@ function semanticPolygonEqual(a, b, epsilon = 1e-7) {
       }, 0),
       authority: candidate.diagnostics.authoritative,
       semanticEqual: semanticPolygonEqual(polygon, candidate.polygon),
+      diagnostics: candidate.diagnostics,
     });
   }
   const topologyBreaks = diffs.filter((item) => item.topology === "candidate-normalization-failed").length;
-  const authorityViolations = diffs.filter((item) => item.authority !== false).length;
+  const authorityViolations = diffs.filter((item) => item.diagnostics?.authoritative === true).length;
 
   const forensicSnapshot = {
     contract: V15_SHADOW_CONTRACT,
@@ -228,6 +317,11 @@ function semanticPolygonEqual(a, b, epsilon = 1e-7) {
     maxCoordinateDelta: diffs.some((item) => typeof item.coordinateDeltaMax === "number")
       ? Math.max(...diffs.filter((item) => typeof item.coordinateDeltaMax === "number").map((item) => item.coordinateDeltaMax))
       : null,
+    failureStageCounts: Object.fromEntries(failureStages.reduce((counts, item) => {
+      counts.set(item.failureStage, (counts.get(item.failureStage) ?? 0) + 1);
+      return counts;
+    }, new Map())),
+    failureForensics: failureStages,
     diffs,
   };
   fs.mkdirSync("artifacts/phase2.8-c", { recursive: true });
@@ -237,6 +331,7 @@ function semanticPolygonEqual(a, b, epsilon = 1e-7) {
     "utf8",
   );
   console.log(`V15 shadow forensic snapshot: topologyBreaks=${topologyBreaks}, candidate-normalization-failed=${topologyBreaks}, shadowDiffCount=${diffs.length}`);
+  console.log(`V15 shadow failure-stage counts: ${JSON.stringify(forensicSnapshot.failureStageCounts)}`);
 
   assert.equal(topologyBreaks, 0, `V15 shadow topology failures: ${topologyBreaks}`);
   assert.equal(authorityViolations, 0, `V15 shadow authority violations: ${authorityViolations}`);
@@ -249,8 +344,9 @@ function semanticPolygonEqual(a, b, epsilon = 1e-7) {
     topologyBreaks,
     authorityViolations,
     semanticEqualCount: diffs.filter((item) => item.semanticEqual).length,
-    maxAreaDelta: Math.max(...diffs.map((item) => Math.abs(item.areaDelta))),
-    maxCoordinateDelta: Math.max(...diffs.map((item) => item.coordinateDeltaMax)),
+    maxAreaDelta: Math.max(...diffs.filter((item) => typeof item.areaDelta === "number").map((item) => Math.abs(item.areaDelta))),
+    maxCoordinateDelta: Math.max(...diffs.filter((item) => typeof item.coordinateDeltaMax === "number").map((item) => item.coordinateDeltaMax)),
+    failureStageCounts: forensicSnapshot.failureStageCounts,
   }, null, 2));
 }
 
