@@ -5,6 +5,7 @@ import process from "node:process";
 
 import aoi from "../../../src/world/map/source/physical/copernicus-glo30.aoi.json" with { type: "json" };
 import manifest from "../../../src/world/map/source/physical/copernicus-glo30.manifest.json" with { type: "json" };
+import { validateCopernicusGlo30GeoTiff } from "../P62GeoTiffValidator.js";
 
 const CATALOG_URL = "https://catalogue.dataspace.copernicus.eu/odata/v1/Products";
 const DOWNLOAD_URL = "https://download.dataspace.copernicus.eu/odata/v1/Products";
@@ -96,33 +97,37 @@ async function listNodes(productId, token, parentNode = null) {
   return (await response.json()).result ?? [];
 }
 
-async function findDemNode(productId, token, nodes = null, prefix = []) {
+async function findTiffNodes(productId, token, nodes = null, prefix = []) {
   const children = nodes ?? await listNodes(productId, token);
+  const candidates = [];
   for (const node of children) {
     const current = [...prefix, node.Name];
     if (node.ChildrenNumber > 0) {
-      const nested = await findDemNode(productId, token, await listNodes(productId, token, node.Name), current);
-      if (nested) return nested;
-    } else if (/\.tif(f)?$/i.test(node.Name) && /(^|[_-])DEM([_.-]|$)/i.test(node.Name)) {
-      return { node, path: current };
+      candidates.push(...await findTiffNodes(productId, token, await listNodes(productId, token, node.Name), current));
+    } else if (/\.tif(f)?$/i.test(node.Name)) {
+      candidates.push({ node, path: current });
     }
   }
-  return null;
+  return candidates;
+}
+
+function nodeDownloadUrl(productId, nodePath) {
+  let url = `${DOWNLOAD_URL}(${productId})/Nodes`;
+  for (const node of nodePath) url += `(${encodeURIComponent(node)})/Nodes`;
+  return url.replace(/\/Nodes$/, "/$value");
 }
 
 async function downloadNode(productId, nodePath, token, destination) {
-  let url = `${DOWNLOAD_URL}(${productId})/Nodes`;
-  for (const node of nodePath) url += `(${encodeURIComponent(node)})/Nodes`;
-  url = url.replace(/\/Nodes$/, "/$value");
+  const url = nodeDownloadUrl(productId, nodePath);
   const response = await fetch(url, { headers: { Authorization: `Bearer ${token}` }, redirect: "follow" });
-  if (!response.ok) throw new Error(`CDSE DEM node download failed: HTTP ${response.status}`);
+  if (!response.ok) throw new Error(`CDSE TIFF node download failed: HTTP ${response.status}`);
   const bytes = Buffer.from(await response.arrayBuffer());
   if (bytes.length < 4 || !((bytes[0] === 0x49 && bytes[1] === 0x49 && bytes[2] === 0x2a && bytes[3] === 0x00)
     || (bytes[0] === 0x4d && bytes[1] === 0x4d && bytes[2] === 0x00 && bytes[3] === 0x2a))) {
-    throw new Error(`P6.2-A downloaded node is not a TIFF payload: ${destination}`);
+    throw new Error(`P6.2-A downloaded node is not a classic TIFF payload: ${destination}`);
   }
   await fs.writeFile(destination, bytes);
-  return bytes.length;
+  return bytes;
 }
 
 function sha256File(buffer) {
@@ -140,6 +145,42 @@ function assertCatalogIntegrity(results, expectedIds) {
   if (new Set(results.map((item) => item.id)).size !== expectedIds.length) {
     throw new Error("P6.2-A catalog result IDs are not unique.");
   }
+}
+
+async function acquireValidatedTile(item, token) {
+  const candidates = await findTiffNodes(item.productId, token);
+  if (candidates.length === 0) throw new Error(`P6.2-A product ${item.productId} contains no GeoTIFF node.`);
+
+  const candidateResults = [];
+  for (const candidate of candidates) {
+    const tempPath = path.join(OUTPUT_DIR, `.candidate-${item.id}-${candidate.node.Name}`);
+    try {
+      const bytes = await downloadNode(item.productId, candidate.path, token, tempPath);
+      const semantic = validateCopernicusGlo30GeoTiff(bytes, { tileId: item.id });
+      candidateResults.push({ candidate, bytes, semantic });
+    } catch (error) {
+      candidateResults.push({ candidate, error });
+    } finally {
+      await fs.rm(tempPath, { force: true });
+    }
+  }
+
+  if (candidateResults.filter((result) => result.semantic).length !== 1) {
+    const diagnostics = candidateResults.map((result) => result.semantic
+      ? `${result.candidate.node.Name}: VALID`
+      : `${result.candidate.node.Name}: ${result.error?.message ?? "invalid"}`);
+    throw new Error(`P6.2-A DEM asset identity is ambiguous for ${item.id}; exactly one semantically valid GeoTIFF is required. ${diagnostics.join(" | ")}`);
+  }
+
+  const selected = candidateResults.find((result) => result.semantic);
+  const destination = path.join(OUTPUT_DIR, `${item.id}.tif`);
+  await fs.writeFile(destination, selected.bytes);
+  return {
+    destination,
+    node: selected.candidate,
+    semantic: selected.semantic,
+    bytes: selected.bytes,
+  };
 }
 
 async function main() {
@@ -192,21 +233,18 @@ async function main() {
   const token = await getToken();
   const promoted = [];
   for (const item of results) {
-    const demNode = await findDemNode(item.productId, token);
-    if (!demNode) throw new Error(`P6.2-A could not locate DEM GeoTIFF inside product ${item.productId} (${item.id}).`);
-    const destination = path.join(OUTPUT_DIR, `${item.id}.tif`);
-    await downloadNode(item.productId, demNode.path, token, destination);
-    const bytes = await fs.readFile(destination);
-    const sha256 = sha256File(bytes);
+    const acquired = await acquireValidatedTile(item, token);
+    const sha256 = sha256File(acquired.bytes);
     promoted.push({
       id: item.id,
       catalogDataset: DATASET,
       productId: item.productId,
       productName: item.productName,
-      downloadLocator: `${DOWNLOAD_URL}(${item.productId})/Nodes/${demNode.path.join("/Nodes/")}/$value`,
-      demNodePath: demNode.path,
+      downloadLocator: nodeDownloadUrl(item.productId, acquired.node.path),
+      demNodePath: acquired.node.path,
       sha256,
-      byteLength: bytes.length,
+      byteLength: acquired.bytes.length,
+      semantic: acquired.semantic,
     });
   }
 
@@ -225,6 +263,7 @@ async function main() {
       aoi,
       verifiedAt: new Date().toISOString(),
       source: "CDSE OData authenticated download",
+      semanticValidation: "P6.2-A strict GeoTIFF validator",
     },
     tiles: promoted,
   };
