@@ -81,6 +81,8 @@ jobs:
         run: npm run test:p6.2-wgs84-elevation-sampler
       - name: Run P6.2 River Evidence Adapter
         run: npm run test:p6.2-river-evidence-adapter
+      - name: Run P6.2-B.1 River Evidence to Boundary Solver integration
+        run: npm run test:p6.2-river-evidence-integration
       - name: Run P6.2 boundary solver foundation tests
         run: npm run test:p6.2-boundary-solver
       - name: Lint
