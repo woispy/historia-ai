@@ -1,0 +1,39 @@
+name: Phase 2.8-C V15 Shadow
+
+on:
+  push:
+    branches:
+      - codex/phase2.8-c-v15-shadow
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  shadow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run V15 shadow contracts
+        run: npm run test:phase2d-v15-shadow
+
+      - name: Upload forensic report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2.8-c-v15-shadow-forensics
+          path: |
+            artifacts/phase2.8-c/**
+            tools/tests/fixtures/phase2d/**
+          if-no-files-found: ignore
