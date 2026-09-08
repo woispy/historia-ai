@@ -142,42 +142,13 @@ function normalizeWithForensics(provinceId, polygon) {
     const resolvedEnd = authority.isPhysicalLandPoint(end) ? [...end] : authority.resolvePhysicalGeometryBoundaryPoint(end);
     if (!resolvedStart || !resolvedEnd) {
       diagnostics.failedEdges += 1;
-      failures.push({
-        provinceId,
-        edgeIndex: index,
-        start,
-        end,
-        resolvedStart,
-        resolvedEnd,
-        endpointRecovery: { start: resolvedStart ? "resolved" : "failed", end: resolvedEnd ? "resolved" : "failed" },
-        repairResult: null,
-        terminationReason: null,
-        maxDepthObserved: null,
-        sampleCount: null,
-        recursionCalls: null,
-        failureStage: !resolvedStart ? "start-endpoint-recovery" : "end-endpoint-recovery",
-      });
+      failures.push({ provinceId, edgeIndex: index, start, end, resolvedStart, resolvedEnd, endpointRecovery: { start: resolvedStart ? "resolved" : "failed", end: resolvedEnd ? "resolved" : "failed" }, repairResult: null, terminationReason: null, maxDepthObserved: null, sampleCount: null, recursionCalls: null, failureStage: !resolvedStart ? "start-endpoint-recovery" : "end-endpoint-recovery" });
       return { polygon: null, diagnostics, failures };
     }
-
     const repaired = repairPhysicalEdgeCandidate(resolvedStart, resolvedEnd, authority);
     if (!repaired.points) {
       diagnostics.failedEdges += 1;
-      failures.push({
-        provinceId,
-        edgeIndex: index,
-        start,
-        end,
-        resolvedStart,
-        resolvedEnd,
-        endpointRecovery: { start: "resolved", end: "resolved" },
-        repairResult: "failed",
-        terminationReason: repaired.diagnostics.terminationReason,
-        maxDepthObserved: repaired.diagnostics.maxDepthObserved,
-        sampleCount: repaired.diagnostics.sampleCount,
-        recursionCalls: repaired.diagnostics.recursionCalls,
-        failureStage: `edge-repair:${repaired.diagnostics.terminationReason ?? "unknown"}`,
-      });
+      failures.push({ provinceId, edgeIndex: index, start, end, resolvedStart, resolvedEnd, endpointRecovery: { start: "resolved", end: "resolved" }, repairResult: "failed", terminationReason: repaired.diagnostics.terminationReason, maxDepthObserved: repaired.diagnostics.maxDepthObserved, sampleCount: repaired.diagnostics.sampleCount, recursionCalls: repaired.diagnostics.recursionCalls, failureStage: `edge-repair:${repaired.diagnostics.terminationReason ?? "unknown"}` });
       return { polygon: null, diagnostics, failures };
     }
     if (repaired.points.length > 2) diagnostics.repairedEdges += 1;
@@ -196,21 +167,7 @@ function normalizeWithForensics(provinceId, polygon) {
   }
   if (deduplicated.length < 3 || Math.abs(signedArea(deduplicated)) < 0.00005) {
     diagnostics.failedEdges += 1;
-    failures.push({
-      provinceId,
-      edgeIndex: null,
-      start: null,
-      end: null,
-      resolvedStart: null,
-      resolvedEnd: null,
-      endpointRecovery: null,
-      repairResult: "failed",
-      terminationReason: null,
-      maxDepthObserved: null,
-      sampleCount: null,
-      recursionCalls: null,
-      failureStage: "post-normalization-degenerate-or-min-area",
-    });
+    failures.push({ provinceId, edgeIndex: null, start: null, end: null, resolvedStart: null, resolvedEnd: null, endpointRecovery: null, repairResult: "failed", terminationReason: null, maxDepthObserved: null, sampleCount: null, recursionCalls: null, failureStage: "post-normalization-degenerate-or-min-area" });
     return { polygon: null, diagnostics, failures };
   }
   return { polygon: deduplicated, diagnostics, failures };
@@ -285,19 +242,7 @@ function normalizeWithForensics(provinceId, polygon) {
     }
     const canonical = canonicalMetrics(polygon);
     const shadow = canonicalMetrics(candidate.polygon);
-    diffs.push({
-      provinceId,
-      topology: canonical.vertexCount === shadow.vertexCount ? "same-cardinality" : "vertex-count-delta",
-      ringStructure: `${canonical.ringCount}->${shadow.ringCount}`,
-      areaDelta: shadow.area - canonical.area,
-      coordinateDeltaMax: polygon.reduce((max, point, index) => {
-        const other = candidate.polygon[index % candidate.polygon.length];
-        return Math.max(max, Math.hypot(point[0] - other[0], point[1] - other[1]));
-      }, 0),
-      authority: candidate.diagnostics.authoritative,
-      semanticEqual: semanticPolygonEqual(polygon, candidate.polygon),
-      diagnostics: candidate.diagnostics,
-    });
+    diffs.push({ provinceId, topology: canonical.vertexCount === shadow.vertexCount ? "same-cardinality" : "vertex-count-delta", ringStructure: `${canonical.ringCount}->${shadow.ringCount}`, areaDelta: shadow.area - canonical.area, coordinateDeltaMax: polygon.reduce((max, point, index) => { const other = candidate.polygon[index % candidate.polygon.length]; return Math.max(max, Math.hypot(point[0] - other[0], point[1] - other[1])); }, 0), authority: candidate.diagnostics.authoritative, semanticEqual: semanticPolygonEqual(polygon, candidate.polygon), diagnostics: candidate.diagnostics });
   }
   const topologyBreaks = diffs.filter((item) => item.topology === "candidate-normalization-failed").length;
   const authorityViolations = diffs.filter((item) => item.diagnostics?.authoritative === true).length;
@@ -311,43 +256,22 @@ function normalizeWithForensics(provinceId, polygon) {
     topologyBreaks,
     authorityViolations,
     semanticEqualCount: diffs.filter((item) => item.semanticEqual).length,
-    maxAreaDelta: diffs.some((item) => typeof item.areaDelta === "number")
-      ? Math.max(...diffs.filter((item) => typeof item.areaDelta === "number").map((item) => Math.abs(item.areaDelta)))
-      : null,
-    maxCoordinateDelta: diffs.some((item) => typeof item.coordinateDeltaMax === "number")
-      ? Math.max(...diffs.filter((item) => typeof item.coordinateDeltaMax === "number").map((item) => item.coordinateDeltaMax))
-      : null,
-    failureStageCounts: Object.fromEntries(failureStages.reduce((counts, item) => {
-      counts.set(item.failureStage, (counts.get(item.failureStage) ?? 0) + 1);
-      return counts;
-    }, new Map())),
+    maxAreaDelta: diffs.some((item) => typeof item.areaDelta === "number") ? Math.max(...diffs.filter((item) => typeof item.areaDelta === "number").map((item) => Math.abs(item.areaDelta))) : null,
+    maxCoordinateDelta: diffs.some((item) => typeof item.coordinateDeltaMax === "number") ? Math.max(...diffs.filter((item) => typeof item.coordinateDeltaMax === "number").map((item) => item.coordinateDeltaMax)) : null,
+    failureStageCounts: Object.fromEntries(failureStages.reduce((counts, item) => { counts.set(item.failureStage, (counts.get(item.failureStage) ?? 0) + 1); return counts; }, new Map())),
     failureForensics: failureStages,
     diffs,
   };
   fs.mkdirSync("artifacts/phase2.8-c", { recursive: true });
-  fs.writeFileSync(
-    "artifacts/phase2.8-c/v15-shadow-forensics.json",
-    `${JSON.stringify(forensicSnapshot, null, 2)}\n`,
-    "utf8",
-  );
+  fs.writeFileSync("artifacts/phase2.8-c/v15-shadow-forensics.json", `${JSON.stringify(forensicSnapshot, null, 2)}\n`, "utf8");
   console.log(`V15 shadow forensic snapshot: topologyBreaks=${topologyBreaks}, candidate-normalization-failed=${topologyBreaks}, shadowDiffCount=${diffs.length}`);
   console.log(`V15 shadow failure-stage counts: ${JSON.stringify(forensicSnapshot.failureStageCounts)}`);
 
   assert.equal(topologyBreaks, 0, `V15 shadow topology failures: ${topologyBreaks}`);
   assert.equal(authorityViolations, 0, `V15 shadow authority violations: ${authorityViolations}`);
-  console.log(JSON.stringify({
-    contract: V15_SHADOW_CONTRACT,
-    PA05: "EXECUTED",
-    PA10: "EXECUTED",
-    PA11: "EXECUTED",
-    shadowDiffCount: diffs.length,
-    topologyBreaks,
-    authorityViolations,
-    semanticEqualCount: diffs.filter((item) => item.semanticEqual).length,
-    maxAreaDelta: Math.max(...diffs.filter((item) => typeof item.areaDelta === "number").map((item) => Math.abs(item.areaDelta))),
-    maxCoordinateDelta: Math.max(...diffs.filter((item) => typeof item.coordinateDeltaMax === "number").map((item) => item.coordinateDeltaMax)),
-    failureStageCounts: forensicSnapshot.failureStageCounts,
-  }, null, 2));
+  console.log(JSON.stringify({ contract: V15_SHADOW_CONTRACT, PA05: "EXECUTED", PA10: "EXECUTED", PA11: "EXECUTED", shadowDiffCount: diffs.length, topologyBreaks, authorityViolations, semanticEqualCount: diffs.filter((item) => item.semanticEqual).length, maxAreaDelta: Math.max(...diffs.filter((item) => typeof item.areaDelta === "number").map((item) => Math.abs(item.areaDelta))), maxCoordinateDelta: Math.max(...diffs.filter((item) => typeof item.coordinateDeltaMax === "number").map((item) => item.coordinateDeltaMax)), failureStageCounts: forensicSnapshot.failureStageCounts }, null, 2));
 }
 
 console.log("V15 shadow runner: execution completed without granting production authority");
+
+// CI trigger marker: no executable behavior change.
