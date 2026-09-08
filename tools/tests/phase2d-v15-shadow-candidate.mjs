@@ -1,3 +1,5 @@
+import { isPhysicalLandPoint as canonicalIsPhysicalLandPoint } from "../historical-gis/AnatoliaPhase2DGeometryBuilder.js";
+
 const EPS = 1e-9;
 const RECOVERY_STEP = 0.001;
 const MAX_RECOVERY_DISTANCE = 0.75;
@@ -22,8 +24,14 @@ function area(polygon) {
   return Math.abs(signedArea(polygon));
 }
 
+function isCanonicalLandPoint(point) {
+  return canonicalIsPhysicalLandPoint(point);
+}
+
 export function resolveGeometryAnchorCandidate(provinceId, sourceAnchor, authority) {
-  if (authority.isPhysicalLandPoint(sourceAnchor)) return [...sourceAnchor];
+  if (isCanonicalLandPoint(sourceAnchor)) {
+    return { point: [...sourceAnchor], authoritative: false, diagnostics: { provinceId, recoveryDistance: 0 } };
+  }
 
   for (let distance = RECOVERY_STEP; distance <= MAX_RECOVERY_DISTANCE + EPS; distance += RECOVERY_STEP) {
     const samples = Math.max(96, Math.ceil((Math.PI * 2 * distance) / RECOVERY_STEP));
@@ -33,14 +41,14 @@ export function resolveGeometryAnchorCandidate(provinceId, sourceAnchor, authori
         sourceAnchor[0] + Math.cos(angle) * distance,
         sourceAnchor[1] + Math.sin(angle) * distance,
       ];
-      if (authority.isPhysicalLandPoint(candidate)) {
+      if (isCanonicalLandPoint(candidate)) {
         return { point: candidate, authoritative: false, diagnostics: { provinceId, recoveryDistance: distance, sampleIndex: sample, searchSamples: samples } };
       }
     }
   }
 
   const boundary = authority.nearestBoundaryLandPoint(sourceAnchor);
-  if (boundary.point && boundary.distance <= MAX_RECOVERY_DISTANCE && authority.isPhysicalLandPoint(boundary.point)) {
+  if (boundary.point && boundary.distance <= MAX_RECOVERY_DISTANCE && isCanonicalLandPoint(boundary.point)) {
     return { point: [...boundary.point], authoritative: false, diagnostics: { provinceId, recoveryDistance: boundary.distance, fallback: "nearest-boundary" } };
   }
 
@@ -61,7 +69,7 @@ export function repairPhysicalEdgeCandidate(start, end, authority, options = {})
   let edgePhysical = true;
   for (let index = 0; index <= FINAL_EDGE_SAMPLE_COUNT; index += 1) {
     state.sampleCount += 1;
-    if (!authority.isPhysicalGeometryBoundaryPoint(interpolate(index / FINAL_EDGE_SAMPLE_COUNT))) {
+    if (!isCanonicalLandPoint(interpolate(index / FINAL_EDGE_SAMPLE_COUNT))) {
       edgePhysical = false;
       break;
     }
@@ -79,7 +87,7 @@ export function repairPhysicalEdgeCandidate(start, end, authority, options = {})
   let invalidFraction = null;
   for (let index = 1; index < FINAL_EDGE_SAMPLE_COUNT; index += 1) {
     const fraction = index / FINAL_EDGE_SAMPLE_COUNT;
-    if (!authority.isPhysicalGeometryBoundaryPoint(interpolate(fraction))) {
+    if (!isCanonicalLandPoint(interpolate(fraction))) {
       invalidFraction = fraction;
       break;
     }
@@ -114,8 +122,8 @@ export function normalizePhysicalBoundaryCandidate(polygon, authority) {
   for (let index = 0; index < polygon.length; index += 1) {
     const start = polygon[index];
     const end = polygon[(index + 1) % polygon.length];
-    const resolvedStart = authority.isPhysicalLandPoint(start) ? [...start] : authority.resolvePhysicalGeometryBoundaryPoint(start);
-    const resolvedEnd = authority.isPhysicalLandPoint(end) ? [...end] : authority.resolvePhysicalGeometryBoundaryPoint(end);
+    const resolvedStart = isCanonicalLandPoint(start) ? [...start] : authority.resolvePhysicalGeometryBoundaryPoint(start);
+    const resolvedEnd = isCanonicalLandPoint(end) ? [...end] : authority.resolvePhysicalGeometryBoundaryPoint(end);
     if (!resolvedStart || !resolvedEnd) {
       diagnostics.failedEdges += 1;
       return { polygon: null, diagnostics };
