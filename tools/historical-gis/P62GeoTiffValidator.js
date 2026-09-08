@@ -1,10 +1,10 @@
 const TIFF_TYPE_SIZES = Object.freeze({
-  1: 1, // BYTE
-  2: 1, // ASCII
-  3: 2, // SHORT
-  4: 4, // LONG
-  5: 8, // RATIONAL
-  12: 8, // DOUBLE
+  1: 1,
+  2: 1,
+  3: 2,
+  4: 4,
+  5: 8,
+  12: 8,
 });
 
 const TAG = Object.freeze({
@@ -12,10 +12,7 @@ const TAG = Object.freeze({
   IMAGE_LENGTH: 257,
   BITS_PER_SAMPLE: 258,
   COMPRESSION: 259,
-  STRIP_OFFSETS: 273,
   SAMPLES_PER_PIXEL: 277,
-  ROWS_PER_STRIP: 278,
-  STRIP_BYTE_COUNTS: 279,
   SAMPLE_FORMAT: 339,
   MODEL_PIXEL_SCALE: 33550,
   MODEL_TIEPOINT: 33922,
@@ -31,7 +28,6 @@ const GEO_KEY = Object.freeze({
   GEOGRAPHIC_TYPE: 2048,
   GEOG_ANGULAR_UNITS: 2054,
   VERTICAL_CRS: 4096,
-  VERTICAL_UNITS: 4099,
 });
 
 const EXPECTED = Object.freeze({
@@ -40,10 +36,10 @@ const EXPECTED = Object.freeze({
   gridSpacingDegrees: 1 / 3600,
   horizontalCrs: 4326,
   verticalCrs: 3855,
-  rasterType: 2, // RasterPixelIsPoint
-  modelType: 2, // Geographic
+  rasterType: 2,
+  modelType: 2,
   bitsPerSample: 32,
-  sampleFormat: 3, // IEEE floating point
+  sampleFormat: 3,
   samplesPerPixel: 1,
 });
 
@@ -62,13 +58,6 @@ function readUInt(buffer, offset, bytes, littleEndian) {
   if (bytes === 2) return littleEndian ? buffer.readUInt16LE(offset) : buffer.readUInt16BE(offset);
   if (bytes === 4) return littleEndian ? buffer.readUInt32LE(offset) : buffer.readUInt32BE(offset);
   fail(`unsupported unsigned integer width ${bytes}.`);
-}
-
-function readInt(buffer, offset, bytes, littleEndian) {
-  if (offset < 0 || offset + bytes > buffer.length) fail(`read exceeds payload at offset ${offset}.`);
-  if (bytes === 2) return littleEndian ? buffer.readInt16LE(offset) : buffer.readInt16BE(offset);
-  if (bytes === 4) return littleEndian ? buffer.readInt32LE(offset) : buffer.readInt32BE(offset);
-  fail(`unsupported signed integer width ${bytes}.`);
 }
 
 function readDouble(buffer, offset, littleEndian) {
@@ -100,7 +89,7 @@ function parseTiff(buffer) {
     if (!typeSize) fail(`unsupported TIFF field type ${type} for tag ${tag}.`);
     const byteLength = count * typeSize;
     const valueOffset = byteLength <= 4 ? offset + 8 : readUInt(buffer, offset + 8, 4, littleEndian);
-    if (valueOffset < 0 || valueOffset + byteLength > buffer.length) fail(`tag ${tag} value exceeds payload.`);
+    if (valueOffset + byteLength > buffer.length) fail(`tag ${tag} value exceeds payload.`);
     entries.set(tag, { type, count, offset: valueOffset });
   }
 
@@ -125,7 +114,7 @@ function parseTiff(buffer) {
     return out;
   };
 
-  return { entries, values, littleEndian };
+  return { values };
 }
 
 function geoKeys(parsed) {
@@ -137,14 +126,14 @@ function geoKeys(parsed) {
   for (let index = 0; index < keyCount; index += 1) {
     const base = 4 + index * 4;
     const keyId = raw[base];
-    const tiffTagLocation = raw[base + 1];
+    const location = raw[base + 1];
     const count = raw[base + 2];
     const valueOffset = raw[base + 3];
     let value;
-    if (tiffTagLocation === 0) value = valueOffset;
-    else if (tiffTagLocation === TAG.GEO_DOUBLE_PARAMS) value = parsed.values(tiffTagLocation, 12)?.slice(valueOffset, valueOffset + count);
-    else if (tiffTagLocation === TAG.GEO_ASCII_PARAMS) value = parsed.values(tiffTagLocation, 2)?.slice(valueOffset, valueOffset + count).join("");
-    else fail(`GeoKey ${keyId} references unsupported TIFF tag ${tiffTagLocation}.`);
+    if (location === 0) value = valueOffset;
+    else if (location === TAG.GEO_DOUBLE_PARAMS) value = parsed.values(location, 12)?.slice(valueOffset, valueOffset + count);
+    else if (location === TAG.GEO_ASCII_PARAMS) value = parsed.values(location, 2)?.slice(valueOffset, valueOffset + count).join("");
+    else fail(`GeoKey ${keyId} references unsupported TIFF tag ${location}.`);
     keys.set(keyId, value);
   }
   return keys;
@@ -178,7 +167,7 @@ export function validateCopernicusGlo30GeoTiff(buffer, { tileId = null } = {}) {
   if (!bits || bits.length !== 1 || bits[0] !== EXPECTED.bitsPerSample) fail("DGED raster must be a single 32-bit band.");
   if (!sampleFormat || sampleFormat.length !== 1 || sampleFormat[0] !== EXPECTED.sampleFormat) fail("DGED raster must use IEEE floating-point samples.");
   if (samples !== EXPECTED.samplesPerPixel) fail("DGED raster must contain exactly one elevation band.");
-  if (compression !== 1 && compression !== 5 && compression !== 8 && compression !== 32773) fail(`unsupported TIFF compression ${compression}; cannot establish deterministic sampler compatibility.`);
+  if (compression !== 1) fail(`unsupported DGED DEM compression ${compression}; authoritative sampler requires the uncompressed source raster.`);
   if (!scale || scale.length !== 3 || !nearlyEqual(scale[0], EXPECTED.gridSpacingDegrees) || !nearlyEqual(scale[1], EXPECTED.gridSpacingDegrees) || !nearlyEqual(scale[2], 0)) fail("ModelPixelScale does not match the one-arc-second geographic grid.");
   if (!tiepoint || tiepoint.length < 6 || !nearlyEqual(tiepoint[0], 0) || !nearlyEqual(tiepoint[1], 0)) fail("ModelTiepoint must anchor the first raster point at pixel (0,0).");
 
