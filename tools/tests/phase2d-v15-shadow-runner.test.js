@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { buildAnatoliaPhase2DAssets } from "../historical-gis/AnatoliaPhase2DGeometryBuilder.js";
+import { buildAnatoliaPhase2DAssets, isPhysicalLandPoint as canonicalIsPhysicalLandPoint } from "../historical-gis/AnatoliaPhase2DGeometryBuilder.js";
 import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtlas.js";
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
@@ -80,7 +80,7 @@ const physicalPolygons = ANATOLIA_PHYSICAL_ATLAS.landPolygons.filter((polygon) =
 
 const authority = {
   isPhysicalLandPoint(point) {
-    return physicalPolygons.some((polygon) => pointInPolygon(point, polygon)) && !isLakeInteriorPoint(point);
+    return canonicalIsPhysicalLandPoint(point);
   },
   isPhysicalGeometryBoundaryPoint(point) {
     return this.isPhysicalLandPoint(point) || isLakeInteriorPoint(point);
