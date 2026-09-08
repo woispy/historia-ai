@@ -25,6 +25,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Generate required hydrography runtime fixture
+        run: npm run build:assets
+
       - name: Run V15 shadow contracts
         run: npm run test:phase2d-v15-shadow
 
