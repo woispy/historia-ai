@@ -35,14 +35,6 @@ function normalizeRiver(river, index) {
   });
 }
 
-function normalizedName(value) {
-  return String(value ?? "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "");
-}
-
 function haversineKm(a, b) {
   const toRad = (value) => (value * Math.PI) / 180;
   const lat1 = toRad(a[1]);
