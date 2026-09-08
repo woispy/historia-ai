@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Historia AI Phase 2D Canonical Golden Baseline",
+  "type": "object",
+  "required": ["schemaVersion", "fixtureType", "provenance", "semantic", "geometry", "physicalLand", "waterLake", "topology"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "fixtureType": {"const": "phase2d-canonical-golden-baseline"},
+    "provenance": {"type": "object", "required": ["builderModule", "invocation", "canonicalBaseRevision", "historicalDate", "projection", "authorityMode"]},
+    "semantic": {"type": "object", "required": ["provinceCount", "polygonCount", "siteCount", "politicalSiteCount", "barrierSiteCount", "fallbackProvinceCount", "sha256"]},
+    "geometry": {"type": "object", "required": ["provinceCount", "provinces", "sha256"]},
+    "physicalLand": {"type": "object", "required": ["pointCount", "points", "sha256"]},
+    "waterLake": {"type": "object", "required": ["seaCount", "lakeCount", "seas", "lakes", "sha256"]},
+    "topology": {"type": "object", "required": ["sha256", "provinces"]}
+  }
+}
