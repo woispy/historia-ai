@@ -26,3 +26,5 @@ jobs:
         run: npm run build:assets
       - name: Run V15 raw/serialized forensic probe
         run: node tools/tests/phase2d-v15-raw-forensics.mjs
+      - name: Run V15 authority comparison probe
+        run: node tools/tests/phase2d-v15-authority-probe.mjs
