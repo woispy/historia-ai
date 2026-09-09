@@ -35,6 +35,7 @@ jobs:
             src/map/data/Anatolia1300ProvinceGeometryManifest.js \
             src/map/data/AnatoliaPhysicalAtlasRuntime.js \
             src/map/data/AnatoliaPhysicalAtlas.js \
+            src/map/data/AnatoliaPhysicalCoastCorrections.js \
             src/map/data/AnatoliaProvinceMetadata.js \
             src/map/data/AnatoliaProvinceRefinement.js \
             | tar -x -C "$RUNNER_TEMP/v15"
@@ -44,6 +45,7 @@ jobs:
           test -f "$RUNNER_TEMP/v15/tools/historical-gis/recovery/physical-land-authority.mjs"
           test -f "$RUNNER_TEMP/v15/src/map/data/AnatoliaPhysicalAtlasRuntime.js"
           test -f "$RUNNER_TEMP/v15/src/map/data/AnatoliaPhysicalAtlas.js"
+          test -f "$RUNNER_TEMP/v15/src/map/data/AnatoliaPhysicalCoastCorrections.js"
           mkdir -p "$RUNNER_TEMP/v15/src/map/data/generated"
           cp src/map/data/generated/anatolia-hydrography-10m.json "$RUNNER_TEMP/v15/src/map/data/generated/anatolia-hydrography-10m.json"
           test -f "$RUNNER_TEMP/v15/src/map/data/generated/anatolia-hydrography-10m.json"
