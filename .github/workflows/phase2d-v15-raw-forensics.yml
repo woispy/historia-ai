@@ -30,6 +30,12 @@ jobs:
         run: node tools/tests/phase2d-v15-raw-forensics.mjs
       - name: Run V15 authority comparison probe
         run: node tools/tests/phase2d-v15-authority-probe.mjs
+      - name: Fetch canonical production branch
+        run: git fetch --no-tags origin 6b7424125eee4a1c72925b7a1780c68e695e9ba3 && git worktree add --detach /tmp/historia-ai-canonical 6b7424125eee4a1c72925b7a1780c68e695e9ba3
+      - name: Run canonical geometry comparison probe
+        env:
+          CANONICAL_ROOT: /tmp/historia-ai-canonical
+        run: node tools/tests/phase2d-v15-canonical-geometry-probe.mjs
       - name: Preserve expected forensic failure status
         if: steps.raw_probe.outcome == 'failure'
-        run: echo 'Raw V15 forensic probe reproduced the expected native failure; authority probe completed independently.'
+        run: echo 'Raw V15 forensic probe reproduced the expected native failure; comparison probes completed independently.'
