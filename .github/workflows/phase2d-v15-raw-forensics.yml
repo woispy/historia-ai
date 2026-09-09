@@ -1,0 +1,26 @@
+name: Phase 2D V15 Raw Forensics
+
+on:
+  push:
+    branches:
+      - codex/phase2.8-c-v15-raw-forensics
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  forensic:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Run V15 raw/serialized forensic probe
+        run: node tools/tests/phase2d-v15-raw-forensics.mjs
