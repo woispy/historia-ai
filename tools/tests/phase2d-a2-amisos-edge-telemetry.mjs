@@ -1,0 +1,117 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+
+const TARGET = "pontus-amisos";
+const sourcePath = path.resolve("tools/historical-gis/AnatoliaPhase2DGeometryBuilderV15.js");
+const source = fs.readFileSync(sourcePath, "utf8");
+const areaSource = `function __a2Area(polygon) { let sum = 0; for (let i = 0; i < polygon.length; i += 1) { const n = polygon[(i + 1) % polygon.length]; sum += polygon[i][0] * n[1] - n[0] * polygon[i][1]; } return Math.abs(sum) / 2; }`;
+
+function instrument(sourceText) {
+  const prelude = `\n${areaSource}\nconst __A2_RECORDS = [];\nconst __a2Record = (stage, payload = {}) => __A2_RECORDS.push({ stage, ...payload });\n`;
+  let s = sourceText.replace("const rawAnchor = (item) =>", `${prelude}\nconst rawAnchor = (item) =>`);
+
+  s = s.replace(
+    "function clipCellToLand(cell, anchorPoint) {",
+    "function clipCellToLand(cell, anchorPoint) { __a2Record(\"clip-input\", { anchorPoint: [...anchorPoint], cellVertexCount: cell.length });",
+  );
+  s = s.replace(
+    "  return selected ? [selected] : [];\n}",
+    "  __a2Record(\"clip-output\", { candidateCount: candidates.length, containingCount: containing.length, candidateAreas: candidates.map(__a2Area).sort((a, b) => b - a), selectedArea: selected ? __a2Area(selected) : null, selectedVertexCount: selected?.length ?? 0 });\n  return selected ? [selected] : [];\n}",
+  );
+
+  s = s.replace(
+    "function repairPhysicalEdge(start, end, depth = 0) {\n  if (edgeIsPhysical(start, end)) return [start, end];",
+    "function repairPhysicalEdge(start, end, depth = 0) {\n  __a2Record(\"repair-enter\", { depth, start: [...start], end: [...end], inputLength: Math.hypot(end[0] - start[0], end[1] - start[1]) });\n  if (edgeIsPhysical(start, end)) { __a2Record(\"repair-physical\", { depth, start: [...start], end: [...end] }); return [start, end]; }",
+  );
+  s = s.replace(
+    "  if (depth >= MAX_EDGE_REPAIR_DEPTH) return null;",
+    "  if (depth >= MAX_EDGE_REPAIR_DEPTH) { __a2Record(\"repair-max-depth\", { depth, start: [...start], end: [...end] }); return null; }",
+  );
+  s = s.replace(
+    "  const boundary = resolvePhysicalGeometryBoundaryPoint(interpolate(start, end, invalidFraction));\n  if (!boundary) return null;",
+    "  const invalidPoint = interpolate(start, end, invalidFraction);\n  const boundary = resolvePhysicalGeometryBoundaryPoint(invalidPoint);\n  __a2Record(\"repair-resolution\", { depth, invalidFraction, invalidPoint: [...invalidPoint], boundary: boundary ? [...boundary] : null });\n  if (!boundary) return null;",
+  );
+  s = s.replace(
+    "  const resolved = boundary.map((value) => Number(value.toFixed(7)));\n  if (Math.hypot(resolved[0] - start[0], resolved[1] - start[1]) <= EPS\n    || Math.hypot(resolved[0] - end[0], resolved[1] - end[1]) <= EPS) return null;",
+    "  const resolved = boundary.map((value) => Number(value.toFixed(7)));\n  const startDistance = Math.hypot(resolved[0] - start[0], resolved[1] - start[1]);\n  const endDistance = Math.hypot(resolved[0] - end[0], resolved[1] - end[1]);\n  __a2Record(\"repair-resolved\", { depth, resolved: [...resolved], startDistance, endDistance });\n  if (startDistance <= EPS || endDistance <= EPS) { __a2Record(\"repair-zero-progress\", { depth, resolved: [...resolved] }); return null; }",
+  );
+
+  s = s.replace(
+    "function normalizePhysicalBoundary(polygon) {\n  const normalized = [];",
+    "function normalizePhysicalBoundary(polygon) {\n  __a2Record(\"normalize-input\", { vertexCount: polygon.length, area: __a2Area(polygon), polygon: polygon.map((point) => [...point]) });\n  const normalized = [];",
+  );
+  s = s.replace(
+    "    if (!resolvedStart || !resolvedEnd) return null;\n    const repaired = repairPhysicalEdge(resolvedStart, resolvedEnd);\n    if (!repaired) return null;",
+    "    __a2Record(\"normalize-edge\", { edgeIndex: index, start: [...start], end: [...end], resolvedStart: resolvedStart ? [...resolvedStart] : null, resolvedEnd: resolvedEnd ? [...resolvedEnd] : null });\n    if (!resolvedStart || !resolvedEnd) { __a2Record(\"normalize-endpoint-failure\", { edgeIndex: index }); return null; }\n    const repaired = repairPhysicalEdge(resolvedStart, resolvedEnd);\n    if (!repaired) { __a2Record(\"normalize-edge-repair-failure\", { edgeIndex: index }); return null; }\n    __a2Record(\"normalize-edge-result\", { edgeIndex: index, repairedPointCount: repaired.length, repairedArea: __a2Area(repaired) });",
+  );
+  s = s.replace(
+    "  return deduplicated.length >= 3 && area(deduplicated) >= MIN_AREA ? deduplicated : null;\n}",
+    "  const postDedupArea = __a2Area(deduplicated);\n  __a2Record(\"normalize-output\", { normalizedVertexCount: normalized.length, deduplicatedVertexCount: deduplicated.length, postDedupArea, minArea: MIN_AREA, areaCollapse: postDedupArea < MIN_AREA, polygon: deduplicated.map((point) => [...point]) });\n  return deduplicated.length >= 3 && postDedupArea >= MIN_AREA ? deduplicated : null;\n}",
+  );
+
+  s = s.replace(
+    "function buildPartition(sites, weights) {\n  const result = new Map();\n  for (let index = 0; index < sites.length; index += 1) {",
+    "function buildPartition(sites, weights) {\n  const result = new Map();\n  const targetIndex = sites.findIndex((site) => site.provinceId === TARGET_PROVINCE_ID);\n  const order = targetIndex >= 0 ? [targetIndex, ...sites.map((_, index) => index).filter((index) => index !== targetIndex)] : sites.map((_, index) => index);\n  for (const index of order) {",
+  );
+  s = s.replace(
+    "    const rawPolygon = clipCellToLand(cell, site.point)[0];\n    const polygon = rawPolygon ? normalizePhysicalBoundary(rawPolygon) : null;",
+    "    const rawPolygon = clipCellToLand(cell, site.point)[0];\n    if (site.provinceId === TARGET_PROVINCE_ID) { __a2Record(\"partition-raw\", { provinceId: site.provinceId, vertexCount: rawPolygon?.length ?? 0, area: rawPolygon ? __a2Area(rawPolygon) : null, polygon: rawPolygon?.map((point) => [...point]) ?? null }); }\n    const polygon = rawPolygon ? normalizePhysicalBoundary(rawPolygon) : null;\n    if (site.provinceId === TARGET_PROVINCE_ID) { __a2Record(\"partition-normalized\", { provinceId: site.provinceId, valid: Boolean(polygon), vertexCount: polygon?.length ?? 0, area: polygon ? __a2Area(polygon) : null, polygon: polygon?.map((point) => [...point]) ?? null }); throw new Error(\"A2 telemetry stop after Amisos\"); }",
+  );
+  s = s.replace(
+    "const rawAnchor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id]?.anchor ?? item.centroid;",
+    "const TARGET_PROVINCE_ID = \"pontus-amisos\";\nconst rawAnchor = (item) => ANATOLIA_PROVINCE_REFINEMENTS[item.id]?.anchor ?? item.centroid;",
+  );
+  s = s.replace("export { isPhysicalLandPoint };", "export { isPhysicalLandPoint, __A2_RECORDS };");
+  return s;
+}
+
+const tempPath = path.join(path.dirname(sourcePath), `.AnatoliaPhase2DGeometryBuilderV15.a2.${process.pid}.mjs`);
+fs.writeFileSync(tempPath, instrument(source), "utf8");
+
+try {
+  const mod = await import(`file://${tempPath}`);
+  let failure = null;
+  try {
+    mod.buildAnatoliaPhase2DAssets();
+  } catch (error) {
+    failure = error;
+  }
+
+  assert.ok(failure, "Expected telemetry stop/failure");
+  assert.match(String(failure.message), /A2 telemetry stop after Amisos|invalid physical-land geometry/);
+
+  const records = mod.__A2_RECORDS;
+  assert.ok(records.some((record) => record.stage === "partition-raw"), "Missing Amisos raw polygon record");
+  assert.ok(records.some((record) => record.stage === "normalize-input"), "Missing normalization input record");
+  assert.ok(records.some((record) => record.stage === "normalize-output"), "Missing normalization output record");
+
+  const raw = records.find((record) => record.stage === "partition-raw");
+  const normalized = records.find((record) => record.stage === "normalize-output");
+  const repairFailures = records.filter((record) => record.stage === "repair-max-depth" || record.stage === "repair-zero-progress");
+  const edgeFailures = records.filter((record) => record.stage === "normalize-edge-repair-failure");
+
+  const report = {
+    migrationId: "MIG-2.8-A2",
+    targetProvince: TARGET,
+    sourcePath,
+    sourceSHA: "37cc47ecf7cef0aa12abffb6fe3e1a527fd409c9",
+    telemetryOnly: true,
+    mutation: false,
+    rawArea: raw?.area ?? null,
+    normalizedArea: normalized?.postDedupArea ?? null,
+    minArea: normalized?.minArea ?? null,
+    areaRatioToMinArea: raw?.area != null && normalized?.minArea ? raw.area / normalized.minArea : null,
+    collapseObserved: Boolean(raw?.area != null && normalized?.postDedupArea != null && normalized.postDedupArea < (normalized.minArea ?? 0)),
+    repairFailureCount: repairFailures.length,
+    edgeRepairFailureCount: edgeFailures.length,
+    edgeRecords: records.filter((record) => record.stage === "normalize-edge" || record.stage === "normalize-edge-result" || record.stage === "normalize-edge-repair-failure"),
+    repairRecords: records.filter((record) => record.stage.startsWith("repair-")),
+    records,
+  };
+  fs.mkdirSync("artifacts/phase2.8-c", { recursive: true });
+  fs.writeFileSync("artifacts/phase2.8-c/a2-amisos-edge-telemetry.json", JSON.stringify(report, null, 2));
+  console.log(JSON.stringify({ ...report, records: undefined }, null, 2));
+} finally {
+  fs.rmSync(tempPath, { force: true });
+}
