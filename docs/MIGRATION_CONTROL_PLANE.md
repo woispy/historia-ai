@@ -34,6 +34,33 @@ Every work item and branch must be assigned one of these states:
 - `BLOCKED` — dependency or gate prevents migration.
 - `SAFE TO DELETE` — only after explicit provenance, equivalence, CI, and reference checks. Current value: `0`.
 
+## Migration ledger
+
+This ledger is the authoritative tracking surface for work that may eventually reach canonical. **No candidate is allowed to disappear from the migration process merely because its branch is old, renamed, or superseded by another investigation.** Every meaningful workstream must have one row here until its disposition is final.
+
+| Migration ID | Workstream | Source branch / commits | Unique value | Canonical destination | Evidence status | Current disposition | Next action |
+|---|---|---|---|---|---|---|---|
+| `MIG-2.8-A1` | Native micro-polygons | Canonical geometry generation; Smyrna, Ayasuluk, Pecin, Halikarnassos, Sinop | Five raw canonical polygons are already below `MIN_AREA` | Canonical Phase 2D generation/input geometry | Root cause established | `BLOCKED` | Complete generation/input proof; do not change `MIN_AREA` |
+| `MIG-2.8-A2` | Amisos normalization collapse | V15 shadow/raw forensic lineage | Raw canonical area ~`0.006755` collapses to ~`2.27e-13` during normalization | Phase 2D boundary/normalization path | Root cause class established; edge-level proof pending | `BLOCKED` | Complete edge-level transformation trace |
+| `MIG-2.8-B` | Nicomedia/Nicaea edge repair | `codex/phase2.8-c-v15-shadow`, `codex/phase2.8-c-v15-raw-forensics` | Deterministic cross-geometry edge-repair divergence | Shared physical boundary/repair contract | Deterministic symptom proven; extraction not yet authorized | `BLOCKED` | Compare canonical edge, V15 raw edge, authority boundary, first-invalid sample |
+| `MIG-2.8-C` | Amasya authority semantics | V15 raw forensic lineage | Lake-interior vs physical-land boundary semantic distinction | MW-02 physical authority contract | Semantic class established; decision matrix pending | `BLOCKED` | Complete endpoint authority decision matrix |
+| `MW-02` | Physical land authority consolidation | `85fe793a4d0f4801c3805d78ebd211019566e979` + lineage | Shared `PHYSICAL_LAND_POLYGONS` and recovery authority | `tools/historical-gis/recovery/physical-land-authority.mjs` on canonical line | Provenance established; migration gate blocked by 2.8-C | `PRESERVE` | Migrate only the proven authority contract after 2.8-C gate |
+| `MW-01` | CDSE DEM source adapter | P6.2 DEM contract lineage | Copernicus Data Space `COP-DEM_GLO-30-DGED`, release `2024_1` contract | DEM source adapter / asset-builder boundary | Contract known; authenticated acquisition not claimed | `BLOCKED` | Keep isolated; migrate adapter only after evidence and source verification |
+| `P6.1` | Real Anatolia adjacency diagnostics | `feat/p6.1-real-anatolia-adjacency` | Non-authoritative candidate adjacency/MST diagnostics | Future topology/AI diagnostic layer | Candidate evidence exists; authoritative promotion not approved | `PRESERVE` | Reconcile with topology authority after GIS migration |
+| `Phase H` | GPU timing/profiling work | Phase H GPU branches / PR #84 lineage | Measured 144 Hz/picking/pass timing evidence | GPU benchmark/production hardening | Historical evidence exists; equivalence/integration audit pending | `PRESERVE` | Audit unique production-relevant deltas before integration |
+| `Phase G` | Gameplay/simulation foundation | PR #81/#82 lineage | Deterministic simulation RNG and save-library runtime contracts | WorldState / Save-Load runtime | Historical CI evidence exists; canonical incorporation not yet reconciled | `PRESERVE` | Inventory against canonical runtime before any merge |
+
+### Ledger rules
+
+1. **A work item gets a Migration ID before migration.**
+2. **A commit is not considered migrated merely because a similar file exists in canonical.** Provenance and behavioral equivalence must be recorded.
+3. **If a work item is integrated, record the resulting canonical commit SHA and CI run before changing its disposition to `CANONICAL`.**
+4. **If only part of a branch is migrated, record the exact files/symbols/commits migrated; the remaining lineage stays `PRESERVE` or `BLOCKED`.**
+5. **If work is superseded, record the replacement canonical behavior and evidence.**
+6. **No branch deletion is implied by any ledger disposition.** `SAFE TO DELETE` remains a separate final state.
+7. **Before Local convergence, every `INTEGRATE` item must be either migrated or explicitly preserved with provenance.**
+8. **The ledger is updated in the same controlled change that establishes each migration decision, so the repository itself retains the map needed to resume work without rediscovery.**
+
 ## Required evidence for migration
 
 For each candidate branch/work item record:
@@ -48,6 +75,7 @@ For each candidate branch/work item record:
 8. Dependency/authority relationships.
 9. Migration destination.
 10. Final disposition.
+11. If integrated: canonical commit SHA and authoritative CI run.
 
 ## Synchronization protocol
 
@@ -69,7 +97,7 @@ Run targeted tests and forensic probes. No integration decision is made from bra
 
 ### Phase S4 — Controlled integration
 
-Only proven `INTEGRATE` work is moved toward the canonical line, in small, independently testable units.
+Only proven `INTEGRATE` work is moved toward the canonical line, in small, independently testable units. Each unit must immediately receive a ledger entry with source provenance and resulting canonical SHA.
 
 ### Phase S5 — Canonical gate
 
