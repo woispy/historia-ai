@@ -1,6 +1,4 @@
-import {
-  isPhysicalLandPoint as canonicalIsPhysicalLandPoint,
-} from "../historical-gis/AnatoliaPhase2DGeometryBuilder.js";
+import { isPhysicalLandPoint as canonicalIsPhysicalLandPoint } from "./phase2d-v15-shadow-authority.mjs";
 
 const EPS = 1e-9;
 const RECOVERY_STEP = 0.001;
