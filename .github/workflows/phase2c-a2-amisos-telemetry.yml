@@ -15,33 +15,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
       - name: Install dependencies
         run: npm install --include=dev --no-audit --no-fund --package-lock=false
-
       - name: Generate required GIS runtime assets
         run: npm run build:assets
-
       - name: Fetch retained V15 forensic source
         shell: bash
         run: |
           git fetch --no-tags --depth=1 origin "$A2_V15_SOURCE_SHA"
-          V15_SOURCE_PATH="$(git ls-tree -r --name-only "$A2_V15_SOURCE_SHA" | grep -E '(^|/)AnatoliaPhase2DGeometryBuilder\.js$' | head -n 1)"
-          test -n "$V15_SOURCE_PATH"
-          git show "$A2_V15_SOURCE_SHA:$V15_SOURCE_PATH" > "$RUNNER_TEMP/AnatoliaPhase2DGeometryBuilderV15.mjs"
-          echo "A2_V15_SOURCE_FILE=$RUNNER_TEMP/AnatoliaPhase2DGeometryBuilderV15.mjs" >> "$GITHUB_ENV"
+          V15_SOURCE_PATH="tools/historical-gis/AnatoliaPhase2DGeometryBuilderV15.js"
+          test -n "$(git ls-tree -r --name-only "$A2_V15_SOURCE_SHA" -- "$V15_SOURCE_PATH")"
+          mkdir -p "$RUNNER_TEMP/v15/tools/historical-gis"
+          git show "$A2_V15_SOURCE_SHA:$V15_SOURCE_PATH" > "$RUNNER_TEMP/v15/$V15_SOURCE_PATH"
+          echo "A2_V15_SOURCE_FILE=$RUNNER_TEMP/v15/$V15_SOURCE_PATH" >> "$GITHUB_ENV"
           echo "A2_V15_SOURCE_PATH=$V15_SOURCE_PATH" >> "$GITHUB_ENV"
-          echo "Resolved V15 source: $V15_SOURCE_PATH"
-
+          echo "Resolved V15 engine: $V15_SOURCE_PATH"
       - name: Run isolated A2 Amisos edge telemetry
-        run: node tools/tests/phase2d-a2-amisos-edge-telemetry.mjs
-
+        run: node tools/tests/phase2d-a2-amisos-edge-telemetry-v2.mjs
       - name: Upload A2 edge telemetry
         if: always()
         uses: actions/upload-artifact@v4
