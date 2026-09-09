@@ -48,6 +48,16 @@ jobs:
           echo "A2_V15_SOURCE_PATH=tools/historical-gis/AnatoliaPhase2DGeometryBuilderV15.js" >> "$GITHUB_ENV"
           echo "Resolved V15 source tree at: $RUNNER_TEMP/v15"
           echo "Generated hydrography runtime asset supplied from checked-out candidate workspace"
+      - name: Verify telemetry source isolation
+        shell: bash
+        run: |
+          test -n "$A2_V15_SOURCE_FILE"
+          case "$A2_V15_SOURCE_FILE" in
+            "$RUNNER_TEMP/v15/"*) ;;
+            *) echo "A2 telemetry source escaped pinned V15 tree: $A2_V15_SOURCE_FILE"; exit 1 ;;
+          esac
+          test -f "$A2_V15_SOURCE_FILE"
+          echo "Telemetry source isolated at: $A2_V15_SOURCE_FILE"
       - name: Run isolated A2 Amisos edge telemetry
         run: node tools/tests/phase2d-a2-amisos-edge-telemetry-v2.mjs
       - name: Upload A2 edge telemetry
