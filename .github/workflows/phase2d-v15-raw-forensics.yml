@@ -38,6 +38,10 @@ jobs:
         env:
           CANONICAL_ROOT: /tmp/historia-ai-canonical
         run: node tools/tests/phase2d-v15-canonical-geometry-probe.mjs
+      - name: Run B1 B2 B3 nine-edge divergence probe
+        env:
+          CANONICAL_ROOT: /tmp/historia-ai-canonical
+        run: node tools/tests/phase2d-v15-b1-b2-b3-9edge-probe.mjs
       - name: Preserve expected forensic failure status
         if: steps.raw_probe.outcome == 'failure'
         run: echo 'Raw V15 forensic probe reproduced the expected native failure; comparison probes completed independently.'
