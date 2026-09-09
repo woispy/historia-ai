@@ -83,9 +83,25 @@ Only after the gate is green, align the local repository to the verified canonic
 
 Only after convergence and provenance review may any branch become a `SAFE TO DELETE` candidate. Deletion is a separate, reversible decision and is never part of synchronization itself.
 
-## Current blocker
+## Current forensic migration gate
 
-The immediate blocker is the Phase 2.8-C authoritative geometry gate. Current forensic work has identified four failure classes (A1, A2, B, C), so local synchronization remains locked.
+The active blocker is Phase 2.8-C authoritative geometry migration. The current evidence set distinguishes four classes and must not be collapsed into one generic failure count:
+
+| Class | Scope | Current classification | Migration consequence |
+|---|---|---|---|
+| A1 | Smyrna, Ayasuluk, Pecin, Halikarnassos, Sinop | Native canonical micro-polygons below `MIN_AREA` in raw canonical generation | Investigate canonical generation/input geometry; do not change `MIN_AREA` |
+| A2 | Pontus-Amisos | Raw canonical area is approximately `0.006755`, but V15 normalization collapses it to approximately `2.27e-13` | Edge-level transformation proof required; do not alter constants |
+| B | 8 Nicomedia edges + 1 Nicaea edge | Cross-geometry recursive edge-repair divergence; deterministic max-depth behavior | Compare canonical edge, V15 raw edge, authority boundary, and first-invalid sample before extraction |
+| C | Pontus-Amasya edge 3 | Authority semantic boundary case involving lake interior semantics | Complete endpoint decision matrix before authority migration |
+
+### Evidence already established
+
+- V15 raw Nicomedia/Nicaea normalization succeeds, so the nine current canonical max-depth failures are not proof that V15's raw pipeline itself fails on those edges.
+- The nine cross-geometry failures show deterministic boundary-walk/creep behavior with repeated first-invalid sampling and bounded depth termination.
+- The five A1 provinces are already below `MIN_AREA` before V15 normalization in canonical raw geometry.
+- Amisos is materially above `MIN_AREA` before normalization and collapses during V15 normalization.
+- Amasya edge 3 has a native V15 authority semantic mismatch: the endpoint is not accepted as physical land although its nearest land-boundary distance is zero, consistent with lake-interior semantics.
+- These findings do not authorize changing `MIN_AREA`, `MAX_EDGE_REPAIR_DEPTH`, `RECOVERY_STEP`, or `MAX_RECOVERY_DISTANCE`.
 
 ## Near-term execution order
 
@@ -96,6 +112,10 @@ The immediate blocker is the Phase 2.8-C authoritative geometry gate. Current fo
 5. Establish MW-01 DEM source-adapter migration as a separate unit.
 6. Reconcile GitHub/local refs only after the authoritative gate is green.
 7. Build the final branch disposition matrix.
+
+## MW-02 authority lineage
+
+The central physical-land authority was introduced by commit `85fe793a4d0f4801c3805d78ebd211019566e979` (`refactor: centralize physical land authority`). It created `tools/historical-gis/recovery/physical-land-authority.mjs` and established `PHYSICAL_LAND_POLYGONS` as a single physical-land authority including coast corrections while excluding runtime lake interiors. This is migration lineage evidence, not permission to merge the whole historical branch. urlGitHub commit 85fe793ahttps://github.com/woispy/historia-ai/commit/85fe793a4d0f4801c3805d78ebd211019566e979
 
 ## Local/GitHub convergence rule
 
