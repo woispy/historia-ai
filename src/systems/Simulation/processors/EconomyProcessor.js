@@ -5,6 +5,21 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
+function normalizeMonths(unit, amount) {
+  switch (unit) {
+    case "day":
+      return amount / 30;
+    case "week":
+      return amount / 4;
+    case "month":
+      return amount;
+    case "year":
+      return amount * 12;
+    default:
+      return 1;
+  }
+}
+
 export function processEconomy(gameSession) {
   const state = getState(gameSession);
   const simulation = state.simulation ?? {};
@@ -12,6 +27,9 @@ export function processEconomy(gameSession) {
   const cities = Object.values(
     gameSession.world.repositories.cities?.byId ?? {}
   ).filter((city) => city.owner === playerCountryId);
+  const unit = state.time.lastUnit ?? "week";
+  const amount = Number(state.time.lastAmount ?? 1);
+  const elapsedMonths = Math.max(0, normalizeMonths(unit, amount));
 
   const cityCount = Math.max(cities.length, 1);
   const prosperity = cities.reduce(
@@ -23,9 +41,11 @@ export function processEconomy(gameSession) {
     0
   ) / cityCount;
 
-  const baseIncome = Math.max(5, Math.round(prosperity * cityCount * 0.45));
-  const expenses = Math.max(2, Math.round((simulation.militaryPower ?? 0) * 0.025));
-  const net = baseIncome - expenses;
+  const baseMonthlyIncome = Math.max(5, Math.round(prosperity * cityCount * 0.45));
+  const monthlyExpenses = Math.max(2, Math.round((simulation.militaryPower ?? 0) * 0.025));
+  const net = Math.round((baseMonthlyIncome - monthlyExpenses) * elapsedMonths);
+  const baseIncome = Math.round(baseMonthlyIncome * elapsedMonths);
+  const expenses = Math.round(monthlyExpenses * elapsedMonths);
 
   const nextSimulation = {
     ...simulation,
@@ -48,7 +68,13 @@ export function processEconomy(gameSession) {
     category: "economy",
     source: "economy-engine",
     key: net >= 0 ? "treasury_growth" : "treasury_decline",
-    data: { income: baseIncome, expenses, net, cities: cities.length },
+    data: {
+      income: baseIncome,
+      expenses,
+      net,
+      cities: cities.length,
+      elapsedMonths,
+    },
     editable: false,
   });
 

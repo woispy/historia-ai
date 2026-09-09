@@ -1,15 +1,15 @@
 import { getState, updateState } from "../../../state/index.js";
 import { addTimelineEvent } from "../../Timeline/index.js";
+import { nextSimulationRandom } from "../SimulationRandom.js";
 
 export function processEvents(gameSession) {
   const state = getState(gameSession);
   const simulation = state.simulation ?? {};
   const recentEvents = [...(simulation.recentEvents ?? [])];
+  const random = nextSimulationRandom(simulation.rngState ?? simulation.simulationSeed ?? 1);
   let nextSession = gameSession;
 
-  const roll = Math.random();
-
-  if (roll < 0.12) {
+  if (random.value < 0.12) {
     const event = {
       key: "market_shift",
       title: "Pazar hareketlendi",
@@ -22,6 +22,7 @@ export function processEvents(gameSession) {
       ...state,
       simulation: {
         ...simulation,
+        rngState: random.state,
         treasury: Math.max(0, (simulation.treasury ?? 0) + event.impact.treasury),
         prestige: (simulation.prestige ?? 0) + event.impact.prestige,
         recentEvents: recentEvents.slice(0, 8),
@@ -40,6 +41,7 @@ export function processEvents(gameSession) {
       ...state,
       simulation: {
         ...simulation,
+        rngState: random.state,
         recentEvents: recentEvents.slice(0, 8),
       },
     });

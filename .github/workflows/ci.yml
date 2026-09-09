@@ -21,6 +21,7 @@ on:
       - feat/cartography-visual-refinement
       - feat/cartography-foundation-v2
       - feat/map-gpu-texture-architecture
+      - phase-g/gameplay-simulation-foundation
   push:
     branches:
       - main
@@ -48,6 +49,7 @@ on:
       - feat/runtime-province-selection
       - feat/historical-map-clean-foundation
       - feat/historical-political-map-v1
+      - phase-g/gameplay-simulation-foundation
 
 concurrency:
   group: historia-ai-ci-${{ github.workflow }}-${{ github.ref }}
@@ -145,6 +147,14 @@ jobs:
         run: npm run test:esm-import-contract
       - name: Run runtime engine tests
         run: npm run test:runtime-engine
+      - name: Run Phase G simulation foundation tests
+        run: npm run test:phase-g-simulation-foundation
+      - name: Run action identity integrity tests
+        run: npm run test:action-identity-integrity
+      - name: Run Phase G save continuation tests
+        run: npm run test:phase-g-save-continuation
+      - name: Run Phase G save slot tests
+        run: npm run test:phase-g-save-slots
       - name: Build
         run: npm run build
       - name: Verify repository cleanliness after production build
