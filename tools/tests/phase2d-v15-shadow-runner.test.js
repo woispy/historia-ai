@@ -5,6 +5,12 @@ import { ANATOLIA_PHYSICAL_ATLAS } from "../../src/map/data/AnatoliaPhysicalAtla
 import { ANATOLIA_PHYSICAL_ATLAS_RUNTIME } from "../../src/map/data/AnatoliaPhysicalAtlasRuntime.js";
 import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
 import {
+  isPhysicalLandPoint as shadowIsPhysicalLandPoint,
+  isPhysicalGeometryBoundaryPoint as shadowIsPhysicalGeometryBoundaryPoint,
+  nearestBoundaryLandPoint as shadowNearestBoundaryLandPoint,
+  resolvePhysicalGeometryBoundaryPoint as shadowResolvePhysicalGeometryBoundaryPoint,
+} from "./phase2d-v15-shadow-authority.mjs";
+import {
   normalizePhysicalBoundaryCandidate,
   repairPhysicalEdgeCandidate,
   resolveGeometryAnchorCandidate,
@@ -80,28 +86,16 @@ const physicalPolygons = ANATOLIA_PHYSICAL_ATLAS.landPolygons.filter((polygon) =
 
 const authority = {
   isPhysicalLandPoint(point) {
-    return physicalPolygons.some((polygon) => pointInPolygon(point, polygon)) && !isLakeInteriorPoint(point);
+    return shadowIsPhysicalLandPoint(point);
   },
   isPhysicalGeometryBoundaryPoint(point) {
-    return this.isPhysicalLandPoint(point) || isLakeInteriorPoint(point);
+    return shadowIsPhysicalGeometryBoundaryPoint(point);
   },
   nearestBoundaryLandPoint(point) {
-    let best = null;
-    let bestDistance = Infinity;
-    for (const polygon of physicalPolygons) {
-      const candidate = nearestPointOnRing(point, polygon);
-      if (candidate.distance < bestDistance) {
-        best = candidate.point;
-        bestDistance = candidate.distance;
-      }
-    }
-    return { point: best, distance: bestDistance };
+    return shadowNearestBoundaryLandPoint(point);
   },
   resolvePhysicalGeometryBoundaryPoint(point) {
-    if (this.isPhysicalLandPoint(point)) return [...point];
-    const boundary = this.nearestBoundaryLandPoint(point);
-    if (boundary.point && boundary.distance <= V15_SHADOW_CONTRACT.MAX_RECOVERY_DISTANCE && !isLakeInteriorPoint(point)) return [...boundary.point];
-    return null;
+    return shadowResolvePhysicalGeometryBoundaryPoint(point);
   },
 };
 
@@ -269,7 +263,7 @@ function normalizeWithForensics(provinceId, polygon) {
 
   assert.equal(topologyBreaks, 0, `V15 shadow topology failures: ${topologyBreaks}`);
   assert.equal(authorityViolations, 0, `V15 shadow authority violations: ${authorityViolations}`);
-  console.log(JSON.stringify({ contract: V15_SHADOW_CONTRACT, PA05: "EXECUTED", PA10: "EXECUTED", PA11: "EXECUTED", shadowDiffCount: diffs.length, topologyBreaks, authorityViolations, semanticEqualCount: diffs.filter((item) => item.semanticEqual).length, maxAreaDelta: Math.max(...diffs.filter((item) => typeof item.areaDelta === "number").map((item) => Math.abs(item.areaDelta))), maxCoordinateDelta: Math.max(...diffs.filter((item) => typeof item.coordinateDeltaMax === "number").map((item) => item.coordinateDeltaMax)), failureStageCounts: forensicSnapshot.failureStageCounts }, null, 2));
+  console.log(JSON.stringify({ contract: V15_SHADOW_CONTRACT, PA05: "EXECUTED", PA10: "EXECUTED", PA11: "EXECUTED", shadowDiffCount: diffs.length, topologyBreaks, authorityViolations, semanticEqualCount: diffs.filter((item) => item.semanticEqual).length, maxAreaDelta: forensicSnapshot.maxAreaDelta, maxCoordinateDelta: forensicSnapshot.maxCoordinateDelta, failureStageCounts: forensicSnapshot.failureStageCounts }, null, 2));
 }
 
 console.log("V15 shadow runner: execution completed without granting production authority");
