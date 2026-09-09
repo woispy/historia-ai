@@ -142,7 +142,7 @@ function normalizeWithForensics(provinceId, polygon) {
     const repaired = repairPhysicalEdgeCandidate(resolvedStart, resolvedEnd, authority);
     if (!repaired.points) {
       diagnostics.failedEdges += 1;
-      failures.push({ provinceId, edgeIndex: index, start, end, resolvedStart, resolvedEnd, endpointRecovery: { start: "resolved", end: "resolved" }, repairResult: "failed", terminationReason: repaired.diagnostics.terminationReason, maxDepthObserved: repaired.diagnostics.maxDepthObserved, sampleCount: repaired.diagnostics.sampleCount, recursionCalls: repaired.diagnostics.recursionCalls, failureStage: `edge-repair:${repaired.diagnostics.terminationReason ?? "unknown"}` });
+      failures.push({ provinceId, edgeIndex: index, start, end, resolvedStart, resolvedEnd, endpointRecovery: { start: "resolved", end: "resolved" }, repairResult: "failed", terminationReason: repaired.diagnostics.terminationReason, maxDepthObserved: repaired.diagnostics.maxDepthObserved, sampleCount: repaired.diagnostics.sampleCount, recursionCalls: repaired.diagnostics.recursionCalls, failureStage: `edge-repair:${repaired.diagnostics.terminationReason ?? "unknown"}`, forensic: { recursionTrace: repaired.diagnostics.trace ?? [] } });
       return { polygon: null, diagnostics, failures };
     }
     if (repaired.points.length > 2) diagnostics.repairedEdges += 1;
@@ -161,7 +161,32 @@ function normalizeWithForensics(provinceId, polygon) {
   }
   if (deduplicated.length < 3 || Math.abs(signedArea(deduplicated)) < 0.00005) {
     diagnostics.failedEdges += 1;
-    failures.push({ provinceId, edgeIndex: null, start: null, end: null, resolvedStart: null, resolvedEnd: null, endpointRecovery: null, repairResult: "failed", terminationReason: null, maxDepthObserved: null, sampleCount: null, recursionCalls: null, failureStage: "post-normalization-degenerate-or-min-area" });
+    failures.push({
+      provinceId,
+      edgeIndex: null,
+      start: null,
+      end: null,
+      resolvedStart: null,
+      resolvedEnd: null,
+      endpointRecovery: null,
+      repairResult: "failed",
+      terminationReason: null,
+      maxDepthObserved: null,
+      sampleCount: null,
+      recursionCalls: null,
+      failureStage: "post-normalization-degenerate-or-min-area",
+      forensic: {
+        originalVertexCount: polygon.length,
+        normalizedVertexCount: normalized.length,
+        deduplicatedVertexCount: deduplicated.length,
+        preDedupArea: Math.abs(signedArea(normalized)),
+        postDedupArea: Math.abs(signedArea(deduplicated)),
+        removedDuplicateCount: normalized.length - deduplicated.length,
+        minArea: 0.00005,
+        vertexCollapse: deduplicated.length < 3,
+        areaCollapse: Math.abs(signedArea(deduplicated)) < 0.00005,
+      },
+    });
     return { polygon: null, diagnostics, failures };
   }
   return { polygon: deduplicated, diagnostics, failures };
