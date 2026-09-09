@@ -70,6 +70,17 @@ export {
   default as RenderLayer,
 } from "./RenderLayer";
 
+export {
+  MAP_RENDER_PASSES,
+  PHYSICAL_MASK_CONTRACT,
+  getRenderPass,
+  assertPhysicalMaskPass,
+} from "./RenderPassGraph";
+
+export {
+  default as WaterRenderer,
+} from "./water/WaterRenderer";
+
 /* ============================================================================
  * React Hooks
  * ========================================================================== */
