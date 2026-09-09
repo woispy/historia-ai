@@ -1,4 +1,9 @@
-import { isPhysicalLandPoint as canonicalIsPhysicalLandPoint } from "./phase2d-v15-shadow-authority.mjs";
+import {
+  isPhysicalLandPoint as canonicalIsPhysicalLandPoint,
+  isPhysicalGeometryBoundaryPoint as canonicalIsPhysicalGeometryBoundaryPoint,
+  resolvePhysicalGeometryBoundaryPoint as canonicalResolvePhysicalGeometryBoundaryPoint,
+  nearestBoundaryLandPoint as canonicalNearestBoundaryLandPoint,
+} from "./phase2d-v15-shadow-authority.mjs";
 
 const EPS = 1e-9;
 const RECOVERY_STEP = 0.001;
@@ -28,7 +33,23 @@ function isCanonicalLandPoint(point) {
   return canonicalIsPhysicalLandPoint(point);
 }
 
+function effectiveAuthority(authority) {
+  // Real shadow execution uses the exact recovered V15 authority adapter.
+  // PA-10 deliberately supplies a minimal pathological authority and must
+  // therefore continue to exercise the injected authority unchanged.
+  if (typeof authority?.isPhysicalLandPoint === "function") {
+    return {
+      isPhysicalLandPoint: canonicalIsPhysicalLandPoint,
+      isPhysicalGeometryBoundaryPoint: canonicalIsPhysicalGeometryBoundaryPoint,
+      nearestBoundaryLandPoint: canonicalNearestBoundaryLandPoint,
+      resolvePhysicalGeometryBoundaryPoint: canonicalResolvePhysicalGeometryBoundaryPoint,
+    };
+  }
+  return authority;
+}
+
 export function resolveGeometryAnchorCandidate(provinceId, sourceAnchor, authority) {
+  const v15Authority = effectiveAuthority(authority);
   if (isCanonicalLandPoint(sourceAnchor)) {
     return { point: [...sourceAnchor], authoritative: false, diagnostics: { provinceId, recoveryDistance: 0 } };
   }
@@ -47,7 +68,7 @@ export function resolveGeometryAnchorCandidate(provinceId, sourceAnchor, authori
     }
   }
 
-  const boundary = authority.nearestBoundaryLandPoint(sourceAnchor);
+  const boundary = v15Authority.nearestBoundaryLandPoint(sourceAnchor);
   if (boundary.point && boundary.distance <= MAX_RECOVERY_DISTANCE && isCanonicalLandPoint(boundary.point)) {
     return { point: [...boundary.point], authoritative: false, diagnostics: { provinceId, recoveryDistance: boundary.distance, fallback: "nearest-boundary" } };
   }
@@ -56,6 +77,7 @@ export function resolveGeometryAnchorCandidate(provinceId, sourceAnchor, authori
 }
 
 export function repairPhysicalEdgeCandidate(start, end, authority, options = {}) {
+  const v15Authority = effectiveAuthority(authority);
   const state = options.state ?? { recursionCalls: 0, maxDepthObserved: 0, sampleCount: 0, terminationReason: null };
   const depth = options.depth ?? 0;
   state.recursionCalls += 1;
@@ -69,7 +91,7 @@ export function repairPhysicalEdgeCandidate(start, end, authority, options = {})
   let edgePhysical = true;
   for (let index = 0; index <= FINAL_EDGE_SAMPLE_COUNT; index += 1) {
     state.sampleCount += 1;
-    if (!authority.isPhysicalGeometryBoundaryPoint(interpolate(index / FINAL_EDGE_SAMPLE_COUNT))) {
+    if (!v15Authority.isPhysicalGeometryBoundaryPoint(interpolate(index / FINAL_EDGE_SAMPLE_COUNT))) {
       edgePhysical = false;
       break;
     }
@@ -87,7 +109,7 @@ export function repairPhysicalEdgeCandidate(start, end, authority, options = {})
   let invalidFraction = null;
   for (let index = 1; index < FINAL_EDGE_SAMPLE_COUNT; index += 1) {
     const fraction = index / FINAL_EDGE_SAMPLE_COUNT;
-    if (!authority.isPhysicalGeometryBoundaryPoint(interpolate(fraction))) {
+    if (!v15Authority.isPhysicalGeometryBoundaryPoint(interpolate(fraction))) {
       invalidFraction = fraction;
       break;
     }
@@ -97,7 +119,7 @@ export function repairPhysicalEdgeCandidate(start, end, authority, options = {})
     return { points: [start, end], diagnostics: state, authoritative: false };
   }
 
-  const boundary = authority.resolvePhysicalGeometryBoundaryPoint(interpolate(invalidFraction));
+  const boundary = v15Authority.resolvePhysicalGeometryBoundaryPoint(interpolate(invalidFraction));
   if (!boundary) {
     state.terminationReason = "boundary-resolution-failed";
     return { points: null, diagnostics: state, authoritative: false };
@@ -109,27 +131,28 @@ export function repairPhysicalEdgeCandidate(start, end, authority, options = {})
     return { points: null, diagnostics: state, authoritative: false };
   }
 
-  const left = repairPhysicalEdgeCandidate(start, resolved, authority, { state, depth: depth + 1 });
-  const right = repairPhysicalEdgeCandidate(resolved, end, authority, { state, depth: depth + 1 });
+  const left = repairPhysicalEdgeCandidate(start, resolved, v15Authority, { state, depth: depth + 1 });
+  const right = repairPhysicalEdgeCandidate(resolved, end, v15Authority, { state, depth: depth + 1 });
   if (!left.points || !right.points) return { points: null, diagnostics: state, authoritative: false };
   return { points: [...left.points.slice(0, -1), ...right.points], diagnostics: state, authoritative: false };
 }
 
 export function normalizePhysicalBoundaryCandidate(polygon, authority) {
+  const v15Authority = effectiveAuthority(authority);
   const normalized = [];
   const diagnostics = { edgeCount: polygon.length, repairedEdges: 0, failedEdges: 0, authoritative: false };
 
   for (let index = 0; index < polygon.length; index += 1) {
     const start = polygon[index];
     const end = polygon[(index + 1) % polygon.length];
-    const resolvedStart = isCanonicalLandPoint(start) ? [...start] : authority.resolvePhysicalGeometryBoundaryPoint(start);
-    const resolvedEnd = isCanonicalLandPoint(end) ? [...end] : authority.resolvePhysicalGeometryBoundaryPoint(end);
+    const resolvedStart = isCanonicalLandPoint(start) ? [...start] : v15Authority.resolvePhysicalGeometryBoundaryPoint(start);
+    const resolvedEnd = isCanonicalLandPoint(end) ? [...end] : v15Authority.resolvePhysicalGeometryBoundaryPoint(end);
     if (!resolvedStart || !resolvedEnd) {
       diagnostics.failedEdges += 1;
       return { polygon: null, diagnostics };
     }
 
-    const repaired = repairPhysicalEdgeCandidate(resolvedStart, resolvedEnd, authority);
+    const repaired = repairPhysicalEdgeCandidate(resolvedStart, resolvedEnd, v15Authority);
     if (!repaired.points) {
       diagnostics.failedEdges += 1;
       return { polygon: null, diagnostics };
