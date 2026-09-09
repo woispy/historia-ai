@@ -1,6 +1,5 @@
 import {
   isPhysicalLandPoint as canonicalIsPhysicalLandPoint,
-  isPhysicalGeometryBoundaryPoint as canonicalIsPhysicalGeometryBoundaryPoint,
 } from "../historical-gis/AnatoliaPhase2DGeometryBuilder.js";
 
 const EPS = 1e-9;
@@ -29,10 +28,6 @@ function area(polygon) {
 
 function isCanonicalLandPoint(point) {
   return canonicalIsPhysicalLandPoint(point);
-}
-
-function isCanonicalGeometryBoundaryPoint(point) {
-  return canonicalIsPhysicalGeometryBoundaryPoint(point);
 }
 
 export function resolveGeometryAnchorCandidate(provinceId, sourceAnchor, authority) {
@@ -76,7 +71,7 @@ export function repairPhysicalEdgeCandidate(start, end, authority, options = {})
   let edgePhysical = true;
   for (let index = 0; index <= FINAL_EDGE_SAMPLE_COUNT; index += 1) {
     state.sampleCount += 1;
-    if (!isCanonicalGeometryBoundaryPoint(interpolate(index / FINAL_EDGE_SAMPLE_COUNT))) {
+    if (!authority.isPhysicalGeometryBoundaryPoint(interpolate(index / FINAL_EDGE_SAMPLE_COUNT))) {
       edgePhysical = false;
       break;
     }
@@ -94,7 +89,7 @@ export function repairPhysicalEdgeCandidate(start, end, authority, options = {})
   let invalidFraction = null;
   for (let index = 1; index < FINAL_EDGE_SAMPLE_COUNT; index += 1) {
     const fraction = index / FINAL_EDGE_SAMPLE_COUNT;
-    if (!isCanonicalGeometryBoundaryPoint(interpolate(fraction))) {
+    if (!authority.isPhysicalGeometryBoundaryPoint(interpolate(fraction))) {
       invalidFraction = fraction;
       break;
     }
