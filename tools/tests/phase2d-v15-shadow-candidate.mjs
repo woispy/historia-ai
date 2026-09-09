@@ -78,7 +78,8 @@ export function resolveGeometryAnchorCandidate(provinceId, sourceAnchor, authori
 
 export function repairPhysicalEdgeCandidate(start, end, authority, options = {}) {
   const v15Authority = effectiveAuthority(authority);
-  const state = options.state ?? { recursionCalls: 0, maxDepthObserved: 0, sampleCount: 0, terminationReason: null };
+  const state = options.state ?? { recursionCalls: 0, maxDepthObserved: 0, sampleCount: 0, terminationReason: null, trace: [] };
+  if (!state.trace) state.trace = [];
   const depth = options.depth ?? 0;
   state.recursionCalls += 1;
   state.maxDepthObserved = Math.max(state.maxDepthObserved, depth);
@@ -97,11 +98,13 @@ export function repairPhysicalEdgeCandidate(start, end, authority, options = {})
     }
   }
   if (edgePhysical) {
+    state.trace.push({ depth, start: [...start], end: [...end], firstInvalidFraction: null, invalidPoint: null, resolvedBoundary: null, distanceToStart: null, distanceToEnd: null, terminationReason: "physical-edge" });
     state.terminationReason = state.terminationReason ?? "physical-edge";
     return { points: [start, end], diagnostics: state, authoritative: false };
   }
 
   if (depth >= MAX_EDGE_REPAIR_DEPTH) {
+    state.trace.push({ depth, start: [...start], end: [...end], firstInvalidFraction: null, invalidPoint: null, resolvedBoundary: null, distanceToStart: null, distanceToEnd: null, terminationReason: "max-depth" });
     state.terminationReason = "max-depth";
     return { points: null, diagnostics: state, authoritative: false };
   }
@@ -115,18 +118,24 @@ export function repairPhysicalEdgeCandidate(start, end, authority, options = {})
     }
   }
   if (invalidFraction === null) {
+    state.trace.push({ depth, start: [...start], end: [...end], firstInvalidFraction: null, invalidPoint: null, resolvedBoundary: null, distanceToStart: null, distanceToEnd: null, terminationReason: "physical-edge" });
     state.terminationReason = state.terminationReason ?? "physical-edge";
     return { points: [start, end], diagnostics: state, authoritative: false };
   }
 
-  const boundary = v15Authority.resolvePhysicalGeometryBoundaryPoint(interpolate(invalidFraction));
+  const invalidPoint = interpolate(invalidFraction);
+  const boundary = v15Authority.resolvePhysicalGeometryBoundaryPoint(invalidPoint);
   if (!boundary) {
+    state.trace.push({ depth, start: [...start], end: [...end], firstInvalidFraction: invalidFraction, invalidPoint, resolvedBoundary: null, distanceToStart: null, distanceToEnd: null, terminationReason: "boundary-resolution-failed" });
     state.terminationReason = "boundary-resolution-failed";
     return { points: null, diagnostics: state, authoritative: false };
   }
   const resolved = roundPoint(boundary);
-  if (Math.hypot(resolved[0] - start[0], resolved[1] - start[1]) <= EPS
-    || Math.hypot(resolved[0] - end[0], resolved[1] - end[1]) <= EPS) {
+  const distanceToStart = Math.hypot(resolved[0] - start[0], resolved[1] - start[1]);
+  const distanceToEnd = Math.hypot(resolved[0] - end[0], resolved[1] - end[1]);
+  state.trace.push({ depth, start: [...start], end: [...end], firstInvalidFraction: invalidFraction, invalidPoint, resolvedBoundary: [...resolved], distanceToStart, distanceToEnd, terminationReason: null });
+  if (distanceToStart <= EPS || distanceToEnd <= EPS) {
+    state.trace[state.trace.length - 1].terminationReason = "degenerate-resolution";
     state.terminationReason = "degenerate-resolution";
     return { points: null, diagnostics: state, authoritative: false };
   }
@@ -155,7 +164,7 @@ export function normalizePhysicalBoundaryCandidate(polygon, authority) {
     const repaired = repairPhysicalEdgeCandidate(resolvedStart, resolvedEnd, v15Authority);
     if (!repaired.points) {
       diagnostics.failedEdges += 1;
-      return { polygon: null, diagnostics };
+      return { polygon: null, diagnostics: { ...diagnostics, forensic: { edgeIndex: index, edgeTrace: repaired.diagnostics.trace ?? [] } } };
     }
     if (repaired.points.length > 2) diagnostics.repairedEdges += 1;
     normalized.push(...repaired.points.slice(0, -1));
@@ -174,7 +183,18 @@ export function normalizePhysicalBoundaryCandidate(polygon, authority) {
 
   if (deduplicated.length < 3 || area(deduplicated) < MIN_AREA) {
     diagnostics.failedEdges += 1;
-    return { polygon: null, diagnostics };
+    return { polygon: null, diagnostics: {
+      ...diagnostics,
+      forensic: {
+        originalVertexCount: polygon.length,
+        normalizedVertexCount: normalized.length,
+        deduplicatedVertexCount: deduplicated.length,
+        preDedupArea: area(normalized),
+        postDedupArea: area(deduplicated),
+        removedDuplicateCount: normalized.length - deduplicated.length,
+        minArea: MIN_AREA,
+      },
+    } };
   }
   return { polygon: deduplicated, diagnostics };
 }
