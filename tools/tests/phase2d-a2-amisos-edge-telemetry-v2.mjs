@@ -26,7 +26,8 @@ const instrument = (text) => {
   return s;
 };
 
-const tempPath=path.resolve("tools/historical-gis",`.a2-v15-source-${process.pid}.mjs`);
+const tempDir=path.dirname(sourcePath);
+const tempPath=path.join(tempDir,`.a2-v15-source-${process.pid}.mjs`);
 fs.writeFileSync(tempPath,instrument(source),"utf8");
 try{
   const mod=await import(`file://${tempPath}`);
