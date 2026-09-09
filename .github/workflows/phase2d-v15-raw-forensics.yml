@@ -22,5 +22,7 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Generate required hydrography runtime fixture
+        run: npm run build:assets
       - name: Run V15 raw/serialized forensic probe
         run: node tools/tests/phase2d-v15-raw-forensics.mjs
