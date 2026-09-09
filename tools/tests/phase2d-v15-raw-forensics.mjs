@@ -1,11 +1,8 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
 
 const TARGETS = new Set(["pontus-amasya", "lydia-smyrna", "ionia-ayasuluk", "caria-pecin", "caria-halikarnassos", "pontus-sinop", "pontus-amisos", "bithynia-nicomedia", "bithynia-nicaea"]);
-
 const areaSource = `function __forensicArea(polygon) { let sum = 0; for (let i = 0; i < polygon.length; i += 1) { const n = polygon[(i + 1) % polygon.length]; sum += polygon[i][0] * n[1] - n[0] * polygon[i][1]; } return Math.abs(sum) / 2; }`;
 
 function instrument(source) {
@@ -25,18 +22,20 @@ function instrument(source) {
 
 const sourcePath = path.resolve("tools/historical-gis/AnatoliaPhase2DGeometryBuilderV15.js");
 const source = fs.readFileSync(sourcePath, "utf8");
-const dir = fs.mkdtempSync(path.join(os.tmpdir(), "v15-raw-forensics-"));
-const tempPath = path.join(dir, "AnatoliaPhase2DGeometryBuilderV15.mjs");
+const tempPath = path.join(path.dirname(sourcePath), `.AnatoliaPhase2DGeometryBuilderV15.forensics.${process.pid}.mjs`);
 fs.writeFileSync(tempPath, instrument(source), "utf8");
 
-const mod = await import(pathToFileURL(tempPath).href);
-let failure = null;
-try { mod.buildAnatoliaPhase2DAssets(); } catch (error) { failure = error; }
-assert.ok(failure, "Expected unmodified V15 pipeline to fail so forensic stages can be captured");
-assert.match(String(failure.message), /Phase 2D V15 produced invalid physical-land geometry/);
-
-const records = mod.__FORENSICS;
-assert.ok(records.length > 0, "No V15 forensic records captured");
-const byStage = Object.fromEntries([...new Set(records.map((r) => r.stage))].map((stage) => [stage, records.filter((r) => r.stage === stage).length]));
-console.log(JSON.stringify({ failure: failure.message, stageCounts: byStage, records }, null, 2));
-fs.rmSync(dir, { recursive: true, force: true });
+let mod;
+try {
+  mod = await import(`file://${tempPath}`);
+  let failure = null;
+  try { mod.buildAnatoliaPhase2DAssets(); } catch (error) { failure = error; }
+  assert.ok(failure, "Expected unmodified V15 pipeline to fail so forensic capture can execute");
+  assert.match(String(failure.message), /Phase 2D V15 produced invalid physical-land geometry/);
+  const records = mod.__FORENSICS;
+  assert.ok(records.length > 0, "No V15 forensic records captured");
+  const stageCounts = Object.fromEntries([...new Set(records.map((r) => r.stage))].map((stage) => [stage, records.filter((r) => r.stage === stage).length]));
+  console.log(JSON.stringify({ failure: failure.message, stageCounts, records }, null, 2));
+} finally {
+  fs.rmSync(tempPath, { force: true });
+}
