@@ -41,9 +41,13 @@ jobs:
           test -f "$V15_SOURCE_PATH"
           test -f "$RUNNER_TEMP/v15/src/map/data/Anatolia1300ProvinceGeometryManifest.js"
           test -f "$RUNNER_TEMP/v15/tools/historical-gis/recovery/physical-land-authority.mjs"
+          mkdir -p "$RUNNER_TEMP/v15/src/map/data/generated"
+          cp src/map/data/generated/anatolia-hydrography-10m.json "$RUNNER_TEMP/v15/src/map/data/generated/anatolia-hydrography-10m.json"
+          test -f "$RUNNER_TEMP/v15/src/map/data/generated/anatolia-hydrography-10m.json"
           echo "A2_V15_SOURCE_FILE=$V15_SOURCE_PATH" >> "$GITHUB_ENV"
           echo "A2_V15_SOURCE_PATH=tools/historical-gis/AnatoliaPhase2DGeometryBuilderV15.js" >> "$GITHUB_ENV"
           echo "Resolved V15 source tree at: $RUNNER_TEMP/v15"
+          echo "Generated hydrography runtime asset supplied from checked-out candidate workspace"
       - name: Run isolated A2 Amisos edge telemetry
         run: node tools/tests/phase2d-a2-amisos-edge-telemetry-v2.mjs
       - name: Upload A2 edge telemetry
