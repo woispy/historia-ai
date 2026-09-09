@@ -41,7 +41,7 @@ This ledger is the authoritative tracking surface for work that may eventually r
 | Migration ID | Workstream | Source branch / commits | Unique value | Canonical destination | Evidence status | Current disposition | Next action |
 |---|---|---|---|---|---|---|---|
 | `MIG-2.8-A1` | Native micro-polygons | Canonical geometry generation; Smyrna, Ayasuluk, Pecin, Halikarnassos, Sinop | Five raw canonical polygons are already below `MIN_AREA` | Canonical Phase 2D generation/input geometry | Root cause established | `BLOCKED` | Complete generation/input proof; do not change `MIN_AREA` |
-| `MIG-2.8-A2` | Amisos normalization collapse | V15 shadow/raw forensic lineage | Raw canonical area ~`0.006755` collapses to ~`2.27e-13` during normalization | Phase 2D boundary/normalization path | Root cause class established; edge-level proof pending | `BLOCKED` | Complete edge-level transformation trace |
+| `MIG-2.8-A2` | Amisos normalization collapse | `codex/phase2.8-c-v15-raw-forensics`; V15 builder `37cc47ecf7cef0aa12abffb6fe3e1a527fd409c9`; V15 authority `c47238cee6ab6b9c522e11b5f1cd92ad0d5970a3` | Raw canonical area ~`0.006755` collapses to ~`2.27e-13`; exact V15 path is `buildPartition()` → `clipCellToLand()` → `normalizePhysicalBoundary()` → `repairPhysicalEdge()` → `resolvePhysicalGeometryBoundaryPoint()` | Phase 2D boundary/normalization path | Exact symbol/path resolution established; edge-level transformation proof still pending | `BLOCKED` | Trace the Amisos polygon edge-by-edge through `normalizePhysicalBoundary()` and `repairPhysicalEdge()` before changing behavior |
 | `MIG-2.8-B` | Nicomedia/Nicaea edge repair | `codex/phase2.8-c-v15-shadow`, `codex/phase2.8-c-v15-raw-forensics` | Deterministic cross-geometry edge-repair divergence | Shared physical boundary/repair contract | Deterministic symptom proven; extraction not yet authorized | `BLOCKED` | Compare canonical edge, V15 raw edge, authority boundary, first-invalid sample |
 | `MIG-2.8-C` | Amasya authority semantics | V15 raw forensic lineage | Lake-interior vs physical-land boundary semantic distinction | MW-02 physical authority contract | Semantic class established; decision matrix pending | `BLOCKED` | Complete endpoint authority decision matrix |
 | `MW-02` | Physical land authority consolidation | `85fe793a4d0f4801c3805d78ebd211019566e979` + lineage | Shared `PHYSICAL_LAND_POLYGONS` and recovery authority | `tools/historical-gis/recovery/physical-land-authority.mjs` on canonical line | Provenance established; migration gate blocked by 2.8-C | `PRESERVE` | Migrate only the proven authority contract after 2.8-C gate |
@@ -130,6 +130,20 @@ The active blocker is Phase 2.8-C authoritative geometry migration. The current 
 - Amisos is materially above `MIN_AREA` before normalization and collapses during V15 normalization.
 - Amasya edge 3 has a native V15 authority semantic mismatch: the endpoint is not accepted as physical land although its nearest land-boundary distance is zero, consistent with lake-interior semantics.
 - These findings do not authorize changing `MIN_AREA`, `MAX_EDGE_REPAIR_DEPTH`, `RECOVERY_STEP`, or `MAX_RECOVERY_DISTANCE`.
+
+## A2 exact symbol resolution
+
+The canonical production builder at `integration/phase-a-h-production` is `tools/historical-gis/AnatoliaPhase2DGeometryBuilder.js`. Its current implementation keeps physical-land authority inline (`isPhysicalLandPoint`, `isPhysicalLandPolygon`, `distanceToLandBoundary`) and does not expose the V15 normalization functions as public symbols. urlCanonical Phase 2D builderhttps://github.com/woispy/historia-ai/blob/integration/phase-a-h-production/tools/historical-gis/AnatoliaPhase2DGeometryBuilder.js
+
+The retained V15 implementation is `tools/historical-gis/AnatoliaPhase2DGeometryBuilderV15.js`, source SHA `37cc47ecf7cef0aa12abffb6fe3e1a527fd409c9`. The exact A2 normalization chain identified in that source is:
+
+`buildPartition()` → `clipCellToLand()` → `normalizePhysicalBoundary()` → `repairPhysicalEdge()` → `resolvePhysicalGeometryBoundaryPoint()`.
+
+The V15 physical authority adapter is `tools/historical-gis/recovery/physical-land-authority.mjs`, source SHA `c47238cee6ab6b9c522e11b5f1cd92ad0d5970a3`. Its relevant contracts are `isPhysicalLandPoint()`, `isLakeInteriorPoint()`, `nearestLakeBoundaryPoint()`, `resolvePhysicalGeometryBoundaryPoint()`, and `isPhysicalGeometryBoundaryPoint()`.
+
+The V15 adapter wrapper is `tools/historical-gis/AnatoliaPhase2DGeometryBuilderV15Adapter.js`, source SHA `dea20986189c2499fdee16184145763c22d3c958`. It delegates generation to the retained V15 engine and supplies the shared authority contract.
+
+This resolution is **evidence registration only**. No canonical algorithm has been changed by this entry, and A2 remains `BLOCKED` until the actual Amisos edge-level transformation is reproduced and the smallest behavior-preserving correction is proven.
 
 ## Near-term execution order
 
