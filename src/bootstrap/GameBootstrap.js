@@ -62,6 +62,7 @@ export function createGame({
       startDate: scenario.startDate,
       scenario,
       player,
+      world,
     })
   );
 
