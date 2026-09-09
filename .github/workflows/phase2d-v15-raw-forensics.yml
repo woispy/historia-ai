@@ -39,9 +39,24 @@ jobs:
           CANONICAL_ROOT: /tmp/historia-ai-canonical
         run: node tools/tests/phase2d-v15-canonical-geometry-probe.mjs
       - name: Run B1 B2 B3 nine-edge divergence probe
+        id: b123_probe
+        continue-on-error: true
         env:
           CANONICAL_ROOT: /tmp/historia-ai-canonical
-        run: node tools/tests/phase2d-v15-b1-b2-b3-9edge-probe.mjs
+        run: |
+          mkdir -p forensic-output
+          node tools/tests/phase2d-v15-b1-b2-b3-9edge-probe.mjs > forensic-output/b1-b2-b3-9edge.json
+          status=$?
+          cat forensic-output/b1-b2-b3-9edge.json
+          exit $status
+      - name: Upload B1 B2 B3 machine-readable artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2d-v15-b1-b2-b3-9edge-forensic
+          path: forensic-output/b1-b2-b3-9edge.json
+          if-no-files-found: warn
+          retention-days: 7
       - name: Preserve expected forensic failure status
         if: steps.raw_probe.outcome == 'failure'
         run: echo 'Raw V15 forensic probe reproduced the expected native failure; comparison probes completed independently.'
