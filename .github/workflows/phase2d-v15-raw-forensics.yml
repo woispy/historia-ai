@@ -32,6 +32,8 @@ jobs:
         run: node tools/tests/phase2d-v15-authority-probe.mjs
       - name: Fetch canonical production branch
         run: git fetch --no-tags origin 6b7424125eee4a1c72925b7a1780c68e695e9ba3 && git worktree add --detach /tmp/historia-ai-canonical 6b7424125eee4a1c72925b7a1780c68e695e9ba3
+      - name: Provision canonical generated hydrography fixture
+        run: mkdir -p /tmp/historia-ai-canonical/src/map/data/generated && cp src/map/data/generated/anatolia-hydrography-10m.json /tmp/historia-ai-canonical/src/map/data/generated/anatolia-hydrography-10m.json
       - name: Run canonical geometry comparison probe
         env:
           CANONICAL_ROOT: /tmp/historia-ai-canonical
