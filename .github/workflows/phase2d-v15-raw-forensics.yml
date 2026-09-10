@@ -75,6 +75,26 @@ jobs:
           name: phase2d-v15-site-pair-forensics-v3
           path: forensic-output/
           if-no-files-found: warn
+      - name: Run V15 site-pair matrix v4 probe
+        if: github.ref == 'refs/heads/codex/phase2.8-c-v15-site-pair-forensics-v3b'
+        id: v4_probe
+        continue-on-error: true
+        env:
+          CANONICAL_ROOT: /tmp/historia-ai-canonical
+        run: |
+          mkdir -p forensic-output
+          set +e
+          node tools/tests/phase2d-v15-site-pair-forensics-v4.mjs > forensic-output/site-pair-forensics-v4.stdout.json 2> forensic-output/site-pair-forensics-v4.stderr.log
+          status=$?
+          printf '%s\n' "$status" > forensic-output/site-pair-forensics-v4.exit-code
+          exit "$status"
+      - name: Upload V15 site-pair matrix v4 artifact
+        if: always() && github.ref == 'refs/heads/codex/phase2.8-c-v15-site-pair-forensics-v3b'
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2d-v15-site-pair-forensics-v4
+          path: forensic-output/site-pair-forensics-v4.*
+          if-no-files-found: warn
       - name: Preserve expected forensic failure status
         if: steps.raw_probe.outcome == 'failure'
         run: echo 'Raw V15 forensic probe reproduced the expected native failure; comparison probes completed independently.'
