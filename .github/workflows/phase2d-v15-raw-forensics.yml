@@ -95,6 +95,24 @@ jobs:
           name: phase2d-v15-site-pair-forensics-v4
           path: forensic-output/site-pair-forensics-v4.*
           if-no-files-found: warn
+      - name: Run read-only V15 solver provenance trace
+        if: github.ref == 'refs/heads/codex/phase2.8-c-v15-site-pair-forensics-v3b'
+        id: solver_trace
+        continue-on-error: true
+        run: |
+          mkdir -p forensic-output
+          set +e
+          node tools/tests/phase2d-v15-solver-trace.mjs > forensic-output/solver-trace.stdout.json 2> forensic-output/solver-trace.stderr.log
+          status=$?
+          printf '%s\n' "$status" > forensic-output/solver-trace.exit-code
+          exit "$status"
+      - name: Upload read-only V15 solver provenance trace
+        if: always() && github.ref == 'refs/heads/codex/phase2.8-c-v15-site-pair-forensics-v3b'
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2d-v15-solver-trace
+          path: forensic-output/solver-trace.*
+          if-no-files-found: warn
       - name: Preserve expected forensic failure status
         if: steps.raw_probe.outcome == 'failure'
         run: echo 'Raw V15 forensic probe reproduced the expected native failure; comparison probes completed independently.'
