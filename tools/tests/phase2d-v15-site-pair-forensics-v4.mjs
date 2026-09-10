@@ -44,19 +44,21 @@ const state = await loadInstrumentedV15();
 assert.ok(state.sites?.length, "V15 control-site capture failed");
 
 const targetSites = state.sites.filter((site) => site.provinceId === "bithynia-nicomedia" || site.provinceId === "bithynia-nicaea");
-const nicomedia = state.sites.find((site) => site.provinceId === "bithynia-nicomedia");
-const nicaea = state.sites.find((site) => site.provinceId === "bithynia-nicaea");
-assert.ok(nicomedia && nicaea, "V15 target province anchors not found");
+const nicomediaIndex = state.sites.findIndex((site) => site.provinceId === "bithynia-nicomedia");
+const nicaeaIndex = state.sites.findIndex((site) => site.provinceId === "bithynia-nicaea");
+assert.ok(nicomediaIndex >= 0 && nicaeaIndex >= 0, "V15 target province anchors not found");
+const nicomedia = state.sites[nicomediaIndex];
+const nicaea = state.sites[nicaeaIndex];
 
 const v15ProvincePair = {
-  a: nicomedia,
-  b: nicaea,
+  a: { ...nicomedia, index: nicomediaIndex },
+  b: { ...nicaea, index: nicaeaIndex },
   plane: plane(nicomedia.point, nicaea.point, state.weights[nicomedia.provinceId] ?? 0, state.weights[nicaea.provinceId] ?? 0),
 };
 
 const rawCells = {
-  "bithynia-nicomedia": state.powerCell(nicomedia, state.sites, state.weights),
-  "bithynia-nicaea": state.powerCell(nicaea, state.sites, state.weights),
+  "bithynia-nicomedia": state.powerCell(nicomediaIndex, state.sites, state.weights),
+  "bithynia-nicaea": state.powerCell(nicaeaIndex, state.sites, state.weights),
 };
 
 const matrix = PAIRS.map((pair) => {
@@ -89,7 +91,7 @@ console.log(JSON.stringify({
   canonicalBaseline: "6b7424125eee4a1c72925b7a1780c68e695e9ba3",
   v15: {
     targetSiteCount: targetSites.length,
-    targetSites: targetSites.map((site) => ({ point: site.point, provinceId: site.provinceId, kind: site.kind, historicalAnchor: site.historicalAnchor })),
+    targetSites: targetSites.map((site, index) => ({ index: state.sites.indexOf(site), point: site.point, provinceId: site.provinceId, kind: site.kind, historicalAnchor: site.historicalAnchor })),
     targetWeights: {
       "bithynia-nicomedia": state.weights["bithynia-nicomedia"],
       "bithynia-nicaea": state.weights["bithynia-nicaea"],
