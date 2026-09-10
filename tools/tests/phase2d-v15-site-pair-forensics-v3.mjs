@@ -32,7 +32,7 @@ function pointOnSegment(point, start, end, tolerance = POINT_TOLERANCE) {
   const length = distance(start, end);
   if (length <= tolerance) return distance(point, start) <= tolerance;
   if (Math.abs(cross(start, end, point)) > tolerance * Math.max(1, length)) return false;
-  const dot = (point[0] - start[0]) * (end[0] - start[0]) + (point[1] - start[1]) * (end[0] - start[0]) + (point[1] - start[1]) * (end[1] - start[1]);
+  const dot = (point[0] - start[0]) * (end[0] - start[0]) + (point[1] - start[1]) * (end[1] - start[1]);
   return dot >= -tolerance && dot <= length * length + tolerance;
 }
 function edgeLineResidual(edge, a, b) {
