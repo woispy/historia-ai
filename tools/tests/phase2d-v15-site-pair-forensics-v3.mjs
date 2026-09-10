@@ -24,6 +24,7 @@ const POINT_TOLERANCE = 3e-6;
 
 function distance(a, b) { return Math.hypot(a[0] - b[0], a[1] - b[1]); }
 function cross(a, b, p) { return (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]); }
+function interpolate(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; }
 function endpointPairMatch(a, b, c, d) {
   return (distance(a, c) <= EDGE_TOLERANCE && distance(b, d) <= EDGE_TOLERANCE)
     || (distance(a, d) <= EDGE_TOLERANCE && distance(b, c) <= EDGE_TOLERANCE);
@@ -43,6 +44,11 @@ function edgeLineResidual(edge, a, b) {
     Math.abs(A * edge.start[0] + B * edge.start[1] - C),
     Math.abs(A * edge.end[0] + B * edge.end[1] - C),
   );
+}
+function segmentOverlapScore(edge, segment) {
+  if (!pointOnSegment(edge.start, segment[0], segment[1]) || !pointOnSegment(edge.end, segment[0], segment[1])) return 0;
+  return Math.min(distance(edge.start, segment[0]), distance(edge.start, segment[1]))
+    + Math.min(distance(edge.end, segment[0]), distance(edge.end, segment[1]));
 }
 function finalEdgeHits(edge, records) {
   const hits = [];
@@ -200,7 +206,7 @@ const matrix = FAILURE_EDGES.map((edge) => {
   return {
     id: edge.id,
     provinceId: edge.provinceId,
-    edge,
+    edge: edge,
     finalEdgeHitCount: hits.length,
     provenanceStatus: status,
     uniqueProvenanceCount: uniqueKeys.size,
