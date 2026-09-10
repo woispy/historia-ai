@@ -24,7 +24,6 @@ const POINT_TOLERANCE = 3e-6;
 
 function distance(a, b) { return Math.hypot(a[0] - b[0], a[1] - b[1]); }
 function cross(a, b, p) { return (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]); }
-function interpolate(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; }
 function endpointPairMatch(a, b, c, d) {
   return (distance(a, c) <= EDGE_TOLERANCE && distance(b, d) <= EDGE_TOLERANCE)
     || (distance(a, d) <= EDGE_TOLERANCE && distance(b, c) <= EDGE_TOLERANCE);
@@ -33,7 +32,7 @@ function pointOnSegment(point, start, end, tolerance = POINT_TOLERANCE) {
   const length = distance(start, end);
   if (length <= tolerance) return distance(point, start) <= tolerance;
   if (Math.abs(cross(start, end, point)) > tolerance * Math.max(1, length)) return false;
-  const dot = (point[0] - start[0]) * (end[0] - start[0]) + (point[1] - start[1]) * (end[1] - start[1]);
+  const dot = (point[0] - start[0]) * (end[0] - start[0]) + (point[1] - start[1]) * (end[0] - start[0]) + (point[1] - start[1]) * (end[1] - start[1]);
   return dot >= -tolerance && dot <= length * length + tolerance;
 }
 function edgeLineResidual(edge, a, b) {
@@ -44,11 +43,6 @@ function edgeLineResidual(edge, a, b) {
     Math.abs(A * edge.start[0] + B * edge.start[1] - C),
     Math.abs(A * edge.end[0] + B * edge.end[1] - C),
   );
-}
-function segmentOverlapScore(edge, segment) {
-  if (!pointOnSegment(edge.start, segment[0], segment[1]) || !pointOnSegment(edge.end, segment[0], segment[1])) return 0;
-  return Math.min(distance(edge.start, segment[0]), distance(edge.start, segment[1]))
-    + Math.min(distance(edge.end, segment[0]), distance(edge.end, segment[1]));
 }
 function finalEdgeHits(edge, records) {
   const hits = [];
@@ -156,7 +150,7 @@ function roundPolygon(polygon) {`,
   );
   instrumented = instrumented.replace(
     "export { isPhysicalLandPoint };",
-    "export { isPhysicalLandPoint, buildAnatoliaPhase2DAssets, __V3 };",
+    "export { __V3 };",
   );
   instrumented = `const TARGETS = new Set(${JSON.stringify([...TARGETS])});\n${instrumented}`;
   const tempPath = path.join(path.dirname(sourcePath), `.v3-canonical.${process.pid}.mjs`);
@@ -206,7 +200,7 @@ const matrix = FAILURE_EDGES.map((edge) => {
   return {
     id: edge.id,
     provinceId: edge.provinceId,
-    edge: edge,
+    edge,
     finalEdgeHitCount: hits.length,
     provenanceStatus: status,
     uniqueProvenanceCount: uniqueKeys.size,
