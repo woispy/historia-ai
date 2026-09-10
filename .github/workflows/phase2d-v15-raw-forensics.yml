@@ -5,6 +5,7 @@ on:
     branches:
       - codex/phase2.8-c-v15-raw-forensics
       - codex/phase2.8-c-v15-site-pair-forensics-v2
+      - codex/phase2.8-c-v15-site-pair-forensics-v3b
   workflow_dispatch:
 
 permissions:
@@ -54,6 +55,17 @@ jobs:
         with:
           name: phase2d-v15-site-pair-forensics-v2
           path: forensic-output/site-pair-forensics-v2.json
+      - name: Run direct canonical site-pair provenance v3 probe
+        if: github.ref == 'refs/heads/codex/phase2.8-c-v15-site-pair-forensics-v3b'
+        env:
+          CANONICAL_ROOT: /tmp/historia-ai-canonical
+        run: mkdir -p forensic-output && node tools/tests/phase2d-v15-site-pair-forensics-v3.mjs > forensic-output/site-pair-forensics-v3.json
+      - name: Upload direct canonical site-pair provenance v3 artifact
+        if: github.ref == 'refs/heads/codex/phase2.8-c-v15-site-pair-forensics-v3b'
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2d-v15-site-pair-forensics-v3
+          path: forensic-output/site-pair-forensics-v3.json
       - name: Preserve expected forensic failure status
         if: steps.raw_probe.outcome == 'failure'
         run: echo 'Raw V15 forensic probe reproduced the expected native failure; comparison probes completed independently.'
