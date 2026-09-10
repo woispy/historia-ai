@@ -39,11 +39,8 @@ async function loadInstrumentedV15() {
     "  const solved = solveWeights(controlSites);",
     "  const solved = solveWeights(controlSites);\n  globalThis.__V15_FORENSIC.weights = solved.weights;",
   );
-  instrumented = instrumented.replace(
-    "export { isPhysicalLandPoint };",
-    "export { isPhysicalLandPoint };",
-  );
-  const tempPath = path.join("/tmp", `.v4-v15-${process.pid}.mjs`);
+  const sourceDir = path.dirname(sourcePath);
+  const tempPath = path.join(sourceDir, `.v4-v15-${process.pid}.mjs`);
   fs.writeFileSync(tempPath, `globalThis.__V15_FORENSIC = { sites: null, weights: null };\n${instrumented}`, "utf8");
   try {
     const mod = await import(`file://${tempPath}?v4=${process.pid}`);
