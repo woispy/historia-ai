@@ -26,26 +26,15 @@ function plane(a, b, wa = 0, wb = 0) {
 async function loadInstrumentedV15() {
   const sourcePath = path.join(ROOT, "tools/historical-gis/AnatoliaPhase2DGeometryBuilderV15.js");
   const source = fs.readFileSync(sourcePath, "utf8");
-  let instrumented = source;
-  instrumented = instrumented.replace(
-    "function buildControlSites() {\n  return ANATOLIA_PROVINCE_METADATA.map((item) => {",
-    "function buildControlSites() {\n  const __result = ANATOLIA_PROVINCE_METADATA.map((item) => {",
-  );
-  instrumented = instrumented.replace(
-    "  });\n}\n\nfunction polygonCentroid(polygon) {",
-    "  });\n  globalThis.__V15_FORENSIC.sites = __result;\n  return __result;\n}\n\nfunction polygonCentroid(polygon) {",
-  );
-  instrumented = instrumented.replace(
-    "  const solved = solveWeights(controlSites);",
-    "  const solved = solveWeights(controlSites);\n  globalThis.__V15_FORENSIC.weights = solved.weights;",
-  );
+  const instrumented = `${source}\nexport { buildControlSites, featureWeightBias, powerCell };\n`;
   const sourceDir = path.dirname(sourcePath);
   const tempPath = path.join(sourceDir, `.v4-v15-${process.pid}.mjs`);
-  fs.writeFileSync(tempPath, `globalThis.__V15_FORENSIC = { sites: null, weights: null };\n${instrumented}`, "utf8");
+  fs.writeFileSync(tempPath, instrumented, "utf8");
   try {
     const mod = await import(`file://${tempPath}?v4=${process.pid}`);
-    mod.buildAnatoliaPhase2DAssets();
-    return globalThis.__V15_FORENSIC;
+    const sites = mod.buildControlSites();
+    const weights = mod.featureWeightBias();
+    return { sites, weights, powerCell: mod.powerCell };
   } finally {
     fs.rmSync(tempPath, { force: true });
   }
@@ -53,7 +42,6 @@ async function loadInstrumentedV15() {
 
 const state = await loadInstrumentedV15();
 assert.ok(state.sites?.length, "V15 control-site capture failed");
-assert.ok(state.weights, "V15 solved-weight capture failed");
 
 const targetSites = state.sites.filter((site) => site.provinceId === "bithynia-nicomedia" || site.provinceId === "bithynia-nicaea");
 const nicomedia = state.sites.find((site) => site.provinceId === "bithynia-nicomedia");
@@ -66,22 +54,33 @@ const v15ProvincePair = {
   plane: plane(nicomedia.point, nicaea.point, state.weights[nicomedia.provinceId] ?? 0, state.weights[nicaea.provinceId] ?? 0),
 };
 
+const rawCells = {
+  "bithynia-nicomedia": state.powerCell(nicomedia, state.sites, state.weights),
+  "bithynia-nicaea": state.powerCell(nicaea, state.sites, state.weights),
+};
+
 const matrix = PAIRS.map((pair) => {
   const canonicalPlane = plane(pair.a.point, pair.b.point);
   const candidates = [];
   const isCrossProvince =
     (pair.a.provinceId === "bithynia-nicomedia" && pair.b.provinceId === "bithynia-nicaea")
     || (pair.a.provinceId === "bithynia-nicaea" && pair.b.provinceId === "bithynia-nicomedia");
-  if (isCrossProvince) candidates.push({ kind: "province-control-pair", a: v15ProvincePair.a, b: v15ProvincePair.b, plane: v15ProvincePair.plane });
+  if (isCrossProvince) candidates.push({
+    kind: "v15-control-site-pair",
+    a: v15ProvincePair.a,
+    b: v15ProvincePair.b,
+    plane: v15ProvincePair.plane,
+    planeSource: "derived-from-V15-control-sites-plus-feature-weight-bias",
+  });
   return {
     key: pair.key,
     canonical: { a: pair.a, b: pair.b, plane: canonicalPlane, planeSource: "derived-from-resolved-canonical-site-pair" },
     v15: {
       candidateCount: candidates.length,
       candidates,
-      absenceReason: candidates.length ? null : "V15 exposes one political control site per province and no equivalent micro-control/barrier site pair for this canonical topology class",
+      absenceReason: candidates.length ? null : "V15 exposes one control site per province and no equivalent micro-control/barrier site pair for this canonical topology class",
     },
-    classification: candidates.length ? "V15_EQUIVALENT_PROVINCE_PAIR" : "NO_EQUIVALENT_V15_SITE_PAIR",
+    classification: candidates.length ? "V15_EQUIVALENT_PROVINCE_CONTROL_PAIR" : "NO_EQUIVALENT_V15_SITE_PAIR",
   };
 });
 
@@ -95,6 +94,12 @@ console.log(JSON.stringify({
       "bithynia-nicomedia": state.weights["bithynia-nicomedia"],
       "bithynia-nicaea": state.weights["bithynia-nicaea"],
     },
+    rawPowerCellVertexCount: {
+      "bithynia-nicomedia": rawCells["bithynia-nicomedia"].length,
+      "bithynia-nicaea": rawCells["bithynia-nicaea"].length,
+    },
+    fullBuilderGate: "NOT_EXECUTED_IN_V4_FORENSIC_ISOLATION",
+    note: "V4 deliberately isolates V15 control-site topology from the global buildPartition/solveWeights gate so an unrelated province failure cannot erase target topology evidence. Weights are the V15 featureWeightBias baseline, not solvedWeights.",
   },
   matrix,
 }, null, 2));
