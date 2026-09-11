@@ -1,0 +1,40 @@
+name: Phase 2D V15 B-C4 Replay
+
+on:
+  push:
+    branches:
+      - codex/phase2.8-c-b-c4-replay-final7
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    env:
+      CANONICAL_ROOT: /tmp/historia-ai-canonical
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Generate required hydrography runtime fixture
+        run: npm run build:assets
+      - name: Fetch canonical production branch
+        run: git fetch --no-tags origin 6b7424125eee4a1c72925b7a1780c68e695e9ba3 && git worktree add --detach /tmp/historia-ai-canonical 6b7424125eee4a1c72925b7a1780c68e695e9ba3
+      - name: Provision canonical generated hydrography fixture
+        run: mkdir -p /tmp/historia-ai-canonical/src/map/data/generated && cp src/map/data/generated/anatolia-hydrography-10m.json /tmp/historia-ai-canonical/src/map/data/generated/anatolia-hydrography-10m.json
+      - name: Run B-C4 replay
+        run: node tools/tests/phase2d-v15-b-c4-nicomedia-nicaea-replay.mjs > b-c4-replay.json
+      - name: Upload B-C4 replay artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2d-v15-b-c4-replay
+          path: b-c4-replay.json
+          retention-days: 7
