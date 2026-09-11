@@ -44,13 +44,29 @@ jobs:
           cat forensic-output/c2-amasya-edge3-semantics.json
           if [ -s forensic-output/c2-amasya-edge3-semantics.stderr ]; then cat forensic-output/c2-amasya-edge3-semantics.stderr; fi
           exit $status
-      - name: Upload C2 machine-readable artifact
+      - name: Run C3 production-equivalent Pontus-Amasya Edge 3 replay
+        id: c3_probe
+        continue-on-error: true
+        run: |
+          node tools/tests/phase2d-v15-c-c3-amasya-edge3-replay.mjs > forensic-output/c3-amasya-edge3-replay.json 2> forensic-output/c3-amasya-edge3-replay.stderr
+          status=$?
+          if [ ! -s forensic-output/c3-amasya-edge3-replay.json ]; then
+            printf '{"probeStatus":"failed-before-summary","exitCode":%s,"stderr":' "$status" > forensic-output/c3-amasya-edge3-replay.json
+            python -c 'import json,sys; print(json.dumps(open(sys.argv[1]).read()), end="")' forensic-output/c3-amasya-edge3-replay.stderr >> forensic-output/c3-amasya-edge3-replay.json
+            printf '}\n' >> forensic-output/c3-amasya-edge3-replay.json
+          fi
+          cat forensic-output/c3-amasya-edge3-replay.json
+          if [ -s forensic-output/c3-amasya-edge3-replay.stderr ]; then cat forensic-output/c3-amasya-edge3-replay.stderr; fi
+          exit $status
+      - name: Upload C2/C3 machine-readable artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phase2d-v15-c-c2-amasya-edge3-semantics
+          name: phase2d-v15-c-c3-amasya-edge3-replay
           path: |
             forensic-output/c2-amasya-edge3-semantics.json
             forensic-output/c2-amasya-edge3-semantics.stderr
+            forensic-output/c3-amasya-edge3-replay.json
+            forensic-output/c3-amasya-edge3-replay.stderr
           if-no-files-found: warn
           retention-days: 7
