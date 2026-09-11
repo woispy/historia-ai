@@ -43,6 +43,25 @@ jobs:
           status=$?
           cat forensic-output/a2-amisos-edge-trace.json
           exit $status
+      - name: Run A2 V15 source-stage divergence probe
+        id: a2_source
+        continue-on-error: true
+        env:
+          CANONICAL_ROOT: /tmp/historia-ai-canonical
+        run: |
+          mkdir -p forensic-output
+          node tools/tests/phase2d-v15-a2-source-divergence.mjs > forensic-output/a2-source-divergence.json
+          status=$?
+          cat forensic-output/a2-source-divergence.json
+          exit $status
+      - name: Upload A2 source divergence artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2d-v15-a2-source-divergence
+          path: forensic-output/a2-source-divergence.json
+          if-no-files-found: warn
+          retention-days: 7
       - name: Upload A2 Amisos edge trace artifact
         if: always()
         uses: actions/upload-artifact@v4
