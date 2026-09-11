@@ -1,11 +1,15 @@
 import assert from "node:assert/strict";
-import { isPhysicalLandPoint as canonicalIsPhysicalLandPoint } from `${process.env.CANONICAL_ROOT}/tools/historical-gis/AnatoliaPhase2DGeometryBuilder.js`;
+import path from "node:path";
 import {
   isPhysicalLandPoint,
   isPhysicalGeometryBoundaryPoint,
   resolvePhysicalGeometryBoundaryPoint,
 } from "../historical-gis/recovery/physical-land-authority.mjs";
 import { buildAnatoliaPhase2DAssets } from "../historical-gis/AnatoliaPhase2DGeometryBuilderV15.js";
+
+const CANONICAL_ROOT = process.env.CANONICAL_ROOT;
+assert.ok(CANONICAL_ROOT, "CANONICAL_ROOT is required");
+const canonicalModule = await import(`file://${path.join(CANONICAL_ROOT, "tools/historical-gis/AnatoliaPhase2DGeometryBuilder.js")}?b-c4=${process.pid}`);
 
 const FAILURE_EDGES = [
   { caseId: "B-01", provinceId: "bithynia-nicomedia", start: [29.87953,40.72476], end: [29.88817,40.72993] },
@@ -24,22 +28,17 @@ function pointAt(edge, fraction) {
   return [edge.start[0] + (edge.end[0] - edge.start[0]) * fraction, edge.start[1] + (edge.end[1] - edge.start[1]) * fraction];
 }
 
-function distance(a, b) {
-  return a && b ? Math.hypot(a[0] - b[0], a[1] - b[1]) : Infinity;
-}
-
 function replayEdge(edge) {
   const samples = [];
   for (let index = 0; index <= SAMPLE_COUNT; index += 1) {
     const fraction = index / SAMPLE_COUNT;
     const point = pointAt(edge, fraction);
-    const canonicalLand = canonicalIsPhysicalLandPoint(point);
+    const canonicalLand = canonicalModule.isPhysicalLandPoint(point);
     const v15SupportBoundary = isPhysicalGeometryBoundaryPoint(point);
     const v15Land = isPhysicalLandPoint(point);
     const resolved = v15Land ? [...point] : resolvePhysicalGeometryBoundaryPoint(point);
     samples.push({ fraction, point, canonicalLand, v15SupportBoundary, v15Land, resolved });
   }
-
   const authorityDivergence = samples.filter((sample) => sample.canonicalLand !== sample.v15SupportBoundary);
   const finalAuthorityDivergence = samples.filter((sample) => sample.canonicalLand !== Boolean(sample.resolved));
   const unresolved = samples.filter((sample) => !sample.v15Land && !sample.resolved);
