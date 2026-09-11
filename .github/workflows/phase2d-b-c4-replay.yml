@@ -1,0 +1,53 @@
+name: Phase 2D B-C4 Final Edge Replay
+
+# Forensic-only workflow. Never merges or mutates production.
+on:
+  push:
+    branches:
+      - codex/phase2.8-c-b-c4-replay-canonical
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    env:
+      CANONICAL_ROOT: /tmp/historia-ai-canonical
+    steps:
+      - name: Checkout forensic branch
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Generate hydrography runtime fixture
+        run: npm run build:assets
+      - name: Fetch canonical production branch
+        run: |
+          git fetch --no-tags origin 6b7424125eee4a1c72925b7a1780c68e695e9ba3
+          git worktree add --detach "$CANONICAL_ROOT" 6b7424125eee4a1c72925b7a1780c68e695e9ba3
+          mkdir -p "$CANONICAL_ROOT/src/map/data/generated"
+          cp src/map/data/generated/anatolia-hydrography-10m.json "$CANONICAL_ROOT/src/map/data/generated/anatolia-hydrography-10m.json"
+      - name: Run observational B-C4 replay
+        run: |
+          mkdir -p forensic-output
+          node tools/tests/phase2d-v15-b-c4-nicomedia-nicaea-replay.mjs > forensic-output/b-c4-nicomedia-nicaea-replay.json 2> forensic-output/b-c4-nicomedia-nicaea-replay.stderr
+          status=$?
+          cat forensic-output/b-c4-nicomedia-nicaea-replay.json
+          if [ -s forensic-output/b-c4-nicomedia-nicaea-replay.stderr ]; then cat forensic-output/b-c4-nicomedia-nicaea-replay.stderr; fi
+          exit $status
+      - name: Upload B-C4 replay artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2d-b-c4-nicomedia-nicaea-replay
+          path: |
+            forensic-output/b-c4-nicomedia-nicaea-replay.json
+            forensic-output/b-c4-nicomedia-nicaea-replay.stderr
+          if-no-files-found: warn
+          retention-days: 14
