@@ -155,3 +155,5 @@ jobs:
             forensic-output/b5-raw-cell-lineage.stderr
           if-no-files-found: warn
           retention-days: 7
+
+# A2 lineage trigger: preserve all forensic probes above while forcing a fresh push event.
