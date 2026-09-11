@@ -1,3 +1,4 @@
+// Forensic-only A2 source-stage probe; no production behavior change.
 import { readFileSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
@@ -37,10 +38,6 @@ traced = traced.replace(
 traced = traced.replace(
   "    const rawPolygon = clipCellToLand(cell, site.point)[0];\n    const polygon = rawPolygon ? normalizePhysicalBoundary(rawPolygon) : null;",
   "    const rawPolygon = clipCellToLand(cell, site.point)[0];\n    if (site.provinceId === \"pontus-amisos\") __a2Rec(\"partition-raw\", { vertexCount: rawPolygon?.length ?? 0, area: __a2Area(rawPolygon), polygon: rawPolygon ?? null, site: site.point, weight: weights[site.provinceId] ?? null });\n    const polygon = rawPolygon ? normalizePhysicalBoundary(rawPolygon) : null;\n    if (site.provinceId === \"pontus-amisos\") __a2Rec(\"partition-normalized\", { vertexCount: polygon?.length ?? 0, area: __a2Area(polygon), polygon: polygon ?? null });"
-);
-traced = traced.replace(
-  "  return { weights, partition, iterations: MAX_WEIGHT_ITERATIONS };",
-  "  return { weights, partition, iterations: MAX_WEIGHT_ITERATIONS };"
 );
 traced += "\nexport function __getA2(){return __A2;}\n";
 writeFileSync(tempPath, traced, "utf8");
