@@ -32,6 +32,12 @@ jobs:
           git worktree add --detach /tmp/historia-ai-canonical 6b7424125eee4a1c72925b7a1780c68e695e9ba3
           mkdir -p /tmp/historia-ai-canonical/src/map/data/generated
           cp src/map/data/generated/anatolia-hydrography-10m.json /tmp/historia-ai-canonical/src/map/data/generated/anatolia-hydrography-10m.json
+      - name: Fetch historical A2 checkpoints
+        run: |
+          git fetch --no-tags origin \
+            5f48731eec9804e99abd9ce60ea7f0b5d3ef5713 \
+            bdf166a42bdccf1ce4669488f3a84c97b9e2dc2e \
+            3021b2d1104c8ea9e9f700435c453adf5f1ae4e8
       - name: Run A2 producer lineage V3
         id: producer_lineage
         continue-on-error: true
