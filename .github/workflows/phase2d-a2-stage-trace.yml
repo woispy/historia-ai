@@ -32,3 +32,4 @@ jobs:
           name: phase2d-a2-stage-trace
           path: a2-stage-trace.json
           retention-days: 7
+      # Forensic-only trigger: no production behavior change.
