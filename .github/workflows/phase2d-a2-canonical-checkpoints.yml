@@ -1,5 +1,6 @@
 name: Phase 2D A2 Canonical Checkpoints
 
+# Focused forensic checkpoint runner; intentionally isolated from production.
 on:
   push:
     branches:
