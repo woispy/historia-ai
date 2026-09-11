@@ -1,0 +1,52 @@
+name: Phase 2D A2 Counterfactual
+
+on:
+  push:
+    branches:
+      - codex/phase2.8-c-a2-edge-trace
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  counterfactual:
+    runs-on: ubuntu-latest
+    env:
+      CANONICAL_ROOT: /tmp/historia-ai-canonical
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Generate required hydrography runtime fixture
+        run: npm run build:assets
+      - name: Fetch canonical production branch
+        run: |
+          git fetch --no-tags origin 6b7424125eee4a1c72925b7a1780c68e695e9ba3
+          git worktree add --detach /tmp/historia-ai-canonical 6b7424125eee4a1c72925b7a1780c68e695e9ba3
+          mkdir -p /tmp/historia-ai-canonical/src/map/data/generated
+          cp src/map/data/generated/anatolia-hydrography-10m.json /tmp/historia-ai-canonical/src/map/data/generated/anatolia-hydrography-10m.json
+      - name: Run A2 counterfactual
+        run: |
+          mkdir -p forensic-output
+          node tools/tests/phase2d-a2-counterfactual-land-halfplane.mjs > forensic-output/a2-counterfactual.json 2> forensic-output/a2-counterfactual.stderr
+          status=$?
+          cat forensic-output/a2-counterfactual.json
+          if [ -s forensic-output/a2-counterfactual.stderr ]; then cat forensic-output/a2-counterfactual.stderr; fi
+          exit $status
+      - name: Upload A2 counterfactual artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2d-a2-counterfactual
+          path: |
+            forensic-output/a2-counterfactual.json
+            forensic-output/a2-counterfactual.stderr
+          if-no-files-found: warn
+          retention-days: 7
