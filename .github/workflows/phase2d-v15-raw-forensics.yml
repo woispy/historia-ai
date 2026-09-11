@@ -125,6 +125,36 @@ jobs:
             forensic-output/b4-calibrated-seed-authority.stderr
           if-no-files-found: warn
           retention-days: 7
+      - name: Run B5 raw-cell lineage probe
+        id: b5_probe
+        continue-on-error: true
+        env:
+          CANONICAL_ROOT: /tmp/historia-ai-canonical
+        run: |
+          mkdir -p forensic-output
+          node tools/tests/phase2d-v15-b5-raw-cell-lineage.mjs > forensic-output/b5-raw-cell-lineage.json 2> forensic-output/b5-raw-cell-lineage.stderr
+          status=$?
+          if [ ! -s forensic-output/b5-raw-cell-lineage.json ]; then
+            printf '{"probeStatus":"failed-before-summary","exitCode":%s,"stderr":' "$status" > forensic-output/b5-raw-cell-lineage.json
+            python -c 'import json,sys; print(json.dumps(open(sys.argv[1]).read()), end="")' forensic-output/b5-raw-cell-lineage.stderr >> forensic-output/b5-raw-cell-lineage.json
+            printf '}\n' >> forensic-output/b5-raw-cell-lineage.json
+          fi
+          cat forensic-output/b5-raw-cell-lineage.json
+          if [ -s forensic-output/b5-raw-cell-lineage.stderr ]; then
+            echo '--- B5 stderr ---'
+            cat forensic-output/b5-raw-cell-lineage.stderr
+          fi
+          exit $status
+      - name: Upload B5 machine-readable artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2d-v15-b5-raw-cell-lineage
+          path: |
+            forensic-output/b5-raw-cell-lineage.json
+            forensic-output/b5-raw-cell-lineage.stderr
+          if-no-files-found: warn
+          retention-days: 7
       - name: Preserve expected forensic failure status
         if: steps.raw_probe.outcome == 'failure'
         run: echo 'Raw V15 forensic probe reproduced the expected native failure; comparison probes completed independently.'
