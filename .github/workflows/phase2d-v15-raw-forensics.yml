@@ -58,15 +58,31 @@ jobs:
           cat forensic-output/c3-amasya-edge3-replay.json
           if [ -s forensic-output/c3-amasya-edge3-replay.stderr ]; then cat forensic-output/c3-amasya-edge3-replay.stderr; fi
           exit $status
-      - name: Upload C2/C3 machine-readable artifacts
+      - name: Run B-C4 production-equivalent Nicomedia/Nicaea replay
+        id: b_c4_probe
+        continue-on-error: true
+        run: |
+          node tools/tests/phase2d-v15-b-c4-nicomedia-nicaea-replay.mjs > forensic-output/b-c4-nicomedia-nicaea-replay.json 2> forensic-output/b-c4-nicomedia-nicaea-replay.stderr
+          status=$?
+          if [ ! -s forensic-output/b-c4-nicomedia-nicaea-replay.json ]; then
+            printf '{"probeStatus":"failed-before-summary","exitCode":%s,"stderr":' "$status" > forensic-output/b-c4-nicomedia-nicaea-replay.json
+            python -c 'import json,sys; print(json.dumps(open(sys.argv[1]).read()), end="")' forensic-output/b-c4-nicomedia-nicaea-replay.stderr >> forensic-output/b-c4-nicomedia-nicaea-replay.json
+            printf '}\n' >> forensic-output/b-c4-nicomedia-nicaea-replay.json
+          fi
+          cat forensic-output/b-c4-nicomedia-nicaea-replay.json
+          if [ -s forensic-output/b-c4-nicomedia-nicaea-replay.stderr ]; then cat forensic-output/b-c4-nicomedia-nicaea-replay.stderr; fi
+          exit $status
+      - name: Upload C2/C3/B-C4 machine-readable artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phase2d-v15-c-c3-amasya-edge3-replay
+          name: phase2d-v15-c-c3-b-c4-replays
           path: |
             forensic-output/c2-amasya-edge3-semantics.json
             forensic-output/c2-amasya-edge3-semantics.stderr
             forensic-output/c3-amasya-edge3-replay.json
             forensic-output/c3-amasya-edge3-replay.stderr
+            forensic-output/b-c4-nicomedia-nicaea-replay.json
+            forensic-output/b-c4-nicomedia-nicaea-replay.stderr
           if-no-files-found: warn
           retention-days: 7
