@@ -50,3 +50,4 @@ jobs:
             forensic-output/a2-counterfactual.stderr
           if-no-files-found: warn
           retention-days: 7
+# forensic trigger marker: corrected counterfactual workflow execution
