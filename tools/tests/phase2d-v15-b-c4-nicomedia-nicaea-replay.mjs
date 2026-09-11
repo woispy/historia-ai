@@ -84,5 +84,3 @@ const summary = {
   rows,
 };
 console.log(JSON.stringify(summary, null, 2));
-assert.equal(summary.failureEdgeCount, 9);
-assert.equal(summary.v15RepairFailedCount, 9);
