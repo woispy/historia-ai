@@ -12,6 +12,8 @@ permissions:
 jobs:
   forensic:
     runs-on: ubuntu-latest
+    env:
+      CANONICAL_ROOT: /tmp/historia-ai-canonical
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,6 +34,36 @@ jobs:
         run: git fetch --no-tags origin 6b7424125eee4a1c72925b7a1780c68e695e9ba3 && git worktree add --detach /tmp/historia-ai-canonical 6b7424125eee4a1c72925b7a1780c68e695e9ba3
       - name: Provision canonical generated hydrography fixture
         run: mkdir -p /tmp/historia-ai-canonical/src/map/data/generated && cp src/map/data/generated/anatolia-hydrography-10m.json /tmp/historia-ai-canonical/src/map/data/generated/anatolia-hydrography-10m.json
+      - name: Fetch historical canonical builder commits
+        run: |
+          git fetch --no-tags origin 532e52f9a54e0b306cafd61adff9bf6e8c18e126 402685fc6ff8a7d14fe76a8c1ef0f9d5106b55c0 0095f32a93eb6705eab9b5291c969b4d0b35c42f e67cdd3f7a3b89631c497f0d2ec1ac9d24444364
+          for item in 532e52f9a54e0b306cafd61adff9bf6e8c18e126 402685fc6ff8a7d14fe76a8c1ef0f9d5106b55c0 0095f32a93eb6705eab9b5291c969b4d0b35c42f e67cdd3f7a3b89631c497f0d2ec1ac9d24444364; do
+            git worktree add --detach "/tmp/a2-$item" "$item"
+            mkdir -p "/tmp/a2-$item/src/map/data/generated"
+            cp src/map/data/generated/anatolia-hydrography-10m.json "/tmp/a2-$item/src/map/data/generated/anatolia-hydrography-10m.json"
+          done
+      - name: Run A2 historical canonical builder lineage
+        id: a2_history
+        continue-on-error: true
+        env:
+          A2_HISTORICAL_ROOTS: '[{"commit":"532e52f9a54e0b306cafd61adff9bf6e8c18e126","path":"/tmp/a2-532e52f9a54e0b306cafd61adff9bf6e8c18e126"},{"commit":"402685fc6ff8a7d14fe76a8c1ef0f9d5106b55c0","path":"/tmp/a2-402685fc6ff8a7d14fe76a8c1ef0f9d5106b55c0"},{"commit":"0095f32a93eb6705eab9b5291c969b4d0b35c42f","path":"/tmp/a2-0095f32a93eb6705eab9b5291c969b4d0b35c42f"},{"commit":"e67cdd3f7a3b89631c497f0d2ec1ac9d24444364","path":"/tmp/a2-e67cdd3f7a3b89631c497f0d2ec1ac9d24444364"},{"commit":"6b7424125eee4a1c72925b7a1780c68e695e9ba3","path":"/tmp/historia-ai-canonical"}]'
+        run: |
+          mkdir -p forensic-output
+          node tools/tests/phase2d-a2-historical-builder-lineage.mjs > forensic-output/a2-historical-builder-lineage.json 2> forensic-output/a2-historical-builder-lineage.stderr
+          status=$?
+          cat forensic-output/a2-historical-builder-lineage.json
+          if [ -s forensic-output/a2-historical-builder-lineage.stderr ]; then cat forensic-output/a2-historical-builder-lineage.stderr; fi
+          exit $status
+      - name: Upload A2 historical lineage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2d-a2-historical-builder-lineage
+          path: |
+            forensic-output/a2-historical-builder-lineage.json
+            forensic-output/a2-historical-builder-lineage.stderr
+          if-no-files-found: warn
+          retention-days: 7
       - name: Run A2 Amisos edge transformation trace
         id: a2_trace
         continue-on-error: true
@@ -110,10 +142,7 @@ jobs:
             printf '}\n' >> forensic-output/b4-calibrated-seed-authority.json
           fi
           cat forensic-output/b4-calibrated-seed-authority.json
-          if [ -s forensic-output/b4-calibrated-seed-authority.stderr ]; then
-            echo '--- B4 stderr ---'
-            cat forensic-output/b4-calibrated-seed-authority.stderr
-          fi
+          if [ -s forensic-output/b4-calibrated-seed-authority.stderr ]; then echo '--- B4 stderr ---'; cat forensic-output/b4-calibrated-seed-authority.stderr; fi
           exit $status
       - name: Upload B4 machine-readable artifact
         if: always()
@@ -140,10 +169,7 @@ jobs:
             printf '}\n' >> forensic-output/b5-raw-cell-lineage.json
           fi
           cat forensic-output/b5-raw-cell-lineage.json
-          if [ -s forensic-output/b5-raw-cell-lineage.stderr ]; then
-            echo '--- B5 stderr ---'
-            cat forensic-output/b5-raw-cell-lineage.stderr
-          fi
+          if [ -s forensic-output/b5-raw-cell-lineage.stderr ]; then echo '--- B5 stderr ---'; cat forensic-output/b5-raw-cell-lineage.stderr; fi
           exit $status
       - name: Upload B5 machine-readable artifact
         if: always()
