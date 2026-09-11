@@ -32,149 +32,23 @@ jobs:
         run: git fetch --no-tags origin 6b7424125eee4a1c72925b7a1780c68e695e9ba3 && git worktree add --detach /tmp/historia-ai-canonical 6b7424125eee4a1c72925b7a1780c68e695e9ba3
       - name: Provision canonical generated hydrography fixture
         run: mkdir -p /tmp/historia-ai-canonical/src/map/data/generated && cp src/map/data/generated/anatolia-hydrography-10m.json /tmp/historia-ai-canonical/src/map/data/generated/anatolia-hydrography-10m.json
-      - name: Fetch historical canonical builder commits
-        run: |
-          git fetch --no-tags origin 532e52f9a54e0b306cafd61adff9bf6e8c18e126 402685fc6ff8a7d14fe76a8c1ef0f9d5106b55c0 0095f32a93eb6705eab9b5291c969b4d0b35c42f e67cdd3f7a3b89631c497f0d2ec1ac9d24444364 837ec8dd2d878ceb227f609c3da481610b54d0db
-          for item in 532e52f9a54e0b306cafd61adff9bf6e8c18e126 402685fc6ff8a7d14fe76a8c1ef0f9d5106b55c0 0095f32a93eb6705eab9b5291c969b4d0b35c42f e67cdd3f7a3b89631c497f0d2ec1ac9d24444364 837ec8dd2d878ceb227f609c3da481610b54d0db; do
-            git worktree add --detach "/tmp/a2-$item" "$item"
-            mkdir -p "/tmp/a2-$item/src/map/data/generated"
-            cp src/map/data/generated/anatolia-hydrography-10m.json "/tmp/a2-$item/src/map/data/generated/anatolia-hydrography-10m.json"
-          done
-      - name: Run A2 historical canonical builder lineage
-        id: a2_history
+      - name: Run A2 producer lineage V3
+        id: a2_producer
         continue-on-error: true
-        env:
-          A2_HISTORICAL_ROOTS: '[{"commit":"837ec8dd2d878ceb227f609c3da481610b54d0db","path":"/tmp/a2-837ec8dd2d878ceb227f609c3da481610b54d0db"},{"commit":"532e52f9a54e0b306cafd61adff9bf6e8c18e126","path":"/tmp/a2-532e52f9a54e0b306cafd61adff9bf6e8c18e126"},{"commit":"402685fc6ff8a7d14fe76a8c1ef0f9d5106b55c0","path":"/tmp/a2-402685fc6ff8a7d14fe76a8c1ef0f9d5106b55c0"},{"commit":"0095f32a93eb6705eab9b5291c969b4d0b35c42f","path":"/tmp/a2-0095f32a93eb6705eab9b5291c969b4d0b35c42f"},{"commit":"e67cdd3f7a3b89631c497f0d2ec1ac9d24444364","path":"/tmp/a2-e67cdd3f7a3b89631c497f0d2ec1ac9d24444364"},{"commit":"6b7424125eee4a1c72925b7a1780c68e695e9ba3","path":"/tmp/historia-ai-canonical"}]'
         run: |
           mkdir -p forensic-output
-          node tools/tests/phase2d-a2-historical-builder-lineage.mjs > forensic-output/a2-historical-builder-lineage.json 2> forensic-output/a2-historical-builder-lineage.stderr
+          node tools/tests/phase2d-a2-producer-lineage-v3.mjs > forensic-output/a2-producer-lineage-v3.json 2> forensic-output/a2-producer-lineage-v3.stderr
           status=$?
-          cat forensic-output/a2-historical-builder-lineage.json
-          if [ -s forensic-output/a2-historical-builder-lineage.stderr ]; then cat forensic-output/a2-historical-builder-lineage.stderr; fi
+          cat forensic-output/a2-producer-lineage-v3.json
+          if [ -s forensic-output/a2-producer-lineage-v3.stderr ]; then cat forensic-output/a2-producer-lineage-v3.stderr; fi
           exit $status
-      - name: Upload A2 historical lineage artifact
+      - name: Upload A2 producer lineage artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phase2d-a2-historical-builder-lineage
+          name: phase2d-a2-producer-lineage-v3
           path: |
-            forensic-output/a2-historical-builder-lineage.json
-            forensic-output/a2-historical-builder-lineage.stderr
+            forensic-output/a2-producer-lineage-v3.json
+            forensic-output/a2-producer-lineage-v3.stderr
           if-no-files-found: warn
           retention-days: 7
-      - name: Run A2 canonical-base 837 Amisos probe
-        id: a2_base
-        continue-on-error: true
-        run: |
-          mkdir -p forensic-output
-          node tools/tests/phase2d-a2-canonical-base-probe.mjs > forensic-output/a2-canonical-base-837.json 2> forensic-output/a2-canonical-base-837.stderr
-          status=$?
-          cat forensic-output/a2-canonical-base-837.json
-          if [ -s forensic-output/a2-canonical-base-837.stderr ]; then cat forensic-output/a2-canonical-base-837.stderr; fi
-          exit $status
-      - name: Upload A2 canonical-base artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: phase2d-a2-canonical-base-837
-          path: |
-            forensic-output/a2-canonical-base-837.json
-            forensic-output/a2-canonical-base-837.stderr
-          if-no-files-found: warn
-          retention-days: 7
-      - name: Run A2 Amisos edge transformation trace
-        id: a2_trace
-        continue-on-error: true
-        run: |
-          mkdir -p forensic-output
-          node tools/tests/phase2d-v15-a2-amisos-edge-trace.mjs > forensic-output/a2-amisos-edge-trace.json
-          status=$?
-          cat forensic-output/a2-amisos-edge-trace.json
-          exit $status
-      - name: Run A2 V15 source-stage divergence probe
-        id: a2_source
-        continue-on-error: true
-        run: |
-          mkdir -p forensic-output
-          node tools/tests/phase2d-v15-a2-source-divergence.mjs > forensic-output/a2-source-divergence.json
-          status=$?
-          cat forensic-output/a2-source-divergence.json
-          exit $status
-      - name: Upload A2 source divergence artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: phase2d-v15-a2-source-divergence
-          path: forensic-output/a2-source-divergence.json
-          if-no-files-found: warn
-          retention-days: 7
-      - name: Upload A2 Amisos edge trace artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: phase2d-v15-a2-amisos-edge-trace
-          path: forensic-output/a2-amisos-edge-trace.json
-          if-no-files-found: warn
-          retention-days: 7
-      - name: Run V15 authority comparison probe
-        run: node tools/tests/phase2d-v15-authority-probe.mjs
-      - name: Run canonical geometry comparison probe
-        run: node tools/tests/phase2d-v15-canonical-geometry-probe.mjs
-      - name: Run B1 B2 B3 nine-edge divergence probe
-        id: b123_probe
-        continue-on-error: true
-        run: |
-          mkdir -p forensic-output
-          node tools/tests/phase2d-v15-b1-b2-b3-9edge-probe.mjs > forensic-output/b1-b2-b3-9edge.json
-          status=$?
-          cat forensic-output/b1-b2-b3-9edge.json
-          exit $status
-      - name: Upload B1 B2 B3 machine-readable artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: phase2d-v15-b1-b2-b3-9edge-forensic
-          path: forensic-output/b1-b2-b3-9edge.json
-          if-no-files-found: warn
-          retention-days: 7
-      - name: Run B4 calibrated seed-universe equivalence probe
-        id: b4_probe
-        continue-on-error: true
-        run: |
-          mkdir -p forensic-output
-          node tools/tests/phase2d-v15-b4-calibrated-seed-authority.mjs > forensic-output/b4-calibrated-seed-authority.json 2> forensic-output/b4-calibrated-seed-authority.stderr
-          status=$?
-          cat forensic-output/b4-calibrated-seed-authority.json
-          exit $status
-      - name: Upload B4 machine-readable artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: phase2d-v15-b4-calibrated-seed-authority
-          path: |
-            forensic-output/b4-calibrated-seed-authority.json
-            forensic-output/b4-calibrated-seed-authority.stderr
-          if-no-files-found: warn
-          retention-days: 7
-      - name: Run B5 raw-cell lineage probe
-        id: b5_probe
-        continue-on-error: true
-        run: |
-          mkdir -p forensic-output
-          node tools/tests/phase2d-v15-b5-raw-cell-lineage.mjs > forensic-output/b5-raw-cell-lineage.json 2> forensic-output/b5-raw-cell-lineage.stderr
-          status=$?
-          cat forensic-output/b5-raw-cell-lineage.json
-          exit $status
-      - name: Upload B5 machine-readable artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: phase2d-v15-b5-raw-cell-lineage
-          path: |
-            forensic-output/b5-raw-cell-lineage.json
-            forensic-output/b5-raw-cell-lineage.stderr
-          if-no-files-found: warn
-          retention-days: 7
-
-# A2 lineage trigger: preserve all forensic probes above while forcing a fresh push event.
-# Fresh-run marker: execute the canonical-base 837 probe on this exact revision.
