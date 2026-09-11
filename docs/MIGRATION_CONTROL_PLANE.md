@@ -42,8 +42,8 @@ This ledger is the authoritative tracking surface for work that may eventually r
 | Migration ID | Workstream | Source branch / commits | Unique value | Canonical destination | Evidence status | Current disposition | Next action |
 |---|---|---|---|---|---|---|---|
 | `MIG-2.8-A1` | Native micro-polygons | Canonical geometry generation; Smyrna, Ayasuluk, Pecin, Halikarnassos, Sinop | Five raw canonical polygons are already below `MIN_AREA` | Canonical Phase 2D generation/input geometry | Root cause class established; generation/input proof still required | `BLOCKED` | Complete generation/input proof; do not change `MIN_AREA` |
-| `MIG-2.8-A2` | Amisos normalization collapse | `codex/phase2.8-c-v15-raw-forensics`, `codex/phase2.8-c-a2-edge-trace`; V15 builder `37cc47ecf7cef0aa12abffb6fe3e1a527fd409c9`; V15 authority `c47238cee6ab6b9c522e11b5f1cd92ad0d5970a3` | The earlier claim that canonical raw area ~`0.006755` collapses to ~`2.27e-13` inside V15 normalization is **not reproduced** when the exact canonical Amisos raw polygon is fed directly to V15 `normalizePhysicalBoundary()` | Phase 2D boundary/normalization path | A2 exact symbol resolution established; direct canonical→V15 edge trace shows area preserved (~98.1% of input) with no repair recursion; the previously attributed V15 normalization collapse is a rejected hypothesis | `BLOCKED` | Locate the actual transformation that produced ~`2.27e-13`; do not change behavior or constants until that stage is reproduced |
-| `MIG-2.8-B` | Nicomedia/Nicaea edge repair | `codex/phase2.8-c-v15-shadow`, `codex/phase2.8-c-v15-raw-forensics` | Deterministic cross-geometry edge-repair divergence | Shared physical boundary/repair contract | Deterministic symptom proven; extraction not yet authorized | `BLOCKED` | Compare canonical edge, V15 raw edge, authority boundary, first-invalid sample |
+| `MIG-2.8-A2` | Amisos normalization collapse | `codex/phase2.8-c-v15-raw-forensics`, `codex/phase2.8-c-a2-edge-trace`; V15 builder `37cc47ecf7cef0aa12abffb6fe3e1a527fd409c9`; V15 authority `c47238cee6ab6b9c522e11b5f1cd92ad0d5970a3` | The earlier claim that canonical raw area ~`0.006755` collapses to ~`2.27e-13` inside V15 normalization is **not reproduced** when the exact canonical Amisos raw polygon is fed directly to V15 `normalizePhysicalBoundary()`. A second probe through V15 `buildPartition()` shows Amisos `partition-raw` and `partition-normalized` both remain ~`0.502395`, while the build aborts independently on `pontus-amasya`. | Phase 2D boundary/normalization path | The direct normalization collapse is disproven. The current V15 build path also does not produce `~2.27e-13` for Amisos. Therefore the old `~2.27e-13` observation belongs to another transformation, fixture/version, downstream serialization, or previously captured state that has not yet been reproduced. | `BLOCKED` | Reproduce the historical producer of `~2.27e-13` from its exact artifact/fixture lineage; do not mutate V15 or canonical behavior |
+| `MIG-2.8-B` | Nicomedia/Nicaea edge repair | `codex/phase2.8-c-v15-shadow`, `codex/phase2.8-c-v15-raw-forensics` | Deterministic cross-geometry edge-repair divergence | Shared physical boundary/repair contract | Initial B1/B2/B3 probe proves canonical endpoints can classify as land while V15 boundary authority classifies several as water/invalid; however the probe is not yet a calibrated equivalence test because canonical uses a much richer multi-site universe than V15's province-anchor-only target records | `BLOCKED` | Run B4 with the exact canonical site universe fed into V15 `powerCell()`; separate seed/power-cell equivalence from physical-authority divergence |
 | `MIG-2.8-C` | Amasya authority semantics | V15 raw forensic lineage | Lake-interior vs physical-land boundary semantic distinction | MW-02 physical authority contract | Semantic class established; decision matrix pending | `BLOCKED` | Complete endpoint authority decision matrix |
 | `MW-02` | Physical land authority consolidation | `85fe793a4d0f4801c3805d78ebd211019566e979` + lineage | Shared `PHYSICAL_LAND_POLYGONS` and recovery authority | `tools/historical-gis/recovery/physical-land-authority.mjs` on canonical line | Provenance established; migration gate blocked by 2.8-C | `PRESERVE` | Migrate only the proven authority contract after 2.8-C gate |
 | `MW-01` | CDSE DEM source adapter | P6.2 DEM contract lineage | Copernicus Data Space `COP-DEM_GLO-30-DGED`, release `2024_1` contract | DEM source adapter / asset-builder boundary | Contract known; authenticated acquisition not claimed | `BLOCKED` | Keep isolated; migrate adapter only after evidence and source verification |
@@ -108,8 +108,8 @@ The active blocker is Phase 2.8-C authoritative geometry migration. The current 
 | Class | Scope | Current classification | Migration consequence |
 |---|---|---|---|
 | A1 | Smyrna, Ayasuluk, Pecin, Halikarnassos, Sinop | Native canonical micro-polygons below `MIN_AREA` in raw canonical generation | Investigate canonical generation/input geometry; do not change `MIN_AREA` |
-| A2 | Pontus-Amisos | **The previously reported V15 normalization collapse is not reproduced by direct canonical-raw → V15 normalization tracing.** The exact stage producing ~`2.27e-13` remains unidentified. | Reproduce the actual collapse stage before any algorithmic change |
-| B | 8 Nicomedia edges + 1 Nicaea edge | Cross-geometry recursive edge-repair divergence; deterministic max-depth behavior | Compare canonical edge, V15 raw edge, authority boundary, and first-invalid sample before extraction |
+| A2 | Pontus-Amisos | **The previously reported V15 normalization collapse is not reproduced by direct canonical-raw → V15 normalization tracing, and the current V15 `buildPartition()` path also does not produce the reported tiny area.** | Reproduce the historical producer of `~2.27e-13` before any algorithmic change |
+| B | 8 Nicomedia edges + 1 Nicaea edge | Initial B1/B2/B3 probe is confounded by the difference between canonical multi-site geometry generation and the retained V15 province-anchor-only target view; authority divergence is also observed at several canonical edge endpoints | Run calibrated B4 with canonical seed universe; only then decide whether authority migration or geometry algorithm migration is implicated |
 | C | Pontus-Amasya edge 3 | Authority semantic boundary case involving lake interior semantics | Complete endpoint decision matrix before authority migration |
 
 ### A2 evidence correction — 2026-09-11
@@ -124,6 +124,18 @@ Targeted workflow run: `34604315604` (`Phase 2D V15 Raw Forensics`). The produce
 - no recursive repair events on the traced canonical→V15 normalization path
 
 Therefore the earlier statement “Amisos collapses during V15 normalization” is a **rejected hypothesis**. This does **not** close A2: it proves that the reported `~2.27e-13` value came from another transformation, input representation, or stage not yet isolated.
+
+### A2 source-stage probe — 2026-09-11
+
+Targeted workflow run `34605576666` executed the V15 builder's own `buildPartition()` with the Amisos target instrumented. The result was:
+
+- canonical raw Amisos area: `0.006755373858482017`
+- V15 `partition-raw` Amisos area: `0.5023951571206453`
+- V15 `partition-normalized` Amisos area: `0.5023951571206453`
+- V15 normalized vertex count: `6`
+- V15 build aborted independently on `pontus-amasya` with `Phase 2D V15 produced invalid physical-land geometry`
+
+This is decisive for the current V15 implementation: **the reported `~2.27e-13` value is not generated by either `partition-raw` or `normalizePhysicalBoundary()` in this run.** The forensic target therefore moves upstream/downstream of those stages and/or to the exact historical fixture/version that produced the old observation.
 
 No `MIN_AREA`, `MAX_EDGE_REPAIR_DEPTH`, `RECOVERY_STEP`, or `MAX_RECOVERY_DISTANCE` change is authorized.
 
@@ -141,16 +153,23 @@ The V15 adapter wrapper is `tools/historical-gis/AnatoliaPhase2DGeometryBuilderV
 
 This resolution is **evidence registration only**. No canonical algorithm has been changed by this entry.
 
+## B evidence calibration — 2026-09-11
+
+The first B1/B2/B3 nine-edge probe must **not** be treated as proof that V15's power-cell algorithm is the root cause. Its output shows `canonicalTargetSiteCount = 66` versus `v15TargetSiteCount = 2`, because the canonical builder uses a richer site universe (province anchors, micro/shape control sites, physical barriers, coast-interior sites, and historical-source sites), while the retained V15 control-site builder supplies province anchors. The probe therefore correctly reports seed divergence but is not itself an algorithm-equivalence test.
+
+A calibrated B4 probe has now been added on `codex/phase2.8-c-a2-edge-trace`. It captures the exact canonical site universe and feeds those same sites into V15's `powerCell()` with zero weights, then separately compares canonical/V15 physical authority classification at the nine known edges. This is still forensic-only and has no production impact.
+
 ## Near-term execution order
 
 1. Finish A1/A2/B/C root-cause proofs.
-2. For A2, reproduce the exact producer of `~2.27e-13` before comparing repair behavior again.
-3. Apply only the smallest proven migration change, candidate-side first where possible.
-4. Re-run PA-05/PA-10/PA-11 and the full 1586-province shadow comparison.
-5. Establish MW-02 authority consolidation as a controlled migration unit.
-6. Establish MW-01 DEM source-adapter migration as a separate unit.
-7. Reconcile GitHub/local refs only after the authoritative gate is green.
-8. Build the final branch disposition matrix.
+2. For A2, reproduce the exact historical producer of `~2.27e-13` from its artifact/fixture/version lineage.
+3. For B, complete calibrated B4 using the canonical seed universe; separate power-cell equivalence from physical-authority divergence.
+4. Apply only the smallest proven migration change, candidate-side first where possible.
+5. Re-run PA-05/PA-10/PA-11 and the full 1586-province shadow comparison.
+6. Establish MW-02 authority consolidation as a controlled migration unit.
+7. Establish MW-01 DEM source-adapter migration as a separate unit.
+8. Reconcile GitHub/local refs only after the authoritative gate is green.
+9. Build the final branch disposition matrix.
 
 ## MW-02 authority lineage
 
