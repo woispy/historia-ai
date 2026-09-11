@@ -525,7 +525,7 @@ function createGeometryAsset(metadata, polygons) {
   };
 }
 
-export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
+function buildSites(sourceRegions = []) {
   const sites = [];
   const seen = new Set();
   addAnchorSites(sites, seen);
@@ -534,6 +534,11 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
   addPhysicalBarrierSites(sites, seen);
   addCoastInteriorSites(sites, seen);
   addSourceShapeSites(sites, seen, sourceRegions);
+  return sites;
+}
+
+export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
+  const sites = buildSites(sourceRegions);
 
   const polygonsByProvince = Object.fromEntries(
     ANATOLIA_PROVINCE_METADATA.map((metadata) => [metadata.id, []]),
@@ -588,6 +593,37 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
     provinces,
     geometries,
   };
+}
+
+// Forensic-only raw-stage introspection. Normal production callers continue to
+// use buildAnatoliaPhase2DAssets() unchanged; this helper exposes the exact
+// pre-filter Voronoi cells for one province so historical area collapses can be
+// attributed to a concrete stage rather than inferred from exported geometry.
+export function traceAnatoliaPhase2DProvince(provinceId, sourceRegions = []) {
+  const sites = buildSites(sourceRegions);
+  const cells = [];
+  for (let siteIndex = 0; siteIndex < sites.length; siteIndex += 1) {
+    if (sites[siteIndex].provinceId !== provinceId) continue;
+    const raw = buildVoronoiCell(siteIndex, sites);
+    const rounded = raw.length >= 3 ? roundPolygon(raw) : [];
+    cells.push({
+      siteIndex,
+      site: sites[siteIndex],
+      raw,
+      rawArea: polygonArea(raw),
+      centroid: raw.length >= 3 ? polygonCentroid(raw) : null,
+      centroidPhysicalLand: raw.length >= 3 ? isPhysicalLandPoint(polygonCentroid(raw)) : false,
+      rawAllPhysicalLand: raw.length >= 3 ? raw.every((point) => isPhysicalLandPoint(point)) : false,
+      rawAcceptedByBuilder: raw.length >= 3
+        && polygonArea(raw) >= 0.00005
+        && isPhysicalLandPoint(polygonCentroid(raw))
+        && raw.every((point) => isPhysicalLandPoint(point)),
+      rounded,
+      roundedArea: polygonArea(rounded),
+      roundedAllPhysicalLand: rounded.length >= 3 ? rounded.every((point) => isPhysicalLandPoint(point)) : false,
+    });
+  }
+  return { provinceId, siteCount: sites.length, politicalSiteCount: sites.filter((site) => Boolean(site.provinceId)).length, cells };
 }
 
 export function isAnatoliaGeometryPoint(point) {

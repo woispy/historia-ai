@@ -1,0 +1,12 @@
+import assert from "node:assert/strict";
+import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
+import { buildAnatoliaPhase2DAssets, isPhysicalLandPoint } from "../historical-gis/AnatoliaPhase2DGeometryBuilder.js";
+const target="pontus-amisos";
+const result=buildAnatoliaPhase2DAssets([]);
+const metadata=ANATOLIA_PROVINCE_METADATA.find((x)=>x.id===target);
+const geometry=result.geometries.find((x)=>x.identity?.provinceId===target);
+assert.ok(metadata&&geometry&&geometry.polygons.length);
+const area=(p)=>Math.abs(p.reduce((s,a,i)=>{const b=p[(i+1)%p.length];return s+a[0]*b[1]-b[0]*a[1]},0))/2;
+const edgeStats=(p)=>{const e=p.map((a,i)=>{const b=p[(i+1)%p.length];return Math.hypot(b[0]-a[0],b[1]-a[1])});return {minEdge:Math.min(...e),maxEdge:Math.max(...e)}};
+const round=(p)=>p.map(([x,y])=>[Number(x.toFixed(5)),Number(y.toFixed(5))]);
+console.log(JSON.stringify({phase:"A2 canonical stage trace",target,metadataCentroid:metadata.centroid,builder:{siteCount:result.siteCount,politicalSiteCount:result.politicalSiteCount,fallbackProvinceCount:result.fallbackProvinceCount},polygons:geometry.polygons.map((p,index)=>({index,vertexCount:p.length,area:area(p),...edgeStats(p),duplicateVertices:p.length-new Set(p.map(String)).size,allPhysical:p.every(isPhysicalLandPoint),roundedArea:area(round(p)),roundedVertexCount:round(p).length,roundedVertices:round(p)}))},null,2));
