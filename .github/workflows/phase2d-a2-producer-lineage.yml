@@ -42,13 +42,24 @@ jobs:
           cat forensic-output/a2-producer-lineage-v3.json
           if [ -s forensic-output/a2-producer-lineage-v3.stderr ]; then cat forensic-output/a2-producer-lineage-v3.stderr; fi
           exit $status
-      - name: Upload A2 producer lineage artifact
+      - name: Run A2 counterfactual checkpoints
+        id: counterfactual
+        continue-on-error: true
+        run: |
+          node tools/tests/phase2d-a2-counterfactual-land-halfplane.mjs > forensic-output/a2-counterfactual.json 2> forensic-output/a2-counterfactual.stderr
+          status=$?
+          cat forensic-output/a2-counterfactual.json
+          if [ -s forensic-output/a2-counterfactual.stderr ]; then cat forensic-output/a2-counterfactual.stderr; fi
+          exit $status
+      - name: Upload A2 forensic artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phase2d-a2-producer-lineage-v3
+          name: phase2d-a2-producer-lineage-combined
           path: |
             forensic-output/a2-producer-lineage-v3.json
             forensic-output/a2-producer-lineage-v3.stderr
+            forensic-output/a2-counterfactual.json
+            forensic-output/a2-counterfactual.stderr
           if-no-files-found: warn
           retention-days: 7
