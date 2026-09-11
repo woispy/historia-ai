@@ -150,8 +150,11 @@ export function resolvePhysicalGeometryBoundaryPoint(point) {
   const shoreline = nearestLakeBoundaryPoint(point);
   const landBoundary = nearestBoundaryLandPoint(point);
 
+  // Lake-interior vertices are physically invalid, but when a recovery point
+  // is inside a real lake, the authoritative lake shoreline is the intended
+  // boundary. Do not let the enclosing land polygon outrank that shoreline.
   if (isLakeShorelineRecoveryCandidate(point, shoreline)
-    && shoreline.distance <= landBoundary.distance) {
+    && (isLakeInteriorPoint(point) || shoreline.distance <= landBoundary.distance)) {
     return [...shoreline.point];
   }
 
@@ -168,7 +171,10 @@ export function isPhysicalGeometryBoundaryPoint(point) {
 }
 
 export function isFinalPhysicalGeometryBoundaryPoint(point) {
-  return isPhysicalLandPoint(point);
+  // Final geometry may use an authoritative lake shoreline, but never a lake
+  // interior. This preserves the support-vs-final distinction in the authority
+  // contract while allowing recovered real shorelines to survive normalization.
+  return isPhysicalLandPoint(point) || isLakeBoundaryPoint(point);
 }
 
 export function resolveGeometryAnchor(provinceId, sourceAnchor) {
