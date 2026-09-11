@@ -95,6 +95,25 @@ jobs:
           path: forensic-output/b1-b2-b3-9edge.json
           if-no-files-found: warn
           retention-days: 7
+      - name: Run B4 calibrated seed-universe equivalence probe
+        id: b4_probe
+        continue-on-error: true
+        env:
+          CANONICAL_ROOT: /tmp/historia-ai-canonical
+        run: |
+          mkdir -p forensic-output
+          node tools/tests/phase2d-v15-b4-calibrated-seed-authority.mjs > forensic-output/b4-calibrated-seed-authority.json
+          status=$?
+          cat forensic-output/b4-calibrated-seed-authority.json
+          exit $status
+      - name: Upload B4 machine-readable artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2d-v15-b4-calibrated-seed-authority
+          path: forensic-output/b4-calibrated-seed-authority.json
+          if-no-files-found: warn
+          retention-days: 7
       - name: Preserve expected forensic failure status
         if: steps.raw_probe.outcome == 'failure'
         run: echo 'Raw V15 forensic probe reproduced the expected native failure; comparison probes completed independently.'
