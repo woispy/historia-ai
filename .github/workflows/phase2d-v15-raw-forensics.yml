@@ -1,5 +1,7 @@
 name: Phase 2D V15 Raw Forensics
 
+# A2 historical builder lineage forensic trigger.
+
 on:
   push:
     branches:
@@ -26,10 +28,6 @@ jobs:
         run: npm ci
       - name: Generate required hydrography runtime fixture
         run: npm run build:assets
-      - name: Run V15 raw/serialized forensic probe
-        id: raw_probe
-        continue-on-error: true
-        run: node tools/tests/phase2d-v15-raw-forensics.mjs
       - name: Fetch canonical production branch
         run: git fetch --no-tags origin 6b7424125eee4a1c72925b7a1780c68e695e9ba3 && git worktree add --detach /tmp/historia-ai-canonical 6b7424125eee4a1c72925b7a1780c68e695e9ba3
       - name: Provision canonical generated hydrography fixture
@@ -67,8 +65,6 @@ jobs:
       - name: Run A2 Amisos edge transformation trace
         id: a2_trace
         continue-on-error: true
-        env:
-          CANONICAL_ROOT: /tmp/historia-ai-canonical
         run: |
           mkdir -p forensic-output
           node tools/tests/phase2d-v15-a2-amisos-edge-trace.mjs > forensic-output/a2-amisos-edge-trace.json
@@ -78,8 +74,6 @@ jobs:
       - name: Run A2 V15 source-stage divergence probe
         id: a2_source
         continue-on-error: true
-        env:
-          CANONICAL_ROOT: /tmp/historia-ai-canonical
         run: |
           mkdir -p forensic-output
           node tools/tests/phase2d-v15-a2-source-divergence.mjs > forensic-output/a2-source-divergence.json
@@ -105,14 +99,10 @@ jobs:
       - name: Run V15 authority comparison probe
         run: node tools/tests/phase2d-v15-authority-probe.mjs
       - name: Run canonical geometry comparison probe
-        env:
-          CANONICAL_ROOT: /tmp/historia-ai-canonical
         run: node tools/tests/phase2d-v15-canonical-geometry-probe.mjs
       - name: Run B1 B2 B3 nine-edge divergence probe
         id: b123_probe
         continue-on-error: true
-        env:
-          CANONICAL_ROOT: /tmp/historia-ai-canonical
         run: |
           mkdir -p forensic-output
           node tools/tests/phase2d-v15-b1-b2-b3-9edge-probe.mjs > forensic-output/b1-b2-b3-9edge.json
@@ -130,19 +120,11 @@ jobs:
       - name: Run B4 calibrated seed-universe equivalence probe
         id: b4_probe
         continue-on-error: true
-        env:
-          CANONICAL_ROOT: /tmp/historia-ai-canonical
         run: |
           mkdir -p forensic-output
           node tools/tests/phase2d-v15-b4-calibrated-seed-authority.mjs > forensic-output/b4-calibrated-seed-authority.json 2> forensic-output/b4-calibrated-seed-authority.stderr
           status=$?
-          if [ ! -s forensic-output/b4-calibrated-seed-authority.json ]; then
-            printf '{"probeStatus":"failed-before-summary","exitCode":%s,"stderr":' "$status" > forensic-output/b4-calibrated-seed-authority.json
-            python -c 'import json,sys; print(json.dumps(open(sys.argv[1]).read()), end="")' forensic-output/b4-calibrated-seed-authority.stderr >> forensic-output/b4-calibrated-seed-authority.json
-            printf '}\n' >> forensic-output/b4-calibrated-seed-authority.json
-          fi
           cat forensic-output/b4-calibrated-seed-authority.json
-          if [ -s forensic-output/b4-calibrated-seed-authority.stderr ]; then echo '--- B4 stderr ---'; cat forensic-output/b4-calibrated-seed-authority.stderr; fi
           exit $status
       - name: Upload B4 machine-readable artifact
         if: always()
@@ -157,19 +139,11 @@ jobs:
       - name: Run B5 raw-cell lineage probe
         id: b5_probe
         continue-on-error: true
-        env:
-          CANONICAL_ROOT: /tmp/historia-ai-canonical
         run: |
           mkdir -p forensic-output
           node tools/tests/phase2d-v15-b5-raw-cell-lineage.mjs > forensic-output/b5-raw-cell-lineage.json 2> forensic-output/b5-raw-cell-lineage.stderr
           status=$?
-          if [ ! -s forensic-output/b5-raw-cell-lineage.json ]; then
-            printf '{"probeStatus":"failed-before-summary","exitCode":%s,"stderr":' "$status" > forensic-output/b5-raw-cell-lineage.json
-            python -c 'import json,sys; print(json.dumps(open(sys.argv[1]).read()), end="")' forensic-output/b5-raw-cell-lineage.stderr >> forensic-output/b5-raw-cell-lineage.json
-            printf '}\n' >> forensic-output/b5-raw-cell-lineage.json
-          fi
           cat forensic-output/b5-raw-cell-lineage.json
-          if [ -s forensic-output/b5-raw-cell-lineage.stderr ]; then echo '--- B5 stderr ---'; cat forensic-output/b5-raw-cell-lineage.stderr; fi
           exit $status
       - name: Upload B5 machine-readable artifact
         if: always()
@@ -181,6 +155,3 @@ jobs:
             forensic-output/b5-raw-cell-lineage.stderr
           if-no-files-found: warn
           retention-days: 7
-      - name: Preserve expected forensic failure status
-        if: steps.raw_probe.outcome == 'failure'
-        run: echo 'Raw V15 forensic probe reproduced the expected native failure; comparison probes completed independently.'
