@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 
 const CANONICAL_ROOT = process.env.CANONICAL_ROOT;
 assert.ok(CANONICAL_ROOT, "CANONICAL_ROOT is required");
@@ -49,51 +50,41 @@ function firstInvalid(edge, predicate) {
   return null;
 }
 
-async function loadCanonicalInstrumented() {
+function captureCanonicalUniverse() {
   const sourcePath = path.join(CANONICAL_ROOT, "tools/historical-gis/AnatoliaPhase2DGeometryBuilder.js");
   const source = fs.readFileSync(sourcePath, "utf8");
-  let instrumented = `const __B4 = { sites: [], records: [] };\n${source}`;
-
-  instrumented = instrumented.replace(
-    /function buildVoronoiCell\(/,
-    "function __B4OriginalBuildVoronoiCell("
+  const marker = "  const polygonsByProvince = Object.fromEntries(\n";
+  const injected = source.replace(
+    marker,
+    "  globalThis.__B4_CAPTURED_SITES = sites.map((site) => ({ ...site, point: [...site.point] }));\n  globalThis.__B4_CAPTURED_RECORDS = [];\n\n" + marker,
+  ).replace(
+    "    const cell = buildVoronoiCell(siteIndex, sites);\n",
+    "    const cell = buildVoronoiCell(siteIndex, sites);\n    if (sites[siteIndex]?.provinceId) globalThis.__B4_CAPTURED_RECORDS.push({ siteIndex, site: sites[siteIndex], cell });\n",
+  ).replace(
+    "export { isPhysicalLandPoint };",
+    "export { isPhysicalLandPoint };\nexport function __b4GetCapture() { return { sites: globalThis.__B4_CAPTURED_SITES ?? [], records: globalThis.__B4_CAPTURED_RECORDS ?? [] }; }",
   );
-  instrumented += `\nfunction buildVoronoiCell(siteIndex, sites, ...rest) {\n  __B4.sites = sites;\n  const cell = __B4OriginalBuildVoronoiCell(siteIndex, sites, ...rest);\n  if (sites[siteIndex]?.provinceId) __B4.records.push({ siteIndex, site: sites[siteIndex], cell });\n  return cell;\n}\n`;
-  instrumented = instrumented.replace(
-    /export \{([^}]+)\};?\s*$/m,
-    (full, exports) => `export { ${exports}, __B4, buildVoronoiCell };\n`,
-  );
-
+  assert.notEqual(injected, source, "B4 instrumentation did not modify canonical source");
   const tempPath = path.join(path.dirname(sourcePath), `.b4-canonical.${process.pid}.mjs`);
-  fs.writeFileSync(tempPath, instrumented, "utf8");
+  fs.writeFileSync(tempPath, injected, "utf8");
   try {
-    return await import(`file://${tempPath}?b4=${process.pid}`);
+    const code = `import * as m from ${JSON.stringify(`file://${tempPath}?b4=${process.pid}`)}; const r=m.buildAnatoliaPhase2DAssets([]); process.stdout.write(JSON.stringify(m.__b4GetCapture()));`;
+    const child = spawnSync(process.execPath, ["--input-type=module", "-e", code], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+    if (child.status !== 0) throw new Error(child.stderr || `canonical capture exited ${child.status}`);
+    return JSON.parse(child.stdout);
   } finally {
     fs.rmSync(tempPath, { force: true });
   }
 }
 
-const canonical = await loadCanonicalInstrumented();
-const exportedBuilders = Object.entries(canonical)
-  .filter(([name, value]) => typeof value === "function" && /build|generate|create/i.test(name))
-  .map(([name, value]) => [name, value]);
-
-const invocationErrors = [];
-for (const [name, fn] of exportedBuilders) {
-  try {
-    await fn();
-    if (canonical.__B4.sites.length > 0) break;
-  } catch (error) {
-    invocationErrors.push({ name, message: String(error?.message ?? error) });
-  }
-}
-
-assert.ok(canonical.__B4.sites.length > 0, `Canonical site universe was not captured. Exported builders: ${exportedBuilders.map(([name]) => name).join(", ")}; errors: ${JSON.stringify(invocationErrors)}`);
+const canonical = captureCanonicalUniverse();
+const sites = canonical.sites;
+const canonicalRecords = canonical.records;
+assert.ok(sites.length > 0, "Canonical site universe is empty");
 
 const v15 = await import("../historical-gis/AnatoliaPhase2DGeometryBuilderV15.js");
 const authority = await import("../historical-gis/recovery/physical-land-authority.mjs");
-const sites = canonical.__B4.sites;
-const zeroWeights = Object.fromEntries(sites.map((site) => [site.provinceId, 0]));
+const zeroWeights = Object.fromEntries(sites.map((site) => [site.provinceId ?? `__site_${sites.indexOf(site)}`, 0]));
 const v15Records = [];
 for (let siteIndex = 0; siteIndex < sites.length; siteIndex += 1) {
   const cell = v15.powerCell(siteIndex, sites, zeroWeights);
@@ -101,9 +92,9 @@ for (let siteIndex = 0; siteIndex < sites.length; siteIndex += 1) {
 }
 
 const matrix = FAILURE_EDGES.map((edge) => {
-  const canonicalHit = findEdge(edge, canonical.__B4.records);
+  const canonicalHit = findEdge(edge, canonicalRecords);
   const v15Hit = findEdge(edge, v15Records);
-  const canonicalAuthority = firstInvalid(edge, canonical.isPhysicalLandPoint);
+  const canonicalAuthority = firstInvalid(edge, canonical.isPhysicalLandPoint ?? (() => true));
   const v15Authority = firstInvalid(edge, authority.isPhysicalGeometryBoundaryPoint);
   return {
     ...edge,
