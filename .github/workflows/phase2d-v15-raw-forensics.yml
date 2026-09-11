@@ -29,28 +29,28 @@ jobs:
         run: git fetch --no-tags origin 6b7424125eee4a1c72925b7a1780c68e695e9ba3 && git worktree add --detach /tmp/historia-ai-canonical 6b7424125eee4a1c72925b7a1780c68e695e9ba3
       - name: Provision canonical generated hydrography fixture
         run: mkdir -p /tmp/historia-ai-canonical/src/map/data/generated && cp src/map/data/generated/anatolia-hydrography-10m.json /tmp/historia-ai-canonical/src/map/data/generated/anatolia-hydrography-10m.json
-      - name: Run C1 Pontus-Amasya Edge 3 authority matrix
-        id: c1_probe
+      - name: Run C2 controlled Pontus-Amasya Edge 3 semantics
+        id: c2_probe
         continue-on-error: true
         run: |
           mkdir -p forensic-output
-          node tools/tests/phase2d-v15-c-c1-amasya-edge3-matrix.mjs > forensic-output/c1-amasya-edge3-matrix.json 2> forensic-output/c1-amasya-edge3-matrix.stderr
+          node tools/tests/phase2d-v15-c-c2-amasya-edge3-semantics.mjs > forensic-output/c2-amasya-edge3-semantics.json 2> forensic-output/c2-amasya-edge3-semantics.stderr
           status=$?
-          if [ ! -s forensic-output/c1-amasya-edge3-matrix.json ]; then
-            printf '{"probeStatus":"failed-before-summary","exitCode":%s,"stderr":' "$status" > forensic-output/c1-amasya-edge3-matrix.json
-            python -c 'import json,sys; print(json.dumps(open(sys.argv[1]).read()), end="")' forensic-output/c1-amasya-edge3-matrix.stderr >> forensic-output/c1-amasya-edge3-matrix.json
-            printf '}\n' >> forensic-output/c1-amasya-edge3-matrix.json
+          if [ ! -s forensic-output/c2-amasya-edge3-semantics.json ]; then
+            printf '{"probeStatus":"failed-before-summary","exitCode":%s,"stderr":' "$status" > forensic-output/c2-amasya-edge3-semantics.json
+            python -c 'import json,sys; print(json.dumps(open(sys.argv[1]).read()), end="")' forensic-output/c2-amasya-edge3-semantics.stderr >> forensic-output/c2-amasya-edge3-semantics.json
+            printf '}\n' >> forensic-output/c2-amasya-edge3-semantics.json
           fi
-          cat forensic-output/c1-amasya-edge3-matrix.json
-          if [ -s forensic-output/c1-amasya-edge3-matrix.stderr ]; then cat forensic-output/c1-amasya-edge3-matrix.stderr; fi
+          cat forensic-output/c2-amasya-edge3-semantics.json
+          if [ -s forensic-output/c2-amasya-edge3-semantics.stderr ]; then cat forensic-output/c2-amasya-edge3-semantics.stderr; fi
           exit $status
-      - name: Upload C1 machine-readable artifact
+      - name: Upload C2 machine-readable artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phase2d-v15-c-c1-amasya-edge3-matrix
+          name: phase2d-v15-c-c2-amasya-edge3-semantics
           path: |
-            forensic-output/c1-amasya-edge3-matrix.json
-            forensic-output/c1-amasya-edge3-matrix.stderr
+            forensic-output/c2-amasya-edge3-semantics.json
+            forensic-output/c2-amasya-edge3-semantics.stderr
           if-no-files-found: warn
           retention-days: 7
