@@ -177,3 +177,4 @@ jobs:
           retention-days: 7
 
 # A2 lineage trigger: preserve all forensic probes above while forcing a fresh push event.
+# Fresh-run marker: execute the canonical-base 837 probe on this exact revision.
