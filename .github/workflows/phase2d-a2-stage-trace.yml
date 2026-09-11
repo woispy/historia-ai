@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - codex/phase2.8-c-a2-stage-trace
+  pull_request:
+    branches:
+      - integration/phase-a-h-production
   workflow_dispatch:
 
 permissions:
@@ -32,4 +35,3 @@ jobs:
           name: phase2d-a2-stage-trace
           path: a2-stage-trace.json
           retention-days: 7
-      # Forensic-only trigger: no production behavior change.
