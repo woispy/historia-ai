@@ -102,16 +102,27 @@ jobs:
           CANONICAL_ROOT: /tmp/historia-ai-canonical
         run: |
           mkdir -p forensic-output
-          node tools/tests/phase2d-v15-b4-calibrated-seed-authority.mjs > forensic-output/b4-calibrated-seed-authority.json
+          node tools/tests/phase2d-v15-b4-calibrated-seed-authority.mjs > forensic-output/b4-calibrated-seed-authority.json 2> forensic-output/b4-calibrated-seed-authority.stderr
           status=$?
+          if [ ! -s forensic-output/b4-calibrated-seed-authority.json ]; then
+            printf '{"probeStatus":"failed-before-summary","exitCode":%s,"stderr":' "$status" > forensic-output/b4-calibrated-seed-authority.json
+            python -c 'import json,sys; print(json.dumps(open(sys.argv[1]).read()), end="")' forensic-output/b4-calibrated-seed-authority.stderr >> forensic-output/b4-calibrated-seed-authority.json
+            printf '}\n' >> forensic-output/b4-calibrated-seed-authority.json
+          fi
           cat forensic-output/b4-calibrated-seed-authority.json
+          if [ -s forensic-output/b4-calibrated-seed-authority.stderr ]; then
+            echo '--- B4 stderr ---'
+            cat forensic-output/b4-calibrated-seed-authority.stderr
+          fi
           exit $status
       - name: Upload B4 machine-readable artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: phase2d-v15-b4-calibrated-seed-authority
-          path: forensic-output/b4-calibrated-seed-authority.json
+          path: |
+            forensic-output/b4-calibrated-seed-authority.json
+            forensic-output/b4-calibrated-seed-authority.stderr
           if-no-files-found: warn
           retention-days: 7
       - name: Preserve expected forensic failure status
