@@ -3,7 +3,7 @@ name: Phase 2D V15 Raw Forensics
 on:
   push:
     branches:
-      - codex/phase2.8-c-v15-raw-forensics
+      - codex/phase2.8-c-a2-edge-trace
   workflow_dispatch:
 
 permissions:
@@ -28,6 +28,23 @@ jobs:
         id: raw_probe
         continue-on-error: true
         run: node tools/tests/phase2d-v15-raw-forensics.mjs
+      - name: Run A2 Amisos edge transformation trace
+        id: a2_trace
+        continue-on-error: true
+        run: |
+          mkdir -p forensic-output
+          node tools/tests/phase2d-v15-a2-amisos-edge-trace.mjs > forensic-output/a2-amisos-edge-trace.json
+          status=$?
+          cat forensic-output/a2-amisos-edge-trace.json
+          exit $status
+      - name: Upload A2 Amisos edge trace artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2d-v15-a2-amisos-edge-trace
+          path: forensic-output/a2-amisos-edge-trace.json
+          if-no-files-found: warn
+          retention-days: 7
       - name: Run V15 authority comparison probe
         run: node tools/tests/phase2d-v15-authority-probe.mjs
       - name: Fetch canonical production branch
