@@ -1,0 +1,50 @@
+name: Phase 2D A2 Canonical Checkpoints
+
+on:
+  push:
+    branches:
+      - codex/phase2.8-c-a2-edge-trace
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checkpoints:
+    runs-on: ubuntu-latest
+    env:
+      CANONICAL_ROOT: /tmp/historia-ai-canonical
+      A2_CHECKPOINTS: '["837ec8dd2d878ceb227f609c3da481610b54d0db","353c893fa9307cfb6d47e51ff847c85eb34c9f34","3db105afb857be55e0ce7696f3d7e904185fc5f8","16c17706c436954eacb76b8262480388b40d673b","2cf87a306f77da687186385c5096198ceb8bb119","6b7424125eee4a1c72925b7a1780c68e695e9ba3"]'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Generate required hydrography runtime fixture
+        run: npm run build:assets
+      - name: Fetch canonical checkpoints
+        run: |
+          git fetch --no-tags origin 837ec8dd2d878ceb227f609c3da481610b54d0db 353c893fa9307cfb6d47e51ff847c85eb34c9f34 3db105afb857be55e0ce7696f3d7e904185fc5f8 16c17706c436954eacb76b8262480388b40d673b 2cf87a306f77da687186385c5096198ceb8bb119 6b7424125eee4a1c72925b7a1780c68e695e9ba3
+          git worktree add --detach "$CANONICAL_ROOT" 6b7424125eee4a1c72925b7a1780c68e695e9ba3
+          mkdir -p "$CANONICAL_ROOT/src/map/data/generated"
+          cp src/map/data/generated/anatolia-hydrography-10m.json "$CANONICAL_ROOT/src/map/data/generated/anatolia-hydrography-10m.json"
+      - name: Run focused A2 checkpoints
+        run: |
+          mkdir -p forensic-output
+          node tools/tests/phase2d-a2-canonical-checkpoint-runner.mjs > forensic-output/a2-canonical-checkpoints.json 2> forensic-output/a2-canonical-checkpoints.stderr
+          cat forensic-output/a2-canonical-checkpoints.json
+          if [ -s forensic-output/a2-canonical-checkpoints.stderr ]; then cat forensic-output/a2-canonical-checkpoints.stderr; fi
+      - name: Upload A2 checkpoint artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2d-a2-canonical-checkpoints
+          path: |
+            forensic-output/a2-canonical-checkpoints.json
+            forensic-output/a2-canonical-checkpoints.stderr
+          retention-days: 7
