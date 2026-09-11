@@ -1,7 +1,47 @@
 import assert from "node:assert/strict";
-import { ANATOLIA_PROVINCE_METADATA } from "../../src/map/data/AnatoliaProvinceMetadata.js";
-import { buildAnatoliaPhase2DAssets, isPhysicalLandPoint } from "../historical-gis/AnatoliaPhase2DGeometryBuilder.js";
-const id="pontus-amisos"; const r=buildAnatoliaPhase2DAssets([]); const m=ANATOLIA_PROVINCE_METADATA.find(x=>x.id===id); const g=r.geometries.find(x=>x.identity?.provinceId===id); assert.ok(m&&g);
-const signed=(p)=>p.reduce((s,a,i)=>{const b=p[(i+1)%p.length];return s+a[0]*b[1]-b[0]*a[1]},0)/2; const round=(p)=>p.map(([x,y])=>[Number(x.toFixed(5)),Number(y.toFixed(5))]);
-const stats=(p)=>{const e=p.map((a,i)=>{const b=p[(i+1)%p.length];return Math.hypot(b[0]-a[0],b[1]-a[1])});return {n:p.length,signedArea:signed(p),area:Math.abs(signed(p)),minEdge:Math.min(...e),maxEdge:Math.max(...e),vertices:p}};
-console.log(JSON.stringify({phase:"A2 exact representation trace",target:id,metadataCentroid:m.centroid,builderSummary:{siteCount:r.siteCount,politicalSiteCount:r.politicalSiteCount,polygonCount:r.polygonCount,fallbackProvinceCount:r.fallbackProvinceCount},polygons:g.polygons.map((p,i)=>{const q=round(p);return {index:i,exported:stats(p),rounded:stats(q),allPhysical:p.every(x=>x.every(isPhysicalLandPoint)),vertexDelta:p.map((x,j)=>({i:j,dx:q[j][0]-x[0],dy:q[j][1]-x[1]}))}})},null,2));
+import { traceAnatoliaPhase2DProvince } from "../historical-gis/AnatoliaPhase2DGeometryBuilder.js";
+
+const id = "pontus-amisos";
+const trace = traceAnatoliaPhase2DProvince(id, []);
+assert.equal(trace.provinceId, id);
+assert.ok(trace.cells.length > 0, "expected at least one political cell for Pontus-Amisos");
+
+const stats = (polygon) => ({
+  vertexCount: polygon.length,
+  area: polygon.length >= 3
+    ? Math.abs(polygon.reduce((sum, point, index) => {
+      const next = polygon[(index + 1) % polygon.length];
+      return sum + point[0] * next[1] - next[0] * point[1];
+    }, 0) / 2)
+    : 0,
+  vertices: polygon,
+});
+
+const cells = trace.cells.map((cell) => ({
+  siteIndex: cell.siteIndex,
+  site: cell.site,
+  raw: stats(cell.raw),
+  rawArea: cell.rawArea,
+  centroid: cell.centroid,
+  centroidPhysicalLand: cell.centroidPhysicalLand,
+  rawAllPhysicalLand: cell.rawAllPhysicalLand,
+  rawAcceptedByBuilder: cell.rawAcceptedByBuilder,
+  rounded: stats(cell.rounded),
+  roundedArea: cell.roundedArea,
+  roundedAllPhysicalLand: cell.roundedAllPhysicalLand,
+}));
+
+const smallestRaw = [...cells].sort((a, b) => a.rawArea - b.rawArea)[0];
+const accepted = cells.filter((cell) => cell.rawAcceptedByBuilder && cell.roundedAllPhysicalLand);
+
+console.log(JSON.stringify({
+  phase: "A2 exact raw -> validation -> rounding stage trace",
+  target: id,
+  siteCount: trace.siteCount,
+  politicalSiteCount: trace.politicalSiteCount,
+  cellCount: cells.length,
+  smallestRawCell: smallestRaw,
+  acceptedCellCount: accepted.length,
+  acceptedCells: accepted,
+  historicalTinyAreaMatch: cells.filter((cell) => cell.rawArea < 1e-10 || cell.roundedArea < 1e-10),
+}, null, 2));
