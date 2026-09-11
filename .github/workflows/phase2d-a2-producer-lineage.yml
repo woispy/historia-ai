@@ -57,6 +57,15 @@ jobs:
           cat forensic-output/a2-counterfactual.json
           if [ -s forensic-output/a2-counterfactual.stderr ]; then cat forensic-output/a2-counterfactual.stderr; fi
           exit $status
+      - name: Run A2 authority isolation
+        id: authority_isolation
+        continue-on-error: true
+        run: |
+          node tools/tests/phase2d-a2-authority-isolation.mjs > forensic-output/a2-authority-isolation.json 2> forensic-output/a2-authority-isolation.stderr
+          status=$?
+          cat forensic-output/a2-authority-isolation.json
+          if [ -s forensic-output/a2-authority-isolation.stderr ]; then cat forensic-output/a2-authority-isolation.stderr; fi
+          exit $status
       - name: Upload A2 forensic artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -67,5 +76,7 @@ jobs:
             forensic-output/a2-producer-lineage-v3.stderr
             forensic-output/a2-counterfactual.json
             forensic-output/a2-counterfactual.stderr
+            forensic-output/a2-authority-isolation.json
+            forensic-output/a2-authority-isolation.stderr
           if-no-files-found: warn
           retention-days: 7
