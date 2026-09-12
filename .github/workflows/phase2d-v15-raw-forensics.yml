@@ -1,5 +1,7 @@
 name: Phase 2D V15 Raw Forensics
 
+# C9.2 forensic trigger: no production parameters or logic changed.
+
 on:
   push:
     branches:
