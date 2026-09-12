@@ -1,6 +1,6 @@
 name: Phase 2D V15 Raw Forensics
 
-# C9.2 forensic trigger: no production parameters or logic changed.
+# C10 forensic trigger: no production parameters or logic changed.
 
 on:
   push:
@@ -9,6 +9,7 @@ on:
       - codex/phase2.8-c-v15-site-pair-forensics-v2
       - codex/phase2.8-c-v15-site-pair-forensics-v3b
       - codex/phase2.8-c-v15-site-pair-forensics-v3b-c9
+      - codex/phase2.8-c-v15-site-pair-forensics-v3b-c10
   workflow_dispatch:
 
 permissions:
@@ -115,6 +116,24 @@ jobs:
         with:
           name: phase2d-v15-site-pair-forensics-v5-c9
           path: forensic-output/site-pair-forensics-v5-c9.*
+          if-no-files-found: warn
+      - name: Run B-C10 final polygon edge instrumentation
+        if: github.ref == 'refs/heads/codex/phase2.8-c-v15-site-pair-forensics-v3b-c10'
+        id: c10_probe
+        continue-on-error: true
+        run: |
+          mkdir -p forensic-output
+          set +e
+          node tools/tests/phase2d-v15-site-pair-forensics-v6-c10.mjs > forensic-output/site-pair-forensics-v6-c10.stdout.json 2> forensic-output/site-pair-forensics-v6-c10.stderr.log
+          status=$?
+          printf '%s\n' "$status" > forensic-output/site-pair-forensics-v6-c10.exit-code
+          exit "$status"
+      - name: Upload B-C10 final polygon edge artifact
+        if: always() && github.ref == 'refs/heads/codex/phase2.8-c-v15-site-pair-forensics-v3b-c10'
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2d-v15-site-pair-forensics-v6-c10
+          path: forensic-output/site-pair-forensics-v6-c10.*
           if-no-files-found: warn
       - name: Preserve expected forensic failure status
         if: steps.raw_probe.outcome == 'failure'
