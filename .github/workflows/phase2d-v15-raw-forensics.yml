@@ -6,6 +6,7 @@ on:
       - codex/phase2.8-c-v15-raw-forensics
       - codex/phase2.8-c-v15-site-pair-forensics-v2
       - codex/phase2.8-c-v15-site-pair-forensics-v3b
+      - codex/phase2.8-c-v15-site-pair-forensics-v3b-c9
   workflow_dispatch:
 
 permissions:
@@ -94,6 +95,24 @@ jobs:
         with:
           name: phase2d-v15-site-pair-forensics-v4
           path: forensic-output/site-pair-forensics-v4.*
+          if-no-files-found: warn
+      - name: Run B-C9 actual repair recursion instrumentation
+        if: github.ref == 'refs/heads/codex/phase2.8-c-v15-site-pair-forensics-v3b-c9'
+        id: c9_probe
+        continue-on-error: true
+        run: |
+          mkdir -p forensic-output
+          set +e
+          node tools/tests/phase2d-v15-site-pair-forensics-v5-c9.mjs > forensic-output/site-pair-forensics-v5-c9.stdout.json 2> forensic-output/site-pair-forensics-v5-c9.stderr.log
+          status=$?
+          printf '%s\n' "$status" > forensic-output/site-pair-forensics-v5-c9.exit-code
+          exit "$status"
+      - name: Upload B-C9 actual repair recursion artifact
+        if: always() && github.ref == 'refs/heads/codex/phase2.8-c-v15-site-pair-forensics-v3b-c9'
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2d-v15-site-pair-forensics-v5-c9
+          path: forensic-output/site-pair-forensics-v5-c9.*
           if-no-files-found: warn
       - name: Preserve expected forensic failure status
         if: steps.raw_probe.outcome == 'failure'
