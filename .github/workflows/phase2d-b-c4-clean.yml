@@ -67,7 +67,16 @@ jobs:
             > tools/tests/b-c6-transition-geometry.json \
             2> tools/tests/b-c6-transition-geometry.stderr.log
 
-      - name: Upload B-C4/B-C6 results
+      - name: Run B-C8 repair boundary segment trace
+        working-directory: forensic
+        env:
+          V15_ROOT: ${{ github.workspace }}/v15-source
+        run: |
+          node tools/tests/phase2d-v15-b-c8-repair-segment-trace.mjs \
+            > tools/tests/b-c8-repair-segment-trace.json \
+            2> tools/tests/b-c8-repair-segment-trace.stderr.log
+
+      - name: Upload B-C4/B-C6/B-C8 results
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
@@ -77,5 +86,8 @@ jobs:
             forensic/tools/tests/b-c4-nicomedia-nicaea-replay.stderr.log
             forensic/tools/tests/b-c6-transition-geometry.json
             forensic/tools/tests/b-c6-transition-geometry.stderr.log
+            forensic/tools/tests/b-c8-repair-segment-trace.json
+            forensic/tools/tests/b-c8-repair-segment-trace.stderr.log
             forensic/tools/tests/phase2d-v15-b-c4-nicomedia-nicaea-replay.mjs
             forensic/tools/tests/phase2d-v15-b-c6-transition-geometry.mjs
+            forensic/tools/tests/phase2d-v15-b-c8-repair-segment-trace.mjs
