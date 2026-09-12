@@ -1,6 +1,6 @@
 name: Phase 2D V15 Raw Forensics
 
-# C10 forensic trigger: no production parameters or logic changed.
+# C11 forensic trigger: no production parameters or logic changed.
 
 on:
   push:
@@ -59,7 +59,7 @@ jobs:
         with:
           name: phase2d-v15-site-pair-forensics-v2
           path: forensic-output/site-pair-forensics-v2.json
-      - name: Run direct canonical site-pair provenance v3 probe
+      - name: Run direct canonical site-pair provenance v3
         if: github.ref == 'refs/heads/codex/phase2.8-c-v15-site-pair-forensics-v3b'
         id: v3_probe
         continue-on-error: true
@@ -134,6 +134,24 @@ jobs:
         with:
           name: phase2d-v15-site-pair-forensics-v6-c10
           path: forensic-output/site-pair-forensics-v6-c10.*
+          if-no-files-found: warn
+      - name: Run B-C11 normalize rejection instrumentation
+        if: github.ref == 'refs/heads/codex/phase2.8-c-v15-site-pair-forensics-v3b-c10'
+        id: c11_probe
+        continue-on-error: true
+        run: |
+          mkdir -p forensic-output
+          set +e
+          node tools/tests/phase2d-v15-site-pair-forensics-v7-c11.mjs > forensic-output/site-pair-forensics-v7-c11.stdout.json 2> forensic-output/site-pair-forensics-v7-c11.stderr.log
+          status=$?
+          printf '%s\n' "$status" > forensic-output/site-pair-forensics-v7-c11.exit-code
+          exit "$status"
+      - name: Upload B-C11 normalize rejection artifact
+        if: always() && github.ref == 'refs/heads/codex/phase2.8-c-v15-site-pair-forensics-v3b-c10'
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2d-v15-site-pair-forensics-v7-c11
+          path: forensic-output/site-pair-forensics-v7-c11.*
           if-no-files-found: warn
       - name: Preserve expected forensic failure status
         if: steps.raw_probe.outcome == 'failure'
