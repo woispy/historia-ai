@@ -57,6 +57,7 @@ function captureCanonical() {
 function diagnoseRepair(edge, v15) {
   const stats = { calls: 0, successLeaves: 0, depthLimit: 0, resolverNull: 0, endpointCollapse: 0, invalidEdgeLeaves: 0, maxDepthReached: 0 };
   const resolverSamples = [];
+  const progress = [];
   function edgeIsPhysical(start, end) {
     for (let index = 0; index <= FINAL_EDGE_SAMPLE_COUNT; index += 1) {
       if (!v15.isPhysicalGeometryBoundaryPoint(interpolate(start, end, index / FINAL_EDGE_SAMPLE_COUNT))) return false;
@@ -66,8 +67,9 @@ function diagnoseRepair(edge, v15) {
   function walk(start, end, depth) {
     stats.calls += 1;
     stats.maxDepthReached = Math.max(stats.maxDepthReached, depth);
+    const segmentLength = dist(start, end);
     if (edgeIsPhysical(start, end)) { stats.successLeaves += 1; return true; }
-    if (depth >= MAX_EDGE_REPAIR_DEPTH) { stats.depthLimit += 1; return false; }
+    if (depth >= MAX_EDGE_REPAIR_DEPTH) { stats.depthLimit += 1; progress.push({ depth, status: "depth-limit", start, end, segmentLength }); return false; }
     let invalidFraction = null;
     for (let index = 1; index < FINAL_EDGE_SAMPLE_COUNT; index += 1) {
       const fraction = index / FINAL_EDGE_SAMPLE_COUNT;
@@ -76,9 +78,12 @@ function diagnoseRepair(edge, v15) {
     if (invalidFraction === null) { stats.successLeaves += 1; return true; }
     const sample = interpolate(start, end, invalidFraction);
     const boundary = v15.resolvePhysicalGeometryBoundaryPoint(sample);
+    const resolved = boundary ? boundary.map((value) => Number(value.toFixed(7))) : null;
+    const leftLength = resolved ? dist(start, resolved) : null;
+    const rightLength = resolved ? dist(resolved, end) : null;
+    progress.push({ depth, status: boundary ? "resolved" : "resolver-null", start, end, segmentLength, invalidFraction, sample, boundary, resolved, leftLength, rightLength, maxChildLength: resolved ? Math.max(leftLength, rightLength) : null, progressRatio: resolved ? Math.max(leftLength, rightLength) / segmentLength : null });
     if (resolverSamples.length < 20) resolverSamples.push({ depth, fraction: invalidFraction, sample, boundary });
     if (!boundary) { stats.resolverNull += 1; return false; }
-    const resolved = boundary.map((value) => Number(value.toFixed(7)));
     if (dist(resolved, start) <= EPS || dist(resolved, end) <= EPS) { stats.endpointCollapse += 1; return false; }
     const left = walk(start, resolved, depth + 1);
     const right = walk(resolved, end, depth + 1);
@@ -86,7 +91,7 @@ function diagnoseRepair(edge, v15) {
     return true;
   }
   const result = walk(edge.start, edge.end, 0);
-  return { result, stats, resolverSamples };
+  return { result, stats, resolverSamples, progress };
 }
 
 const v15 = await instrumentV15();
