@@ -27,12 +27,13 @@ async function loadInstrumentedV15() {
   );
   assert.notEqual(instrumented, `${prelude}${source}`, "C10 failed to locate production polygon validation block");
 
-  // The production builder already owns its export declaration. Remove that
-  // declaration from the temporary module, then add exactly one forensic export.
+  // buildAnatoliaPhase2DAssets is already exported by the production source.
+  // Replace only the trailing secondary export so the temporary module adds __C10
+  // without re-exporting an already-exported binding.
   const exportPattern = /export\s*\{[\s\S]*?\};\s*$/m;
   const withoutProductionExport = instrumented.replace(exportPattern, "");
   assert.notEqual(withoutProductionExport, instrumented, "C10 failed to locate production export declaration");
-  instrumented = `${withoutProductionExport}\nexport { isPhysicalLandPoint, __C10, buildAnatoliaPhase2DAssets };\n`;
+  instrumented = `${withoutProductionExport}\nexport { isPhysicalLandPoint, __C10 };\n`;
 
   const tempPath = path.join(ROOT, `tools/historical-gis/.c10-v15-${process.pid}.mjs`);
   fs.writeFileSync(tempPath, instrumented, "utf8");
