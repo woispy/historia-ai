@@ -5,6 +5,10 @@ on:
   push:
     branches:
       - codex/phase2.8-c-b-c4-replay-canonical
+  pull_request:
+    branches:
+      - integration/phase-a-h-production
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 permissions:
