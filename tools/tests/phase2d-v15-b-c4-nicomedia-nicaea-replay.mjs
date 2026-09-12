@@ -4,7 +4,9 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 
 const CANONICAL_ROOT = process.env.CANONICAL_ROOT;
+const V15_ROOT = process.env.V15_ROOT;
 assert.ok(CANONICAL_ROOT, "CANONICAL_ROOT is required");
+assert.ok(V15_ROOT, "V15_ROOT is required");
 const FAILURE_EDGES = [
   { caseId: "B-01", provinceId: "bithynia-nicomedia", start: [29.87953, 40.72476], end: [29.88817, 40.72993] },
   { caseId: "B-02", provinceId: "bithynia-nicomedia", start: [29.88817, 40.72993], end: [29.91915, 40.71851] },
@@ -23,10 +25,10 @@ const area = (poly) => Math.abs(poly.reduce((s, p, i) => { const q = poly[(i + 1
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 
 async function instrumentV15() {
-  const sourcePath = path.join(CANONICAL_ROOT, "tools/historical-gis/AnatoliaPhase2DGeometryBuilderV15.js");
+  const sourcePath = path.join(V15_ROOT, "tools/historical-gis/AnatoliaPhase2DGeometryBuilderV15.js");
   const source = fs.readFileSync(sourcePath, "utf8");
   const marker = "function buildPartition(sites, weights) {";
-  const injected = source.replace(marker, "export { powerCell, repairPhysicalEdge, normalizePhysicalBoundary, edgeOnPhysicalLand, isPhysicalGeometryBoundaryPoint };\n\n" + marker);
+  const injected = source.replace(marker, "export { powerCell, repairPhysicalEdge, normalizePhysicalBoundary, edgeOnPhysicalLand, isPhysicalGeometryBoundaryPoint, resolvePhysicalGeometryBoundaryPoint };\n\n" + marker);
   assert.notEqual(injected, source, "V15 instrumentation failed");
   const temp = path.join(path.dirname(sourcePath), `.b-c4-v15.${process.pid}.mjs`);
   fs.writeFileSync(temp, injected, "utf8");
