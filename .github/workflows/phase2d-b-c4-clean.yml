@@ -48,11 +48,6 @@ jobs:
           mkdir -p v15-source/src/map/data/generated
           cp canonical/src/map/data/generated/anatolia-hydrography-10m.json v15-source/src/map/data/generated/anatolia-hydrography-10m.json
 
-      - name: Provision generated hydrography fixture into canonical baseline
-        run: |
-          mkdir -p canonical/src/map/data/generated
-          cp canonical/src/map/data/generated/anatolia-hydrography-10m.json canonical/src/map/data/generated/anatolia-hydrography-10m.json
-
       - name: Run B-C4 observational replay
         working-directory: forensic
         env:
