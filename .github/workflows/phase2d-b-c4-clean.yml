@@ -1,0 +1,40 @@
+name: Phase 2D B-C4 Clean Forensic Replay
+
+on:
+  push:
+    branches:
+      - codex/phase2.8-c-b-c4-clean
+  workflow_dispatch:
+
+jobs:
+  b-c4-clean-replay:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout canonical baseline
+        uses: actions/checkout@v4
+        with:
+          ref: 6b7424125eee4a1c72925b7a1780c68e695e9ba3
+          path: canonical
+
+      - name: Checkout forensic branch
+        uses: actions/checkout@v4
+        with:
+          path: forensic
+
+      - name: Prepare canonical environment
+        working-directory: canonical
+        run: npm ci
+
+      - name: Run B-C4 observational replay
+        working-directory: forensic
+        env:
+          CANONICAL_ROOT: ${{ github.workspace }}/canonical
+        run: node tools/tests/phase2d-v15-b-c4-nicomedia-nicaea-replay.mjs
+
+      - name: Upload B-C4 result
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2d-b-c4-clean-replay
+          path: |
+            tools/tests/b-c4-nicomedia-nicaea-replay.json
+            tools/tests/b-c4-nicomedia-nicaea-replay.stderr.log
