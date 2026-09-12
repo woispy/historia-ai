@@ -33,7 +33,7 @@ async function loadInstrumentedV15() {
 
   instrumented = instrumented.replace(
     "export { isPhysicalLandPoint };",
-    "export { __C9, repairPhysicalEdge, buildAnatoliaPhase2DAssets };",
+    "export { isPhysicalLandPoint, __C9, repairPhysicalEdge };",
   );
   assert.notEqual(instrumented, `${prelude}${source}`, "C9 export instrumentation did not apply");
 
@@ -58,7 +58,7 @@ try {
 }
 
 const allCalls = mod.__C9.calls;
-assert.ok(allCalls.length > 0, "C9.1 captured no production repairPhysicalEdge calls from buildAnatoliaPhase2DAssets");
+assert.ok(allCalls.length > 0, `C9.3 captured no production repairPhysicalEdge calls from buildAnatoliaPhase2DAssets; builderError=${builderError ?? "none"}`);
 
 const transitions = mod.__C9.transitions;
 const maxDepth = allCalls.reduce((max, call) => Math.max(max, call.depth), -1);
@@ -71,7 +71,7 @@ console.log(JSON.stringify({
   baseline: "6b7424125eee4a1c72925b7a1780c68e695e9ba3",
   productionFunction: "tools/historical-gis/AnatoliaPhase2DGeometryBuilderV15.js::repairPhysicalEdge",
   productionCallSite: "normalizePhysicalBoundary() -> repairPhysicalEdge()",
-  builderReachedProductionCallSite: true,
+  builderReachedProductionCallSite: allCalls.length > 0,
   builderError,
   constants: { FINAL_EDGE_SAMPLE_COUNT: 64, MAX_EDGE_REPAIR_DEPTH: 12 },
   instrumentation: {
