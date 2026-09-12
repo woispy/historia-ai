@@ -33,12 +33,15 @@ jobs:
         working-directory: forensic
         env:
           CANONICAL_ROOT: ${{ github.workspace }}/canonical
-        run: node tools/tests/phase2d-v15-b-c4-nicomedia-nicaea-replay.mjs
+        run: |
+          node tools/tests/phase2d-v15-b-c4-nicomedia-nicaea-replay.mjs \
+            > tools/tests/b-c4-nicomedia-nicaea-replay.json \
+            2> tools/tests/b-c4-nicomedia-nicaea-replay.stderr.log
 
       - name: Upload B-C4 result
         uses: actions/upload-artifact@v4
         with:
           name: phase2d-b-c4-clean-replay
           path: |
-            tools/tests/b-c4-nicomedia-nicaea-replay.json
-            tools/tests/b-c4-nicomedia-nicaea-replay.stderr.log
+            forensic/tools/tests/b-c4-nicomedia-nicaea-replay.json
+            forensic/tools/tests/b-c4-nicomedia-nicaea-replay.stderr.log
