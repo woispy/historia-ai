@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "authority": "Copernicus DEM GLO-30",
+  "purpose": "build-data acquisition envelope only; not a province or coastline authority",
+  "crs": "EPSG:4326",
+  "west": 26,
+  "east": 45,
+  "south": 35,
+  "north": 43,
+  "tileSizeDegrees": 1,
+  "tileCount": 152,
+  "gridIdRule": "N/S latitude floor + E/W longitude floor, one-degree DGED cell",
+  "selectionRule": "cover the full Anadolu build envelope; individual tile availability is verified against the pinned CDSE dataset before promotion",
+  "dataset": "COP-DEM_GLO-30-DGED/2024_1"
+}

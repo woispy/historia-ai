@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "authority": "Copernicus DEM GLO-30",
+  "dataset": "COP-DEM_GLO-30-DGED",
+  "release": "2024_1",
+  "format": "GeoTIFF-DGED",
+  "horizontalCrs": "EPSG:4326",
+  "verticalCrs": "EPSG:3855",
+  "tileExtent": "1x1-degree-latitude-longitude",
+  "gridSpacingArcSeconds": 1,
+  "runtimeRule": "build-data-only",
+  "checksumRule": "sha256-required-per-tile",
+  "catalog": {
+    "provider": "Copernicus Data Space Ecosystem",
+    "collection": "CCM",
+    "datasetPath": "COP-DEM_GLO-30-DGED/2024_1",
+    "productType": "SAR_DGE_30_A4AD",
+    "catalogApi": "https://catalogue.dataspace.copernicus.eu/odata/v1/Products"
+  },
+  "tiles": []
+}

@@ -2,9 +2,8 @@ import { MapRendererContract } from "../MapRendererContract.js";
 import { createWebGpuBenchmarkTelemetry } from "../../runtime/BenchmarkGpuTelemetry.js";
 
 const ID_SCALE = 1 / 255;
-const ID_CLEAR = "vec4<f32>(0.0,0.0,0.0,0.0)";
 
-const CULL_WGSL = `
+export const CULL_WGSL = `
 struct Camera { viewProj: mat4x4<f32>, zoom: f32, _pad: vec3<f32> };
 @group(0) @binding(0) var<uniform> camera: Camera;
 @group(0) @binding(1) var<storage, read> tiles: array<u32>;
@@ -19,14 +18,14 @@ fn lodRange(province:u32)->vec2<u32>{ let b=province*4u; return vec2(lods[b],lod
 fn cull(@builtin(global_invocation_id) id:vec3<u32>) { let tileIndex=id.x; if(tileIndex>=arrayLength(&tiles)/6u){return;} let t=tileIndex*6u; let province=tiles[t+2u]; let b=province*4u; if(!visible(bounds[b],bounds[b+1u],bounds[b+2u],bounds[b+3u])){return;} let range=lodRange(province); if(tileIndex<range.x||tileIndex>=range.x+range.y){return;} let pointOffset=tiles[t]; let pointCount=tiles[t+1u]; if(pointCount<3u){return;} for(var k=1u;k+1u<pointCount;k=k+1u){ let dst=atomicAdd(&counter,3u); indices[dst]=pointOffset; indices[dst+1u]=pointOffset+k; indices[dst+2u]=pointOffset+k+1u; indexProvinceIds[dst]=province; indexProvinceIds[dst+1u]=province; indexProvinceIds[dst+2u]=province; } }
 `;
 
-const FINALIZE_WGSL = `
+export const FINALIZE_WGSL = `
 @group(0) @binding(0) var<storage, read_write> counter: atomic<u32>;
 @group(0) @binding(1) var<storage, read_write> indirect: array<u32>;
 @compute @workgroup_size(1)
 fn finalize(){ indirect[0]=atomicLoad(&counter); indirect[1]=1u; indirect[2]=0u; indirect[3]=0u; indirect[4]=0u; }
 `;
 
-const RENDER_WGSL = `
+export const RENDER_WGSL = `
 enable primitive_index;
 struct Camera { viewProj: mat4x4<f32> };
 @group(0) @binding(0) var<uniform> camera: Camera;
@@ -36,7 +35,7 @@ struct VsOut { @builtin(position) position: vec4<f32>, @location(0) @interpolate
 @fragment fn fs(in:VsOut, @builtin(primitive_index) primitiveIndex:u32)->@location(0) vec4<f32>{let x=f32(in.provinceId)+f32(primitiveIndex)*0.0;return vec4<f32>(0.18+fract(x*0.103),0.22+fract(x*0.067),0.28+fract(x*0.043),1.0);}
 `;
 
-const PICK_WGSL = `
+export const PICK_WGSL = `
 struct Camera { viewProj: mat4x4<f32>, pickNdc: vec2<f32>, _pad: vec2<f32> };
 @group(0) @binding(0) var<uniform> camera: Camera;
 @group(0) @binding(1) var<storage, read> indexProvinceIds: array<u32>;
@@ -45,8 +44,6 @@ struct VsOut { @builtin(position) position: vec4<f32>, @location(0) @interpolate
 @vertex fn vs(@location(0) p:vec2<f32>, @builtin(vertex_index) vertexIndex:u32)->VsOut{ var out:VsOut; var c=camera.viewProj*vec4<f32>(p,0.0,1.0); c.xy=c.xy-camera.pickNdc*c.w; out.position=c; out.provinceId=indexProvinceIds[vertexIndex]; return out; }
 @fragment fn fs(in:VsOut)->@location(0) vec4<f32>{return encode(in.provinceId);}
 `;
-
-export { CULL_WGSL, FINALIZE_WGSL, RENDER_WGSL, PICK_WGSL };
 
 export class WebGPUMapRenderer extends MapRendererContract {
   constructor(canvas){super();this.canvas=canvas;this.device=null;this.context=null;this.format=null;this.adapter=null;this.cullPipeline=null;this.finalizePipeline=null;this.renderPipeline=null;this.pickPipeline=null;this.cullBindGroup=null;this.finalizeBindGroup=null;this.renderBindGroup=null;this.pickBindGroup=null;this.buffers=null;this.assetSource=null;this.destroyed=false;this.running=false;this.frameRequest=0;this.camera={viewProj:new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]),zoom:1};this.selected=0;this.hovered=0;this.pickTexture=null;this.pickReadback=null;this.pickPending=false;this.lastPickId=null;this.telemetry=null;}

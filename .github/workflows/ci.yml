@@ -6,52 +6,27 @@ on:
     branches:
       - main
       - master
-      - feat/phase1-polish
-      - feat/phase1-historical-gis-runtime
-      - feat/phase1-map-camera-ui-polish
-      - agent/anatolia-byzantium-regional-layer
-      - feat/anatolia-historical-map-overhaul
-      - feat/anatolia-physical-geography
-      - feat/anatolia-map-label-water-overhaul
-      - feat/world-1300-map-foundation
-      - feat/phase2b-anatolia-reconstruction
-      - feat/phase2c-anatolia-geometry-refinement
-      - feat/phase2d-anatolia-province-geometry
-      - feat/phase2efgh-cartography
-      - feat/cartography-visual-refinement
-      - feat/map-gpu-texture-architecture
-      - feat/cartography-foundation-v2
+      - integration/**
+      - feat/**
+      - fix/**
+      - agent/**
   push:
     branches:
       - main
       - master
-      - integration/phase-a-h-production
-      - feat/living-game-foundation
-      - feat/phase1-polish
-      - feat/phase1-historical-gis-runtime
-      - feat/phase1-map-camera-ui-polish
-      - feat/phase1-save-menu-camera-ux
-      - fix/historical-gis-import-integrity
-      - agent/anatolia-byzantium-regional-layer
-      - feat/anatolia-historical-map-overhaul
-      - feat/anatolia-physical-geography
-      - feat/anatolia-map-label-water-overhaul
-      - feat/world-1300-map-foundation
-      - feat/anatolia-phase2-historical-gis
-      - feat/phase2b-anatolia-reconstruction
-      - feat/phase2c-anatolia-geometry-refinement
-      - feat/phase2d-anatolia-province-geometry
-      - feat/phase2efgh-cartography
-      - feat/cartography-visual-refinement
-      - feat/map-gpu-texture-architecture
-      - feat/phase3-runtime-engine
-      - feat/runtime-province-selection
-      - feat/historical-map-clean-foundation
-      - feat/historical-political-map-v1
+      - integration/**
+      - feat/**
+      - fix/**
+      - agent/**
+
+concurrency:
+  group: historia-ai-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -140,6 +115,20 @@ jobs:
         run: npm run test:p5-full-face-assembly
       - name: Run P6.1 province adjacency graph
         run: npm run test:p6-province-adjacency
+      - name: Run P6.1 candidate adjacency telemetry
+        run: npm run test:p6.1-province-adjacency
+      - name: Run P6.2 Copernicus GLO-30 acquisition contract
+        run: npm run test:p6.2-copernicus-dem-contract
+      - name: Run P6.2 GeoTIFF semantic validator
+        run: npm run test:p6.2-geotiff-validator
+      - name: Run P6.2 WGS84 elevation sampler
+        run: npm run test:p6.2-wgs84-elevation-sampler
+      - name: Run P6.2 River Evidence Adapter
+        run: npm run test:p6.2-river-evidence-adapter
+      - name: Run P6.2-B.1 River Evidence to Boundary Solver integration
+        run: npm run test:p6.2-river-evidence-integration
+      - name: Run P6.2 boundary solver foundation tests
+        run: npm run test:p6.2-boundary-solver
       - name: Run Anatolia seed + physical-cost stress
         run: npm run test:anatolia-seed-physical-cost-stress
       - name: Run adaptive ridge boundary quality
@@ -162,6 +151,10 @@ jobs:
         run: npm run test:cartography-visual
       - name: Run map rendering contract tests
         run: npm run test:map-rendering-contract
+      - name: Run GPU province pack integrity tests
+        run: npm run test:province-gpu-pack
+      - name: Build deterministic GPU province pack
+        run: npm run build:gpu-province-pack
       - name: Run province selection contract tests
         run: npm run test:province-selection
       - name: Run new game state tests
@@ -188,5 +181,9 @@ jobs:
         run: |
           git status --short
           git ls-files --others --exclude-standard
+      - name: Run 15K+ province scalability and diagnostics tests
+        run: npm run test:province-scale-15k
+      - name: Verify repository cleanliness after scalability tests
+        run: npm run test:repository-cleanliness
 
 # Validation trigger: rerun the full production gate chain on the current integration HEAD.
