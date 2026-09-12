@@ -19,6 +19,9 @@ const FAILURE_EDGES = [
   { caseId: "B-09", provinceId: "bithynia-nicaea", start: [29.91915, 40.71851], end: [29.88817, 40.72993] },
 ];
 const SAMPLE_COUNT = 64;
+const FINAL_EDGE_SAMPLE_COUNT = 64;
+const MAX_EDGE_REPAIR_DEPTH = 12;
+const EPS = 1e-7;
 const interpolate = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
 const edgeInvalids = (edge, predicate) => Array.from({ length: SAMPLE_COUNT + 1 }, (_, i) => i / SAMPLE_COUNT).map((t) => ({ fraction: t, point: interpolate(edge.start, edge.end, t) })).filter(({ point }) => !predicate(point));
 const area = (poly) => Math.abs(poly.reduce((s, p, i) => { const q = poly[(i + 1) % poly.length]; return s + p[0] * q[1] - q[0] * p[1]; }, 0) / 2);
@@ -51,6 +54,41 @@ function captureCanonical() {
   } finally { fs.rmSync(temp, { force: true }); }
 }
 
+function diagnoseRepair(edge, v15) {
+  const stats = { calls: 0, successLeaves: 0, depthLimit: 0, resolverNull: 0, endpointCollapse: 0, invalidEdgeLeaves: 0, maxDepthReached: 0 };
+  const resolverSamples = [];
+  function edgeIsPhysical(start, end) {
+    for (let index = 0; index <= FINAL_EDGE_SAMPLE_COUNT; index += 1) {
+      if (!v15.isPhysicalGeometryBoundaryPoint(interpolate(start, end, index / FINAL_EDGE_SAMPLE_COUNT))) return false;
+    }
+    return true;
+  }
+  function walk(start, end, depth) {
+    stats.calls += 1;
+    stats.maxDepthReached = Math.max(stats.maxDepthReached, depth);
+    if (edgeIsPhysical(start, end)) { stats.successLeaves += 1; return true; }
+    if (depth >= MAX_EDGE_REPAIR_DEPTH) { stats.depthLimit += 1; return false; }
+    let invalidFraction = null;
+    for (let index = 1; index < FINAL_EDGE_SAMPLE_COUNT; index += 1) {
+      const fraction = index / FINAL_EDGE_SAMPLE_COUNT;
+      if (!v15.isPhysicalGeometryBoundaryPoint(interpolate(start, end, fraction))) { invalidFraction = fraction; break; }
+    }
+    if (invalidFraction === null) { stats.successLeaves += 1; return true; }
+    const sample = interpolate(start, end, invalidFraction);
+    const boundary = v15.resolvePhysicalGeometryBoundaryPoint(sample);
+    if (resolverSamples.length < 20) resolverSamples.push({ depth, fraction: invalidFraction, sample, boundary });
+    if (!boundary) { stats.resolverNull += 1; return false; }
+    const resolved = boundary.map((value) => Number(value.toFixed(7)));
+    if (dist(resolved, start) <= EPS || dist(resolved, end) <= EPS) { stats.endpointCollapse += 1; return false; }
+    const left = walk(start, resolved, depth + 1);
+    const right = walk(resolved, end, depth + 1);
+    if (!left || !right) return false;
+    return true;
+  }
+  const result = walk(edge.start, edge.end, 0);
+  return { result, stats, resolverSamples };
+}
+
 const v15 = await instrumentV15();
 const canonical = captureCanonical();
 const sites = canonical.sites;
@@ -66,6 +104,7 @@ const rows = FAILURE_EDGES.map((edge) => {
   try { repair = v15.repairPhysicalEdge(edge.start, edge.end); } catch (e) { repairError = e?.message ?? String(e); }
   const resolvedStart = v15.resolvePhysicalGeometryBoundaryPoint(edge.start);
   const resolvedEnd = v15.resolvePhysicalGeometryBoundaryPoint(edge.end);
+  const diagnostic = diagnoseRepair(edge, v15);
   const candidateCells = nearest(mid).map((siteIndex) => {
     const raw = recordByIndex.get(siteIndex)?.cell ?? [];
     const cell = v15.powerCell(siteIndex, sites, zeroWeights);
@@ -73,7 +112,7 @@ const rows = FAILURE_EDGES.map((edge) => {
     try { normalized = v15.normalizePhysicalBoundary(raw); } catch (e) { normalizeError = e?.message ?? String(e); }
     return { siteIndex, site: sites[siteIndex], canonicalRawArea: area(raw), v15RawArea: area(cell), normalizedArea: normalized ? area(normalized) : 0, normalizedVertexCount: normalized?.length ?? 0, normalizedAccepted: Boolean(normalized && v15.edgeOnPhysicalLand(normalized)), normalizeError };
   });
-  return { ...edge, midpoint: mid, supportInvalidSamples: supportInvalid.length, firstSupportInvalid: supportInvalid[0] ?? null, resolvedStart, resolvedEnd, endpointResolutionSucceeded: Boolean(resolvedStart && resolvedEnd), v15RepairSucceeded: Boolean(repair), v15RepairVertexCount: repair?.length ?? 0, v15RepairError: repairError, candidateCells };
+  return { ...edge, midpoint: mid, supportInvalidSamples: supportInvalid.length, firstSupportInvalid: supportInvalid[0] ?? null, resolvedStart, resolvedEnd, endpointResolutionSucceeded: Boolean(resolvedStart && resolvedEnd), v15RepairSucceeded: Boolean(repair), v15RepairVertexCount: repair?.length ?? 0, v15RepairError: repairError, repairDiagnostic: diagnostic, candidateCells };
 });
 
 const summary = {
