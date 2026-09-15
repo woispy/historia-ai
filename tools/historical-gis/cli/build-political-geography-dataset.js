@@ -17,7 +17,7 @@ if (!sourcePath) {
   const readJson = async (name) => JSON.parse(await fs.readFile(path.join(fixtureDirectory, name), "utf8"));
   const sourceDocument = JSON.parse(await fs.readFile(sourcePath, "utf8"));
   try {
-    const { dataset, report } = buildPoliticalGeographyDataset({
+    const { report } = buildPoliticalGeographyDataset({
       coverage: await readJson("coverage.json"),
       provinces: await readJson("provinces.json"),
       provenance: await readJson("provenance.json"),
