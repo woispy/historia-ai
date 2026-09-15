@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "scope": "Sakarya–Akova–Sapanca–Akyazi–Konuralp northeastern Bithynia source review",
+  "status": "evidence-only",
+  "canonicalGeometryPromotion": "blocked",
+  "principles": [
+    "Political control is separate from settlement, route, fortification, and economic layers.",
+    "Later administrative boundaries are not promoted to 1326 political geometry.",
+    "Where sources disagree on exact conquest dates, retain the disagreement and lower confidence rather than inventing certainty."
+  ],
+  "anchors": [
+    {
+      "id": "sapanca",
+      "status1326": "ottoman-control-supported",
+      "confidence": "medium",
+      "evidence": [
+        "Sakarya MEB district history states that Akcakoca brought the Sapanca Lake and Adapazari area into Ottoman control in 1324 and that Sapanca was taken in 1324-1326.",
+        "This is an institutional/local-history source and should be cross-checked before canonical promotion."
+      ],
+      "sources": ["turn1search0"]
+    },
+    {
+      "id": "akyazi",
+      "status1326": "ottoman-control-supported",
+      "confidence": "medium",
+      "evidence": [
+        "Sakarya University city-memory material attributes the early Ottoman conquest of Akyazi to Konur Alp.",
+        "Akyazi Chamber of Commerce records the general tradition that Konur Alp conquered Akyazi, Mudurnu and Konrapa during Osman/Orhan's expansion.",
+        "Exact 7 April 1326 boundary geometry is not established by these sources."
+      ],
+      "sources": ["turn0search7", "turn0search5"]
+    },
+    {
+      "id": "konuralp-prusias-ad-hypium",
+      "status1326": "ottoman-control-supported",
+      "confidence": "high",
+      "evidence": [
+        "Turkish Ministry of Culture and Tourism states that Prusias ad Hypium was taken in 1323 by Konur Alp and incorporated into Ottoman territory.",
+        "The 2022 Turkish Historical Society journal article likewise dates incorporation to 1323 and identifies the settlement as continuing through the Byzantine and Ottoman periods.",
+        "The settlement had fortifications, a bridge and a strategic position near the Melen/Hypios river and routes toward Akcakoca and the Duzce plain."
+      ],
+      "sources": ["turn1search5", "turn1search1", "turn1search7"]
+    },
+    {
+      "id": "sakarya-1304-frontier-corridor",
+      "status1326": "ottoman-controlled-corridor-supported",
+      "confidence": "high",
+      "evidence": [
+        "The 2025 Sinop University research article reconstructs the 1304 Sakarya campaign using chronicles, archival evidence, maps and fieldwork, identifying Leblebici, Cadirli, Lefke, Mekece, Akhisar and Geyve as captured fortresses.",
+        "The article identifies the Lefke–Iznik road and associated watchpoints/fortifications, supporting a route-and-fortification model rather than a simple smooth political boundary."
+      ],
+      "sources": ["turn0search1", "turn0search53"]
+    },
+    {
+      "id": "konuralp-1323-northwest-frontier",
+      "status1326": "ottoman-control-supported",
+      "confidence": "medium-high",
+      "evidence": [
+        "A Duzce provincial educational publication describes Konur Alp's campaigns toward Akova and the Black Sea and his 1323 campaign around Bolu/Duzce.",
+        "The source also records Konur Alp's participation in the 1326 Bursa campaign and death in the same year; this supports his role in the regional conquest network but not an exact province boundary."
+      ],
+      "sources": ["turn1search60"]
+    }
+  ],
+  "negativeOrCautionaryFindings": [
+    {
+      "subject": "Akova/Akyazi/Sapanca polygon",
+      "finding": "Do not convert modern district boundaries or later Hüdavendigar/Kocaeli administrative limits into a 1326 political polygon."
+    },
+    {
+      "subject": "Konuralp extent",
+      "finding": "The evidence establishes a settlement/control anchor, not the exact territorial extent of a Konur Alp domain."
+    },
+    {
+      "subject": "Ancient route continuity",
+      "finding": "Ancient road evidence can support geographic plausibility but does not by itself prove uninterrupted medieval use in 1326."
+    }
+  ],
+  "runtimeImplications": [
+    "Represent Sapanca, Akyazi and Konuralp as historical settlement/control anchors with confidence metadata.",
+    "Represent the Sakarya valley and Geyve–Mekece–Lefke corridor as route/frontier evidence, not as an invented smooth border.",
+    "Keep fortifications, roads, settlements and political control in separate layers.",
+    "Do not promote exact canonical province polygons until geometry-specific evidence and topology reconciliation are complete."
+  ]
+}
