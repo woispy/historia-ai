@@ -102,16 +102,18 @@ try {
     }],
   }), "utf8");
 
+  const cliArgs = [
+    "--year", "1326",
+    "--date", "1326-04-07",
+    "--input", inputPath,
+    "--rules", rulesPath,
+    "--manifest", manifestPath,
+    "--output", outputPath,
+  ];
+
   const result = await runNode(
     "tools/historical-gis/cli/extract-cliopatria-candidates.js",
-    [
-      "--year", "1326",
-      "--date", "1326-04-07",
-      "--input", inputPath,
-      "--rules", rulesPath,
-      "--manifest", manifestPath,
-      "--output", outputPath,
-    ],
+    cliArgs,
     root,
   );
 
@@ -127,6 +129,61 @@ try {
   assert.equal(artifact.candidates[0].geometry.type, "Polygon");
   assert.equal(artifact.entityReconciliation.reconciled[0].canonicalEntityId, "ottoman-beylik");
   assert.equal(artifact.promotion.status, "not-promoted");
+
+  const originalManifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
+  await fs.writeFile(manifestPath, JSON.stringify({
+    ...originalManifest,
+    sources: [{ ...originalManifest.sources[0], id: "wrong-source-id" }],
+  }), "utf8");
+  const wrongSource = await runNode(
+    "tools/historical-gis/cli/extract-cliopatria-candidates.js",
+    cliArgs,
+    root,
+  );
+  assert.notEqual(wrongSource.code, 0);
+  assert.match(wrongSource.stderr, /cliopatria-v0\.2\.0/);
+
+  await fs.writeFile(manifestPath, JSON.stringify(originalManifest), "utf8");
+  await fs.writeFile(rulesPath, JSON.stringify({
+    schemaVersion: 1,
+    scenarioDate: "1326-04-08",
+    records: originalManifest.sources.map(() => ({ entityId: "unused", sourceMatches: [] })),
+  }), "utf8");
+  const mismatchedRulesDate = await runNode(
+    "tools/historical-gis/cli/extract-cliopatria-candidates.js",
+    cliArgs,
+    root,
+  );
+  assert.notEqual(mismatchedRulesDate.code, 0);
+  assert.match(mismatchedRulesDate.stderr, /Entity reconciliation scenarioDate/);
+
+  await fs.writeFile(rulesPath, JSON.stringify({
+    schemaVersion: 1,
+    scenarioDate: "1326-04-07",
+  }), "utf8");
+  const missingRecords = await runNode(
+    "tools/historical-gis/cli/extract-cliopatria-candidates.js",
+    cliArgs,
+    root,
+  );
+  assert.notEqual(missingRecords.code, 0);
+  assert.match(missingRecords.stderr, /records array/);
+
+  await fs.writeFile(rulesPath, JSON.stringify({
+    schemaVersion: 1,
+    scenarioDate: "1326-04-07",
+    records: [],
+  }), "utf8");
+  const unresolved = await runNode(
+    "tools/historical-gis/cli/extract-cliopatria-candidates.js",
+    cliArgs,
+    root,
+  );
+  assert.equal(unresolved.code, 0, unresolved.stderr || unresolved.stdout);
+  const unresolvedArtifact = JSON.parse(await fs.readFile(outputPath, "utf8"));
+  assert.equal(unresolvedArtifact.summary.reconciledCount, 0);
+  assert.equal(unresolvedArtifact.summary.unresolvedCount, 1);
+  assert.equal(unresolvedArtifact.promotion.status, "not-promoted");
 
   console.log("Cliopatria candidate pipeline tests passed.");
 } finally {
