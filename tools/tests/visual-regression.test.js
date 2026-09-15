@@ -8,13 +8,11 @@
  * This test validates the infrastructure is ready.
  */
 
-import { VisualRegressionTester, createVisualRegressionTest, snapshotTest, VisualRegressionConfig, DiffResult, compareImages } from "../visual-regression.js";
-import { generateBiomePalette } from "../../src/map/terrain/TerrainTileProvider.js";
-
 let passed = 0;
 
 async function runTests() {
   // Test 1: VisualRegressionConfig defaults
+  const { VisualRegressionConfig, DiffResult } = await import("../visual-regression.js");
   if (VisualRegressionConfig.pixelThreshold !== 2) throw new Error("Default pixelThreshold should be 2");
   if (VisualRegressionConfig.maxDiffPercent !== 0.1) throw new Error("Default maxDiffPercent should be 0.1");
   if (VisualRegressionConfig.updateBaselines !== false) throw new Error("Default updateBaselines should be false");
