@@ -10,14 +10,23 @@ function assertRules(rules) {
   }
 }
 
-function matchesRule(candidate, rule) {
-  if (rule.wikidataId && candidate.wikidataId === rule.wikidataId) return "wikidata";
-  if (rule.seshatId && candidate.seshatId === rule.seshatId) return "seshat";
+function normalize(value) {
+  return String(value ?? "").trim().toLocaleLowerCase("en-US");
+}
 
-  const normalizedName = candidate.name.trim().toLocaleLowerCase("en-US");
-  const aliases = Array.isArray(rule.aliases) ? rule.aliases : [];
-  if (aliases.some((alias) => String(alias).trim().toLocaleLowerCase("en-US") === normalizedName)) {
-    return "name";
+function sourceMatchesForRule(rule) {
+  return Array.isArray(rule.sourceMatches) ? rule.sourceMatches : [];
+}
+
+function matchesRule(candidate, rule) {
+  for (const sourceMatch of sourceMatchesForRule(rule)) {
+    if (sourceMatch.wikidataId && candidate.wikidataId === sourceMatch.wikidataId) return "wikidata";
+    if (sourceMatch.seshatId && candidate.seshatId === sourceMatch.seshatId) return "seshat";
+  }
+
+  for (const sourceMatch of sourceMatchesForRule(rule)) {
+    const aliases = Array.isArray(sourceMatch.names) ? sourceMatch.names : [];
+    if (aliases.some((alias) => normalize(alias) === normalize(candidate.name))) return "name";
   }
 
   return null;
@@ -26,6 +35,13 @@ function matchesRule(candidate, rule) {
 export function reconcileHistoricalEntities(candidates, rules) {
   assertCandidates(candidates);
   assertRules(rules);
+
+  const ruleValidation = validateReconciliationRules(rules);
+  if (!ruleValidation.valid) {
+    throw new Error(
+      `Invalid reconciliation rules: ${ruleValidation.errors.map((error) => error.reason).join("; ")}`,
+    );
+  }
 
   const reconciled = [];
   const unresolved = [];
@@ -39,6 +55,7 @@ export function reconcileHistoricalEntities(candidates, rules) {
     if (matches.length === 0) {
       unresolved.push({
         sourceFeatureId: candidate.sourceFeatureId,
+        candidateName: candidate.name,
         reason: "No reconciliation rule matched the source candidate.",
       });
       continue;
@@ -96,11 +113,30 @@ export function validateReconciliationRules(rules) {
     }
     seenEntityIds.add(rule.entityId);
 
+    if (!Array.isArray(rule.sourceMatches)) {
+      errors.push({ index, reason: "sourceMatches must be an array." });
+    }
+
     if (
       rule.confidence !== undefined &&
       (!Number.isFinite(rule.confidence) || rule.confidence < 0 || rule.confidence > 1)
     ) {
       errors.push({ index, reason: "confidence must be between 0 and 1." });
+    }
+
+    for (const [matchIndex, sourceMatch] of sourceMatchesForRule(rule).entries()) {
+      if (!sourceMatch || typeof sourceMatch.sourceId !== "string" || !sourceMatch.sourceId.trim()) {
+        errors.push({ index, reason: `sourceMatches[${matchIndex}].sourceId is required.` });
+      }
+      if (sourceMatch.matchStatus !== "candidate" && sourceMatch.matchStatus !== "reviewed") {
+        errors.push({
+          index,
+          reason: `sourceMatches[${matchIndex}].matchStatus must be candidate or reviewed.`,
+        });
+      }
+      if (!Array.isArray(sourceMatch.names)) {
+        errors.push({ index, reason: `sourceMatches[${matchIndex}].names must be an array.` });
+      }
     }
   }
 
