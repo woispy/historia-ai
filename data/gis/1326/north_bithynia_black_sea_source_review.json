@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "scope": "north-bithynia-black-sea-corridor",
+  "status": "evidence-only",
+  "promotionGate": {
+    "politicalGeometry": "blocked",
+    "reason": "Sources establish control anchors and frontier activity, but not authoritative 1326 polygon boundaries."
+  },
+  "anchors": [
+    {
+      "id": "kandira",
+      "label": "Kandıra",
+      "politicalControl1326": "Ottoman",
+      "confidence": "high",
+      "evidence": "TDV Akça Koca states that Kandıra and its vicinity were taken around 1326."
+    },
+    {
+      "id": "aydos",
+      "label": "Aydos",
+      "politicalControl1326": "Ottoman",
+      "confidence": "high",
+      "evidence": "TDV Akça Koca states that Aydos was taken by Akça Koca together with Konuralp and Gazi Abdurrahman around the same campaign sequence."
+    },
+    {
+      "id": "samandira",
+      "label": "Samandıra",
+      "politicalControl1326": "Ottoman",
+      "confidence": "high",
+      "evidence": "TDV Akça Koca states that Samandıra fortress was taken after Aydos and that the Samandıra area was granted to Akça Koca as mülk."
+    },
+    {
+      "id": "diapolis",
+      "label": "Diapolis / Akçakoca",
+      "politicalControl1326": "Ottoman",
+      "confidence": "medium-high",
+      "evidence": "Recent academic material reports Diapolis as taken in 1319; chronology varies in secondary/local literature, so retain source-level date rather than over-normalizing."
+    },
+    {
+      "id": "duzce_prusias",
+      "label": "Prusias ad Hypium / Konuralp",
+      "politicalControl1326": "Ottoman",
+      "confidence": "high",
+      "evidence": "TDV Düzce gives 1321 or 1323 as the conquest date by Konuralp."
+    },
+    {
+      "id": "gebze_eskihisar",
+      "label": "Dakibyza / Eskihisar",
+      "politicalControl1326": "uncertain-frontier",
+      "confidence": "medium",
+      "evidence": "The fortress controlled the İzmit-Istanbul road and Gulf crossing; sources describe repeated changes of control in the broader coastal belt and later Ottoman consolidation. Do not promote it to a clean 1326 Ottoman polygon without date-specific evidence."
+    },
+    {
+      "id": "sile",
+      "label": "Şile",
+      "politicalControl1326": "Byzantine / unverified transition",
+      "confidence": "medium",
+      "evidence": "TDV material dates Ottoman conquest of Şile to the 1390s; this strongly argues against back-projecting a late Ottoman Şile polygon into 1326."
+    }
+  ],
+  "networkFindings": [
+    "The northern Bithynian frontier is better represented as a chain of fortified/control anchors and raid corridors than as a single smooth border.",
+    "Aydos and Samandıra are especially important because their 1326-era Ottoman control is explicitly tied to Akça Koca's frontier command.",
+    "The Black Sea coastal belt should not be globally promoted from later Genoese-presence lists: source chronology must be attached to each node.",
+    "The İzmit-Istanbul road and Gulf crossing remain strategically important independent of later administrative boundaries."
+  ],
+  "sources": [
+    {
+      "title": "TDV İslâm Ansiklopedisi — Akça Koca",
+      "url": "https://islamansiklopedisi.org.tr/akca-koca"
+    },
+    {
+      "title": "TDV İslâm Ansiklopedisi — Düzce",
+      "url": "https://islamansiklopedisi.org.tr/duzce"
+    },
+    {
+      "title": "TDV İslâm Ansiklopedisi — Orhan",
+      "url": "https://islamansiklopedisi.org.tr/orhan"
+    },
+    {
+      "title": "TDV İslâm Ansiklopedisi — Üsküdar",
+      "url": "https://islamansiklopedisi.org.tr/uskudar"
+    },
+    {
+      "title": "Düzce’den İki Orta Çağ Kalesi: Akçakoca (Dia) ve Beyköy (Embolos) Kaleleri",
+      "url": "https://dergipark.org.tr/tr/download/article-file/4408119"
+    },
+    {
+      "title": "Kocaeli yarımadası / Akça Koca source discussion",
+      "url": "https://dergipark.org.tr/en/download/article-file/3570116"
+    }
+  ],
+  "notes": [
+    "Historical control is separated from settlement, fortress, route, and later administrative geography.",
+    "Modern district boundaries are not used as 1326 political geometry.",
+    "The file is evidence-only and must not be treated as canonical political authority."
+  ]
+}
