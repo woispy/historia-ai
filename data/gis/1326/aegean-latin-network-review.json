@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "historical_gis_1326_aegean_latin_network_review",
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "evidence-only",
+  "purpose": "Cross-source review of Venetian and Genoese presence, trade nodes, enclaves, family lordships, and maritime anchors around the Aegean and adjacent Anatolian coasts.",
+  "sourcePrinciples": [
+    "Merchant presence is not equivalent to territorial sovereignty.",
+    "A later Genoese/Venetian colony is not back-projected into the 1326 snapshot.",
+    "Commercial agreements and consulates are dated independently from political control.",
+    "Canonical political geometry is not promoted from this review alone."
+  ],
+  "sources": [
+    {"id":"cambridge-latins-aegean-1300-1400","provider":"Cambridge History of the Byzantine Empire","role":"Aegean/Latin maritime network context","url":"https://www.cambridge.org/core/books/abs/cambridge-history-of-the-byzantine-empire-c5001492/latins-in-the-aegean-and-the-balkans-13001400/E9F7A837D3097BE16C4A1A5F031B6590"},
+    {"id":"zachariadou-trade-crusade-review","provider":"Belleten / Zachariadou review","role":"Venetian Crete, Menteshe and Aydin documentary trade evidence","url":"https://belleten.gov.tr/eng/full-text/1839/tur"},
+    {"id":"cavusdere-grain-trade","provider":"Tarih Araştırmaları Dergisi","role":"Venetian/Genoese grain trade and western Anatolian ports","url":"https://dergipark.org.tr/tr/pub/tariharastirmalari/article/603627"},
+    {"id":"tib10-aigaion-pelagos","provider":"Tabula Imperii Byzantini","role":"Northern Aegean geography and Latin archival evidence","url":"https://www.persee.fr/doc/rebyz_0766-5598_1999_num_57_1_1980_t1_0311_0000_2"},
+    {"id":"anaia-topography-2025","provider":"Ortaçağ Araştırmaları Dergisi","role":"Anaia/Kadıkalesi port, dockyard and primary Latin-source evidence","url":"https://dergipark.org.tr/tr/pub/oad/article/1612155"},
+    {"id":"thiriet-tenedos","provider":"Persée / École française de Rome","role":"Tenedos and the Dardanelles strategic maritime context","url":"https://www.persee.fr/doc/mefr_0223-4874_1953_num_65_1_7388"},
+    {"id":"khvalkov-black-sea-colonies","provider":"Evgeny Khvalkov","role":"Genoese Black Sea colonial system","url":"https://books.google.com/books/about/The_Colonies_of_Genoa_in_the_Black_Sea_R.html?hl=en&id=ApqgAQAACAAJ&output=html_text"}
+  ],
+  "nodes": [
+    {"id":"chios","name":"Chios/Sakız","1326Status":"Zaccaria family lordship","presenceType":["political-lordship","Genoese-network","trade"],"temporalEvidence":"Zaccaria control began in 1304 and ended with Byzantine recovery in 1329.","geometryStatus":"point-and-island-control-anchor","confidence":0.95},
+    {"id":"phocaea","name":"Phocaea/Foça","1326Status":"Genoese-family lordship/control candidate","presenceType":["family-lordship","alum-production","fortified-port","trade"],"temporalEvidence":"Zaccaria/Cattaneo control is documented in the early fourteenth century; later Maona arrangements must not be projected backward.","geometryStatus":"port-and-fortification-anchor","confidence":0.9},
+    {"id":"smyrna","name":"Smyrna/İzmir","1326Status":"Zaccaria-controlled fortified-port candidate","presenceType":["fortified-port","Genoese-family-network","trade"],"temporalEvidence":"Zaccaria captured the port in 1317; Aydinid recovery is later, around 1329.","geometryStatus":"upper-port-lower-port reconciliation-required","confidence":0.85},
+    {"id":"ayasuluk","name":"Ayasuluk/Selçuk","1326Status":"Aydinid-controlled port with Latin merchant activity","presenceType":["local-polity","foreign-merchants","trade"],"temporalEvidence":"Later Venetian consular evidence is not back-projected to 1326.","geometryStatus":"city-port-anchor","confidence":0.85},
+    {"id":"anaia","name":"Anaia/Kadıkalesi","1326Status":"Late Byzantine/Aydinid-period maritime node","presenceType":["port","dockyard","trade","archaeological-anchor"],"temporalEvidence":"Primary Genoese/Venetian records, portolans and archaeology support the port and maritime infrastructure; political control remains separately date-scoped.","geometryStatus":"high-value port-and-infrastructure-anchor","confidence":0.9},
+    {"id":"balat","name":"Balat/Palatia","1326Status":"Menteshe-controlled regional port","presenceType":["local-polity","Venetian-trade","grain-trade"],"temporalEvidence":"Venetian relations with Menteshe predate 1326; later treaty/consular dates are kept separate.","geometryStatus":"port-anchor","confidence":0.85},
+    {"id":"galata","name":"Galata/Pera","1326Status":"Genoese urban-commercial enclave under Byzantine sovereignty","presenceType":["urban-enclave","merchant-community","trade"],"temporalEvidence":"Genoese privileges and settlement precede 1326; later wall expansions are not back-projected.","geometryStatus":"urban-footprint-reconstruction-required","confidence":0.9},
+    {"id":"trebizond","name":"Trebizond/Trabzon","1326Status":"Trapezuntine sovereign city with Genoese/Venetian merchant presence","presenceType":["local-polity","Genoese-trade","Venetian-fondaco","trade"],"temporalEvidence":"Venetian commercial privileges are documented by 1319; this does not imply Venetian sovereignty.","geometryStatus":"urban-commercial-node","confidence":0.9},
+    {"id":"caffa","name":"Caffa/Kefe","1326Status":"Genoese Black Sea colony","presenceType":["Genoese-colony","port","administrative-centre","trade"],"temporalEvidence":"Established Genoese colonial centre in the Black Sea system by the early fourteenth century.","geometryStatus":"city-and-colony-anchor","confidence":0.95},
+    {"id":"tana","name":"Tana","1326Status":"Genoese/Italian trade node; exact 1326 institutional status requires date-specific verification","presenceType":["trade-node","Black-Sea-Azov-network"],"temporalEvidence":"Italian access and Genoese expansion are documented in the early fourteenth century, but later interruptions are not back-projected.","geometryStatus":"trade-node","confidence":0.8},
+    {"id":"soldaia","name":"Soldaia/Sudak","1326Status":"Genoese Black Sea colonial/trade node","presenceType":["Genoese-colony","port","trade"],"temporalEvidence":"Genoese settlement is documented from the late thirteenth century; 1326 administrative detail remains to be refined.","geometryStatus":"city-and-port-anchor","confidence":0.9},
+    {"id":"sinop","name":"Sinop","1326Status":"Local Anatolian/Black Sea port; Genoese-colony status not promoted for 1326","presenceType":["port","trade"],"temporalEvidence":"Later Genoese settlement evidence may date to the mid/late fourteenth century; it is not back-projected.","geometryStatus":"port-anchor","confidence":0.8},
+    {"id":"amasra","name":"Amasra/Samastri","1326Status":"Local Black Sea port; Genoese-colony status deferred","presenceType":["port","trade"],"temporalEvidence":"Later Genoese settlement evidence is insufficiently early for automatic 1326 promotion.","geometryStatus":"port-anchor","confidence":0.8},
+    {"id":"rhodes","name":"Rhodes","1326Status":"Hospitaller possession","presenceType":["maritime-polity","trade"],"temporalEvidence":"Hospitallers took Rhodes in 1309; this is distinct from Venetian/Genoese sovereignty.","geometryStatus":"island-polity-anchor","confidence":0.98},
+    {"id":"tenedos","name":"Tenedos/Bozcaada","1326Status":"Not promoted as Venetian possession at scenario start","presenceType":["strategic-island","maritime-route"],"temporalEvidence":"Major Venetian/Genoese strategic interest is documented, but the later Venetian occupation belongs to the late fourteenth century.","geometryStatus":"island-anchor","confidence":0.85}
+  ],
+  "networkRules": {
+    "politicalSovereignty": "owner/controller state only when independently date-supported",
+    "familyLordship": "represent as a distinct political relation, not automatically Genoa republic territory",
+    "merchantCommunity": "trade presence without territorial ownership",
+    "fondaco": "commercial institution; does not imply sovereign control",
+    "consulate": "institutional presence; date separately from political control",
+    "port": "physical/economic node independent of owner",
+    "tradeRoute": "network edge independent of political border"
+  },
+  "promotionGate": [
+    "1326-04-07 date applicability",
+    "independent source confirmation",
+    "entity identity reconciliation",
+    "control versus commercial presence separation",
+    "later-event back-projection prohibited",
+    "canonical geometry remains unpromoted until spatial reconstruction",
+    "provenance and confidence retained"
+  ]
+}
