@@ -26,7 +26,10 @@ assert.match(physical, /renderWaterAndCoast/);
 assert.match(physical, /Array\.isArray\(feature\)\?feature:\[\]/);
 assert.match(physical, /\[PhysicalMapLayer\] geometry counts/);
 assert.match(diagnostics, /renderPhysicalLand: true/);
-assert.match(diagnostics, /renderTerrain: true/);
+// Terrain remains fail-closed until the streamed DEM mesh passes visual validation
+// at every LOD. The diagnostics contract must therefore assert the safe default.
+assert.match(diagnostics, /renderTerrain: false/);
+assert.match(diagnostics, /streamed DEM mesh has passed visual validation/);
 assert.match(diagnostics, /renderWaterAndCoast: true/);
 assert.match(diagnostics, /renderPoliticalProvinces: true/);
 assert.match(diagnostics, /setPassEnabled/);
