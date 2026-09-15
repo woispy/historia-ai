@@ -50,7 +50,6 @@ export default function MapStudioEditor({ template, mapConfig, coverage = null, 
     const imageUrl = mapConfig?.imageUrl;
     if (!imageUrl) {
       imageRef.current = null;
-      setImageReadyUrl(null);
       return undefined;
     }
     const image = new Image();
