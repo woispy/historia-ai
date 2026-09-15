@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "scope": "Menteşe–Teke frontier: Eşen, Kaş, Finike, Elmalı and adjacent mountain corridors",
+  "status": "evidence-only",
+  "canonicalGeometryPromotion": "blocked",
+  "principles": [
+    "Do not back-project later Ottoman administrative boundaries into 1326.",
+    "Do not convert a later documented sphere of influence into a precise 1326 polygon without date-specific evidence.",
+    "Separate political control from settlement, route, fortification and economic-zone evidence.",
+    "Preserve contradictory or lower-confidence evidence instead of silently reconciling it."
+  ],
+  "anchors": [
+    {
+      "name": "Finike / Phoinikos",
+      "classification": "Menteşe-to-Hamîd/Teke transition",
+      "confidence": "medium",
+      "1326Assessment": "Menteşe had an early branch associated with Finike; TDV states that this secondary Finike branch later came under Hamîdoğulları influence. Because the transition date is not pinned to 1326-04-07, do not assign a hard single-state polygon yet.",
+      "sources": ["TDV Menteşe", "TDV Menteşeoğulları"]
+    },
+    {
+      "name": "Kaş / Antiphellos region",
+      "classification": "southern Menteşe/Teke frontier anchor",
+      "confidence": "medium",
+      "1326Assessment": "Broad historical summaries place Kaş within the wider Menteşe sphere, while later Teke-ili sources include Kaş among Teke territory. This is useful for a frontier band, but insufficient for a precise 7 April 1326 sovereignty polygon.",
+      "sources": ["TDV Menteşe", "TDV Teke-ili", "secondary medieval geography summaries"]
+    },
+    {
+      "name": "Elmalı",
+      "classification": "Teke interior / mountain corridor",
+      "confidence": "medium",
+      "1326Assessment": "Elmalı is repeatedly associated with the Menteşe/Teke transitional geography. Teke sources identify it as a major later Teke centre, while the Menteşe material includes Elmalı in the broad historical sphere. The exact political handover is not sufficiently dated for a 1326 polygon.",
+      "sources": ["TDV Teke-ili", "TDV Menteşe", "secondary regional histories"]
+    },
+    {
+      "name": "Eşen / Xanthos–Letoon corridor",
+      "classification": "frontier and route zone",
+      "confidence": "low-to-medium",
+      "1326Assessment": "The Eşen valley is geographically important for the transition between the Menteşe coast and the Teke/Lycia interior. Current evidence reviewed does not justify a precise political boundary on 1326-04-07.",
+      "sources": ["regional historical geography; date-specific political evidence still required"]
+    },
+    {
+      "name": "Korkuteli / Istanos",
+      "classification": "Teke-side control anchor",
+      "confidence": "high",
+      "1326Assessment": "The Teke branch of the Hamîdoğulları had a strong presence in Istanos/Korkuteli by the early 14th century; TDV records a 1319 madrasa inscription and identifies the region as part of the Teke branch's formation. This provides a firm eastern/northeastern control anchor without defining a continuous frontier line.",
+      "sources": ["TDV Tekeoğulları", "TDV Teke-ili"]
+    },
+    {
+      "name": "Antalya",
+      "classification": "Teke branch core",
+      "confidence": "high",
+      "1326Assessment": "Antalya was captured by Dündar Bey and assigned to his brother Yunus, creating the Teke branch. Dündar was killed in 1326; the control sequence around that year should therefore remain date-scoped rather than inferred from later Ottoman/Teke administrative geography.",
+      "sources": ["TDV Hamîdoğulları", "TDV Antalya", "TDV Tekeoğulları"]
+    }
+  ],
+  "chronologyGuards": [
+    "Dündar Bey's death in 1326 must not be treated as an instantaneous redrawing of all Teke/Menteşe borders.",
+    "Later Teke-ili administrative boundaries are not 1326 political geography.",
+    "The later statement that Finike came under Hamîdoğulları influence cannot by itself establish the exact control state on 1326-04-07.",
+    "Kaş and Elmalı appearing in broad later Menteşe or Teke lists are regional evidence, not exact contemporary cadastral boundaries."
+  ],
+  "recommendedRuntimeModel": {
+    "politicalGeometry": "defer",
+    "frontierBand": "allow",
+    "settlementAnchors": ["Finike", "Kaş", "Elmalı", "Korkuteli", "Antalya"],
+    "routeLayers": ["Eşen valley", "coastal Lycia route", "Elmalı mountain corridor", "Antalya–interior corridor"],
+    "confidenceFieldRequired": true,
+    "sourceProvenanceRequired": true
+  }
+}
