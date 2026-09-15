@@ -24,8 +24,8 @@ function geometryPartCount(geometry) {
   return 0;
 }
 
-function sourceArea(properties) {
-  const value = properties?.Area ?? properties?.area ?? properties?.AREA;
+function sourceArea(candidate) {
+  const value = candidate?.areaKm2;
   return Number.isFinite(value) ? value : null;
 }
 
@@ -107,7 +107,7 @@ export function buildHistoricalGeometryEvidenceInventory({
       geometryType: type,
       geometryPartCount: geometryPartCount(geometry),
       coordinateCount: coordinateCount(geometry?.coordinates),
-      areaKm2: sourceArea(candidate.properties),
+      areaKm2: sourceArea(candidate),
       canonicalEntityId: match?.canonicalEntityId ?? null,
       identityStatus: match?.identityStatus ?? "unresolved",
       candidateEntityIds: match?.candidateEntityIds ?? [],
