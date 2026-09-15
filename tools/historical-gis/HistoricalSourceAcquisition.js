@@ -174,14 +174,30 @@ export async function acquireHistoricalSource({
   license = null,
   acquiredAt = null,
   allowTimeless = false,
+  expectedInputSha256 = null,
 }) {
   if (!sourceId) throw new Error("sourceId is required.");
   if (!provider) throw new Error("provider is required.");
   if (!dataset) throw new Error("dataset is required.");
   if (!Number.isInteger(targetYear)) throw new Error("targetYear is required.");
+  if (
+    expectedInputSha256 !== null &&
+    !/^[a-f0-9]{64}$/i.test(expectedInputSha256)
+  ) {
+    throw new Error("expectedInputSha256 must be a 64-character hexadecimal SHA-256 digest.");
+  }
 
   const { rawText, acquisition } = await readHistoricalSourceInput({ inputPath, url });
   const inputSha256 = sha256Text(rawText);
+  if (
+    expectedInputSha256 !== null &&
+    inputSha256.toLowerCase() !== expectedInputSha256.toLowerCase()
+  ) {
+    throw new Error(
+      `Historical source SHA-256 mismatch: expected ${expectedInputSha256}, received ${inputSha256}.`,
+    );
+  }
+
   const geojson = JSON.parse(rawText);
   const filtered = filterHistoricalFeatures(geojson, targetYear, { allowTimeless });
 
@@ -202,6 +218,9 @@ export async function acquireHistoricalSource({
         projection,
         license,
         inputSha256,
+        ...(expectedInputSha256 !== null
+          ? { inputSha256Verification: "passed" }
+          : { inputSha256Verification: "not-requested" }),
         authorityStatus: "evidence-only",
         ...(acquisition.mode === "url"
           ? { sourceUrl: acquisition.url }
