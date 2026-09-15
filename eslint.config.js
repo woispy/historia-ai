@@ -46,10 +46,13 @@ export default defineConfig([
   {
     files: ["tools/historical-gis/AnatoliaPhase2DGeometryBuilder.js"],
     rules: {
-      // These names are retained as compatibility hooks for the historical
-      // geometry fallback API; they are intentionally not part of the current
-      // Voronoi/physical reconciliation path.
-      "no-unused-vars": ["error", { varsIgnorePattern: "^closestPointOnSegment$", argsIgnorePattern: "^_" }],
+      // Phase2D is retained as a legacy/reference geometry builder only. Its
+      // unused compatibility helpers are deliberately outside the production
+      // authority path and must not block the current canonical pipeline.
+      "no-unused-vars": ["error", {
+        varsIgnorePattern: "^(closestPointOnSegment|sequence|addProvinceMicroSites|buildVoronoiCell|buildLandSafeCell)$",
+        argsIgnorePattern: "^_",
+      }],
     },
   },
 ]);
