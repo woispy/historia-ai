@@ -8,12 +8,7 @@
  * - Biome palette as storage buffer
  */
 
-import { MapRendererContract } from "../MapRendererContract.js";
-import { createWebGpuBenchmarkTelemetry } from "../../runtime/BenchmarkGpuTelemetry.js";
-import { TERRAIN_CULL_WGSL, TERRAIN_FINALIZE_WGSL, TERRAIN_RENDER_WGSL, TERRAIN_PICK_WGSL, TERRAIN_BIOME_PALETTE, TERRAIN_VERTEX_STRIDE } from "./TerrainShaders.js";
-import { MapBinIntegrity } from "../runtime/RuntimeStateIntegrity.js";
-
-const ID_SCALE = 1 / 255;
+import { TERRAIN_CULL_WGSL, TERRAIN_FINALIZE_WGSL, TERRAIN_RENDER_WGSL, TERRAIN_PICK_WGSL } from "./TerrainShaders.js";
 
 export class TerrainWebGPUMapRenderer {
   constructor(canvas) {
