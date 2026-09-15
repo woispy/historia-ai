@@ -33,6 +33,28 @@ async function readJson(filePath) {
   return JSON.parse(await fs.readFile(filePath, "utf8"));
 }
 
+function validateScenarioDocuments({ rulesDocument, matrixDocument, scenarioDate }) {
+  if (!Array.isArray(rulesDocument?.records)) {
+    throw new Error("Reconciliation document must contain a records array.");
+  }
+  if (!Array.isArray(matrixDocument?.records)) {
+    throw new Error("Evidence matrix must contain a records array.");
+  }
+  if (rulesDocument.scenarioDate && rulesDocument.scenarioDate !== scenarioDate) {
+    throw new Error("Reconciliation scenarioDate does not match the inventory scenarioDate.");
+  }
+  if (matrixDocument.scenarioDate && matrixDocument.scenarioDate !== scenarioDate) {
+    throw new Error("Evidence matrix scenarioDate does not match the inventory scenarioDate.");
+  }
+
+  const matrixEntityIds = new Set(matrixDocument.records.map((record) => record.entityId));
+  for (const rule of rulesDocument.records) {
+    if (!matrixEntityIds.has(rule.entityId)) {
+      throw new Error(`Reconciliation entity is missing from evidence matrix: ${rule.entityId}.`);
+    }
+  }
+}
+
 async function main() {
   const args = process.argv.slice(2);
   if (args.includes("--help") || args.includes("-h")) {
@@ -59,8 +81,10 @@ async function main() {
     readJson(matrixPath),
   ]);
 
+  validateScenarioDocuments({ rulesDocument, matrixDocument, scenarioDate });
+
   const { candidates, excluded } = extractCliopatriaCandidates(geojson, year);
-  const reconciliation = reconcileHistoricalEntities(candidates, rulesDocument.records ?? []);
+  const reconciliation = reconcileHistoricalEntities(candidates, rulesDocument.records);
   const inventory = buildHistoricalGeometryEvidenceInventory({
     sourceId,
     version,
@@ -75,6 +99,7 @@ async function main() {
     rulesPath: path.resolve(rulesPath),
     matrixPath: path.resolve(matrixPath),
     excludedFeatureCount: excluded.length,
+    evidenceMatrixEntityCount: matrixDocument.records.length,
   };
 
   await fs.mkdir(path.dirname(outputPath), { recursive: true });
