@@ -6,7 +6,9 @@ Design contract for the canonical playable `1326` scenario.
 
 The production scenario date is **1326-04-07**. The existing `1300` scenario and its historical GIS assets remain reference/legacy material and are not relabeled as 1326.
 
-The current engineering gate remains **CI/lint baseline stabilization before authoritative 1326 data promotion**.
+The engineering stabilization gate is now **GREEN**: the current canonical branch completed the full 77-step validation/build/scalability workflow successfully on commit `e3d5acb6a4203738f7f41f972fc5f777629576da` (workflow run `34995090171`).
+
+The active blocker is therefore no longer CI/lint stabilization. The active blocker is authoritative 1326 historical source acquisition, reconciliation, review, and canonical geography production.
 
 ## Runtime dependency
 
@@ -130,23 +132,40 @@ production runtime/mapbin
 
 ## Engineering stabilization gate
 
-Before authoritative 1326 geography is promoted, the production branch must first reach a clean lint baseline and then complete the full validation workflow.
+The production branch has now passed the engineering stabilization gate.
 
-The latest observed workflow attempt before the current cleanup commits checked out `bca4dd8594544db9d82069d63aaf799ef649f756` and failed at the ESLint step with **45 errors and 0 warnings**. Because the subsequent cleanup commits were made after that run, that 45-error result is a historical CI snapshot, not proof of the current branch's exact lint count.
+Verified workflow:
 
-The workflow contains 77 validation/build/scalability steps after setup. Since lint is an early gate, a lint failure skips the later map, GIS, runtime, build, and 15K+ scalability checks. A green result therefore requires observing the workflow on the current branch after lint reaches zero.
+```text
+commit: e3d5acb6a4203738f7f41f972fc5f777629576da
+workflow: 34995090171
+result: SUCCESS
+validation/build/scalability steps: 77/77
+```
 
-The current cleanup pass remains behavior-preserving and includes:
+The successful workflow included lint, physical geography, historical GIS, topology, P3/P4/P5, P6.1/P6.2, cartography, GPU pack, runtime/startup, production build, repository cleanliness, and 15K+ scalability/diagnostics checks.
 
-- remove genuinely unused triangulation constants/locals without changing thresholds or algorithms;
-- remove unused terrain renderer imports while retaining the dynamic telemetry import and terrain buffers;
-- avoid reading React refs during render in `MapStudioEditor`;
-- remove unused physical-geography accumulators without changing classification behavior;
-- clean runtime, reference-layer, visual-regression, and proof-group test/CLI bindings while preserving their assertions and validation paths;
-- keep legacy/reference GIS paths intact unless repository usage proves they are dead;
-- do not introduce new Voronoi, jitter, anchor, or fallback geometry generation;
-- keep terrain diagnostics fail-closed until the streamed DEM mesh passes visual validation at every LOD;
-- update this contract whenever the acceptance state changes.
+The terrain diagnostics contract remains fail-closed until the streamed DEM mesh passes visual validation at every LOD.
+
+## 1326 source evidence gate
+
+The source registry is now established at:
+
+```text
+data/gis/1326/registry.json
+docs/architecture/1326-source-register.md
+```
+
+The registry is evidence-only. It does not constitute canonical political geography.
+
+Current candidate evidence classes include:
+
+- global political-entity evidence from Cliopatria;
+- late-medieval European ecclesiastical boundary evidence from the Digital Atlas of Dioceses and Ecclesiastical Provinces;
+- historical feature/boundary evidence from OpenHistoricalMap;
+- historical place identity and reconciliation evidence from World Historical Gazetteer.
+
+These sources have different purposes and limitations. None is automatically authoritative for every 1326 political boundary.
 
 ## Acceptance gates before enabling 1326
 
@@ -165,4 +184,4 @@ The current cleanup pass remains behavior-preserving and includes:
 
 ## Current blocker
 
-The generic evidence importer is now in place, but **no authoritative 1326 runtime asset is present yet**. The immediate engineering blocker is CI/lint baseline stabilization; after that, the remaining data blocker is source acquisition/reconciliation and canonical historical geography production, not importer architecture. The production scenario must remain on 1300 until those acceptance gates are satisfied.
+**Authoritative 1326 historical geography is not present yet.** The next production work is source acquisition and reconciliation, beginning with Tier 1 evidence and highest-confidence historical entities. The generic importer and runtime architecture are ready; the canonical dataset must still be produced and validated before the 1326 scenario can replace 1300 as the production scenario.
