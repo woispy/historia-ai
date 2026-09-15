@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "scope": "Troas / southern Marmara / Dardanelles Anatolian shore",
+  "status": "evidence-only",
+  "canonicalGeometryPromotion": "blocked",
+  "principles": [
+    "Political control is separate from settlement, route, fortress, and maritime-node status.",
+    "Later Ottoman conquest dates are not back-projected into the 1326 snapshot.",
+    "No continuous polygon is inferred from anchor points.",
+    "Conflicting chronology remains explicit until date-specific evidence resolves it."
+  ],
+  "anchors": [
+    {
+      "name": "Biga / Pegae",
+      "control1326": "unresolved-frontier",
+      "confidence": "medium",
+      "evidence": "TDV states that part of the Biga region probably entered Karesi control in the early 14th century, while well-fortified Marmara and Dardanelles coastal towns resisted capture; a 1328 Andronikos III–Demirhan agreement at Pegae prohibited raids on Byzantine coastal towns.",
+      "sources": ["TDV Biga", "Troy Museum Journal 2025 Pegae survey"],
+      "runtimeRole": ["frontier", "fortress", "port", "trade-node"]
+    },
+    {
+      "name": "Karabiga / Pegae",
+      "control1326": "Byzantine-or-contested",
+      "confidence": "medium-high",
+      "evidence": "Recent archaeological survey identifies Pegae as a large Byzantine settlement with surviving land and sea walls, a strategic port between Kyzikos and Lampsakos, and a commercial center at the mouth of the Granikos/Biga valley. TDV records the 1328 agreement at Pegae between Byzantium and Karesi.",
+      "sources": ["Troy Museum Journal 2025 Pegae survey", "TDV Biga"],
+      "runtimeRole": ["fortress", "port", "river-valley-gateway", "frontier"]
+    },
+    {
+      "name": "Lapseki / Lampsakos",
+      "control1326": "Karesi-candidate",
+      "confidence": "medium",
+      "evidence": "A 2025 academic study states that Lapseki and its surroundings were under Karesi administration until the mid-14th century and were captured by the Ottomans in 1353. Another art-history study describes Turkish conquest in the early 14th century. Because the exact transition date is not established here, 1326 is retained as Karesi-candidate rather than promoted to high confidence.",
+      "sources": ["Erzurum Technical University 2025 Lapseki foundations", "Sanat Tarihi Dergisi 2014 Lapseki"],
+      "runtimeRole": ["port", "strait-crossing-node", "settlement"]
+    },
+    {
+      "name": "Umurbey / Percote",
+      "control1326": "Karesi-candidate",
+      "confidence": "medium",
+      "evidence": "Academic architectural research describes the Umurbey area as conquered by the Karesi Emirate in the 14th century and later annexed by Orhan. The evidence does not establish an exact 7 April 1326 boundary.",
+      "sources": ["Sanat Tarihi Dergisi 2013 Umurbey"],
+      "runtimeRole": ["settlement", "route-node"]
+    },
+    {
+      "name": "Assos / Behramkale",
+      "control1326": "Turkish-control-candidate",
+      "confidence": "medium-low",
+      "evidence": "A recent study states that the Assos region entered Turkish rule from 1299, but the source is retrospective and does not provide a precise 7 April 1326 political boundary. The surviving Ottoman Hüdavendigar Mosque is explicitly a 14th-century second-half monument, so it cannot be used as evidence for Ottoman control in 1326.",
+      "sources": ["Osmanlı Medeniyeti Araştırmaları Dergisi 2026 Assos", "TDV Hüdavendigar Camii"],
+      "runtimeRole": ["port", "fortified-site", "historical-settlement"]
+    },
+    {
+      "name": "Alexandria Troas",
+      "control1326": "unresolved",
+      "confidence": "low",
+      "evidence": "The current source pass confirms the archaeological importance and long settlement history of the site, but does not provide sufficiently date-specific political control evidence for 1326.",
+      "sources": ["Troy Museum / archaeological literature reviewed"],
+      "runtimeRole": ["archaeological-anchor", "historical-site"]
+    },
+    {
+      "name": "Ayvacik–southern Troas",
+      "control1326": "Turkish-control-candidate",
+      "confidence": "medium-low",
+      "evidence": "Regional evidence indicates Turkish political penetration in southern Troas by the early 14th century, but the present source set does not support a canonical 1326 polygon.",
+      "sources": ["Assos regional studies", "Karesi regional history"],
+      "runtimeRole": ["frontier", "route-network", "settlement"]
+    }
+  ],
+  "strategicRules": [
+    "Pegae/Karabiga must remain a fortified maritime gateway rather than being flattened into a generic inland province.",
+    "Lapseki should be modeled as a Dardanelles port/crossing node even while political control confidence remains medium.",
+    "The Dardanelles coastal towns should not be treated as uniformly controlled by Karesi merely because the surrounding hinterland was penetrated.",
+    "Assos and southern Troas require separate control and settlement evidence before canonical geometry promotion.",
+    "Karesi's independent political status must be preserved in the 1326 scenario; its later Ottoman incorporation belongs to a later temporal state."
+  ],
+  "promotionGate": {
+    "required": [
+      "date-specific political control evidence",
+      "entity reconciliation",
+      "geometry source or defensible reconstruction evidence",
+      "topology review",
+      "provenance and confidence metadata"
+    ],
+    "current": "blocked"
+  }
+}
