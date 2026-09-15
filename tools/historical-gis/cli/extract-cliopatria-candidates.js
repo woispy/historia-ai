@@ -20,7 +20,7 @@ function usage() {
   --date 1326-04-07 \\
   --input <cliopatria.geojson> \\
   --rules <entity-reconciliation.json> \\
-  --manifest <source.manifest.json> \\
+  --manifest <acquisition-manifest.json> \\
   --output <candidates.json>`);
 }
 
@@ -38,25 +38,34 @@ function assertScenarioDate(scenarioDate, year) {
   }
 }
 
-function buildArtifact({ year, scenarioDate, inputPath, rulesPath, manifestPath, manifest, extracted, reconciliation }) {
-  const source = {
-    sourceId: manifest.sourceId,
-    provider: manifest.provider,
-    dataset: manifest.dataset,
-    version: manifest.version ?? null,
-    releaseDate: manifest.releaseDate ?? null,
-    archive: manifest.archive ?? null,
-    license: manifest.license ?? null,
-    authorityStatus: "evidence-only",
-  };
+function resolveCliopatriaSource(manifest) {
+  if (!Array.isArray(manifest.sources)) {
+    throw new Error("Acquisition manifest must contain a sources array.");
+  }
+  const source = manifest.sources.find((candidate) => candidate.id === "cliopatria-v0.2.0");
+  if (!source) throw new Error("Acquisition manifest does not contain cliopatria-v0.2.0.");
+  return source;
+}
 
+function buildArtifact({ year, scenarioDate, inputPath, rulesPath, manifestPath, source, extracted, reconciliation }) {
   return {
     schemaVersion: 1,
     id: `historical_gis_${year}_cliopatria_candidates`,
     scenarioDate,
     targetYear: year,
     authorityStatus: "evidence-only",
-    source,
+    source: {
+      sourceId: source.id,
+      provider: source.provider,
+      dataset: source.dataset,
+      version: source.version ?? null,
+      releaseDate: source.releaseDate ?? null,
+      archive: source.archive ?? null,
+      url: source.url ?? null,
+      license: source.license ?? source.licenseReview ?? null,
+      role: source.role ?? null,
+      projection: source.projection ?? null,
+    },
     input: {
       geojsonPath: path.resolve(inputPath),
       reconciliationRulesPath: path.resolve(rulesPath),
@@ -103,17 +112,15 @@ async function main() {
   }
   assertScenarioDate(scenarioDate, year);
 
-  const [geojson, rulesDocument, manifest] = await Promise.all([
+  const [geojson, rulesDocument, acquisitionManifest] = await Promise.all([
     readJson(inputPath),
     readJson(rulesPath),
     readJson(manifestPath),
   ]);
+  const source = resolveCliopatriaSource(acquisitionManifest);
 
-  if (manifest.sourceId !== "cliopatria-v0.2.0") {
-    throw new Error("The source manifest must identify cliopatria-v0.2.0.");
-  }
-  if (manifest.scenarioDate !== scenarioDate) {
-    throw new Error("Source manifest scenarioDate must match --date.");
+  if (acquisitionManifest.scenarioDate !== scenarioDate) {
+    throw new Error("Acquisition manifest scenarioDate must match --date.");
   }
   if (rulesDocument.scenarioDate !== scenarioDate) {
     throw new Error("Entity reconciliation scenarioDate must match --date.");
@@ -130,7 +137,7 @@ async function main() {
     inputPath,
     rulesPath,
     manifestPath,
-    manifest,
+    source,
     extracted,
     reconciliation,
   });
