@@ -5,10 +5,7 @@
  * Replaces the O(n³) ear-clipping with spatial grid acceleration.
  */
 
-const EPSILON = 1e-10;
 const POSITION_EPSILON = 1e-7;
-const COLLINEAR_EPSILON = 1e-12;
-const MAX_TRIANGULATION_VERTICES = 12000;
 
 /**
  * Spatial grid for accelerating point-in-polygon queries.
@@ -115,7 +112,6 @@ function estimateCellSize(points) {
  * Uses spatial grid to accelerate point-in-triangle tests.
  */
 export function triangulateRingOptimized(ring, context = {}) {
-  const EPSILON = 1e-10;
   const points = unwrapRing(normalizeRing(ring));
 
   if (points.length < 3) return [];
@@ -257,7 +253,6 @@ function isSimpleOptimized(points) {
     const minY = Math.min(a[1], b[1]);
     const maxY = Math.max(a[1], b[1]);
 
-    const cellSize = estimateCellSize(points);
     const gx0 = Math.floor((minX - 1e-7) / cellSize);
     const gx1 = Math.floor((maxX + 1e-7) / cellSize);
     const gy0 = Math.floor((minY - 1e-7) / cellSize);
@@ -281,7 +276,6 @@ function isSimpleOptimized(points) {
     const minY = Math.min(a[1], b[1]);
     const maxY = Math.max(a[1], b[1]);
 
-    const cellSize = estimateCellSize(points);
     const gx0 = Math.floor((minX - 1e-7) / cellSize);
     const gx1 = Math.floor((maxX + 1e-7) / cellSize);
     const gy0 = Math.floor((minY - 1e-7) / cellSize);
