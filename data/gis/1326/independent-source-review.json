@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "id": "historical_gis_1326_independent_source_review",
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "evidence-only",
+  "purpose": "Broaden 1326 historical-geography research beyond a single reference tradition by recording Turkish and international academic sources and their evidentiary limits.",
+  "method": {
+    "rule": "Separate existence, control, regional geography, physical anchors and canonical geometry.",
+    "dateRule": "Do not project events after 1326-04-07 backward into the scenario start.",
+    "geometryRule": "No cited source is automatically promoted to canonical political geometry.",
+    "independenceRule": "Prefer evidence chains crossing language traditions, source families or scholarly traditions where available."
+  },
+  "sources": [
+    {
+      "id": "cambridge-lindner-2010",
+      "provider": "Cambridge University Press / Rudi Lindner",
+      "title": "Anatolia, 1300-1451",
+      "role": "regional political chronology and historiographical framework",
+      "url": "https://www.cambridge.org/core/books/abs/cambridge-history-of-turkey/anatolia-13001451/71691A45EAABF8F09B64EB28C1C680EB"
+    },
+    {
+      "id": "cambridge-melville-2010",
+      "provider": "Cambridge University Press / Charles Melville",
+      "title": "Anatolia under the Mongols",
+      "role": "Ilkhanid political framework and Anatolian Mongol rule",
+      "url": "https://www.cambridge.org/core/books/abs/the-cambridge-history-of-turkey/anatolia-under-the-mongols/73C5FC788C55900D12455E170F5535C8"
+    },
+    {
+      "id": "iranica-konya",
+      "provider": "Encyclopaedia Iranica / Andrew Peacock",
+      "title": "Konya I. History and Persian Culture in the Islamic Period",
+      "role": "Karamanid-Konya chronology, Ilkhanid interventions and primary-source orientation",
+      "url": "https://www.iranicaonline.org/articles/konya/konya-i-history-and-persian-culture-in-the-islamic-period/"
+    },
+    {
+      "id": "perssee-failler-1994",
+      "provider": "Revue des études byzantines / Albert Failler",
+      "title": "Les émirs turcs à la conquête de l'Anatolie au début du 14e siècle",
+      "role": "Byzantine-source-based reconstruction of early 14th-century Turkish emirates",
+      "url": "https://www.persee.fr/doc/rebyz_0766-5598_1994_num_52_1_1887"
+    },
+    {
+      "id": "oxford-korobeinikov-2014",
+      "provider": "Oxford University Press / Dimitri Korobeinikov",
+      "title": "Byzantium and the Turks in the Thirteenth Century",
+      "role": "Byzantine-Turkish relations and source criticism leading into the 14th century",
+      "url": "https://academic.oup.com/book/8557"
+    },
+    {
+      "id": "jstage-nakamachi-2025",
+      "provider": "J-STAGE / Nobutaka Nakamachi",
+      "title": "The Armenian Kingdom of Cilicia and the Mamluk Sultanate: A Historiographical Analysis for the Reign of Lewon IV (1320-1341)",
+      "role": "Armenian colophons and Arabic chronicles for Cilicia and Mamluk relations",
+      "url": "https://www.jstage.jst.go.jp/article/orient/60/0/60_7/_article"
+    },
+    {
+      "id": "medieval-review-stewart",
+      "provider": "The Medieval Review / Angus Donal Stewart",
+      "title": "The Armenian Kingdom and the Mamluks",
+      "role": "Armenian, Cypriot and Arabic source synthesis for Cilicia",
+      "url": "https://scholarworks.iu.edu/journals/index.php/tmr/article/view/15321"
+    },
+    {
+      "id": "ttk-cambridge-catalogue",
+      "provider": "Türk Tarih Kurumu Kütüphanesi",
+      "title": "Byzantium to Turkey, 1071-1453 / The Cambridge History of Turkey volume 1",
+      "role": "Turkish institutional bibliographic confirmation of the international reference volume",
+      "url": "https://kutuphane.ttk.gov.tr/details?id=545877&materialType=KT"
+    },
+    {
+      "id": "dergipark-turgut-2017",
+      "provider": "Osmanlı Araştırmaları / Vedat Turgut",
+      "title": "Menteşe Bey'in İsmi, Menşe'i ve Menteşeoğulları'nın Vakıflarına Dair",
+      "role": "Turkish scholarship and documentary/vakıf evidence for Menteşe origins and networks",
+      "url": "https://osmanliarastirmalari.isam.org.tr/dergi/article/view/174"
+    },
+    {
+      "id": "dergipark-metin-2014",
+      "provider": "Türkiye Sosyal Araştırmalar Dergisi / Tülay Metin",
+      "title": "Ortaçağ Akdenizinde Menteşe Beyliğinin İktisadî Faaliyetleri ve At Ticareti",
+      "role": "Menteşe's Mediterranean economic and geographic context",
+      "url": "https://dergipark.org.tr/tr/pub/tsadergisi/article/230314"
+    },
+    {
+      "id": "kebikec-dalkesen-2017",
+      "provider": "Kebikeç / Nilgün Dalkesen",
+      "title": "İlhanlı Valisi Emir Timurtaş'ın İsyanı",
+      "role": "Turkish scholarship on Timurtaş's 1318-1327 Anatolian governorship and chronology",
+      "url": "https://www.kebikec.org/sayi-43/makale/141-ilhanli-valisi-emir-timurtas-in-isyani"
+    }
+  ],
+  "findings": [
+    {
+      "topic": "Anatolia-wide framework",
+      "confidence": "high",
+      "findings": [
+        "Cambridge's synthesis treats 1300-1451 as a period in which Ilkhanid suzerainty, multiple Turkmen principalities and Byzantium coexisted; the political map should therefore model overlapping authority relationships rather than assume a single clean territorial hierarchy.",
+        "The same volume identifies al-Umari, Byzantine, Islamic and Ottoman traditions among the evidence base, supporting a multi-source reconstruction strategy rather than reliance on one modern atlas."
+      ],
+      "geometryImplication": "Use independent sources to constrain regions and control points; do not derive a canonical polygon directly from the synthesis."
+    },
+    {
+      "topic": "Karaman-Konya",
+      "confidence": "high",
+      "findings": [
+        "Encyclopaedia Iranica records repeated Ilkhanid recapture of Konya in 1314, 1320 and 1323 and places the Ilkhanid center of power farther east around Kayseri and Sivas.",
+        "Iranica identifies the anonymous Tarikh-e al-e Saljuq as an important local chronicle for the late 13th to mid-14th century and notes Ibn Battuta's circa-1332 observation of Konya under Karamanid control.",
+        "The 1332 observation is post-start evidence and therefore cannot by itself prove the 7 April 1326 control state; it is useful as a temporal bracket and reconciliation target."
+      ],
+      "geometryImplication": "Treat Konya as a high-value control anchor but keep the Karamanid polygon unresolved until 1326-specific evidence is reconciled."
+    },
+    {
+      "topic": "Menteşe",
+      "confidence": "medium-high",
+      "findings": [
+        "Failler's Byzantine-source study identifies Mantachias with Menteshe and places Turkish settlement in the former Caria region, including the permanent occupation of Tralles and Nysa.",
+        "Turkish scholarship independently connects Menteşe to the Caria region and documentary/vakıf evidence, while Mediterranean economic research places the polity in a wider maritime trade network.",
+        "Later 1330s al-Umari material is valuable for regional scale but is not a direct 1326 boundary source."
+      ],
+      "geometryImplication": "Regional Caria/Muğla anchors are well supported; exact 1326 inland/coastal boundary remains a reconstruction task."
+    },
+    {
+      "topic": "Cilician Armenia",
+      "confidence": "high",
+      "findings": [
+        "The 2025 Nakamachi study explicitly combines Armenian manuscript colophons and Arabic chronicles for the reign of Levon IV (1320-1341), including diplomatic activity in 1325 and later Mamluk campaigns.",
+        "This cross-language evidence confirms that Cilician Armenian political history must be reconstructed separately from later Mamluk control and not collapsed into a post-1370 map.",
+        "Stewart's historiographical study similarly emphasizes Armenian, Cypriot and Arabic evidence and the kingdom's position between Ilkhanid and Mamluk power."
+      ],
+      "geometryImplication": "Keep Cilician Armenia as a distinct 1326 political entity; use ports, fortresses and diplomatic/military records as anchors rather than later maximum/minimum borders."
+    },
+    {
+      "topic": "Ilkhanid authority and Timurtaş",
+      "confidence": "high",
+      "findings": [
+        "Cambridge's Melville chapter frames Anatolia as under Mongol/Ilkhanid rule until the collapse of the Ilkhanid regime in the 1340s.",
+        "Turkish scholarship on Timurtaş dates his Anatolian governorship to 1318-1327, with his departure in 1327 after the death of Chupan.",
+        "The evidence supports modeling Ilkhanid suzerainty/control relationships separately from the local territorial geometry of each Turkmen polity."
+      ],
+      "geometryImplication": "Do not replace local beylic boundaries with an Ilkhanid polygon; encode suzerainty as a separate relation layer."
+    },
+    {
+      "topic": "Source methodology",
+      "confidence": "high",
+      "findings": [
+        "The international literature repeatedly warns that early Ottoman and Anatolian political history is source-poor and reconstructed from Byzantine, Islamic, Armenian, numismatic, archaeological and later Ottoman evidence.",
+        "This supports Historia AI's existing evidence-only layer, confidence values, date-scoped reconciliation and explicit unresolved states."
+      ],
+      "geometryImplication": "A province can be present in the evidence registry without being promotable to canonical geometry."
+    }
+  ],
+  "nextTargets": [
+    "Candaroğlu/Sinop: combine Byzantine, Genoese/Black Sea trade, Ibn Battuta and numismatic evidence for a 1326 control bracket.",
+    "Trabzon: locate contemporary Byzantine/Trapezuntine and Persian/Ilkhanid evidence for the eastern Black Sea frontier.",
+    "Hamid-Teke-Eşref: reconstruct the state immediately before Timurtaş's 1326 interventions, not after them.",
+    "Germiyan: combine western Anatolian Byzantine evidence with Ilkhanid intervention chronology around 1325-1327.",
+    "Balkans/Black Sea: extend the same cross-language method beyond Anatolia before generating world-scale political polygons."
+  ],
+  "promotionGate": [
+    "1326-04-07 applicability",
+    "cross-source entity identity",
+    "control state separated from geometry",
+    "physical and settlement anchors identified",
+    "source provenance and license reviewed",
+    "independent geometry reconstruction",
+    "topology validation",
+    "no later-event back-projection",
+    "no synthetic fallback geometry"
+  ]
+}
