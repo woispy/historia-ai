@@ -104,6 +104,28 @@ The decision must update simulation state; it must not be implemented as narrati
 7. The physical map remains independent from political province geometry.
 8. The production map must continue to use the established physical/coastline/terrain pipeline rather than a scenario-specific renderer.
 
+## Import pipeline
+
+The legacy `import-1300.js` remains available as a regression/reference path. A new year-agnostic `import-historical.js` accepts an explicit year and GeoJSON input and writes an **evidence-only** runtime asset under the requested historical year. It does not promote source polygons to canonical political authority.
+
+The generic asset builder now propagates the requested historical year/date into asset identity and headers. This prevents a future 1326 import from silently producing `1300` asset IDs or metadata while preserving the existing 1300 default behavior of legacy callers.
+
+Example:
+
+```text
+1326 GeoJSON evidence
+      ↓
+import-historical.js --year 1326 --input <source.geojson>
+      ↓
+evidence-only runtime
+      ↓
+historical reconciliation
+      ↓
+canonical political geography
+      ↓
+production runtime/mapbin
+```
+
 ## Acceptance gates before enabling 1326
 
 - `data/scenarios/1326/scenario.json` exists and declares `1326-04-07`.
@@ -121,4 +143,4 @@ The decision must update simulation state; it must not be implemented as narrati
 
 ## Current blocker
 
-The repository currently contains a dedicated 1300 historical importer and 1300 source/runtime assumptions. No authoritative 1326 runtime asset is present yet. The correct next step is therefore **1326 source acquisition/reconciliation and runtime generation**, not a string replacement of `1300` with `1326`.
+The generic evidence importer is now in place, but **no authoritative 1326 runtime asset is present yet**. The remaining blocker is source acquisition/reconciliation and canonical historical geography production, not importer architecture. The production scenario must remain on 1300 until those acceptance gates are satisfied.
