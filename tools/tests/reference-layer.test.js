@@ -10,7 +10,6 @@
  */
 
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { drawLandAndSea, drawLakes, drawRivers, drawReferenceLayer, referenceLayerStyle } from "../../src/map/studio/ReferenceLayerRenderer.js";
 
@@ -74,7 +73,7 @@ passed += 1;
 
 // 4. Clipping: a view far from Anatolia skips all features.
 const farView = { minX: -10, minY: -10, maxX: -5, maxY: -5 };
-const farGeoToCanvas = (lon, lat) => [0, 0];
+const farGeoToCanvas = () => [0, 0];
 const { ctx: ctx4, calls: calls4 } = mockContext();
 const farResult = drawReferenceLayer(ctx4, atlas, farView, farGeoToCanvas);
 assert.equal(farResult.landRingsDrawn, 0, "land must be clipped outside the view");
