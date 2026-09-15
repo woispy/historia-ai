@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "id": "historical_gis_1326_acquisition_manifest",
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "evidence-only",
+  "purpose": "Define reproducible acquisition inputs for 1326 historical geography evidence before reconciliation and canonical promotion.",
+  "rules": [
+    "Acquisition does not imply canonical authority.",
+    "Every imported source must retain provider, dataset/version or snapshot, source identity, source URL, license classification, and acquisition timestamp or snapshot identifier.",
+    "Source polygons must remain in the evidence layer until temporal, entity, geometry, topology, provenance, confidence, and review gates pass.",
+    "No 1300 asset may be copied, relabeled, or used as a geometry fallback for 1326.",
+    "Missing evidence remains missing; synthetic Voronoi, jitter, anchor, or filler geometry is prohibited."
+  ],
+  "sources": [
+    {
+      "id": "cliopatria-v0.2.0",
+      "provider": "Seshat Global History Databank",
+      "dataset": "Cliopatria",
+      "version": "v0.2.0",
+      "role": "global-political-entity-candidate-evidence",
+      "url": "https://github.com/Seshat-Global-History-Databank/cliopatria/releases/tag/v0.2.0",
+      "repository": "https://github.com/Seshat-Global-History-Databank/cliopatria",
+      "format": "GeoJSON archive",
+      "projection": "EPSG:4326",
+      "temporalFilter": "Rows whose FromYear <= 1326 <= ToYear",
+      "status": "acquisition-required",
+      "licenseReview": "required-before-redistribution-or-embedding",
+      "expectedEvidence": [
+        "Ottoman Beylik candidate extent",
+        "Byzantine Empire candidate extent",
+        "Ilkhanid candidate extent",
+        "Other Tier 1 polity candidates where matching temporal records exist"
+      ],
+      "reconciliationWarning": "Cliopatria documents that its maps represent one historical interpretation and contain border, naming, territorial-change, and duration uncertainties."
+    },
+    {
+      "id": "medieval-europe-digital-atlas",
+      "provider": "Stanford Digital Repository / University of Texas Libraries GeoData",
+      "dataset": "Digital Atlas of Dioceses and Ecclesiastical Provinces in Late Medieval Europe",
+      "version": "repository release",
+      "role": "European-late-medieval-boundary-context",
+      "url": "https://geodata-cdn.lib.utexas.edu/catalog/stanford-rh195hm5975",
+      "format": "Shapefile / GeoJSON supplement",
+      "projection": "source-defined; normalize during import",
+      "temporalFilter": "1200-1500 coverage; use as corroborating context for 1326",
+      "status": "acquisition-required",
+      "license": "CC BY 3.0",
+      "expectedEvidence": [
+        "European ecclesiastical boundary context",
+        "Historical place/jurisdiction corroboration"
+      ],
+      "reconciliationWarning": "Ecclesiastical jurisdictions are not political provinces and cannot directly become political authority."
+    },
+    {
+      "id": "openhistoricalmap",
+      "provider": "OpenHistoricalMap",
+      "dataset": "OpenHistoricalMap database",
+      "version": "snapshot to be recorded at acquisition",
+      "role": "historical-feature-and-boundary-evidence",
+      "url": "https://www.openhistoricalmap.org/export",
+      "copyrightUrl": "https://www.openhistoricalmap.org/copyright",
+      "format": "OHM XML / export API",
+      "projection": "source-defined; normalize during import",
+      "temporalFilter": "features applicable to 1326 where mapped",
+      "status": "acquisition-required",
+      "license": "CC0 generally; preserve/check individually tagged feature licenses",
+      "expectedEvidence": [
+        "Historical settlements",
+        "Rivers and physical boundary context",
+        "Mapped historical boundary/features"
+      ],
+      "reconciliationWarning": "Collaborative coverage is uneven; mapped features are evidence, not automatic political authority."
+    },
+    {
+      "id": "world-historical-gazetteer",
+      "provider": "World Historical Gazetteer",
+      "dataset": "WHG historical place records",
+      "version": "snapshot to be recorded at acquisition",
+      "role": "historical-place-identity-and-reconciliation",
+      "url": "https://whgazetteer.org/",
+      "format": "historical place records / linked data",
+      "projection": "source-defined; normalize during import",
+      "temporalFilter": "records relevant to 1326 entities and places",
+      "status": "acquisition-required",
+      "licenseReview": "record source-specific terms before redistribution",
+      "expectedEvidence": [
+        "Place identity reconciliation",
+        "Historical names and aliases",
+        "Source-linked provenance"
+      ],
+      "reconciliationWarning": "WHG is a place-identity/provenance resource, not a single authoritative 1326 province layer."
+    },
+    {
+      "id": "tabula-imperii-byzantini",
+      "provider": "Austrian Academy of Sciences",
+      "dataset": "Tabula Imperii Byzantini",
+      "version": "reference edition/snapshot to be recorded",
+      "role": "Byzantine-historical-geography-reference",
+      "url": "https://tib.oeaw.ac.at/",
+      "format": "reference / project data where openly available",
+      "projection": "source-defined",
+      "temporalFilter": "Byzantine historical geography through the mid-15th century",
+      "status": "reference-acquisition-or-citation-required",
+      "licenseReview": "required for any data extraction or redistribution",
+      "expectedEvidence": [
+        "Byzantine place and regional geography",
+        "Toponym and historical geography corroboration"
+      ],
+      "reconciliationWarning": "Use as expert historical-geography evidence; do not infer political polygon authority solely from regional descriptions."
+    }
+  ],
+  "acquisitionOrder": [
+    "1. Acquire Cliopatria snapshot and isolate 1326 candidate political records.",
+    "2. Reconcile candidate entities against the 1326 evidence matrix and historical place identities.",
+    "3. Acquire European Digital Atlas evidence for European corroboration only.",
+    "4. Acquire OpenHistoricalMap historical features and preserve feature-level licensing/provenance.",
+    "5. Reconcile WHG identities and aliases against source entities and places.",
+    "6. Add TIB evidence to Byzantine regional review where openly usable evidence is available.",
+    "7. Produce reviewed geometry candidates only after cross-source reconciliation.",
+    "8. Run topology and physical-boundary checks before any canonical promotion."
+  ],
+  "promotionGate": {
+    "required": [
+      "date applicability to 1326-04-07",
+      "canonical entity identity",
+      "source identity and snapshot/version",
+      "geometry provenance",
+      "cross-source reconciliation notes",
+      "confidence score",
+      "review status",
+      "topology validation",
+      "physical-boundary validation where applicable"
+    ],
+    "forbidden": [
+      "copying 1300 geometry into 1326",
+      "back-projecting later 1326 territorial changes to April 7",
+      "synthetic fallback geometry",
+      "treating broad polity existence as proof of a province polygon"
+    ]
+  }
+}
