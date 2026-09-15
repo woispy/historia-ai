@@ -6,72 +6,14 @@
   "purpose": "Map source-specific historical entity identities to Historia AI canonical entity IDs without promoting source geometry.",
   "promotionRule": "Entity reconciliation establishes identity only; it does not establish canonical political boundaries or control.",
   "records": [
-    {
-      "entityId": "ottoman-beylik",
-      "displayName": "Osmanlı Beyliği",
-      "matchPolicy": "candidate-match",
-      "sourceMatches": [
-        {"sourceId": "cliopatria-v0.2.0", "names": ["Ottoman Beylik", "Ottomans"], "matchStatus": "candidate"}
-      ],
-      "notes": "Do not infer province ownership from name match alone; Bursa control is separately evidenced in the 1326 evidence matrix."
-    },
-    {
-      "entityId": "byzantine-empire",
-      "displayName": "Bizans İmparatorluğu",
-      "matchPolicy": "candidate-match",
-      "sourceMatches": [
-        {"sourceId": "cliopatria-v0.2.0", "names": ["Byzantine Empire"], "matchStatus": "candidate"}
-      ]
-    },
-    {
-      "entityId": "esrefogullari",
-      "displayName": "Eşrefoğulları",
-      "matchPolicy": "candidate-match",
-      "sourceMatches": [
-        {"sourceId": "cliopatria-v0.2.0", "names": ["Eshrefids", "Eshrefid Emirate", "Eşrefoğulları"], "matchStatus": "candidate"}
-      ],
-      "notes": "The 1326-04-07 existence gate remains independently supported; later October 1326 events must not be projected backward."
-    },
-    {
-      "entityId": "ilkhanate",
-      "displayName": "İlhanlılar",
-      "matchPolicy": "candidate-match",
-      "sourceMatches": [
-        {"sourceId": "cliopatria-v0.2.0", "names": ["Ilkhanate", "Ilkhanids"], "matchStatus": "candidate"}
-      ]
-    },
-    {
-      "entityId": "karasi",
-      "displayName": "Karesi Beyliği",
-      "matchPolicy": "candidate-match",
-      "sourceMatches": [
-        {"sourceId": "cliopatria-v0.2.0", "names": ["Karasi"], "matchStatus": "candidate"}
-      ]
-    },
-    {
-      "entityId": "saruhan",
-      "displayName": "Saruhan Beyliği",
-      "matchPolicy": "candidate-match",
-      "sourceMatches": [
-        {"sourceId": "cliopatria-v0.2.0", "names": ["Saruhan"], "matchStatus": "candidate"}
-      ]
-    },
-    {
-      "entityId": "aydin",
-      "displayName": "Aydınoğulları",
-      "matchPolicy": "candidate-match",
-      "sourceMatches": [
-        {"sourceId": "cliopatria-v0.2.0", "names": ["Aydinids", "Aydın"], "matchStatus": "candidate"}
-      ]
-    },
-    {
-      "entityId": "alaye",
-      "displayName": "Alâiye Beyliği",
-      "matchPolicy": "candidate-match",
-      "sourceMatches": [
-        {"sourceId": "cliopatria-v0.2.0", "names": ["Alaiye", "Alanya"], "matchStatus": "candidate"}
-      ]
-    }
+    {"entityId":"ottoman-beylik","displayName":"Osmanlı Beyliği","matchPolicy":"candidate-match","sourceMatches":[],"notes":"Cliopatria identity must be resolved from the acquired v0.2.0 record using stable identifiers and reviewed source fields; no unverified alias is committed."},
+    {"entityId":"byzantine-empire","displayName":"Bizans İmparatorluğu","matchPolicy":"candidate-match","sourceMatches":[],"notes":"Cliopatria identity must be resolved from the acquired v0.2.0 record using stable identifiers and reviewed source fields; no unverified alias is committed."},
+    {"entityId":"esrefogullari","displayName":"Eşrefoğulları","matchPolicy":"candidate-match","sourceMatches":[],"notes":"Cliopatria identity must be resolved from the acquired v0.2.0 record; the 1326-04-07 existence gate remains independently supported."},
+    {"entityId":"ilkhanate","displayName":"İlhanlılar","matchPolicy":"candidate-match","sourceMatches":[],"notes":"Cliopatria identity must be resolved from the acquired v0.2.0 record using stable identifiers and reviewed source fields."},
+    {"entityId":"karasi","displayName":"Karesi Beyliği","matchPolicy":"candidate-match","sourceMatches":[],"notes":"Exact source identity and 1326 territorial evidence remain unresolved."},
+    {"entityId":"saruhan","displayName":"Saruhan Beyliği","matchPolicy":"candidate-match","sourceMatches":[],"notes":"Exact source identity and 1326 territorial evidence remain unresolved."},
+    {"entityId":"aydin","displayName":"Aydınoğulları","matchPolicy":"candidate-match","sourceMatches":[],"notes":"Exact source identity and 1326 territorial evidence remain unresolved."},
+    {"entityId":"alaye","displayName":"Alâiye Beyliği","matchPolicy":"candidate-match","sourceMatches":[],"notes":"Exact source identity and 1326 territorial evidence remain unresolved."}
   ],
   "globalRules": [
     "A name match is never sufficient for canonical entity promotion.",
