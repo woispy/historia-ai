@@ -1,13 +1,14 @@
 import { createHistoricalAssetId } from "./HistoricalAssetId.js";
 
 function createHeader(assetType, region) {
+  const year = Number.isInteger(region.year) ? region.year : 1300;
   return {
     assetType,
     assetVersion: 4,
     generator: "Historia Historical GIS Importer",
     provider: region.provider ?? "historical-basemaps",
     dataset: region.dataset ?? "world_1300.geojson",
-    historicalDate: "1300-01-01",
+    historicalDate: region.historicalDate ?? `${String(year).padStart(4, "0")}-01-01`,
     borderPrecision: region.borderPrecision,
     sourceFeatureId: region.sourceFeatureId,
     sourceFeatureIndex: region.sourceFeatureIndex,
@@ -25,6 +26,7 @@ export function buildCuratedRegionalAssets(regionalLayer) {
     }
 
     const normalized = {
+      ...region,
       assetId: region.id,
       name: region.name,
       sourceName: region.name,
@@ -36,6 +38,8 @@ export function buildCuratedRegionalAssets(regionalLayer) {
       polygons: region.polygons,
       provider: "historia-ai-curated",
       dataset: regionalLayer.id,
+      year: region.year ?? 1300,
+      historicalDate: region.historicalDate ?? null,
     };
 
     const province = buildHistoricalProvinceAsset(normalized);
@@ -53,10 +57,11 @@ export function buildCuratedRegionalAssets(regionalLayer) {
 }
 
 function getAssetId(region) {
+  const year = Number.isInteger(region.year) ? region.year : 1300;
   return (
     region.assetId ??
     createHistoricalAssetId({
-      year: 1300,
+      year,
       sourceFeatureId: region.sourceFeatureId,
       sourceFeatureIndex: region.sourceFeatureIndex,
     })
