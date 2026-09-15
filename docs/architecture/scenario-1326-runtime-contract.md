@@ -6,9 +6,7 @@ Design contract for the canonical playable `1326` scenario.
 
 The production scenario date is **1326-04-07**. The existing `1300` scenario and its historical GIS assets remain reference/legacy material and are not relabeled as 1326.
 
-The engineering stabilization gate is now **GREEN**: the current canonical branch completed the full 77-step validation/build/scalability workflow successfully on commit `e3d5acb6a4203738f7f41f972fc5f777629576da` (workflow run `34995090171`).
-
-The active blocker is therefore no longer CI/lint stabilization. The active blocker is authoritative 1326 historical source acquisition, reconciliation, review, and canonical geography production.
+The engineering stabilization gate is **GREEN**: the current acquisition branch completed the full **83-step** validation/build/scalability workflow successfully on workflow run `35020661408`. The active blocker is therefore no longer CI/lint stabilization; it is authoritative 1326 historical source acquisition, reconciliation, review, and canonical geography production.
 
 ## Runtime dependency
 
@@ -110,60 +108,67 @@ The decision must update simulation state; it must not be implemented as narrati
 
 ## Import pipeline
 
-The legacy `import-1300.js` remains available as a regression/reference path. A new year-agnostic `import-historical.js` accepts an explicit year and GeoJSON input and writes an **evidence-only** runtime asset under the requested historical year. It does not promote source polygons to canonical political authority.
+The legacy `import-1300.js` remains available as a regression/reference path. The year-agnostic `import-historical.js` accepts an explicit year and GeoJSON input and writes an **evidence-only** runtime asset under the requested historical year. It does not promote source polygons to canonical political authority. The separate `acquire-historical-source.js` path records source identity, version, license classification, acquisition metadata, temporal filtering, and an input SHA-256 when provided. fileciteturn595file0
 
-The generic asset builder now propagates the requested historical year/date into asset identity and headers. This prevents a future 1326 import from silently producing `1300` asset IDs or metadata while preserving the existing 1300 default behavior of legacy callers.
+The generic asset builder propagates the requested historical year/date into asset identity and headers. This prevents a future 1326 import from silently producing `1300` asset IDs or metadata while preserving the existing 1300 default behavior of legacy callers.
 
 Example:
 
 ```text
-1326 GeoJSON evidence
+pinned source snapshot
       ↓
-import-historical.js --year 1326 --input <source.geojson>
+acquire-historical-source.js
       ↓
-evidence-only runtime
+1326 temporal evidence
       ↓
-historical reconciliation
+Cliopatria candidate extraction
+      ↓
+entity reconciliation
+      ↓
+geometry reconciliation
       ↓
 canonical political geography
       ↓
 production runtime/mapbin
 ```
 
+Acquisition output remains evidence-only. The source registry explicitly forbids copying 1300 geometry, back-projecting later 1326 territorial changes to April 7, synthetic fallback geometry, or treating broad polity existence as proof of a province polygon. fileciteturn597file0
+
 ## Engineering stabilization gate
 
-The production branch has now passed the engineering stabilization gate.
+The production acquisition branch has passed the engineering stabilization gate.
 
 Verified workflow:
 
 ```text
-commit: e3d5acb6a4203738f7f41f972fc5f777629576da
-workflow: 34995090171
+workflow: 35020661408
 result: SUCCESS
-validation/build/scalability steps: 77/77
+validation/build/scalability steps: 83/83
 ```
 
-The successful workflow included lint, physical geography, historical GIS, topology, P3/P4/P5, P6.1/P6.2, cartography, GPU pack, runtime/startup, production build, repository cleanliness, and 15K+ scalability/diagnostics checks.
+The successful workflow includes lint; historical source acquisition, Cliopatria candidate extraction, entity reconciliation, entity evidence audit, geometry evidence inventory, cross-source geometry reconciliation; physical geography; topology; P3/P4/P5; P6.1/P6.2; cartography; GPU pack; runtime/startup; production build; repository cleanliness; and 15K+ scalability/diagnostics checks.
 
 The terrain diagnostics contract remains fail-closed until the streamed DEM mesh passes visual validation at every LOD.
 
 ## 1326 source evidence gate
 
-The source registry is now established at:
+The source registry is established at:
 
 ```text
 data/gis/1326/registry.json
+data/gis/1326/acquisition-manifest.json
 docs/architecture/1326-source-register.md
 ```
 
-The registry is evidence-only. It does not constitute canonical political geography.
+The registry and acquisition manifest are evidence-only. They do not constitute canonical political geography.
 
 Current candidate evidence classes include:
 
 - global political-entity evidence from Cliopatria;
 - late-medieval European ecclesiastical boundary evidence from the Digital Atlas of Dioceses and Ecclesiastical Provinces;
 - historical feature/boundary evidence from OpenHistoricalMap;
-- historical place identity and reconciliation evidence from World Historical Gazetteer.
+- historical place identity and reconciliation evidence from World Historical Gazetteer;
+- Byzantine historical-geography reference evidence from Tabula Imperii Byzantini.
 
 These sources have different purposes and limitations. None is automatically authoritative for every 1326 political boundary.
 
@@ -184,4 +189,6 @@ These sources have different purposes and limitations. None is automatically aut
 
 ## Current blocker
 
-**Authoritative 1326 historical geography is not present yet.** The next production work is source acquisition and reconciliation, beginning with Tier 1 evidence and highest-confidence historical entities. The generic importer and runtime architecture are ready; the canonical dataset must still be produced and validated before the 1326 scenario can replace 1300 as the production scenario.
+**Authoritative 1326 historical geography is not present yet.** The engineering pipeline is ready, but the pinned Cliopatria archive still has to be acquired into the local evidence workflow, its actual 1326 candidate records inspected, and those candidates reconciled against independent historical evidence before any canonical geography is promoted.
+
+No binary source archive is committed to the repository. The intended workflow is to acquire the pinned external snapshot locally, verify its recorded identity/hash, extract the GeoJSON, run the evidence-only acquisition/extraction tools, and commit only the compact provenance/evidence artifacts required by the project.
