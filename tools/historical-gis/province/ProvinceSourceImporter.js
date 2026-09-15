@@ -16,8 +16,6 @@
  * or as a topology failure downstream in full face assembly.
  */
 
-import { AuthoritativeArcRegistry } from "./AuthoritativeArcGenerator.js";
-
 const DEFAULT_TOLERANCE = 1e-7;
 const WORLD_FACE_ID = "world";
 const ALLOWED_REVIEW_STATUSES = new Set(["reviewed", "verified"]);
