@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
+import path from "node:path";
 
 const TEMPORAL_KEYS = {
   fromYear: ["FromYear", "fromYear", "FROMYEAR", "from_year"],
@@ -63,11 +64,7 @@ export function readTemporalInterval(feature) {
     };
   }
 
-  return {
-    status: "dated",
-    fromYear,
-    toYear,
-  };
+  return { status: "dated", fromYear, toYear };
 }
 
 export function isApplicableToYear(interval, targetYear, allowTimeless = false) {
@@ -107,11 +104,7 @@ export function filterHistoricalFeatures(
     );
 
     if (interval.status === "invalid") {
-      excluded.push({
-        index,
-        sourceFeatureId,
-        reason: interval.reason,
-      });
+      excluded.push({ index, sourceFeatureId, reason: interval.reason });
       return;
     }
 
@@ -121,13 +114,15 @@ export function filterHistoricalFeatures(
         warnings.push({
           index,
           sourceFeatureId,
-          warning: "Feature has no temporal interval; retained only because allowTimeless=true.",
+          warning:
+            "Feature has no temporal interval; retained only because allowTimeless=true.",
         });
       } else {
         excluded.push({
           index,
           sourceFeatureId,
-          reason: "Feature has no temporal interval; evidence is not silently assumed applicable to the target year.",
+          reason:
+            "Feature has no temporal interval; evidence is not silently assumed applicable to the target year.",
         });
       }
       return;
@@ -229,7 +224,9 @@ export async function acquireHistoricalSource({
       temporalFilter: {
         targetYear,
         rule: "FromYear <= targetYear <= ToYear",
-        timelessPolicy: allowTimeless ? "retain-with-warning" : "exclude-fail-closed",
+        timelessPolicy: allowTimeless
+          ? "retain-with-warning"
+          : "exclude-fail-closed",
       },
       counts: {
         inputFeatures: geojson.features.length,
@@ -241,7 +238,8 @@ export async function acquireHistoricalSource({
       warnings: filtered.warnings,
       promotion: {
         status: "not-promoted",
-        reason: "Acquisition output is source evidence only; canonical historical political geography requires reconciliation, provenance, review, topology, and physical-boundary validation.",
+        reason:
+          "Acquisition output is source evidence only; canonical historical political geography requires reconciliation, provenance, review, topology, and physical-boundary validation.",
       },
     },
   };
@@ -256,15 +254,8 @@ export async function writeHistoricalSourceEvidence({
   if (!outputPath) throw new Error("outputPath is required.");
   if (!manifestPath) throw new Error("manifestPath is required.");
 
-  await fs.mkdir(new URL(".", `file://${outputPath}`).pathname, {
-    recursive: true,
-  }).catch(async () => {
-    const lastSlash = outputPath.lastIndexOf("/");
-    if (lastSlash > 0) await fs.mkdir(outputPath.slice(0, lastSlash), { recursive: true });
-  });
-
-  const manifestDirectory = manifestPath.slice(0, manifestPath.lastIndexOf("/"));
-  if (manifestDirectory) await fs.mkdir(manifestDirectory, { recursive: true });
+  await fs.mkdir(path.dirname(outputPath), { recursive: true });
+  await fs.mkdir(path.dirname(manifestPath), { recursive: true });
 
   await fs.writeFile(
     outputPath,
