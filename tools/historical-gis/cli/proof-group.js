@@ -29,8 +29,8 @@ if (!sourcePath) {
   process.exitCode = 1;
 } else {
   const readJson = async (name) => JSON.parse(await fs.readFile(path.join(fixtureDirectory, name), "utf8"));
-  let coverage = null;
-  let provincesManifest = null;
+  let coverage;
+  let provincesManifest;
   try {
     coverage = await readJson("coverage.json");
   } catch {
