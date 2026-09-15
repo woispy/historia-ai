@@ -50,6 +50,7 @@ export default function MapStudioEditor({ template, mapConfig, coverage = null, 
     const imageUrl = mapConfig?.imageUrl;
     if (!imageUrl) {
       imageRef.current = null;
+      setImageReadyUrl(null);
       return undefined;
     }
     const image = new Image();
@@ -59,6 +60,7 @@ export default function MapStudioEditor({ template, mapConfig, coverage = null, 
     };
     image.onerror = () => {
       if (imageRef.current === image) imageRef.current = null;
+      setImageReadyUrl((current) => current === imageUrl ? null : current);
     };
     image.src = imageUrl;
     return () => {
@@ -66,7 +68,7 @@ export default function MapStudioEditor({ template, mapConfig, coverage = null, 
     };
   }, [mapConfig?.imageUrl]);
 
-  const imageReady = Boolean(mapConfig?.imageUrl && imageReadyUrl === mapConfig.imageUrl && imageRef.current);
+  const imageReady = Boolean(mapConfig?.imageUrl && imageReadyUrl === mapConfig.imageUrl);
 
   const viewExtent = useMemo(() => {
     const bbox = coverage?.bbox;
