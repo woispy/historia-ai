@@ -136,11 +136,13 @@ The latest observed workflow attempt before the current cleanup commits checked 
 
 The workflow contains 77 validation/build/scalability steps after setup. Since lint is an early gate, a lint failure skips the later map, GIS, runtime, build, and 15K+ scalability checks. A green result therefore requires observing the workflow on the current branch after lint reaches zero.
 
-Current cleanup scope is intentionally narrow:
+The current cleanup pass remains behavior-preserving and includes:
 
-- preserve triangulation and terrain behavior while removing only genuinely unused bindings;
+- remove genuinely unused triangulation constants/locals without changing thresholds or algorithms;
+- remove unused terrain renderer imports while retaining the dynamic telemetry import and terrain buffers;
 - avoid reading React refs during render in `MapStudioEditor`;
 - remove unused physical-geography accumulators without changing classification behavior;
+- clean runtime, reference-layer, visual-regression, and proof-group test/CLI bindings while preserving their assertions and validation paths;
 - keep legacy/reference GIS paths intact unless repository usage proves they are dead;
 - do not introduce new Voronoi, jitter, anchor, or fallback geometry generation;
 - update this contract whenever the acceptance state changes.
