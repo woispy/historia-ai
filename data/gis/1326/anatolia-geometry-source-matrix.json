@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "id": "historical_gis_1326_anatolia_geometry_source_matrix",
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "evidence-only",
+  "purpose": "Record which independent historical-geography sources can contribute evidence to 1326 Anatolian geometry reconstruction without treating regional reference material as automatic political boundary authority.",
+  "sources": [
+    {
+      "sourceId": "cliopatria-v0.2.0",
+      "role": "global-polity-candidate-geometry",
+      "authorityForCanonicalGeometry": false,
+      "observedCandidates": {
+        "ottoman-beylik": "6204",
+        "ilkhanate": "6179",
+        "saruhan": "6208",
+        "aydin": "6224",
+        "karasi": "6227",
+        "hamid": "6229",
+        "teke": "6221",
+        "byzantine-empire": "6241",
+        "sinop": "6242",
+        "germiyanids": "6249"
+      },
+      "limitations": [
+        "Source polity names and territorial interpretations require review.",
+        "Temporal applicability is interval-based and does not prove the exact 7 April 1326 boundary state.",
+        "Source geometry is evidence only until independent reconciliation and review."
+      ]
+    },
+    {
+      "sourceId": "tib-13-bithynia-hellespont",
+      "role": "Byzantine-historical-geography-region-reference",
+      "authorityForCanonicalGeometry": false,
+      "regionalUse": ["Bithynia", "Hellespont", "northwestern Anatolia", "Marmara approaches"],
+      "availability": "published volume and digital register/reference resources",
+      "limitations": [
+        "TIB is a historical-geography atlas/reference, not a 1326 political boundary dataset.",
+        "Regional evidence must be translated into dated political-boundary evidence through separate review."
+      ]
+    },
+    {
+      "sourceId": "tib-14-western-asia-minor",
+      "role": "Western-Anatolia historical-geography-region-reference",
+      "authorityForCanonicalGeometry": false,
+      "regionalUse": ["Lydia", "Asia", "İzmir/Smyrna hinterland", "Manisa", "Alaşehir/Philadelphia", "Sardis", "Aegean western Anatolia"],
+      "documentedCoverage": "Slightly more than 35,000 km2 covering parts of Çanakkale and Balıkesir, all of İzmir and Manisa, western Uşak, northwestern Denizli and northern Aydın.",
+      "physicalAnchors": ["Kaikos/Bakır çay", "Hermos/Gediz", "Kaÿstrios/Küçük Menderes", "Maiandros/Büyük Menderes", "Kaz dağları", "Dilek dağları"],
+      "limitations": [
+        "The published TIB 14 description concerns late antique provinces and broader Byzantine historical geography; it does not itself define 1326 beylik borders.",
+        "TIB 14 is therefore a regional/physical/settlement evidence layer for reconstruction, not a political polygon source."
+      ]
+    },
+    {
+      "sourceId": "tib-7-phrygia-pisidia",
+      "role": "Central-western-Anatolia historical-geography-region-reference",
+      "authorityForCanonicalGeometry": false,
+      "regionalUse": ["Phrygia", "Pisidia", "western interior Anatolia"],
+      "limitations": [
+        "Historical regional geography must not be equated with 1326 political control.",
+        "Use for settlement, routes, terrain and historical-region context."
+      ]
+    },
+    {
+      "sourceId": "tib-4-galatia-lycaonia",
+      "role": "Central-Anatolia historical-geography-region-reference",
+      "authorityForCanonicalGeometry": false,
+      "regionalUse": ["Galatia", "Lycaonia", "central Anatolia"],
+      "limitations": [
+        "Use as historical geography and place evidence; political boundary reconstruction remains a separate task."
+      ]
+    },
+    {
+      "sourceId": "tib-5-cilicia-isauria",
+      "role": "Southern-Anatolia historical-geography-region-reference",
+      "authorityForCanonicalGeometry": false,
+      "regionalUse": ["Cilicia", "Isauria", "southern Anatolia"],
+      "limitations": [
+        "Use for regional geography, routes, settlements and physical anchors; do not directly convert the TIB regional extent into Alâiye or other beylik geometry."
+      ]
+    },
+    {
+      "sourceId": "tib-8-lycia-pamphylia",
+      "role": "Southwestern-Anatolia historical-geography-region-reference",
+      "authorityForCanonicalGeometry": false,
+      "regionalUse": ["Lycia", "Pamphylia", "southwestern Anatolia"],
+      "limitations": [
+        "Regional coverage does not establish 1326 political ownership by itself."
+      ]
+    }
+  ],
+  "entityAssessment": [
+    {
+      "entityId": "ottoman-beylik",
+      "cliopatriaCandidate": "6204",
+      "tibRegionalSources": ["tib-13-bithynia-hellespont", "tib-14-western-asia-minor", "tib-7-phrygia-pisidia"],
+      "geometryReconstructionStatus": "candidate-cross-source-review",
+      "reason": "Cliopatria supplies a dated polity candidate; TIB supplies independent regional, settlement, route and physical-geography context. Neither source alone is sufficient for canonical political geometry."
+    },
+    {
+      "entityId": "karasi",
+      "cliopatriaCandidate": "6227",
+      "tibRegionalSources": ["tib-13-bithynia-hellespont", "tib-14-western-asia-minor"],
+      "geometryReconstructionStatus": "candidate-cross-source-review",
+      "reason": "The candidate overlaps a TIB-covered historical-geography region, but TIB regional coverage is not a direct Karesi boundary source."
+    },
+    {
+      "entityId": "saruhan",
+      "cliopatriaCandidate": "6208",
+      "tibRegionalSources": ["tib-14-western-asia-minor"],
+      "geometryReconstructionStatus": "candidate-cross-source-review",
+      "reason": "Western Asia Minor evidence is directly relevant to the historical landscape around Manisa/İzmir, but the source does not by itself define Saruhan's 1326 political boundary."
+    },
+    {
+      "entityId": "aydin",
+      "cliopatriaCandidate": "6224",
+      "tibRegionalSources": ["tib-14-western-asia-minor"],
+      "geometryReconstructionStatus": "candidate-cross-source-review",
+      "reason": "TIB 14 covers northern Aydın and adjacent western Anatolian geography, providing regional anchors but not an automatic Aydınoğulları polygon."
+    },
+    {
+      "entityId": "esrefogullari",
+      "cliopatriaCandidate": null,
+      "tibRegionalSources": ["tib-4-galatia-lycaonia", "tib-7-phrygia-pisidia"],
+      "geometryReconstructionStatus": "independent-evidence-required",
+      "reason": "No exact Cliopatria candidate was observed. TIB regional coverage may support place/landscape reconstruction, but an entity-specific 1326 boundary source is still required."
+    },
+    {
+      "entityId": "alaye",
+      "cliopatriaCandidate": null,
+      "tibRegionalSources": ["tib-5-cilicia-isauria", "tib-8-lycia-pamphylia"],
+      "geometryReconstructionStatus": "independent-evidence-required",
+      "reason": "No exact Cliopatria candidate was observed. TIB regional sources can provide historical-geography context but do not establish an Alâiye political polygon."
+    }
+  ],
+  "promotionRules": [
+    "TIB regional coverage is evidence, not political authority.",
+    "Cliopatria geometry is evidence, not canonical authority.",
+    "A canonical polygon requires entity identity, date applicability, geometry provenance, independent corroboration where available, topology validation, physical-boundary validation and review.",
+    "Where independent evidence is insufficient, geometryStatus remains pending and no synthetic geometry may be generated.",
+    "Historical regional names, Byzantine administrative regions and later Ottoman provincial concepts must not be silently conflated with 1326 political entities."
+  ],
+  "webEvidence": [
+    {
+      "source": "Tabula Imperii Byzantini",
+      "url": "https://tib.oeaw.ac.at/",
+      "claim": "TIB systematically researches Byzantine historical geography from the 4th century to the mid-15th century and combines maps, geography, borders, territorial designations, administrative history, routes, economy, demographics, toponyms, written sources, archaeology and field research."
+    },
+    {
+      "source": "TIB 14",
+      "url": "https://tib.oeaw.ac.at/balkan/volumes/TIB_14",
+      "claim": "TIB 14 covers Western Asia Minor including Lydia and Asia and describes the regional physical geography, settlements and major rivers relevant to western Anatolia."
+    },
+    {
+      "source": "Dig-TIB",
+      "url": "https://tib.oeaw.ac.at/subprojects/digtib",
+      "claim": "TIB geographical registers for volumes 1-15 are available online, with searchable toponyms and page references; selected volume pages can be opened for context."
+    }
+  ]
+}
