@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "scope": "Saruhan core and Gediz basin source review",
+  "status": "evidence-only",
+  "canonicalGeometryPromotion": "blocked",
+  "principles": [
+    "Political control is distinct from settlement, fortress, route, and economic evidence.",
+    "Later Ottoman administrative boundaries are not used as 1326 province polygons.",
+    "Later conquests are not back-projected into the 1326 snapshot.",
+    "A source-supported city or fortress anchor does not by itself justify a surrounding territorial polygon."
+  ],
+  "sources": [
+    {
+      "id": "tdv-saruhanoğulları",
+      "title": "Saruhanoğulları",
+      "publisher": "TDV İslâm Ansiklopedisi",
+      "url": "https://islamansiklopedisi.org.tr/saruhanogullari",
+      "role": "primary synthesis for polity extent and chronology"
+    },
+    {
+      "id": "tdv-manisa",
+      "title": "Manisa",
+      "publisher": "TDV İslâm Ansiklopedisi",
+      "url": "https://islamansiklopedisi.org.tr/manisa",
+      "role": "city capture and fortress context"
+    },
+    {
+      "id": "tdv-akhisar",
+      "title": "Akhisar",
+      "publisher": "TDV İslâm Ansiklopedisi",
+      "url": "https://islamansiklopedisi.org.tr/akhisar",
+      "role": "city and early Saruhan control context"
+    },
+    {
+      "id": "tdv-alasehir",
+      "title": "Alaşehir",
+      "publisher": "TDV İslâm Ansiklopedisi",
+      "url": "https://islamansiklopedisi.org.tr/alasehir",
+      "role": "critical negative control evidence for 1326"
+    },
+    {
+      "id": "gediz-basin-roads",
+      "title": "Gediz Havzasında Tarihi Köprüler ve Fonksiyonel Özellikleri",
+      "publisher": "Doğu Coğrafya Dergisi",
+      "url": "https://dergipark.org.tr/tr/pub/ataunidcd/article/31235",
+      "role": "route-network and basin geography context"
+    },
+    {
+      "id": "manisa-urban-form",
+      "title": "Saruhanlı Beyliği Dönemi Manisa Kent Kurgusu Üzerine Düşünceler",
+      "publisher": "Art-Sanat",
+      "url": "https://dergipark.org.tr/tr/pub/iuarts/article/604353",
+      "role": "fortress, terrain and urban morphology"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "Manisa",
+      "historicalName": "Magnesia",
+      "role": ["capital", "fortress", "urban-center", "road-node"],
+      "control": "Saruhan",
+      "confidence": "high",
+      "dateBasis": "captured after a prolonged siege sometime after 1310; 1313 is widely used but TDV notes that the exact date is not established by a contemporary source",
+      "geometryPolicy": "point/urban anchor only until reviewed historical extent exists"
+    },
+    {
+      "name": "Akhisar",
+      "historicalName": "Thyateira",
+      "role": ["urban-center", "fortress", "agricultural-basin-node"],
+      "control": "Saruhan",
+      "confidence": "medium-high",
+      "dateBasis": "TDV states the city was probably first brought under Turkish rule by Saruhanoğulları active in Manisa region from 1300",
+      "geometryPolicy": "anchor; no modern district polygon"
+    },
+    {
+      "name": "Demirci",
+      "role": ["eastern-frontier-anchor", "mountain-route-node"],
+      "control": "Saruhan-associated",
+      "confidence": "medium",
+      "dateBasis": "TDV places Demirci on the eastern side of Saruhan territory and records it as a separate appanage associated with Çuga Bey",
+      "geometryPolicy": "anchor; territorial extent unresolved"
+    },
+    {
+      "name": "Borlu",
+      "role": ["eastern-frontier-anchor", "river-route-node"],
+      "control": "Saruhan-associated",
+      "confidence": "medium",
+      "dateBasis": "named by TDV among the eastern limits of the beylik",
+      "geometryPolicy": "anchor; territorial extent unresolved"
+    },
+    {
+      "name": "Adala",
+      "role": ["Gediz-basin-node", "route-node"],
+      "control": "Saruhan-associated",
+      "confidence": "medium",
+      "dateBasis": "named by TDV among eastern limits of Saruhan territory",
+      "geometryPolicy": "anchor; no administrative polygon inference"
+    },
+    {
+      "name": "Turgutlu",
+      "historicalName": "Kasaba-area",
+      "role": ["Gediz-basin-node", "road-node"],
+      "control": "Saruhan-associated",
+      "confidence": "medium",
+      "dateBasis": "named by TDV among the westward Saruhan domain; modern town identity must not be projected directly onto 1326",
+      "geometryPolicy": "historical locality/route anchor"
+    },
+    {
+      "name": "Nif/Kemalpaşa",
+      "historicalName": "Nymphaion",
+      "role": ["fortress", "palace-site", "route-node", "frontier-anchor"],
+      "control": "Saruhan-associated, but boundary-sensitive",
+      "confidence": "medium",
+      "dateBasis": "TDV places Nif within Saruhan's western/eastern boundary description and states Saruhan gave Nif to his brother Ali Bey; independent research identifies a Saruhan/Aydın frontier across Nif Mountain",
+      "geometryPolicy": "anchor plus frontier corridor; do not infer a large polygon"
+    },
+    {
+      "name": "Gördes",
+      "role": ["upland-anchor", "route-node"],
+      "control": "Saruhan-associated",
+      "confidence": "medium",
+      "dateBasis": "appears in later Saruhan territorial tradition, but direct 7 April 1326 evidence is thinner than for Manisa/Akhisar",
+      "geometryPolicy": "retain as review candidate, not canonical polygon"
+    },
+    {
+      "name": "Menemen",
+      "role": ["Gediz-mouth-node", "coastal-route-node"],
+      "control": "Saruhan-associated",
+      "confidence": "medium",
+      "dateBasis": "TDV's Saruhan synthesis includes Menemen and the İzmir Gulf western shore among the beylik's western extent; exact 1326 local boundary requires further review",
+      "geometryPolicy": "anchor; separate political control from coastal/trade function"
+    },
+    {
+      "name": "Alaşehir/Philadelphia",
+      "historicalName": "Philadelphia",
+      "role": ["fortified-city", "route-node", "Byzantine-anchor"],
+      "control": "Byzantine",
+      "confidence": "high",
+      "dateBasis": "TDV states that after a 1324 Germiyan attack the city was relieved by Andronikos II, then soon entered Aydinid protection, but remained the only Byzantine city in western Anatolia not conquered by Turks until Bayezid's 1391 conquest",
+      "geometryPolicy": "Byzantine city anchor; do not assign to Saruhan in 1326"
+    }
+  ],
+  "territorialSynthesis": {
+    "core": ["Manisa", "Akhisar", "Gediz basin"],
+    "northwest": ["Akhisar", "Menemen"],
+    "east": ["Demirci", "Borlu", "Adala", "Kemaliye"],
+    "southwest": ["Turgutlu", "Nif/Kemalpaşa", "Menemen"],
+    "southernBoundary": "Aydın/Germiyan interface remains evidence-sensitive",
+    "northBoundary": "Karesi interface requires reconciliation with the previously recorded Karesi/Troas evidence"
+  },
+  "routeNetwork": [
+    {
+      "route": "Manisa–Turgutlu–Salihli–Alaşehir/Uşak direction",
+      "role": "major east-west Gediz corridor",
+      "confidence": "high as geographic corridor; political control must be evaluated per node"
+    },
+    {
+      "route": "Turgutlu–Manisa–Menemen–Foça",
+      "role": "northwest coastal connection",
+      "confidence": "high as later-documented route family; exact medieval alignment requires local archaeological review"
+    },
+    {
+      "route": "Akhisar–Gölmarmara–Salihli",
+      "role": "Gediz basin connection",
+      "confidence": "medium-high"
+    },
+    {
+      "route": "Demirci–Köprübaşı–Salihli",
+      "role": "upland-to-basin connection",
+      "confidence": "medium"
+    }
+  ],
+  "negativeEvidence": [
+    {
+      "place": "Alaşehir",
+      "rule": "Do not promote to Saruhan control in 1326 solely because it lies inside modern Manisa Province."
+    },
+    {
+      "place": "Alaşehir",
+      "rule": "Do not use Umur Bey's 1335 conquest or Bayezid's 1390/1391 conquest as 1326 evidence."
+    },
+    {
+      "place": "Nif/Kemalpaşa",
+      "rule": "Do not treat the modern district boundary as a medieval Saruhan polygon; the Nif Mountain frontier requires separate reconciliation with Aydın evidence."
+    }
+  ],
+  "promotionGate": {
+    "status": "blocked",
+    "requirements": [
+      "date-specific political-control evidence",
+      "historical boundary reconstruction independent of modern administrative boundaries",
+      "topology reconciliation with Karesi, Aydin and Germiyan source reviews",
+      "confidence and provenance retained per edge/anchor"
+    ]
+  }
+}

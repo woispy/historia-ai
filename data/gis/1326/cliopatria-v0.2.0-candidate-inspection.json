@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "historical_gis_1326_cliopatria_v0_2_0_candidate_inspection",
+  "scenarioDate": "1326-04-07",
+  "targetYear": 1326,
+  "authorityStatus": "evidence-only",
+  "source": {
+    "id": "cliopatria-v0.2.0",
+    "provider": "Seshat Global History Databank",
+    "version": "v0.2.0",
+    "releaseDate": "2026-05-16",
+    "archiveFilename": "cliopatria-v0.2.0.zip",
+    "archiveSizeBytes": 297058350,
+    "archiveMd5": "6d573d5a07dfcd5a2c6c9933d6401d48",
+    "isolatedDataset": "cliopatria_polities_only.geojson",
+    "isolatedDatasetSha256": "5df3b5868cfab8f76030853fa2346ed3cd71171ad807b6f72d783ee2dce6839e",
+    "projection": "EPSG:4326"
+  },
+  "extractionRule": "Type == POLITY and FromYear <= 1326 <= ToYear",
+  "featureCount": 13765,
+  "candidateCount": 150,
+  "geometrySummary": {"polygon": 101, "multiPolygon": 49, "valid": 149, "invalid": 1},
+  "invalidCandidates": [{
+    "sourceFeatureId": "6203",
+    "sourceFeatureIndex": 6203,
+    "sourceName": "(Kingdom of France)",
+    "fromYear": 1326,
+    "toYear": 1332,
+    "wikidataId": "Q207162",
+    "seshatId": "fr_capetian_k_2",
+    "geometryType": "MultiPolygon",
+    "geometryValid": false,
+    "geometryValidityReason": "Too few points in geometry component[5.91519165039062 44.6792812347412]"
+  }],
+  "observedTargetCandidates": [
+    {"sourceFeatureId":"6179","sourceName":"Ilkhanate","fromYear":1314,"toYear":1332,"wikidataId":"Q178084","seshatId":"ir_il_khanate","areaKm2":3710501.663249251,"geometryType":"MultiPolygon","geometryValid":true},
+    {"sourceFeatureId":"6202","sourceName":"Banate of Bosnia","fromYear":1326,"toYear":1332,"wikidataId":"Q3627069","seshatId":"ba_bosnia_banate","areaKm2":28973.10246344632,"geometryType":"Polygon","geometryValid":true},
+    {"sourceFeatureId":"6204","sourceName":"Ottoman Empire","fromYear":1326,"toYear":1332,"wikidataId":"Q12560","seshatId":"","areaKm2":27118.09024679865,"geometryType":"Polygon","geometryValid":true},
+    {"sourceFeatureId":"6207","sourceName":"Second Bulgarian Empire","fromYear":1326,"toYear":1332,"wikidataId":"Q420759","seshatId":"","areaKm2":106120.6763150234,"geometryType":"Polygon","geometryValid":true},
+    {"sourceFeatureId":"6208","sourceName":"Beylik of Saruhan","fromYear":1326,"toYear":1406,"wikidataId":"Q1968654","seshatId":"","areaKm2":14138.811586473767,"geometryType":"Polygon","geometryValid":true},
+    {"sourceFeatureId":"6210","sourceName":"Armenian Kingdom of Cilicia","fromYear":1326,"toYear":1332,"wikidataId":"Q335088","seshatId":"","areaKm2":36551.18918038442,"geometryType":"Polygon","geometryValid":true},
+    {"sourceFeatureId":"6213","sourceName":"Kingdom of Serbia","fromYear":1326,"toYear":1332,"wikidataId":"Q241748","seshatId":"rs_serbia_k","areaKm2":102415.57630431518,"geometryType":"Polygon","geometryValid":true},
+    {"sourceFeatureId":"6221","sourceName":"Beylik of Teke","fromYear":1326,"toYear":1332,"wikidataId":"Q373988","seshatId":"","areaKm2":30549.60089142698,"geometryType":"Polygon","geometryValid":true},
+    {"sourceFeatureId":"6224","sourceName":"Beylik of Aydin","fromYear":1326,"toYear":1414,"wikidataId":"Q717112","seshatId":"","areaKm2":7957.838692289094,"geometryType":"Polygon","geometryValid":true},
+    {"sourceFeatureId":"6227","sourceName":"Beylik of Karasi","fromYear":1326,"toYear":1332,"wikidataId":"Q941887","seshatId":"","areaKm2":30666.060435992553,"geometryType":"Polygon","geometryValid":true},
+    {"sourceFeatureId":"6229","sourceName":"Beylik of Hamid","fromYear":1326,"toYear":1332,"wikidataId":"Q2410637","seshatId":"","areaKm2":30958.027226048078,"geometryType":"Polygon","geometryValid":true},
+    {"sourceFeatureId":"6231","sourceName":"Kingdom of Hungary","fromYear":1326,"toYear":1332,"wikidataId":"Q171150","seshatId":"hu_later_dyn","areaKm2":341023.355557945,"geometryType":"Polygon","geometryValid":true},
+    {"sourceFeatureId":"6241","sourceName":"Byzantine Empire","fromYear":1326,"toYear":1332,"wikidataId":"Q112039853","seshatId":"","areaKm2":154752.5712281389,"geometryType":"MultiPolygon","geometryValid":true},
+    {"sourceFeatureId":"6242","sourceName":"Beylik of Sinop","fromYear":1326,"toYear":1332,"wikidataId":"Q2096678","seshatId":"","areaKm2":13695.159631350227,"geometryType":"Polygon","geometryValid":true},
+    {"sourceFeatureId":"6249","sourceName":"Germiyanids","fromYear":1326,"toYear":1332,"wikidataId":"Q1324889","seshatId":"","areaKm2":22215.196220714533,"geometryType":"Polygon","geometryValid":true},
+    {"sourceFeatureId":"6053","sourceName":"Empire of Trebizond","fromYear":1326,"toYear":1332,"wikidataId":"Q178913","seshatId":"tr_trebizond_emp","areaKm2":14971.642530942623,"geometryType":"MultiPolygon","geometryValid":true},
+    {"sourceFeatureId":"6133","sourceName":"Republic of Genoa","fromYear":1326,"toYear":1332,"wikidataId":"Q174306","seshatId":"it_genoa_rep_2","areaKm2":28010.293690103343,"geometryType":"MultiPolygon","geometryValid":true},
+    {"sourceFeatureId":"6193","sourceName":"Golden Horde","fromYear":1326,"toYear":1332,"wikidataId":"Q79965","seshatId":"ru_golden_horde","areaKm2":4925316.962530983,"geometryType":"MultiPolygon","geometryValid":true},
+    {"sourceFeatureId":"6220","sourceName":"Republic of Venice","fromYear":1326,"toYear":1332,"wikidataId":"Q4948","seshatId":"it_venetian_rep_3","areaKm2":18375.970909410713,"geometryType":"MultiPolygon","geometryValid":true},
+    {"sourceFeatureId":"6047","sourceName":"Mamluk Sultanate","fromYear":1326,"toYear":1332,"wikidataId":"Q282428","seshatId":"eg_mamluk_sultanate_1","areaKm2":1468646.1005294216,"geometryType":"Polygon","geometryValid":true}
+  ],
+  "notObservedByExactName": [
+    {"canonicalEntityId":"esrefogullari","searchedName":"Eşrefoğulları","interpretation":"Absence from this Cliopatria candidate set is not evidence of historical non-existence at 1326-04-07."},
+    {"canonicalEntityId":"alaye","searchedName":"Alâiye","interpretation":"Absence from this Cliopatria candidate set is not evidence of historical non-existence at 1326-04-07."}
+  ],
+  "interpretationRules": [
+    "Candidate extraction is source evidence only; it does not promote geometry.",
+    "Source naming, borders, territorial extent, and temporal intervals require historical review.",
+    "SourceFeatureId is the source feature index for this inspected GeoJSON because the relevant features do not expose a stable feature id.",
+    "No candidate is converted into canonical province geometry by this artifact.",
+    "The single invalid France geometry is retained as a source-quality finding rather than repaired or silently discarded."
+  ]
+}

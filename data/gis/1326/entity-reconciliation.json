@@ -6,20 +6,69 @@
   "purpose": "Map source-specific historical entity identities to Historia AI canonical entity IDs without promoting source geometry.",
   "promotionRule": "Entity reconciliation establishes identity only; it does not establish canonical political boundaries or control.",
   "records": [
-    {"entityId":"ottoman-beylik","displayName":"Osmanlı Beyliği","matchPolicy":"candidate-match","sourceMatches":[],"notes":"Cliopatria identity must be resolved from the acquired v0.2.0 record using stable identifiers and reviewed source fields; no unverified alias is committed."},
-    {"entityId":"byzantine-empire","displayName":"Bizans İmparatorluğu","matchPolicy":"candidate-match","sourceMatches":[],"notes":"Cliopatria identity must be resolved from the acquired v0.2.0 record using stable identifiers and reviewed source fields; no unverified alias is committed."},
-    {"entityId":"esrefogullari","displayName":"Eşrefoğulları","matchPolicy":"candidate-match","sourceMatches":[],"notes":"Cliopatria identity must be resolved from the acquired v0.2.0 record; the 1326-04-07 existence gate remains independently supported."},
-    {"entityId":"ilkhanate","displayName":"İlhanlılar","matchPolicy":"candidate-match","sourceMatches":[],"notes":"Cliopatria identity must be resolved from the acquired v0.2.0 record using stable identifiers and reviewed source fields."},
-    {"entityId":"karasi","displayName":"Karesi Beyliği","matchPolicy":"candidate-match","sourceMatches":[],"notes":"Exact source identity and 1326 territorial evidence remain unresolved."},
-    {"entityId":"saruhan","displayName":"Saruhan Beyliği","matchPolicy":"candidate-match","sourceMatches":[],"notes":"Exact source identity and 1326 territorial evidence remain unresolved."},
-    {"entityId":"aydin","displayName":"Aydınoğulları","matchPolicy":"candidate-match","sourceMatches":[],"notes":"Exact source identity and 1326 territorial evidence remain unresolved."},
-    {"entityId":"alaye","displayName":"Alâiye Beyliği","matchPolicy":"candidate-match","sourceMatches":[],"notes":"Exact source identity and 1326 territorial evidence remain unresolved."}
+    {
+      "entityId": "ottoman-beylik",
+      "displayName": "Osmanlı Beyliği",
+      "matchPolicy": "candidate-match",
+      "sourceMatches": [{"sourceId":"cliopatria-v0.2.0","sourceFeatureId":"6204","sourceName":"Ottoman Empire","wikidataId":"Q12560","matchStatus":"candidate","matchConfidence":0.99,"matchBasis":["sourceName","Wikidata"]}],
+      "notes": "Observed in the acquired v0.2.0 1326 candidate set. The source label is Ottoman Empire while the Historia AI canonical entity is Osmanlı Beyliği; identity remains evidence-stage and does not promote source geometry."
+    },
+    {
+      "entityId": "byzantine-empire",
+      "displayName": "Bizans İmparatorluğu",
+      "matchPolicy": "candidate-match",
+      "sourceMatches": [{"sourceId":"cliopatria-v0.2.0","sourceFeatureId":"6241","sourceName":"Byzantine Empire","wikidataId":"Q112039853","matchStatus":"candidate","matchConfidence":0.99,"matchBasis":["sourceName","Wikidata"]}],
+      "notes": "Observed in the acquired v0.2.0 1326 candidate set. Identity is recorded as a candidate match only; Byzantine geometry still requires independent historical-geography reconciliation."
+    },
+    {
+      "entityId": "esrefogullari",
+      "displayName": "Eşrefoğulları",
+      "matchPolicy": "candidate-match",
+      "sourceMatches": [],
+      "notes": "No Cliopatria candidate was observed by exact source name in the 1326 extraction. This absence is not evidence of non-existence; the 1326-04-07 existence gate remains independently supported."
+    },
+    {
+      "entityId": "ilkhanate",
+      "displayName": "İlhanlılar",
+      "matchPolicy": "candidate-match",
+      "sourceMatches": [{"sourceId":"cliopatria-v0.2.0","sourceFeatureId":"6179","sourceName":"Ilkhanate","wikidataId":"Q178084","seshatId":"ir_il_khanate","matchStatus":"candidate","matchConfidence":0.99,"matchBasis":["sourceName","Wikidata","SeshatID"]}],
+      "notes": "Observed in the acquired v0.2.0 1326 candidate set. Stable source identifiers are retained for later review; geometry remains evidence-only."
+    },
+    {
+      "entityId": "karasi",
+      "displayName": "Karesi Beyliği",
+      "matchPolicy": "candidate-match",
+      "sourceMatches": [{"sourceId":"cliopatria-v0.2.0","sourceFeatureId":"6227","sourceName":"Beylik of Karasi","wikidataId":"Q941887","matchStatus":"candidate","matchConfidence":0.98,"matchBasis":["sourceName","Wikidata"]}],
+      "notes": "Observed in the acquired v0.2.0 1326 candidate set. Candidate identity is not a canonical boundary decision."
+    },
+    {
+      "entityId": "saruhan",
+      "displayName": "Saruhan Beyliği",
+      "matchPolicy": "candidate-match",
+      "sourceMatches": [{"sourceId":"cliopatria-v0.2.0","sourceFeatureId":"6208","sourceName":"Beylik of Saruhan","wikidataId":"Q1968654","matchStatus":"candidate","matchConfidence":0.99,"matchBasis":["sourceName","Wikidata"]}],
+      "notes": "Observed in the acquired v0.2.0 1326 candidate set. Candidate identity is not a canonical boundary decision."
+    },
+    {
+      "entityId": "aydin",
+      "displayName": "Aydınoğulları",
+      "matchPolicy": "candidate-match",
+      "sourceMatches": [{"sourceId":"cliopatria-v0.2.0","sourceFeatureId":"6224","sourceName":"Beylik of Aydin","wikidataId":"Q717112","matchStatus":"candidate","matchConfidence":0.99,"matchBasis":["sourceName","Wikidata"]}],
+      "notes": "Observed in the acquired v0.2.0 1326 candidate set. Candidate identity is not a canonical boundary decision."
+    },
+    {
+      "entityId": "alaye",
+      "displayName": "Alâiye Beyliği",
+      "matchPolicy": "candidate-match",
+      "sourceMatches": [],
+      "notes": "No Cliopatria candidate was observed by exact source name in the 1326 extraction. This absence is not evidence of non-existence; independent historical evidence remains required."
+    }
   ],
   "globalRules": [
     "A name match is never sufficient for canonical entity promotion.",
     "Prefer stable source identifiers such as Wikidata and SeshatID when present.",
     "A source entity may map to one canonical entity only after review; ambiguous matches remain unresolved.",
     "Entity identity does not imply historical ownership, control, or province geometry.",
-    "No 1300 geometry may be copied, relabelled, or promoted into the 1326 dataset."
+    "No 1300 geometry may be copied, relabelled, or promoted into the 1326 dataset.",
+    "Candidate match confidence records identity evidence only and must not be interpreted as geometry confidence."
   ]
 }

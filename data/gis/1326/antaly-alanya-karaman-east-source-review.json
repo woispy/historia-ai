@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "scope": "Antalya-Alanya-Karaman eastern Teke corridor",
+  "status": "evidence-only",
+  "canonicalGeometryPromotion": "BLOCKED",
+  "sources": [
+    {"type":"TDV","title":"HAMÎDOĞULLARI","url":"https://islamansiklopedisi.org.tr/hamidogullari"},
+    {"type":"TDV","title":"TEKEOĞULLARI","url":"https://islamansiklopedisi.org.tr/tekeogullari"},
+    {"type":"TDV","title":"ALÂİYE BEYLİĞİ","url":"https://islamansiklopedisi.org.tr/alaiye-beyligi"},
+    {"type":"TDV","title":"ALANYA","url":"https://islamansiklopedisi.org.tr/alanya"},
+    {"type":"TDK/TTK","title":"Osmanlı Tarihine Giriş","url":"https://ttk.gov.tr/osmanli-tarihine-giris/"},
+    {"type":"Dergipark/Cedrus","title":"İbn Battuta ve El-Ömeri’nin Anlatımıyla Geç Ortaçağ’da Antalya ile Alanya","url":"https://dergipark.org.tr/tr/pub/cedrus/article/674184"},
+    {"type":"Dergipark","title":"PRINCIPALITY OF TEKEOĞULLARI","url":"https://dergipark.org.tr/tr/pub/sema/article/529825"}
+  ],
+  "anchors": [
+    {"name":"Antalya","control":"Teke/Hamidoğlu Antalya branch","confidence":"high","dateGuard":"Dündar captured Antalya before 1321; Yunus branch administered it; Mahmud was ruler immediately before Dündar's 1326 capture/death."},
+    {"name":"Korkuteli/Istanos","control":"Teke/Hamidoğlu sphere","confidence":"high","dateGuard":"Yunus son Hızır had an early-14th-century madrasa inscription at Istanos (1319)."},
+    {"name":"Alanya/Alaiye","control":"Karamanid-linked Alaiye polity; Mamluk suzerainty/coinage evidence","confidence":"high","dateGuard":"TDV records Karamanid control and Yusuf Bey in 1333; independent study reports coins of 1321, 1326 and 1329 in name of Mamluk sultan al-Nasir Muhammad."},
+    {"name":"Manavgat","control":"southern frontier / control requires date-specific reconciliation","confidence":"medium","dateGuard":"Later sources associate Manavgat with Teke and Alaiye; do not back-project later 1361-66 events."},
+    {"name":"Anamur-Silifke corridor","control":"Karamanid sphere toward Cilician coast","confidence":"medium","dateGuard":"Do not infer a continuous 1326 polygon from later Karamanid expansion; retain as corridor/frontier until more date-specific evidence."}
+  ],
+  "keyFindings": [
+    "Antalya and Alanya must not be merged into one polity polygon in 1326.",
+    "Antalya belongs to the Hamid/Teke branch context; Alanya is separately tied to the Karamanid-linked Alaiye polity.",
+    "Dündar Bey's death is dated 1326 in TDV, while some older references give 1324; scenario reconstruction should not silently collapse this disagreement.",
+    "Alanya has unusually strong date-specific evidence because 1326 coinage exists in the name of Mamluk Sultan al-Nasir Muhammad, while 1333 Ibn Battuta records Yusuf b. Karaman as ruler. This supports a Karamanid-linked polity with Mamluk suzerainty/legitimacy signals rather than direct Mamluk territorial administration.",
+    "The Antalya-Alanya coastal road and maritime network should be represented separately from political ownership.",
+    "Later Latin/Kypriot attacks and later Teke/Alaiye arrangements must not be back-projected into the 1326 political layer."
+  ],
+  "modelingRules": [
+    "Separate politicalControl from settlement, port, route, and externalSuzerainty.",
+    "Represent uncertain Antalya-Alanya inland boundaries as frontier bands, not artificial precise lines.",
+    "Do not use modern Antalya, Alanya, Manavgat, or provincial boundaries as 1326 geometry.",
+    "Do not promote geometry until independent historical-geography evidence supplies defensible boundary reconstruction."
+  ]
+}

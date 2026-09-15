@@ -1,0 +1,61 @@
+{
+  "scenarioDate": "1326-04-07",
+  "scope": "Karaman-Larende to Nigde-Eregli-Aksaray-Kayseri central Anatolia",
+  "status": "evidence-only",
+  "canonicalGeometryPromotion": "BLOCKED",
+  "method": "Multi-source historical reconciliation; later territorial configurations are not back-projected to 1326-04-07.",
+  "sources": [
+    {"type":"TDV","topic":"Karamanoğulları","url":"https://islamansiklopedisi.org.tr/karamanogullari"},
+    {"type":"TDV","topic":"Eşrefoğulları","url":"https://islamansiklopedisi.org.tr/esrefogullari"},
+    {"type":"TDV","topic":"Ereğli","url":"https://islamansiklopedisi.org.tr/eregli"},
+    {"type":"Türkiye Kültür Portalı","topic":"Aksaray","url":"https://www.kulturportali.gov.tr/turkiye/aksaray/genelbilgiler"},
+    {"type":"academic","topic":"Orta Anadolu'da Karamanoğulları-Eretnalılar-Kadı Burhâneddin ilişkileri","url":"https://dergipark.org.tr/tr/pub/sema/article/1455990"},
+    {"type":"academic","topic":"Aksaray Zinciriye Medresesi source criticism","url":"https://dergipark.org.tr/tr/download/article-file/1147188"},
+    {"type":"municipal reference","topic":"İbn Battuta and Kayseri administration","url":"https://www.kayseri.bel.tr/uploads/pdf/kayseri_kitabi_2023.pdf"}
+  ],
+  "anchors": [
+    {
+      "name":"Larende/Karaman",
+      "control":"Karamanoğulları",
+      "confidence":"high",
+      "note":"Karamanid political core; XIV c. first half is poorly documented, so exact outer frontier remains unresolved."
+    },
+    {
+      "name":"Ereğli",
+      "control":"Karamanoğulları candidate / frontier",
+      "confidence":"medium",
+      "note":"TDV records Karamanid rule from 1276, destruction by Geyhatu in 1291, and later Karamanid association; no sufficiently precise 7 Apr 1326 boundary evidence found."
+    },
+    {
+      "name":"Niğde",
+      "control":"unresolved; Ilkhanid administrative sphere stronger than later Karamanid configuration",
+      "confidence":"medium",
+      "note":"Later sources clearly place Niğde in Karamanid territory, but that configuration cannot be safely projected backward to 1326. Eretna control is documented by Ibn Battuta only in 1332-33, after the scenario date."
+    },
+    {
+      "name":"Aksaray",
+      "control":"Ilkhanid/Anatolian governorate sphere candidate",
+      "confidence":"medium-high",
+      "note":"The 1332 Ibn Battuta testimony places Aksaray under the Iraqi/Ilkhanid ruler via Eretna's deputy; this is post-1326 evidence, so it is a bracket rather than direct start-date proof. Later claims of Karamanid control are not back-projected."
+    },
+    {
+      "name":"Kayseri",
+      "control":"Ilkhanid administrative sphere",
+      "confidence":"high for broader sphere, medium for exact 1326 local control",
+      "note":"Ibn Battuta in 1332-33 describes Kayseri as under the Iraqi ruler, with Iraqi troops and Eretna's household present. Eretna's independent polity belongs to the later 1340s; do not label 1326 as an Eretna state."
+    }
+  ],
+  "chronologyGuards": [
+    "Do not use the 1380 Karamanid territorial list as a 1326 polygon.",
+    "Do not assign Aksaray, Niğde, or Kayseri to the later Eretna state in 1326.",
+    "Do not treat the later Karamanid control of Niğde/Aksaray/Kayseri as proof of control on 1326-04-07.",
+    "Konya was recovered from the Karamanids by Demirtaş in 1320; therefore the Konya-Karaman frontier must remain separate from the later Karamanid expansion.",
+    "Beyşehir, Seydişehir and Akşehir remained Eşrefoğlu territory until the October 9, 1326 death of II Süleyman; subsequent Hamid/Karaman/Sahib Ata partition must not be back-projected to April 7."
+  ],
+  "networkImplications": [
+    "Model Larende-Eregli-Konya as a strategic corridor rather than assuming a smooth provincial polygon.",
+    "Treat Aksaray-Kayseri as an Ilkhanid administrative/army network layer separate from later Eretna sovereignty.",
+    "Keep Niğde as a review-queue node until direct 1326 evidence is found.",
+    "Use caravan routes, fortifications, urban anchors and administrative appointments independently from political-control geometry."
+  ]
+}

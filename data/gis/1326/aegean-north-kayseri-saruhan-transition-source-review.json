@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "status": "evidence-only",
+  "canonicalGeometryPromotion": "BLOCKED",
+  "scope": "Northern Aegean coast from Edremit Gulf through Ayvalik, Pergamon and the Saruhan frontier; Lesbos/Chios maritime context.",
+  "principles": [
+    "Political control is separate from settlement, port activity, trade presence and maritime influence.",
+    "Later conquests and administrative borders must not be back-projected into the 1326 snapshot.",
+    "A historical anchor does not imply a territorial polygon around the anchor.",
+    "Island lordship and mainland coastal control are represented independently."
+  ],
+  "anchors": [
+    {
+      "id": "edremit-gulf",
+      "name": "Edremit Gulf",
+      "type": ["maritime_region", "port_network", "economic_region"],
+      "controlAssessment": "Karesi sphere",
+      "confidence": "high",
+      "dateBasis": "Karesi was active across the Balikesir/Edremit region before 1326; the 1334 Edremit naval battle confirms the later strength of the Bergama branch but is not used as 1326 proof.",
+      "promotion": "blocked"
+    },
+    {
+      "id": "edremit",
+      "name": "Edremit",
+      "type": ["settlement", "port", "regional_node"],
+      "controlAssessment": "Karesi sphere",
+      "confidence": "high",
+      "dateBasis": "TDV places Edremit among the western Anatolian territories associated with Karesi from the late 13th/early 14th century.",
+      "promotion": "blocked"
+    },
+    {
+      "id": "ayvalik-coast",
+      "name": "Ayvalik / northern Gulf coast",
+      "type": ["coastal_settlement_cluster", "maritime_node"],
+      "controlAssessment": "Karesi-region candidate; exact 1326 political control unresolved",
+      "confidence": "medium-low",
+      "dateBasis": "Later administrative and economic sources identify Ayvalik within the Edremit Gulf region, but they do not establish a precise 7 April 1326 boundary.",
+      "promotion": "blocked"
+    },
+    {
+      "id": "bergama",
+      "name": "Pergamon / Bergama",
+      "type": ["fortified_city", "regional_capital", "road_node"],
+      "controlAssessment": "Karesi / Bergama branch",
+      "confidence": "high",
+      "dateBasis": "Karesi sources place Bergama within the beylik; Yahsi Bey later used Bergama as an administrative center. The 1333 Ibn Battuta observation is later evidence and is not used to date the initial control.",
+      "promotion": "blocked"
+    },
+    {
+      "id": "saruhan-frontier",
+      "name": "Bergama–Manisa/Saruhan frontier zone",
+      "type": ["frontier_zone", "corridor"],
+      "controlAssessment": "Karesi–Saruhan transition; exact line unresolved",
+      "confidence": "medium",
+      "dateBasis": "Karesi is documented as bordering Saruhan to the south; no exact 1326 boundary geometry is promoted.",
+      "promotion": "blocked"
+    },
+    {
+      "id": "phocaea",
+      "name": "Phocaea / Foca",
+      "type": ["port", "fortified_city", "Latin_lordship_context"],
+      "controlAssessment": "Zaccaria/Cattaneo lordship context; not Genoese Republic sovereignty",
+      "confidence": "medium",
+      "dateBasis": "Zaccaria family held Phocaea as a Byzantine-linked lordship; later Cattaneo arrangements must be date-scoped. This source review does not promote a 1326 polygon.",
+      "promotion": "blocked"
+    },
+    {
+      "id": "lesbos",
+      "name": "Lesbos / Mytilene",
+      "type": ["island", "maritime_node"],
+      "controlAssessment": "Byzantine / Latin-claim context unresolved for 1326; no later Gattilusio control projected backward",
+      "confidence": "medium",
+      "dateBasis": "Cambridge synthesis places Lesbos in the later Genoese eastern-Aegean sphere, but the documented Gattilusio possession begins in 1354. Therefore 1326 is not assigned to Gattilusio or Genoese colonial control.",
+      "promotion": "blocked"
+    },
+    {
+      "id": "chios",
+      "name": "Chios",
+      "type": ["island", "Latin_lordship", "maritime_node"],
+      "controlAssessment": "Zaccaria lordship",
+      "confidence": "high",
+      "dateBasis": "Zaccaria control begins in 1304 and lasts until Byzantine recovery in 1329; therefore Chios is a separate Latin lordship node in the 1326 snapshot.",
+      "promotion": "blocked"
+    }
+  ],
+  "networkRules": [
+    "Do not convert maritime influence into sovereignty.",
+    "Represent Chios as a political island node independently from mainland Phocaea/Bergama.",
+    "Represent Lesbos separately; do not assign Gattilusio control before 1354.",
+    "Use Edremit and Bergama as Karesi regional anchors while keeping exact internal boundaries unresolved.",
+    "Treat the Karesi–Saruhan frontier as a confidence-weighted zone until date-specific boundary evidence is available."
+  ],
+  "sources": [
+    {
+      "title": "Karesi Bey, TDV Islam Ansiklopedisi",
+      "url": "https://islamansiklopedisi.org.tr/karesi-bey",
+      "use": "Karesi territorial expansion and Edremit/Bergama context"
+    },
+    {
+      "title": "Karesiogullari, TDV Islam Ansiklopedisi",
+      "url": "https://islamansiklopedisi.org.tr/karesiogullari",
+      "use": "1328 two-center structure, Bergama branch, maritime activity, and later Ottoman annexation chronology"
+    },
+    {
+      "title": "Edremit Denizi Savasi (1334), Ankara Universitesi Sosyal Bilimler Dergisi",
+      "url": "https://dergipark.org.tr/tr/pub/sobild/article/1394359",
+      "use": "Later corroboration of Karesi maritime strength in Edremit Gulf; not back-projected as sole 1326 evidence"
+    },
+    {
+      "title": "The Zaccaria of Phocaea and Chios, Journal of Hellenic Studies",
+      "url": "https://www.cambridge.org/core/journals/journal-of-hellenic-studies/article/abs/zaccaria-of-phocaea-and-chios/708C605E14397B9F21CC14C26EA2CF74",
+      "use": "Zaccaria family lordship context"
+    },
+    {
+      "title": "Latins in the Aegean and the Balkans (1300-1400), Cambridge History of the Byzantine Empire",
+      "url": "https://www.cambridge.org/core/books/abs/cambridge-history-of-the-byzantine-empire-c5001492/latins-in-the-aegean-and-the-balkans-13001400/C2C24FAF38A47C6F28BB361526D6DAFC",
+      "use": "Aegean maritime network and Genoese eastern-Aegean context"
+    }
+  ]
+}

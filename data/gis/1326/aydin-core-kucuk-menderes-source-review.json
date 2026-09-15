@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "status": "evidence-only",
+  "canonicalGeometryPromotion": "BLOCKED",
+  "scope": "Aydinid core, Nif-Saruhan frontier, Izmir, Tire, Birgi, Odemis/Kaystros and Selcuk-Ayasuluk",
+  "principles": [
+    "Political control is separate from settlement, fortification, route and maritime presence.",
+    "Later Aydinid expansion, especially Umur Bey's post-1329 activity, must not be projected backward into the 1326 snapshot.",
+    "Modern administrative boundaries are not treated as 1326 political polygons.",
+    "Where the evidence establishes a city or node but not an exact frontier, retain an anchor and block polygon promotion."
+  ],
+  "anchors": [
+    {
+      "id": "birgi",
+      "type": ["city", "capital", "political_anchor", "mountain_route_node"],
+      "control": "Aydinid",
+      "confidence": "high",
+      "evidence": "TDV identifies Birgi as the first center of the Aydinid principality; it developed as a medieval city on the southern foothills of Bozdag.",
+      "sources": ["TDV Birgi", "TDV Aydinogullari"]
+    },
+    {
+      "id": "tire",
+      "type": ["city", "political_anchor", "commercial_node", "route_node"],
+      "control": "Aydinid",
+      "confidence": "high",
+      "evidence": "Aydinid rule in the early 14th century is established; TDV lists Tire among Mehmed Bey's conquests and later Aydinid centers.",
+      "sources": ["TDV Aydinogullari", "Tire spatial transformation study"]
+    },
+    {
+      "id": "sultanhisari",
+      "type": ["settlement", "route_node"],
+      "control": "Aydinid",
+      "confidence": "medium-high",
+      "evidence": "TDV and numismatic research list Sultanhisari among Mehmed Bey's early conquests and Aydinid mint/administrative centers.",
+      "sources": ["TDV Aydinogullari", "Aydinid mints study"]
+    },
+    {
+      "id": "odemis-kaystros",
+      "type": ["agricultural_basin", "settlement_zone", "route_corridor"],
+      "control": "Aydinid regional sphere",
+      "confidence": "medium",
+      "evidence": "Sources place Bodemya/modern Odemis within Mehmed Bey's early conquests and describe the Kaystros/Kucuk Menderes basin as a core Aydinid landscape. The modern town itself should not be used as a 1326 polygon without additional urban evidence.",
+      "sources": ["TDV Aydinogullari", "BelletEN Kaystros study"]
+    },
+    {
+      "id": "ayasuluk-selcuk",
+      "type": ["city", "port", "political_anchor", "maritime_node"],
+      "control": "Aydinid",
+      "confidence": "high",
+      "evidence": "Mehmed Bey captured Ayasuluk; TDV identifies it as one of the principal Aydinid centers and notes the establishment of a fleet there.",
+      "sources": ["TDV Aydinogullari", "Aydinid mints study"]
+    },
+    {
+      "id": "izmir-upper-city",
+      "type": ["fortress", "urban_anchor"],
+      "control": "Aydinid",
+      "confidence": "high",
+      "evidence": "TDV records Mehmed Bey's capture of the upper castle in 1310 or 1317 and subsequent assignment of Izmir to Umur Bey.",
+      "sources": ["TDV Izmir"]
+    },
+    {
+      "id": "izmir-latin-port-castle",
+      "type": ["fortress", "port", "latin_enclave", "contested_node"],
+      "control": "Latin/Zaccaria until 1328-1329 capture",
+      "confidence": "high",
+      "evidence": "TDV dates the surrender of the Latin port castle after a two-and-a-half-year siege to 1328 or 1329; therefore it must remain outside Aydinid control on 1326-04-07.",
+      "sources": ["TDV Izmir", "TDV Aydinogullari", "TDV Umur Bey"]
+    },
+    {
+      "id": "nif-kemalpasa",
+      "type": ["frontier_anchor", "mountain_pass", "route_node"],
+      "control": "Saruhan/Aydin frontier unresolved",
+      "confidence": "medium",
+      "evidence": "TDV places Nif/Kemalpasa within the Saruhan sphere, while Aydinid geography reaches north from the Menderes region. The evidence supports a frontier node but not an exact 1326 boundary polygon.",
+      "sources": ["TDV Saruhanogullari", "TDV Aydinogullari"]
+    },
+    {
+      "id": "alasehir-philadelphia",
+      "type": ["city", "fortress", "byzantine_anchor", "negative_control"],
+      "control": "Byzantine",
+      "confidence": "high",
+      "evidence": "TDV states that after the 1324 Germiyan attack and Byzantine relief, the city remained the last major Byzantine city in western Anatolia until its 1391 Ottoman conquest. It must not be assigned to Aydinid or Saruhan in 1326.",
+      "sources": ["TDV Alasehir"]
+    }
+  ],
+  "chronologyGuards": [
+    {
+      "rule": "Do not assign the Latin port castle of Izmir to Aydinid control in the 1326 snapshot.",
+      "reason": "Its documented surrender is 1328 or 1329."
+    },
+    {
+      "rule": "Do not use Umur Bey's 1329-1340s maritime campaigns as evidence for the 1326 territorial snapshot.",
+      "reason": "These events post-date the scenario start."
+    },
+    {
+      "rule": "Do not assign Alasehir to Aydinid or Saruhan control.",
+      "reason": "The city remained Byzantine until 1391 according to TDV."
+    }
+  ],
+  "promotionGate": {
+    "state": "blocked",
+    "requiredNextEvidence": [
+      "1326-specific frontier evidence between Nif, Manisa and the Aydinid interior",
+      "date-scoped evidence for individual rural fortifications and crossings",
+      "reconciled geometry sources before any political polygon is created"
+    ]
+  }
+}

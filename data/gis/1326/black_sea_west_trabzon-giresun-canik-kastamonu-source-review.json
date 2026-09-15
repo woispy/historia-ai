@@ -1,0 +1,87 @@
+{
+  "scenarioDate": "1326-04-07",
+  "scope": "Trabzon-Giresun-Canik-Samsun-Sinop-Kastamonu",
+  "status": "evidence-only",
+  "canonicalGeometryPromotion": "blocked",
+  "method": {
+    "policy": "Cross-check TDV, peer-reviewed regional studies, and primary/near-primary chronicle evidence where available. Do not back-project later beylik borders into 1326.",
+    "politicalControl": "Keep direct control, frontier influence, military presence, and trade/merchant presence separate.",
+    "geometry": "No continuous political polygon is promoted from narrative evidence alone. Use city/fort/route anchors and uncertainty bands until date-specific boundary evidence is reconciled."
+  },
+  "anchors": [
+    {
+      "name": "Kastamonu",
+      "control1326": "Candaroğulları",
+      "confidence": "high",
+      "evidence": ["Candaroğlu Süleyman Bey succeeded Yaman Candar and expanded from Eflani to Kastamonu; Kastamonu became the beylik center in the early 14th century."],
+      "guard": "Do not use later 14th-century Candar boundaries as the 1326 polygon."
+    },
+    {
+      "name": "Safranbolu",
+      "control1326": "Candaroğulları sphere",
+      "confidence": "medium-high",
+      "evidence": ["Candaroğlu expansion included Safranbolu; later 1332 Ibn Battuta evidence confirms Candar administration."],
+      "guard": "Exact 7 April 1326 local boundary remains less certain than Kastamonu/Sinop."
+    },
+    {
+      "name": "Sinop",
+      "control1326": "Candaroğulları",
+      "confidence": "high",
+      "evidence": ["Pervâneoğulları ended in 1322 and Candaroğlu Süleyman Bey incorporated Sinop; independent academic bibliography confirms the 1322 transition."],
+      "guard": "Do not retain Pervâneoğulları after 1322."
+    },
+    {
+      "name": "Bafra-Samsun",
+      "control1326": "unresolved / fragmented local control",
+      "confidence": "medium",
+      "evidence": ["Pervâneoğulları had previously taken Bafra and Samsun, but the polity ended in 1322; later Taceddinoğulları belong to c.1348 onward. Later Ottoman sources describe multiple local political units."],
+      "guard": "Do not assign Taceddinoğulları to 1326; do not automatically extend Candar control from Sinop to Samsun."
+    },
+    {
+      "name": "Ordu-Bayramlu zone",
+      "control1326": "Çepni/Türkmen frontier sphere; specific beylik control unresolved",
+      "confidence": "medium",
+      "evidence": ["Academic work places intensive Turkmen military settlement along the Giresun coast in the early 14th century; Hacıemiroğulları are later and should not be back-projected."],
+      "guard": "Do not create Hacıemiroğulları polygon for 1326."
+    },
+    {
+      "name": "Giresun",
+      "control1326": "Trabzon Empire city/fortress with active Türkmen frontier pressure",
+      "confidence": "high",
+      "evidence": ["TDV and Panaretos-based studies describe the 1301 Byzantine/Trabzon counter-campaign and fortification of Giresun; early 14th-century Türkmen activity reached the coastal area."],
+      "guard": "Do not equate nearby Türkmen military settlements with permanent political possession of Giresun."
+    },
+    {
+      "name": "Kuşluhan-Aksu/Dereli zone",
+      "control1326": "Türkmen military frontier anchor; exact polity unresolved",
+      "confidence": "medium",
+      "evidence": ["Feridun Emecen identifies Kuşdoğan's influence between Canik and the Giresun Aksu valley and suggests Kuşluhan as a possible military bastion."],
+      "guard": "Kuşdoğan is not automatically treated as founder of Hacıemiroğulları."
+    },
+    {
+      "name": "Trabzon",
+      "control1326": "Empire of Trebizond",
+      "confidence": "high",
+      "evidence": ["The Komnenian state remained centered on Trabzon; western territorial contraction had already removed Sinop and Ordu from durable direct control."],
+      "guard": "Keep Ilkhanid influence, trade privileges, and political sovereignty as separate runtime relations."
+    }
+  ],
+  "negativeControls": [
+    "Pervâneoğulları as an independent polity in 1326",
+    "Taceddinoğulları as a 1326 polity",
+    "Hacıemiroğulları as a fully formed 1326 polygon",
+    "later Candar borders projected unchanged onto 1326",
+    "merchant/Genovese presence treated as sovereignty"
+  ],
+  "networkLayer": {
+    "ports": ["Trabzon", "Giresun", "Samsun", "Sinop"],
+    "rule": "Port status and merchant presence must remain separate from territorial sovereignty.",
+    "routes": ["Sinop-Samsun-Canik coastal route", "Trabzon-Giresun inland/coastal connections", "Kastamonu-Sinop corridor"]
+  },
+  "sourceClasses": [
+    "TDV Islam Ansiklopedisi",
+    "peer-reviewed Karadeniz İncelemeleri / regional history studies",
+    "Vakıflar archaeological/architectural study for later Hacıemir evidence",
+    "Michael Panaretos chronicle as discussed and critically framed by modern scholarship"
+  ]
+}

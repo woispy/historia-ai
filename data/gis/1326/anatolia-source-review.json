@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "id": "historical_gis_1326_anatolia_source_review",
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "evidence-only",
+  "purpose": "Record independently researched historical-geography evidence for Anatolian polity reconstruction without promoting source polygons.",
+  "method": {
+    "rule": "Separate polity existence, historical control, regional geography, physical anchors, and canonical geometry.",
+    "canonicalGeometry": "not-promoted",
+    "laterEventRule": "Events after 1326-04-07 are not projected backward into the scenario start.",
+    "sourceRoleRule": "No source is treated as automatic authority for 1326 political borders."
+  },
+  "sources": [
+    {"id":"tdv-anadolu-beylikleri","provider":"TDV İslâm Ansiklopedisi","role":"polity-existence-and-regional-context","url":"https://islamansiklopedisi.org.tr/anadolu-beylikleri"},
+    {"id":"tdv-karesiogullari","provider":"TDV İslâm Ansiklopedisi","role":"Karesi regional extent and chronology","url":"https://islamansiklopedisi.org.tr/karesiogullari"},
+    {"id":"tdv-saruhanogullari","provider":"TDV İslâm Ansiklopedisi","role":"Saruhan regional extent and chronology","url":"https://islamansiklopedisi.org.tr/saruhanogullari"},
+    {"id":"tdv-esrefogullari","provider":"TDV İslâm Ansiklopedisi","role":"Eşrefoğulları chronology","url":"https://islamansiklopedisi.org.tr/esrefogullari"},
+    {"id":"tdv-hamidogullari","provider":"TDV İslâm Ansiklopedisi","role":"Hamid/Teke chronology and regional extent","url":"https://islamansiklopedisi.org.tr/hamidogullari"},
+    {"id":"tdv-tekeogullari","provider":"TDV İslâm Ansiklopedisi","role":"Teke chronology and Antalya regional context","url":"https://islamansiklopedisi.org.tr/tekeogullari"},
+    {"id":"tdv-alaiye","provider":"TDV İslâm Ansiklopedisi","role":"Alâiye chronology and local geography","url":"https://islamansiklopedisi.org.tr/alaiye-beyligi"},
+    {"id":"tdv-germiyanogullari","provider":"TDV İslâm Ansiklopedisi","role":"Germiyan chronology and western Anatolian regional context","url":"https://islamansiklopedisi.org.tr/germiyanogullari"},
+    {"id":"tib-13","provider":"Austrian Academy of Sciences","role":"Bithynia/Hellespont historical geography and physical/settlement anchors","url":"https://tib.oeaw.ac.at/balkan/volumes/TIB_13"},
+    {"id":"tib-14","provider":"Austrian Academy of Sciences","role":"Western Asia Minor historical geography and physical/settlement anchors","url":"https://tib.oeaw.ac.at/balkan/volumes/TIB_14"}
+  ],
+  "entityReviews": [
+    {
+      "entityId":"ottoman-beylik",
+      "cliopatriaSourceFeatureId":"6204",
+      "regionalEvidence":["tib-13"],
+      "evidenceFindings":[
+        "TIB 13 identifies Bithynia as the Anatolian hinterland of Constantinople and includes Prusa/Bursa, Nikaia/Iznik and Nikomedeia/Izmit among its major fortified centers.",
+        "TDV Orhan records Bursa's surrender on 6 April 1326, making Ottoman control of Bursa a scenario-start state fact on 7 April 1326."
+      ],
+      "geometryStatus":"candidate-cross-source-review",
+      "controlStatus":"supported-at-scenario-start",
+      "canonicalPolygon":"not-promoted"
+    },
+    {
+      "entityId":"karasi",
+      "cliopatriaSourceFeatureId":"6227",
+      "regionalEvidence":["tdv-karesiogullari","tib-13","tib-14"],
+      "evidenceFindings":[
+        "TDV places early Karesi expansion in Erdek, Biga, Edremit, Bergama and the wider Mysia area, and states that by the period of Yahşi Bey the polity bordered Saruhan to the south and Osmanlı to the east.",
+        "TIB 13 and TIB 14 provide the adjoining Bithynia/Hellespont and western Asia Minor geographic frameworks needed to test physical and settlement anchors."
+      ],
+      "geometryStatus":"candidate-cross-source-review",
+      "canonicalPolygon":"not-promoted"
+    },
+    {
+      "entityId":"saruhan",
+      "cliopatriaSourceFeatureId":"6208",
+      "regionalEvidence":["tdv-saruhanogullari","tib-14"],
+      "evidenceFindings":[
+        "TDV states that Saruhan was centered on Manisa and controlled the Gediz valley/plain, with a regional extent described through Demirci, Borlu, Ilıca, Adala, Kemaliye, Akhisar, Turgutlu, Manisa, Nif, Menemen and Foça-area coasts.",
+        "TIB 14 independently defines Western Asia Minor around the Gediz/Hermos, Kaikos, Kaystros and Maiandros river systems and includes Manisa, Akhisar, Sardis and Philadelphia among major historical centers."
+      ],
+      "geometryStatus":"strong-regional-evidence-candidate",
+      "canonicalPolygon":"not-promoted"
+    },
+    {
+      "entityId":"aydin",
+      "cliopatriaSourceFeatureId":"6224",
+      "regionalEvidence":["tdv-anadolu-beylikleri","tib-14"],
+      "evidenceFindings":[
+        "TDV dates Aydınoğulları to 1308-1426, supporting existence at the scenario start.",
+        "TIB 14 covers northern Aydın and the historical Asia/Lydia region, including Ephesus, Smyrna and the Meander basin; these are useful regional anchors but do not by themselves define an Aydınid border.",
+        "A 13th-14th century historical-topography study of Anaia/Kadıkalesi provides additional local evidence for the late Byzantine/Aydinid transition around the Kuşadası area."
+      ],
+      "geometryStatus":"regional-evidence-candidate",
+      "canonicalPolygon":"not-promoted"
+    },
+    {
+      "entityId":"esrefogullari",
+      "cliopatriaSourceFeatureId":null,
+      "regionalEvidence":["tdv-esrefogullari"],
+      "evidenceFindings":[
+        "TDV identifies Eşrefoğulları as a polity founded around Beyşehir and Seydişehir.",
+        "The separate chronology evidence establishes that the polity had not yet ended on 7 April 1326; its termination occurred later in 1326."
+      ],
+      "geometryStatus":"independent-source-reconstruction-required",
+      "canonicalPolygon":"not-promoted"
+    },
+    {
+      "entityId":"hamid",
+      "cliopatriaSourceFeatureId":"6229",
+      "regionalEvidence":["tdv-hamidogullari"],
+      "evidenceFindings":[
+        "TDV places the Hamid polity around Uluborlu, Isparta, Burdur and Eğridir, with later expansion toward Yalvaç, Şarkikaraağaç, Gölhisar, Korkuteli and Antalya.",
+        "TDV states that Dündar Bey was killed in 1326 after the Ilkhanid governor's intervention; therefore later Hamid/Teke configurations must not be projected backward without date-specific evidence."
+      ],
+      "geometryStatus":"date-sensitive-reconstruction-required",
+      "canonicalPolygon":"not-promoted"
+    },
+    {
+      "entityId":"teke",
+      "cliopatriaSourceFeatureId":"6221",
+      "regionalEvidence":["tdv-tekeogullari","tdv-hamidogullari"],
+      "evidenceFindings":[
+        "TDV identifies Antalya as the center of the Teke polity and connects its formation to Hamidid control of Antalya.",
+        "The chronology around the 1308-1321 formation period and Dündar Bey's 1326 death requires careful date-scoped reconstruction rather than a generic later-period polygon."
+      ],
+      "geometryStatus":"date-sensitive-reconstruction-required",
+      "canonicalPolygon":"not-promoted"
+    },
+    {
+      "entityId":"alaye",
+      "cliopatriaSourceFeatureId":null,
+      "regionalEvidence":["tdv-alaiye"],
+      "evidenceFindings":[
+        "TDV dates the Alâiye polity from the late 13th century to 1471 and places it around Alâiye/Alanya.",
+        "TDV reports that Alanya was under Karamanoğlu-affiliated rulers after 1293 and remained a commercially important port; this requires separate political-control reconciliation for 1326."
+      ],
+      "geometryStatus":"independent-control-and-geometry-reconstruction-required",
+      "canonicalPolygon":"not-promoted"
+    },
+    {
+      "entityId":"germiyanids",
+      "cliopatriaSourceFeatureId":"6249",
+      "regionalEvidence":["tdv-germiyanogullari","tib-14"],
+      "evidenceFindings":[
+        "TDV places Germiyan's center at Kütahya and describes its influence across western Anatolia, including Denizli, Alaşehir and surrounding areas during the early 14th century.",
+        "TDV records an Ilkhanid governor's 1325-1327 campaign context against Eşref, Hamid and neighboring western Anatolian territories, which makes the exact 7 April 1326 control state highly date-sensitive."
+      ],
+      "geometryStatus":"date-sensitive-cross-source-review",
+      "canonicalPolygon":"not-promoted"
+    }
+  ],
+  "nextResearchTargets": [
+    "Bithynia: Bursa-Nicaea-Nicomedia-Adranos and physical boundary anchors",
+    "Mysia/Karesi: Balıkesir-Bergama-Edremit-Biga-Erdek corridor",
+    "Gediz/Saruhan: Manisa-Akhisar-Demirci-Nif-Menemen-Foça corridor",
+    "Aydın: Aydın-Ephesus-Smyrna-Anaia/Kuşadası corridor",
+    "Hamid-Eşref: Beyşehir-Eğridir-Uluborlu-Isparta-Gölhisar transition",
+    "Teke-Alâiye: Antalya-Korkuteli-Alanya and the 1326 control chronology",
+    "Germiyan: Kütahya-Simav-Alaşehir-Denizli frontier and 1325-1327 Ilkhanid intervention"
+  ],
+  "promotionGate": [
+    "Date applicability to 1326-04-07",
+    "Canonical entity identity",
+    "At least one independent regional/physical evidence chain where available",
+    "Explicit control-vs-geometry separation",
+    "Source provenance and license status",
+    "Geometry reconstruction review",
+    "Topology and physical-boundary validation",
+    "No later-event back-projection",
+    "No synthetic fallback geometry"
+  ]
+}

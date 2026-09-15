@@ -1,0 +1,72 @@
+{
+  "scenarioDate": "1326-04-07",
+  "scope": "Samsun-Bafra-Canik-Taceddin-Haciemir transition",
+  "status": "evidence-only",
+  "canonicalGeometryPromotion": "blocked",
+  "method": {
+    "policy": "Cross-check multiple independent source classes; do not back-project later beylik borders into 1326.",
+    "sourceClasses": ["TDV Islam Ansiklopedisi", "peer-reviewed historical studies", "regional/administrative historical studies", "material/urban evidence"],
+    "controls": ["political control != tribal presence", "city control != hinterland control", "later beylik != 1326 polity", "commercial presence != sovereignty"]
+  },
+  "anchors": [
+    {
+      "place": "Sinop",
+      "assessment": "Candaroğlu control",
+      "confidence": "high",
+      "evidence": "Pervâneoğulları ended in 1322 when Candaroğlu Süleyman Bey incorporated Sinop; Candaroğlu independence is later than 1326 and must not be projected backward."
+    },
+    {
+      "place": "Samsun",
+      "assessment": "unresolved / fragmented post-Pervane control",
+      "confidence": "medium-low",
+      "evidence": "Pervâneoğulları ended in 1322; later Taceddinoğulları are a 14th-century later formation and cannot be assigned to 1326. No sufficiently precise 1326 political boundary located in the reviewed sources."
+    },
+    {
+      "place": "Bafra",
+      "assessment": "unresolved / frontier node",
+      "confidence": "medium-low",
+      "evidence": "Pervâneoğulları had previously controlled Bafra, but the polity ended in 1322. Later Canik divisions cannot be projected backward."
+    },
+    {
+      "place": "Çarşamba",
+      "assessment": "unresolved / frontier",
+      "confidence": "medium-low",
+      "evidence": "Later Taceddinoğlu control of the Çarşamba area is documented, but Taceddinoğulları emergence is after 1326."
+    },
+    {
+      "place": "Ordu/Bayramlu",
+      "assessment": "Turkmen/Çepni frontier; Haciemiroğlu polygon blocked",
+      "confidence": "medium",
+      "evidence": "Sources attest Çepni activity and later Haciemiroğlu control, but Emecen cautions against projecting the later dynasty backward to Kuşdoğan or early-14th-century activity."
+    },
+    {
+      "place": "Giresun",
+      "assessment": "Trebizond city/fortress with intense Turkmen frontier pressure",
+      "confidence": "high",
+      "evidence": "TDV records 1297 Turkmen/Çepni activity, early-14th-century attacks, and 1301 fortification by Alexios II after defeating Kuşdoğan."
+    }
+  ],
+  "chronologyGuards": [
+    "Do not assign Taceddinoğulları as a sovereign polity in 1326; emergence is associated with the 1340s.",
+    "Do not assign Haciemiroğulları a precise 1326 polygon solely from later Ordu control.",
+    "Do not extend Candaroğlu Sinop control automatically west/east across all Canik in 1326.",
+    "Do not convert Çepni settlement or raiding activity into automatic territorial sovereignty.",
+    "Do not use 15th-17th century Canik administrative boundaries as 1326 geography."
+  ],
+  "runtimeModel": {
+    "Sinop": "politicalAnchor:Candaroğlu",
+    "Samsun": "politicalControl:uncertain; portNode:active candidate",
+    "Bafra": "politicalControl:uncertain; river-delta economic node",
+    "Çarşamba": "politicalControl:uncertain; Yeşilırmak corridor",
+    "Ordu": "frontierNode; Turkmen/Çepni activity; later Haciemiroğlu claim separated",
+    "Giresun": "politicalAnchor:Trebizond; frontierPressure:high"
+  },
+  "sourceNotes": [
+    "TDV Candaroğulları: Süleyman Bey expanded from Eflani to Kastamonu/Safranbolu and later Sinop; he continued recognizing Ilkhanid authority until later independence.",
+    "TDV Pervâneoğulları: Sinop polity ended in 1322 when Candaroğlu Süleyman Bey incorporated Sinop.",
+    "TDV Tâceddinoğulları: dynasty/polity belongs to the later 14th century, centered on Niksar-Kelkit; not a 1326 polity.",
+    "Emecen, XIV. Asır Doğu Karadeniz Tarihinden Bir Safha: Kuşdoğan was a Çepni leader active before the emergence of Haciemiroğulları/Taceddinoğulları; direct dynastic identification is uncertain.",
+    "TDV Çepni: Çepni groups were active around Sinop and Canik-Giresun, but this is ethnic/tribal activity evidence, not a ready-made political polygon.",
+    "Canik tahrir research: Ottoman incorporation of the region occurred much later, with Samsun around 1419-20 and Ordu/Çarşamba later; later administrative units are not evidence for 1326 boundaries."
+  ]
+}

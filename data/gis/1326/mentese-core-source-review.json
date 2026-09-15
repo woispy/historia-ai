@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "scope": "Menteşe core and southern Aydın–Menteşe interface",
+  "status": "evidence-only",
+  "canonicalGeometryPromotion": "blocked",
+  "principles": [
+    "Political control is separate from settlement, route, economic, and fortification layers.",
+    "Later 14th-century buildings, treaties, and administrative boundaries must not be back-projected into 1326.",
+    "A source describing a regional sphere does not by itself establish an exact 1326 polygon boundary.",
+    "Unknown or disputed control remains explicitly unresolved rather than being filled by inferred geometry."
+  ],
+  "anchors": [
+    {
+      "id": "milas",
+      "name": "Milas / Mylasa",
+      "role": ["settlement", "political-core", "regional-center"],
+      "control1326": "Menteshe",
+      "confidence": "high",
+      "evidence": "TDV Menteşe states that the beylik center was initially Milas; a Turkish Ministry of Culture source places Milas under Menteşe control and states that Orhan Bey's period followed Mesud Bey's death in 1319.",
+      "chronologyGuard": "Do not treat later Peçin institutional centrality as evidence that Milas ceased to be a major center in 1326."
+    },
+    {
+      "id": "pecin-becin",
+      "name": "Peçin / Beçin",
+      "role": ["fortified-settlement", "administrative-center-candidate", "regional-center"],
+      "control1326": "Menteshe",
+      "confidence": "high",
+      "evidence": "The Turkish Ministry of Culture identifies Beçin as a Menteşe administrative center and describes its fortified topography. TDV records the sequence of Milas as an earlier center and Peçin as a later center; Ibn Battuta's 1333 visit describes Peçin as newly developed and settled.",
+      "chronologyGuard": "The exact date when the permanent capital function shifted from Milas to Peçin is not treated as proven for 1326."
+    },
+    {
+      "id": "mentese-coast-balat",
+      "name": "Balat / Milet",
+      "role": ["port", "trade-node", "fortified-settlement"],
+      "control1326": "Menteshe",
+      "confidence": "high",
+      "evidence": "TDV Balat states that after entering Menteşe control it developed as an export port for Anatolian goods and became an important fortified trade center in the 14th century. Venetian formal residence/consular rights documented in 1331 are later evidence and are not back-projected as the 1326 institutional status.",
+      "chronologyGuard": "Model Genoese/Venetian activity as maritime-commercial interaction, not automatic foreign sovereignty."
+    },
+    {
+      "id": "eski-cine",
+      "name": "Eski Çine",
+      "role": ["settlement", "route-node", "Menteshe-anchor"],
+      "control1326": "Menteshe",
+      "confidence": "medium-high",
+      "evidence": "Archaeological/historical study identifies the early 14th-century Eski Çine Ahmed Gazi Mosque as a Menteşe-period monument; regional historical-geography research places the Çine area within Menteşe's southern Aydın interface.",
+      "chronologyGuard": "The surviving mosque is evidence for the Menteşe presence and regional importance, but its exact construction date should not be equated mechanically with 7 April 1326 control boundaries."
+    },
+    {
+      "id": "mugla",
+      "name": "Muğla",
+      "role": ["settlement", "regional-center"],
+      "control1326": "Menteshe",
+      "confidence": "medium-high",
+      "evidence": "TDV Menteşe records Muğla as a center during the beylik's history and describes the Menteşe geographic sphere extending through Muğla and the surrounding region. Ministry of Culture regional history likewise places Muğla within Menteşe control.",
+      "chronologyGuard": "Do not infer that Muğla was necessarily the permanent capital in 1326; center functions changed during the beylik's history."
+    },
+    {
+      "id": "latmos-herakleia",
+      "name": "Latmos / Herakleia under Latmos",
+      "role": ["archaeological-anchor", "fortification", "landscape-node"],
+      "control1326": "unresolved-from-current-evidence",
+      "confidence": "low",
+      "evidence": "Recent archaeological research confirms substantial Byzantine-period activity in Latmos continuing to the end of the 13th century and documents defensive structures around Lake Bafa. The current source set does not establish a precise 7 April 1326 political-control transition.",
+      "chronologyGuard": "Do not assign a clean Menteşe polygon solely from geographic proximity to Menteşe core."
+    },
+    {
+      "id": "bodrum-halikarnassos",
+      "name": "Bodrum / Halikarnassos",
+      "role": ["coastal-settlement", "strategic-node"],
+      "control1326": "Menteshe-sphere",
+      "confidence": "medium",
+      "evidence": "Historical research places Halikarnassos/Bodrum within the Menteşe sphere from the 13th-century Menteşe expansion; however, the Turkish fortification associated with Menteşe is described as a mid-14th-century construction.",
+      "chronologyGuard": "Do not model the later Menteşe-era Turkish castle as an existing 1326 fortification without separate dated evidence."
+    }
+  ],
+  "networkNotes": [
+    "Balat should connect to the Büyük Menderes delta and Aegean maritime network as a trade node.",
+    "Milas–Peçin should be represented as a paired inland urban/fortified core rather than collapsing the two into one polygon.",
+    "Çine should be treated as a southward gateway between the Büyük Menderes basin and Menteşe interior.",
+    "Latmos/Bafa is best represented as a terrain/fortification/archaeological layer until political control is independently dated.",
+    "Bodrum/Halikarnassos is a coastal strategic node; later Hospitaller and Menteşe fortification phases must remain date-scoped."
+  ],
+  "sources": [
+    "https://islamansiklopedisi.org.tr/mentese",
+    "https://islamansiklopedisi.org.tr/balat",
+    "https://mugla.ktb.gov.tr/TR-436936/becin-kalesi.html",
+    "https://kvmgm.ktb.gov.tr/tr-44129/mugla-milas-muze-mudurlugu.html",
+    "https://dergipark.org.tr/tr/pub/susbed/article/923532",
+    "https://dergipark.org.tr/tr/pub/iuarts/article/1921052"
+  ]
+}

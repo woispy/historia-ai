@@ -1,0 +1,105 @@
+{
+  "scenarioDate": "1326-04-07",
+  "scope": "Samsun-Amisos, Bafra, Canik, Çarşamba, Terme, Ordu, Giresun and western Trabzon frontier",
+  "status": "evidence-only",
+  "canonicalGeometryPromotion": "blocked",
+  "method": {
+    "policy": "Cross-source chronology is required before political geometry promotion.",
+    "sourceClasses": [
+      "TDV Islam Ansiklopedisi",
+      "peer-reviewed historical studies",
+      "primary-source scholarship on Michael Panaretos",
+      "archaeological and trade-colony research"
+    ],
+    "rule": "Political ownership, urban control, frontier influence, ethnic/tribal presence and commercial presence are modeled separately."
+  },
+  "anchors": [
+    {
+      "place": "Sinop",
+      "assessment": "Candaroğlu control",
+      "confidence": "high",
+      "evidence": "Pervaneoğlu Gazi Çelebi died in 1324; TDV records Sinop subsequently being taken by Candaroğlu Süleyman Paşa. Candaroğlu remained under Ilkhanid overlordship until 1327, so 1326 is not an independent-Candar date."
+    },
+    {
+      "place": "Kastamonu",
+      "assessment": "Candaroğlu control",
+      "confidence": "high",
+      "evidence": "Süleyman Bey expanded from Eflani to Kastamonu and made Kastamonu the center. TDV identifies the Candaroğlu polity in Kastamonu-Sinop area."
+    },
+    {
+      "place": "Samsun / Amisos",
+      "assessment": "dual urban-commercial structure; political ownership unresolved at exact 1326 date",
+      "confidence": "medium",
+      "evidence": "TDV distinguishes the Christian/Latin-associated Samsun section and the Muslim Samsun context, while a 2021 academic study documents the Genoese Simisso colony from the late 13th century until 1417-18 and its separate administration by a Genoese consul. This prevents treating the whole modern Samsun area as one political polygon."
+    },
+    {
+      "place": "Bafra",
+      "assessment": "frontier / unresolved",
+      "confidence": "medium-low",
+      "evidence": "Later Canik political structures cannot safely be projected to 1326. Sources document Pervaneoğlu and later Canik beyliks, but exact 7 April 1326 control is insufficiently resolved."
+    },
+    {
+      "place": "Çarşamba",
+      "assessment": "Canik/Taceddin-associated sphere candidate, exact 1326 control unresolved",
+      "confidence": "medium-low",
+      "evidence": "Recent Vakıflar research places Taceddinoğlu activity in Niksar, Terme and Çarşamba, but its chronology and sparse sources require caution when assigning an exact 1326 political polygon."
+    },
+    {
+      "place": "Terme",
+      "assessment": "Canik/Taceddin-associated sphere candidate, exact 1326 control unresolved",
+      "confidence": "medium-low",
+      "evidence": "Recent research associates Terme with the Taceddinoğlu sphere, but this should not be converted into a precise 1326 boundary without date-specific evidence."
+    },
+    {
+      "place": "Ordu / Bayramlu area",
+      "assessment": "Türkmen/Çepni frontier and early Hacıemirli-associated zone; exact 1326 sovereign polygon unresolved",
+      "confidence": "medium",
+      "evidence": "TDV describes a long 1270-1380 conquest process involving Turkish groups and Hacıemiroğulları. Emecen's study identifies Kuşdoğan as a Çepni military leader active before the emergence of Hacıemiroğulları and Taceddinoğulları, but rejects synthetic genealogical claims."
+    },
+    {
+      "place": "Giresun",
+      "assessment": "Trabzon political control / western frontier fortress, with strong Türkmen pressure",
+      "confidence": "high",
+      "evidence": "TDV and modern scholarship place Giresun within the Trabzon political sphere while recording early 14th-century Türkmen attacks. TDV states the city was a fortified western outpost of the Trabzon state against surrounding Türkmen groups."
+    },
+    {
+      "place": "Harşit valley / Tirebolu corridor",
+      "assessment": "Trabzon frontier corridor; no 1326 Turkish political polygon",
+      "confidence": "medium-high",
+      "evidence": "TDV Tirebolu states that Türkmen groups, especially Çepnis, fought with the Trabzon state but places their arrival at Tirebolu only in 1380. Academic work identifies Harşit and Zigana corridors as major links between Kelkit and the Black Sea."
+    }
+  ],
+  "commercialLayer": [
+    {
+      "place": "Simisso / Samsun",
+      "status": "Genoese commercial colony",
+      "confidence": "high",
+      "controlModel": "commercial enclave / consular administration, not sovereign Genoese province",
+      "chronology": "late 13th century-1417/18"
+    }
+  ],
+  "negativeControls": [
+    "Do not project the later Taceddinoğlu territory backward as a fully resolved 1326 polygon.",
+    "Do not equate Çepni settlement or raiding activity with a single sovereign state.",
+    "Do not extend Candaroğlu Sinop control automatically across Samsun, Bafra or Çarşamba.",
+    "Do not treat the Genoese Simisso colony as sovereignty over all Samsun.",
+    "Do not use 15th-16th century Canik administrative boundaries as 1326 geometry.",
+    "Do not use the later Hacıemiroğlu territorial maximum as the 1326 frontier."
+  ],
+  "networkNodes": [
+    "Sinop-Kastamonu inland/Black Sea route",
+    "Samsun-Amisos inland trade corridor",
+    "Samsun-Bafra-Canik coastal corridor",
+    "Yeşilırmak-Çarşamba corridor",
+    "Kelkit-Torul-Zigana-Trabzon corridor",
+    "Kelkit-Harşit-Tirebolu-Giresun corridor"
+  ],
+  "sourceNotes": [
+    "TDV Samsun describes 13th-century Çepni settlement from Sinop toward Trabzon and identifies Canik as the Samsun-centered regional name in later administrative usage.",
+    "TDV Sinop dates Gazi Çelebi's death to 1324 and the subsequent Candaroğlu takeover of Sinop.",
+    "TDV Candaroğulları states that Süleyman Bey remained under Ilkhanid overlordship until 1327, so 1326 Candar control is not equivalent to full independence.",
+    "Feridun Emecen's 2018 study stresses that Kuşdoğan was a Çepni military leader before the emergence of Hacıemiroğulları and Taceddinoğulları and that his relationship to their dynasties is not securely documented.",
+    "A 2021 study of Genoese Simisso documents a Genoese colony at Amisos from the late 13th century to 1417-18, administered by a consul appointed from Genoa.",
+    "A 2022 study of the western borders of the Trabzon state places the long-term western contraction at Giresun by the late 13th century, while emphasizing chronology and disputed frontier evidence."
+  ]
+}

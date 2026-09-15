@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "id": "historical_gis_1326_aegean_black_sea_spatial_anchors",
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "evidence-only",
+  "purpose": "Record independently researched temporal and spatial anchors for Latin maritime presence without promoting them to canonical political geometry.",
+  "rules": {
+    "dateRule": "Evidence after 1326-04-07 is not projected backward.",
+    "presenceRule": "Merchant presence, fondaco, consulate, family lordship, and sovereign territory are distinct statuses.",
+    "geometryRule": "A documented port or settlement is a spatial anchor, not automatically a polygon boundary.",
+    "sourceRule": "Cross-source agreement is preferred; unresolved chronology remains unresolved."
+  },
+  "sources": [
+    {"id":"princeton-medieval-black-sea","provider":"Princeton Medieval Black Sea Project","role":"bibliography and primary-source index","url":"https://medievalblackseaproject.princeton.edu/sources/"},
+    {"id":"khvalkov-genoese-colonies","provider":"EUI / Evgeny Khvalkov","role":"Black Sea Genoese settlement system","url":"https://op.europa.eu/en/publication-detail/-/publication/56064db1-0784-11e6-b713-01aa75ed71a1"},
+    {"id":"genoa-iranica","provider":"Encyclopaedia Iranica","role":"Genoese Black Sea and Trebizond context","url":"https://www.iranicaonline.org/articles/genoa/"},
+    {"id":"simisso-2021","provider":"Tarih İncelemeleri Dergisi / Eğilmez, Yıldırım, Aydın","role":"Simisso chronology, administration, built environment","url":"https://dergipark.org.tr/tr/pub/egetid/article/1050201"},
+    {"id":"fleet-review-sinop-amasra","provider":"Oxford Journal of Islamic Studies review of Kate Fleet","role":"chronological reassessment of Genoese Sinop/Amasra settlements","url":"https://academic.oup.com/jis/article/34/3/426/7000305"},
+    {"id":"galata-reevaluation","provider":"Université de Poitiers / In-scription","role":"Galata/Pera boundary and fortification chronology","url":"https://in-scription.edel.univ-poitiers.fr/index.php?id=480"},
+    {"id":"zaccaria-treccani","provider":"Treccani","role":"Zaccaria Chios/Phocaea lordship chronology","url":"https://www.treccani.it/enciclopedia/zaccaria_%28Dizionario-Biografico%29/"},
+    {"id":"zaccaria-phocaea-cambridge","provider":"Journal of Hellenic Studies / Cambridge","role":"Zaccaria Aegean lordship and historiography","url":"https://www.cambridge.org/core/journals/journal-of-hellenic-studies/article/abs/zaccaria-of-phocaea-and-chios/708C6056E14397B9F21CC14C26EA2CF74"},
+    {"id":"trebizond-venice-treccani","provider":"Treccani","role":"1319 Venetian privilege and Leontokastron fondaco","url":"https://www.treccani.it/enciclopedia/la-lotta-contro-genova_%28Storia-di-Venezia%29/"},
+    {"id":"tana-karpov-2023","provider":"Zbornik radova Vizantoloskog instituta / Sergey Karpov","role":"Tana Venetian/Genoese relations and primary sources","url":"https://doiserbia.nb.rs/Article.aspx?id=0584-98882302303K"}
+  ],
+  "anchors": [
+    {
+      "entityId":"simisso",
+      "modernName":"Samsun",
+      "historicalName":"Simisso",
+      "statusAtScenarioStart":"genoese-trading-colony",
+      "confidence":"high",
+      "findings":[
+        "Published Turkish research identifies permanent Genoese settlement from around 1290.",
+        "A 1298 testament records a Catholic church, hospice and cemetery; 1314-1315 notarial records confirm logia, stores, shops and houses.",
+        "The colony had a Genoese consul and administrative structures and was subordinate to Pera before the 1370s.",
+        "Simisso was distinct from Muslim Samsun and ancient Amisos."
+      ],
+      "geometryUse":"settlement-and-port-anchor",
+      "canonicalPolygon":"not-promoted"
+    },
+    {
+      "entityId":"sinop",
+      "modernName":"Sinop",
+      "statusAtScenarioStart":"host-city; genoese-settlement-status-unresolved",
+      "confidence":"medium",
+      "findings":[
+        "Older literature and Genoese network lists include Sinope among Black Sea establishments.",
+        "Kate Fleet's chronological reassessment, as summarized by Oxford Journal of Islamic Studies, concludes that the Genoese settlements at Sinop and Amasra were established between 1360 and 1380.",
+        "Therefore Sinop must not be represented as a confirmed Genoese colony on the 1326 start map."
+      ],
+      "geometryUse":"native-port-anchor-only",
+      "canonicalPolygon":"not-promoted"
+    },
+    {
+      "entityId":"amasra",
+      "modernName":"Amasra",
+      "historicalName":"Samastri/Amastris",
+      "statusAtScenarioStart":"host-city; genoese-settlement-status-unresolved",
+      "confidence":"medium",
+      "findings":[
+        "Amasra is a long-standing fortified Black Sea port on a peninsula.",
+        "Later Genoese presence is well attested, but Fleet's chronological reassessment places the Genoese settlement at Amasra in 1360-1380 rather than automatically in 1326."
+      ],
+      "geometryUse":"fortified-port-anchor",
+      "canonicalPolygon":"not-promoted"
+    },
+    {
+      "entityId":"caffa",
+      "modernName":"Feodosia",
+      "historicalName":"Caffa/Theodosia",
+      "statusAtScenarioStart":"genoese-colonial-trading-centre",
+      "confidence":"high",
+      "findings":[
+        "Princeton's Medieval Black Sea Project identifies Caffa as a major Genoese Black Sea settlement with notarial evidence.",
+        "The Genoese settlement began in the late 13th century and had a consul by 1281.",
+        "Caffa headed a wider Genoese network linking Black Sea settlements and trade routes."
+      ],
+      "geometryUse":"colony-and-port-anchor",
+      "canonicalPolygon":"not-promoted"
+    },
+    {
+      "entityId":"tana",
+      "modernName":"Azov",
+      "historicalName":"Tana",
+      "statusAtScenarioStart":"genoese-presence; venetian-status-date-sensitive",
+      "confidence":"medium",
+      "findings":[
+        "Genoese presence at Tana is attested before the formal Venetian concession.",
+        "Treccani reports a Venetian consul mention in January 1326, while other documentary summaries date the formal Venetian territorial concession to 1332 and consulate establishment to 1333.",
+        "Because the documentary chronology differs by institutional status, 1326 should record Venetian contact/consular evidence separately from the later territorial concession."
+      ],
+      "geometryUse":"trade-node-with-status-history",
+      "canonicalPolygon":"not-promoted"
+    },
+    {
+      "entityId":"galata-pera",
+      "modernName":"Galata/Pera",
+      "statusAtScenarioStart":"genoese-urban-enclave",
+      "confidence":"high",
+      "findings":[
+        "The 1303 Byzantine imperial edict defined the boundaries of the Genoese quarter; a 1304 edict expanded it.",
+        "Early fortifications followed later in the 14th century; the much larger 15th-century extent must not be projected backward.",
+        "The Genoese quarter was distinct from Byzantine Constantinople and should not be encoded as a sovereign Genoese province."
+      ],
+      "geometryUse":"urban-enclave-anchor",
+      "canonicalPolygon":"not-promoted"
+    },
+    {
+      "entityId":"chios",
+      "modernName":"Chios",
+      "statusAtScenarioStart":"zaccaria-family-lordship-under-byzantine-theoretical-sovereignty",
+      "confidence":"high",
+      "findings":[
+        "Zaccaria control began in 1304 and continued until Byzantine reconquest in 1329.",
+        "The lordship was family-controlled rather than a simple direct Genoese Republic province."
+      ],
+      "geometryUse":"island-political-anchor",
+      "canonicalPolygon":"not-promoted"
+    },
+    {
+      "entityId":"phocaea",
+      "modernName":"Foça",
+      "historicalName":"Phocaea",
+      "statusAtScenarioStart":"zaccaria-family-lordship",
+      "confidence":"high",
+      "findings":[
+        "Zaccaria control at Phocaea is documented through historiography, numismatics and Genoese notarial sources.",
+        "The family expanded and fortified the settlement and exploited alum resources.",
+        "Byzantine reconquest occurred in 1329, so the 1326 scenario must preserve the pre-reconquest state."
+      ],
+      "geometryUse":"fortified-port-and-alum-anchor",
+      "canonicalPolygon":"not-promoted"
+    },
+    {
+      "entityId":"trebizond",
+      "modernName":"Trabzon",
+      "statusAtScenarioStart":"trapezuntine-sovereignty-with-genoese-and-venetian-commercial-presence",
+      "confidence":"high",
+      "findings":[
+        "Genoese commercial presence predates the Venetian 1319 privilege.",
+        "The 1319 Venetian chrysobull granted land at Leontokastron for a fondaco and trading privileges while retaining imperial dues.",
+        "This is evidence for commercial enclaves under Trapezuntine sovereignty, not replacement of the city's political authority by Venice or Genoa."
+      ],
+      "geometryUse":"dual-merchant-enclave-anchor",
+      "canonicalPolygon":"not-promoted"
+    }
+  ],
+  "promotionImplications":[
+    "Simisso is a strong 1326 Genoese settlement anchor and should be represented separately from Muslim Samsun.",
+    "Sinop and Amasra should remain non-Genoese or unresolved for 1326 until stronger date-specific evidence is found.",
+    "Tana requires separate fields for Genoese presence, Venetian consular evidence, and later Venetian territorial concession.",
+    "Galata/Pera requires a time-sliced enclave geometry rather than a modern or later medieval Genoese polygon.",
+    "Chios and Phocaea should use family-lordship status rather than direct Genoese Republic sovereignty.",
+    "Trabzon should preserve Trapezuntine sovereignty while modelling Genoese and Venetian commercial institutions as sub-city entities."
+  ]
+}

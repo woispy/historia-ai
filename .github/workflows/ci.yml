@@ -45,6 +45,8 @@ jobs:
         run: npm run test:historical-source-acquisition
       - name: Validate 1326 Cliopatria candidate extraction
         run: node tools/tests/cliopatria-candidate-extraction.test.js
+      - name: Validate 1326 Cliopatria candidate pipeline
+        run: npm run test:cliopatria-candidate-pipeline
       - name: Validate 1326 entity reconciliation
         run: npm run test:historical-entity-reconciliation
       - name: Validate 1326 entity evidence audit

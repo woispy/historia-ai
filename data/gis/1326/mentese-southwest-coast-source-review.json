@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "scope": "Menteşe southwest coast: Datça, Bozburun, Marmaris, Köyceğiz/Dalaman, Fethiye/Meğri",
+  "status": "evidence-only",
+  "canonicalGeometryPromotion": "BLOCKED",
+  "method": [
+    "Political control is separated from settlement, port, route, and later administrative boundaries.",
+    "Later 14th-century or Ottoman evidence is not back-projected as 1326 polygon evidence.",
+    "Where evidence supports regional Menteşe presence but not an exact 1326 frontier, retain an anchor/frontier classification rather than inventing a boundary."
+  ],
+  "anchors": [
+    {
+      "id": "datca-peninsula",
+      "name": "Datça peninsula / Dadya",
+      "control": "Menteşe regional control",
+      "confidence": "medium-high",
+      "evidence": "A historical study of Knidos/Datça states that by 1269 the Karia/Trachia/Stadia area had passed to Turkish groups and describes the peninsula as under Menteşe control, with an inland local administrative center at Batır/Hızırşah. Medieval settlement was dispersed and shifted inland for security.",
+      "guard": "Do not convert the whole peninsula into a precise 1326 political polygon solely from later administrative geography."
+    },
+    {
+      "id": "hizirsah",
+      "name": "Hızırşah / Batır",
+      "control": "Menteşe-associated local center",
+      "confidence": "medium",
+      "evidence": "The Datça historical study identifies an inland Menteşe administrative center at Batır/Hızırşah; the surviving Hızırşah mosque is generally dated to the Menteşe period, but its exact construction date and the identity of Hızırşah are disputed.",
+      "guard": "Treat the settlement as an anchor, not proof of a modern-style district boundary."
+    },
+    {
+      "id": "marmaris-physkos",
+      "name": "Marmaris / Physkos",
+      "control": "Menteşe sphere",
+      "confidence": "medium-high",
+      "evidence": "Marmaris municipal historical chronology places the area in the Menteşe period from around 1290 and describes Marmaris as a large port settlement in the 1300s. Later scholarship records Marmaris as part of Menteşe territory.",
+      "guard": "The surviving Marmaris castle is Ottoman-period (1522); do not use that fortress as a 1326 fortification."
+    },
+    {
+      "id": "koycegiz-kaunos",
+      "name": "Köyceğiz / Kaunos area",
+      "control": "Menteşe-associated regional zone",
+      "confidence": "medium",
+      "evidence": "Muğla Provincial Government describes Kaunos/Köyceğiz as an important ancient port and states that the area was conquered by Menteşeoğulları in 1291. TDV's Menteşe overview includes Köyceğiz among the later-attested Menteşe cities/areas.",
+      "guard": "The modern Köyceğiz settlement is not a 1326 polygon. Model the Kaunos/lake/coastal corridor as historical landscape and regional anchor until stronger contemporary evidence is found."
+    },
+    {
+      "id": "dalaman-corridor",
+      "name": "Dalaman valley / Dalaman Çayı",
+      "control": "Menteşe–Lycia/Teke transition zone",
+      "confidence": "medium-low",
+      "evidence": "Menteşe sources describe the broader southwest as the beylik's territory, while historical-geographical material places Dalaman within the later Menteşe region. The available evidence does not establish a precise 7 April 1326 political line at the Dalaman river.",
+      "guard": "Keep as frontier/transition terrain rather than a hard political border."
+    },
+    {
+      "id": "fethiye-megri",
+      "name": "Fethiye / Meğri / Makri",
+      "control": "Menteşe regional control",
+      "confidence": "medium-high",
+      "evidence": "TDV describes Meğri/Fethiye as a Menteşe port city and records Menteşe architectural activity there. A Menteşe Bey tomb is located at Fethiye, although its surviving structure was renovated/rebuilt later. Later Menteşe political organization explicitly places southern coastal control around Fethiye and Marmaris.",
+      "guard": "Do not date Ahmed Gazi's later 1360–1391 southern division back to 1326; use it only as corroboration of the established southern Menteşe zone."
+    },
+    {
+      "id": "eshen-frontier",
+      "name": "Eşen valley / northern Lycian transition",
+      "control": "Menteşe–Teke frontier candidate",
+      "confidence": "low-medium",
+      "evidence": "Menteşe regional sources include Meğri and its hinterland, while the southern/eastern boundary toward Teke is not sufficiently resolved for a 1326 polygon from the sources reviewed here.",
+      "guard": "Do not assign the whole Eşen basin to Menteşe or Teke without date-specific evidence."
+    }
+  ],
+  "negativeControls": [
+    {
+      "item": "Marmaris Castle",
+      "reason": "The extant major castle is associated with Süleyman's 1522 Rhodes campaign; it is not evidence for a 1326 fortress."
+    },
+    {
+      "item": "Ahmed Gazi southern subdivision",
+      "reason": "The documented Fethiye/Marmaris southern branch belongs to the post-1360 political division and must not be projected to 1326 as an administrative subdivision."
+    }
+  ],
+  "runtimeImplications": [
+    "Represent Datça, Marmaris, Köyceğiz/Kaunos and Meğri/Fethiye as settlement/port/route anchors with historical control metadata.",
+    "Use a broad Menteşe regional control layer where evidence is strong, but keep exact frontier geometry unresolved.",
+    "Model the southwest coast as a maritime network: ports, anchorages, sea lanes and piracy exposure are more historically meaningful than a smooth coastal province polygon.",
+    "Keep the Dalaman–Eşen direction as a frontier review zone pending stronger date-specific evidence."
+  ],
+  "sources": [
+    {
+      "title": "TDV İslâm Ansiklopedisi — Menteşe",
+      "url": "https://islamansiklopedisi.org.tr/mentese"
+    },
+    {
+      "title": "TDV İslâm Ansiklopedisi — Menteşeoğulları",
+      "url": "https://islamansiklopedisi.org.tr/menteseogullari"
+    },
+    {
+      "title": "Datça/Knidos historical-geography study",
+      "url": "https://www.ancientportsantiques.com/wp-content/uploads/Documents/PLACES/Turkey/Knidos-Tuna2012.pdf"
+    },
+    {
+      "title": "Muğla Provincial Government — Köyceğiz history",
+      "url": "https://www.mugla.gov.tr/koycegiz"
+    },
+    {
+      "title": "Marmaris Municipality — historical chronology",
+      "url": "https://www.marmaris.bel.tr/?Page=gecmisten-bugune-marmaris"
+    }
+  ]
+}
