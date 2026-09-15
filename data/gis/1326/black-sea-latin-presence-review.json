@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "id": "historical_gis_1326_black_sea_latin_presence_review",
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "evidence-only",
+  "purpose": "Record independently researched Genoese/Venetian presence around the Black Sea and distinguish political possession, concession, colony, merchant access, and trade-network evidence for the 1326 scenario.",
+  "method": {
+    "rule": "Do not convert merchant presence or trade access into political ownership.",
+    "dateRule": "Evidence after 1326-04-07 is not projected backward into the scenario start.",
+    "geometryRule": "No canonical polygon is promoted from this review; sites are spatial anchors and status evidence only.",
+    "conflictRule": "Later summaries that date colonies after 1326 are preferred over generic statements that merely describe a site's later Genoese importance."
+  },
+  "sources": [
+    {
+      "id": "iranica-genoa",
+      "provider": "Encyclopaedia Iranica",
+      "role": "Genoese Black Sea network, Caffa, Tana and Pera chronology",
+      "url": "https://www.iranicaonline.org/articles/genoa/"
+    },
+    {
+      "id": "cambridge-latins-aegean",
+      "provider": "Cambridge History of the Byzantine Empire",
+      "role": "Aegean/Black Sea Latin trading-post framework",
+      "url": "https://www.cambridge.org/core/books/abs/the-cambridge-history-of-the-byzantine-empire-c5001492/latins-in-the-aegean-and-the-balkans-13001400/C2C24FAF38A47C6F28BB361526D6DAFC"
+    },
+    {
+      "id": "treccani-zaccaria",
+      "provider": "Treccani / Dizionario Biografico degli Italiani",
+      "role": "Zaccaria lordship in Chios and Phocaea, 1304-1329",
+      "url": "https://www.treccani.it/enciclopedia/zaccaria_%28Dizionario-Biografico%29/"
+    },
+    {
+      "id": "treccani-galata",
+      "provider": "Treccani / Enciclopedia dell'Arte Medievale",
+      "role": "Genoese concession and urban footprint at Galata/Pera",
+      "url": "https://www.treccani.it/enciclopedia/costantinopoli_%28Enciclopedia-dell%27Arte-Medievale%29/"
+    },
+    {
+      "id": "unesco-genoese-routes",
+      "provider": "UNESCO World Heritage Centre tentative-list documentation",
+      "role": "Candidate Genoese route sites and later colony claims; used with date caution",
+      "url": "https://whc.unesco.org/en/tentativelists/6468/"
+    },
+    {
+      "id": "fleet-review",
+      "provider": "Oxford Academic review of Kate Fleet, Turkish-Genoese Trade",
+      "role": "Chronological caution for Genoese settlements at Sinop and Amasra",
+      "url": "https://academic.oup.com/jis/article/34/3/426/7000305"
+    },
+    {
+      "id": "blacksea-encyclopedia",
+      "provider": "Encyclopaedia of the Black Sea / EHW",
+      "role": "Pera, Caffa, Soldaia, Cembalo, Kerch and Tanais network overview",
+      "url": "https://blacksea.ehw.gr/Forms/fLemmaBody.aspx?lemmaid=11936"
+    }
+  ],
+  "siteReviews": [
+    {
+      "siteId": "galata-pera",
+      "category": "genoese-quarter-concession",
+      "scenarioStatus": "present",
+      "confidence": 0.9,
+      "findings": [
+        "Byzantine agreements in 1267 and 1303 recognized a substantial Genoese settlement area at Galata/Pera with houses, warehouses, commercial privileges and autonomous legal/administrative arrangements.",
+        "The major masonry fortification phase should not be back-projected wholesale: Treccani dates a true enclosing wall to 1335 and later expansion to 1348.",
+        "For 1326, represent Galata as a Genoese commercial/urban enclave with a distinct footprint, not as an independent sovereign province."
+      ],
+      "geometryStatus": "urban-anchor-required",
+      "canonicalPolygon": "not-promoted"
+    },
+    {
+      "siteId": "chios",
+      "category": "genoese-family-lordship",
+      "scenarioStatus": "present",
+      "confidence": 0.98,
+      "findings": [
+        "Benedetto Zaccaria seized Chios in 1304 and received it as a Byzantine concession; later Zaccaria rule continued until Byzantine reconquest in 1329.",
+        "Therefore Chios is a high-confidence 1326 Genoese-family political possession, but not simply a polygon labelled Republic of Genoa.",
+        "The island's mastich production and maritime position make it both a political anchor and an economic-network anchor."
+      ],
+      "geometryStatus": "island-political-anchor",
+      "canonicalPolygon": "not-promoted"
+    },
+    {
+      "siteId": "phocaea",
+      "category": "genoese-family-lordship",
+      "scenarioStatus": "present",
+      "confidence": 0.96,
+      "findings": [
+        "The Zaccaria/Cattaneo family held Phocaea and its alum interests during the years immediately preceding 1326.",
+        "Treccani records Cattaneo as lord of Phocaea from 1314 and notes an annual tribute arrangement with Saruhan for security of alum transport.",
+        "Andronikos III recovered the Genoese possessions in 1329, so the 1329 recovery must not be projected into the 1326 start state."
+      ],
+      "geometryStatus": "fortified-port-anchor",
+      "canonicalPolygon": "not-promoted"
+    },
+    {
+      "siteId": "smyrna-port",
+      "category": "genoese-family-port-control",
+      "scenarioStatus": "present-but-subcomponent-status-requires-review",
+      "confidence": 0.82,
+      "findings": [
+        "Martino Zaccaria controlled the port fortifications of Smyrna before their later loss to the Turkish/Aydinid side.",
+        "Because the exact lower-port/upper-city configuration is spatially complex, this review treats the port fortification as an anchor rather than assigning the whole city to Genoa.",
+        "The later 1329 changes are explicitly excluded from the 1326 snapshot."
+      ],
+      "geometryStatus": "fortification-and-port-anchor-required",
+      "canonicalPolygon": "not-promoted"
+    },
+    {
+      "siteId": "trebizond",
+      "category": "foreign-merchant-quarters",
+      "scenarioStatus": "present",
+      "confidence": 0.9,
+      "findings": [
+        "Genoese merchants had an established presence at Trebizond by the late 13th/early 14th century and a consul is attested before 1290 in the Trebizond trade framework.",
+        "Venice received a formal chrysobull in 1319 granting land at Leontokastron for a fondaco and freedom of trade subject to customs and weighing taxes.",
+        "These are merchant-community and commercial-privilege anchors, not evidence that Genoa or Venice owned the city or its surrounding territory."
+      ],
+      "geometryStatus": "merchant-quarter-anchor-required",
+      "canonicalPolygon": "not-promoted"
+    },
+    {
+      "siteId": "caffa",
+      "category": "genoese-colony",
+      "scenarioStatus": "present",
+      "confidence": 0.96,
+      "findings": [
+        "Genoese access to Caffa followed the 13th-century Byzantine-Genoese settlement framework; after the 1307 crisis, Genoese dominion in Crimea and Tana was re-established in 1313.",
+        "Caffa functioned as a major Genoese administrative and commercial center for the northern Black Sea network.",
+        "The 1326 map should represent Caffa as a Genoese colonial/trading node, not as evidence for Genoese control of the whole Crimean peninsula."
+      ],
+      "geometryStatus": "city-colony-anchor",
+      "canonicalPolygon": "not-promoted"
+    },
+    {
+      "siteId": "soldaia",
+      "category": "genoa-venice-competing-trade-post",
+      "scenarioStatus": "present-as-trade-node; exact political status requires further source review",
+      "confidence": 0.75,
+      "findings": [
+        "Soldaia/Sudak appears in the established Genoese Black Sea network, while Venetian commercial activity was also present in the region.",
+        "The evidence currently supports a trade-network node more securely than a single 1326 sovereign-control polygon.",
+        "Further charter and archaeological review is required before assigning a political owner."
+      ],
+      "geometryStatus": "trade-node-anchor",
+      "canonicalPolygon": "not-promoted"
+    },
+    {
+      "siteId": "tanais",
+      "category": "mixed-genoese-venetian-trade-post",
+      "scenarioStatus": "present-in-network",
+      "confidence": 0.82,
+      "findings": [
+        "Genoese dominion in La Tana/Azaq was re-established in 1313, while Venetian trade was also active there during the late medieval period.",
+        "The site should be represented as a commercial node with competing Latin communities rather than a generic Venetian or Genoese territorial polygon without further date-specific charter evidence."
+      ],
+      "geometryStatus": "trade-node-anchor",
+      "canonicalPolygon": "not-promoted"
+    },
+    {
+      "siteId": "sinop",
+      "category": "black-sea-port",
+      "scenarioStatus": "not-proven-as-genoese-colony-at-scenario-start",
+      "confidence": 0.88,
+      "findings": [
+        "UNESCO tentative-list material describes later Genoese and Venetian activity at Sinop and a Genoese flag on the 1351 Laurentiana map.",
+        "Kate Fleet's chronological review, as summarized by Oxford Academic, argues that the Genoese settlements at Sinop and Amasra were established between 1360 and 1380.",
+        "Therefore a 1326 Genoese colony at Sinop must not be inserted merely because Sinop became a major Genoese center later.",
+        "Sinop remains a high-value port and political-control anchor for the Candaroğlu state, but Latin colony status is deferred."
+      ],
+      "geometryStatus": "native-port-anchor; latin-status-deferred",
+      "canonicalPolygon": "not-promoted"
+    },
+    {
+      "siteId": "amasra",
+      "category": "black-sea-port",
+      "scenarioStatus": "not-proven-as-genoese-colony-at-scenario-start",
+      "confidence": 0.9,
+      "findings": [
+        "Generic heritage summaries describe Amasra as a Genoese colony, but a chronological review of contemporary-source evidence places the establishment of the Genoese settlements at Amasra and Sinop between 1360 and 1380.",
+        "Therefore the later Genoese-colony label cannot be projected backward to 7 April 1326.",
+        "Amasra remains an important Black Sea port anchor whose later Genoese phase is retained as future temporal evidence."
+      ],
+      "geometryStatus": "native-port-anchor; latin-status-deferred",
+      "canonicalPolygon": "not-promoted"
+    }
+  ],
+  "modelRules": [
+    "Genoese family lordship is distinct from Republic of Genoa sovereign territory.",
+    "A merchant quarter/fondaco is distinct from political ownership of its host city.",
+    "A trade route or commercial privilege is not a territorial claim.",
+    "Later colony dates are not projected backward into 1326.",
+    "City, port, fortress, quarter and hinterland must be separately modelled where the evidence supports different authorities.",
+    "These records are evidence-only and cannot promote canonical political geometry without independent geometry reconstruction and temporal review."
+  ]
+}
