@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { fitGeoreferencer, digitizeRing, ringSignedArea } from "./MapGeoreferencer.js";
+import { fitGeoreferencer, ringSignedArea } from "./MapGeoreferencer.js";
 import { autoCalibrate } from "./ControlPointAutomation.js";
 import { drawReferenceLayer, referenceLayerStyle } from "./ReferenceLayerRenderer.js";
 
@@ -13,7 +13,7 @@ const VIEW_PADDING = 40;
 export default function MapStudioEditor({ template, mapConfig, coverage = null, referenceLayer = null, onChange = () => {} }) {
   const canvasRef = useRef(null);
   const imageRef = useRef(null);
-  const [imageReady, setImageReady] = useState(false);
+  const [imageReadyUrl, setImageReadyUrl] = useState(null);
   const [document_, setDocument_] = useState(template);
   const [activeProvinceId, setActiveProvinceId] = useState(template?.provinces?.[0]?.provinceId ?? null);
 
@@ -41,16 +41,32 @@ export default function MapStudioEditor({ template, mapConfig, coverage = null, 
     }
   }, [mapConfig]);
 
+  // Intentional prop-to-editor-document synchronization: template is an external
+  // source-of-truth replacement, not derived rendering state.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setDocument_(template); }, [template]);
 
   useEffect(() => {
-    if (!mapConfig?.imageUrl) { setImageReady(false); return undefined; }
+    const imageUrl = mapConfig?.imageUrl;
+    if (!imageUrl) {
+      imageRef.current = null;
+      return undefined;
+    }
     const image = new Image();
-    image.onload = () => { imageRef.current = image; setImageReady(true); };
-    image.onerror = () => setImageReady(false);
-    image.src = mapConfig.imageUrl;
-    return () => { imageRef.current = null; };
+    image.onload = () => {
+      imageRef.current = image;
+      setImageReadyUrl(imageUrl);
+    };
+    image.onerror = () => {
+      if (imageRef.current === image) imageRef.current = null;
+    };
+    image.src = imageUrl;
+    return () => {
+      if (imageRef.current === image) imageRef.current = null;
+    };
   }, [mapConfig?.imageUrl]);
+
+  const imageReady = Boolean(mapConfig?.imageUrl && imageReadyUrl === mapConfig.imageUrl && imageRef.current);
 
   const viewExtent = useMemo(() => {
     const bbox = coverage?.bbox;
