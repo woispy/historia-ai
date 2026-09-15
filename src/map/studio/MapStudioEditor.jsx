@@ -8,18 +8,7 @@ const VIEW_PADDING = 40;
 /**
  * Historia AI — Map Studio Editor
  *
- * Digitization editor for the editorial reconstruction workflow. Instead of
- * hand-writing JSON coordinates, the editor draws province boundaries by
- * clicking on a georeferenced historical raster map; every click becomes a
- * WGS84 coordinate through the fitted affine transform, rings are validated
- * live, and the source document exports in the exact format the
- * proof-group -> dataset builder -> mapbin pipeline consumes.
- *
- * Props:
- *  - template: source document from `studio:source-document init` (38 pending provinces)
- *  - mapConfig: { imageUrl, controlPoints: [{pixel:[x,y], geo:[lon,lat]}] }
- *  - coverage: coverage manifest (bbox used for the view extent + live checks)
- *  - onChange(sourceDocument): emitted on every edit
+ * Digitization editor for the editorial reconstruction workflow.
  */
 export default function MapStudioEditor({ template, mapConfig, coverage = null, referenceLayer = null, onChange = () => {} }) {
   const canvasRef = useRef(null);
@@ -29,8 +18,6 @@ export default function MapStudioEditor({ template, mapConfig, coverage = null, 
   const [activeProvinceId, setActiveProvinceId] = useState(template?.provinces?.[0]?.provinceId ?? null);
 
   const georeferencer = useMemo(() => {
-    // Auto-calibrated mode: extent + city anchors -> control points + fit,
-    // with the city-anchor sanity gate (fail-closed on wrong extent).
     if (mapConfig?.imageWidth && mapConfig?.extent) {
       try {
         const calibration = autoCalibrate({
@@ -68,7 +55,6 @@ export default function MapStudioEditor({ template, mapConfig, coverage = null, 
   const viewExtent = useMemo(() => {
     const bbox = coverage?.bbox;
     if (Array.isArray(bbox) && bbox.length === 4) return { minX: bbox[0], minY: bbox[1], maxX: bbox[2], maxY: bbox[3] };
-    // Fall back to the geo extent of the control points.
     const lons = (mapConfig?.controlPoints ?? []).map((point) => Number(point.geo[0]));
     const lats = (mapConfig?.controlPoints ?? []).map((point) => Number(point.geo[1]));
     return { minX: Math.min(...lons), minY: Math.min(...lats), maxX: Math.max(...lons), maxY: Math.max(...lats) };
@@ -98,16 +84,11 @@ export default function MapStudioEditor({ template, mapConfig, coverage = null, 
     const toCanvasY = (lat) => height - (offsetY + (lat - viewExtent.minY) * scale);
     const geoToCanvas = (lon, lat) => [toCanvasX(lon), toCanvasY(lat)];
 
-    // Background image: draw through the georeferenced image corners so the
-    // raster aligns with the geographic view (affine, north-up assumption).
     const image = imageRef.current;
     if (image && georeferencer) {
       const corners = [[0, 0], [image.width, 0], [image.width, image.height], [0, image.height]]
         .map(([px, py]) => georeferencer.toGeo(px, py))
         .map(([lon, lat]) => geoToCanvas(lon, lat));
-      // Affine image draw: solve view transform of image corners as a 2x3
-      // matrix applied via ctx.transform (parallelogram approximation of the
-      // georeferenced quad).
       const [p0, p1, p3] = [corners[0], corners[1], corners[3]];
       const m11 = (p1[0] - p0[0]) / image.width;
       const m12 = (p1[1] - p0[1]) / image.width;
@@ -120,9 +101,6 @@ export default function MapStudioEditor({ template, mapConfig, coverage = null, 
       ctx.restore();
     }
 
-    // Natural Earth 10m land/sea reference beneath the entered rings —
-    // Open-Historia-quality geographic context for digitization. Drawn over
-    // the historical raster (semi-transparent) so both are visible.
     if (referenceLayer) {
       ctx.save();
       ctx.globalAlpha = 0.6;
@@ -130,7 +108,6 @@ export default function MapStudioEditor({ template, mapConfig, coverage = null, 
       ctx.restore();
     }
 
-    // All entered rings.
     for (const province of document_?.provinces ?? []) {
       if (!province.ring?.length) continue;
       ctx.beginPath();
@@ -155,7 +132,6 @@ export default function MapStudioEditor({ template, mapConfig, coverage = null, 
       }
     }
 
-    // Control points (georeference anchors).
     for (const point of mapConfig?.controlPoints ?? []) {
       const [cx, cy] = geoToCanvas(Number(point.geo[0]), Number(point.geo[1]));
       ctx.strokeStyle = "#e05d5d";
@@ -165,11 +141,10 @@ export default function MapStudioEditor({ template, mapConfig, coverage = null, 
       ctx.stroke();
     }
 
-    // Draw-vertex tracking for canvas click mapping.
     canvas.__view = { scale, offsetX, offsetY, toCanvasX, toCanvasY, geoToCanvas };
-  }, [document_, activeProvinceId, viewExtent, georeferencer, mapConfig]);
+  }, [document_, activeProvinceId, viewExtent, georeferencer, mapConfig, referenceLayer]);
 
-  useEffect(() => { draw(); }, [draw, imageReady, referenceLayer]);
+  useEffect(() => { draw(); }, [draw, imageReady]);
 
   const handleCanvasClick = useCallback((event) => {
     const canvas = canvasRef.current;
@@ -179,15 +154,12 @@ export default function MapStudioEditor({ template, mapConfig, coverage = null, 
     const dpr = canvas.width / rect.width;
     const cx = (event.clientX - rect.left) * dpr;
     const cy = (event.clientY - rect.top) * dpr;
-    // Invert the geo->canvas view transform: the click position IS geo.
     const lonValue = viewExtent.minX + (cx - view.offsetX) / view.scale;
     const latValue = viewExtent.minY + (canvas.height - cy - view.offsetY) / view.scale;
     const nextDocument = {
       ...document_,
       provinces: document_.provinces.map((province) => (
-        province.provinceId === activeProvinceId
-          ? { ...province, ring: [...(province.ring ?? []), [lonValue, latValue]] }
-          : province
+        province.provinceId === activeProvinceId ? { ...province, ring: [...(province.ring ?? []), [lonValue, latValue]] } : province
       )),
     };
     setDocument_(nextDocument);
@@ -199,9 +171,7 @@ export default function MapStudioEditor({ template, mapConfig, coverage = null, 
     const nextDocument = {
       ...document_,
       provinces: document_.provinces.map((province) => (
-        province.provinceId === activeProvinceId
-          ? { ...province, ring: (province.ring ?? []).slice(0, -1) }
-          : province
+        province.provinceId === activeProvinceId ? { ...province, ring: (province.ring ?? []).slice(0, -1) } : province
       )),
     };
     setDocument_(nextDocument);
@@ -242,32 +212,18 @@ export default function MapStudioEditor({ template, mapConfig, coverage = null, 
   return (
     <div style={{ display: "flex", gap: 12, fontFamily: "monospace", color: "#dce8f2" }}>
       <div>
-        <canvas
-          ref={canvasRef}
-          width={760}
-          height={560}
-          onClick={handleCanvasClick}
-          style={{ border: "1px solid #34506a", cursor: georeferencer ? "crosshair" : "not-allowed", background: "#0b1620" }}
-        />
+        <canvas ref={canvasRef} width={760} height={560} onClick={handleCanvasClick} style={{ border: "1px solid #34506a", cursor: georeferencer ? "crosshair" : "not-allowed", background: "#0b1620" }} />
         <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
           <button type="button" onClick={undoLastVertex}>Undo vertex</button>
           <button type="button" onClick={closeRing}>Close ring</button>
           <button type="button" onClick={exportDocument}>Export source document</button>
         </div>
-        {!georeferencer && <p style={{ color: "#e05d5d" }}>Georeferencer unavailable: mapConfig needs >= 3 non-collinear control points.</p>}
+        {!georeferencer && <p style={{ color: "#e05d5d" }}>Georeferencer unavailable: mapConfig needs &gt;= 3 non-collinear control points.</p>}
       </div>
       <div style={{ minWidth: 280, maxHeight: 560, overflowY: "auto" }}>
         <h3 style={{ margin: "0 0 6px" }}>Provinces</h3>
         {(document_?.provinces ?? []).map((province) => (
-          <div
-            key={province.provinceId}
-            onClick={() => setActiveProvinceId(province.provinceId)}
-            style={{
-              padding: "4px 6px", marginBottom: 2, cursor: "pointer",
-              background: province.provinceId === activeProvinceId ? "#34506a" : "transparent",
-              border: province.provinceId === activeProvinceId ? "1px solid #f5c542" : "1px solid transparent",
-            }}
-          >
+          <div key={province.provinceId} onClick={() => setActiveProvinceId(province.provinceId)} style={{ padding: "4px 6px", marginBottom: 2, cursor: "pointer", background: province.provinceId === activeProvinceId ? "#34506a" : "transparent", border: province.provinceId === activeProvinceId ? "1px solid #f5c542" : "1px solid transparent" }}>
             {province.provinceId} — {province.ring?.length ?? 0} pts
           </div>
         ))}
