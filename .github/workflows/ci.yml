@@ -49,6 +49,8 @@ jobs:
         run: npm run test:historical-entity-reconciliation
       - name: Validate 1326 entity evidence audit
         run: npm run test:historical-entity-evidence-audit
+      - name: Validate 1326 geometry evidence inventory
+        run: npm run test:historical-geometry-evidence-inventory
       - name: Validate map render diagnostics and depth context contracts
         run: npm run test:map-render-diagnostics
       - name: Validate camera world-wrap continuity
