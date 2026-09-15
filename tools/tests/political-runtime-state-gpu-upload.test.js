@@ -20,7 +20,6 @@ import assert from "node:assert/strict";
 import { encodeMapBin } from "../build/mapbin-encoder.js";
 import { ProvinceRuntimeState } from "../../src/map/runtime/ProvinceRuntimeState.js";
 import { DynamicStateUploader } from "../../src/map/runtime/DynamicStateUploader.js";
-import { DynamicProvinceState } from "../../src/map/runtime/DynamicProvinceState.js";
 import { captureStaticGeometryChecksum, assertStaticGeometryUnchanged } from "../../src/map/runtime/RuntimeStateIntegrity.js";
 import { DYNAMIC_STATE_RENDER_WGSL, DYNAMIC_STATE_PICK_WGSL, DYNAMIC_STATE_BINDINGS } from "../../src/map/rendering/gpu/DynamicStateShader.js";
 import { BinaryMapRenderer } from "../../src/map/rendering/gpu/BinaryMapRenderer.js";
