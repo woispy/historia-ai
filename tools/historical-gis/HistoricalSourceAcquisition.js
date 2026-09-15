@@ -97,10 +97,7 @@ export function filterHistoricalFeatures(
   geojson.features.forEach((feature, index) => {
     const interval = readTemporalInterval(feature);
     const sourceFeatureId = String(
-      feature?.id ??
-      feature?.properties?.ID ??
-      feature?.properties?.id ??
-      index,
+      feature?.id ?? feature?.properties?.ID ?? feature?.properties?.id ?? index,
     );
 
     if (interval.status === "invalid") {
@@ -161,10 +158,7 @@ export async function readHistoricalSourceInput({ inputPath, url }) {
     );
   }
 
-  return {
-    rawText: await response.text(),
-    acquisition: { mode: "url", url },
-  };
+  return { rawText: await response.text(), acquisition: { mode: "url", url } };
 }
 
 export async function acquireHistoricalSource({
@@ -186,23 +180,16 @@ export async function acquireHistoricalSource({
   if (!dataset) throw new Error("dataset is required.");
   if (!Number.isInteger(targetYear)) throw new Error("targetYear is required.");
 
-  const { rawText, acquisition } = await readHistoricalSourceInput({
-    inputPath,
-    url,
-  });
+  const { rawText, acquisition } = await readHistoricalSourceInput({ inputPath, url });
   const inputSha256 = sha256Text(rawText);
   const geojson = JSON.parse(rawText);
-  const filtered = filterHistoricalFeatures(geojson, targetYear, {
-    allowTimeless,
-  });
-
-  const evidenceGeoJson = {
-    type: "FeatureCollection",
-    features: filtered.retained.map(({ feature }) => feature),
-  };
+  const filtered = filterHistoricalFeatures(geojson, targetYear, { allowTimeless });
 
   return {
-    evidenceGeoJson,
+    evidenceGeoJson: {
+      type: "FeatureCollection",
+      features: filtered.retained.map(({ feature }) => feature),
+    },
     report: {
       schemaVersion: 1,
       assetType: "historical-source-evidence",
@@ -224,9 +211,7 @@ export async function acquireHistoricalSource({
       temporalFilter: {
         targetYear,
         rule: "FromYear <= targetYear <= ToYear",
-        timelessPolicy: allowTimeless
-          ? "retain-with-warning"
-          : "exclude-fail-closed",
+        timelessPolicy: allowTimeless ? "retain-with-warning" : "exclude-fail-closed",
       },
       counts: {
         inputFeatures: geojson.features.length,
@@ -256,17 +241,8 @@ export async function writeHistoricalSourceEvidence({
 
   await fs.mkdir(path.dirname(outputPath), { recursive: true });
   await fs.mkdir(path.dirname(manifestPath), { recursive: true });
-
-  await fs.writeFile(
-    outputPath,
-    `${JSON.stringify(evidenceGeoJson, null, 2)}\n`,
-    "utf8",
-  );
-  await fs.writeFile(
-    manifestPath,
-    `${JSON.stringify(report, null, 2)}\n`,
-    "utf8",
-  );
+  await fs.writeFile(outputPath, `${JSON.stringify(evidenceGeoJson, null, 2)}\n`, "utf8");
+  await fs.writeFile(manifestPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
 }
 
 export { assertFeatureCollection, TEMPORAL_KEYS };
