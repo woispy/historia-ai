@@ -43,6 +43,8 @@ jobs:
         run: npm run lint
       - name: Validate 1326 historical source acquisition contracts
         run: npm run test:historical-source-acquisition
+      - name: Validate 1326 Cliopatria candidate extraction
+        run: node tools/tests/cliopatria-candidate-extraction.test.js
       - name: Validate map render diagnostics and depth context contracts
         run: npm run test:map-render-diagnostics
       - name: Validate camera world-wrap continuity
