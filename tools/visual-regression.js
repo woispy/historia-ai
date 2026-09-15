@@ -153,23 +153,16 @@ class VisualRegressionTester {
     // Load baseline
     const baseline = loadImageRGBA(baselinePath, width, height);
 
-    // Get current image data
-    const current = new Uint8Array(width * height * 4);
-    // Assume renderFn returns Uint8Array RGBA
-    const currentData = await renderFn(width, height);
-
     // Compare
     const result = compareImages(
       new Uint8Array(baseline),
-      new Uint8Array(currentData),
+      new Uint8Array(currentImage),
       width, height
     );
 
     if (!result.passed) {
       // Generate diff image
-      const diffData = new Uint8Array(width * height * 4);
-      // Generate diff visualization (red for differences)
-      // Simplified for now
+      // Diff visualization is reserved for the future debug artifact path.
 
       return {
         passed: false,
