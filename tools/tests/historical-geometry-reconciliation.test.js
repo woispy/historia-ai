@@ -77,13 +77,21 @@ const unresolved = reconcileHistoricalGeometryEvidence({
 });
 assert.equal(unresolved.records.length, 0);
 
+const filtered = reconcileHistoricalGeometryEvidence({
+  scenarioDate: "1326-04-07",
+  targetYear: 1326,
+  inventories: [inventory("source-a", "1", [{ ...baseRecord, temporalStatus: "not-applicable" }])],
+});
+assert.equal(filtered.records.length, 0);
+
 assert.throws(
   () => reconcileHistoricalGeometryEvidence({
     scenarioDate: "1326-04-07",
     targetYear: 1326,
-    inventories: [inventory("source-a", "1", [{ ...baseRecord, temporalStatus: "not-applicable" }])],
+    inventories: [inventory("source-a", "1")],
+    areaDifferenceThreshold: 2,
   }),
-  /not-applicable/,
+  /areaDifferenceThreshold/,
 );
 
 console.log("Historical geometry reconciliation tests passed.");
