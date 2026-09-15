@@ -80,7 +80,7 @@ export function buildPoliticalGeographyDataset({ coverage, provinces, provenance
       createRegistry: (options) => new AuthoritativeArcRegistry(options),
     });
   } catch (error) {
-    throw new Error(`Dataset builder rejected source ${sourceDocument.sourceId}: ${error.message}`);
+    throw new Error(`Dataset builder rejected source ${sourceDocument.sourceId}: ${error.message}`, { cause: error });
   }
 
   const registry = imported.registry;
@@ -103,7 +103,7 @@ export function buildPoliticalGeographyDataset({ coverage, provinces, provenance
     return {
   ...entry,
   reviewStatus: sourceProvince?.reviewStatus,
-  geometryStatus: "authoritative",
+      geometryStatus: "authoritative",
       geometry: {
         sourceId: sourceDocument.sourceId,
         sourceRef: sourceProvince?.sourceRef ?? sourceDocument.sourceRef,
