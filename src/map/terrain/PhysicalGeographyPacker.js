@@ -6,10 +6,7 @@
  */
 
 import { buildIndexedProvincePack } from "../rendering/gpu/ProvinceGpuPackStable.js";
-import { collectWorldLandPolygons } from "../physical/WorldLandMask.js";
-import { TerrainTileProvider, biomeFromLatElevation, BIOME_PALETTE } from "./TerrainTileProvider.js";
-import { biomeFromLatElevation as classifyBiome, BIOME_PALETTE as BIOME_COLORS } from "./BiomeClassifier.js";
-import { computeRiverSegmentWidths } from "./RiverWidth.js";
+import { biomeFromLatElevation as classifyBiome, BIOME_PALETTE } from "./BiomeClassifier.js";
 
 /**
  * Physical geography feature types for GPU packing.
@@ -32,7 +29,6 @@ export async function buildPhysicalGeographyPack(entries, options = {}) {
     quantization = 1e6,
     terrainProvider = null,
     includeRivers = true,
-    includeLakes = true,
     includeBiome = true,
     includeTerrain = true,
   } = options;
@@ -124,14 +120,12 @@ function computeBiomeForFeatures(entries) {
       results.push({ biomeId: 0, color: [20, 40, 80, 255] });
       continue;
     }
-    const centroidLon = totalLon / count;
-    const centroidLat = totalLat / count;
     // Use average elevation from terrain if available
     const elevation = entry.terrain?.elevation ?? 0;
     const biomeId = classifyBiome(totalLat / count, elevation);
     results.push({
       biomeId,
-      color: [BIOME_PALETTE[biomeId] ?? [60, 130, 60, 255]],
+      color: BIOME_PALETTE[biomeId] ?? [60, 130, 60, 255],
     });
   }
   return results;
