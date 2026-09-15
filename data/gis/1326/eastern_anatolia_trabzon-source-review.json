@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "scope": "Sivas–Erzincan–Erzurum–Bayburt–Trabzon corridor",
+  "status": "evidence-only",
+  "canonicalGeometryPromotion": "blocked",
+  "method": {
+    "policy": "Multi-source corroboration required; political control is separated from route, fortress, settlement and commercial presence.",
+    "dateGuard": "Do not back-project post-1326 Eretna, Sutayli, Aq Qoyunlu or later Turkoman territorial arrangements into 1326."
+  },
+  "anchors": [
+    {
+      "name": "Sivas",
+      "controlModel": "Ilkhanid imperial administration / Timurtash period",
+      "confidence": "high",
+      "evidence": "1326 falls inside Timurtash's 1318–1327 Anatolian governorship; Eretna's later autonomous polity is not promoted to 1326."
+    },
+    {
+      "name": "Erzincan",
+      "controlModel": "Ilkhanid imperial sphere",
+      "confidence": "high",
+      "evidence": "Independent academic work describes taxation and coinage under Ilkhanid rule through 1243–1343; Kemah/Erzincan corridor functioned as an east-west route."
+    },
+    {
+      "name": "Kemah",
+      "controlModel": "fortress and route anchor within the Erzincan/Firat corridor",
+      "confidence": "high",
+      "evidence": "TDV identifies Kemah as a strategically positioned medieval fortress on the Karasu/Firat valley; exact 1326 territorial polygon remains unproven."
+    },
+    {
+      "name": "Erzurum",
+      "controlModel": "Ilkhanid imperial sphere",
+      "confidence": "high",
+      "evidence": "Academic study of the Ilkhanid period describes Erzurum as an important Ilkhanid trade centre; 1326 travel evidence is also reported in secondary scholarship."
+    },
+    {
+      "name": "Bayburt",
+      "controlModel": "Ilkhanid sphere / fortified frontier node",
+      "confidence": "high",
+      "evidence": "TDV traces Bayburt's Seljuk and Ilkhanid development and its strategic fortification against Trabzon; later Eretna control is post-1334 and excluded."
+    },
+    {
+      "name": "Ispir",
+      "controlModel": "frontier/route fortress; exact 1326 sovereignty unresolved",
+      "confidence": "medium",
+      "evidence": "Cambridge archaeological-historical study describes Ispir and Bayburt as long-term marcher territory between competing powers and highlights Ispir's control of the Coruh valley and route to the Black Sea."
+    },
+    {
+      "name": "Trabzon",
+      "controlModel": "Empire of Trebizond / Komnenian sovereignty",
+      "confidence": "high",
+      "evidence": "TDV identifies Trabzon as the capital of the Komnenian empire, with Ilkhanid overlordship in the period and Genoese/Venetian commercial colonies; Türkmen pressure intensified from the 1320s, especially in surrounding western/southern mountains."
+    },
+    {
+      "name": "Giresun",
+      "controlModel": "Trebizond sphere with frontier pressure; exact 1326 control needs local reconstruction",
+      "confidence": "medium",
+      "evidence": "TDV records 1297 Turkish advances, early-14th-century attacks and 1301 refortification by Alexios II; this supports a contested frontier model rather than a smooth later boundary."
+    }
+  ],
+  "negativeControls": [
+    {
+      "name": "Eretna State",
+      "rule": "exclude from 1326 canonical political geography",
+      "reason": "Eretna's independent polity belongs to the post-1327/post-1335 political transformation."
+    },
+    {
+      "name": "Aq Qoyunlu",
+      "rule": "exclude from 1326",
+      "reason": "TDV places their emergence in this regional political theatre from 1340 onward."
+    },
+    {
+      "name": "Sutayli/late Ilkhanid successor polities",
+      "rule": "exclude from 1326",
+      "reason": "Their regional dominance belongs to the post-1335 fragmentation period."
+    }
+  ],
+  "spatialModel": {
+    "IlkhanidCore": ["Sivas", "Erzincan", "Kemah", "Erzurum", "Bayburt"],
+    "TrebizondCore": ["Trabzon"],
+    "FrontierTransition": ["Ispir", "Giresun", "Coruh/Pontic mountain passes", "Kelkit corridor"],
+    "majorConnectors": [
+      "Sivas–Erzincan east-west corridor",
+      "Erzincan–Erzurum corridor",
+      "Erzurum–Bayburt–Trabzon mountain route",
+      "Coruh valley northward route"
+    ]
+  },
+  "modelingRules": [
+    "Do not draw a single hard Ilkhanid–Trebizond border across the Pontic mountains without local evidence.",
+    "Treat fortress nodes and mountain passes independently from province ownership.",
+    "Separate imperial suzerainty from direct local administration.",
+    "Treat Trabzon's Genoese/Venetian commercial presence as a trade-network layer, not foreign sovereignty.",
+    "Use post-1326 events only as chronology brackets, never as direct 1326 ownership evidence."
+  ],
+  "sources": [
+    "TDV İslâm Ansiklopedisi: Erzincan, Kemah, Bayburt, Trabzon, Giresun, İlhanlılar",
+    "Ankara University DTCF: İlhanlılar Devrinde Erzurum",
+    "Erzincan University Social Sciences: The Politics of the Ilkhanids against the Anatolian Turkmen Beys",
+    "Cambridge / Anatolian Studies: A Note on the South-eastern Borders of the Empire of Trebizond",
+    "2024 academic study derived from Moğollar / İlhanlılar Zamanında Erzincan (1243–1343)",
+    "2025 Belleten study on Bayburt–Trabzon historical routes"
+  ]
+}
