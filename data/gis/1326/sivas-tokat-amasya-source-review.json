@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "scope": "Sivas–Tokat–Amasya axis and the eastern Anatolian Ilkhanid administrative transition",
+  "status": "evidence-only",
+  "canonicalGeometryPromotion": "blocked",
+  "method": {
+    "policy": "Cross-check TDV, academic studies, institutional/official material and chronological evidence before promoting any political geometry.",
+    "rules": [
+      "Do not project Eretna state borders backward into 1326.",
+      "Separate Ilkhanid sovereignty, Anatolian governor administration, local emir authority and later independent beylik control.",
+      "Use 1327 Timurtaş departure and 1335 Abu Said death as explicit temporal guards.",
+      "Do not infer exact rural boundaries from city-level administrative evidence."
+    ]
+  },
+  "anchors": [
+    {
+      "name": "Sivas",
+      "controlModel": "Ilkhanid provincial/vice-regal center under Timurtaş",
+      "confidence": "high",
+      "evidence": [
+        "Academic study of Sivas attacks states Timurtaş served as Anatolian governor from 1318 to 1327 and that Sivas was the provincial center.",
+        "TDV Eretnaoğulları states Eretna became acting governor only after Timurtaş left for Egypt in 1327."
+      ],
+      "guard": "Do not label Sivas Eretna state in April 1326."
+    },
+    {
+      "name": "Tokat",
+      "controlModel": "Ilkhanid administration / local emirate within Ilkhanid Anatolia",
+      "confidence": "high",
+      "evidence": [
+        "TDV Tokat traces Tokat under Ilkhanid authority and places its transition to Eretna administration after Timurtaş's 1327 departure and Abu Said's 1335 death.",
+        "1314 tomb of Ilkhanid emir Nureddin b. Sentimur in Tokat provides material evidence for the Ilkhanid administrative environment."
+      ],
+      "guard": "Do not assign Tokat to Eretna in 1326."
+    },
+    {
+      "name": "Amasya",
+      "controlModel": "Ilkhanid administration; local authority retained as an administrative layer",
+      "confidence": "medium-high",
+      "evidence": [
+        "TDV Amasya history places the city within the long Ilkhanid governmental period ending in 1335.",
+        "Later independent Amasya emirates are explicitly post-Ilkhanid and must not be back-projected."
+      ],
+      "guard": "Do not model the later Taceddinoğlu polity in 1326; that dynasty emerged in the mid-14th century."
+    },
+    {
+      "name": "Kayseri",
+      "controlModel": "Ilkhanid Anatolian administrative sphere",
+      "confidence": "high",
+      "evidence": [
+        "TDV Kayseri places Eretna's effective rule later and notes Ibn Battuta's 1332 visit while Eretna was still an Ilkhanid governor.",
+        "TDV Eretnaoğulları places Eretna's delegated administration of Kayseri after 1327."
+      ],
+      "guard": "Do not use later Eretna territorial geometry for 1326."
+    }
+  ],
+  "politicalChronology": {
+    "1318-1327": "Timurtaş is Anatolian governor; Sivas functions as the provincial center.",
+    "1326-04-07": "Scenario start remains inside Timurtaş's governorship; Sivas/Tokat/Amasya/Kayseri are not Eretna independent territory.",
+    "1327": "Timurtaş leaves Anatolia for Egypt and leaves Alaeddin Eretna as deputy; this is the transition point for Eretna's administrative prominence.",
+    "1335": "Abu Said dies; Ilkhanid authority fragments and independent Eretna state formation follows."
+  },
+  "negativeControls": [
+    "Eretnaoğulları as an independent state in 1326",
+    "Taceddinoğulları in Tokat/Niksar in 1326",
+    "Kadı Burhaneddin's Sivas state in 1326",
+    "Later Eretna borders projected backward to 1326"
+  ],
+  "runtimeModel": {
+    "politicalOwner": "Ilkhanid imperial authority / delegated Anatolian governor layer",
+    "localAuthority": "separate emir, city notables and administrative-office layer where evidence supports it",
+    "provinceGeometry": "not promoted",
+    "tradeAndRoadNetwork": "can be modeled independently from sovereignty",
+    "uncertainty": "retain source-level confidence and date guards"
+  },
+  "sources": [
+    "TDV İslâm Ansiklopedisi: Sivas",
+    "TDV İslâm Ansiklopedisi: Tokat",
+    "TDV İslâm Ansiklopedisi: Amasya Tarihi",
+    "TDV İslâm Ansiklopedisi: Kayseri",
+    "TDV İslâm Ansiklopedisi: Eretnaoğulları",
+    "TDV İslâm Ansiklopedisi: İlhanlılar",
+    "Hasan Geyikoğlu, Sivas'ın Maruz Kaldığı Saldırı ve İşgaller (1232-1402), Dergipark",
+    "Amasya İlahiyat Dergisi, 2026 study on early Ottoman-era Amasya scholarly history",
+    "TDV İslâm Ansiklopedisi: Nûreddin b. Sentimur Türbesi"
+  ]
+}
