@@ -10,7 +10,6 @@
 
 import assert from "node:assert/strict";
 import { generateTerrainAttributes, generateBiomePalette, biomeFromLatElevation } from "../../src/map/terrain/TerrainAttributes.js";
-import { TerrainTileProvider } from "../../src/map/terrain/TerrainTileProvider.js";
 import { classifyBiome, BIOME_PALETTE } from "../../src/map/terrain/BiomeClassifier.js";
 import { computeRiverSegmentWidths, haversineMeters } from "../../src/map/terrain/RiverWidth.js";
 
