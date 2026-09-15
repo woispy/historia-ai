@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "id": "historical_gis_1326_aegean_latin_presence_review",
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "evidence-only",
+  "purpose": "Record independently researched Genoese and Venetian settlements, ports, concessions, and commercial presence around the Aegean and western Anatolia without promoting any source-derived polygon.",
+  "rules": {
+    "settlementVsTrade": "A merchant presence, consulate, warehouse, or trade concession is not automatically territorial sovereignty.",
+    "familyLordshipVsRepublic": "Private Genoese family lordships are tracked separately from direct Commune of Genoa administration.",
+    "dateScope": "Evidence is evaluated specifically for 1326-04-07; later settlements and treaties are not projected backward.",
+    "geometry": "Ports, fortresses, islands, and urban quarters are point/anchor evidence until independent geometry reconstruction is completed."
+  },
+  "sources": [
+    {
+      "id": "cambridge-latins-aegean-1300-1400",
+      "provider": "Michel Balard / Cambridge History of the Byzantine Empire",
+      "role": "regional Latin network and Aegean political-commercial structure",
+      "url": "https://www.cambridge.org/core/books/abs/cambridge-history-of-the-byzantine-empire-c5001492/latins-in-the-aegean-and-the-balkans-13001400/C2C24FAF38A47C6F28BB361526D6DAFC"
+    },
+    {
+      "id": "miller-zaccaria",
+      "provider": "William Miller / Journal of Hellenic Studies",
+      "role": "Zaccaria lordship of Phocaea and Chios",
+      "url": "https://www.cambridge.org/core/journals/journal-of-hellenic-studies/article/abs/zaccaria-of-phocaea-and-chios/708C605E14397B9F21CC14C26EA2CF74"
+    },
+    {
+      "id": "treccani-martino-zaccaria",
+      "provider": "Antonio Musarra / Dizionario Biografico degli Italiani, Treccani",
+      "role": "1326-specific Zaccaria control, Smyrna, Chios, Phocaea and chronology",
+      "url": "https://www.treccani.it/enciclopedia/martino-zaccaria_%28Dizionario-Biografico%29/"
+    },
+    {
+      "id": "carr-merchant-crusaders",
+      "provider": "Mike Carr / Merchant Crusaders in the Aegean, 1291-1352",
+      "role": "documentary evidence for Genoese Chios and Latin commercial/military networks",
+      "url": "https://www.cambridge.org/core/books/merchant-crusaders-in-the-aegean-12911352/1AEB72B17D8265EAF8AA51781CA07AE5/listing"
+    },
+    {
+      "id": "zachariadou-trade-crusade-review",
+      "provider": "Belleten review of Elizabeth A. Zachariadou, Trade and Crusade",
+      "role": "Venetian Crete trade with Menteshe and Aydin, 1300-1415",
+      "url": "https://belleten.gov.tr/tam-metin/1839/tur"
+    },
+    {
+      "id": "cesme-belleten",
+      "provider": "Belleten, Çeşme Kalesi study",
+      "role": "Chios-Anatolia maritime connection and Çeşme/Urla/Foça/Ayasuluk port evidence",
+      "url": "https://belleten.gov.tr/eng/full-text/2154/tur"
+    },
+    {
+      "id": "anaia-historical-topography",
+      "provider": "Hasan Sercan Sağlam and Suna Çağaptay, Ortaçağ Araştırmaları Dergisi 2025",
+      "role": "Anaia/Kadıkalesi port, dockyard, Genoese/Venetian archival and portolan evidence",
+      "url": "https://dergipark.org.tr/tr/pub/oad/article/1612155"
+    },
+    {
+      "id": "ayasuluk-belleten",
+      "provider": "Belleten, XIV-XVI. Yüzyıllarda Ayasuluğ",
+      "role": "Italian merchant colonies and later consular evidence; used only with date filtering",
+      "url": "https://www.belleten.gov.tr/tam-metin/2130/tur"
+    },
+    {
+      "id": "unesco-genoese-routes",
+      "provider": "UNESCO World Heritage tentative list, Genoese trade routes",
+      "role": "physical fortification and port anchors associated with Genoese routes",
+      "url": "https://whc.unesco.org/en/tentativelists/6468"
+    }
+  ],
+  "entities": [
+    {
+      "id": "phocaea-old-new",
+      "location": "Eski Foça / Yeni Foça",
+      "presenceType": ["Genoese-family-lordship", "alum-production", "fortified-port"],
+      "dateStatus": "active-at-1326",
+      "evidence": [
+        "Zaccaria control of Old and New Phocaea is established from the late 13th century.",
+        "The Cattaneo della Volta family also held Phocaea-related rights and administration; therefore the exact internal division of Genoese authority must not be collapsed into a single generic Genoa state polygon.",
+        "Foça remained a major alum-export port and a strategic Aegean-Anatolian node."
+      ],
+      "geometryStatus": "anchor-supported; canonical-polygon-pending",
+      "controlModel": "private Genoese lordship/concession, not automatically Commune of Genoa territory"
+    },
+    {
+      "id": "chios",
+      "location": "Chios / Sakız",
+      "presenceType": ["Genoese-family-lordship", "island", "mastic-production", "naval-base"],
+      "dateStatus": "active-at-1326",
+      "evidence": [
+        "Benedetto I Zaccaria acquired Chios in 1304 under Byzantine suzerainty/concession.",
+        "Martino and Benedetto II Zaccaria controlled the island in 1314-1329.",
+        "A 5 March 1320 papal document records the Zaccaria brothers' defense of Chios and mastic trade.",
+        "The Byzantine reconquest occurred in 1329, so it must not be applied to the 7 April 1326 snapshot."
+      ],
+      "geometryStatus": "island geometry available from physical geography; political authority requires temporal annotation",
+      "controlModel": "Zaccaria lordship under nominal Byzantine sovereignty"
+    },
+    {
+      "id": "smyrna-port",
+      "location": "Smyrna / İzmir harbour fortress",
+      "presenceType": ["Genoese-controlled-port", "fortress", "commercial-quarter-or-network"],
+      "dateStatus": "active-at-1326-but-date-sensitive",
+      "evidence": [
+        "Treccani's Martino Zaccaria biography states that Zaccaria occupied the port of Smyrna in 1317.",
+        "The same source states that the Turkish/Aydinid side later captured the harbour fortifications in 1329; therefore the 7 April 1326 start should preserve Genoese/Zaccaria control of the harbour if this chronology is accepted.",
+        "A 2026 study also traces a structured Genoese commercial presence in Smyrna to the early 14th century, while the exact legal scope of the settlement requires source-by-source reconciliation."
+      ],
+      "geometryStatus": "anchor-supported; political footprint pending",
+      "controlModel": "Zaccaria-associated Genoese control, not automatically Commune of Genoa sovereign territory"
+    },
+    {
+      "id": "ayasuluk-theologo",
+      "location": "Ayasuluk / Ephesus / Theologo",
+      "presenceType": ["international-trade-port", "Italian-merchant-presence", "Aydinid-port"],
+      "dateStatus": "Aydinid-controlled-at-1326; later Latin institutionalization must not be back-projected",
+      "evidence": [
+        "The port and city were under Turkish/Aydinid control by the early 14th century.",
+        "Italian merchants were active there, but the stronger documented Venetian consular presence dates to 1337 and later; therefore a 1337 Venetian consulate cannot be placed into the 1326 start state.",
+        "Later evidence shows both Genoese and Venetian commercial communities, but those later institutional forms are not evidence of 1326 sovereignty."
+      ],
+      "geometryStatus": "city/port anchor supported; political geometry remains Aydinid reconstruction",
+      "controlModel": "Aydinid territorial control with international merchant access"
+    },
+    {
+      "id": "anaia-kadikalesi",
+      "location": "Anaia / Kadıkalesi / Kuşadası area",
+      "presenceType": ["late-byzantine-port", "dockyard", "Genoese-and-Venetian-commercial-network"],
+      "dateStatus": "active-maritime-node-at-1326; exact political control requires reconciliation",
+      "evidence": [
+        "2025 historical-topography research re-examines Genoese and Venetian archival records, portolan evidence and archaeology for Anaia.",
+        "The study identifies continuity of a late Byzantine dockyard into the Aydinid period.",
+        "This makes Anaia a high-value spatial anchor for coastline, harbour and maritime-network reconstruction rather than an automatic Latin territorial polygon."
+      ],
+      "geometryStatus": "high-value port/dockyard anchor; canonical political polygon pending"
+    },
+    {
+      "id": "cesme-urla-corridor",
+      "location": "Çeşme - Urla - opposite Chios coast",
+      "presenceType": ["maritime-route", "port", "alum-logistics"],
+      "dateStatus": "relevant-to-14th-century Chios-Anatolia network",
+      "evidence": [
+        "Belleten's Çeşme study notes the practical maritime connection between Chios and the Anatolian coast and identifies Çeşme as a particularly favorable Anatolian harbour.",
+        "The same study discusses the movement of Foça alum toward Chios via Urla, demonstrating a specific commodity route.",
+        "This is route/network evidence, not proof that Çeşme was a Genoese territorial possession in 1326."
+      ],
+      "geometryStatus": "maritime-network anchor only"
+    },
+    {
+      "id": "venetian-crete-modon-coron-negroponte",
+      "location": "Crete, Modon, Coron, Negroponte",
+      "presenceType": ["Venetian-state-possession", "colony", "naval-commercial-base"],
+      "dateStatus": "active-at-1326",
+      "evidence": [
+        "Cambridge synthesis places the principal Venetian Aegean network on the western/southern side, including Crete and Negroponte.",
+        "Treccani documents Venetian administrative and settler activity at Modon, Coron and Negroponte in the early 14th century.",
+        "These are genuine Venetian state/colonial anchors and should be represented separately from merchant access to Anatolian ports."
+      ],
+      "geometryStatus": "historical-island/coastal geometry can be independently reconstructed"
+    },
+    {
+      "id": "venetian-menteshe-aydin-trade",
+      "location": "Menteshe and Aydin coastal ports",
+      "presenceType": ["Venetian-trade-access", "Crete-linked-commerce", "merchant-network"],
+      "dateStatus": "active-before-and-around-1326; exact local institutions date-sensitive",
+      "evidence": [
+        "Zachariadou's study records Venetian merchants visiting Menteshe from around 1275 and Venetian-Cretan trade relations with Menteshe and later Aydin in the first half of the 14th century.",
+        "The review records a break in the earlier accommodation after 1318 as Turkish attacks on Aegean islands intensified.",
+        "This establishes a strong trade-network relationship without implying Venetian territorial sovereignty on the Anatolian mainland."
+      ],
+      "geometryStatus": "trade-network evidence only"
+    }
+  ],
+  "1326_modeling_conclusions": [
+    "Genoese and Venetian presence must be modeled as multiple relationship types: sovereign possession, family lordship, concession, fortified trading post, merchant quarter, consulate, trade access, and maritime route.",
+    "Chios is a high-confidence 1326 Genoese-family lordship anchor; its 1329 Byzantine reconquest is a future event and must not alter the start snapshot.",
+    "Phocaea is a high-confidence Genoese/Zaccaria-Cattaneo alum and port anchor, but internal family rights require reconciliation before political geometry is promoted.",
+    "Smyrna harbour is a high-value 1326 control anchor because the chronology places Zaccaria control before the 1329 Aydinid capture; this needs independent source reconciliation before canonical promotion.",
+    "Ayasuluk and Anaia demonstrate that major Aegean ports can have dense Latin commercial presence while remaining under local Byzantine/Turkish territorial authority.",
+    "Venetian Crete/Modon/Coron/Negroponte are suitable examples of direct Venetian possessions and should not be conflated with Venetian merchant presence in Menteshe/Aydin.",
+    "No later 1337, 1344, 1351 or 1353 consulate/treaty arrangements are to be inserted into the 7 April 1326 snapshot."
+  ],
+  "promotionGate": [
+    "Temporal applicability to 1326-04-07",
+    "Entity/legal-status reconciliation",
+    "Separate family lordship from Commune of Genoa authority",
+    "Separate merchant presence from territorial sovereignty",
+    "Independent spatial anchor verification",
+    "Physical coastline/harbour validation",
+    "Topology validation before canonical political geometry",
+    "No later-event back-projection"
+  ]
+}
