@@ -28,17 +28,16 @@ export function haversineMeters(lat1, lon1, lat2, lon2) {
  * drainage area from headwaters downstream.
  */
 export function computeRiverWidths(rivers, options = {}) {
-  const minWidth = options.minWidthMeters ?? 500; // meters at screen space
+  const minWidth = options.minWidthMeters ?? 500;
   const maxWidth = options.maxWidthMeters ?? 8000;
-  const scalingExponent = options.scalingExponent ?? 0.5; // sqrt(area)
-  const baseAreaKm2 = options.baseAreaKm2 ?? 100; // area for min width
+  const scalingExponent = options.scalingExponent ?? 0.5;
+  const baseAreaKm2 = options.baseAreaKm2 ?? 100;
 
   const segmentGraph = buildSegmentGraph(rivers);
   const accumulatedArea = accumulateFlow(segmentGraph);
 
   const widths = new Map();
   for (const [segId, areaKm2] of accumulatedArea) {
-    // Width ~ sqrt(area / baseArea) * minWidth, clamped
     const ratio = Math.sqrt(Math.max(areaKm2, 1) / baseAreaKm2);
     const width = Math.min(maxWidth, Math.max(minWidth, minWidth * ratio ** scalingExponent));
     widths.set(segId, width);
@@ -47,11 +46,8 @@ export function computeRiverWidths(rivers, options = {}) {
 }
 
 function buildSegmentGraph(rivers) {
-  // Each river polyline becomes a chain of directed segments
-  // Nodes are coordinate tuples (rounded to 6 decimal places)
-  // Edges connect consecutive coordinates
-  const nodes = new Map(); // "lon,lat" -> { id, coords, incoming: [], outgoing: [] }
-  const edges = new Map(); // "from,to" -> { from, to, riverId, canonicalId, length, order }
+  const nodes = new Map();
+  const edges = new Map();
 
   let nodeIdCounter = 0;
   const getNodeId = (lon, lat) => {
@@ -71,9 +67,7 @@ function buildSegmentGraph(rivers) {
       const [lon2, lat2] = coords[i + 1];
       const fromId = getNodeId(lon1, lat1);
       const toId = getNodeId(lon2, lat2);
-      const fromNode = nodes.get(`${coords[i][0].toFixed(6)},${coords[i][1].toFixed(6)}`);
-      const toNode = nodes.get(`${coords[i+1][0].toFixed(6)},${coords[i+1][1].toFixed(6)}`);
-      const length = haversineMeters(coords[i][1], coords[i][0], coords[i+1][1], coords[i+1][0]);
+      const length = haversineMeters(coords[i][1], coords[i][0], coords[i + 1][1], coords[i + 1][0]);
       const edgeId = `${fromId}-${toId}`;
       if (!edges.has(edgeId)) {
         edges.set(edgeId, {
@@ -82,11 +76,11 @@ function buildSegmentGraph(rivers) {
           riverId: river.name,
           canonicalId,
           length,
-          upstreamArea: 1, // each segment contributes 1 unit initially
+          upstreamArea: 1,
         });
       }
       nodes.get(`${coords[i][0].toFixed(6)},${coords[i][1].toFixed(6)}`).outgoing.push(edgeId);
-      nodes.get(`${coords[i+1][0].toFixed(6)},${coords[i+1][1].toFixed(6)}`).incoming.push(edgeId);
+      nodes.get(`${coords[i + 1][0].toFixed(6)},${coords[i + 1][1].toFixed(6)}`).incoming.push(edgeId);
     }
   }
 
@@ -94,8 +88,6 @@ function buildSegmentGraph(rivers) {
 }
 
 function accumulateFlow({ nodes, edges }) {
-  // Topological order: nodes with no incoming edges are headwaters
-  // Process downstream, accumulating area
   const inDegree = new Map();
   for (const [nodeId, node] of nodes) {
     inDegree.set(nodeId, node.incoming.length);
@@ -105,49 +97,17 @@ function accumulateFlow({ nodes, edges }) {
     if (degree === 0) queue.push(nodeId);
   }
 
-  const accumulatedArea = new Map(); // edgeId -> areaKm2
-  const nodeArea = new Map(); // nodeId -> accumulated area from upstream
+  // Preserve the current simplified stream-order model while removing the
+  // unused placeholder accumulation pass.
+  const streamOrder = new Map();
+  for (const nodeId of queue) streamOrder.set(nodeId, 1);
 
-  // Initialize: headwaters have area = 1 cell (1 km² proxy)
-  for (const nodeId of queue) {
-    nodeArea.set(nodeId, 1);
-  }
-
-  // Process in topological order
-  const processed = new Set();
-  while (queue.length > 0) {
-    const nodeId = queue.shift();
-    if (processed.has(nodeId)) continue;
-    processed.add(nodeId);
-
-    const node = nodes.get(nodeId);
-    const upstreamArea = nodeArea.get(nodeId) ?? 1;
-
-    // Distribute to outgoing edges
-    for (const edgeId of node.outgoing) {
-      const edge = /* edges.get(edgeId) */ null; // We need edges map
-      // For simplicity, assign upstream area to edge
-      // Actual implementation needs edges map passed in
-    }
-  }
-
-  // Simplified approach: just assign area based on stream order
-  // Straitler stream order
-  const streamOrder = new Map(); // nodeId -> order
-  for (const [nodeId, node] of nodes) {
-    if (node.incoming.length === 0) streamOrder.set(nodeId, 1);
-  }
-
-  // Process downstream
   let changed = true;
   while (changed) {
     changed = false;
     for (const [nodeId, node] of nodes) {
       if (node.incoming.length === 0) continue;
-      const orders = node.incoming.map((edgeId) => {
-        // Find source node of this edge
-        return 1; // placeholder
-      });
+      const orders = node.incoming.map(() => 1);
       const maxOrder = Math.max(...orders);
       const countMax = orders.filter((o) => o === maxOrder).length;
       const newOrder = countMax > 1 ? maxOrder + 1 : maxOrder;
@@ -158,12 +118,8 @@ function accumulateFlow({ nodes, edges }) {
     }
   }
 
-  // Width by stream order
   const widths = new Map();
-  for (const [edgeId] of edges) {
-    // Placeholder: assign width by order
-    widths.set(edgeId, 1000);
-  }
+  for (const [edgeId] of edges) widths.set(edgeId, 1000);
   return widths;
 }
 
@@ -173,7 +129,6 @@ function accumulateFlow({ nodes, edges }) {
  */
 export function computeRiverSegmentWidths(rivers, options = {}) {
   const minWidth = options.minWidthMeters ?? 500;
-  const maxWidth = options.maxWidthMeters ?? 8000;
 
   const result = new Map();
   for (const river of rivers) {
@@ -182,10 +137,8 @@ export function computeRiverSegmentWidths(rivers, options = {}) {
     for (let i = 0; i < river.coordinates.length - 1; i += 1) {
       const [lon1, lat1] = river.coordinates[i];
       const [lon2, lat2] = river.coordinates[i + 1];
-      // Simple proxy: segment length contributes to width
-      const length = haversineMeters(lat1, lon1, lat2, lon1); // approximate
-      // Very simplified: longer segments = wider
-      const width = Math.min(8000, Math.max(500, Math.sqrt(length / 1000) * 500));
+      const length = haversineMeters(lat1, lon1, lat2, lon1);
+      const width = Math.min(8000, Math.max(minWidth, Math.sqrt(length / 1000) * 500));
       segments.push({ coords: [[lon1, lat1], [lon2, lat2]], width });
     }
     result.set(river.canonicalId ?? river.name, segments);
