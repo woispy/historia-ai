@@ -17,9 +17,20 @@ export function classifyBiome(lat, elevation, precipitationProxy = null) {
   if (absLat > 75) return BIOME_ID.ICE_CAP;
   if (elevation > 4500) return BIOME_ID.ALPINE_TUNDRA;
   if (elevation > 3500) return BIOME_ID.MONTANE_GRASSLAND;
-  if (absLat > 66.5) return elevation > 1500 ? BIOME_ID.ALPINE_TUNDRA : BIOME_ID.TUNDRA;
-  if (absLat > 55) return BIOME_ID.BOREAL_FOREST;
-  if (absLat > 45) return elevation > 2000 ? BIOME_ID.MONTANE_GRASSLAND : BIOME_ID.TEMPERATE_FOREST;
+  if (absLat > 66.5) {
+    if (elevation > 1500) return BIOME_ID.ALPINE_TUNDRA;
+    return BIOME_ID.TUNDRA;
+  }
+  if (absLat > 55) {
+    if (elevation >= 2000) return BIOME_ID.ALPINE_TUNDRA;
+    if (elevation > 1000) return BIOME_ID.BOREAL_FOREST;
+    return BIOME_ID.BOREAL_FOREST;
+  }
+  if (absLat > 45) {
+    if (elevation > 2000) return BIOME_ID.MONTANE_GRASSLAND;
+    if (elevation > 1000) return BIOME_ID.TEMPERATE_FOREST;
+    return BIOME_ID.TEMPERATE_FOREST;
+  }
   if (absLat >= 30) {
     if (elevation >= 2000) return BIOME_ID.MONTANE_GRASSLAND;
     if (elevation > 1500) return BIOME_ID.TEMPERATE_FOREST;
@@ -27,9 +38,12 @@ export function classifyBiome(lat, elevation, precipitationProxy = null) {
   }
   if (absLat > 23.5) {
     if (elevation > 3000) return BIOME_ID.MONTANE_GRASSLAND;
-    return elevation > 1000 ? BIOME_ID.TEMPERATE_FOREST : BIOME_ID.DESERT;
+    if (elevation > 2000) return BIOME_ID.TEMPERATE_FOREST;
+    if (elevation > 1000) return BIOME_ID.TEMPERATE_FOREST;
+    return BIOME_ID.DESERT;
   }
   if (absLat < 23.5) {
+    if (elevation > 3500) return BIOME_ID.MONTANE_GRASSLAND;
     if (elevation > 2500) return BIOME_ID.MONTANE_GRASSLAND;
     if (elevation > 1500) return BIOME_ID.TEMPERATE_FOREST;
     return BIOME_ID.TROPICAL_RAINFOREST;
