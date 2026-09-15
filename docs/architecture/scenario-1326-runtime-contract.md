@@ -6,6 +6,8 @@ Design contract for the canonical playable `1326` scenario.
 
 The production scenario date is **1326-04-07**. The existing `1300` scenario and its historical GIS assets remain reference/legacy material and are not relabeled as 1326.
 
+The current engineering gate remains **CI/lint baseline stabilization before authoritative 1326 data promotion**.
+
 ## Runtime dependency
 
 A dated scenario is loaded through:
@@ -126,6 +128,23 @@ canonical political geography
 production runtime/mapbin
 ```
 
+## Engineering stabilization gate
+
+Before authoritative 1326 geography is promoted, the production branch must first reach a clean lint baseline and then complete the full validation workflow.
+
+The latest observed workflow attempt before the current cleanup commits checked out `bca4dd8594544db9d82069d63aaf799ef649f756` and failed at the ESLint step with **45 errors and 0 warnings**. Because the subsequent cleanup commits were made after that run, that 45-error result is a historical CI snapshot, not proof of the current branch's exact lint count.
+
+The workflow contains 77 validation/build/scalability steps after setup. Since lint is an early gate, a lint failure skips the later map, GIS, runtime, build, and 15K+ scalability checks. A green result therefore requires observing the workflow on the current branch after lint reaches zero.
+
+Current cleanup scope is intentionally narrow:
+
+- preserve triangulation and terrain behavior while removing only genuinely unused bindings;
+- avoid reading React refs during render in `MapStudioEditor`;
+- remove unused physical-geography accumulators without changing classification behavior;
+- keep legacy/reference GIS paths intact unless repository usage proves they are dead;
+- do not introduce new Voronoi, jitter, anchor, or fallback geometry generation;
+- update this contract whenever the acceptance state changes.
+
 ## Acceptance gates before enabling 1326
 
 - `data/scenarios/1326/scenario.json` exists and declares `1326-04-07`.
@@ -143,4 +162,4 @@ production runtime/mapbin
 
 ## Current blocker
 
-The generic evidence importer is now in place, but **no authoritative 1326 runtime asset is present yet**. The remaining blocker is source acquisition/reconciliation and canonical historical geography production, not importer architecture. The production scenario must remain on 1300 until those acceptance gates are satisfied.
+The generic evidence importer is now in place, but **no authoritative 1326 runtime asset is present yet**. The immediate engineering blocker is CI/lint baseline stabilization; after that, the remaining data blocker is source acquisition/reconciliation and canonical historical geography production, not importer architecture. The production scenario must remain on 1300 until those acceptance gates are satisfied.
