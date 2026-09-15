@@ -88,7 +88,8 @@ const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "historia-source-acquisi
 const inputPath = path.join(tempDir, "source.geojson");
 const outputPath = path.join(tempDir, "evidence.geojson");
 const manifestPath = path.join(tempDir, "evidence.manifest.json");
-await fs.writeFile(inputPath, `${JSON.stringify(source)}\n`, "utf8");
+const inputText = `${JSON.stringify(source)}\n`;
+await fs.writeFile(inputPath, inputText, "utf8");
 
 const result = await acquireHistoricalSource({
   inputPath,
@@ -101,16 +102,42 @@ const result = await acquireHistoricalSource({
   projection: "EPSG:4326",
   license: "test-only",
   acquiredAt: "2026-09-15T00:00:00Z",
+  expectedInputSha256: sha256Text(inputText),
 });
 
 assert.equal(result.report.source.sourceId, "test-source-v1");
-assert.equal(result.report.source.inputSha256, sha256Text(`${JSON.stringify(source)}\n`));
+assert.equal(result.report.source.inputSha256, sha256Text(inputText));
+assert.equal(result.report.source.inputSha256Verification, "passed");
 assert.equal(result.report.source.authorityStatus, "evidence-only");
 assert.equal(result.report.counts.inputFeatures, 5);
 assert.equal(result.report.counts.retainedFeatures, 1);
 assert.equal(result.evidenceGeoJson.features.length, 1);
 assert.equal(result.evidenceGeoJson.features[0].properties.custom, "kept");
 assert.equal(result.report.promotion.status, "not-promoted");
+
+assert.throws(
+  () => acquireHistoricalSource({
+    inputPath,
+    sourceId: "test-source-v1",
+    provider: "Historia Test",
+    dataset: "Synthetic Historical Source",
+    targetYear: 1326,
+    expectedInputSha256: "0".repeat(64),
+  }),
+  /SHA-256 mismatch/,
+);
+
+assert.throws(
+  () => acquireHistoricalSource({
+    inputPath,
+    sourceId: "test-source-v1",
+    provider: "Historia Test",
+    dataset: "Synthetic Historical Source",
+    targetYear: 1326,
+    expectedInputSha256: "not-a-sha256",
+  }),
+  /64-character hexadecimal SHA-256/,
+);
 
 await writeHistoricalSourceEvidence({
   outputPath,
