@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "scope": "Marmara southern shore, southern Marmara islands, Bursa maritime approaches, and western Propontis evidence",
+  "status": "evidence-only",
+  "purpose": "Date-scoped source review. This artifact does not promote any geometry into canonical political authority.",
+  "sourcePolicy": {
+    "politicalControl": "must be date-specific",
+    "merchantPresence": "does not imply sovereignty",
+    "portInfrastructure": "does not imply political ownership",
+    "archaeologicalSite": "does not imply active settlement",
+    "laterEvidence": "may corroborate geography but must not be back-projected without explicit justification"
+  },
+  "anchors": [
+    {
+      "id": "mudanya",
+      "canonicalName": "Mudanya / Apameia",
+      "dateStatus": "ottoman-controlled",
+      "confidence": "high",
+      "evidence": [
+        "Mudanya municipal history states that Apameia was conquered by Orhan in 1321.",
+        "A Mudanya district government page records the use of Mudanya and Tirilye as Bursa-facing ports and notes Genoese commercial use of the ports after the 1261 Nymphaion arrangements."
+      ],
+      "runtimeInterpretation": "politicalControl=Ottoman at scenario start; retain port/trade attributes independently; do not infer that all nearby coast was Ottoman from the port event alone.",
+      "sources": [
+        "https://mudanya.bel.tr/tarihce",
+        "https://www.mudanya.gov.tr/kapanca-limani"
+      ]
+    },
+    {
+      "id": "gemlik",
+      "canonicalName": "Gemlik / Kios",
+      "dateStatus": "byzantine-controlled",
+      "confidence": "high",
+      "evidence": [
+        "Gemlik municipal and MEB histories date Ottoman capture to 1334, after resistance during the Bursa campaign period.",
+        "A recent academic survey notes Kios/Gemlik had long-standing port activity and a shipyard tradition."
+      ],
+      "runtimeInterpretation": "politicalControl=Byzantine at 1326-04-07; port and shipbuilding capacity can be modeled separately; no Ottoman control polygon before 1334.",
+      "sources": [
+        "https://www.gemlik.bel.tr/tr/gemlik",
+        "https://gemlik.meb.gov.tr/www/marmaranin-incisi-gemlik/icerik/39",
+        "https://dergipark.org.tr/en/download/issue-full-file/31619"
+      ]
+    },
+    {
+      "id": "proconnesus",
+      "canonicalName": "Proconnesus / Marmara Island",
+      "dateStatus": "byzantine-ecclesiastical-and-settlement-anchor",
+      "confidence": "high",
+      "evidence": [
+        "A study of the southern Marmara islands identifies Proconnesus, Koutali/Ekinlik, Aloni/Paşalimanı and Afyssia/Avşa as an ecclesiastical cluster under the archbishopric of Proconnesus.",
+        "A 1324 synodal contribution of 72 hyperpyra is reported for the archbishopric, indicating a functioning and comparatively robust ecclesiastical institution immediately before the scenario date.",
+        "A Gephyra study argues that the Byzantine and Latin episcopal toponyms Stelaria/Estilar/Destillaria should be associated with Proconnesus, strengthening the need to preserve a distinct medieval settlement/ecclesiastical anchor."
+      ],
+      "runtimeInterpretation": "retain Marmara, Ekinlik, Paşalimanı and Avşa as separate island/settlement entities within a Byzantine evidence layer; do not infer Ottoman ownership in 1326.",
+      "sources": [
+        "https://marmaras-island.blogspot.com/2012/03/publication-of-foundation-of-hellinic.html",
+        "https://dergipark.org.tr/en/pub/gephyra/article/420782",
+        "https://www.cambridge.org/core/journals/journal-of-hellenic-studies/article/abs/marmara-islands/915EE3E4F8A3734816C35DE3000595CE"
+      ]
+    },
+    {
+      "id": "ganos",
+      "canonicalName": "Ganos / Gaziköy",
+      "dateStatus": "byzantine-maritime-production-anchor",
+      "confidence": "medium-high",
+      "evidence": [
+        "Archaeological work at Ganos identifies Byzantine amphora production, kilns and a settlement around the harbour.",
+        "Research on medieval Marmara trade links Ganos wine production and amphora shipping to Constantinople and identifies shipwreck concentrations along routes departing Ganos toward Constantinople.",
+        "The evidence establishes a production and maritime-network node but does not by itself establish a precise 1326 political boundary."
+      ],
+      "runtimeInterpretation": "model Ganos as a Byzantine maritime production/trade node; keep political control separately sourced.",
+      "sources": [
+        "https://www.persee.fr/doc/anata_1018-1946_1995_num_3_1_1184",
+        "https://www.persee.fr/doc/anata_1018-1946_1995_num_3_1_1183",
+        "https://www.persee.fr/doc/anata_1018-1946_2010_num_18_1_1317"
+      ]
+    },
+    {
+      "id": "lopadion",
+      "canonicalName": "Lopadion / Uluabat",
+      "dateStatus": "byzantine-frontier-post",
+      "confidence": "high",
+      "evidence": [
+        "The Byzantine Legacy synthesis, citing TIB 13 and Byzantine scholarship, describes Lopadion as an important fortress, market town and bridge point on the Rhyndakos route, functioning as a frontier post against the Ottomans in the early 14th century.",
+        "The same synthesis dates Ottoman capture to 1335, after the 1326 scenario start."
+      ],
+      "runtimeInterpretation": "politicalControl=Byzantine at scenario start; model bridge/market/fortress functions independently of political polygon.",
+      "sources": [
+        "https://www.thebyzantinelegacy.com/lopadion"
+      ]
+    },
+    {
+      "id": "kyzikos-erdek",
+      "canonicalName": "Kyzikos / Erdek area",
+      "dateStatus": "degraded-urban-anchor",
+      "confidence": "high",
+      "evidence": [
+        "Official Erdek sources describe severe decline and abandonment after major earthquakes, with population shifting toward Erdek.",
+        "The evidence supports preserving Kyzikos as an archaeological/historical anchor rather than treating the ancient city footprint as a fully active 1326 urban polygon."
+      ],
+      "runtimeInterpretation": "do not use the ancient Kyzikos polygon as a 1326 active city; retain archaeological site and regional maritime context, with Erdek treated as the later settlement anchor where supported.",
+      "sources": [
+        "https://www.erdek.gov.tr/kyzkos-antik-sehri",
+        "https://balikesir.ktb.gov.tr/TR-65868/erdek.html"
+      ]
+    },
+    {
+      "id": "propontis-network",
+      "canonicalName": "Southern Propontis maritime network",
+      "dateStatus": "active-network-context",
+      "confidence": "high",
+      "evidence": [
+        "Cambridge's synthesis of Latins in the Aegean describes a chain of trading posts and ports of call connecting Italy, Constantinople and the Black Sea, while emphasizing that merchant/trading networks and political sovereignty were distinct.",
+        "Archaeological work on medieval Marmara trade identifies production, shipping routes and shipwreck concentrations rather than a single uniform political maritime zone."
+      ],
+      "runtimeInterpretation": "implement ports, sea lanes, production and trade institutions as a separate historical maritime network layer; do not encode them as political ownership.",
+      "sources": [
+        "https://www.cambridge.org/core/books/abs/cambridge-history-of-the-byzantine-empire-c5001492/latins-in-the-aegean-and-the-balkans-13001400/E9F7A837D3097BE16C4A1A5F031B6590",
+        "https://www.cambridge.org/core/books/abs/the-sea-in-history-the-medieval-world/harbours-and-shipbuilding-in-byzantine-constantinople/D6F35A91FB4C96519A28128E5E6A46DF"
+      ]
+    }
+  ],
+  "negativeEvidence": [
+    {
+      "target": "Gemlik",
+      "rule": "Do not promote to Ottoman control on 1326-04-07; available local histories place capture in 1334."
+    },
+    {
+      "target": "Lopadion",
+      "rule": "Do not promote to Ottoman control on 1326-04-07; available synthesis places capture in 1335."
+    },
+    {
+      "target": "Kyzikos",
+      "rule": "Do not treat the ancient city footprint as a fully active medieval urban polygon without separate 1326 evidence."
+    }
+  ],
+  "nextReviewTargets": [
+    "Bithynian Marmara coast between Gemlik and Nicomedia",
+    "Gulf of Izmit maritime routes",
+    "Nicomedia-Nicaea-Lopadion inland corridor",
+    "Byzantine fiscal/customs evidence for Marmara ports",
+    "Ganos-Marmara Island-Constantinople shipping archaeology",
+    "date-specific evidence for Paşalimanı, Avşa and Ekinlik political control"
+  ]
+}
