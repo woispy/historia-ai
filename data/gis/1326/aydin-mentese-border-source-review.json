@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "status": "evidence-only",
+  "canonicalGeometryPromotion": "BLOCKED",
+  "scope": "Aydinid-Menteshe eastern and southern frontier: Sultanhisar, Nysa, Nazilli/Kestel, Büyük Menderes corridor, Cayi/Eski Çine, and adjacent frontier zones",
+  "principles": [
+    "Do not back-project later Ottoman administrative boundaries into 1326.",
+    "Political control, settlement continuity, route significance, and economic activity are separate evidence dimensions.",
+    "A later monument or administrative record is not by itself proof of a 1326 political boundary.",
+    "Where Aydinid, Menteshe, and Germiyan frontiers converge, preserve uncertainty rather than drawing a synthetic polygon."
+  ],
+  "anchors": [
+    {
+      "name": "Sultanhisar / Nysa",
+      "control": "Aydinid-associated after the 1308 conquest of Aydin-ili; exact 1326 local boundary not independently resolved",
+      "confidence": "medium-high",
+      "roles": ["settlement", "route", "river-valley anchor", "archaeological anchor"],
+      "evidence": ["TDV Aydinogullari", "Nysa archaeological research"]
+    },
+    {
+      "name": "Aydin / Tralles-Guzelhisar",
+      "control": "Aydinid after Mehmed Bey's conquest around 1309; exact 1326 urban extent unresolved",
+      "confidence": "high",
+      "roles": ["urban node", "Büyük Menderes valley", "economic node"],
+      "evidence": ["TDV Aydin"]
+    },
+    {
+      "name": "Nazilli / Kestel region",
+      "control": "frontier zone; do not assign a precise 1326 polity polygon",
+      "confidence": "medium",
+      "roles": ["route junction", "market region", "frontier"],
+      "evidence": ["2026 Nazilli historical geography research", "2023 Kestel Kasim Bey study"]
+    },
+    {
+      "name": "Kestel",
+      "control": "unresolved among Aydinid/Germiyan/Menteshe frontier contexts",
+      "confidence": "low-medium",
+      "roles": ["frontier anchor", "historical monument"],
+      "evidence": ["Kasim Bey tomb research"]
+    },
+    {
+      "name": "Eski Çine",
+      "control": "Menteshe-associated cultural and political center by the early 14th century; exact 1326 boundary relative to Aydinid territory remains unresolved",
+      "confidence": "medium-high",
+      "roles": ["settlement", "cultural center", "frontier anchor"],
+      "evidence": ["Ahmed Gazi complex research", "Old Çine architectural study"]
+    },
+    {
+      "name": "Çine / northern Menteshe gateway",
+      "control": "Menteshe-associated; model as a gateway toward the Büyük Menderes basin rather than as a modern district polygon",
+      "confidence": "medium",
+      "roles": ["route", "gateway", "frontier", "economic corridor"],
+      "evidence": ["Çine historical studies"]
+    }
+  ],
+  "regional_findings": [
+    "TDV places Aydinid territory from the Büyük Menderes through Tire, Ayasuluk and Birgi and records Mehmed Bey's conquest of Sultanhisar among the early expansions.",
+    "Aydin/Tralles lies on the northern edge of the Büyük Menderes valley and became an important Aydinid center after the conquest around 1309.",
+    "The Nazilli plain is a major natural junction: the Büyük Menderes corridor connects the Aegean coast with the interior, while northern valleys lead toward Lydia and the Harpasos/Akçay corridor leads toward Caria.",
+    "The Kestel evidence is particularly useful as a negative control: modern scholarship explicitly places the area near the interacting Aydinid, Germiyanid and Menteshe frontiers, so a smooth single-polity boundary would overstate certainty.",
+    "Eski Çine is associated with Menteshe political and cultural activity in the early fourteenth century and should be treated as a Menteshe-side anchor while keeping the exact 7 April 1326 boundary unresolved.",
+    "The Büyük Menderes basin should be represented as a physical and economic corridor independently of political ownership."
+  ],
+  "runtimeImplications": [
+    "Create a frontier-band representation between Aydinid, Menteshe and Germiyan evidence rather than forcing a hard border where sources do not support one.",
+    "Represent Nazilli as a route-junction/economic node even if its 1326 political owner remains unresolved.",
+    "Represent Büyük Menderes and Harpasos/Akçay as route and terrain constraints used by the simulation.",
+    "Keep later Ottoman sanjak/kaza boundaries out of canonical 1326 geometry generation."
+  ],
+  "sources": [
+    {"title": "TDV - Aydinogullari", "url": "https://islamansiklopedisi.org.tr/aydinogullari"},
+    {"title": "TDV - Aydin", "url": "https://islamansiklopedisi.org.tr/aydin"},
+    {"title": "TDV - Mentese", "url": "https://islamansiklopedisi.org.tr/mentese"},
+    {"title": "Nazilli Region Historical Events and Fortifications", "url": "https://dergipark.org.tr/tr/pub/anasay/article/1872196"},
+    {"title": "Nazilli Kestel'de Kasim Bey Turbesi", "url": "https://dergipark.org.tr/en/pub/oad/article/1276300"},
+    {"title": "Eski Çine - Ahmed Gazi Kulliyesi", "url": "https://dergipark.org.tr/en/pub/yenifikirjournal/article/923214"},
+    {"title": "Ortaçag Turk Mimarisinin Onemli Bir Eseri: Eski Çine - Ahmed Gazi Camii", "url": "https://dergipark.org.tr/en/download/article-file/1722196"}
+  ]
+}
