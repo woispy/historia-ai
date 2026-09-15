@@ -17,6 +17,7 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
+import { validatePoliticalGeographyAuthority } from "../province/PoliticalGeographyAuthorityValidator.js";
 
 const fixtureDirectory = process.argv[3] ? path.resolve(process.argv[3]) : path.join(process.cwd(), "tools/tests/fixtures/political-geography/anatolia-1300");
 
