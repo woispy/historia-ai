@@ -25,6 +25,10 @@ assertVisibleCopies(900, 1, [720, 1080]);
 assertVisibleCopies(-179, 1, [-360, 0]);
 assertVisibleCopies(-180, 1, [-360, 0]);
 assertVisibleCopies(-181, 1, [-360, 0]);
+assert.deepEqual(getVisibleWorldCopyOffsets(0, 2, { perspective: true }), [-360, 0, 360]);
+assert.deepEqual(getVisibleWorldCopyOffsets(90, 2, { perspective: true }), [-360, 0, 360]);
+assert.deepEqual(getVisibleWorldCopyOffsets(-90, 2, { perspective: true }), [-360, 0, 360]);
+assert.deepEqual(getVisibleWorldCopyOffsets(540, 2, { perspective: true }), [360, 720, 1080]);
 
 const nearAntimeridian = getVisibleWorldCopyOffsets(179, 2);
 const oneWorldLater = getVisibleWorldCopyOffsets(539, 2);

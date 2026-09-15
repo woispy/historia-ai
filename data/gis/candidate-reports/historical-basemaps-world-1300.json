@@ -1,0 +1,124 @@
+{
+  "sourceId": "historical-basemaps-world-1300",
+  "evaluatedAt": "2026-09-14T19:47:53.024Z",
+  "licenseReview": "pending",
+  "featureCount": 237,
+  "anatoliaCandidateCount": 8,
+  "candidates": [
+    {
+      "name": "Bulgar Khanate",
+      "geometryType": "MultiPolygon",
+      "coordinateCount": 43,
+      "properties": {
+        "NAME": "Bulgar Khanate",
+        "ABBREVN": "Bulgar Khan.",
+        "SUBJECTO": "Bulgar Khanate",
+        "BORDERPRECISION": 1,
+        "PARTOF": "Bulgar Khanate"
+      }
+    },
+    {
+      "name": "Mamluke Sultanate",
+      "geometryType": "MultiPolygon",
+      "coordinateCount": 194,
+      "properties": {
+        "NAME": "Mamluke Sultanate",
+        "ABBREVN": "Mamluke",
+        "SUBJECTO": "Mamluke Sultanate",
+        "BORDERPRECISION": 1,
+        "PARTOF": "Mamluke Sultanate"
+      }
+    },
+    {
+      "name": "Trebizond",
+      "geometryType": "MultiPolygon",
+      "coordinateCount": 17,
+      "properties": {
+        "NAME": "Trebizond",
+        "ABBREVN": "Trebizond",
+        "SUBJECTO": "Trebizond",
+        "BORDERPRECISION": 1,
+        "PARTOF": "Trebizond"
+      }
+    },
+    {
+      "name": "Seljuk Caliphate",
+      "geometryType": "MultiPolygon",
+      "coordinateCount": 67,
+      "properties": {
+        "NAME": "Seljuk Caliphate",
+        "ABBREVN": "Seljuk Turks",
+        "SUBJECTO": "Seljuk Caliphate",
+        "BORDERPRECISION": 1,
+        "PARTOF": "Seljuk Caliphate"
+      }
+    },
+    {
+      "name": "Ilkhanate",
+      "geometryType": "MultiPolygon",
+      "coordinateCount": 270,
+      "properties": {
+        "NAME": "Ilkhanate",
+        "ABBREVN": "Ilkhanate",
+        "SUBJECTO": "Ilkhanate",
+        "BORDERPRECISION": 1,
+        "PARTOF": "Ilkhanate"
+      }
+    },
+    {
+      "name": "Georgia",
+      "geometryType": "MultiPolygon",
+      "coordinateCount": 12,
+      "properties": {
+        "NAME": "Georgia",
+        "ABBREVN": "Georgia",
+        "SUBJECTO": "Georgia",
+        "BORDERPRECISION": 1,
+        "PARTOF": "Georgia"
+      }
+    },
+    {
+      "name": "Khanate of the Golden Horde",
+      "geometryType": "MultiPolygon",
+      "coordinateCount": 398,
+      "properties": {
+        "NAME": "Khanate of the Golden Horde",
+        "ABBREVN": "Golden Horde",
+        "SUBJECTO": "Mongol Empire",
+        "BORDERPRECISION": 1,
+        "PARTOF": "Mongol Empire"
+      }
+    },
+    {
+      "name": "Byzantine Empire",
+      "geometryType": "MultiPolygon",
+      "coordinateCount": 514,
+      "properties": {
+        "NAME": "Byzantine Empire",
+        "ABBREVN": "Byzantine E.",
+        "SUBJECTO": "Byzantine Empire",
+        "BORDERPRECISION": 1,
+        "PARTOF": "Byzantine Empire"
+      }
+    }
+  ],
+  "hints": {
+    "anatoliaCandidateCount": 8,
+    "totalVerticesInBbox": 1515,
+    "averageVerticesPerCandidate": 189,
+    "geometryTypes": [
+      "MultiPolygon"
+    ],
+    "namedCandidateCount": 8
+  },
+  "bbox": [
+    25.45,
+    35.72,
+    44.85,
+    42.35
+  ],
+  "verdict": {
+    "usableAsProvinceBoundary": false,
+    "reason": "fail-closed: usableAsProvinceBoundary requires human review of license and historical granularity; this tool reports evidence only"
+  }
+}
