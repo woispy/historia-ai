@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "coverage": "bithynia-east-corridor",
+  "status": "evidence-only",
+  "purpose": "Date-scoped source review for the Bursa-Sakarya-Geyve-Lefke-Bilecik-İnegöl-Newşehir corridor. This artifact does not promote canonical political geometry.",
+  "principles": [
+    "Political control is separate from settlement, military pressure, route use, and historical influence.",
+    "Later Ottoman administrative boundaries are not back-projected to 1326.",
+    "A source describing a conquest or route at an earlier date is evidence for historical change, not automatically a 1326 polygon boundary.",
+    "Where evidence is indirect or conflicting, keep the status unresolved rather than inventing geometry."
+  ],
+  "anchors": [
+    {
+      "id": "bursa",
+      "name": "Bursa / Prusa",
+      "politicalStatus1326": "Ottoman",
+      "confidence": "high",
+      "evidence": "TDV states that Bursa surrendered to the Ottomans on 6 April 1326 after the long blockade; the castle and immediate strategic area received Turkish settlement while the Greek population was moved to lower parts of the city."
+    },
+    {
+      "id": "iznik",
+      "name": "Nikaia / İznik",
+      "politicalStatus1326": "Byzantine",
+      "confidence": "high",
+      "evidence": "TDV dates the Ottoman capture to 2 March 1331 and describes the 1329 Pelekanon defeat as the event that determined the city's later fate."
+    },
+    {
+      "id": "lefke",
+      "name": "Lefke / Osmaneli",
+      "politicalStatus1326": "Ottoman",
+      "confidence": "high",
+      "evidence": "TDV's Osman I account places Lefke among the Sakarya-valley fortifications captured during the early Ottoman expansion; the same account describes the 1304 campaign as closing routes to Nikaia."
+    },
+    {
+      "id": "mekece",
+      "name": "Mekece",
+      "politicalStatus1326": "Ottoman",
+      "confidence": "high",
+      "evidence": "The Sakarya campaign evidence places Mekece among the positions taken by Osman during the 1304 campaign."
+    },
+    {
+      "id": "geyve",
+      "name": "Geyve",
+      "politicalStatus1326": "Ottoman",
+      "confidence": "high",
+      "evidence": "TDV's Osman I account states that Geyve, Mekece, Absu and Lefke were taken in the 1304 Sakarya campaign; later source material continues to treat Geyve as a strategic passage."
+    },
+    {
+      "id": "akhisar_pamukova",
+      "name": "Akhisar / Metabole area",
+      "politicalStatus1326": "Ottoman",
+      "confidence": "medium-high",
+      "evidence": "TDV identifies Akhisar among the early Ottoman conquests and notes that Orhan used Akhisar as an operational center in 1305."
+    },
+    {
+      "id": "bilecik",
+      "name": "Bilecik / Belokome",
+      "politicalStatus1326": "Ottoman",
+      "confidence": "high",
+      "evidence": "TDV states that Bilecik was taken in 1299 and describes the town as a former Byzantine frontier center with a market serving both Greek and Turkmen populations."
+    },
+    {
+      "id": "inegol",
+      "name": "İnegöl / Angelokomis",
+      "politicalStatus1326": "Ottoman",
+      "confidence": "high",
+      "evidence": "TDV's general Anatolia history lists İnegöl among the early Ottoman conquests. The Osman I account also places Angelokomis among settlements whose population fled during the early campaigns."
+    },
+    {
+      "id": "harmankaya",
+      "name": "Harmankaya",
+      "politicalStatus1326": "Ottoman-aligned frontier zone; exact jurisdiction unresolved",
+      "confidence": "medium",
+      "evidence": "TDV identifies Köse Mihal as the Byzantine Harmankaya tekfur who became an Ottoman ally and Muslim around 1313 according to the Ottoman tradition. The exact territorial/legal status of Harmankaya on 7 April 1326 should not be inferred solely from this relationship."
+    },
+    {
+      "id": "yenisehir_melengeia",
+      "name": "Yenişehir / Melengeia",
+      "politicalStatus1326": "Ottoman",
+      "confidence": "high",
+      "evidence": "TDV's general Anatolia account says a Turkish town called Yenişehir was founded around 1301 after the early Ottoman conquests. TDV's Osman I account identifies Melengeia (Yenişehir) among areas depopulated during the 1304 campaign."
+    }
+  ],
+  "routeEvidence": [
+    {
+      "route": "Söğüt-Domaniç-İnegöl corridor",
+      "status1326": "historically important land corridor",
+      "confidence": "medium-high",
+      "note": "TDV describes the early Ottoman migration and conflict geography around Söğüt, Domaniç and the İnegöl plain."
+    },
+    {
+      "route": "Lefke-Mekece-Geyve-Sakarya valley",
+      "status1326": "Ottoman-controlled strategic corridor",
+      "confidence": "high",
+      "note": "The 1304 campaign evidence identifies these positions as controlling the route system toward Nikaia. This should be represented as a network of route/control nodes rather than a modern-style straight border."
+    },
+    {
+      "route": "Bilecik-Yenişehir-Bursa",
+      "status1326": "Ottoman interior communication corridor",
+      "confidence": "medium-high",
+      "note": "The historical conquest sequence establishes the chain of Ottoman-held centers, but a precise 1326 road geometry requires separate archaeological/topographic evidence."
+    }
+  ],
+  "negativeOrCautionaryEvidence": [
+    {
+      "subject": "Iznik approaches",
+      "finding": "The fact that Ottoman forces controlled surrounding positions before 1326 does not make Nikaia Ottoman. The city remained Byzantine until 1331."
+    },
+    {
+      "subject": "Harmankaya",
+      "finding": "Köse Mihal's personal alignment should not be converted directly into a canonical province polygon."
+    },
+    {
+      "subject": "Ancient roads",
+      "finding": "An ancient Roman route should not automatically be treated as an active 1326 road without medieval-use evidence."
+    },
+    {
+      "subject": "Later Ottoman administration",
+      "finding": "Later Hüdavendigâr/Kocaeli administrative units are intentionally excluded from 1326 political geometry reconstruction."
+    }
+  ],
+  "sources": [
+    {
+      "title": "TDV İslâm Ansiklopedisi — Anadolu",
+      "url": "https://islamansiklopedisi.org.tr/anadolu",
+      "role": "early Ottoman territorial sequence and 1326 boundary anchors"
+    },
+    {
+      "title": "TDV İslâm Ansiklopedisi — Osman I",
+      "url": "https://islamansiklopedisi.org.tr/osman-i",
+      "role": "Sakarya valley campaigns, Geyve, Lefke, Mekece, Bilecik/İnegöl route context"
+    },
+    {
+      "title": "TDV İslâm Ansiklopedisi — Bilecik",
+      "url": "https://islamansiklopedisi.org.tr/bilecik",
+      "role": "Bilecik frontier and market context"
+    },
+    {
+      "title": "TDV İslâm Ansiklopedisi — İznik",
+      "url": "https://islamansiklopedisi.org.tr/iznik",
+      "role": "1326 Byzantine control and 1331 capture date"
+    },
+    {
+      "title": "Belleten — Osmanlı Beyliği'nin Kurucusu Osman Beg",
+      "url": "https://www.belleten.gov.tr/eng/full-text/2716/tur",
+      "role": "early Sakarya campaign and place-name identification"
+    },
+    {
+      "title": "Sakarya Kaleleri / Sakarya Büyükşehir Belediyesi",
+      "url": "https://sakarya.bel.tr/uploads/files/sakaryakaleleri.pdf",
+      "role": "fortification landscape and unresolved medieval place identifications"
+    }
+  ],
+  "promotionGate": {
+    "politicalGeometry": "blocked",
+    "reason": "The evidence establishes a set of dated control nodes and corridors but does not yet provide a source-independent, topologically complete 7 April 1326 provincial boundary network."
+  }
+}
