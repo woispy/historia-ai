@@ -13,7 +13,6 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildPoliticalGeographyDataset } from "../historical-gis/province/PoliticalGeographyDatasetBuilder.js";
 import { buildPoliticalMapbin } from "../build/political-mapbin-builder.js";
-import { validatePoliticalGeographyAuthority } from "../historical-gis/province/PoliticalGeographyAuthorityValidator.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const fixtureDirectory = path.join(root, "tools/tests/fixtures/political-geography/proof-grid");
@@ -37,7 +36,7 @@ const SOURCE_DOCUMENT = {
 
 let passed = 0;
 
-const { dataset, report: buildReport } = buildPoliticalGeographyDataset({ coverage, provinces, provenance, sourceDocument: SOURCE_DOCUMENT });
+const { dataset } = buildPoliticalGeographyDataset({ coverage, provinces, provenance, sourceDocument: SOURCE_DOCUMENT });
 const { buffer, source, idMap, report } = buildPoliticalMapbin(dataset);
 passed += 1;
 
