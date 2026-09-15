@@ -11,6 +11,7 @@
     "build:assets": "node tools/asset-builder/cli/fetch-natural-earth-50m.js && node tools/asset-builder/cli/fetch-natural-earth-hydrography-10m.js && node tools/asset-builder/cli/build-assets.js && node tools/asset-builder/cli/build-anatolia-hydrography-10m.js",
     "build:assets:debug": "node tools/asset-builder/cli/fetch-natural-earth-50m.js && node tools/asset-builder/cli/fetch-natural-earth-hydrography-10m.js && node --trace-uncaught tools/asset-builder/cli/build-assets.js && node tools/asset-builder/cli/build-anatolia-hydrography-10m.js",
     "build:historical-gis:1300": "node tools/historical-gis/cli/import-1300.js",
+    "build:historical-gis": "node tools/historical-gis/cli/import-historical.js",
     "build:mapbin": "node tools/build/build-mapbin.js",
     "benchmark:prepare": "node tools/benchmarks/generate-15k-mapbin.js",
     "benchmark": "node tools/benchmarks/run-browser-benchmark.js",
