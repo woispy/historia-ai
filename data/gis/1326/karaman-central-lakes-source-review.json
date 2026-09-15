@@ -1,0 +1,65 @@
+{
+  "scenarioDate": "1326-04-07",
+  "scope": "Karaman core - Larende, Konya, Beysehir, Seydisehir, Bozkir, Hadim corridor",
+  "status": "evidence-only",
+  "canonicalGeometryPromotion": "BLOCKED",
+  "sources": [
+    "TDV Islam Ansiklopedisi: Karamanoğulları",
+    "TDV Islam Ansiklopedisi: Eşrefoğulları",
+    "TDV Islam Ansiklopedisi: Konya",
+    "TDV Islam Ansiklopedisi: Seydişehir",
+    "TDV Islam Ansiklopedisi: Akşehir",
+    "Sait Kofoğlu, A Principality In Southwest Anatolia In The Post-Selçuk Era: Eşrefoğullari, SDÜ Sosyal Bilimler Dergisi 19 (2009)",
+    "Selçuk Üniversitesi Selçuklu Araştırmaları Dergisi: Konya-Alanya güzergâhındaki Selçuklu kervansarayları ve Eşrefoğlu Beyliği"
+  ],
+  "anchors": {
+    "Larende_Karaman": {
+      "control": "Karamanid core",
+      "confidence": "high",
+      "notes": "Karamanid capital from Ibrahim Bey's period; the dynasty's central seat was Larende. Do not project later provincial boundaries onto 1326."
+    },
+    "Konya": {
+      "control": "contested / Ilkhanid-Demirtas-Karamanid transition",
+      "confidence": "high",
+      "notes": "Demirtas captured Konya in 1320 and 1323; after his withdrawal the Karamanids regained it only in 1328-29. Therefore Konya must not be encoded as a stable Karamanid polygon on 1326-04-07."
+    },
+    "Beysehir": {
+      "control": "Eshrefid immediately before 1326-10-09; 1326-04-07 unresolved",
+      "confidence": "high",
+      "notes": "Eshrefid II Suleyman was killed at Beysehir on 1326-10-09. TDV says Beysehir and surrounding Eshrefid lands were subsequently seized by Hamidids. This is later than the scenario start, so 7 April must remain unresolved rather than back-projecting October control."
+    },
+    "Seydisehir": {
+      "control": "Eshrefid / transition zone at scenario start",
+      "confidence": "high",
+      "notes": "TDV places Seydisehir under Eshrefids, then Hamidids, Karamanids and later Turgutids. The decisive Eshrefid collapse is October 1326, so no later Hamidid control should be back-projected to April."
+    },
+    "Bozkir": {
+      "control": "Eshrefid legacy / frontier, not safely Karamanid in April 1326",
+      "confidence": "medium",
+      "notes": "Eshrefid territory had historically extended south to Bozkir. Later Karamanid association is real, but the available sources do not establish an exact 7 April 1326 boundary."
+    },
+    "Hadim": {
+      "control": "Karamanid-associated southern corridor, exact April 1326 boundary unresolved",
+      "confidence": "medium",
+      "notes": "Modern historical studies place Hadim in the Karamanid period and identify the Hadim-Bozkir route as a major Toros transit corridor. Exact 1326 political geometry is not established."
+    }
+  },
+  "chronologyGuards": [
+    "Do not assign Beysehir/Seydisehir to Hamidids before the documented 9 October 1326 Eshrefid collapse.",
+    "Do not assign Konya as stable Karamanid in April 1326; the documented Karamanid recovery is 1328-29.",
+    "Do not use later Karamanid provincial boundaries as 1326 polygons.",
+    "Separate city control, dynastic influence, route control and frontier pressure.",
+    "Treat the Konya-Alanya road as a transport network independent of political polygons."
+  ],
+  "networkEvidence": {
+    "Konya_Alanya_corridor": {
+      "confidence": "high",
+      "notes": "Academic research identifies the Konya-Beysehir-Alanya/Akdeniz route as a major medieval caravan corridor; Beysehir's strategic position connected inland Anatolia to Mediterranean ports."
+    },
+    "Anamur_Ermenek_Hadim_Bozkir_Seydisehir": {
+      "confidence": "medium-high",
+      "notes": "Academic route reconstruction identifies a southern route from Anamur through Ermenek, Kisle, Taşkent, Hadim, Bozkir and south of Lake Sugla toward Seydisehir. This supports a route-network layer, not an automatic political boundary."
+    }
+  },
+  "inferencePolicy": "Where sources establish a later 1326 transition but not the exact scenario date, retain unresolved/transition state instead of back-projecting the later result."
+}
