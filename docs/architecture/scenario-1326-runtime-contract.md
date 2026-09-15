@@ -145,6 +145,7 @@ The current cleanup pass remains behavior-preserving and includes:
 - clean runtime, reference-layer, visual-regression, and proof-group test/CLI bindings while preserving their assertions and validation paths;
 - keep legacy/reference GIS paths intact unless repository usage proves they are dead;
 - do not introduce new Voronoi, jitter, anchor, or fallback geometry generation;
+- keep terrain diagnostics fail-closed until the streamed DEM mesh passes visual validation at every LOD;
 - update this contract whenever the acceptance state changes.
 
 ## Acceptance gates before enabling 1326
