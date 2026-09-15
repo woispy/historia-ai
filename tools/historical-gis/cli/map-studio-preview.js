@@ -17,19 +17,8 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { createSourceDocumentTemplate, validateSourceDocumentProgress } from "../province/ProvinceSourceStudio.js";
-import { buildPoliticalGeographyDataset } from "../province/PoliticalGeographyDatasetBuilder.js";
-import { validatePoliticalGeographyAuthority, assertPoliticalGeographyAuthorityReady } from "../province/PoliticalGeographyAuthorityValidator.js";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
-
-const command = process.argv[2];
 const fixtureDirectory = process.argv[3] ? path.resolve(process.argv[3]) : path.join(process.cwd(), "tools/tests/fixtures/political-geography/anatolia-1300");
-const outputPath = process.argv[4] ? path.resolve(process.argv[4]) : null;
-
-const readJson = async (name) => JSON.parse(await fs.readFile(path.join(fixtureDirectory, name), "utf8"));
 
 async function loadFixture() {
   const coverage = await fs.readFile(path.join(fixtureDirectory, "coverage.json"), "utf8").then(JSON.parse);
