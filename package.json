@@ -15,6 +15,7 @@
     "acquire:historical-source": "node tools/historical-gis/cli/acquire-historical-source.js",
     "test:historical-source-acquisition": "node tools/tests/historical-source-acquisition.test.js",
     "test:historical-entity-reconciliation": "node tools/tests/historical-entity-reconciliation.test.js",
+    "test:historical-entity-evidence-audit": "node tools/tests/historical-entity-evidence-audit.test.js",
     "test:historical-gis-importer": "node tools/historical-gis/cli/test-import-historical.js",
     "build:mapbin": "node tools/build/build-mapbin.js",
     "benchmark:prepare": "node tools/benchmarks/generate-15k-mapbin.js",
@@ -124,10 +125,11 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
+    "@eslint/js": "^10.0.1",
+    "@vitejs/plugin-react": "^6.0.3",
     "eslint": "^10.6.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
-    "globals": "^17.7.0",
     "vite": "^8.1.1"
   }
 }
