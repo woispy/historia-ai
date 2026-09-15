@@ -37,6 +37,7 @@ const dataset = requireArg("--dataset");
 const version = readArg("--version");
 const license = readArg("--license");
 const acquiredAt = readArg("--acquired-at");
+const expectedInputSha256 = readArg("--expected-sha256");
 const allowTimeless = process.argv.includes("--allow-timeless");
 
 if ((input && url) || (!input && !url)) {
@@ -71,6 +72,7 @@ const result = await acquireHistoricalSource({
   license,
   acquiredAt,
   allowTimeless,
+  expectedInputSha256,
 });
 
 await writeHistoricalSourceEvidence({
