@@ -19,10 +19,14 @@
       "version": "v0.2.0",
       "releaseDate": "2026-05-16",
       "zenodoRecord": "10.5281/zenodo.20274630",
-      "archive": {
-        "filename": "cliopatria-v0.2.0.zip",
-        "sizeBytesApprox": 297100000,
-        "md5": "6d573d5a07dfcd5a2c6c9933d6401d48"
+      "archive": {"filename": "cliopatria-v0.2.0.zip", "sizeBytesApprox": 297100000, "md5": "6d573d5a07dfcd5a2c6c9933d6401d48"},
+      "localAcquisition": {
+        "status": "acquired-verified-local",
+        "archiveSizeBytes": 297058350,
+        "archiveMd5": "6d573d5a07dfcd5a2c6c9933d6401d48",
+        "isolatedDataset": "cliopatria_polities_only.geojson",
+        "isolatedDatasetSha256": "5df3b5868cfab8f76030853fa2346ed3cd71171ad807b6f72d783ee2dce6839e",
+        "verification": "Archive MD5 matches the pinned manifest value; the embedded polity GeoJSON was extracted and inspected locally."
       },
       "role": "global-political-entity-candidate-evidence",
       "url": "https://github.com/Seshat-Global-History-Databank/cliopatria/releases/tag/v0.2.0",
@@ -30,14 +34,9 @@
       "format": "GeoJSON archive",
       "projection": "EPSG:4326",
       "temporalFilter": "Rows whose FromYear <= 1326 <= ToYear",
-      "status": "acquisition-required",
+      "status": "acquired-verified-local",
       "licenseReview": "required-before-redistribution-or-embedding",
-      "expectedEvidence": [
-        "Ottoman Beylik candidate extent",
-        "Byzantine Empire candidate extent",
-        "Ilkhanid candidate extent",
-        "Other Tier 1 polity candidates where matching temporal records exist"
-      ],
+      "expectedEvidence": ["Ottoman Beylik candidate extent", "Byzantine Empire candidate extent", "Ilkhanid candidate extent", "Other Tier 1 polity candidates where matching temporal records exist"],
       "reconciliationWarning": "Cliopatria documents that its maps represent one historical interpretation and contain border, naming, territorial-change, and duration uncertainties."
     },
     {
@@ -52,10 +51,7 @@
       "temporalFilter": "1200-1500 coverage; use as corroborating context for 1326",
       "status": "acquisition-required",
       "license": "CC BY 3.0",
-      "expectedEvidence": [
-        "European ecclesiastical boundary context",
-        "Historical place/jurisdiction corroboration"
-      ],
+      "expectedEvidence": ["European ecclesiastical boundary context", "Historical place/jurisdiction corroboration"],
       "reconciliationWarning": "Ecclesiastical jurisdictions are not political provinces and cannot directly become political authority."
     },
     {
@@ -71,11 +67,7 @@
       "temporalFilter": "features applicable to 1326 where mapped",
       "status": "acquisition-required",
       "license": "CC0 generally; preserve/check individually tagged feature licenses",
-      "expectedEvidence": [
-        "Historical settlements",
-        "Rivers and physical boundary context",
-        "Mapped historical boundary/features"
-      ],
+      "expectedEvidence": ["Historical settlements", "Rivers and physical boundary context", "Mapped historical boundary/features"],
       "reconciliationWarning": "Collaborative coverage is uneven; mapped features are evidence, not automatic political authority."
     },
     {
@@ -90,11 +82,7 @@
       "temporalFilter": "records relevant to 1326 entities and places",
       "status": "acquisition-required",
       "licenseReview": "record source-specific terms before redistribution",
-      "expectedEvidence": [
-        "Place identity reconciliation",
-        "Historical names and aliases",
-        "Source-linked provenance"
-      ],
+      "expectedEvidence": ["Place identity reconciliation", "Historical names and aliases", "Source-linked provenance"],
       "reconciliationWarning": "WHG is a place-identity/provenance resource, not a single authoritative 1326 province layer."
     },
     {
@@ -109,10 +97,7 @@
       "temporalFilter": "Byzantine historical geography through the mid-15th century",
       "status": "reference-acquisition-or-citation-required",
       "licenseReview": "required for any data extraction or redistribution",
-      "expectedEvidence": [
-        "Byzantine place and regional geography",
-        "Toponym and historical geography corroboration"
-      ],
+      "expectedEvidence": ["Byzantine place and regional geography", "Toponym and historical geography corroboration"],
       "reconciliationWarning": "Use as expert historical-geography evidence; do not infer political polygon authority solely from regional descriptions."
     }
   ],
@@ -127,22 +112,7 @@
     "8. Run topology and physical-boundary checks before any canonical promotion."
   ],
   "promotionGate": {
-    "required": [
-      "date applicability to 1326-04-07",
-      "canonical entity identity",
-      "source identity and snapshot/version",
-      "geometry provenance",
-      "cross-source reconciliation notes",
-      "confidence score",
-      "review status",
-      "topology validation",
-      "physical-boundary validation where applicable"
-    ],
-    "forbidden": [
-      "copying 1300 geometry into 1326",
-      "back-projecting later 1326 territorial changes to April 7",
-      "synthetic fallback geometry",
-      "treating broad polity existence as proof of a province polygon"
-    ]
+    "required": ["date applicability to 1326-04-07", "canonical entity identity", "source identity and snapshot/version", "geometry provenance", "cross-source reconciliation notes", "confidence score", "review status", "topology validation", "physical-boundary validation where applicable"],
+    "forbidden": ["copying 1300 geometry into 1326", "back-projecting later 1326 territorial changes to April 7", "synthetic fallback geometry", "treating broad polity existence as proof of a province polygon"]
   }
 }
