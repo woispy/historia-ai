@@ -8,8 +8,6 @@
  * This test validates the infrastructure is ready.
  */
 
-let passed = 0;
-
 async function runTests() {
   // Test 1: VisualRegressionConfig defaults
   const { VisualRegressionConfig, DiffResult } = await import("../visual-regression.js");
@@ -48,7 +46,6 @@ async function runTests() {
   console.log("✓ compareImages");
 
   // Test: generateBiomePalette
-  const { generateBiomePalette } = await import("../../src/map/terrain/TerrainTileProvider.js");
   const palette = (await import("../../src/map/terrain/TerrainTileProvider.js")).generateBiomePalette();
   if (!palette || !(palette instanceof Uint32Array)) throw new Error("palette should be Uint32Array");
   if (palette.length !== 11) throw new Error("palette should have 11 biomes");
@@ -59,13 +56,11 @@ async function runTests() {
   console.log("✓ generateBiomePalette");
 
   // Test: VisualRegressionTester instantiation
-  const { VisualRegressionTester } = await import("../visual-regression.js");
   const tester = new (await import("../visual-regression.js")).VisualRegressionTester({ baselineDir: "/tmp/test-baselines" });
   if (!tester.baselineDir.includes("test-baselines")) throw new Error("baselineDir not set correctly");
   console.log("✓ VisualRegressionTester instantiation");
 
   // Test: snapshotTest
-  const { snapshotTest } = await import("../visual-regression.js");
   const data = { version: 1, data: [1, 2, 3] };
   // Create directory for snapshots
   const fs = await import("node:fs/promises");
