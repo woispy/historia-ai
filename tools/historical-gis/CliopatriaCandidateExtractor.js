@@ -15,6 +15,14 @@ function integerProperty(properties, key) {
   return Number.isInteger(value) ? value : null;
 }
 
+function numericProperty(properties, keys) {
+  for (const key of keys) {
+    const value = properties?.[key];
+    if (Number.isFinite(value)) return value;
+  }
+  return null;
+}
+
 function normalizeCandidate(feature, index) {
   const properties = feature?.properties ?? {};
   const name = typeof properties.Name === "string" ? properties.Name.trim() : "";
@@ -35,6 +43,7 @@ function normalizeCandidate(feature, index) {
     wikidataId: properties.Wikidata ?? null,
     seshatId: properties.SeshatID ?? null,
     wikipedia: properties.Wikipedia ?? null,
+    areaKm2: numericProperty(properties, ["Area", "area", "AREA"]),
     geometry: feature?.geometry ?? null,
   };
 }
