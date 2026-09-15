@@ -1,145 +1,128 @@
 /**
  * Historia AI — Parallel Triangulation Pool
  *
- * Worker-thread based parallel triangulation for 15K+ province scale.
- * Distributes triangulation work across worker threads.
+ * Worker-thread based parallel triangulation for build-time GPU packing.
+ * The worker protocol is deterministic: input order is preserved in the result.
  */
 
 import { Worker, isMainThread, parentPort } from "node:worker_threads";
 import { cpus } from "node:os";
 import { triangulateRingOptimized } from "./TriangulationOptimized.js";
 
-const DEFAULT_WORKER_COUNT = Math.max(1, cpus() - 1);
+const DEFAULT_WORKER_COUNT = Math.max(1, cpus().length - 1);
 
-// Worker thread entry point
 if (!isMainThread) {
-  const { triangulateRingOptimized } = await import("./TriangulationOptimized.js");
+  parentPort?.postMessage({ type: "READY" });
 
-  parentPort?.on("message", (msg) => {
-    if (msg.type === "TRIANGULATE_BATCH") {
-      const { taskId, rings, context } = msg;
+  parentPort?.on("message", (message) => {
+    if (message?.type !== "TRIANGULATE_BATCH") return;
 
-      const results = rings.map((ring, index) => {
-        try {
-          const triangles = triangulateRingOptimized(ring, context);
-          return { index, triangles, success: true };
-        } catch (error) {
-          return { index, error: error.message, success: false };
-        }
-      });
+    const { taskId, rings, context } = message;
+    const results = rings.map((ring, index) => {
+      try {
+        return {
+          index,
+          triangles: triangulateRingOptimized(ring, context),
+          success: true,
+        };
+      } catch (error) {
+        return {
+          index,
+          error: error instanceof Error ? error.message : String(error),
+          success: false,
+        };
+      }
+    });
 
-      parentPort?.postMessage({ type: "RESULT", taskId: msg.taskId, results });
-    }
+    parentPort?.postMessage({ type: "RESULT", taskId, results });
   });
-} else {
-  // Main thread class
-  export class ParallelTriangulator {
-    constructor(options = {}) {
-      this.workerCount = options.workerCount ?? Math.max(1, require("os").cpus().length - 1);
-      this.workers = [];
-      this.initialized = false;
-    }
+}
 
-    async initialize() {
-      if (this.initialized) return;
-
-      const workerPath = new URL("./ParallelTriangulator.js", import.meta.url);
-      const workerCount = Math.max(1, require("os").cpus().length - 1);
-
-      for (let i = 0; i < this.workerCount; i++) {
-        const worker = new Worker(new URL("./ParallelTriangulator.js", import.meta.url), {
-          workerData: { workerIndex: i },
-          type: "module",
-        });
-
-        worker.on("error", (err) => console.error(`Triangulation worker error:`, err));
-        worker.on("exit", (code) => {
-          if (code !== 0) console.error(`Triangulation worker exited with code ${code}`);
-        });
-
-        this.workers.push(worker);
-      }
-
-      // Wait for workers to be ready
-      await Promise.all(this.workers.map(w => new Promise(resolve => {
-        w.once("message", msg => { if (msg.type === "READY") resolve(); });
-        setTimeout(resolve, 100);
-      })));
-
-      this.initialized = true;
-    }
-
-    /**
-     * Triangulate multiple rings in parallel
-     * @param {Array<Array<number[]>>} rings - Array of rings (each ring is [lon, lat][])
-     * @param {Object} context - Context for triangulation (provinceId, etc.)
-     * @returns {Array<Uint32Array>} Array of triangle index arrays
-     */
-    async triangulateBatch(rings, context = {}) {
-      if (!this.workers.length) await this.initialize();
-
-      const chunkSize = Math.ceil(rings.length / this.workers.length);
-      const chunks = [];
-      for (let i = 0; i < rings.length; i += chunkSize) {
-        chunks.push(rings.slice(i, i + chunkSize));
-      }
-
-      const promises = chunks.map((chunk, index) => {
-        const worker = this.workers[index % this.workers.length];
-        const taskId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-
-        return new Promise((resolve, reject) => {
-          const handler = (msg) => {
-            if (msg.type === "RESULT" && msg.taskId === taskId) {
-              worker.off("message", handler);
-              const sorted = msg.results.sort((a, b) => a.index - b.index);
-              resolve(sorted.map(r => r.success ? r.triangles : null));
-            } else if (msg.type === "ERROR") {
-              worker.off("message", handler);
-              reject(new Error(msg.error));
-            }
-          };
-
-          worker.on("message", handler);
-          worker.postMessage({
-            type: "TRIANGULATE_BATCH",
-            taskId,
-            rings: chunk,
-            context,
-          });
-        });
-      });
-
-      const results = await Promise.all(promises);
-      return results.flat();
-    }
-
-    terminate() {
-      for (const worker of this.workers) {
-        worker.terminate();
-      }
-      this.workers = [];
-    }
+export class ParallelTriangulator {
+  constructor(options = {}) {
+    const requested = Number(options.workerCount);
+    this.workerCount = Number.isInteger(requested) && requested > 0
+      ? requested
+      : DEFAULT_WORKER_COUNT;
+    this.workers = [];
+    this.initialized = false;
   }
 
-  // Worker thread entry point
-  if (!require("node:worker_threads").isMainThread) {
-    const { triangulateRingOptimized } = await import("./TriangulationOptimized.js");
+  async initialize() {
+    if (this.initialized) return;
 
-    parentPort?.on("message", (msg) => {
-      if (msg.type === "TRIANGULATE_BATCH") {
-        const { taskId, rings, context } = msg;
-
-        const results = rings.map((ring, index) => {
-          try {
-            const triangles = triangulateRingOptimized(ring, context);
-            return { index, triangles, success: true };
-          } catch (error) {
-            return { index, error: error.message, success: false };
-          }
-        });
-
-        parentPort?.postMessage({ type: "RESULT", taskId: msg.taskId, results });
+    for (let index = 0; index < this.workerCount; index += 1) {
+      const worker = new Worker(new URL("./ParallelTriangulator.js", import.meta.url), {
+        type: "module",
       });
+      this.workers.push(worker);
     }
+
+    await Promise.all(this.workers.map((worker) => new Promise((resolve, reject) => {
+      const onReady = (message) => {
+        if (message?.type !== "READY") return;
+        cleanup();
+        resolve();
+      };
+      const onError = (error) => {
+        cleanup();
+        reject(error);
+      };
+      const cleanup = () => {
+        worker.off("message", onReady);
+        worker.off("error", onError);
+      };
+
+      worker.on("message", onReady);
+      worker.once("error", onError);
+    })));
+
+    this.initialized = true;
   }
+
+  async triangulateBatch(rings, context = {}) {
+    if (!Array.isArray(rings) || rings.length === 0) return [];
+    if (!this.workers.length) await this.initialize();
+
+    const workerCount = Math.min(this.workers.length, rings.length);
+    const chunkSize = Math.ceil(rings.length / workerCount);
+    const promises = [];
+
+    for (let start = 0, workerIndex = 0; start < rings.length; start += chunkSize, workerIndex += 1) {
+      const chunk = rings.slice(start, start + chunkSize);
+      const worker = this.workers[workerIndex % this.workers.length];
+      const taskId = `${start}:${chunk.length}`;
+
+      promises.push(new Promise((resolve, reject) => {
+        const onMessage = (message) => {
+          if (message?.type !== "RESULT" || message.taskId !== taskId) return;
+          cleanup();
+          const sorted = [...message.results].sort((a, b) => a.index - b.index);
+          resolve(sorted.map((result) => result.success ? result.triangles : null));
+        };
+        const onError = (error) => {
+          cleanup();
+          reject(error);
+        };
+        const cleanup = () => {
+          worker.off("message", onMessage);
+          worker.off("error", onError);
+        };
+
+        worker.on("message", onMessage);
+        worker.once("error", onError);
+        worker.postMessage({ type: "TRIANGULATE_BATCH", taskId, rings: chunk, context });
+      }));
+    }
+
+    const results = await Promise.all(promises);
+    return results.flat();
+  }
+
+  async terminate() {
+    const workers = this.workers;
+    this.workers = [];
+    this.initialized = false;
+    await Promise.all(workers.map((worker) => worker.terminate()));
+  }
+}
