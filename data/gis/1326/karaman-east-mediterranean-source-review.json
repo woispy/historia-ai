@@ -1,0 +1,34 @@
+{
+  "scenarioDate": "1326-04-07",
+  "scope": "Alanya-Anamur-Mut-Gulnar-Silifke-Manavgat-Karaman eastern Mediterranean transition",
+  "status": "evidence-only",
+  "canonicalGeometryPromotion": "blocked",
+  "sourcePolicy": "multi-source corroboration required; later political arrangements are not back-projected",
+  "anchors": [
+    {"name":"Alanya/Alaiye","assessment":"Karaman-linked local polity; Memluk suzerainty/coinage context","confidence":"high","notes":"TDV identifies Karaman-linked beys after 1293; 1321/1326/1329 coin evidence associates Alaiye with Mamluk Sultan al-Nasir Muhammad. Do not model as direct Mamluk provincial territory."},
+    {"name":"Anamur/Mamure","assessment":"Karamanid sphere/control anchor","confidence":"high","notes":"Early Seljuk conquest was followed by Karamanid control in the Kameruddin-ili tradition. The Mamure complex has Karamanid phases; an official local source associates Ak Camii with 1326 but explicitly notes the surviving inscription is not original, so this is corroboration rather than a precise dating proof."},
+    {"name":"Mut","assessment":"Karamanid core/interior anchor","confidence":"high","notes":"Karamanid origins and Kameruddin-ili sources consistently place Mut in the core southern Karaman zone. Sertavul-Mut corridor links Central Anatolia to the Mediterranean."},
+    {"name":"Gulnar","assessment":"Karamanid sphere","confidence":"high","notes":"Multiple historical syntheses place Gulnar within the Kameruddin-ili/Karaman sphere; avoid treating later İçel administrative limits as 1326 geometry."},
+    {"name":"Silifke","assessment":"uncertain in 1326; do not promote to canonical Karaman polygon","confidence":"high","notes":"TDV Silifke explicitly argues the city probably entered Karamanid control later, before 1359, despite later narrative traditions assigning it earlier. This is a critical chronology guard."},
+    {"name":"Korykos/Gorgos (Kizkalesi)","assessment":"not Karamanid in 1326","confidence":"high","notes":"Archaeological study records Lusignan capture in 1361 and subsequent struggle with Karamanids. Therefore later Karamanid control must not be back-projected to 1326."},
+    {"name":"Manavgat","assessment":"autonomous local polity with Karamanid/Mamluk patronage context; exact 1326 control unresolved","confidence":"medium","notes":"A numismatic/historical study argues Manavgat rulers accepted Karamanid rule under Mamluk patronage after weakening Mongol control around 1320; evidence is indirect and later narratives should not be converted into a hard 1326 polygon."},
+    {"name":"Gazipasa/Selinti","assessment":"frontier/transition zone","confidence":"medium","notes":"Modern institutional and geographic studies show succession of Seljuk, Teke and Karamanid control, but do not establish a precise 7 April 1326 boundary. Keep as a control-confidence band."}
+  ],
+  "negativeControls": [
+    {"name":"Korykos","reason":"Lusignan capture dated 1361; later Karamanid conflict cannot establish Karamanid control in 1326."},
+    {"name":"Silifke","reason":"TDV chronology states Karamanid control was probably later than commonly repeated early narratives, before 1359."}
+  ],
+  "geographicStructure": {
+    "karamanCore": ["Ermenek","Mut","Gulnar","Anamur"],
+    "karamanLinkedCoastalNode": ["Alanya/Alaiye"],
+    "frontierOrUnresolved": ["Gazipasa","Manavgat","Silifke"],
+    "externalControlIn1326": ["Korykos"]
+  },
+  "modelingRules": [
+    "Do not derive a continuous coastal Karamanid polygon from later 14th-century control.",
+    "Separate local autonomy, suzerainty, tribute and direct territorial control.",
+    "Use fort/port/road anchors independently from political ownership.",
+    "Treat the Sertavul-Mut-Goksu corridor as a major geographic/logistical connector.",
+    "Keep source disagreement in provenance rather than silently resolving it."
+  ]
+}
