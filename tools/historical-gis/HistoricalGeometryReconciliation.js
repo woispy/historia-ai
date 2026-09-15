@@ -26,9 +26,6 @@ function compareCandidates(candidates, areaDifferenceThreshold) {
   if (geometryCandidates.length === 0) {
     conflictFlags.push("no-geometry-candidate");
   }
-  if (geometryCandidates.length > 1) {
-    conflictFlags.push("multiple-geometry-candidates");
-  }
   if (geometryTypes.length > 1) {
     conflictFlags.push("geometry-type-difference");
   }
@@ -49,8 +46,7 @@ function compareCandidates(candidates, areaDifferenceThreshold) {
 
   const uniqueFlags = [...new Set(conflictFlags)];
   let status = "candidate";
-  if (uniqueFlags.includes("no-geometry-candidate")) status = "needs-review";
-  if (uniqueFlags.some((flag) => flag !== "no-geometry-candidate")) status = "needs-review";
+  if (uniqueFlags.length > 0) status = "needs-review";
   if (sourceIds.length > 1 && status === "candidate") status = "corroborated";
 
   return {
@@ -137,7 +133,7 @@ export function reconcileHistoricalGeometryEvidence({
     targetYear,
     authorityStatus: "evidence-only",
     purpose:
-      "Compare temporally applicable, identity-reconciled geometry evidence across sources without promoting any source geometry to canonical political geography.",
+      "Compare temporally applicable, identity-reconciled geometry evidence across sources without promoting any source geometry to canonical historical political geography.",
     methodology: {
       geometryComparisonStatus: "metadata-only",
       areaDifferenceThreshold,
