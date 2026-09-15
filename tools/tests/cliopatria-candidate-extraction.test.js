@@ -22,6 +22,7 @@ const fixture = {
         Type: "POLITY",
         Wikidata: "Q1",
         SeshatID: "S1",
+        Area: 123.45,
       },
       "p1",
     ),
@@ -69,6 +70,7 @@ assert.equal(result.candidates[0].name, "Test Polity");
 assert.equal(result.candidates[0].sourceFeatureId, "p1");
 assert.equal(result.candidates[0].wikidataId, "Q1");
 assert.equal(result.candidates[0].seshatId, "S1");
+assert.equal(result.candidates[0].areaKm2, 123.45);
 assert.equal(result.excluded.length, 3);
 assert.equal(result.excluded.some((item) => item.sourceFeatureId === "r1"), true);
 
