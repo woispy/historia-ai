@@ -85,6 +85,7 @@ const ottoman = inventory.records.find((record) => record.sourceFeatureId === "o
 assert.equal(ottoman.geometryType, "Polygon");
 assert.equal(ottoman.geometryPartCount, 1);
 assert.equal(ottoman.coordinateCount, 4);
+assert.equal(ottoman.areaKm2, 12.5);
 assert.equal(ottoman.temporalStatus, "applicable");
 assert.equal(ottoman.identityStatus, "matched");
 assert.equal(ottoman.canonicalEntityId, "ottoman-beylik");
