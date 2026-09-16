@@ -30,4 +30,8 @@ const contained = validateIndexedMeshTopology({ vertices:[[0,0],[6,0],[0,6],[1,1
 assert.equal(contained.valid, false);
 assert.ok(contained.errors.some((error) => error.includes("overlap")));
 
-console.log("Indexed mesh topology validator contract passed: shared edges/vertices accepted; crossing, T-junction, partial overlap, and containment rejected.");
+const duplicateTriangle = validateIndexedMeshTopology({ vertices:[[0,0],[4,0],[0,4]], indices:Uint32Array.from([0,1,2,2,1,0]) });
+assert.equal(duplicateTriangle.valid, false);
+assert.ok(duplicateTriangle.errors.some((error) => error.includes("duplicate-triangle")));
+
+console.log("Indexed mesh topology validator contract passed: shared edges/vertices accepted; crossing, T-junction, partial overlap, containment, and duplicate triangles rejected.");
