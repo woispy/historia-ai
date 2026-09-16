@@ -40,37 +40,47 @@ export function createDEMSamplerEvidenceProvider(sampler, {
   sampleStepDegrees = DEFAULT_SAMPLE_STEP_DEGREES,
   reliefScaleMeters = 500,
   ridgeScaleMeters = 400,
+  cache = true,
 } = {}) {
   if (!sampler || typeof sampler.elevation !== "function") throw new TypeError("sampler.elevation must be a function");
   if (!Number.isInteger(radiusSamples) || radiusSamples < 1) throw new RangeError("radiusSamples must be a positive integer");
   if (!(sampleStepDegrees > 0)) throw new RangeError("sampleStepDegrees must be positive");
+  if (typeof cache !== "boolean") throw new TypeError("cache must be boolean");
 
-  return Object.freeze({
-    sample(node) {
-      const lon = finite(node?.lon, "node.lon");
-      const lat = finite(node?.lat, "node.lat");
-      const grid = buildElevationGrid(sampler, lon, lat, radiusSamples, sampleStepDegrees);
-      const evidence = extractDEMReliefEvidence(grid, { reliefScaleMeters, ridgeScaleMeters });
-      const centerIndex = radiusSamples * (radiusSamples * 2 + 1) + radiusSamples;
-      const center = evidence.samples[centerIndex];
-      const validCount = evidence.samples.filter((sample) => sample.valid).length;
-      const coverage = evidence.samples.length ? validCount / evidence.samples.length : 0;
+  const evidenceCache = cache ? new Map() : null;
+  let cacheHits = 0;
+  let sampleCount = 0;
 
-      if (!center?.valid) {
-        return Object.freeze({
-          valid: false,
-          authoritative: false,
-          source: "Copernicus DEM GLO-30",
-          coverage: Number(coverage.toFixed(6)),
-          slopeNormalized: 0,
-          ridgeAffinity: 0,
-          mountainResistance: 0,
-          reliefMeters: null,
-          ridgeProminenceMeters: null,
-        });
-      }
+  const sample = (node) => {
+    const lon = finite(node?.lon, "node.lon");
+    const lat = finite(node?.lat, "node.lat");
+    const cacheKey = `${lon},${lat}`;
+    if (evidenceCache?.has(cacheKey)) {
+      cacheHits += 1;
+      return evidenceCache.get(cacheKey);
+    }
 
-      return Object.freeze({
+    sampleCount += 1;
+    const grid = buildElevationGrid(sampler, lon, lat, radiusSamples, sampleStepDegrees);
+    const evidence = extractDEMReliefEvidence(grid, { reliefScaleMeters, ridgeScaleMeters });
+    const centerIndex = radiusSamples * (radiusSamples * 2 + 1) + radiusSamples;
+    const center = evidence.samples[centerIndex];
+    const validCount = evidence.samples.filter((sampleValue) => sampleValue.valid).length;
+    const coverage = evidence.samples.length ? validCount / evidence.samples.length : 0;
+
+    const result = !center?.valid
+      ? Object.freeze({
+        valid: false,
+        authoritative: false,
+        source: "Copernicus DEM GLO-30",
+        coverage: Number(coverage.toFixed(6)),
+        slopeNormalized: 0,
+        ridgeAffinity: 0,
+        mountainResistance: 0,
+        reliefMeters: null,
+        ridgeProminenceMeters: null,
+      })
+      : Object.freeze({
         valid: true,
         authoritative: false,
         source: "Copernicus DEM GLO-30",
@@ -81,6 +91,20 @@ export function createDEMSamplerEvidenceProvider(sampler, {
         mountainResistance: clamp01(center.mountainResistance),
         reliefMeters: center.reliefMeters,
         ridgeProminenceMeters: center.ridgeProminenceMeters,
+      });
+
+    evidenceCache?.set(cacheKey, result);
+    return result;
+  };
+
+  return Object.freeze({
+    sample,
+    getCacheStats() {
+      return Object.freeze({
+        enabled: Boolean(evidenceCache),
+        entries: evidenceCache?.size ?? 0,
+        sampleCount,
+        cacheHits,
       });
     },
   });
@@ -93,6 +117,7 @@ export const DEM_SAMPLER_EVIDENCE_BRIDGE_CONTRACT = Object.freeze({
   input: "initialized P6.2 CopernicusDemCostSampler",
   output: "candidate physical terrain evidence",
   neighbourhood: "3x3 elevation post by default",
+  caching: "coordinate-keyed evidence cache by default",
   politicalAuthority: false,
 });
 
@@ -101,5 +126,6 @@ export const demSamplerEvidenceBridgeDefaults = Object.freeze({
   sampleStepDegrees: DEFAULT_SAMPLE_STEP_DEGREES,
   reliefScaleMeters: 500,
   ridgeScaleMeters: 400,
+  cache: true,
   defaultCellSizeMeters: DEFAULT_SAMPLE_STEP_DEGREES * METERS_PER_DEGREE,
 });
