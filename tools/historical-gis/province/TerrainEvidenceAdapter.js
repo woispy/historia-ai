@@ -2,9 +2,27 @@
 import { adaptDemSample, composeCostSamples } from "./CostAdapters.js";
 import { createCostField } from "./CostField.js";
 
+function finiteOrDefault(value, fallback = 0) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+}
+
+function clamp01(value) {
+  return Math.min(1, Math.max(0, finiteOrDefault(value)));
+}
+
 export function normalizeTerrainEvidence({ slopeDegrees = 0, slopeNormalized, ridgeAffinity = 0, mountainResistance = 0, riverPenalty = 0, lakePenalty = 0, coastPenalty = 0 } = {}) {
-  const dem = adaptDemSample({ slopeDegrees, slopeNormalized, ridgeAffinity, mountainResistance });
-  const hydro = { river: clamp01(riverPenalty), lake: clamp01(lakePenalty), coast: clamp01(coastPenalty) };
+  const dem = adaptDemSample({
+    slopeDegrees: finiteOrDefault(slopeDegrees),
+    slopeNormalized: slopeNormalized == null ? undefined : clamp01(slopeNormalized),
+    ridgeAffinity: clamp01(ridgeAffinity),
+    mountainResistance: clamp01(mountainResistance),
+  });
+  const hydro = {
+    river: clamp01(riverPenalty),
+    lake: clamp01(lakePenalty),
+    coast: clamp01(coastPenalty),
+  };
   const channels = composeCostSamples(dem, hydro);
   return Object.freeze({
     channels: Object.freeze(channels),
@@ -36,5 +54,3 @@ export function aggregateTerrainEvidence(samples, weights = {}) {
     samples: evaluated,
   });
 }
-
-function clamp01(value) { return Math.min(1, Math.max(0, Number(value) || 0)); }
