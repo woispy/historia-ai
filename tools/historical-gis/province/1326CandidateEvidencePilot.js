@@ -8,6 +8,7 @@
 import { associateT3ReferencePointsWithP61 } from "./T3P61ReferenceAssociation.js";
 import { associateT3ReferencePointsWithTerrain } from "./T3TerrainConstraintAdapter.js";
 import { scoreAdjacencyEdges } from "./AdjacencyEvidenceScorer.js";
+import { createDEMSamplerEvidenceProvider } from "./DEMSamplerEvidenceBridge.js";
 
 function requireCandidate(result, label) {
   if (!result || result.authoritative !== false) throw new Error(`${label} must remain non-authoritative`);
@@ -21,15 +22,36 @@ export function build1326CandidateEvidencePilot({
   adjacencyGraph,
   referenceTerrainProvider = () => [],
   edgeTerrainProvider = () => [],
+  demSampler = null,
+  demSamplerOptions = {},
   radiusKm = 35,
 }) {
   if (scenarioDate !== "1326-04-07") throw new RangeError("1326 pilot requires scenarioDate 1326-04-07");
   requireCandidate(t3Result, "T3 result");
   requireCandidate(adjacencyGraph, "P6.1 graph");
 
+  const demProvider = demSampler ? createDEMSamplerEvidenceProvider(demSampler, demSamplerOptions) : null;
+  const resolvedReferenceTerrainProvider = demProvider
+    ? (reference) => {
+      const evidence = demProvider.sample(reference);
+      return evidence.valid ? [evidence] : [];
+    }
+    : referenceTerrainProvider;
+
+  const resolvedEdgeTerrainProvider = demProvider
+    ? (edge) => {
+      const source = adjacencyGraph.nodes?.find((node) => node.id === edge.source);
+      const target = adjacencyGraph.nodes?.find((node) => node.id === edge.target);
+      if (!source || !target) return [];
+      const sourceEvidence = demProvider.sample(source);
+      const targetEvidence = demProvider.sample(target);
+      return [sourceEvidence, targetEvidence].filter((evidence) => evidence.valid);
+    }
+    : edgeTerrainProvider;
+
   const t3Association = associateT3ReferencePointsWithP61(t3Result, adjacencyGraph, { radiusKm });
-  const terrainAssociation = associateT3ReferencePointsWithTerrain(t3Result, referenceTerrainProvider);
-  const edgeScores = scoreAdjacencyEdges(adjacencyGraph.edges, edgeTerrainProvider);
+  const terrainAssociation = associateT3ReferencePointsWithTerrain(t3Result, resolvedReferenceTerrainProvider);
+  const edgeScores = scoreAdjacencyEdges(adjacencyGraph.edges, resolvedEdgeTerrainProvider);
 
   const edgeEvidence = edgeScores.map((score) => {
     const association = t3Association.edgeAssociations.find((item) => item.edgeId === score.edgeId) ?? null;
@@ -56,6 +78,7 @@ export function build1326CandidateEvidencePilot({
     region,
     authoritative: false,
     status: "candidate-review-package",
+    terrainSource: demProvider ? "P6.2-CopernicusDemCostSampler" : "injected-candidate-provider",
     layers: {
       t3D: t3Association,
       t3E: terrainAssociation,
@@ -68,6 +91,7 @@ export function build1326CandidateEvidencePilot({
       unscoredEdgeCount: edgeEvidence.filter((edge) => edge.disposition === "unscored").length,
       terrainSupportedReferenceCount: terrainAssociation.diagnostics.terrainSupportedCount,
       terrainConstrainedReferenceCount: terrainAssociation.diagnostics.terrainConstrainedCount,
+      demSamplerConnected: Boolean(demProvider),
     },
   });
 }
