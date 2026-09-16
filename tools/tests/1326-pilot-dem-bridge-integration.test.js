@@ -54,5 +54,10 @@ assert.equal(result.layers.t3E.authoritative, false);
 assert.equal(result.layers.p61EdgeEvidence.length, 3);
 assert.ok(result.layers.p61EdgeEvidence.every((edge) => edge.candidateOnly === true));
 assert.ok(result.layers.p61EdgeEvidence.every((edge) => edge.physicalSupport != null));
+assert.equal(result.layers.historicalQALedger.authoritative, false);
+assert.equal(result.layers.historicalQALedger.candidateOnly, true);
+assert.equal(result.layers.historicalQALedger.counts.edgeCount, 3);
+assert.equal(result.layers.historicalQALedger.records.length, 3);
+assert.ok(result.layers.historicalQALedger.records.every((record) => record.authoritative === false));
 
-console.log("1326 DEM bridge integration contract passed.");
+console.log("1326 DEM bridge integration and QA ledger contract passed.");
