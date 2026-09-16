@@ -9,6 +9,7 @@ import { associateT3ReferencePointsWithP61 } from "./T3P61ReferenceAssociation.j
 import { associateT3ReferencePointsWithTerrain } from "./T3TerrainConstraintAdapter.js";
 import { buildAdjacencyReviewTelemetry, scoreAdjacencyEdges } from "./AdjacencyEvidenceScorer.js";
 import { createDEMSamplerEvidenceProvider } from "./DEMSamplerEvidenceBridge.js";
+import { build1326HistoricalQALedger } from "./1326HistoricalQALedger.js";
 
 function requireCandidate(result, label) {
   if (!result || result.authoritative !== false) throw new Error(`${label} must remain non-authoritative`);
@@ -89,7 +90,7 @@ export function build1326CandidateEvidencePilot({
   });
   const reviewTelemetry = buildAdjacencyReviewTelemetry(edgeEvidence);
 
-  return Object.freeze({
+  const reviewPackage = Object.freeze({
     schemaVersion: 1,
     phase: "1326-CANDIDATE-EVIDENCE-PILOT",
     scenarioDate,
@@ -113,5 +114,13 @@ export function build1326CandidateEvidencePilot({
       demSamplerConnected: Boolean(demProvider),
       reviewTelemetryEdgeCount: reviewTelemetry.edgeCount,
     },
+  });
+
+  return Object.freeze({
+    ...reviewPackage,
+    layers: Object.freeze({
+      ...reviewPackage.layers,
+      historicalQALedger: build1326HistoricalQALedger(reviewPackage),
+    }),
   });
 }
