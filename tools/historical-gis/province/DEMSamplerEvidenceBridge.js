@@ -50,6 +50,9 @@ export function createDEMSamplerEvidenceProvider(sampler, {
   const evidenceCache = cache ? new Map() : null;
   let cacheHits = 0;
   let sampleCount = 0;
+  let elevationRequestCount = 0;
+  let validSampleCount = 0;
+  let invalidSampleCount = 0;
 
   const sample = (node) => {
     const lon = finite(node?.lon, "node.lon");
@@ -62,6 +65,7 @@ export function createDEMSamplerEvidenceProvider(sampler, {
 
     sampleCount += 1;
     const grid = buildElevationGrid(sampler, lon, lat, radiusSamples, sampleStepDegrees);
+    elevationRequestCount += grid.elevations.length;
     const evidence = extractDEMReliefEvidence(grid, { reliefScaleMeters, ridgeScaleMeters });
     const centerIndex = radiusSamples * (radiusSamples * 2 + 1) + radiusSamples;
     const center = evidence.samples[centerIndex];
@@ -93,6 +97,8 @@ export function createDEMSamplerEvidenceProvider(sampler, {
         ridgeProminenceMeters: center.ridgeProminenceMeters,
       });
 
+    if (result.valid) validSampleCount += 1;
+    else invalidSampleCount += 1;
     evidenceCache?.set(cacheKey, result);
     return result;
   };
@@ -105,19 +111,24 @@ export function createDEMSamplerEvidenceProvider(sampler, {
         entries: evidenceCache?.size ?? 0,
         sampleCount,
         cacheHits,
+        cacheMisses: sampleCount,
+        elevationRequestCount,
+        validSampleCount,
+        invalidSampleCount,
       });
     },
   });
 }
 
 export const DEM_SAMPLER_EVIDENCE_BRIDGE_CONTRACT = Object.freeze({
-  schemaVersion: 1,
+  schemaVersion: 2,
   authoritative: false,
   source: "Copernicus DEM GLO-30",
   input: "initialized P6.2 CopernicusDemCostSampler",
   output: "candidate physical terrain evidence",
   neighbourhood: "3x3 elevation post by default",
   caching: "coordinate-keyed evidence cache by default",
+  telemetry: "cache and elevation request counters",
   politicalAuthority: false,
 });
 
