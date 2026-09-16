@@ -143,6 +143,8 @@ jobs:
         run: npm run test:p6.2-boundary-solver
       - name: Run deterministic DEM sampling benchmark contract
         run: npm run test:dem-sampling-benchmark
+      - name: Run Amasya boundary authority semantics contract
+        run: npm run test:amasya-boundary-authority
       - name: Run Anatolia seed + physical-cost stress
         run: npm run test:anatolia-seed-physical-cost-stress
       - name: Run adaptive ridge boundary quality
