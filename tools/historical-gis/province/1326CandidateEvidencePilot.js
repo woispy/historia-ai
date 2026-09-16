@@ -7,7 +7,7 @@
  */
 import { associateT3ReferencePointsWithP61 } from "./T3P61ReferenceAssociation.js";
 import { associateT3ReferencePointsWithTerrain } from "./T3TerrainConstraintAdapter.js";
-import { scoreAdjacencyEdges } from "./AdjacencyEvidenceScorer.js";
+import { buildAdjacencyReviewTelemetry, scoreAdjacencyEdges } from "./AdjacencyEvidenceScorer.js";
 import { createDEMSamplerEvidenceProvider } from "./DEMSamplerEvidenceBridge.js";
 
 function requireCandidate(result, label) {
@@ -87,6 +87,7 @@ export function build1326CandidateEvidencePilot({
       ].sort(),
     });
   });
+  const reviewTelemetry = buildAdjacencyReviewTelemetry(edgeEvidence);
 
   return Object.freeze({
     schemaVersion: 1,
@@ -100,6 +101,7 @@ export function build1326CandidateEvidencePilot({
       t3D: t3Association,
       t3E: terrainAssociation,
       p61EdgeEvidence: edgeEvidence,
+      adjacencyReviewTelemetry: reviewTelemetry,
     },
     diagnostics: {
       candidateEdgeCount: edgeEvidence.length,
@@ -109,6 +111,7 @@ export function build1326CandidateEvidencePilot({
       terrainSupportedReferenceCount: terrainAssociation.diagnostics.terrainSupportedCount,
       terrainConstrainedReferenceCount: terrainAssociation.diagnostics.terrainConstrainedCount,
       demSamplerConnected: Boolean(demProvider),
+      reviewTelemetryEdgeCount: reviewTelemetry.edgeCount,
     },
   });
 }
