@@ -1,4 +1,4 @@
-import { evaluateTerrainEvidence } from "./TerrainEvidenceAdapter.js";
+import { aggregateTerrainEvidence } from "./TerrainEvidenceAdapter.js";
 
 /**
  * T3-E: associates T3 reference points with terrain/hydrography evidence.
@@ -18,19 +18,16 @@ export function associateT3ReferencePointsWithTerrain(t3Result, sampleProvider, 
   const associations = [];
   for (const feature of t3Result.features ?? []) {
     for (const reference of feature.points ?? []) {
-      const point = reference.point;
       const samples = sampleProvider({
-        point,
+        point: reference.point,
         featureId: feature.featureId,
         sourceIndex: reference.sourceIndex,
         pointType: reference.pointType,
       }) ?? [];
       if (!Array.isArray(samples)) throw new TypeError("sampleProvider must return an array");
 
-      const evaluation = samples.length ? evaluateTerrainEvidence(samples[0]) : null;
-      const meanCost = samples.length
-        ? samples.reduce((sum, sample) => sum + evaluateTerrainEvidence(sample).totalCost, 0) / samples.length
-        : null;
+      const evidence = samples.length ? aggregateTerrainEvidence(samples) : null;
+      const meanCost = evidence?.meanCost ?? null;
       const support = meanCost == null ? null : Math.max(0, 1 - Math.min(1, meanCost));
 
       associations.push({
@@ -40,7 +37,7 @@ export function associateT3ReferencePointsWithTerrain(t3Result, sampleProvider, 
         pointType: reference.pointType,
         locked: reference.locked === true,
         constraintId: reference.constraintId ?? null,
-        sampleCount: samples.length,
+        sampleCount: evidence?.sampleCount ?? 0,
         meanCost,
         physicalSupport: support,
         disposition: support == null
@@ -48,7 +45,7 @@ export function associateT3ReferencePointsWithTerrain(t3Result, sampleProvider, 
           : support >= retainThreshold
             ? "terrain-supported"
             : "terrain-constrained",
-        channelMeans: evaluation?.channels ?? null,
+        channelMeans: evidence?.averageChannels ?? null,
       });
     }
   }
