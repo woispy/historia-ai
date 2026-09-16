@@ -7,8 +7,12 @@ export function triangulateMultiRingPolygon({ outerRing, holes = [], islands = [
   const outer = cloneRing(outerRing);
   const normalizedHoles = holes.map(cloneRing).filter((ring) => ring.length >= 3);
   const normalizedIslands = islands.map(cloneRing).filter((ring) => ring.length >= 3);
-  if (normalizedIslands.length) return triangulateComponents([{ ring: outer, holes: normalizedHoles }, ...normalizedIslands.map((ring) => ({ ring, holes: [] }))]);
-  return triangulateComponents([{ ring: outer, holes: normalizedHoles }]);
+  const expectedArea = Math.max(0, ringArea(outer) - normalizedHoles.reduce((sum, ring) => sum + ringArea(ring), 0)) + normalizedIslands.reduce((sum, ring) => sum + ringArea(ring), 0);
+  const result = normalizedIslands.length
+    ? triangulateComponents([{ ring: outer, holes: normalizedHoles }, ...normalizedIslands.map((ring) => ({ ring, holes: [] }))])
+    : triangulateComponents([{ ring: outer, holes: normalizedHoles }]);
+  if (Math.abs(triangleArea(result.vertices, result.indices) - expectedArea) > 1e-8) throw new Error("Multi-ring triangulation area conservation failed");
+  return result;
 }
 
 function triangulateComponents(components) {
@@ -61,5 +65,8 @@ function leftmostIndex(ring) { return ring.reduce((best, point, index) => point[
 function rotateRing(ring, index) { return ring.slice(index).concat(ring.slice(0, index)); }
 function cloneRing(ring) { return (ring ?? []).map(([x, y]) => [Number(x), Number(y)]).filter(([x, y]) => Number.isFinite(x) && Number.isFinite(y)).filter((point, index, all) => index === 0 || !samePoint(point, all[index - 1])).filter((point, index, all) => index !== all.length - 1 || !samePoint(point, all[0])); }
 function removeAdjacentDuplicates(ring) { return ring.filter((point, index) => index === 0 || !samePoint(point, ring[index - 1])); }
+function ringArea(points) { return Math.abs(signedArea(points)); }
+function triangleArea(points, indices) { let area = 0; for (let i = 0; i < indices.length; i += 3) area += Math.abs(cross(points[indices[i]], points[indices[i + 1]], points[indices[i + 2]])) * 0.5; return area; }
 function signedArea(points) { let area = 0; for (let i = 0; i < points.length; i += 1) { const a = points[i]; const b = points[(i + 1) % points.length]; area += a[0] * b[1] - b[0] * a[1]; } return area * 0.5; }
+function cross(a,b,c) { return (b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]); }
 function samePoint(a, b) { return Math.abs(a[0] - b[0]) <= EPSILON && Math.abs(a[1] - b[1]) <= EPSILON; }
