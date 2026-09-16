@@ -8,9 +8,27 @@ const EPSILON = 1e-10;
  * geometry authority.
  */
 export function triangulateSimpleRing(ring) {
-  const points = normalizeRing(ring);
+  return triangulateRing(ring, { allowBridgeDuplicates: false });
+}
+
+/**
+ * Ear clipping for a weakly-simple bridged ring. Duplicate coordinates are
+ * permitted only when they are bridge endpoints introduced by the multi-ring
+ * stage; ordinary self-intersecting rings remain rejected.
+ */
+export function triangulateWeaklySimpleRing(ring) {
+  return triangulateRing(ring, { allowBridgeDuplicates: true });
+}
+
+export function triangulatePolygonRings(outerRing, holes = []) {
+  if (holes.length) throw new Error("Polygon holes require the multi-ring triangulation stage; simple-ring triangulation refuses them");
+  return triangulateSimpleRing(outerRing);
+}
+
+function triangulateRing(ring, { allowBridgeDuplicates }) {
+  const points = normalizeRing(ring, allowBridgeDuplicates);
   if (points.length < 3) return [];
-  if (hasSelfIntersection(points)) throw new Error("Cannot triangulate self-intersecting ring");
+  if (!allowBridgeDuplicates && hasSelfIntersection(points)) throw new Error("Cannot triangulate self-intersecting ring");
 
   const area = signedArea(points);
   if (Math.abs(area) <= EPSILON) return [];
@@ -32,7 +50,7 @@ export function triangulateSimpleRing(ring) {
       const c = points[next];
 
       if (cross(a, b, c) <= EPSILON) continue;
-      if (indices.some((candidate) => candidate !== previous && candidate !== current && candidate !== next && pointInTriangle(points[candidate], a, b, c))) continue;
+      if (indices.some((candidate) => candidate !== previous && candidate !== current && candidate !== next && !samePoint(points[candidate], a) && !samePoint(points[candidate], b) && !samePoint(points[candidate], c) && pointInTriangle(points[candidate], a, b, c))) continue;
 
       triangles.push(previous, current, next);
       indices.splice(cursor, 1);
@@ -46,12 +64,7 @@ export function triangulateSimpleRing(ring) {
   return triangles;
 }
 
-export function triangulatePolygonRings(outerRing, holes = []) {
-  if (holes.length) throw new Error("Polygon holes require the multi-ring triangulation stage; simple-ring triangulation refuses them");
-  return triangulateSimpleRing(outerRing);
-}
-
-function normalizeRing(ring) {
+function normalizeRing(ring, allowBridgeDuplicates) {
   const points = [];
   for (const point of ring ?? []) {
     if (!Array.isArray(point) || point.length < 2) continue;
@@ -62,7 +75,7 @@ function normalizeRing(ring) {
     points.push(p);
   }
   if (points.length > 1 && samePoint(points[0], points[points.length - 1])) points.pop();
-  return points;
+  return allowBridgeDuplicates ? points : points;
 }
 
 function signedArea(points) {
