@@ -1,4 +1,4 @@
-import { triangulateSimpleRing } from "./DeterministicPolygonTriangulator.js";
+import { triangulateSimpleRing, triangulateWeaklySimpleRing } from "./DeterministicPolygonTriangulator.js";
 import { validateHoleBridge } from "./HoleBridgeValidator.js";
 
 const EPSILON = 1e-9;
@@ -16,7 +16,7 @@ function triangulateComponents(components) {
   for (const component of components) {
     const ring = component.holes.length ? bridgeHoles(component.ring, component.holes) : component.ring;
     const base = vertices.length; vertices.push(...ring);
-    const local = triangulateSimpleRing(ring);
+    const local = component.holes.length ? triangulateWeaklySimpleRing(ring) : triangulateSimpleRing(ring);
     if (!local.length) throw new Error("Multi-ring triangulation failed");
     indices.push(...local.map((index) => index + base)); rings.push(ring);
   }
@@ -26,7 +26,8 @@ function triangulateComponents(components) {
 function bridgeHoles(outer, holes) {
   let result = cloneRing(outer);
   const orderedHoles = holes.map(cloneRing).sort(compareRings);
-  for (const hole of orderedHoles) {
+  for (const rawHole of orderedHoles) {
+    const hole = signedArea(rawHole) * signedArea(result) > 0 ? [...rawHole].reverse() : rawHole;
     const holeIndex = leftmostIndex(hole); const holePoint = hole[holeIndex];
     const candidates = enumerateBridgeCandidates(result, holePoint);
     let accepted = null;
@@ -34,7 +35,7 @@ function bridgeHoles(outer, holes) {
       const validation = validateHoleBridge({ outerRing: result, holeRing: hole, outerIndex: candidate.index, holeIndex });
       if (!validation.valid) continue;
       const candidateRing = spliceHoleBridge(result, hole, holeIndex, candidate.index);
-      try { if (triangulateSimpleRing(candidateRing).length) { accepted = candidateRing; break; } } catch { /* try next deterministic candidate */ }
+      try { if (triangulateWeaklySimpleRing(candidateRing).length) { accepted = candidateRing; break; } } catch { /* try next deterministic candidate */ }
     }
     if (!accepted) throw new Error("Unable to find deterministic valid bridge for hole");
     result = accepted;
@@ -60,4 +61,5 @@ function leftmostIndex(ring) { return ring.reduce((best, point, index) => point[
 function rotateRing(ring, index) { return ring.slice(index).concat(ring.slice(0, index)); }
 function cloneRing(ring) { return (ring ?? []).map(([x, y]) => [Number(x), Number(y)]).filter(([x, y]) => Number.isFinite(x) && Number.isFinite(y)).filter((point, index, all) => index === 0 || !samePoint(point, all[index - 1])).filter((point, index, all) => index !== all.length - 1 || !samePoint(point, all[0])); }
 function removeAdjacentDuplicates(ring) { return ring.filter((point, index) => index === 0 || !samePoint(point, ring[index - 1])); }
+function signedArea(points) { let area = 0; for (let i = 0; i < points.length; i += 1) { const a = points[i]; const b = points[(i + 1) % points.length]; area += a[0] * b[1] - b[0] * a[1]; } return area * 0.5; }
 function samePoint(a, b) { return Math.abs(a[0] - b[0]) <= EPSILON && Math.abs(a[1] - b[1]) <= EPSILON; }
