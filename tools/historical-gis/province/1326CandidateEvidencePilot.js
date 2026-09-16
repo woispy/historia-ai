@@ -19,6 +19,10 @@ function buildNodeIndex(adjacencyGraph) {
   return new Map((adjacencyGraph.nodes ?? []).map((node) => [node.id, node]));
 }
 
+function buildAssociationIndex(edgeAssociations = []) {
+  return new Map(edgeAssociations.map((association) => [association.edgeId, association]));
+}
+
 function nodeCoordinates(node) {
   const position = node?.position ?? node;
   if (!Number.isFinite(Number(position?.lon)) || !Number.isFinite(Number(position?.lat))) return null;
@@ -64,9 +68,10 @@ export function build1326CandidateEvidencePilot({
   const t3Association = associateT3ReferencePointsWithP61(t3Result, adjacencyGraph, { radiusKm });
   const terrainAssociation = associateT3ReferencePointsWithTerrain(t3Result, resolvedReferenceTerrainProvider);
   const edgeScores = scoreAdjacencyEdges(adjacencyGraph.edges, resolvedEdgeTerrainProvider);
+  const associationByEdgeId = buildAssociationIndex(t3Association.edgeAssociations);
 
   const edgeEvidence = edgeScores.map((score) => {
-    const association = t3Association.edgeAssociations.find((item) => item.edgeId === score.edgeId) ?? null;
+    const association = associationByEdgeId.get(score.edgeId) ?? null;
     return Object.freeze({
       ...score,
       t3ReferencePointCount: association?.referencePointCount ?? 0,
