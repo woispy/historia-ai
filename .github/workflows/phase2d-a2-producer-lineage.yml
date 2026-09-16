@@ -48,6 +48,15 @@ jobs:
           cat forensic-output/a2-producer-lineage-v3.json
           if [ -s forensic-output/a2-producer-lineage-v3.stderr ]; then cat forensic-output/a2-producer-lineage-v3.stderr; fi
           exit $status
+      - name: Run A2 stage trace across checkpoints
+        id: stage_trace
+        continue-on-error: true
+        run: |
+          node tools/tests/phase2d-a2-stage-trace.mjs > forensic-output/a2-stage-trace.json 2> forensic-output/a2-stage-trace.stderr
+          status=$?
+          cat forensic-output/a2-stage-trace.json
+          if [ -s forensic-output/a2-stage-trace.stderr ]; then cat forensic-output/a2-stage-trace.stderr; fi
+          exit $status
       - name: Run A2 counterfactual checkpoints
         id: counterfactual
         continue-on-error: true
@@ -74,6 +83,8 @@ jobs:
           path: |
             forensic-output/a2-producer-lineage-v3.json
             forensic-output/a2-producer-lineage-v3.stderr
+            forensic-output/a2-stage-trace.json
+            forensic-output/a2-stage-trace.stderr
             forensic-output/a2-counterfactual.json
             forensic-output/a2-counterfactual.stderr
             forensic-output/a2-authority-isolation.json
