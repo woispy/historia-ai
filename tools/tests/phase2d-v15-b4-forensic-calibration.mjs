@@ -20,7 +20,6 @@ const FAILURE_EDGES = [
 
 const SAMPLE_COUNT = 64;
 const TOLERANCE = 2e-7;
-const AUTHORITY_TOLERANCE = 2e-6;
 
 function area(polygon) {
   let sum = 0;
@@ -65,7 +64,7 @@ function loadInstrumented(sourcePath, mode) {
   } else {
     instrumented = instrumented.replace(
       "export { isPhysicalLandPoint };",
-      "export { isPhysicalLandPoint, isPhysicalGeometryBoundaryPoint, isLakeInteriorPoint, powerCell };",
+      "export { isPhysicalLandPoint, powerCell };",
     );
   }
 
@@ -86,8 +85,10 @@ async function importInstrumented(sourcePath, mode) {
 
 const canonicalPath = path.join(CANONICAL_ROOT, "tools/historical-gis/AnatoliaPhase2DGeometryBuilder.js");
 const v15Path = path.resolve("tools/historical-gis/AnatoliaPhase2DGeometryBuilderV15.js");
+const authorityPath = path.resolve("tools/historical-gis/recovery/physical-land-authority.mjs");
 const canonical = await importInstrumented(canonicalPath, "canonical");
 const v15 = await importInstrumented(v15Path, "v15");
+const authority = await import(`file://${authorityPath}?b4-authority=${process.pid}`);
 
 canonical.buildAnatoliaPhase2DAssets();
 const canonicalSites = canonical.__B4.sites;
@@ -128,9 +129,9 @@ const authorityEndpoints = [...uniqueEndpoints.values()].map((point) => ({
   point,
   canonical: { land: canonical.isPhysicalLandPoint(point), classification: classify(point, canonical) },
   v15: {
-    land: v15.isPhysicalLandPoint(point),
-    boundary: v15.isPhysicalGeometryBoundaryPoint(point),
-    classification: classify(point, v15),
+    land: authority.isPhysicalLandPoint(point),
+    boundary: authority.isPhysicalGeometryBoundaryPoint(point),
+    classification: classify(point, authority),
   },
 }));
 
@@ -144,8 +145,8 @@ const b4B = {
 const edgeAuthority = FAILURE_EDGES.map((edge) => {
   const samples = Array.from({ length: SAMPLE_COUNT + 1 }, (_, index) => interpolate(edge.start, edge.end, index / SAMPLE_COUNT));
   const canonicalInvalid = samples.findIndex((point) => !canonical.isPhysicalLandPoint(point));
-  const v15LandInvalid = samples.findIndex((point) => !v15.isPhysicalLandPoint(point));
-  const v15BoundaryInvalid = samples.findIndex((point) => !v15.isPhysicalGeometryBoundaryPoint(point));
+  const v15LandInvalid = samples.findIndex((point) => !authority.isPhysicalLandPoint(point));
+  const v15BoundaryInvalid = samples.findIndex((point) => !authority.isPhysicalGeometryBoundaryPoint(point));
   return {
     ...edge,
     canonicalFirstInvalidSample: canonicalInvalid < 0 ? null : canonicalInvalid,
@@ -155,7 +156,7 @@ const edgeAuthority = FAILURE_EDGES.map((edge) => {
 });
 
 const b4Complete = b4A.every((item) => item.equivalent);
-const authorityCharacterized = b4B.divergences.length >= 0 && edgeAuthority.length === FAILURE_EDGES.length;
+const authorityCharacterized = edgeAuthority.length === FAILURE_EDGES.length;
 
 console.log(JSON.stringify({
   phase: "B4 — calibrated forensic comparison: identical canonical seed universe into V15 powerCell + endpoint physical-authority comparison",
@@ -172,7 +173,7 @@ console.log(JSON.stringify({
     verdict: b4Complete ? "EQUIVALENT" : "DIVERGENT",
   },
   b4B: {
-    purpose: "same failure-edge endpoints evaluated by canonical physical authority and V15 physical authority",
+    purpose: "same failure-edge endpoints evaluated by canonical physical authority and V15 shared physical authority",
     ...b4B,
     verdict: authorityCharacterized ? "CHARACTERIZED" : "INCOMPLETE",
   },
