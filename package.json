@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "npm run build:assets && node tools/historical-gis/cli/import-1300.js && npm run build:mapbin && vite",
     "build": "npm run build:assets && node tools/historical-gis/cli/import-1300.js && npm run build:mapbin && vite build",
+    "build:legacy:1300": "npm run build:assets && node tools/historical-gis/cli/import-1300.js && npm run build:mapbin",
+    "build:historical-gis": "node tools/historical-gis/cli/import-historical.js",
+    "test:historical-gis-importer": "node tools/historical-gis/cli/test-import-historical.js",
     "build:assets": "node tools/asset-builder/cli/fetch-natural-earth-50m.js && node tools/asset-builder/cli/fetch-natural-earth-hydrography-10m.js && node tools/asset-builder/cli/build-assets.js && node tools/asset-builder/cli/build-anatolia-hydrography-10m.js",
     "build:assets:debug": "node tools/asset-builder/cli/fetch-natural-earth-50m.js && node tools/asset-builder/cli/fetch-natural-earth-hydrography-10m.js && node --trace-uncaught tools/asset-builder/cli/build-assets.js && node tools/asset-builder/cli/build-anatolia-hydrography-10m.js",
     "build:historical-gis:1300": "node tools/historical-gis/cli/import-1300.js",
