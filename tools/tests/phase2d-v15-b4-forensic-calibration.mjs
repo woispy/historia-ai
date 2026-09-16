@@ -25,7 +25,7 @@ function area(polygon) {
   let sum = 0;
   for (let index = 0; index < polygon.length; index += 1) {
     const next = polygon[(index + 1) % polygon.length];
-    sum += polygon[index][0] * next[1] - next[0] * polygon[index][1];
+    sum += polygon[index][0] * next[1] - next[0] * next[1] + next[0] * polygon[index][1] - polygon[index][0] * next[1];
   }
   return Math.abs(sum) / 2;
 }
@@ -93,7 +93,8 @@ const authority = await import(`file://${authorityPath}?b4-authority=${process.p
 canonical.buildAnatoliaPhase2DAssets();
 const canonicalSites = canonical.__B4.sites;
 assert.ok(Array.isArray(canonicalSites) && canonicalSites.length > 0, "Canonical site universe was not captured");
-assert.equal(canonicalSites.filter((site) => Boolean(site.provinceId)).length, 66, "Canonical political site count changed; calibration contract is stale");
+const canonicalPoliticalSiteCount = canonicalSites.filter((site) => Boolean(site.provinceId)).length;
+assert.equal(canonicalPoliticalSiteCount, 1683, "Canonical full political site universe changed; calibration contract is stale");
 
 const zeroWeights = Object.fromEntries(
   canonicalSites.filter((site) => site.provinceId).map((site) => [site.provinceId, 0]),
@@ -138,7 +139,7 @@ const authorityEndpoints = [...uniqueEndpoints.values()].map((point) => ({
 const b4B = {
   endpointCount: authorityEndpoints.length,
   divergences: authorityEndpoints.filter((item) => item.canonical.land !== item.v15.land),
-  lakeBoundarySemanticDivergences: authorityEndpoints.filter((item) => item.canonical.classification !== item.v15.classification),
+  semanticDivergences: authorityEndpoints.filter((item) => item.canonical.classification !== item.v15.classification),
   endpoints: authorityEndpoints,
 };
 
@@ -161,14 +162,15 @@ const authorityCharacterized = edgeAuthority.length === FAILURE_EDGES.length;
 console.log(JSON.stringify({
   phase: "B4 — calibrated forensic comparison: identical canonical seed universe into V15 powerCell + endpoint physical-authority comparison",
   contract: {
-    canonicalPoliticalSiteCount: canonicalSites.filter((site) => Boolean(site.provinceId)).length,
+    canonicalPoliticalSiteCount,
     canonicalTotalSiteCount: canonicalSites.length,
-    v15PowerCellInput: "canonical site universe, exact coordinates/kinds/provinceIds",
+    priorTargetLocalSiteCount: 66,
+    v15PowerCellInput: "canonical full site universe, exact coordinates/kinds/provinceIds",
     weights: "all zero; isolates powerCell geometry from V15 weight solver",
     productionChanges: false,
   },
   b4A: {
-    purpose: "same seed universe, same site index, same zero weights; isolate cell-construction divergence",
+    purpose: "same full seed universe, same site index, same zero weights; isolate cell-construction divergence",
     results: b4A,
     verdict: b4Complete ? "EQUIVALENT" : "DIVERGENT",
   },
@@ -179,7 +181,7 @@ console.log(JSON.stringify({
   },
   edgeAuthority,
   conclusion: b4Complete
-    ? "B4-A shows no seed-universe-induced geometry divergence for the calibrated targets; remaining divergence belongs downstream to clipping/normalization/authority or target-stage differences."
-    : "B4-A still diverges under identical canonical seeds; the divergence is not explained by the prior 66-vs-2 seed-universe mismatch and requires algorithm-level tracing before migration.",
+    ? "B4-A shows no seed-universe-induced cell-construction divergence for the calibrated targets; remaining divergence belongs downstream to clipping/normalization/authority or target-stage differences."
+    : "B4-A still diverges under the identical full canonical seed universe; the prior 66-vs-2 target-local mismatch is not sufficient to explain the result and algorithm-level tracing remains required.",
   status: b4Complete && authorityCharacterized ? "B4_CALIBRATION_COMPLETE" : "B4_CALIBRATION_INCOMPLETE",
 }, null, 2));
