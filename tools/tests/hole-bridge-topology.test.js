@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { triangulateMultiRingPolygon } from "../historical-gis/HoleAwareTriangulator.js";
 
 const cases = [
-  { name: "concave outer", outer: [[0,0],[12,0],[12,10],[7,10],[6,6],[5,10],[0,10]], holes: [[[2,2],[4,2],[4,4],[2,4]]], area: 116 },
+  { name: "concave outer", outer: [[0,0],[12,0],[12,10],[7,10],[6,6],[5,10],[0,10]], holes: [[[2,2],[4,2],[4,4],[2,4]]], area: 112 },
   { name: "two holes", outer: [[0,0],[14,0],[14,12],[0,12]], holes: [[[2,2],[4,2],[4,4],[2,4]],[[8,6],[11,6],[11,9],[8,9]]], area: 131 },
 ];
 
