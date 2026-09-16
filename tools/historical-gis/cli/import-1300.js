@@ -19,7 +19,7 @@ if (inputArgument === "--download") {
   console.log(`Downloaded ${result.featureCount} historical GIS features from ${result.url}`);
 }
 
-const regions = await importHistoricalGeoJson(inputPath, 1300);
+const regions = await importHistoricalGeoJson(inputPath, 1300, { compressAntarctica: true });
 if (!regions.length) throw new Error("The 1300 historical GIS source contains no usable polygons.");
 
 await fs.rm(runtimeDir, { recursive: true, force: true });
