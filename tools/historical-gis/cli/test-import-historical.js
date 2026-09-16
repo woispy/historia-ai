@@ -27,14 +27,25 @@ try {
             coordinates: [[[28, 40], [29, 40], [29, 41], [28, 40]]],
           },
         },
+        {
+          type: "Feature",
+          id: "antarctica-test",
+          properties: { NAME: "Antarctica" },
+          geometry: {
+            type: "Polygon",
+            coordinates: [[[-60, -90], [-50, -90], [-50, -60], [-60, -90]]],
+          },
+        },
       ],
     })}\n`,
     "utf8",
   );
 
   const regions = await importHistoricalGeoJson(inputPath, 1326);
-  assert.equal(regions.length, 1);
+  assert.equal(regions.length, 2);
   assert.equal(regions[0].assetId, "province_1326_bursa_test_0");
+  assert.deepEqual(regions[1].polygons[0][1], [-50, -90]);
+  assert.deepEqual(regions[1].polygons[0][2], [-50, -60]);
 
   const region = {
     ...regions[0],
@@ -53,7 +64,11 @@ try {
   assert.equal(geometry.header.historicalDate, "1326-04-07");
   assert.equal(geometry.header.dataset, "test-source.geojson");
 
-  console.log("Generic historical GIS importer year propagation test passed.");
+  const legacyRegions = await importHistoricalGeoJson(inputPath, 1300, { compressAntarctica: true });
+  assert.deepEqual(legacyRegions[1].polygons[0][1], [-50, -90]);
+  assert.deepEqual(legacyRegions[1].polygons[0][2], [-50, -84.6]);
+
+  console.log("Generic historical GIS importer year propagation and non-destructive geometry test passed.");
 } finally {
   await fs.rm(temporaryDirectory, { recursive: true, force: true });
 }
