@@ -32,6 +32,10 @@ assert.deepEqual(provider.getCacheStats(), {
   entries: 1,
   sampleCount: 1,
   cacheHits: 1,
+  cacheMisses: 1,
+  elevationRequestCount: 9,
+  validSampleCount: 1,
+  invalidSampleCount: 0,
 });
 assert.ok(first.coverage >= 0 && first.coverage <= 1);
 assert.ok(first.slopeNormalized >= 0 && first.slopeNormalized <= 1);
@@ -47,6 +51,10 @@ assert.deepEqual(uncached.getCacheStats(), {
   entries: 0,
   sampleCount: 2,
   cacheHits: 0,
+  cacheMisses: 2,
+  elevationRequestCount: 18,
+  validSampleCount: 2,
+  invalidSampleCount: 0,
 });
 
 const invalid = createDEMSamplerEvidenceProvider({ elevation: () => null }).sample({ lon: 30, lat: 40 });
@@ -57,5 +65,6 @@ assert.equal(invalid.reliefMeters, null);
 assert.equal(DEM_SAMPLER_EVIDENCE_BRIDGE_CONTRACT.authoritative, false);
 assert.equal(DEM_SAMPLER_EVIDENCE_BRIDGE_CONTRACT.politicalAuthority, false);
 assert.equal(DEM_SAMPLER_EVIDENCE_BRIDGE_CONTRACT.caching, "coordinate-keyed evidence cache by default");
+assert.equal(DEM_SAMPLER_EVIDENCE_BRIDGE_CONTRACT.telemetry, "cache and elevation request counters");
 
-console.log("DEM sampler evidence bridge cache contract passed.");
+console.log("DEM sampler evidence bridge telemetry contract passed.");
