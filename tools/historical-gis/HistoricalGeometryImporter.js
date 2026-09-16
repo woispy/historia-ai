@@ -109,13 +109,7 @@ function extractPolygons(geometry) {
   return [];
 }
 
-function compressAntarctica(polygons, sourceName) {
-  if (!/antarctica/i.test(String(sourceName ?? ""))) return polygons;
-
-  // Keep Antarctica as a small visual footer rather than allowing the raw
-  // geographic extent (-90 to roughly -60) to dominate the playable map.
-  // The source's southern edge remains anchored at -90 while the full
-  // continent is compressed to roughly 5.4 degrees of latitude.
+function compressAntarctica(polygons) {
   const pivotLatitude = -90;
   const verticalScale = 0.18;
 
@@ -127,16 +121,22 @@ function compressAntarctica(polygons, sourceName) {
   );
 }
 
-export function normalizeHistoricalFeature(feature, index, year = 1300) {
+export function normalizeHistoricalFeature(
+  feature,
+  index,
+  year = 1300,
+  options = {},
+) {
   const properties = feature?.properties ?? {};
   const sourceName =
     properties.NAME ??
     properties.name ??
     `Historical Region ${index + 1}`;
-  const polygons = compressAntarctica(
-    extractPolygons(feature?.geometry),
-    sourceName,
-  );
+  let polygons = extractPolygons(feature?.geometry);
+  if (options.compressAntarctica && /antarctica/i.test(String(sourceName))) {
+    polygons = compressAntarctica(polygons);
+  }
+
   const sourceFeatureId = String(
     feature?.id ??
     properties.ID ??
@@ -166,34 +166,26 @@ export function normalizeHistoricalFeature(feature, index, year = 1300) {
   };
 }
 
-export async function importHistoricalGeoJson(inputPath, year = 1300) {
+export async function importHistoricalGeoJson(inputPath, year = 1300, options = {}) {
   const raw = await fs.readFile(inputPath, "utf8");
   const geojson = JSON.parse(raw);
   assertGeoJson(geojson);
 
   return geojson.features
-    .map((feature, index) => normalizeHistoricalFeature(feature, index, year))
+    .map((feature, index) => normalizeHistoricalFeature(feature, index, year, options))
     .filter(Boolean);
 }
 
 export async function downloadHistorical1300GeoJson(outputPath) {
   const response = await fetch(HISTORICAL_1300_URL);
-
   if (!response.ok) {
-    throw new Error(
-      `Unable to download historical 1300 GIS source: ${response.status} ${response.statusText}`,
-    );
+    throw new Error(`Historical GIS download failed: ${response.status}`);
   }
 
   const text = await response.text();
+  await fs.writeFile(outputPath, text, "utf8");
+
   const geojson = JSON.parse(text);
   assertGeoJson(geojson);
-  await fs.writeFile(outputPath, `${JSON.stringify(geojson)}\n`, "utf8");
-
-  return {
-    url: HISTORICAL_1300_URL,
-    featureCount: geojson.features.length,
-  };
+  return { url: HISTORICAL_1300_URL, featureCount: geojson.features.length };
 }
-
-export { HISTORICAL_1300_URL };
