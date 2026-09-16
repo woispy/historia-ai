@@ -31,6 +31,7 @@ export function validateIndexedMeshTopology({ vertices, indices, expectedArea, e
 
 function classifyTriangleContact(a, b) {
   const sharedIds = a.ids.filter((id) => b.ids.includes(id));
+  if (sharedIds.length === 3) return "duplicate-triangle";
   if (sharedIds.length === 2) return "shared-edge";
 
   const ea = [[a.a,a.b],[a.b,a.c],[a.c,a.a]], eb = [[b.a,b.b],[b.b,b.c],[b.c,b.a]];
