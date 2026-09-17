@@ -50,7 +50,7 @@ export default defineConfig([
       // unused compatibility helpers are deliberately outside the production
       // authority path and must not block the current canonical pipeline.
       "no-unused-vars": ["error", {
-        varsIgnorePattern: "^(closestPointOnSegment|sequence|addProvinceMicroSites|buildVoronoiCell|buildLandSafeCell)$",
+        varsIgnorePattern: "^(closestPointOnSegment|sequence|addProvinceMicroSites|buildVoronoiCell|buildLandSafeCell|isPoliticalCartographicPoint|deterministicJitter)$",
         argsIgnorePattern: "^_",
       }],
     },
