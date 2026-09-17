@@ -37,7 +37,15 @@ function extractRuntime() {
     || entry?.identity?.id === TARGET
     || entry?.identity?.id === geometryId
   ));
-  if (!geometry) return { runtimePolygonCount: 0, polygons: [], geometryId, geometryFound: false };
+  if (!geometry) {
+    return {
+      provinceFound: Boolean(province),
+      geometryFound: false,
+      geometryId,
+      runtimePolygonCount: 0,
+      polygons: [],
+    };
+  }
 
   const polygons = (geometry.polygons ?? []).map((polygon, polygonIndex) => ({
     polygonIndex,
@@ -47,10 +55,13 @@ function extractRuntime() {
     tiny: Math.abs(signedArea(polygon)) <= 1e-10,
   }));
   return {
+    provinceFound: Boolean(province),
+    geometryFound: true,
+    geometryId: geometry.identity?.id ?? geometryId,
+    provinceGeometryReference: province?.references?.geometryId ?? null,
+    geometryProvinceId: geometry.identity?.provinceId ?? null,
     runtimePolygonCount: polygons.length,
     polygons,
-    geometryId,
-    geometryFound: true,
   };
 }
 
@@ -86,6 +97,7 @@ try {
 
     const phase2dMatch = buildOutput.match(/Phase 2D generated (\d+) Anatolia provinces from (\d+) cartographic sites\./);
     const fallbackMatches = [...buildOutput.matchAll(/\[Phase2D\]\[[^\]]+\]\[fallback-resolved\]/g)].length;
+    const allAreas = runtime?.polygons?.map((polygon) => polygon.absArea) ?? [];
     results.push({
       checkpoint,
       commit,
@@ -94,7 +106,9 @@ try {
       phase2d: phase2dMatch ? { provinces: Number(phase2dMatch[1]), sites: Number(phase2dMatch[2]) } : null,
       fallbackResolvedCount: fallbackMatches,
       runtime,
-      tinyTargetDistance: runtime?.polygons?.map((polygon) => Math.abs(polygon.absArea - TARGET_TINY)) ?? [],
+      nearestTargetDistance: allAreas.length ? Math.min(...allAreas.map((area) => Math.abs(area - TARGET_TINY))) : null,
+      tinyTargetHit: allAreas.some((area) => Math.abs(area - TARGET_TINY) <= 1e-15),
+      buildOutputTail: buildOutput.slice(-2000),
     });
   }
 } finally {
@@ -104,7 +118,8 @@ try {
 const report = {
   target: TARGET,
   targetTinyArea: TARGET_TINY,
-  generatedAt: new Date().toISOString(),
+  areaToleranceForExactHit: 1e-15,
+  geometryLookup: "runtime.geometries[].identity.provinceId / identity.id / province.references.geometryId",
   checkpoints: results,
 };
 
