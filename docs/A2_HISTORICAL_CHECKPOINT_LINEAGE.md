@@ -23,14 +23,9 @@ Its workflow explicitly reconstructs a canonical worktree at:
 6b7424125eee4a1c72925b7a1780c68e695e9ba3
 ```
 
-and runs four forensic probes:
+The forensic branch has since advanced to `2343d98ef23b20b01780e202575ea7ca725be8de`, which adds a controlled historical-V15 normalization probe for the canonical Amisos raw polygon.
 
-1. `phase2d-a2-producer-lineage-v3.mjs`
-2. `phase2d-a2-stage-trace.mjs`
-3. `phase2d-a2-counterfactual-land-halfplane.mjs`
-4. `phase2d-a2-authority-isolation.mjs`
-
-The workflow uploads their outputs as one forensic artifact. The current branch HEAD is `e4c184f46f35f03f6d38f606628938b74d788fbc`, whose latest commit is `test: make A2 checkpoint execution identity explicit`. This commit adds explicit execution identity (`branch`, `HEAD`, target area `2.27e-13`, tiny epsilon `1e-10`, Node and Git versions) to the retained forensic artifact. No retained CI execution artifact for this exact HEAD has yet been verified, so the harness remains **available test machinery, not exact-HEAD execution evidence**.
+The workflow runs producer, stage, counterfactual, authority-isolation and V15 transformation probes. All outputs are retained as forensic artifacts; none is production authority.
 
 ## Historical checkpoint set
 
@@ -65,92 +60,154 @@ BDF checkpoint
         Amisos output
 ```
 
-Again, this is a **probe definition**, not a result. No conclusion about the tiny-area producer is authorized until the probe is actually executed and its artifact is retained.
+The latest exact-head execution retained the probe output, but the authority-isolation path still encounters the unrelated `caria-halikarnassos` geometry failure before a complete common Amisos lineage can be established.
 
 ## Producer-lineage probe scope
 
-The producer-lineage V3 harness reconstructs the canonical `6b7424...` worktree and instruments the `powerCell` return path for `pontus-amisos`. It then records the final exported Amisos polygon area, vertex count, site counts and geometry version.
+The producer-lineage V3 harness reconstructs the canonical `6b7424...` worktree and instruments the `powerCell` return path for `pontus-amisos`. It records the final exported Amisos polygon area, vertex count, site counts and geometry version.
 
-This is useful because it isolates the canonical producer representation before later runtime stages. It does not by itself reproduce the historical tiny value unless the historical artifact shares the same input and transformation lineage.
+The exact-head retained execution at branch HEAD `2343d98...` records canonical producer output:
 
-## New execution archaeology finding
+```text
+commit        = 6b7424125eee4a1c72925b7a1780c68e695e9ba3
+vertexCount  = 5
+area         = 0.0067547530500178254
+siteCount    = 5633
+politicalSites = 1683
+geometryVersion = 2
+```
 
-The first retained-history gap can now be explained precisely. The original telemetry workflow execution `34352910724` did not fail inside the geometry producer. Its job successfully completed dependency installation and the GIS asset-generation step, then failed when the telemetry script attempted to open:
+No `2.27e-13` value is present in the producer result or producer trace.
+
+## Execution archaeology
+
+The original telemetry workflow execution `34352910724` did not demonstrate an anomalous producer result. It completed dependency installation and GIS asset generation, then failed because the telemetry script attempted to open:
 
 ```text
 tools/historical-gis/AnatoliaPhase2DGeometryBuilderV15.js
 ```
 
-from the checked-out candidate workspace. The file did not exist at that workflow head, producing an `ENOENT` filesystem error. The subsequent artifact upload also failed because the expected telemetry JSON had not been produced.
+from a workspace where that file did not exist. This produced `ENOENT`; the expected telemetry JSON was therefore not created.
 
-Therefore the first unpinned execution is a **missing-source execution gap**, not evidence that the unpinned producer generated `~2.27e-13`.
+The later retained execution explicitly fetched the pinned V15 source tree at `3575c1bccf94a322fed175958ce786531b142497`. That execution produced:
 
-By contrast, the later retained execution explicitly fetched the pinned V15 source tree at `3575c1bccf94a322fed175958ce786531b142497`, verified the source path, ran the telemetry successfully, and retained an artifact. That artifact recorded `rawArea = normalizedArea = 0.5023951571206453` and `collapseObserved = false`.
+```text
+rawArea        = 0.5023951571206453
+normalizedArea = 0.5023951571206453
+collapseObserved = false
+```
 
-This distinction is important: the historical provenance gap is now characterized as **execution/input availability failure**, while the actual retained V15 execution remains a clean no-collapse observation.
+Thus the original unpinned run is a **missing-source execution gap**, not evidence of the tiny-area producer.
 
 ## Retained Run #26 V4 execution evidence
 
-A separate retained forensic execution now provides actual execution evidence for the V4 stage replay harness, even though it is **not** the exact `e4c184f...` execution-identity artifact required by Issue #104.
+Workflow run `35234798862` retained the V4 stage replay artifact from HEAD `8cb5151b74b5174d78570b2aea1acf455b15a686`.
+
+The replay recorded zero tiny hits at all six checkpoints. At canonical `6b742412...`, the minimum observed stage area was `0.0034620092040995587`; the accepted Amisos raw-cell value remained `0.006755373858482017`.
+
+The runtime-to-GPU report recorded Amisos runtime/GPU area `0.15216490540012728`, with GPU raw and normalized values identical and no tiny-area hit.
+
+## Exact-head forensic execution
+
+A retained GitHub Actions execution now exists for the instrumented forensic branch HEAD `2343d98ef23b20b01780e202575ea7ca725be8de`.
 
 Workflow run:
 
 ```text
-Run #26 / 35234798862
-HEAD: 8cb5151b74b5174d78570b2aea1acf455b15a686
-Artifact: a2-amisos-forensic-reports
-Artifact ID: 10502413884
-Digest: sha256:14e26312c24a7a19b99c09aa0c0077ad88f4ba10152ec5e5a46eda72899a05e2
+35267020164
 ```
 
-The retained artifact contains:
+The execution identity and forensic artifacts were retained successfully. The producer lineage, stage/edge traces, V15 probes, B-series probes and other forensic steps completed at this exact branch HEAD.
 
-- `a2-amisos-checkpoint-replay.json`
-- `a2-amisos-forensic-report.json`
-- `a2-amisos-stage-replay-v4.json`
+This satisfies the **execution-identity portion** of Issue #104, but does not close the issue because the complete V0/V1/V2 and authority-isolation evidence still does not establish a common lineage to `~2.27e-13`.
 
-The workflow job completed successfully, including physical asset generation, historical GIS generation, runtime-to-GPU tracing, historical checkpoint replay, V4 stage replay, and forensic report upload.
+## New historical-V15 normalization experiment
 
-The V4 artifact records **zero tiny hits and zero target-exact hits** at all six replay checkpoints:
+The latest forensic branch adds a controlled experiment: take the canonical Amisos raw polygon and pass that exact geometry through the historical V15 `normalizePhysicalBoundary` path.
 
-| Checkpoint | Status | Observed stage count | Minimum observed absolute area | Tiny hits |
-|---|---:|---:|---:|---:|
-| `837ec8dd...` | build-failed | 3127 | `0.00141952972467152` | 0 |
-| `bdf166a4...` | success | 779 | `0.5015050788261988` | 0 |
-| `3021b2d1...` | success | 779 | `0.5015050788261988` | 0 |
-| `7d895c99...` | success | 779 | `0.5015050788261988` | 0 |
-| `5be399d4...` | success | 779 | `0.5015050788261988` | 0 |
-| `6b742412...` | success | 61985 | `0.0034620092040995587` | 0 |
+The canonical raw representation has area approximately:
 
-At the canonical `6b742412...` checkpoint, the minimum observed value is a real `A_RAW_POWER_CELL` / Voronoi-clip stage value of `0.0034620092040995587`, not `2.27e-13`. The accepted Amisos raw-cell value previously retained in the stage trace remains `0.006755373858482017`.
+```text
+0.006755373858482017
+```
 
-The runtime-to-GPU forensic report in the same retained artifact records one Amisos runtime polygon with area `0.15216490540012728`; the GPU raw and normalized values are identical, and LOD0–3 remain far above the tiny threshold. No tiny-area hit is reported.
+The historical V15 normalization result is approximately:
 
-This Run #26 result therefore strengthens the existing conclusion that the **currently replayed producer → runtime → GPU path does not reproduce the historical tiny-area observation**. It does not establish the historical representation that first contained `~2.27e-13`, and it does not replace the exact-HEAD execution gate.
+```text
+0.006626536473277156
+```
+
+with an area ratio of approximately:
+
+```text
+0.9809281635770472
+```
+
+This means approximately 98.09% of the raw area survives the historical normalization path. The transformation therefore **does not reproduce `2.27e-13`** and is not the missing collapse mechanism.
+
+The V15 probe also operates on a different historical Amisos geometry in its own producer path, with the retained pinned-V15 result `0.5023951571206453`. Therefore the old model:
+
+```text
+canonical 0.006755
+    ↓
+V15 producer
+    ↓
+2.27e-13
+```
+
+is unsupported. The canonical and V15 producer geometries are different representations/lineages.
+
+## Historical representation transition finding
+
+The commit archaeology now identifies a second important representation family: the Phase 2D fallback sequence.
+
+Commit `0dd1dadb90103b5706fd87c470b8d4a6dc85f496` introduced `createAnchorFallbackPolygon()` and allowed a province with no generated polygon to receive a generated six-vertex fallback. The same commit added `fallbackProvinceCount` to the output diagnostics. fileciteturn418file0L3-L7
+
+Subsequent historical commits changed the fallback behavior. In particular:
+
+- `2edad3f...` reduced fallback radii from `[0.03, 0.015, 0.008]` to `[0.004, 0.002, 0.001]`. fileciteturn423file0L3-L11
+- `8fb70748...` changed acceptance from requiring every fallback vertex to be physical land to requiring only the centroid to be physical land. fileciteturn422file0L3-L11
+- `535d6a6...` explicitly treated tiny fallback polygons differently in the test invariant: polygons below `0.00005` were allowed to bypass the normal centroid-land assertion. fileciteturn421file0L3-L11
+
+These commits establish a historical **tiny-fallback representation family**, but they do **not** prove that any of these fallbacks produced the specific `2.27e-13` Amisos artifact. The evidence currently available shows only that tiny fallback geometry was deliberately introduced and subsequently modified.
+
+## Clipping representation transition
+
+Commit `3db105afb857be55e0ce7696f3d7e904185fc5f8` introduced the custom `clipCellToLand()` path before runtime export. It gathered cell points, land vertices and segment intersections, deduplicated points using six-decimal coordinate keys, sorted them around the centroid, and then applied `roundPolygon()` at five decimal places before export. fileciteturn416file0L3-L7
+
+This is a high-priority historical representation boundary because it changes the polygon from a raw Voronoi cell into a reconstructed clipped polygon and then applies coordinate rounding. It is **not yet proven** to produce `2.27e-13`.
+
+Later commit `16c17706c436954eacb76b8262480388b40d673b` retained the Voronoi partition while changing the rounded-geometry integrity check and fallback handling. fileciteturn417file0L3-L11
 
 ## Current interpretation
 
-The checkpoint machinery and retained Run #26 evidence narrow the historical search space, but they do **not** close A2.
-
-Current proven facts remain:
+The strongest current facts are:
 
 ```text
-canonical stage trace       → 0.006755373858482017 → no tiny hit
-Run #26 V4 replay           → min 0.001419... / 0.003462... → no tiny hit
-pinned V15 Run #24          → 0.5023951571206453   → no tiny hit
-first unpinned telemetry   → ENOENT before producer result
-historical ~2.27e-13       → producer/artifact still unidentified
+canonical producer             → 0.0067547530500178254 → no tiny
+canonical raw stage            → 0.006755373858482017 → no tiny
+V15 normalize(canonical raw)   → ~0.006626536473      → no tiny
+pinned V15 producer            → 0.5023951571206453   → no tiny
+Run #26 V4 replay              → no tiny at all checkpoints
+fallback history               → tiny fallback family exists
+clipCellToLand history         → custom reconstruction + rounding exists
+historical ~2.27e-13           → still unidentified
 ```
 
-The current checkpoint branch has been instrumented so that any future retained execution can be tied unambiguously to its exact branch/HEAD and target threshold. Until an artifact from the exact `e4c184f...` instrumentation head is verified, that harness remains **execution machinery without exact-HEAD evidence**.
+The working hypothesis is therefore now **historical geometry representation/provenance discontinuity**, with two priority branches:
+
+1. the `clipCellToLand → uniquePoints → centroid-sort → roundPolygon` representation transition;
+2. the later tiny-anchor fallback family and its serialization/rounding behavior.
+
+Neither branch is authorized as the root cause until the exact historical artifact or an exact numerical reproduction is obtained.
 
 ## A2 tracking gate
 
-The remaining execution gate is tracked in GitHub Issue **#104 — `A2 forensic checkpoint: exact execution artifact gate`**. The issue records the same acceptance criteria used here: retained execution identity plus V0/V1/V2 and authority-isolation outputs that establish a common lineage to the historical `~2.27e-13` observation. The issue is a tracking mechanism only; it does not authorize production mutation or merge.
+The remaining execution/provenance gate is tracked in GitHub Issue **#104 — `A2 forensic checkpoint: exact execution artifact gate`**. The issue body is now stale with respect to exact execution identity because the retained `35267020164` artifact exists; however, the substantive acceptance requirement remains open: retained V0/V1/V2 and authority-isolation evidence must establish a common lineage to the historical `~2.27e-13` observation.
+
+No production mutation or merge is authorized by the forensic work.
 
 ## Remaining question
-
-The remaining question is therefore not simply “which code version was buggy?” It is:
 
 ```text
 Which historical artifact first contained ~2.27e-13,
@@ -169,20 +226,24 @@ and what exact geometry representation did that artifact measure?
 
 ## Next forensic action
 
-Execute and retain the instrumented checkpoint/authority-isolation harness at exact branch HEAD `e4c184f46f35f03f6d38f606628938b74d788fbc`, including `execution-identity.txt`, and compare the Amisos producer areas and polygons across `5f48731e...`, `bdf166a4...`, and `3021b2d1...`.
+Reconstruct the historical geometry representation boundary around `3db105...` and the fallback family (`0dd1dadb...` through `535d6a6...`) using the exact Amisos anchor/site identity. Capture the **serialized polygon before and after each representation boundary**, compute its area independently, and search specifically for the first appearance of `~2.27e-13`.
 
-Acceptance is **not** merely “one checkpoint differs.” The required evidence is a common lineage that explains:
+Acceptance requires a complete chain:
 
 ```text
-historical input polygon
-        ↓
-checkpoint/source SHA
-        ↓
-producer stage
-        ↓
-intermediate representation
-        ↓
+historical input
+      ↓
+source/checkpoint SHA
+      ↓
+site/anchor identity
+      ↓
+raw polygon
+      ↓
+clip / fallback / rounding representation
+      ↓
+serialized artifact
+      ↓
 ~2.27e-13
 ```
 
-Only then can A2 move from `BLOCKED / provenance discontinuity` to a surgical root-cause decision.
+Only then can A2 move from **BLOCKED / provenance discontinuity** to a surgical root-cause decision.
