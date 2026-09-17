@@ -96,6 +96,8 @@ const originalHead = git(["rev-parse", "HEAD"]);
 try {
   for (const checkpoint of CHECKPOINTS) {
     const worktree = resolve(worktreeRoot, checkpoint.slice(0, 8));
+    let hydrographyBuildStatus = "skipped";
+    let hydrographyOutput = "";
     let buildStatus = "success";
     let buildOutput = "";
     let runtime = null;
@@ -106,10 +108,27 @@ try {
       const message = git(["log", "-1", "--pretty=%s"], worktree);
 
       try {
-        buildOutput = run("npm", ["run", "build:historical-gis:1300"], worktree);
+        hydrographyOutput = run(
+          "node",
+          ["tools/asset-builder/cli/build-anatolia-hydrography-10m.js"],
+          worktree,
+        );
+        hydrographyBuildStatus = "success";
       } catch (error) {
-        buildStatus = "failed";
-        buildOutput = `${error.stdout ?? ""}\n${error.stderr ?? ""}`;
+        hydrographyBuildStatus = "failed";
+        hydrographyOutput = `${error.stdout ?? ""}\n${error.stderr ?? ""}`;
+      }
+
+      if (hydrographyBuildStatus === "success") {
+        try {
+          buildOutput = run("npm", ["run", "build:historical-gis:1300"], worktree);
+        } catch (error) {
+          buildStatus = "failed";
+          buildOutput = `${error.stdout ?? ""}\n${error.stderr ?? ""}`;
+        }
+      } else {
+        buildStatus = "blocked-by-hydrography";
+        buildOutput = "Historical GIS replay skipped because the checkpoint hydrography dependency could not be rebuilt.";
       }
 
       if (buildStatus === "success") {
@@ -132,6 +151,8 @@ try {
         checkpoint,
         commit,
         message,
+        hydrographyBuildStatus,
+        hydrographyOutputTail: hydrographyOutput.slice(-2000),
         buildStatus,
         phase2d: phase2dMatch ? { provinces: Number(phase2dMatch[1]), sites: Number(phase2dMatch[2]) } : null,
         fallbackResolvedCount: fallbackMatches,
@@ -173,7 +194,7 @@ const report = {
   targetTinyArea: TARGET_TINY,
   tinyThreshold: TINY_THRESHOLD,
   areaToleranceForExactHit: 1e-15,
-  harness: "immutable-root-checkout + detached git worktree per historical checkpoint",
+  harness: "immutable-root-checkout + detached git worktree per historical checkpoint + deterministic hydrography rebuild",
   geometryLookup: "runtime.geometries[].identity.provinceId / identity.id / province.references.geometryId",
   checkpoints: results,
 };
