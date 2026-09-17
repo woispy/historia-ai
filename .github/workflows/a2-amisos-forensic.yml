@@ -1,0 +1,27 @@
+name: A2 Amisos Forensic Trace
+
+on:
+  push:
+    branches:
+      - forensics/a2-amisos-pipeline-trace
+  workflow_dispatch:
+
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --include=dev --no-audit --no-fund --package-lock=false
+      - name: Generate physical assets
+        run: npm run build:assets
+      - name: Generate historical GIS runtime
+        run: npm run build:historical-gis:1300
+      - name: Trace Amisos runtime-to-GPU area lineage
+        run: node tools/forensics/a2-amisos-pipeline-trace.mjs
