@@ -1,448 +1,446 @@
 # Historia AI Architecture
 
-Version: 1.0
+Version: 2.0
+Status: Active architecture reference
+Last reviewed: 2026-09-17
 
 ---
 
-# Purpose
+## Purpose
 
-Historia AI is not designed as a single historical strategy game.
+Historia AI is a reusable historical grand-strategy simulation engine. The architecture is designed for multiple historical scenarios while keeping historical evidence, physical geography, simulation state, runtime representation, and rendering concerns separate.
 
-Its primary objective is to build a reusable historical simulation engine capable of supporting multiple historical scenarios, modular gameplay systems and long-term extensibility.
-
-Every architectural decision is made with maintainability, scalability and separation of responsibilities in mind.
+The current production direction is the **1326 scenario**, beginning on **1326-04-07** after the conquest of Bursa. The 1300 map pipeline remains available only as legacy/forensic material during migration and must not be copied into the 1326 canonical world.
 
 ---
 
-# Core Philosophy
+## Core Architectural Rules
 
-The engine is built before the game.
+1. **Historical evidence is not runtime geometry.**
+2. **Physical geography is not political geography.**
+3. **Province identity is not polygon identity.**
+4. **Renderer/GPU data is a representation, never an authority.**
+5. **Candidate geometry is not canonical geometry.**
+6. **Historical uncertainty must remain explicit in data.**
+7. **Static canonical data is immutable at runtime; simulation state is mutable.**
+8. **No migration step may silently reuse 1300 geometry for 1326.**
+9. **Forensic tooling must not mutate production authority.**
+10. **No destructive cleanup is allowed until provenance is established. SAFE TO DELETE = 0.**
 
-Gameplay systems must never dictate engine architecture.
+The canonical evidence flow is:
 
-Instead, the engine provides reusable systems capable of supporting different historical periods and future expansions.
+```text
+Historical Evidence
+        ↓
+Historical Anchor Graph (T3-A)
+        ↓
+Candidate Political Surface (T3-B)
+        ↓
+Physical / Route / Terrain Constraints
+        ↓
+Boundary Solver
+        ↓
+Authoritative Arcs
+        ↓
+Directed Rings
+        ↓
+Full Face Assembly
+        ↓
+PlanarTopology / Euler Validation
+        ↓
+Cartography
+        ↓
+Canonical GIS
+        ↓
+MapBin / GPU Transport
+        ↓
+Runtime Renderer
+```
 
-Examples include:
+The evidence lifecycle is:
 
-- 1300 – Rise of the Ottomans
-- 1453 – Fall of Constantinople
-- 1914 – The Great War
-- Community-created scenarios
+```text
+Evidence → Candidate → Reviewed → Canonical
+```
 
 ---
 
-# Architectural Layers
+# Architecture Layers
 
-Historia AI follows a layered architecture.
+## 1. Historical Evidence Layer
 
-```
-User Interface
+Locations include:
 
-↓
-
-Render Engine
-
-↓
-
-Query Layer
-
-↓
-
-World Model
-
-↓
-
-Game Systems
-
-↓
-
-Scenario Data
+```text
+data/historical/
+data/gis/1326/
 ```
 
-Each layer has a single responsibility.
+Responsibilities:
 
-Communication always flows downward.
+- Historical source registers
+- Historical map evidence
+- Date-specific political evidence
+- Historical city/settlement anchors
+- Provenance and confidence
+- Evidence reconciliation
 
-Lower layers never depend on upper layers.
+This layer describes what the historical record supports. It does not directly define renderable polygons.
 
 ---
 
-# Layer Responsibilities
+## 2. Historical Anchor Graph — T3-A
 
-## User Interface
+The Anchor Graph is the bridge between evidence and candidate political geometry.
 
-Location
+A node may contain:
 
+- anchor ID
+- scenario/date
+- controller
+- historical region
+- location
+- extent confidence
+- controller confidence
+- provenance
+- physical constraints
+- strategic routes
+- frontier status
+
+Edges use a controlled vocabulary such as:
+
+```text
+POLITICAL_ADJACENCY
+FRONTIER
+REGIONAL_PROXIMITY
+ROAD_CORRIDOR
+RIVER_CORRIDOR
+MOUNTAIN_BARRIER
+LAKE_BARRIER
+COASTAL_ACCESS
+STRATEGIC_PASS
+STRATEGIC_CROSSING
 ```
-src/components/
-```
 
-Responsibilities
-
-- User interaction
-- Menus
-- Panels
-- HUD
-- Windows
-- Overlay
-
-Rules
-
-- Never modifies world data directly.
-- Never contains gameplay logic.
+Confidence is independent by evidence type. A city can have high location confidence while its exact historical political extent remains medium or low confidence.
 
 ---
 
-## Render Engine
+## 3. Physical Geography Authority
 
-Location
+Physical geography is an independent authority layer.
 
-```
-src/map/
-```
+It includes:
 
-Responsibilities
+- physical land polygons
+- lakes and hydrography
+- rivers
+- terrain/DEM
+- mountain and ridge constraints
+- route/cost fields
 
-- Rendering the world
-- SVG rendering
-- Province rendering
-- Camera
-- Zoom
-- Selection
-- Visual effects
+Political geometry may be constrained by physical geography, but physical geography must never be inferred from political geometry.
 
-Rules
-
-- Reads world data.
-- Never modifies world state.
+Lake interiors are not physical land. Geometry-boundary recovery may use shoreline semantics, but final geometry must satisfy the final physical-land contract.
 
 ---
 
-## Query Layer
+## 4. Candidate Political Surface — T3-B
 
-Location
+T3-B reconstructs a date-specific political surface from historical evidence and constraints.
 
+Conceptually:
+
+```text
+Anchor Graph
+    ↓
+Weighted Partition
+    ↓
+Historical Constraints
+    ↓
+Physical Clipping
+    ↓
+Frontier / Route Constraints
+    ↓
+Province Candidates
 ```
-src/world/queries/
-```
 
-Responsibilities
+Outputs are **candidate** data until review and authoritative gating are complete.
 
-Read-only access to world data.
-
-Examples
-
-- getProvince()
-- getCountry()
-- getCity()
-- getTerrain()
-
-Rules
-
-- No mutations.
-- No side effects.
+Voronoi/power-cell methods are computational mechanisms only. They are not historical authority and must not be used as visual filler where historical boundary evidence is absent.
 
 ---
 
-## Mutation Layer
+## 5. Province Model
 
-Location
+A province has at least three distinct identities:
 
+```text
+Province Identity
+      ≠
+Historical Surface
+      ≠
+Runtime Geometry
 ```
-src/world/mutations/
-```
 
-Responsibilities
+A province can therefore retain stable simulation identity while its date-specific political surface evolves.
 
-Controlled world modifications.
-
-Examples
-
-- setCityUnderSiege()
-- changeProvinceOwner()
-
-Rules
-
-- Never render UI.
-- Never contain business logic.
+Historical city anchors are not modern administrative boundaries.
 
 ---
 
-## World Model
+## 6. Topology and Boundary Solver
 
-Location
+The production topology chain is:
 
+```text
+Cost / A*
+   ↓
+Authoritative Arc
+   ↓
+Directed Rings
+   ↓
+Full Face Assembly
+   ↓
+PlanarTopology
+   ↓
+Euler = 2
+   ↓
+Cartography
 ```
-src/world/
-```
 
-Responsibilities
-
-Stores every entity in the simulation.
-
-Examples
-
-- Countries
-- Provinces
-- Cities
-- Armies
-- Diplomacy
-- Terrain
-
-Rules
-
-Contains data only.
-
-No React.
-
-No rendering.
+P6.1 provides candidate physical/historical adjacency diagnostics. P6.2 provides terrain, river, and boundary-solver contracts. These components remain separately testable and are not automatically canonical political geography.
 
 ---
 
-## Game Systems
+## 7. Canonical GIS / Build Layer
 
-Location
+The GIS build layer converts reviewed historical candidates into canonical runtime assets only after authority gates pass.
 
-```
-src/systems/
-```
+Legacy 1300 generation remains useful for forensic reproduction. It is not the 1326 production source.
 
-Responsibilities
-
-Simulation rules.
-
-Examples
-
-- Economy
-- Military
-- Diplomacy
-- AI
-- Timeline
-- Population
-- Trade
-
-Rules
-
-Game systems operate on the World Model.
+Generated runtime GIS assets are build artifacts unless explicitly approved as distributable source data.
 
 ---
 
-## Scenario Data
+## 8. MapBin Transport Layer
 
-Location
+The map runtime uses a versioned binary representation:
 
-```
-data/
-```
-
-Responsibilities
-
-Historical content.
-
-Examples
-
-```
-data/
-
-scenarios/
-
-1300/
-
-1453/
-
-1914/
+```text
+Historical Runtime JSON
+        ↓
+MapBin Encoder
+        ↓
+world.mapbin
+        ↓
+MapBin Loader
+        ↓
+BinaryMapAssetSource
 ```
 
-Contains
+The current MapBin implementation uses typed arrays and zero-copy runtime views. Geometry transport is a performance representation and must not become the source of historical truth.
 
-- Countries
-- Armies
-- Population
-- Economy
-- Religion
-- Culture
-
-Rules
-
-Contains data only.
-
-No code.
+The binary layer is also a forensic boundary: any historical geometry anomaly must be traceable across JSON → encoder → binary bytes → decoder before the GPU layer is blamed.
 
 ---
 
-# Data Flow
+## 9. GPU / Rendering Layer
 
-```
-Scenario
+The renderer consumes immutable runtime representations.
 
-↓
+Responsibilities:
 
-World
+- camera and world wrap
+- visibility/culling
+- GPU buffers
+- province rendering
+- terrain rendering
+- selection/picking
+- LOD
+- diagnostics
 
-↓
+The GPU layer must not invent or repair historical political boundaries.
 
-Systems
-
-↓
-
-Queries
-
-↓
-
-Render Engine
-
-↓
-
-User Interface
-```
-
-The UI never reads raw data directly.
-
-All access should go through the Query Layer.
+The 144 Hz work is benchmark evidence for the tested environment, not a universal hardware guarantee.
 
 ---
 
-# Rendering Pipeline
+## 10. Runtime Simulation Layer
 
-```
-GameShell
+Simulation remains independent from GIS production.
 
-↓
+Planned/active domains include:
 
-MapView
+- time
+- population
+- economy
+- trade
+- diplomacy
+- warfare
+- laws and reforms
+- dynasty and characters
+- religion and culture
+- espionage
+- events and timeline
+- AI-controlled states
 
-↓
-
-WorldMap
-
-↓
-
-Layers
-
-↓
-
-Province
-
-↓
-
-SVG
-```
-
-Future layers include
-
-- Province Layer
-- Country Layer
-- City Layer
-- Army Layer
-- Route Layer
-- Effect Layer
-- UI Layer
+Simulation state is mutable. Scenario definitions and canonical map data are immutable inputs.
 
 ---
 
-# Design Principles
+## 11. User Interface Layer
 
-## Single Responsibility Principle
+UI consumes queries and runtime state rather than mutating world data directly.
 
-Every module should have one responsibility.
+Responsibilities:
 
----
+- game shell
+- map controls
+- province/country panels
+- decisions and actions
+- timeline/event notifications
+- AI interaction panel
 
-## Separation of Concerns
-
-Rendering, simulation and data must remain independent.
-
----
-
-## Data Driven Design
-
-Historical content belongs inside data files.
-
-Engine code must remain reusable.
+No UI component is a source of historical geography authority.
 
 ---
 
-## Modular Architecture
+# Performance Architecture
 
-Every system should be independently replaceable.
+The long-term target is 15,000+ active provinces with high visual fidelity and a 144+ FPS target on suitable hardware.
+
+The architecture therefore favors:
+
+- immutable canonical data
+- visible-subset processing
+- multiresolution geometry
+- typed-array transport
+- deterministic builds
+- GPU-side culling where appropriate
+- bounded allocations
+- reusable buffers
+- explicit lifecycle ownership
+- zero-copy binary views where safe
+
+The 15K target does **not** imply that every high-resolution polygon must be resident in every GPU pass.
 
 ---
 
-## Incremental Development
+# Memory / Lifecycle Rules
 
-Development follows small, testable milestones.
+Every long-lived resource must have an explicit owner and release path.
+
+Avoid:
+
+- per-frame object creation for stable geometry
+- duplicated polygon copies across layers
+- uncontrolled event listeners
+- stale GPU buffers
+- repeated ArrayBuffer cloning
+- hidden caches without invalidation policy
+
+Canonical data must be treated as immutable. Runtime caches may be evicted or rebuilt without changing canonical truth.
 
 ---
 
-## Documentation First
+# Scenario Architecture
 
-Every major system must have documentation before implementation.
+The first production scenario is:
 
----
-
-# Folder Structure
-
-```
-historia-ai/
-
-docs/
-public/
-src/
-data/
-
-package.json
-vite.config.js
+```text
+1326-04-07
 ```
 
-Future folders
+The initial historical focus is Anatolia/Byzantine frontier geography, while the world scenario remains extensible.
 
+Historical timing must be represented explicitly. For example, Bursa is available to the Ottoman state at the scenario opening, while Nicaea and Nicomedia have later historical transitions and must not be backdated into the 1326 state.
+
+Scenario data should remain separate from the reusable engine.
+
+---
+
+# Migration / Forensic Governance
+
+Migration follows this order:
+
+```text
+B4
+ ↓
+A1 / A2 / C forensic closure
+ ↓
+EARG / T3-A
+ ↓
+T3-B candidate surface
+ ↓
+Physical authority migration
+ ↓
+Boundary / topology solver
+ ↓
+1326 candidate geometry
+ ↓
+1586 shadow comparison
+ ↓
+Authoritative GIS gate
+ ↓
+Single canonical map
+ ↓
+Local convergence
 ```
-tests/
-tools/
-scripts/
-```
+
+Current forensic policy:
+
+- B4 calibration is forensic-only.
+- A1 remains a provenance/stage-lineage investigation.
+- A2 has cleared the currently replayed Phase 2D producer path; runtime → MapBin → GPU lineage remains under investigation.
+- C requires a real Amasya Edge-3 replay and authoritative binding, not merely a semantic unit test.
+- `MIN_AREA = 0.00005` remains locked until forensic closure.
+- No 1300 → 1326 geometry copying.
+- No synthetic Voronoi filler as production authority.
+- SAFE TO DELETE = 0.
+
+---
+
+# Repository Workflow
+
+Every significant change follows:
+
+1. Define the objective.
+2. Identify the authority boundary.
+3. Inspect existing implementation and history.
+4. Identify affected files and provenance.
+5. Implement the smallest isolated change.
+6. Run focused tests.
+7. Run relevant CI gates.
+8. Compare canonical and candidate outputs.
+9. Record evidence and update documentation.
+10. Merge only when the authority gate is satisfied.
+
+Branches used for forensic experiments are laboratories. The canonical integration branch is the production integration line.
+
+---
+
+# Documentation Rule
+
+Documentation is part of the architecture contract.
+
+When implementation changes materially, the corresponding Markdown documentation must be reviewed in the same work cycle.
+
+Stale documents must be corrected rather than silently treated as current.
 
 ---
 
 # Long-Term Goals
 
-The engine should support
-
-- Multiple historical scenarios
+- 15,000+ provinces
+- dynamic population and economy
+- historical events and timelines
 - AI-driven world simulation
-- Save & Load
-- Modding
-- Map Editor
-- Localization
-- Dynamic historical events
-- Multiplayer-ready architecture
+- detailed map layers
+- high-fidelity character and world presentation
+- save/load
+- modding
+- localization
+- multiplayer-ready boundaries between systems
 
----
-
-# Development Workflow
-
-Every sprint follows the same workflow.
-
-1. Define objective
-
-2. Design architecture
-
-3. Identify affected files
-
-4. Review existing implementation
-
-5. Update complete files
-
-6. Test
-
-7. Git Commit
-
-No implementation should skip this process.
-
----
-
-# Conclusion
-
-Historia AI is developed as a reusable grand strategy engine rather than a single game.
-
-Long-term maintainability always takes priority over short-term implementation speed.
+The architecture should achieve these goals without sacrificing historical provenance or turning rendering code into historical authority.
