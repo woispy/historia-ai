@@ -43,7 +43,7 @@ try {
   runGit(["worktree", "add", "--detach", worktree, commit]);
   const file = join(worktree, "tools/historical-gis/AnatoliaPhase2DGeometryBuilder.js");
   let source = readFileSync(file, "utf8");
-  source += "\nexport { addAnchorSites, addProvinceMicroSites, addProvinceShapeSites, addPhysicalBarrierSites, addCoastInteriorSites, addSourceShapeSites, buildVoronoiCell, clipCellToLand, polygonArea };\n";
+  source += "\nexport { addAnchorSites, addProvinceMicroSites, addProvinceShapeSites, addPhysicalBarrierSites, addCoastInteriorSites, addSourceShapeSites, buildVoronoiCell, clipCellToLand, polygonArea, pointOnSegment, segmentIntersection, uniquePoints, pointInPolygon, ANATOLIA_PHYSICAL_ATLAS };\n";
   writeFileSync(file, source);
   const mod = await import(`file://${file}?clip=${commit}`);
   const sites = [];
@@ -60,11 +60,37 @@ try {
     const cell = mod.buildVoronoiCell(index, sites);
     if (cell.length < 3) continue;
     const rawArea = mod.polygonArea(cell);
+    const land = mod.ANATOLIA_PHYSICAL_ATLAS.landPolygons[0];
+    const rawClipPoints = [];
+    for (const point of cell) {
+      if (mod.pointInPolygon(point, land) || land.some((_, landIndex) => mod.pointOnSegment(point, land[landIndex], land[(landIndex + 1) % land.length]))) rawClipPoints.push({ source: "cell", point });
+    }
+    for (const point of land) {
+      if (mod.pointInPolygon(point, cell)) rawClipPoints.push({ source: "land", point });
+    }
+    for (let cellIndex = 0; cellIndex < cell.length; cellIndex += 1) {
+      const a = cell[cellIndex];
+      const b = cell[(cellIndex + 1) % cell.length];
+      for (let landIndex = 0; landIndex < land.length; landIndex += 1) {
+        const c = land[landIndex];
+        const d = land[(landIndex + 1) % land.length];
+        const intersection = mod.segmentIntersection(a, b, c, d);
+        if (intersection) rawClipPoints.push({ source: "intersection", point: intersection });
+      }
+    }
+    const uniqueClipPoints = mod.uniquePoints(rawClipPoints.map((entry) => entry.point));
     const clipped = mod.clipCellToLand(cell);
     candidates.push({
       siteIndex: index,
       site: sites[index],
       rawCell: trace(cell),
+      clipRepresentation: {
+        preUniqueCount: rawClipPoints.length,
+        unique6DecimalCount: uniqueClipPoints.length,
+        unique6Decimal: uniqueClipPoints,
+        unique6DecimalArea: area(uniqueClipPoints),
+        duplicateReduction: rawClipPoints.length - uniqueClipPoints.length,
+      },
       clipped: clipped.length >= 3 ? trace(clipped) : { vertexCount: clipped.length, area: null, polygon: clipped },
       collapse: {
         raw: rawArea <= 1e-10,
