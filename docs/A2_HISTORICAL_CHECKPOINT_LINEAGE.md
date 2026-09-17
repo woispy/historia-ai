@@ -179,6 +179,59 @@ This is a high-priority historical representation boundary because it changes th
 
 Later commit `16c17706c436954eacb76b8262480388b40d673b` retained the Voronoi partition while changing the rounded-geometry integrity check and fallback handling. fileciteturn417file0L3-L11
 
+## Checkpoint replay evidence — V1/V2 do not reproduce the tiny artifact
+
+A retained checkpoint replay artifact was inspected independently during the current forensic pass:
+
+```text
+bdf166a4  → Amisos runtime polygons: 4.057109021412884 and 0.002238248805042531
+3021b2d1  → identical Amisos runtime polygons: 4.057109021412884 and 0.002238248805042531
+6b742412  → Amisos runtime polygons include 0.0067547530500178254
+```
+
+None of these values is within the tiny threshold `1e-10`. The replay also reports no exact target hit at `2.27e-13`.
+
+The `5f48731e...` baseline is **not yet a successful common-lineage result** in that artifact: its replayed build path did not complete, so it cannot be used to claim a V0 numerical result.
+
+This materially narrows the checkpoint hypothesis. The intermediate `bdf166a4...` half-plane edit and the restored `3021b2d1...` implementation both converge to the same Amisos output in the retained replay. They therefore do not currently explain the historical tiny artifact.
+
+## New measurement hypothesis — signed-area cancellation / topology
+
+External review suggested a separate possibility that is now being tested without modifying production code: the historical `clipCellToLand()` does not perform a conventional polygon clip. It collects points, deduplicates them, computes their arithmetic center, and sorts by `atan2()` before applying shoelace area.
+
+That construction can be sensitive to non-convex point sets. A self-intersecting or nearly self-intersecting ordered ring can have a large spatial extent while its shoelace terms cancel to a very small residual.
+
+The decisive diagnostic is therefore not just absolute area. The forensic probe now records, for each raw and rounded candidate:
+
+- ordinary shoelace absolute area;
+- origin-translated shoelace area;
+- vertex count;
+- self-intersection pairs;
+- six-decimal deduplication count and area;
+- five-decimal rounded representation.
+
+Interpretation will be:
+
+```text
+ordinary area ≈ 2.27e-13
+translated area ≫ ordinary area
+→ numerical cancellation is implicated
+
+ordinary area ≈ translated area ≈ 2.27e-13
+→ geometry is genuinely near-degenerate / topologically collapsed
+
+self-intersections present with large bbox
+→ angle-sort/topological ordering becomes a primary suspect
+```
+
+This remains a **hypothesis under test**, not a root-cause conclusion.
+
+## Precision-alignment hypothesis — status
+
+The `uniquePoints(6)` → `roundPolygon(5)` mismatch remains a valid representation-boundary candidate, but it is not sufficient evidence by itself. Five-decimal rounding can collapse nearby vertices, yet the exact historical `2.27e-13` artifact has not been recovered from the available retained polygons.
+
+Therefore no change from six to five decimals, or from five to six decimals, is authorized at this stage.
+
 ## Current interpretation
 
 The strongest current facts are:
