@@ -4,6 +4,55 @@ All notable changes to Historia AI will be documented here.
 
 ---
 
+# Unreleased — 1326 Migration / Forensic Closure Track
+
+## Current direction
+
+- Production scenario target is now **1326-04-07**.
+- 1300 remains a legacy/research/forensic pipeline and must not silently supply 1326 geometry.
+- Historical evidence, physical geography, political candidates, canonical GIS and GPU transport remain separate authority boundaries.
+- The migration lifecycle remains `Evidence → Candidate → Reviewed → Canonical`.
+
+## Forensic work
+
+### B4
+
+- Completed B4 forensic calibration against the canonical full political seed universe.
+- Confirmed Nicomedia and Nicaea power-cell equivalence under the calibrated comparison.
+- Isolated canonical-land versus shared physical-authority water/invalid endpoint divergence without changing production authority.
+
+### A1
+
+- Kept A1 open as a provenance/stage-lineage investigation.
+- Preserved `MIN_AREA = 0.00005` unchanged.
+- Did not reinterpret historical audit discrepancies as permission to alter geometry.
+
+### A2
+
+- Added immutable checkpoint replay tooling for the Amisos `2.27e-13` anomaly.
+- Replayed historical Phase 2D producer paths with pinned physical/hydrography preparation.
+- Confirmed that the currently replayed Phase 2D producer path does not reproduce the target tiny area.
+- Narrowed the remaining investigation to the runtime representation and downstream serialization/transport path: `runtime.json → MapBin → binary Float32 representation → runtime decoder → GPU/LOD`.
+- Kept forensic harnesses isolated from production geometry.
+
+### C
+
+- Retained Amasya Edge-3 as a separate real replay/authority-binding task.
+- Lake/shoreline recovery semantics remain distinct from final physical-land validation.
+
+## Map architecture
+
+- Established the current architecture around Historical Evidence, T3-A Anchor Graph, T3-B Candidate Political Surface, Physical Authority, Boundary Solver, Topology, Canonical GIS, MapBin and GPU runtime layers.
+- Explicitly documented that renderer/GPU data is transport/representation and not historical authority.
+- Documented immutable canonical data versus mutable simulation state.
+
+## Documentation
+
+- Replaced the stale high-level architecture description with the active architecture in `docs/ARCHITECTURE.md`.
+- Updated `README.md` to reflect the 1326 migration, current map pipeline, forensic governance and performance direction.
+
+---
+
 # Unreleased — Phase 2D Physical Coast & Water Geometry Refinement
 
 ## Added
@@ -26,10 +75,6 @@ All notable changes to Historia AI will be documented here.
 ### Validation
 
 - Strengthened `test:anatolia-phase2d` to validate physical land centroids and the presence of a substantial barrier field.
-
-### Documentation
-
-- Updated the Phase 2D architecture document and roadmap to distinguish physical constraints from future source-backed historical boundary constraints.
 
 ## Cartographic policy
 
