@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CANONICAL_ROOT: /tmp/historia-ai-canonical
+      A2_TARGET_AREA: 2.27e-13
+      A2_TINY_EPSILON: 1e-10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,6 +28,18 @@ jobs:
         run: npm ci
       - name: Generate required hydrography runtime fixture
         run: npm run build:assets
+      - name: Record forensic execution identity
+        run: |
+          mkdir -p forensic-output
+          {
+            echo "branch=$(git branch --show-current)"
+            echo "head=$(git rev-parse HEAD)"
+            echo "targetArea=${A2_TARGET_AREA}"
+            echo "tinyEpsilon=${A2_TINY_EPSILON}"
+            echo "node=$(node --version)"
+            echo "git=$(git --version)"
+          } > forensic-output/execution-identity.txt
+          cat forensic-output/execution-identity.txt
       - name: Fetch canonical production branch
         run: |
           git fetch --no-tags origin 6b7424125eee4a1c72925b7a1780c68e695e9ba3
@@ -42,7 +56,6 @@ jobs:
         id: producer_lineage
         continue-on-error: true
         run: |
-          mkdir -p forensic-output
           node tools/tests/phase2d-a2-producer-lineage-v3.mjs > forensic-output/a2-producer-lineage-v3.json 2> forensic-output/a2-producer-lineage-v3.stderr
           status=$?
           cat forensic-output/a2-producer-lineage-v3.json
@@ -81,6 +94,7 @@ jobs:
         with:
           name: phase2d-a2-producer-lineage-combined
           path: |
+            forensic-output/execution-identity.txt
             forensic-output/a2-producer-lineage-v3.json
             forensic-output/a2-producer-lineage-v3.stderr
             forensic-output/a2-stage-trace.json
