@@ -1,0 +1,27 @@
+{
+  "phase": "C3 — Pontus-Amasya Edge 3 production-equivalent replay",
+  "sourceArtifact": {
+    "runId": 35164261384,
+    "artifactId": 10474750237,
+    "artifactName": "phase2d-v15-c-c3-b-c4-replays",
+    "sha256": "f2ade4d54061bc699c6d95b07001130e8e2b90ef023530fd781ccdad5f8bd6b"
+  },
+  "edge": {"start": [34.828390856782086, 41.01264370368176], "end": [35.31959064327484, 41.25286549707603]},
+  "sampleCount": 256,
+  "counts": {"samples": 257, "lakeInterior": 9, "invalidAfterC3": 0, "shorelineRecoveries": 9},
+  "builderStatus": "success",
+  "builderError": null,
+  "endpointStart": {"fraction": 0, "point": [34.828390856782086, 41.01264370368176], "lakeInterior": false, "physicalLand": true, "shoreline": [35.195811, 41.293463], "shorelineDistance": 0.46244679567161506, "resolved": [34.828390856782086, 41.01264370368176], "resolvedIsFinal": true},
+  "endpointEnd": {"fraction": 1, "point": [35.31959064327484, 41.25286549707603], "lakeInterior": true, "physicalLand": false, "shoreline": [35.31873628613778, 41.24389409094855], "shorelineDistance": 0.009011995007867165, "resolved": [35.31873628613778, 41.24389409094855], "resolvedIsFinal": true},
+  "interiorSamples": [
+    {"fraction": 0.96875, "point": [35.30424064994695, 41.24535856603246], "lakeInterior": true, "physicalLand": false, "shoreline": [35.30423271871952, 41.245275282052894], "shorelineDistance": 8.366077707305583e-05, "resolved": [35.30423271871952, 41.245275282052894], "resolvedIsFinal": true},
+    {"fraction": 0.97265625, "point": [35.30615939911293, 41.2462969324129], "lakeInterior": true, "physicalLand": false, "shoreline": [35.306045664646796, 41.245102633164855], "shorelineDistance": 0.0011997025559178141, "resolved": [35.306045664646796, 41.245102633164855], "resolvedIsFinal": true},
+    {"fraction": 0.9765625, "point": [35.308078148278916, 41.24723529879335], "lakeInterior": true, "physicalLand": false, "shoreline": [35.30785861057408, 41.24492998427681], "shorelineDistance": 0.0023157443347696463, "resolved": [35.30785861057408, 41.24492998427681], "resolvedIsFinal": true},
+    {"fraction": 0.98046875, "point": [35.309996897444904, 41.248173665173795], "lakeInterior": true, "physicalLand": false, "shoreline": [35.309671556501364, 41.24475733538877], "shorelineDistance": 0.0034317861136144044, "resolved": [35.309671556501364, 41.24475733538877], "resolvedIsFinal": true},
+    {"fraction": 0.984375, "point": [35.31191564661089, 41.24911203155425], "lakeInterior": true, "physicalLand": false, "shoreline": [35.31148450242864, 41.24458468650072], "shorelineDistance": 0.0045478278924739836, "resolved": [35.31148450242864, 41.24458468650072], "resolvedIsFinal": true},
+    {"fraction": 0.98828125, "point": [35.31383439577688, 41.25005039793469], "lakeInterior": true, "physicalLand": false, "shoreline": [35.313297448355925, 41.24441203761268], "shorelineDistance": 0.005663869671318743, "resolved": [35.313297448355925, 41.24441203761268], "resolvedIsFinal": true},
+    {"fraction": 0.9921875, "point": [35.31575314494287, 41.25098876431514], "lakeInterior": true, "physicalLand": false, "shoreline": [35.31511039428321, 41.24423938872464], "shorelineDistance": 0.006779911450170575, "resolved": [35.31511039428321, 41.24423938872464], "resolvedIsFinal": true},
+    {"fraction": 0.99609375, "point": [35.317671894108855, 41.251927130695584], "lakeInterior": true, "physicalLand": false, "shoreline": [35.316923340210494, 41.2440667398366], "shorelineDistance": 0.007895953229015333, "resolved": [35.316923340210494, 41.2440667398366], "resolvedIsFinal": true},
+    {"fraction": 1, "point": [35.31959064327484, 41.25286549707603], "lakeInterior": true, "physicalLand": false, "shoreline": [35.31873628613778, 41.24389409094855], "shorelineDistance": 0.009011995007867165, "resolved": [35.31873628613778, 41.24389409094855], "resolvedIsFinal": true}
+  ]
+}
