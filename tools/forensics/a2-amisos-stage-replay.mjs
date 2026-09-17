@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 
 const TARGET = "pontus-amisos";
 const TARGET_TINY = 2.27e-13;
+const TINY_EPS = 1e-10;
 const CHECKPOINTS = [
   "837ec8dd2d878ceb227f609c3da481610b54d0db",
   "bdf166a4",
@@ -35,34 +36,63 @@ function __a2Area(ring) {
 function __a2Stage(stage, payload) {
   console.log("A2_STAGE|" + JSON.stringify({ stage, ...payload }));
 }
+function __a2IsTiny(area) {
+  return Number.isFinite(area) && Math.abs(area) <= ${TINY_EPS};
+}
 `;
+
+function findFunctionBounds(source, name) {
+  const re = new RegExp(`function\\s+${name}\\s*\\(([^)]*)\\)\\s*\\{`, "m");
+  const match = re.exec(source);
+  if (!match) return null;
+  const open = source.indexOf("{", match.index);
+  let depth = 0;
+  for (let i = open; i < source.length; i += 1) {
+    if (source[i] === "{") depth += 1;
+    else if (source[i] === "}") {
+      depth -= 1;
+      if (depth === 0) return { start: match.index, open, end: i + 1, params: match[1].split(",").map((p) => p.trim()).filter(Boolean) };
+    }
+  }
+  return null;
+}
+
+function targetExpression(params) {
+  const index = params.find((p) => /Index$/i.test(p) || /index/i.test(p));
+  const sites = params.find((p) => /sites/i.test(p));
+  if (index && sites) return `${sites}[${index}]?.provinceId === __A2_TARGET`;
+  if (params.length >= 2) return `${params[1]}[${params[0]}]?.provinceId === __A2_TARGET`;
+  return "false";
+}
 
 function instrumentBuilder(worktree) {
   const file = resolve(worktree, "tools/historical-gis/AnatoliaPhase2DGeometryBuilder.js");
   let source = readFileSync(file, "utf8");
-  if (!source.includes('const __A2_TARGET = "pontus-amisos";')) {
-    source = `${INSTRUMENTATION}\n${source}`;
+  if (!source.includes('const __A2_TARGET = "pontus-amisos";')) source = `${INSTRUMENTATION}\n${source}`;
+
+  const rawFn = findFunctionBounds(source, "buildVoronoiCell");
+  if (!rawFn) throw new Error("A2 stage hook anchor missing: buildVoronoiCell");
+  {
+    const body = source.slice(rawFn.open + 1, rawFn.end - 1);
+    const target = targetExpression(rawFn.params);
+    let nextBody = `\n  const __a2TargetSite = ${target};\n  if (__a2TargetSite) __a2Stage("A_RAW_POWER_CELL_START", { params: ${JSON.stringify(rawFn.params)} });\n${body}`;
+    nextBody = nextBody.replace(/return\\s+polygon\\s*;/g, `if (__a2TargetSite) __a2Stage("A_RAW_POWER_CELL", { vertices: polygon.length, signedArea: __a2Area(polygon), absArea: Math.abs(__a2Area(polygon) ?? 0), tiny: __a2IsTiny(__a2Area(polygon)) });\n    return polygon;`);
+    source = `${source.slice(0, rawFn.open + 1)}${nextBody}${source.slice(rawFn.end - 1)}`;
   }
 
-  const rawPowerAnchor = `  const politicalSites = sites.filter((site) => Boolean(site.provinceId));\n`;
-  if (!source.includes(rawPowerAnchor)) throw new Error("A2 stage hook anchor missing: politicalSites");
-  source = source.replace(rawPowerAnchor, `${rawPowerAnchor}  {\n    const targetIndex = politicalSites.findIndex((site) => site.provinceId === __A2_TARGET);\n    if (targetIndex >= 0) {\n      const rawPowerCell = buildVoronoiCell(targetIndex, politicalSites);\n      __a2Stage("A_RAW_POWER_CELL", { targetIndex, vertices: rawPowerCell.length, signedArea: __a2Area(rawPowerCell), absArea: Math.abs(__a2Area(rawPowerCell) ?? 0) });\n    }\n  }\n`);
+  const landFn = findFunctionBounds(source, "buildLandVoronoiCells");
+  if (landFn) {
+    const body = source.slice(landFn.open + 1, landFn.end - 1);
+    const target = targetExpression(landFn.params);
+    let nextBody = `\n  const __a2TargetSite = ${target};\n${body}`;
+    nextBody = nextBody.replace(/polygon\\s*=\\s*clipHalfPlane\\(polygon,\\s*a,\\s*b,\\s*c\\);/g, (match) => `${match}\n      if (__a2TargetSite) __a2Stage("B_POWER_CLIP_ITERATION", { vertices: polygon.length, signedArea: __a2Area(polygon), absArea: Math.abs(__a2Area(polygon) ?? 0), tiny: __a2IsTiny(__a2Area(polygon)) });`);
+    nextBody = nextBody.replace(/return\\s+cells\\s*;/g, `if (__a2TargetSite) __a2Stage("B_PHYSICAL_CLIP_RESULT", { cellCount: cells.length, cellAreas: cells.map((ring) => ({ vertices: ring.length, signedArea: __a2Area(ring), absArea: Math.abs(__a2Area(ring) ?? 0), tiny: __a2IsTiny(__a2Area(ring)) })) });\n  return cells;`);
+    source = `${source.slice(0, landFn.open + 1)}${nextBody}${source.slice(landFn.end - 1)}`;
+  }
 
-  const landStart = `  const site = politicalSites[siteIndex].point;\n  const cells = [];\n  for (const landPolygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {\n    let polygon = landPolygon.slice(0, -1);\n`;
-  if (!source.includes(landStart)) throw new Error("A2 stage hook anchor missing: land cell start");
-  source = source.replace(landStart, `  const site = politicalSites[siteIndex].point;\n  const cells = [];\n  const __a2TargetSite = politicalSites[siteIndex]?.provinceId === __A2_TARGET;\n  let __a2LandIndex = 0;\n  for (const landPolygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {\n    let polygon = landPolygon.slice(0, -1);\n    if (__a2TargetSite) __a2Stage("B_PHYSICAL_CLIP_START", { landIndex: __a2LandIndex, vertices: polygon.length, signedArea: __a2Area(polygon), absArea: Math.abs(__a2Area(polygon) ?? 0) });\n`);
-
-  const clipLine = `      polygon = clipHalfPlane(polygon, a, b, c);\n      if (polygon.length < 3) break;\n`;
-  if (!source.includes(clipLine)) throw new Error("A2 stage hook anchor missing: physical clip iteration");
-  source = source.replace(clipLine, `      polygon = clipHalfPlane(polygon, a, b, c);\n      if (__a2TargetSite) __a2Stage("B_POWER_CLIP_ITERATION", { landIndex: __a2LandIndex, otherIndex, vertices: polygon.length, signedArea: __a2Area(polygon), absArea: Math.abs(__a2Area(polygon) ?? 0) });\n      if (polygon.length < 3) break;\n`);
-
-  const landEnd = `    if (polygon.length >= 3) cells.push(polygon);\n  }\n  return cells;\n}\n`;
-  if (!source.includes(landEnd)) throw new Error("A2 stage hook anchor missing: physical clip end");
-  source = source.replace(landEnd, `    if (__a2TargetSite) __a2Stage("B_PHYSICAL_CLIP_RESULT", { landIndex: __a2LandIndex, vertices: polygon.length, signedArea: __a2Area(polygon), absArea: Math.abs(__a2Area(polygon) ?? 0) });\n    if (polygon.length >= 3) cells.push(polygon);\n    __a2LandIndex += 1;\n  }\n  return cells;\n}\n`);
-
-  const outerLoop = `      if (polygonArea(cell) < 0.00005) continue;\n      if (!isPhysicalLandPoint(polygonCentroid(cell))) continue;\n      const rounded = roundPolygon(cell);\n      if (!rounded.every(isPhysicalLandPoint) || !isPhysicalLandPolygon(rounded)) continue;\n      polygonsByProvince[sites[siteIndex].provinceId].push(rounded);\n`;
-  if (!source.includes(outerLoop)) throw new Error("A2 stage hook anchor missing: canonicalization filter");
-  source = source.replace(outerLoop, `      const __a2TargetCell = sites[siteIndex].provinceId === __A2_TARGET;\n      if (__a2TargetCell) __a2Stage("C_PRE_FILTER", { siteIndex, vertices: cell.length, signedArea: __a2Area(cell), absArea: Math.abs(__a2Area(cell) ?? 0), tiny: Math.abs(__a2Area(cell) ?? 0) <= ${1e-10} });\n      if (polygonArea(cell) < 0.00005) continue;\n      if (!isPhysicalLandPoint(polygonCentroid(cell))) continue;\n      const rounded = roundPolygon(cell);\n      if (__a2TargetCell) __a2Stage("C_ROUNDED", { siteIndex, vertices: rounded.length, signedArea: __a2Area(rounded), absArea: Math.abs(__a2Area(rounded) ?? 0), tiny: Math.abs(__a2Area(rounded) ?? 0) <= ${1e-10} });\n      if (!rounded.every(isPhysicalLandPoint) || !isPhysicalLandPolygon(rounded)) continue;\n      if (__a2TargetCell) __a2Stage("C_ACCEPTED", { siteIndex, vertices: rounded.length, signedArea: __a2Area(rounded), absArea: Math.abs(__a2Area(rounded) ?? 0) });\n      polygonsByProvince[sites[siteIndex].provinceId].push(rounded);\n`);
+  const before = source;
+  source = source.replace(/polygon\\s*=\\s*clipHalfPlane\\(polygon,\\s*a,\\s*b,\\s*c\\);/g, (match) => `${match}\n      if (typeof __a2TargetSite !== "undefined" && __a2TargetSite) __a2Stage("B_POWER_CLIP_ITERATION_GLOBAL", { vertices: polygon.length, signedArea: __a2Area(polygon), absArea: Math.abs(__a2Area(polygon) ?? 0), tiny: __a2IsTiny(__a2Area(polygon)) });`);
+  if (source === before && !landFn) throw new Error("A2 stage hook anchor missing: no clipHalfPlane call found");
 
   writeFileSync(file, source, "utf8");
 }
@@ -81,19 +111,20 @@ const rootTmp = mkdtempSync(resolve(tmpdir(), "historia-a2-stage-replay-"));
 try {
   for (const checkpoint of CHECKPOINTS) {
     const worktree = resolve(rootTmp, checkpoint.slice(0, 8));
-    let status = "success";
-    let output = "";
     try {
       git(["worktree", "add", "--detach", worktree, checkpoint], root);
       run("node", ["tools/asset-builder/cli/fetch-natural-earth-hydrography-10m.js"], worktree);
       run("node", ["tools/asset-builder/cli/build-anatolia-hydrography-10m.js"], worktree);
       instrumentBuilder(worktree);
+      let status = "success";
+      let output = "";
       try { output = run("npm", ["run", "build:historical-gis:1300"], worktree); }
-      catch (error) { status = "build-failed"; output = `${error.stdout ?? ""}\\n${error.stderr ?? ""}`; }
+      catch (error) { status = "build-failed"; output = `${error.stdout ?? ""}\n${error.stderr ?? ""}`; }
       const stages = parseStages(output);
       const tinyHits = stages.filter((entry) => Number.isFinite(entry.absArea) && Math.abs(entry.absArea - TARGET_TINY) <= 1e-15);
+      const thresholdHits = stages.filter((entry) => Number.isFinite(entry.absArea) && entry.absArea <= TINY_EPS);
       const minArea = stages.filter((entry) => Number.isFinite(entry.absArea)).reduce((m, entry) => Math.min(m, entry.absArea), Number.POSITIVE_INFINITY);
-      results.push({ checkpoint, status, stageCount: stages.length, minObservedAbsArea: Number.isFinite(minArea) ? minArea : null, tinyHits, stages, outputTail: output.slice(-5000) });
+      results.push({ checkpoint, status, stageCount: stages.length, minObservedAbsArea: Number.isFinite(minArea) ? minArea : null, tinyHits, thresholdHits, stages, outputTail: output.slice(-5000) });
     } catch (error) {
       results.push({ checkpoint, status: "harness-failed", error: error.message });
     } finally {
@@ -109,11 +140,11 @@ try {
 const report = {
   target: TARGET,
   targetTinyArea: TARGET_TINY,
-  harness: "immutable detached checkpoint worktree + pinned Natural Earth preparation + non-production builder instrumentation",
-  stages: ["A_RAW_POWER_CELL", "B_PHYSICAL_CLIP_START", "B_POWER_CLIP_ITERATION", "B_PHYSICAL_CLIP_RESULT", "C_PRE_FILTER", "C_ROUNDED", "C_ACCEPTED"],
+  tinyThreshold: TINY_EPS,
+  harness: "immutable detached checkpoint worktree + pinned Natural Earth preparation + signature-resilient non-production instrumentation",
   checkpoints: results,
 };
-writeFileSync("a2-amisos-stage-replay.json", `${JSON.stringify(report, null, 2)}\\n`);
+writeFileSync("a2-amisos-stage-replay.json", `${JSON.stringify(report, null, 2)}\n`);
 console.log("A2_AMISOS_STAGE_REPLAY");
 console.log(JSON.stringify(report, null, 2));
 console.log("A2_AMISOS_STAGE_REPLAY_END");
