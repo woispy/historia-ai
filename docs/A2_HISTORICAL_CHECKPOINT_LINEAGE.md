@@ -104,6 +104,12 @@ historical ~2.27e-13       → producer/artifact still unidentified
 
 The current checkpoint branch has now been instrumented so that any future retained execution can be tied unambiguously to its exact branch/HEAD and target threshold. Until such an artifact exists, no checkpoint result should be treated as an executed finding.
 
+## A2 tracking gate
+
+The remaining execution gate is tracked in GitHub Issue **#104 — `A2 forensic checkpoint: exact execution artifact gate`**. The issue records the same acceptance criteria used here: retained execution identity plus V0/V1/V2 and authority-isolation outputs that establish a common lineage to the historical `~2.27e-13` observation. The issue is a tracking mechanism only; it does not authorize production mutation or merge.
+
+## Remaining question
+
 The remaining question is therefore not simply “which code version was buggy?” It is:
 
 ```text
