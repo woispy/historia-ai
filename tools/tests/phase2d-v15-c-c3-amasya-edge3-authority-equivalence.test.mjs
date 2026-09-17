@@ -18,6 +18,7 @@ assert.deepEqual(replay.endpointStart.point, expectedStart);
 assert.deepEqual(replay.endpointEnd.point, expectedEnd);
 assert.equal(replay.interiorSamples.length, 9);
 
+// Bind the replay's original classifications to the authority contract.
 for (const sample of replay.interiorSamples) {
   assert.equal(
     classifyAmasyaBoundaryPoint({
@@ -26,14 +27,14 @@ for (const sample of replay.interiorSamples) {
     }),
     "LAKE_INTERIOR",
   );
+  assert.equal(isFinalAmasyaBoundaryPoint({ isLakeInterior: true }), false);
   assert.equal(sample.resolvedIsFinal, true);
   assert.deepEqual(sample.resolved, sample.shoreline);
-  assert.equal(
-    isFinalAmasyaBoundaryPoint({ isLakeBoundary: sample.resolvedIsFinal }),
-    true,
-  );
 }
 
+// The replay records a successful shoreline resolution; the authority contract
+// separately guarantees that a shoreline/lake-boundary class is final-eligible.
+assert.equal(isFinalAmasyaBoundaryPoint({ isLakeBoundary: true }), true);
 assert.equal(replay.endpointEnd.lakeInterior, true);
 assert.equal(replay.endpointEnd.resolvedIsFinal, true);
 assert.deepEqual(replay.endpointEnd.resolved, replay.endpointEnd.shoreline);
