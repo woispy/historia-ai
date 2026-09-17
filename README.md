@@ -122,6 +122,10 @@ The historical A2 observation is classified as a **provenance discontinuity**, n
 
 The earlier migration wording that described a direct `0.006755 → ~2.27e-13` V15 normalization collapse is **not supported by the current artifact evidence**. PR #89's telemetry workflow explicitly pins the V15 source tree and runs the instrumented V15 builder, while the resulting telemetry records the `0.5023951571206453` Amisos raw/normalized polygon. The `0.006755373858482017` value comes from the separate canonical stage trace. These observations must remain separate until a common source artifact and transformation lineage is proven.
 
+### A2 Run #24 artifact verification
+
+The historical execution associated with PR #89's **Run #24** was traced to GitHub Actions workflow run `34398688728` (workflow run number `11`) on head `78c70ec516852c461c42ceee18c7e64e904843ac`. Its retained artifact `phase2.8-c-a2-amisos-edge-telemetry` is still available and has digest `sha256:cc697c0973a5a8ed4efb8b305dba013f782b9f85d03a91a5588ee734663920f9`. The artifact records the pinned V15 source SHA `3575c1bccf94a322fed175958ce786531b142497`, `rawArea = 0.5023951571206453`, `normalizedArea = 0.5023951571206453`, and `collapseObserved = false`. Therefore the exact retained Run #24 artifact does **not** contain the claimed `~2.27e-13` collapse. This is stronger evidence that the `~2.27e-13` observation originated from a different historical artifact, representation, or execution lineage that has not yet been identified. The provenance search remains open; no production mutation is authorized by this finding.
+
 ### Locked rules
 
 - `MIN_AREA = 0.00005` remains unchanged during forensic work.
