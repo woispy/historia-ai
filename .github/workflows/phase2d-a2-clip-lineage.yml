@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - codex/phase2.8-c-a2-edge-trace-clip-lineage
+  pull_request:
+    branches:
+      - integration/phase-a-h-production
   workflow_dispatch:
 
 permissions:
