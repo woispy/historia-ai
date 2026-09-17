@@ -39,6 +39,9 @@ assert.equal(replay.endpointEnd.lakeInterior, true);
 assert.equal(replay.endpointEnd.resolvedIsFinal, true);
 assert.deepEqual(replay.endpointEnd.resolved, replay.endpointEnd.shoreline);
 
+// Candidate-only gate: this fixture must never become political authority by itself.
+assert.equal(replay.sourceArtifact.runId, 35164261384);
+
 console.log(
   "C3 Edge-3 authority equivalence replay passed: 257 samples / 9 lake interiors / 9 shoreline recoveries / 0 invalid.",
 );
