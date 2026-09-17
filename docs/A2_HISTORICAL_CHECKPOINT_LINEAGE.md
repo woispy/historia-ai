@@ -30,7 +30,7 @@ and runs four forensic probes:
 3. `phase2d-a2-counterfactual-land-halfplane.mjs`
 4. `phase2d-a2-authority-isolation.mjs`
 
-The workflow uploads their outputs as one forensic artifact. The current branch HEAD is `e4c184f46f35f03f6d38f606628938b74d788fbc`, whose latest commit is `test: make A2 checkpoint execution identity explicit`. This commit adds explicit execution identity (`branch`, `HEAD`, target area `2.27e-13`, tiny epsilon `1e-10`, Node and Git versions) to the retained forensic artifact. No retained CI execution artifact for this exact HEAD has yet been verified, so the harness remains **available test machinery, not execution evidence**.
+The workflow uploads their outputs as one forensic artifact. The current branch HEAD is `e4c184f46f35f03f6d38f606628938b74d788fbc`, whose latest commit is `test: make A2 checkpoint execution identity explicit`. This commit adds explicit execution identity (`branch`, `HEAD`, target area `2.27e-13`, tiny epsilon `1e-10`, Node and Git versions) to the retained forensic artifact. No retained CI execution artifact for this exact HEAD has yet been verified, so the harness remains **available test machinery, not exact-HEAD execution evidence**.
 
 ## Historical checkpoint set
 
@@ -89,20 +89,60 @@ By contrast, the later retained execution explicitly fetched the pinned V15 sour
 
 This distinction is important: the historical provenance gap is now characterized as **execution/input availability failure**, while the actual retained V15 execution remains a clean no-collapse observation.
 
+## Retained Run #26 V4 execution evidence
+
+A separate retained forensic execution now provides actual execution evidence for the V4 stage replay harness, even though it is **not** the exact `e4c184f...` execution-identity artifact required by Issue #104.
+
+Workflow run:
+
+```text
+Run #26 / 35234798862
+HEAD: 8cb5151b74b5174d78570b2aea1acf455b15a686
+Artifact: a2-amisos-forensic-reports
+Artifact ID: 10502413884
+Digest: sha256:14e26312c24a7a19b99c09aa0c0077ad88f4ba10152ec5e5a46eda72899a05e2
+```
+
+The retained artifact contains:
+
+- `a2-amisos-checkpoint-replay.json`
+- `a2-amisos-forensic-report.json`
+- `a2-amisos-stage-replay-v4.json`
+
+The workflow job completed successfully, including physical asset generation, historical GIS generation, runtime-to-GPU tracing, historical checkpoint replay, V4 stage replay, and forensic report upload.
+
+The V4 artifact records **zero tiny hits and zero target-exact hits** at all six replay checkpoints:
+
+| Checkpoint | Status | Observed stage count | Minimum observed absolute area | Tiny hits |
+|---|---:|---:|---:|---:|
+| `837ec8dd...` | build-failed | 3127 | `0.00141952972467152` | 0 |
+| `bdf166a4...` | success | 779 | `0.5015050788261988` | 0 |
+| `3021b2d1...` | success | 779 | `0.5015050788261988` | 0 |
+| `7d895c99...` | success | 779 | `0.5015050788261988` | 0 |
+| `5be399d4...` | success | 779 | `0.5015050788261988` | 0 |
+| `6b742412...` | success | 61985 | `0.0034620092040995587` | 0 |
+
+At the canonical `6b742412...` checkpoint, the minimum observed value is a real `A_RAW_POWER_CELL` / Voronoi-clip stage value of `0.0034620092040995587`, not `2.27e-13`. The accepted Amisos raw-cell value previously retained in the stage trace remains `0.006755373858482017`.
+
+The runtime-to-GPU forensic report in the same retained artifact records one Amisos runtime polygon with area `0.15216490540012728`; the GPU raw and normalized values are identical, and LOD0–3 remain far above the tiny threshold. No tiny-area hit is reported.
+
+This Run #26 result therefore strengthens the existing conclusion that the **currently replayed producer → runtime → GPU path does not reproduce the historical tiny-area observation**. It does not establish the historical representation that first contained `~2.27e-13`, and it does not replace the exact-HEAD execution gate.
+
 ## Current interpretation
 
-The checkpoint machinery narrows the historical search space, but it does **not** close A2.
+The checkpoint machinery and retained Run #26 evidence narrow the historical search space, but they do **not** close A2.
 
 Current proven facts remain:
 
 ```text
 canonical stage trace       → 0.006755373858482017 → no tiny hit
+Run #26 V4 replay           → min 0.001419... / 0.003462... → no tiny hit
 pinned V15 Run #24          → 0.5023951571206453   → no tiny hit
 first unpinned telemetry   → ENOENT before producer result
 historical ~2.27e-13       → producer/artifact still unidentified
 ```
 
-The current checkpoint branch has now been instrumented so that any future retained execution can be tied unambiguously to its exact branch/HEAD and target threshold. Until such an artifact exists, no checkpoint result should be treated as an executed finding.
+The current checkpoint branch has been instrumented so that any future retained execution can be tied unambiguously to its exact branch/HEAD and target threshold. Until an artifact from the exact `e4c184f...` instrumentation head is verified, that harness remains **execution machinery without exact-HEAD evidence**.
 
 ## A2 tracking gate
 
@@ -129,7 +169,7 @@ and what exact geometry representation did that artifact measure?
 
 ## Next forensic action
 
-Execute the instrumented checkpoint/authority-isolation harness under CI, retain the artifact including `execution-identity.txt`, and compare the Amisos producer areas and polygons across `5f48731e...`, `bdf166a4...`, and `3021b2d1...`.
+Execute and retain the instrumented checkpoint/authority-isolation harness at exact branch HEAD `e4c184f46f35f03f6d38f606628938b74d788fbc`, including `execution-identity.txt`, and compare the Amisos producer areas and polygons across `5f48731e...`, `bdf166a4...`, and `3021b2d1...`.
 
 Acceptance is **not** merely “one checkpoint differs.” The required evidence is a common lineage that explains:
 
