@@ -55,6 +55,31 @@ function bbox(poly) {
   const ys = poly.map((p) => p[1]);
   return { minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys), spanX: Math.max(...xs) - Math.min(...xs), spanY: Math.max(...ys) - Math.min(...ys) };
 }
+function convexHull(points) {
+  if (!Array.isArray(points) || points.length < 3) return points ?? [];
+  const pts = [...points].map((p) => [p[0], p[1]]).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lower = [];
+  for (const p of pts) {
+    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop();
+    lower.push(p);
+  }
+  const upper = [];
+  for (let i = pts.length - 1; i >= 0; i -= 1) {
+    const p = pts[i];
+    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop();
+    upper.push(p);
+  }
+  lower.pop();
+  upper.pop();
+  return lower.concat(upper);
+}
+function cancellationRatio(poly) {
+  const a = area(poly);
+  const hull = convexHull(poly);
+  const h = area(hull);
+  return h > 0 ? a / h : null;
+}
 function selfIntersections(poly) {
   const hits = [];
   if (!Array.isArray(poly) || poly.length < 4) return hits;
@@ -73,8 +98,8 @@ function selfIntersections(poly) {
 function trace(poly) {
   const rounded = round(poly);
   return {
-    raw: { vertexCount: poly.length, area: area(poly), translatedArea: translatedArea(poly), bbox: bbox(poly), polygon: poly, selfIntersections: selfIntersections(poly) },
-    rounded5: { vertexCount: rounded.length, area: area(rounded), translatedArea: translatedArea(rounded), bbox: bbox(rounded), polygon: rounded, selfIntersections: selfIntersections(rounded) },
+    raw: { vertexCount: poly.length, area: area(poly), translatedArea: translatedArea(poly), bbox: bbox(poly), polygon: poly, selfIntersections: selfIntersections(poly), convexHullArea: area(convexHull(poly)), cancellationRatio: cancellationRatio(poly) },
+    rounded5: { vertexCount: rounded.length, area: area(rounded), translatedArea: translatedArea(rounded), bbox: bbox(rounded), polygon: rounded, selfIntersections: selfIntersections(rounded), convexHullArea: area(convexHull(rounded)), cancellationRatio: cancellationRatio(rounded) },
   };
 }
 
@@ -132,6 +157,9 @@ try {
         unique6DecimalCount: uniqueClipPoints.length,
         unique6Decimal: uniqueClipPoints,
         unique6DecimalArea: area(uniqueClipPoints),
+        unique6DecimalTranslatedArea: translatedArea(uniqueClipPoints),
+        unique6DecimalConvexHullArea: area(convexHull(uniqueClipPoints)),
+        unique6DecimalCancellationRatio: cancellationRatio(uniqueClipPoints),
         duplicateReduction: rawClipPoints.length - uniqueClipPoints.length,
       },
       clipped: clipped.length >= 3 ? trace(clipped) : { vertexCount: clipped.length, area: null, polygon: clipped },
