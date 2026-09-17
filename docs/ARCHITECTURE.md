@@ -392,7 +392,7 @@ Current forensic policy:
 
 - B4 calibration is forensic-only.
 - A1 remains a provenance/stage-lineage investigation.
-- A2 has cleared the currently replayed Phase 2D producer path; runtime → MapBin → GPU lineage remains under investigation.
+- A2 current runtime → MapBin → GPU → LOD replay is cleared for the reported anomaly; the historical `2.27e-13` artifact remains unresolved at the producer/provenance lineage level.
 - C requires a real Amasya Edge-3 replay and authoritative binding, not merely a semantic unit test.
 - `MIN_AREA = 0.00005` remains locked until forensic closure.
 - No 1300 → 1326 geometry copying.
