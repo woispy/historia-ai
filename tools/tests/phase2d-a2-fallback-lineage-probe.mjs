@@ -9,10 +9,6 @@ const worktree = "/tmp/a2-fallback-lineage";
 const target = [36.33, 41.29];
 const commits = [
   ["fallback-introduced", "0dd1dadb90103b5706fd87c470b8d4a6dc85f496"],
-  ["tiny-fallback-radius", "2edad3f3a5c5c4f6d6d5f0c5f7f4b0f6c4c5d6e7"],
-  ["centroid-only-acceptance", "8fb70748e0da3624103b554c040c0a9d972c719b"],
-  ["envelope-anchor", "38ecea26143b69c04e4411c0bbd7a7071333538b"],
-  ["tiny-invariant", "535d6a6bd6a8599f3bb6c69ac4897ef5806c2652"],
   ["historical-candidate-search", "2fbab59d49825d122edabb31de86cc4ecdeb09b2"],
   ["physical-containment-fix", "e67cdd3f7a3b89631c497f0d2ec1ac9d24444364"],
 ];
@@ -30,7 +26,9 @@ function area(poly) {
   }
   return Math.abs(s) / 2;
 }
-function round(poly) { return poly.map(([x, y]) => [Number(x.toFixed(5)), Number(y.toFixed(5))]); }
+function round(poly, digits = 5) {
+  return poly.map(([x, y]) => [Number(x.toFixed(digits)), Number(y.toFixed(digits))]);
+}
 
 rmSync(worktree, { recursive: true, force: true });
 mkdirSync(join(root, "forensic-output"), { recursive: true });
@@ -57,7 +55,8 @@ try {
         target,
         vertexCount: polygon?.length ?? 0,
         rawArea: polygon?.length ? area(polygon) : null,
-        roundedArea: polygon?.length ? area(round(polygon)) : null,
+        roundedArea5: polygon?.length ? area(round(polygon, 5)) : null,
+        roundedArea6: polygon?.length ? area(round(polygon, 6)) : null,
         polygon: polygon ?? null,
       });
     } catch (error) {
@@ -70,15 +69,15 @@ try {
   rmSync(worktree, { recursive: true, force: true });
 }
 
-const hits = results.filter((r) => Number.isFinite(r.rawArea) && r.rawArea <= 1e-10);
+const tiny = results.filter((r) => Number.isFinite(r.rawArea) && r.rawArea <= 1e-10);
 const output = {
   probe: "A2 historical fallback lineage for Amisos metadata centroid",
   target,
   targetArea: 2.27e-13,
   tinyEpsilon: 1e-10,
   results,
-  tinyHits: hits,
-  rootCauseCandidate: hits.length > 0 ? "fallback-clipping representation" : null,
+  tinyHits: tiny,
+  rootCauseCandidate: tiny.length > 0 ? "fallback-clipping representation" : null,
 };
 writeFileSync(join(root, "forensic-output/a2-fallback-lineage.json"), JSON.stringify(output, null, 2));
 process.stdout.write(JSON.stringify(output, null, 2));
