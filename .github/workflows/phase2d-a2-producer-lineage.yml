@@ -112,8 +112,7 @@ jobs:
         run: |
           node tools/tests/phase2d-a2-authority-isolation.mjs > forensic-output/a2-authority-isolation.json 2> forensic-output/a2-authority-isolation.stderr
           status=$?
-          cat forensic-output/a2-authority-isolation.json
-          if [ -s forensic-output/a2-authority-isolation.stderr ]; then cat forensic-output/a2-authority-isolation.stderr; fi
+          cat forensic-output/a2-authority-isolation.stderr
           exit $status
       - name: Upload A2 forensic artifacts
         if: always()
