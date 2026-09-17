@@ -243,14 +243,18 @@ V15 normalize(canonical raw)   → ~0.006626536473      → no tiny
 pinned V15 producer            → 0.5023951571206453   → no tiny
 Run #26 V4 replay              → no tiny at all checkpoints
 fallback history               → tiny fallback family exists
+clipCellToLand Run #9          → no tiny / no filter-collapse / no self-intersection
 clipCellToLand history         → custom reconstruction + rounding exists
 historical ~2.27e-13           → still unidentified
 ```
 
-The working hypothesis is therefore now **historical geometry representation/provenance discontinuity**, with two priority branches:
+The working hypothesis is therefore now **historical geometry representation/provenance discontinuity**. The clip-lineage branch has now been exercised without reproducing the artifact, so the remaining priority is the exact historical artifact identity plus the fallback/serialization representation family. The tested clip path remains part of the audit trail, but it is no longer supported as the immediate producer by Run #9.
 
-1. the `clipCellToLand → uniquePoints → centroid-sort → roundPolygon` representation transition;
-2. the later tiny-anchor fallback family and its serialization/rounding behavior.
+Priority next:
+
+1. identify the first artifact/run that recorded `2.27e-13`;
+2. reconstruct the tiny-anchor fallback family and its serialization/rounding boundaries;
+3. preserve the clip-lineage Run #9 evidence as a negative reproduction result.
 
 Neither branch is authorized as the root cause until the exact historical artifact or an exact numerical reproduction is obtained.
 
