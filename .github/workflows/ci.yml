@@ -68,6 +68,8 @@ jobs:
         run: npm ci
       - name: Lint
         run: npm run lint
+      - name: Run C3 Pontus-Amasya Edge-3 authority equivalence tests
+        run: npm run test:c3-amasya-edge3-authority-equivalence
       - name: Generate world physical geometry assets
         run: npm run build:assets
       - name: Verify repository cleanliness after physical assets
@@ -110,8 +112,6 @@ jobs:
         run: npm run test:anatolia-phase2d
       - name: Run Phase 2D geometry integrity tests
         run: npm run test:anatolia-phase2d-geometry-integrity
-      - name: Run C3 Pontus-Amasya Edge-3 authority equivalence tests
-        run: npm run test:c3-amasya-edge3-authority-equivalence
       - name: Run Phase 2E-2H cartography tests
         run: npm run test:cartography-2efgh
       - name: Run cartography foundation regression tests
