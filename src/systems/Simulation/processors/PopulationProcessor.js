@@ -8,7 +8,7 @@ function clamp(value, min, max) {
 export function processPopulation(gameSession) {
   const state = getState(gameSession);
   const simulation = state.simulation ?? {};
-  const cityRepository = gameSession.world.repositories.cities;
+  const cityRepository = state.cities;
   let nextCities = cityRepository;
   let totalPopulation = 0;
 
@@ -36,19 +36,9 @@ export function processPopulation(gameSession) {
     totalPopulation += population;
   }
 
-  const nextSession = {
-    ...gameSession,
-    world: {
-      ...gameSession.world,
-      repositories: {
-        ...gameSession.world.repositories,
-        cities: nextCities,
-      },
-    },
-  };
-
-  return updateState(nextSession, {
+  return updateState(gameSession, {
     ...state,
+    cities: nextCities,
     simulation: {
       ...simulation,
       population: totalPopulation,
