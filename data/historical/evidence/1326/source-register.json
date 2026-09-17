@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "coverageId": "world-1326",
+  "historicalDate": "1326-04-07",
+  "purpose": "Evidence register for the canonical 1326 scenario. This is not a geometry dataset.",
+  "sources": [
+    {
+      "id": "tdv-orhan",
+      "type": "historical-reference",
+      "title": "Orhan",
+      "publisher": "TDV İslâm Ansiklopedisi",
+      "url": "https://islamansiklopedisi.org.tr/orhan",
+      "scope": "Bursa capture, Orhan succession, early Bithynian campaigns",
+      "use": "primary historical evidence for scenario events and temporal state",
+      "confidence": "high"
+    },
+    {
+      "id": "tdv-bursa",
+      "type": "historical-reference",
+      "title": "Bursa",
+      "publisher": "TDV İslâm Ansiklopedisi",
+      "url": "https://islamansiklopedisi.org.tr/bursa",
+      "scope": "Bursa siege, surrender and post-capture settlement context",
+      "use": "event and city-state evidence",
+      "confidence": "high"
+    },
+    {
+      "id": "tdv-anatolian-beyliks",
+      "type": "historical-reference",
+      "title": "Anadolu Beylikleri",
+      "publisher": "TDV İslâm Ansiklopedisi",
+      "url": "https://islamansiklopedisi.org.tr/anadolu-beylikleri",
+      "scope": "Karesi, Germiyan, Eşref, Saruhan, Aydın, Menteşe, Alâiye and other Anatolian polities",
+      "use": "political entity existence and broad regional context; not polygon authority",
+      "confidence": "medium-high"
+    },
+    {
+      "id": "historical-basemaps",
+      "type": "geospatial-reference",
+      "title": "Historical boundaries of world countries and cultural regions",
+      "publisher": "aourednik/historical-basemaps",
+      "url": "https://github.com/aourednik/historical-basemaps",
+      "scope": "global historical political/cultural reference layers",
+      "use": "source evidence and comparison only; verify against independent sources",
+      "confidence": "medium",
+      "licenseNote": "Repository is GPL-3.0 and explicitly describes the maps as work in progress; do not treat source polygons as automatically canonical Historia AI geometry."
+    },
+    {
+      "id": "medieval-dioceses-1350",
+      "type": "supporting-geospatial-reference",
+      "title": "Dioceses, Medieval Europe, ca. 1350",
+      "publisher": "Stanford Digital Repository",
+      "url": "https://geo.nyu.edu/catalog/stanford-yb346mk5715",
+      "scope": "European ecclesiastical jurisdictions around the fourteenth century",
+      "use": "supporting evidence for European settlement/jurisdiction geography; never substitute for political borders",
+      "confidence": "medium",
+      "license": "CC BY 3.0"
+    },
+    {
+      "id": "early-ottoman-territory-1326",
+      "type": "cartographic-reference",
+      "title": "Early Ottoman Territory and the Byzantine Frontier",
+      "publisher": "Open book / historical synthesis",
+      "url": "https://lib.ysu.am/open_books/413864.pdf",
+      "scope": "Ottoman territory and Byzantine frontier around 1326",
+      "use": "visual cross-check for western Anatolia; not direct geometry authority",
+      "confidence": "medium"
+    }
+  ],
+  "rules": [
+    "No source polygon is promoted directly to canonical political geometry without reconciliation.",
+    "1300 evidence is not silently reused as 1326 ownership.",
+    "A source can establish an entity or event without establishing an exact boundary.",
+    "Political control is stored separately from political geography.",
+    "Uncertain boundaries retain confidence and provenance instead of being fabricated."
+  ]
+}

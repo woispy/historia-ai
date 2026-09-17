@@ -8,7 +8,9 @@ const PASS_NAMES = Object.freeze([
 ]);
 const DEFAULT_FLAGS = Object.freeze({
   renderPhysicalLand: true,
-  renderTerrain: true,
+  // Terrain data is retained for diagnostics, but stays fail-closed until the
+  // streamed DEM mesh has passed visual validation at every LOD.
+  renderTerrain: false,
   renderWaterAndCoast: true,
   renderPoliticalProvinces: true,
 });

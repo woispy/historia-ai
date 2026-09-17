@@ -1,0 +1,127 @@
+{
+  "id": "historical_gis_1326",
+  "date": "1326-04-07",
+  "projection": "EPSG:4326",
+  "authorityStatus": "evidence-registry-only",
+  "canonicalGeometry": {
+    "status": "not-promoted",
+    "policy": "No source polygon is canonical political authority until temporal, entity, geometry, topology, provenance, and historical review gates pass."
+  },
+  "scope": {
+    "scenario": "1326",
+    "tiers": {
+      "tier1": [
+        "Anatolia",
+        "Byzantine Empire",
+        "Balkans",
+        "Black Sea",
+        "Caucasus",
+        "Iran",
+        "Iraq",
+        "Syria",
+        "Egypt"
+      ],
+      "tier2": [
+        "Europe",
+        "Central Asia",
+        "North Africa",
+        "South Asia",
+        "China"
+      ],
+      "tier3": "More distant regions; absence of Tier 3 detail must not prevent a playable 1326 scenario."
+    }
+  },
+  "sources": [
+    {
+      "id": "cliopatria",
+      "role": "global-political-evidence",
+      "provider": "Seshat Global History Databank",
+      "dataset": "Cliopatria",
+      "coverage": "3400 BCE-2024 CE",
+      "format": "GeoJSON",
+      "projection": "EPSG:4326",
+      "temporalModel": "FromYear/ToYear intervals",
+      "status": "candidate-evidence",
+      "licenseReview": "Required before redistribution or embedding source-derived geometry",
+      "limitations": [
+        "One historical interpretation of past territory",
+        "Border and naming uncertainty exists",
+        "Varying timestep and spatial scale"
+      ],
+      "url": "https://github.com/Seshat-Global-History-Databank/cliopatria"
+    },
+    {
+      "id": "medieval-europe-digital-atlas",
+      "role": "late-medieval-europe-boundary-evidence",
+      "provider": "Stanford Digital Repository / University of Texas Libraries GeoData",
+      "dataset": "Digital Atlas of Dioceses and Ecclesiastical Provinces in Late Medieval Europe",
+      "coverage": "1200-1500",
+      "format": "Shapefile / GeoJSON supplement",
+      "status": "candidate-evidence",
+      "license": "CC BY 3.0",
+      "limitations": [
+        "Ecclesiastical geography, not a political-province authority",
+        "Useful for European historical boundary context only"
+      ],
+      "url": "https://geodata-cdn.lib.utexas.edu/catalog/stanford-rh195hm5975"
+    },
+    {
+      "id": "openhistoricalmap",
+      "role": "historical-feature-and-boundary-evidence",
+      "provider": "OpenHistoricalMap",
+      "dataset": "OpenHistoricalMap database",
+      "coverage": "Historical and modern geography where mapped",
+      "format": "OHM XML / APIs / bulk data",
+      "status": "candidate-evidence",
+      "license": "CC0 except individually tagged features with other open licenses",
+      "limitations": [
+        "Collaborative source with uneven historical coverage",
+        "Individual feature license tags must be preserved and checked",
+        "Not an automatic authority for 1326 political boundaries"
+      ],
+      "url": "https://www.openhistoricalmap.org/export"
+    },
+    {
+      "id": "world-historical-gazetteer",
+      "role": "historical-place-identity-and-reconciliation-evidence",
+      "provider": "World Historical Gazetteer",
+      "dataset": "WHG historical place records",
+      "coverage": "Multi-period historical places and source-linked records",
+      "format": "Historical place records / linked data",
+      "status": "candidate-evidence",
+      "limitations": [
+        "Place identity and provenance support; not a single authoritative 1326 province layer"
+      ],
+      "url": "https://whgazetteer.org/"
+    }
+  ],
+  "exclusions": [
+    {
+      "id": "historical-basemaps-1300",
+      "reason": "1300 reference material only; must not be relabeled or copied into 1326 merely to fill coverage"
+    },
+    {
+      "id": "euratlas-1300",
+      "reason": "Paid source; not part of the free-source production pipeline"
+    }
+  ],
+  "pipeline": [
+    "source acquisition",
+    "evidence normalization",
+    "temporal normalization to 1326-04-07",
+    "entity reconciliation",
+    "geometry reconciliation",
+    "topology validation",
+    "provenance and confidence",
+    "review queue",
+    "canonical political geography",
+    "historical runtime asset",
+    "production mapbin"
+  ],
+  "notes": [
+    "This registry is not a canonical geography dataset.",
+    "Missing evidence remains missing until supported by a source or explicit reviewed reconstruction.",
+    "Political geometry and political control remain separate runtime concepts.",
+    "The first production implementation is 1326; future scenario years reuse the pipeline but are not populated by this registry."
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "coverageId": "anatolia-1300",
+  "status": "draft",
+  "projection": "EPSG:4326",
+  "bbox": [25.45, 35.72, 44.85, 42.35],
+  "declaredProvinceCount": 38,
+  "outsideCoverage": "undefined",
+  "internalGapPolicy": "zero-area-only-after-authoritative-topology",
+  "source": {
+    "kind": "curated-historical-reconstruction",
+    "sourceReferences": [],
+    "reviewStatus": "draft"
+  },
+  "promotion": {
+    "fallbackProvinceCount": 0,
+    "overlapCount": 0,
+    "internalGapCount": 0,
+    "sharedEdgeMismatchCount": 0,
+    "provenanceErrorCount": 0,
+    "ready": false
+  }
+}

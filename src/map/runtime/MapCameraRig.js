@@ -22,13 +22,14 @@ export class MapCameraRig {
       x: normalizeLongitude(initialRenderX),
       renderX: initialRenderX,
       y: 0,
-      zoom: 1,
+      zoom: Number.isFinite(Number(options.initialZoom)) ? Number(options.initialZoom) : 1,
       pitch: Number.isFinite(Number(options.pitch)) ? Number(options.pitch) : 24,
       yaw: Number.isFinite(Number(options.yaw)) ? Number(options.yaw) : 0,
     };
     this.velocity = { x: 0, y: 0, zoom: 0, pitch: 0, yaw: 0 };
     this.minZoom = options.minZoom ?? 1;
     this.maxZoom = options.maxZoom ?? 96;
+    this.state.zoom = clamp(this.state.zoom, this.minZoom, this.maxZoom);
     this.pitchMin = options.pitchMin ?? 10;
     this.pitchMax = options.pitchMax ?? 42;
     this.yawMin = options.yawMin ?? -12;

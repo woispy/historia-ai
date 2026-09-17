@@ -53,9 +53,9 @@
 - [x] Physical geography remains authoritative
 - [x] Dedicated Phase 2C validation suite
 
-## Phase 2D — Historical province geometry 🚧
+## Phase 2D — Historical province geometry (legacy/research) 🚧
 
-- [x] Replace coarse Anatolia source polygons at runtime
+- [x] Replace coarse Anatolia source polygons at runtime (legacy transition output)
 - [x] Deterministic 38-province cartographic geometry layer
 - [x] Dense land control field
 - [x] Historical GIS shape anchors
@@ -75,7 +75,25 @@
 
 ### Phase 2D rule
 
-The generated geometry is a deterministic cartographic reconstruction, not a claim of medieval cadastral precision. Exact political control remains in the historical metadata layer. Future hand-reviewed boundary constraints must modify builder inputs rather than introduce screen-coordinate hacks or a second rendering system.
+The generated geometry is a deterministic cartographic reconstruction, not a claim of medieval cadastral precision. Exact political control remains in the historical metadata layer. Phase 2D is retained for legacy, research and forensic comparison; it is not the production political geometry authority. No new Voronoi, jitter, anchor or fallback feature may be added to promote it.
+
+## Phase 2E — Political Geography Authority v2 ⏳
+
+- [ ] Freeze the Political Geography Authority v2 contract
+- [ ] Define physical, political, topology, provenance and political-state authority boundaries
+- [ ] Create the `anatolia-1300` 38-province golden dataset fixture
+- [ ] Build shared political vertex/edge/face topology
+- [ ] Add declared-coverage overlap, internal-gap and shared-edge validation
+- [ ] Add provenance, confidence, review status and geometry version validation
+- [ ] Compile authoritative geometry/topology/LOD into the map pack
+- [ ] Validate owner mutation without geometry rebuild
+- [ ] Pass the Authority Promotion Gate before scaling beyond Anatolia
+
+### Phase 2E promotion gate
+
+Phase 2E becomes production authority only when the 38-province proof dataset has zero fallback geometry, zero internal overlap, zero internal gap, complete provenance, deterministic builds, correct picking, physical validation and green CI. Until then, Phase 2D remains legacy/research tooling and no 500+ province migration begins.
+
+The contract is world-compatible from the first implementation. Physical geography, sea/coast/lake/river layers and LOD interfaces must support global coverage even while the first authoritative political dataset is Anatolia and its surroundings.
 
 ---
 

@@ -18,8 +18,8 @@ export function encodeMapBin(entries = []) {
     const entry = entries[i];
     const province = entry?.province ?? entry;
     const geometryAsset = entry?.geometry ?? entry;
-    ids[i] = numericId(province?.identity?.id ?? province?.province?.id, i + 1);
-    owner[i] = numericId(province?.ownership?.ownerId ?? province?.identity?.ownerId ?? province?.country?.id, 0);
+    ids[i] = numericId(province?.identity?.id ?? province?.province?.id ?? province?.id, i + 1);
+    owner[i] = numericId(province?.ownership?.ownerId ?? province?.identity?.ownerId ?? province?.country?.id ?? entry?.country?.id, 0);
     const provinceTilesStart = tiles.length / TILE_STRIDE;
     const points = [];
     for (const polygon of geometryAsset?.polygons ?? geometryAsset?.geometry?.polygons ?? []) {

@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "id": "historical_gis_1326_evidence_matrix",
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "evidence-only",
+  "purpose": "Track date-specific historical entity evidence before canonical geometry promotion.",
+  "promotionRule": "No record in this matrix is a canonical province geometry or runtime political authority.",
+  "records": [
+    {
+      "entityId": "ottoman-beylik",
+      "displayName": "Osmanlı Beyliği",
+      "region": "Anatolia",
+      "tier": 1,
+      "existenceAtScenarioStart": "supported",
+      "controlAtScenarioStart": "supported",
+      "geometryStatus": "pending-source-acquisition",
+      "confidence": 0.95,
+      "evidence": [
+        {
+          "source": "TDV İslâm Ansiklopedisi — Bursa",
+          "claim": "Bursa surrendered/captured on 6 April 1326; scenario starts 7 April 1326.",
+          "dateScope": "1326-04-06",
+          "role": "historical-control-event"
+        },
+        {
+          "source": "TDV İslâm Ansiklopedisi — Orhan",
+          "claim": "Orhan captured Bursa after the siege.",
+          "dateScope": "1326",
+          "role": "historical-control-context"
+        }
+      ],
+      "notes": "Bursa control is a scenario-state fact and must not be encoded by mutating province geometry."
+    },
+    {
+      "entityId": "byzantine-empire",
+      "displayName": "Bizans İmparatorluğu",
+      "region": "Byzantine Empire",
+      "tier": 1,
+      "existenceAtScenarioStart": "supported",
+      "controlAtScenarioStart": "supported-in-general; province-level reconciliation pending",
+      "geometryStatus": "pending-source-acquisition",
+      "confidence": 0.85,
+      "evidence": [
+        {
+          "source": "Tabula Imperii Byzantini (Austrian Academy of Sciences)",
+          "claim": "Historical geography coverage extends through the Byzantine period to the mid-15th century.",
+          "dateScope": "4th century-mid-15th century",
+          "role": "historical-geography-reference"
+        },
+        {
+          "source": "Cliopatria",
+          "claim": "Candidate global political-entity geometry with temporal intervals.",
+          "dateScope": "1326 interval where matching entity record exists",
+          "role": "candidate-geometry-evidence"
+        }
+      ],
+      "notes": "No single source is accepted as automatic canonical boundary authority."
+    },
+    {
+      "entityId": "esrefogullari",
+      "displayName": "Eşrefoğulları",
+      "region": "Anatolia",
+      "tier": 1,
+      "existenceAtScenarioStart": "supported",
+      "controlAtScenarioStart": "supported",
+      "geometryStatus": "pending-source-acquisition",
+      "confidence": 0.9,
+      "evidence": [
+        {
+          "source": "TDV İslâm Ansiklopedisi — Eşrefoğulları",
+          "claim": "Eşref II Süleyman was killed on 9 October 1326; therefore the polity had not yet ended on 7 April 1326.",
+          "dateScope": "1326-04-07",
+          "role": "temporal-existence-bound"
+        }
+      ],
+      "notes": "Later 1326 territorial changes must not be projected backward to the scenario start."
+    },
+    {
+      "entityId": "ilkhanate",
+      "displayName": "İlhanlılar",
+      "region": "Iran-Iraq-Caucasus-Anatolia",
+      "tier": 1,
+      "existenceAtScenarioStart": "supported",
+      "controlAtScenarioStart": "supported-in-general; frontier geometry pending",
+      "geometryStatus": "pending-source-acquisition",
+      "confidence": 0.9,
+      "evidence": [
+        {
+          "source": "Encyclopaedia Iranica — ABŪ SAʿĪD BAHĀDOR KHAN",
+          "claim": "Abū Saʿīd ruled 1316-1335 and Ilkhanid forces were active in 1326.",
+          "dateScope": "1326",
+          "role": "historical-polity-context"
+        },
+        {
+          "source": "Encyclopaedia Iranica — IL-KHANIDS",
+          "claim": "Ilkhanid rule encompassed Persia, Iraq, southern Caucasus and substantial Anatolian territories.",
+          "dateScope": "Ilkhanid period",
+          "role": "regional-control-context"
+        }
+      ],
+      "notes": "Broad regional extent is not sufficient to create a canonical province polygon."
+    },
+    {
+      "entityId": "karasi",
+      "displayName": "Karesi Beyliği",
+      "region": "Western Anatolia",
+      "tier": 1,
+      "existenceAtScenarioStart": "supported",
+      "controlAtScenarioStart": "supported-in-general",
+      "geometryStatus": "pending-source-acquisition",
+      "confidence": 0.8,
+      "evidence": [
+        {
+          "source": "TDV İslâm Ansiklopedisi — Anadolu Beylikleri",
+          "claim": "Karesi is listed among the Anatolian beyliks of the period.",
+          "dateScope": "14th century context",
+          "role": "polity-existence-context"
+        }
+      ],
+      "notes": "Exact 7 April 1326 territorial extent still requires date-specific reconciliation."
+    },
+    {
+      "entityId": "saruhan",
+      "displayName": "Saruhan Beyliği",
+      "region": "Western Anatolia",
+      "tier": 1,
+      "existenceAtScenarioStart": "supported",
+      "controlAtScenarioStart": "supported-in-general",
+      "geometryStatus": "pending-source-acquisition",
+      "confidence": 0.8,
+      "evidence": [
+        {
+          "source": "TDV İslâm Ansiklopedisi — Anadolu Beylikleri",
+          "claim": "Saruhan is dated 1302-1410.",
+          "dateScope": "1302-1410",
+          "role": "polity-existence-bound"
+        }
+      ],
+      "notes": "Existence interval does not by itself establish the 1326 border."
+    },
+    {
+      "entityId": "aydin",
+      "displayName": "Aydınoğulları",
+      "region": "Western Anatolia",
+      "tier": 1,
+      "existenceAtScenarioStart": "supported",
+      "controlAtScenarioStart": "supported-in-general",
+      "geometryStatus": "pending-source-acquisition",
+      "confidence": 0.8,
+      "evidence": [
+        {
+          "source": "TDV İslâm Ansiklopedisi — Anadolu Beylikleri",
+          "claim": "Aydın is dated 1308-1426.",
+          "dateScope": "1308-1426",
+          "role": "polity-existence-bound"
+        }
+      ],
+      "notes": "Existence interval does not by itself establish the 1326 border."
+    },
+    {
+      "entityId": "alaye",
+      "displayName": "Alâiye Beyliği",
+      "region": "Southern Anatolia",
+      "tier": 1,
+      "existenceAtScenarioStart": "supported",
+      "controlAtScenarioStart": "supported-in-general",
+      "geometryStatus": "pending-source-acquisition",
+      "confidence": 0.8,
+      "evidence": [
+        {
+          "source": "TDV İslâm Ansiklopedisi — Anadolu Beylikleri",
+          "claim": "Alâiye is dated 1293-1471.",
+          "dateScope": "1293-1471",
+          "role": "polity-existence-bound"
+        }
+      ],
+      "notes": "Existence interval does not by itself establish the 1326 border."
+    }
+  ],
+  "globalRules": [
+    "Existence evidence and geometry evidence are separate gates.",
+    "Control evidence and canonical political geometry are separate gates.",
+    "A later historical event must not be projected backward into 1326-04-07.",
+    "Missing geometry remains missing; no synthetic fallback is permitted.",
+    "All geometry promotion requires source identity, temporal applicability, reconciliation, topology validation, provenance, confidence, and review."
+  ]
+}
