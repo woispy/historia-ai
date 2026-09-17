@@ -117,35 +117,12 @@ function addSite(sites, seen, point, provinceId, kind) {
 }
 
 function addProvinceSites(sites, seen) {
-  let sequence = 0;
   for (const province of ANATOLIA_PROVINCE_METADATA) {
     const anchor = PHYSICAL_LAND_ANCHORS[province.id] ?? province.centroid;
     const anchorPoint = province.terrain === "lake" && isUsableCartographicPoint(anchor)
       ? anchor
       : province.centroid;
     addSite(sites, seen, anchorPoint, province.id, "province-anchor");
-  }
-}
-
-function addProvinceMicroSites(sites, seen) {
-  const radii = [0.04, 0.08, 0.12];
-  const directions = 8;
-  let sequence = 0;
-
-  for (const province of ANATOLIA_PROVINCE_METADATA) {
-    const centre = PHYSICAL_LAND_ANCHORS[province.id] ?? province.centroid;
-    for (const radius of radii) {
-      for (let direction = 0; direction < directions; direction += 1) {
-        const angle = (direction / directions) * Math.PI * 2
-          + deterministicJitter(sequence, province.centroid[0] * 100);
-        const point = [
-          centre[0] + Math.cos(angle) * radius,
-          centre[1] + Math.sin(angle) * radius,
-        ];
-        if (isPoliticalCartographicPoint(point)) addSite(sites, seen, point, province.id, "province-micro-control");
-        sequence += 1;
-      }
-    }
   }
 }
 
@@ -207,6 +184,7 @@ function buildVoronoiCell(siteIndex, sites) {
   let polygon = [[BBOX[0], BBOX[1]], [BBOX[2], BBOX[1]], [BBOX[2], BBOX[3]], [BBOX[0], BBOX[3]]];
   for (let otherIndex = 0; otherIndex < sites.length; otherIndex += 1) {
     if (siteIndex === otherIndex) continue;
+    if (!sites[otherIndex].provinceId) continue;
     const other = sites[otherIndex].point;
     const a = 2 * (other[0] - site[0]);
     const b = 2 * (other[1] - site[1]);
@@ -215,6 +193,25 @@ function buildVoronoiCell(siteIndex, sites) {
     if (polygon.length < 3) return [];
   }
   return polygon;
+}
+
+function buildLandVoronoiCells(siteIndex, politicalSites) {
+  const site = politicalSites[siteIndex].point;
+  const cells = [];
+  for (const landPolygon of ANATOLIA_PHYSICAL_ATLAS.landPolygons) {
+    let polygon = landPolygon.slice(0, -1);
+    for (let otherIndex = 0; otherIndex < politicalSites.length; otherIndex += 1) {
+      if (siteIndex === otherIndex) continue;
+      const other = politicalSites[otherIndex].point;
+      const a = 2 * (other[0] - site[0]);
+      const b = 2 * (other[1] - site[1]);
+      const c = other[0] ** 2 + other[1] ** 2 - site[0] ** 2 - site[1] ** 2;
+      polygon = clipHalfPlane(polygon, a, b, c);
+      if (polygon.length < 3) break;
+    }
+    if (polygon.length >= 3) cells.push(polygon);
+  }
+  return cells;
 }
 
 function roundPolygon(polygon) {
@@ -236,14 +233,50 @@ function polygonCentroid(polygon) {
   return [sum[0] / polygon.length, sum[1] / polygon.length];
 }
 
-function buildFallbackPolygon(center, polygonRadii, diagnostic = false) {
+function findLandSafeCenters(anchor) {
+  const centers = [];
+  const seen = new Set();
+  const add = (point) => {
+    if (!isWithinAnatoliaEnvelope(point) || !isPhysicalLandPoint(point)) return;
+    const key = `${point[0].toFixed(4)}:${point[1].toFixed(4)}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    centers.push(point);
+  };
+  add(anchor);
+  for (let radius = 0.02; radius <= 0.3 && centers.length < 24; radius += 0.02) {
+    for (let direction = 0; direction < 16 && centers.length < 24; direction += 1) {
+      const angle = (direction / 16) * Math.PI * 2;
+      add([anchor[0] + Math.cos(angle) * radius, anchor[1] + Math.sin(angle) * radius]);
+    }
+  }
+  return centers;
+}
+
+function buildLandSafeCell(polygon, anchor) {
+  if (!Array.isArray(polygon) || polygon.length < 3) return [];
+  const scales = [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1];
+  for (const center of findLandSafeCenters(anchor)) {
+    for (const scale of scales) {
+      const candidate = polygon.map(([x, y]) => [
+        center[0] + (x - center[0]) * scale,
+        center[1] + (y - center[1]) * scale,
+      ]);
+      if (polygonArea(candidate) >= 0.00005 && isPhysicalLandPolygon(candidate)) return candidate;
+    }
+  }
+  return [];
+}
+
+function buildFallbackPolygon(center, polygonRadii, diagnostic = false, logBudget = null) {
   for (const polygonRadius of polygonRadii) {
     const polygon = Array.from({ length: 6 }, (_, index) => {
       const angle = (index / 6) * Math.PI * 2;
       return [center[0] + Math.cos(angle) * polygonRadius, center[1] + Math.sin(angle) * polygonRadius];
     });
 
-    if (diagnostic) {
+    if (diagnostic && (!logBudget || logBudget.remaining > 0)) {
+      if (logBudget) logBudget.remaining -= 1;
       const vertexResults = polygon.map((point) => isPhysicalLandPoint(point));
       const edgeFailures = [];
       for (let edgeIndex = 0; edgeIndex < polygon.length; edgeIndex += 1) {
@@ -277,8 +310,9 @@ function buildFallbackPolygon(center, polygonRadii, diagnostic = false) {
   return [];
 }
 
-function createAnchorFallbackPolygon(centroid, _requiresLandSafe = false, physicalLandAnchor = null, diagnostic = false) {
-  const polygonRadii = [0.002, 0.001, 0.0005, 0.00025, 0.0001, 0.00005];
+function createAnchorFallbackPolygon(centroid, _requiresLandSafe = false, physicalLandAnchor = null, diagnostic = false, maxPolygonRadius = Number.POSITIVE_INFINITY) {
+  const polygonRadii = [0.25, 0.18, 0.12, 0.08, 0.05, 0.03, 0.02, 0.01, 0.005, 0.002, 0.001, 0.0005, 0.00025, 0.0001, 0.00005]
+    .filter((radius) => radius <= maxPolygonRadius);
   const searchPasses = [
     { radialStep: 0.0025, maxRadius: 0.25, directions: 32 },
     { radialStep: 0.005, maxRadius: 0.75, directions: 32 },
@@ -286,16 +320,23 @@ function createAnchorFallbackPolygon(centroid, _requiresLandSafe = false, physic
   ];
   const candidateCenters = [];
   const seen = new Set();
+  const candidateLogBudget = { remaining: 48 };
+  const radiusLogBudget = { remaining: 24 };
+  const logCandidate = (payload) => {
+    if (!diagnostic || candidateLogBudget.remaining <= 0) return;
+    candidateLogBudget.remaining -= 1;
+    console.log("[Phase2D][phrygia-uluborlu][candidate]", payload);
+  };
 
   const addCandidate = (point, source = "candidate") => {
     if (!Array.isArray(point) || point.length < 2) {
-      if (diagnostic) console.log("[Phase2D][phrygia-uluborlu][candidate]", { source, point, accepted: false, reason: "invalid-point" });
-      return;
+      logCandidate({ source, point, accepted: false, reason: "invalid-point" });
+      return false;
     }
     const withinEnvelope = isWithinAnatoliaEnvelope(point);
     const physicalLand = isPhysicalLandPoint(point);
     if (!withinEnvelope || !physicalLand) {
-      if (diagnostic) console.log("[Phase2D][phrygia-uluborlu][candidate]", {
+      logCandidate({
         source,
         point,
         accepted: false,
@@ -303,32 +344,49 @@ function createAnchorFallbackPolygon(centroid, _requiresLandSafe = false, physic
         isPhysicalLandPoint: physicalLand,
         reason: !withinEnvelope ? "outside-anatolia-envelope" : "not-physical-land",
       });
-      return;
+      return false;
     }
     const key = `${point[0].toFixed(6)}:${point[1].toFixed(6)}`;
     if (seen.has(key)) {
-      if (diagnostic) console.log("[Phase2D][phrygia-uluborlu][candidate]", { source, point, accepted: false, reason: "duplicate" });
-      return;
+      logCandidate({ source, point, accepted: false, reason: "duplicate" });
+      return false;
     }
     seen.add(key);
     candidateCenters.push(point);
-    if (diagnostic) console.log("[Phase2D][phrygia-uluborlu][candidate]", { source, point, accepted: true, isPhysicalLandPoint: true });
+    logCandidate({ source, point, accepted: true, isPhysicalLandPoint: true });
+    return true;
+  };
+
+  const buildFromCandidate = (center) => {
+    const polygon = buildFallbackPolygon(center, polygonRadii, diagnostic, radiusLogBudget);
+    if (polygon.length >= 3) {
+      if (diagnostic) console.log("[Phase2D][phrygia-uluborlu][fallback-resolved]", { center, vertexCount: polygon.length });
+      return polygon;
+    }
+    return null;
   };
 
   const seeds = [physicalLandAnchor, centroid].filter(
     (point) => Array.isArray(point) && point.length >= 2,
   );
-  for (const seed of seeds) addCandidate(seed, seed === physicalLandAnchor ? "physical-land-anchor" : "historical-centroid");
+  for (const seed of seeds) {
+    if (!addCandidate(seed, seed === physicalLandAnchor ? "physical-land-anchor" : "historical-centroid")) continue;
+    const polygon = buildFromCandidate(seed);
+    if (polygon) return polygon;
+  }
 
   for (const seed of seeds) {
     for (const search of searchPasses) {
       for (let radius = search.radialStep; radius <= search.maxRadius; radius += search.radialStep) {
         for (let direction = 0; direction < search.directions; direction += 1) {
           const angle = (direction / search.directions) * Math.PI * 2;
-          addCandidate([
+          const point = [
             seed[0] + Math.cos(angle) * radius,
             seed[1] + Math.sin(angle) * radius,
-          ], `radial-${search.radialStep}/${search.maxRadius}-r${radius.toFixed(4)}-d${direction}`);
+          ];
+          if (!addCandidate(point, `radial-${search.radialStep}/${search.maxRadius}-r${radius.toFixed(4)}-d${direction}`)) continue;
+          const polygon = buildFromCandidate(point);
+          if (polygon) return polygon;
         }
       }
     }
@@ -338,13 +396,9 @@ function createAnchorFallbackPolygon(centroid, _requiresLandSafe = false, physic
     console.log("[Phase2D][phrygia-uluborlu][candidate-summary]", {
       seedCount: seeds.length,
       candidateCenterCount: candidateCenters.length,
-      candidateCenters,
+      candidateCenters: candidateCenters.slice(0, 24),
+      truncated: candidateCenters.length > 24,
     });
-  }
-
-  for (const center of candidateCenters) {
-    const polygon = buildFallbackPolygon(center, polygonRadii, diagnostic);
-    if (polygon.length >= 3) return polygon;
   }
 
   return [];
@@ -417,23 +471,33 @@ function createGeometryAsset(metadata, polygons) {
   };
 }
 
+function nearestProvinceAnchorDistance(provinceId, anchor) {
+  return Math.min(
+    ...ANATOLIA_PROVINCE_METADATA
+      .filter((province) => province.id !== provinceId)
+      .map((province) => distanceSquared(anchor, PHYSICAL_LAND_ANCHORS[province.id] ?? province.centroid) ** 0.5),
+  );
+}
+
 export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
   const sites = [];
   const seen = new Set();
   addProvinceSites(sites, seen);
   addPhysicalBarriers(sites, seen);
   addSourceSites(sites, seen, sourceRegions);
+  const politicalSites = sites.filter((site) => Boolean(site.provinceId));
 
   const polygonsByProvince = Object.fromEntries(ANATOLIA_PROVINCE_METADATA.map((province) => [province.id, []]));
   for (let siteIndex = 0; siteIndex < sites.length; siteIndex += 1) {
     if (!sites[siteIndex].provinceId) continue;
-    const cell = buildVoronoiCell(siteIndex, sites);
-    if (cell.length < 3 || polygonArea(cell) < 0.00005) continue;
-    if (!isPhysicalLandPoint(polygonCentroid(cell))) continue;
-    if (!cell.every(isPhysicalLandPoint)) continue;
-    const rounded = roundPolygon(cell);
-    if (!rounded.every(isPhysicalLandPoint)) continue;
-    polygonsByProvince[sites[siteIndex].provinceId].push(rounded);
+    const politicalSiteIndex = politicalSites.findIndex((site) => site === sites[siteIndex]);
+    for (const cell of buildLandVoronoiCells(politicalSiteIndex, politicalSites)) {
+      if (polygonArea(cell) < 0.00005) continue;
+      if (!isPhysicalLandPoint(polygonCentroid(cell))) continue;
+      const rounded = roundPolygon(cell);
+      if (!rounded.every(isPhysicalLandPoint) || !isPhysicalLandPolygon(rounded)) continue;
+      polygonsByProvince[sites[siteIndex].provinceId].push(rounded);
+    }
   }
 
   let fallbackCount = 0;
@@ -448,6 +512,7 @@ export function buildAnatoliaPhase2DAssets(sourceRegions = []) {
         false,
         PHYSICAL_LAND_ANCHORS[metadata.id] ?? metadata.physicalLandAnchor ?? null,
         metadata.id === PHASE_2D_DIAGNOSTIC_PROVINCE_ID,
+        nearestProvinceAnchorDistance(metadata.id, PHYSICAL_LAND_ANCHORS[metadata.id] ?? metadata.centroid) * 0.32,
       );
       if (fallback.length < 3) throw new Error(`Phase 2D produced no physically valid geometry for ${metadata.id}`);
       polygons = [roundPolygon(fallback)];

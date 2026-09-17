@@ -1,6 +1,6 @@
 import { BinaryMapAssetSource } from "./BinaryMapAssetSource.js";
 
-const DEFAULT_URL = "/assets/world.mapbin";
+const DEFAULT_URL = "/assets/political-authority.mapbin";
 
 /** Browser-only loader: network bytes become immutable binary runtime views. */
 export async function loadMapBin(url = DEFAULT_URL, fetchImpl = globalThis.fetch) {

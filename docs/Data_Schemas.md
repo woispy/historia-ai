@@ -1,237 +1,313 @@
 # Data Schemas
 
-Version: 1.0
+Version: 2.0
+Status: Active schema guidance
+Last reviewed: 2026-09-17
 
 ---
 
 # Purpose
 
-This document defines the official data schemas used throughout Historia AI.
+This document describes the stable schema principles shared by Historia AI's scenario, historical-evidence, runtime-world and map-data layers.
 
-Every scenario, save file, editor tool and engine module must follow these schemas.
+It is intentionally **not** a claim that every runtime JSON object has the same shape. Different layers have different contracts and must not be flattened into one universal entity schema.
 
-The schemas described here represent the contract between game data and the engine.
+The most important rule is:
+
+```text
+Historical Evidence
+    ≠
+Candidate Political Geometry
+    ≠
+Canonical GIS Geometry
+    ≠
+Mutable Runtime State
+    ≠
+GPU / MapBin Representation
+```
 
 ---
 
 # General Rules
 
-- Every entity must have a permanent string identifier.
-- Identifiers are immutable after release.
-- References always use identifiers.
-- Required fields must always exist.
-- Optional fields may be omitted.
-- Unknown fields should be ignored unless explicitly handled by the engine.
+- Stable identifiers are strings at the semantic/data-model level.
+- References use stable identifiers rather than array position.
+- Canonical historical data is immutable after authority approval.
+- Candidate data must remain distinguishable from canonical data.
+- Provenance and confidence must not be discarded when data moves between layers.
+- Runtime representations may use numeric IDs, typed arrays and binary offsets for performance.
+- GPU/MapBin fields are transport representations and are not historical authority.
+- Unknown fields should not be silently reinterpreted as authoritative semantics.
 
 ---
 
-# Country Schema
+# Country / Political Entity
 
-Represents an independent political entity.
+A political entity represents a state or polity used by simulation and scenario systems.
 
-| Field | Type | Required | Description |
-|--------|------|----------|-------------|
-| id | string | ✅ | Permanent unique identifier |
-| name | string | ✅ | Display name |
-| title | string | ✅ | Political title shown to the player |
-| government | string | ✅ | Government type used by game mechanics |
-| capital | string | ✅ | Capital city identifier |
-| culture | string | ✅ | Primary culture identifier |
-| religion | string | ✅ | State religion identifier |
-| color | string | ✅ | Primary map and UI color (HEX) |
-| playable | boolean | ✅ | Whether the player can select this country |
+At the semantic layer, its stable identifier is the primary key. Historical ownership is date-dependent and must not be confused with permanent country identity.
 
-Example
+Typical conceptual fields include:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `id` | string | Stable political entity identifier |
+| `name` | string | Display name |
+| `color` | string | Visual identity where applicable |
+| `playable` | boolean | Scenario/gameplay availability where applicable |
+| historical metadata | object | Date/provenance information where applicable |
+
+The exact scenario schema is defined by the active scenario validators and data files; this document does not override those contracts.
+
+---
+
+# Province Identity
+
+A province is a simulation/geographic identity, not merely a polygon.
+
+Conceptually:
+
+```text
+province identity
+      ↓
+historical ownership / attributes
+      ↓
+date-specific political surface
+      ↓
+runtime geometry representation
+```
+
+The current map runtime uses an `identity.id` for province identity and an ownership object containing an `ownerId` in the runtime data path.
+
+Example shape used by the runtime family:
 
 ```json
 {
-  "id": "ottomans",
-  "name": "Ottoman",
-  "title": "Beylik",
-  "government": "beylik",
-  "capital": "sogut",
-  "culture": "oghuz-turk",
-  "religion": "sunni",
-  "color": "#0F7A32",
-  "playable": true
+  "identity": {
+    "id": "bithynia"
+  },
+  "ownership": {
+    "ownerId": "byzantium"
+  }
 }
 ```
 
+The exact object may contain additional scenario/runtime fields; consumers must use the active runtime contract rather than assuming this example is exhaustive.
+
 ---
 
-# Province Schema
+# Province Geometry Identity
 
-Represents a province on the world map.
+Geometry has its own identity and must be traceable back to the province.
 
-| Field | Type | Required | Description |
-|--------|------|----------|-------------|
-| id | string | ✅ | Permanent province identifier |
-| name | string | ✅ | Province name |
-| owner | string | ✅ | Country identifier |
-| culture | string | ✅ | Primary culture |
-| religion | string | ✅ | Primary religion |
-
-Example
+The runtime GIS representation can associate geometry through fields such as:
 
 ```json
 {
-  "id": "bithynia",
-  "name": "Bithynia",
-  "owner": "byzantium",
-  "culture": "greek",
-  "religion": "orthodox"
+  "identity": {
+    "provinceId": "pontus-amisos"
+  }
 }
 ```
 
----
-
-# City Schema
-
-Represents a city.
-
-| Field | Type | Required | Description |
-|--------|------|----------|-------------|
-| id | string | ✅ | Permanent city identifier |
-| name | string | ✅ | City name |
-| province | string | ✅ | Province identifier |
-| owner | string | ✅ | Country identifier |
-| population | integer | ❌ | Initial population |
-
-Example
+A province may also carry a geometry reference such as:
 
 ```json
 {
-  "id": "bursa",
-  "name": "Bursa",
-  "province": "bithynia",
-  "owner": "byzantium",
-  "population": 12000
+  "references": {
+    "geometryId": "..."
+  }
 }
 ```
 
+This separation is intentional. A province identity must remain stable even when date-specific geometry is rebuilt or when multiple representations (canonical GIS, MapBin, GPU LOD) exist.
+
 ---
 
-# Army Schema
+# Historical Evidence Schema Principles
 
-Represents an army on the map.
+Historical evidence should retain at least:
 
-| Field | Type | Required | Description |
-|--------|------|----------|-------------|
-| id | string | ✅ | Permanent army identifier |
-| owner | string | ✅ | Country identifier |
-| location | string | ✅ | Current city identifier |
-| name | string | ✅ | Army name |
+- source/provenance reference
+- scenario/date
+- entity or anchor identity
+- evidence type
+- confidence
+- temporal validity where known
+- whether the result is evidence, candidate, reviewed or canonical
 
-Example
+Historical city coordinates are evidence/anchor information. They must not automatically become modern administrative boundaries.
+
+---
+
+# Anchor Graph Schema — T3-A
+
+Anchor nodes connect historical evidence to candidate political reconstruction.
+
+Conceptual fields:
 
 ```json
 {
-  "id": "ottomans-army-001",
-  "owner": "ottomans",
-  "location": "sogut",
-  "name": "Main Army"
+  "id": "anchor_bursa_1326",
+  "date": "1326-04-07",
+  "controller": "ottomans",
+  "historicalRegion": "bithynia",
+  "confidence": {
+    "location": "high",
+    "controller": "high",
+    "extent": "medium"
+  },
+  "provenance": []
 }
 ```
 
----
+Edges use controlled relationship types, including:
 
-# Color Standard
-
-Country colors must be stored using hexadecimal RGB values.
-
-Example
-
-```
-#0F7A32
-#6A1B9A
-#C62828
-```
-
-The color represents the visual identity of the country.
-
-It should remain stable across maps, diplomacy screens, statistics and notifications whenever possible.
-
----
-
-# References
-
-Every relationship between entities must use identifiers.
-
-Examples
-
-```
-Country -> Capital City
-
-capital -> sogut
+```text
+POLITICAL_ADJACENCY
+FRONTIER
+REGIONAL_PROXIMITY
+ROAD_CORRIDOR
+RIVER_CORRIDOR
+MOUNTAIN_BARRIER
+LAKE_BARRIER
+COASTAL_ACCESS
+STRATEGIC_PASS
+STRATEGIC_CROSSING
 ```
 
-```
-Province -> Owner
-
-owner -> ottomans
-```
-
-```
-City -> Province
-
-province -> bithynia
-```
-
-```
-Army -> Location
-
-location -> bursa
-```
+Confidence is independent by evidence type.
 
 ---
 
-# Future Extensions
+# Candidate Political Surface — T3-B
 
-Additional fields may be introduced in future schema versions.
+T3-B outputs candidate political geometry.
 
-Examples
+Candidate records must remain distinguishable from canonical records until the relevant review and GIS authority gates pass.
 
-Country
-
-- ruler
-- dynasty
-- treasury
-- legitimacy
-- stability
-
-Province
-
-- climate
-- terrain
-- tradeGoods
-
-City
-
-- buildings
-- prosperity
-- fortLevel
-
-Army
-
-- commander
-- morale
-- supplies
-- composition
-
-The introduction of new fields must preserve backward compatibility whenever possible.
+A candidate geometry may be derived from weighted partitioning and constrained by physical geography, but the computational method itself is not historical authority.
 
 ---
 
-# Schema Versioning
+# Physical Geography Data
 
-Changes to field definitions require a schema version update.
+Physical authority is separate from political data.
 
-ScenarioValidator should validate data against the active schema version.
+Relevant domains include:
+
+- land polygons
+- lakes/hydrography
+- rivers
+- terrain/DEM
+- route/cost constraints
+- mountain/ridge constraints
+
+Physical data may constrain political geometry, but political geometry must not redefine physical authority.
+
+---
+
+# Runtime Map Geometry
+
+The runtime GIS layer can contain multiple polygons per province. This is a representation detail and does not imply multiple province identities.
+
+Runtime geometry should preserve:
+
+- province linkage
+- polygon coordinates
+- provenance/version where provided
+- scenario/date context
+- geometry validity
+
+Generated runtime GIS files are build artifacts unless explicitly designated as distributable source data.
+
+---
+
+# MapBin Schema
+
+The current binary map transport is versioned and uses typed arrays.
+
+Conceptual layout:
+
+```text
+Header
+Province fields
+Tile index
+Geometry Float32 data
+LOD ranges
+City blocks
+Palette
+```
+
+The current encoder uses a versioned MapBin header and stores geometry as `Float32` values. The runtime loader exposes immutable zero-copy typed-array views.
+
+This representation is optimized for runtime transport and must not be treated as the historical source of truth.
+
+---
+
+# Runtime / Simulation State
+
+Simulation state is mutable and should remain separate from immutable scenario definitions and canonical map data.
+
+Examples of mutable domains include:
+
+- ownership
+- population
+- economy
+- diplomacy
+- military state
+- laws/reforms
+- dynasty/characters
+- religion/culture
+- events
+
+A runtime mutation must not silently rewrite canonical historical evidence or canonical geometry.
+
+---
+
+# Identifier and Reference Rules
+
+Semantic references should use stable identifiers:
+
+```text
+Country → Province owner
+Province → Geometry reference
+City → Province
+Army → Country / location
+Anchor → Historical evidence
+```
+
+Runtime binary layers may replace semantic identifiers with numeric indices for performance, but the mapping back to stable semantic identity must remain deterministic.
+
+---
+
+# Validation and Versioning
+
+Schema changes must be accompanied by:
+
+1. focused validation/tests,
+2. provenance documentation where relevant,
+3. migration notes for incompatible changes,
+4. updates to dependent documentation.
+
+A schema version must describe the contract actually consumed by the active system. Examples in this document are conceptual unless explicitly identified as runtime fields.
+
+---
+
+# 1326 Rule
+
+The production scenario date is:
+
+```text
+1326-04-07
+```
+
+1300-era data may remain in the repository for legacy research and forensic replay, but it must not be silently substituted for 1326 data.
 
 ---
 
 # Conclusion
 
-These schemas define the official structure of Historia AI game data.
+Historia AI uses layered data contracts rather than one universal schema. Stable identities, historical evidence, candidate geometry, canonical GIS, runtime simulation state and GPU transport must remain traceable without being conflated.
 
-All engine systems, tools, save files and scenarios should follow these contracts to ensure consistency and long-term compatibility.
+The goal is a data model that can scale from the current historical reconstruction work to 15,000+ provinces while preserving provenance, deterministic builds and runtime performance.

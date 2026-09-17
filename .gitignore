@@ -43,3 +43,9 @@ public/assets/world.mapbin
 artifacts/
 test-results/
 public/assets/stress-15k.mapbin
+
+# Local AI tooling / secrets
+.continue/
+opencode.json
+local-tracked-migration.patch
+local-untracked-manifest.txt

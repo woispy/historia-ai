@@ -16,11 +16,16 @@ export class ProductionBinaryMapRenderer extends BinaryMapRenderer {
         void state;
         this.physicalLayer?.render(camera, width, height);
       };
+      this.afterPoliticalDraw = (state, camera, width, height) => {
+        void state;
+        this.physicalLayer?.renderWaterOverlay(camera, width, height);
+      };
       return true;
     } catch (error) {
       this.physicalLayer?.dispose();
       this.physicalLayer = null;
       this.beforePoliticalDraw = null;
+      this.afterPoliticalDraw = null;
       super.dispose();
       throw error;
     }
@@ -48,7 +53,7 @@ export class ProductionBinaryMapRenderer extends BinaryMapRenderer {
     const localY = (Number(y) - rect.top) / rect.height;
     if (localX < 0 || localX > 1 || localY < 0 || localY > 1) return null;
 
-    const world = screenToWorld(localX, localY, this.camera);
+    const world = screenToWorld(localX, localY, this.camera, rect.width / rect.height);
     if (!world) return null;
 
     const canonicalWorldX = normalizeLongitude(world[0]);
@@ -73,6 +78,7 @@ export class ProductionBinaryMapRenderer extends BinaryMapRenderer {
 
   dispose() {
     this.beforePoliticalDraw = null;
+    this.afterPoliticalDraw = null;
     this.physicalLayer?.dispose();
     this.physicalLayer = null;
     super.dispose();

@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "coverageId": "anatolia-1300",
+  "status": "source-gap",
+  "sourceCandidates": [
+    {
+      "sourceId": "historical-basemaps-world-1300",
+      "url": "https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1300.geojson",
+      "licenseReview": "pending",
+      "featureCount": 237,
+      "anatoliaCandidateCount": 5,
+      "usableAsProvinceBoundary": false,
+      "reason": "The source contains coarse polity-level features, not the 38-province historical boundary system required by this fixture."
+    },
+    {
+      "sourceId": "open-historia-regions-pmtiles",
+      "url": "https://github.com/Open-Historia/open-historia",
+      "licenseReview": "AGPL-3.0 project; architecture reference only",
+      "usableAsProvinceBoundary": false,
+      "usableAsWorldPhysicalOrCurrentAdminBasemap": true,
+      "reason": "High-quality current region geometry and editor pipeline, but not a reviewed 1300 Anatolia political boundary source."
+    },
+    {
+      "sourceId": "natural-earth-admin-1",
+      "url": "https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-1-states-provinces/",
+      "licenseReview": "public-domain cartography; retain source attribution",
+      "usableAsProvinceBoundary": false,
+      "usableAsWorldPhysicalOrCurrentAdminBasemap": true,
+      "reason": "Current first-order administrative boundaries; useful for global basemap and topology stress, not historical 1300 authority."
+    },
+    {
+      "sourceId": "geoboundaries-global",
+      "url": "https://www.geoboundaries.org/",
+      "licenseReview": "CC BY 4.0; acknowledgement required",
+      "usableAsProvinceBoundary": false,
+      "usableAsWorldPhysicalOrCurrentAdminBasemap": true,
+      "reason": "Current global administrative boundaries; not historical 1300 authority."
+    }
+  ],
+  "requiredSource": {
+    "kind": "reviewed-province-boundary-dataset",
+    "status": "missing",
+    "sourceReferences": [],
+    "reviewStatus": "draft"
+  },
+  "policy": "Coarse historical polity polygons and current administrative boundaries must not be promoted to 1300 province geometry. They may support world physical/current-admin basemap work and topology stress only. Phase2D output remains legacy/research until reviewed province boundaries are supplied."
+}
