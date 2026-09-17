@@ -51,7 +51,8 @@ jobs:
           git fetch --no-tags origin \
             5f48731eec9804e99abd9ce60ea7f0b5d3ef5713 \
             bdf166a42bdccf1ce4669488f3a84c97b9e2dc2e8 \
-            3021b2d1104c8ea9e9f700435c453adf5f1ae4e8
+            3021b2d1104c8ea9e9f700435c453adf5f1ae4e8 \
+            3db105afb857be55e0ce7696f3d7e904185fc5f8
       - name: Run A2 producer lineage V3
         id: producer_lineage
         continue-on-error: true
@@ -77,6 +78,15 @@ jobs:
           status=$?
           cat forensic-output/a2-fallback-lineage.json
           if [ -s forensic-output/a2-fallback-lineage.stderr ]; then cat forensic-output/a2-fallback-lineage.stderr; fi
+          exit $status
+      - name: Run A2 historical clip lineage probe
+        id: clip_lineage
+        continue-on-error: true
+        run: |
+          node tools/tests/phase2d-a2-clip-lineage-probe.mjs > forensic-output/a2-clip-lineage.json 2> forensic-output/a2-clip-lineage.stderr
+          status=$?
+          cat forensic-output/a2-clip-lineage.json
+          if [ -s forensic-output/a2-clip-lineage.stderr ]; then cat forensic-output/a2-clip-lineage.stderr; fi
           exit $status
       - name: Run A2 stage trace across checkpoints
         id: stage_trace
@@ -117,6 +127,8 @@ jobs:
             forensic-output/a2-canonical-v15-normalization-probe.json
             forensic-output/a2-fallback-lineage.json
             forensic-output/a2-fallback-lineage.stderr
+            forensic-output/a2-clip-lineage.json
+            forensic-output/a2-clip-lineage.stderr
             forensic-output/a2-stage-trace.json
             forensic-output/a2-stage-trace.stderr
             forensic-output/a2-counterfactual.json
