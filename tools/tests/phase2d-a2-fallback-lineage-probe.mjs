@@ -29,6 +29,22 @@ function area(poly) {
 function round(poly, digits = 5) {
   return poly.map(([x, y]) => [Number(x.toFixed(digits)), Number(y.toFixed(digits))]);
 }
+function normalizeResult(label, sha, result, api) {
+  const polygon = result?.polygon ?? result ?? null;
+  return {
+    label,
+    sha,
+    api,
+    candidate: result?.candidate ?? null,
+    diagnostics: result?.diagnostics ?? null,
+    target,
+    vertexCount: Array.isArray(polygon) ? polygon.length : 0,
+    rawArea: Array.isArray(polygon) && polygon.length ? area(polygon) : null,
+    roundedArea5: Array.isArray(polygon) && polygon.length ? area(round(polygon, 5)) : null,
+    roundedArea6: Array.isArray(polygon) && polygon.length ? area(round(polygon, 6)) : null,
+    polygon,
+  };
+}
 
 rmSync(worktree, { recursive: true, force: true });
 mkdirSync(join(root, "forensic-output"), { recursive: true });
@@ -41,24 +57,23 @@ try {
     try {
       const file = join(worktree, "tools/historical-gis/AnatoliaPhase2DGeometryBuilder.js");
       let source = readFileSync(file, "utf8");
-      if (!source.includes("createAnchorFallbackPolygon")) {
-        results.push({ label, sha, status: "no-fallback-function" });
+      const hasAnchorFallback = source.includes("createAnchorFallbackPolygon");
+      const hasPhysicalFallback = source.includes("resolvePhysicalFallback");
+      if (!hasAnchorFallback && !hasPhysicalFallback) {
+        results.push({ label, sha, status: "no-supported-fallback-api" });
         continue;
       }
-      source += "\nexport { createAnchorFallbackPolygon };\n";
+      const exports = [];
+      if (hasAnchorFallback) exports.push("createAnchorFallbackPolygon");
+      if (hasPhysicalFallback) exports.push("resolvePhysicalFallback");
+      source += `\nexport { ${exports.join(", ")} };\n`;
       writeFileSync(file, source);
       const mod = await import(`file://${file}?fallback=${sha}`);
-      const polygon = mod.createAnchorFallbackPolygon(target);
-      results.push({
-        label,
-        sha,
-        target,
-        vertexCount: polygon?.length ?? 0,
-        rawArea: polygon?.length ? area(polygon) : null,
-        roundedArea5: polygon?.length ? area(round(polygon, 5)) : null,
-        roundedArea6: polygon?.length ? area(round(polygon, 6)) : null,
-        polygon: polygon ?? null,
-      });
+      if (hasPhysicalFallback) {
+        results.push(normalizeResult(label, sha, mod.resolvePhysicalFallback({ id: "pontus-amisos", centroid: target }), "resolvePhysicalFallback"));
+      } else {
+        results.push(normalizeResult(label, sha, mod.createAnchorFallbackPolygon(target), "createAnchorFallbackPolygon"));
+      }
     } catch (error) {
       results.push({ label, sha, status: "error", error: String(error?.stack || error) });
     } finally {
@@ -71,13 +86,13 @@ try {
 
 const tiny = results.filter((r) => Number.isFinite(r.rawArea) && r.rawArea <= 1e-10);
 const output = {
-  probe: "A2 historical fallback lineage for Amisos metadata centroid",
+  probe: "A2 historical fallback API lineage for Amisos metadata centroid",
   target,
   targetArea: 2.27e-13,
   tinyEpsilon: 1e-10,
   results,
   tinyHits: tiny,
-  rootCauseCandidate: tiny.length > 0 ? "fallback-clipping representation" : null,
+  rootCauseCandidate: tiny.length > 0 ? "historical fallback representation" : null,
 };
 writeFileSync(join(root, "forensic-output/a2-fallback-lineage.json"), JSON.stringify(output, null, 2));
 process.stdout.write(JSON.stringify(output, null, 2));
