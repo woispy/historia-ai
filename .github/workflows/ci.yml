@@ -51,6 +51,7 @@ on:
       - feat/historical-map-clean-foundation
       - feat/historical-political-map-v1
       - feat/p3-map-performance
+      - codex/phase2.8-c-c1-amasya-edge3-probe
 
 jobs:
   validate:
