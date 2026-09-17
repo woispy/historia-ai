@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  A2_FORENSIC_HARNESS: immutable-worktree-v3-v15-producer
+  A2_FORENSIC_HARNESS: immutable-worktree-v4-producer-v3
 
 jobs:
   trace:
@@ -32,8 +32,8 @@ jobs:
         run: node tools/forensics/a2-amisos-pipeline-trace.mjs
       - name: Replay historical A2 checkpoints
         run: node tools/forensics/a2-amisos-checkpoint-replay.mjs
-      - name: Replay historical A2 Stage A-B-C V2
-        run: node tools/forensics/a2-amisos-stage-replay-v2.mjs
+      - name: Replay historical A2 Stage A-B-C V3
+        run: node tools/forensics/a2-amisos-stage-replay-v3.mjs
       - name: Upload forensic reports
         uses: actions/upload-artifact@v4
         with:
@@ -41,4 +41,4 @@ jobs:
           path: |
             a2-amisos-forensic-report.json
             a2-amisos-checkpoint-replay.json
-            a2-amisos-stage-replay.json
+            a2-amisos-stage-replay-v3.json
