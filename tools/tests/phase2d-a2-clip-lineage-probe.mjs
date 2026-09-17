@@ -49,6 +49,12 @@ function properSegmentIntersection(a, b, c, d) {
   return ((abC > 1e-12 && abD < -1e-12) || (abC < -1e-12 && abD > 1e-12))
     && ((cdA > 1e-12 && cdB < -1e-12) || (cdA < -1e-12 && cdB > 1e-12));
 }
+function bbox(poly) {
+  if (!Array.isArray(poly) || poly.length === 0) return null;
+  const xs = poly.map((p) => p[0]);
+  const ys = poly.map((p) => p[1]);
+  return { minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys), spanX: Math.max(...xs) - Math.min(...xs), spanY: Math.max(...ys) - Math.min(...ys) };
+}
 function selfIntersections(poly) {
   const hits = [];
   if (!Array.isArray(poly) || poly.length < 4) return hits;
@@ -67,8 +73,8 @@ function selfIntersections(poly) {
 function trace(poly) {
   const rounded = round(poly);
   return {
-    raw: { vertexCount: poly.length, area: area(poly), translatedArea: translatedArea(poly), polygon: poly, selfIntersections: selfIntersections(poly) },
-    rounded5: { vertexCount: rounded.length, area: area(rounded), translatedArea: translatedArea(rounded), polygon: rounded, selfIntersections: selfIntersections(rounded) },
+    raw: { vertexCount: poly.length, area: area(poly), translatedArea: translatedArea(poly), bbox: bbox(poly), polygon: poly, selfIntersections: selfIntersections(poly) },
+    rounded5: { vertexCount: rounded.length, area: area(rounded), translatedArea: translatedArea(rounded), bbox: bbox(rounded), polygon: rounded, selfIntersections: selfIntersections(rounded) },
   };
 }
 
@@ -133,6 +139,7 @@ try {
         raw: rawArea <= 1e-10,
         clipped: clipped.length < 3 || mod.polygonArea(clipped) <= 1e-10,
         roundedClipped: clipped.length < 3 || area(round(clipped)) <= 1e-10,
+        filterBeforeRoundButTinyAfter: clipped.length >= 3 && mod.polygonArea(clipped) >= 0.00005 && area(round(clipped)) <= 1e-10,
       },
     });
   }
@@ -148,6 +155,7 @@ try {
     qualifyingCount: qualifying.length,
     smallest,
     tinyHits: candidates.filter((c) => c.collapse.clipped || c.collapse.roundedClipped),
+    filterBeforeRoundButTinyAfter: candidates.filter((c) => c.collapse.filterBeforeRoundButTinyAfter),
     candidates,
   };
 } catch (error) {
