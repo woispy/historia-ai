@@ -61,6 +61,14 @@ jobs:
           cat forensic-output/a2-producer-lineage-v3.json
           if [ -s forensic-output/a2-producer-lineage-v3.stderr ]; then cat forensic-output/a2-producer-lineage-v3.stderr; fi
           exit $status
+      - name: Run A2 canonical raw to V15 normalization probe
+        id: canonical_v15_normalization
+        continue-on-error: true
+        run: |
+          node tools/tests/phase2d-a2-canonical-v15-normalization-probe.mjs > forensic-output/a2-canonical-v15-normalization-probe.json
+          status=$?
+          cat forensic-output/a2-canonical-v15-normalization-probe.json
+          exit $status
       - name: Run A2 stage trace across checkpoints
         id: stage_trace
         continue-on-error: true
@@ -97,6 +105,7 @@ jobs:
             forensic-output/execution-identity.txt
             forensic-output/a2-producer-lineage-v3.json
             forensic-output/a2-producer-lineage-v3.stderr
+            forensic-output/a2-canonical-v15-normalization-probe.json
             forensic-output/a2-stage-trace.json
             forensic-output/a2-stage-trace.stderr
             forensic-output/a2-counterfactual.json
