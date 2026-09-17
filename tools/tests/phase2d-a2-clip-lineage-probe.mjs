@@ -24,6 +24,34 @@ function area(poly) {
   }
   return Math.abs(s) / 2;
 }
+function shoelaceDiagnostics(poly) {
+  if (!Array.isArray(poly) || poly.length < 3) return null;
+  const terms = [];
+  let positiveSum = 0;
+  let negativeSum = 0;
+  for (let i = 0; i < poly.length; i += 1) {
+    const a = poly[i];
+    const b = poly[(i + 1) % poly.length];
+    const term = a[0] * b[1] - b[0] * a[1];
+    terms.push(term);
+    if (term >= 0) positiveSum += term;
+    else negativeSum += term;
+  }
+  const signedSum = positiveSum + negativeSum;
+  const grossSum = positiveSum + Math.abs(negativeSum);
+  return {
+    signedSum,
+    positiveSum,
+    negativeSum,
+    grossSum,
+    residualToGrossRatio: grossSum > 0 ? Math.abs(signedSum) / grossSum : null,
+    maxAbsTerm: Math.max(...terms.map(Math.abs)),
+    minAbsTerm: Math.min(...terms.map(Math.abs)),
+    termCount: terms.length,
+    terms,
+  };
+}
+
 function round(poly, digits = 5) {
   return poly.map(([x, y]) => [Number(x.toFixed(digits)), Number(y.toFixed(digits))]);
 }
@@ -98,8 +126,8 @@ function selfIntersections(poly) {
 function trace(poly) {
   const rounded = round(poly);
   return {
-    raw: { vertexCount: poly.length, area: area(poly), translatedArea: translatedArea(poly), bbox: bbox(poly), polygon: poly, selfIntersections: selfIntersections(poly), convexHullArea: area(convexHull(poly)), cancellationRatio: cancellationRatio(poly) },
-    rounded5: { vertexCount: rounded.length, area: area(rounded), translatedArea: translatedArea(rounded), bbox: bbox(rounded), polygon: rounded, selfIntersections: selfIntersections(rounded), convexHullArea: area(convexHull(rounded)), cancellationRatio: cancellationRatio(rounded) },
+    raw: { vertexCount: poly.length, area: area(poly), translatedArea: translatedArea(poly), bbox: bbox(poly), polygon: poly, selfIntersections: selfIntersections(poly), convexHullArea: area(convexHull(poly)), cancellationRatio: cancellationRatio(poly), shoelace: shoelaceDiagnostics(poly) },
+    rounded5: { vertexCount: rounded.length, area: area(rounded), translatedArea: translatedArea(rounded), bbox: bbox(rounded), polygon: rounded, selfIntersections: selfIntersections(rounded), convexHullArea: area(convexHull(rounded)), cancellationRatio: cancellationRatio(rounded), shoelace: shoelaceDiagnostics(rounded) },
   };
 }
 
@@ -160,6 +188,7 @@ try {
         unique6DecimalTranslatedArea: translatedArea(uniqueClipPoints),
         unique6DecimalConvexHullArea: area(convexHull(uniqueClipPoints)),
         unique6DecimalCancellationRatio: cancellationRatio(uniqueClipPoints),
+        unique6DecimalShoelace: shoelaceDiagnostics(uniqueClipPoints),
         duplicateReduction: rawClipPoints.length - uniqueClipPoints.length,
       },
       clipped: clipped.length >= 3 ? trace(clipped) : { vertexCount: clipped.length, area: null, polygon: clipped },
