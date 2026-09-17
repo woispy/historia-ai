@@ -116,7 +116,11 @@ tools/              GIS/build/validation/forensic tooling
 
 ### A2 forensic truth as of 2026-09-17
 
-The historical A2 observation is now classified as a **provenance discontinuity**, not a demonstrated renderer/GPU normalization failure. The pinned V15 forensic source at `3575c1bccf94a322fed175958ce786531b142497` produced an Amisos raw/normalized area of `0.5023951571206453`, with no collapse below `MIN_AREA`. A separate canonical stage trace reproduced the historical `0.006755373858482017` raw cell, but also produced no tiny-area hit. Therefore the available evidence does not establish a single producer chain that transforms `0.006755...` into `~2.27e-13`; the remaining task is to identify the historical artifact/representation that supplied the tiny-area observation and reconcile its provenance before any production mutation is considered.
+The historical A2 observation is classified as a **provenance discontinuity**, not a demonstrated renderer/GPU normalization failure. The pinned V15 forensic source at `3575c1bccf94a322fed175958ce786531b142497` was instrumented by the retained A2 telemetry harness and produced an Amisos raw/normalized area of `0.5023951571206453`, with no collapse below `MIN_AREA`. A separate canonical stage trace reproduced the historical `0.006755373858482017` raw cell, but also produced no tiny-area hit. The telemetry harness itself operates on the pinned V15 source tree and records the V15 `partition-raw` → `normalize-output` chain; its captured raw value is therefore a different geometric lineage from the canonical `0.006755...` observation. The repository does not contain a producer record that demonstrates `0.006755... → ~2.27e-13`. Therefore the remaining task is to identify the historical artifact/representation that supplied the tiny-area observation and reconcile its provenance before any production mutation is considered.
+
+### A2 forensic correction
+
+The earlier migration wording that described a direct `0.006755 → ~2.27e-13` V15 normalization collapse is **not supported by the current artifact evidence**. PR #89's telemetry workflow explicitly pins the V15 source tree and runs the instrumented V15 builder, while the resulting telemetry records the `0.5023951571206453` Amisos raw/normalized polygon. The `0.006755373858482017` value comes from the separate canonical stage trace. These observations must remain separate until a common source artifact and transformation lineage is proven.
 
 ### Locked rules
 
