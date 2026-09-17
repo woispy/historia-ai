@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  A2_FORENSIC_HARNESS: immutable-worktree-v2
+  A2_FORENSIC_HARNESS: immutable-worktree-v2-replay
 
 jobs:
   trace:
