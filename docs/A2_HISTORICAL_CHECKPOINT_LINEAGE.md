@@ -30,9 +30,7 @@ and runs four forensic probes:
 3. `phase2d-a2-counterfactual-land-halfplane.mjs`
 4. `phase2d-a2-authority-isolation.mjs`
 
-The workflow uploads their outputs as one forensic artifact. The branch HEAD inspected on 2026-09-17 is `985f97b072e0b91a4713f6757f3c8339a759c4b6`, with the latest commit titled `test: run A2 stage trace across historical checkpoints`.
-
-No retained workflow result was found for that branch HEAD during this review, so these probes are currently **available test machinery, not execution evidence**.
+The workflow uploads their outputs as one forensic artifact. The current branch HEAD is `e4c184f46f35f03f6d38f606628938b74d788fbc`, whose latest commit is `test: make A2 checkpoint execution identity explicit`. This commit adds explicit execution identity (`branch`, `HEAD`, target area `2.27e-13`, tiny epsilon `1e-10`, Node and Git versions) to the retained forensic artifact. No retained CI execution artifact for this exact HEAD has yet been verified, so the harness remains **available test machinery, not execution evidence**.
 
 ## Historical checkpoint set
 
@@ -104,6 +102,8 @@ first unpinned telemetry   → ENOENT before producer result
 historical ~2.27e-13       → producer/artifact still unidentified
 ```
 
+The current checkpoint branch has now been instrumented so that any future retained execution can be tied unambiguously to its exact branch/HEAD and target threshold. Until such an artifact exists, no checkpoint result should be treated as an executed finding.
+
 The remaining question is therefore not simply “which code version was buggy?” It is:
 
 ```text
@@ -123,7 +123,7 @@ and what exact geometry representation did that artifact measure?
 
 ## Next forensic action
 
-Execute the already-defined checkpoint/authority-isolation harness under CI, retain the artifact, and compare the Amisos producer areas and polygons across `5f48731e...`, `bdf166a4...`, and `3021b2d1...`.
+Execute the instrumented checkpoint/authority-isolation harness under CI, retain the artifact including `execution-identity.txt`, and compare the Amisos producer areas and polygons across `5f48731e...`, `bdf166a4...`, and `3021b2d1...`.
 
 Acceptance is **not** merely “one checkpoint differs.” The required evidence is a common lineage that explains:
 
