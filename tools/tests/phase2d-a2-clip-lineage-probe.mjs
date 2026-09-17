@@ -27,11 +27,48 @@ function area(poly) {
 function round(poly, digits = 5) {
   return poly.map(([x, y]) => [Number(x.toFixed(digits)), Number(y.toFixed(digits))]);
 }
+function translatedArea(poly) {
+  if (!Array.isArray(poly) || poly.length < 3) return null;
+  const origin = poly[0];
+  let s = 0;
+  for (let i = 0; i < poly.length; i += 1) {
+    const a = [poly[i][0] - origin[0], poly[i][1] - origin[1]];
+    const b = [poly[(i + 1) % poly.length][0] - origin[0], poly[(i + 1) % poly.length][1] - origin[1]];
+    s += a[0] * b[1] - b[0] * a[1];
+  }
+  return Math.abs(s) / 2;
+}
+function orientation(a, b, c) {
+  return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+}
+function properSegmentIntersection(a, b, c, d) {
+  const abC = orientation(a, b, c);
+  const abD = orientation(a, b, d);
+  const cdA = orientation(c, d, a);
+  const cdB = orientation(c, d, b);
+  return ((abC > 1e-12 && abD < -1e-12) || (abC < -1e-12 && abD > 1e-12))
+    && ((cdA > 1e-12 && cdB < -1e-12) || (cdA < -1e-12 && cdB > 1e-12));
+}
+function selfIntersections(poly) {
+  const hits = [];
+  if (!Array.isArray(poly) || poly.length < 4) return hits;
+  for (let i = 0; i < poly.length; i += 1) {
+    const a = poly[i];
+    const b = poly[(i + 1) % poly.length];
+    for (let j = i + 1; j < poly.length; j += 1) {
+      if (j === i || (j + 1) % poly.length === i || (i + 1) % poly.length === j) continue;
+      const c = poly[j];
+      const d = poly[(j + 1) % poly.length];
+      if (properSegmentIntersection(a, b, c, d)) hits.push([i, j]);
+    }
+  }
+  return hits;
+}
 function trace(poly) {
   const rounded = round(poly);
   return {
-    raw: { vertexCount: poly.length, area: area(poly), polygon: poly },
-    rounded5: { vertexCount: rounded.length, area: area(rounded), polygon: rounded },
+    raw: { vertexCount: poly.length, area: area(poly), translatedArea: translatedArea(poly), polygon: poly, selfIntersections: selfIntersections(poly) },
+    rounded5: { vertexCount: rounded.length, area: area(rounded), translatedArea: translatedArea(rounded), polygon: rounded, selfIntersections: selfIntersections(rounded) },
   };
 }
 
