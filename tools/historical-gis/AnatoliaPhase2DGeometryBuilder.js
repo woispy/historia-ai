@@ -117,35 +117,12 @@ function addSite(sites, seen, point, provinceId, kind) {
 }
 
 function addProvinceSites(sites, seen) {
-  let sequence = 0;
   for (const province of ANATOLIA_PROVINCE_METADATA) {
     const anchor = PHYSICAL_LAND_ANCHORS[province.id] ?? province.centroid;
     const anchorPoint = province.terrain === "lake" && isUsableCartographicPoint(anchor)
       ? anchor
       : province.centroid;
     addSite(sites, seen, anchorPoint, province.id, "province-anchor");
-  }
-}
-
-function addProvinceMicroSites(sites, seen) {
-  const radii = [0.04, 0.08, 0.12];
-  const directions = 8;
-  let sequence = 0;
-
-  for (const province of ANATOLIA_PROVINCE_METADATA) {
-    const centre = PHYSICAL_LAND_ANCHORS[province.id] ?? province.centroid;
-    for (const radius of radii) {
-      for (let direction = 0; direction < directions; direction += 1) {
-        const angle = (direction / directions) * Math.PI * 2
-          + deterministicJitter(sequence, province.centroid[0] * 100);
-        const point = [
-          centre[0] + Math.cos(angle) * radius,
-          centre[1] + Math.sin(angle) * radius,
-        ];
-        if (isPoliticalCartographicPoint(point)) addSite(sites, seen, point, province.id, "province-micro-control");
-        sequence += 1;
-      }
-    }
   }
 }
 
