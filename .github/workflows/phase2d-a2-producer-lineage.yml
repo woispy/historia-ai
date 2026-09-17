@@ -50,7 +50,7 @@ jobs:
         run: |
           git fetch --no-tags origin \
             5f48731eec9804e99abd9ce60ea7f0b5d3ef5713 \
-            bdf166a42bdccf1ce4669488f3a84c97b9e2dc2e \
+            bdf166a42bdccf1ce4669488f3a84c97b9e2dc2e8 \
             3021b2d1104c8ea9e9f700435c453adf5f1ae4e8
       - name: Run A2 producer lineage V3
         id: producer_lineage
@@ -109,7 +109,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phase2d-a2-producer-lineage-combined
+          name: phase2d-a2-producer-lineage-combined-v2
           path: |
             forensic-output/execution-identity.txt
             forensic-output/a2-producer-lineage-v3.json
@@ -124,4 +124,15 @@ jobs:
             forensic-output/a2-authority-isolation.json
             forensic-output/a2-authority-isolation.stderr
           if-no-files-found: warn
+          retention-days: 7
+      - name: Upload A2 fallback lineage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2d-a2-fallback-lineage
+          path: |
+            forensic-output/execution-identity.txt
+            forensic-output/a2-fallback-lineage.json
+            forensic-output/a2-fallback-lineage.stderr
+          if-no-files-found: error
           retention-days: 7
