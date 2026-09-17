@@ -1,9 +1,11 @@
 import { execFileSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 
 const TARGET = "pontus-amisos";
 const TARGET_TINY = 2.27e-13;
+const TINY_THRESHOLD = 1e-10;
 const CHECKPOINTS = [
   "837ec8dd2d878ceb227f609c3da481610b54d0db",
   "bdf166a4",
@@ -13,8 +15,21 @@ const CHECKPOINTS = [
   "6b7424125eee4a1c72925b7a1780c68e695e9ba3",
 ];
 
-function git(args) {
-  return execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+function git(args, cwd = process.cwd()) {
+  return execFileSync("git", args, {
+    cwd,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  }).trim();
+}
+
+function run(cmd, args, cwd) {
+  return execFileSync(cmd, args, {
+    cwd,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    maxBuffer: 16 * 1024 * 1024,
+  });
 }
 
 function signedArea(polygon) {
@@ -27,16 +42,19 @@ function signedArea(polygon) {
   return area / 2;
 }
 
-function extractRuntime() {
-  const runtimePath = resolve("src/world/map/assets/historical/1300/runtime.json");
+function inspectRuntime(worktree) {
+  const runtimePath = resolve(worktree, "src/world/map/assets/historical/1300/runtime.json");
   const runtime = JSON.parse(readFileSync(runtimePath, "utf8"));
-  const province = (runtime.provinces ?? []).find((entry) => entry?.identity?.id === TARGET || entry?.id === TARGET);
+  const province = (runtime.provinces ?? []).find((entry) => (
+    entry?.identity?.id === TARGET || entry?.id === TARGET
+  ));
   const geometryId = province?.references?.geometryId ?? TARGET;
   const geometry = (runtime.geometries ?? []).find((entry) => (
     entry?.identity?.provinceId === TARGET
     || entry?.identity?.id === TARGET
     || entry?.identity?.id === geometryId
   ));
+
   if (!geometry) {
     return {
       provinceFound: Boolean(province),
@@ -47,13 +65,18 @@ function extractRuntime() {
     };
   }
 
-  const polygons = (geometry.polygons ?? []).map((polygon, polygonIndex) => ({
-    polygonIndex,
-    vertices: polygon.length,
-    signedArea: signedArea(polygon),
-    absArea: Math.abs(signedArea(polygon)),
-    tiny: Math.abs(signedArea(polygon)) <= 1e-10,
-  }));
+  const polygons = (geometry.polygons ?? []).map((polygon, polygonIndex) => {
+    const area = signedArea(polygon);
+    return {
+      polygonIndex,
+      vertices: polygon.length,
+      signedArea: area,
+      absArea: Math.abs(area),
+      tiny: Math.abs(area) <= TINY_THRESHOLD,
+      deltaFromTargetTiny: Math.abs(Math.abs(area) - TARGET_TINY),
+    };
+  });
+
   return {
     provinceFound: Boolean(province),
     geometryFound: true,
@@ -66,59 +89,91 @@ function extractRuntime() {
 }
 
 const results = [];
-const original = git(["rev-parse", "HEAD"]);
+const worktreeRoot = mkdtempSync(resolve(tmpdir(), "historia-a2-replay-"));
+const rootRepo = process.cwd();
+const originalHead = git(["rev-parse", "HEAD"]);
+
 try {
   for (const checkpoint of CHECKPOINTS) {
-    git(["checkout", "--detach", checkpoint]);
-    const commit = git(["rev-parse", "HEAD"]);
-    const message = git(["log", "-1", "--pretty=%s"]);
+    const worktree = resolve(worktreeRoot, checkpoint.slice(0, 8));
     let buildStatus = "success";
     let buildOutput = "";
+    let runtime = null;
+
     try {
-      buildOutput = execFileSync("npm", ["run", "build:historical-gis:1300"], {
-        encoding: "utf8",
-        stdio: ["ignore", "pipe", "pipe"],
-        maxBuffer: 8 * 1024 * 1024,
+      git(["worktree", "add", "--detach", worktree, checkpoint], rootRepo);
+      const commit = git(["rev-parse", "HEAD"], worktree);
+      const message = git(["log", "-1", "--pretty=%s"], worktree);
+
+      try {
+        buildOutput = run("npm", ["run", "build:historical-gis:1300"], worktree);
+      } catch (error) {
+        buildStatus = "failed";
+        buildOutput = `${error.stdout ?? ""}\n${error.stderr ?? ""}`;
+      }
+
+      if (buildStatus === "success") {
+        try {
+          runtime = inspectRuntime(worktree);
+        } catch (error) {
+          buildStatus = "runtime-read-failed";
+          buildOutput += `\n${error.message}`;
+        }
+      }
+
+      const phase2dMatch = buildOutput.match(/Phase 2D generated (\d+) Anatolia provinces from (\d+) cartographic sites\./);
+      const fallbackMatches = [...buildOutput.matchAll(/\[Phase2D\]\[[^\]]+\]\[fallback-resolved\]/g)].length;
+      const allAreas = runtime?.polygons?.map((polygon) => polygon.absArea) ?? [];
+      const closest = allAreas.length
+        ? Math.min(...allAreas.map((area) => Math.abs(area - TARGET_TINY)))
+        : null;
+
+      results.push({
+        checkpoint,
+        commit,
+        message,
+        buildStatus,
+        phase2d: phase2dMatch ? { provinces: Number(phase2dMatch[1]), sites: Number(phase2dMatch[2]) } : null,
+        fallbackResolvedCount: fallbackMatches,
+        runtime,
+        nearestTargetTinyDelta: closest,
+        tinyTargetHit: allAreas.some((area) => Math.abs(area - TARGET_TINY) <= 1e-15),
+        buildOutputTail: buildOutput.slice(-3000),
       });
     } catch (error) {
-      buildStatus = "failed";
-      buildOutput = `${error.stdout ?? ""}\n${error.stderr ?? ""}`;
-    }
-
-    let runtime = null;
-    if (buildStatus === "success") {
+      results.push({
+        checkpoint,
+        buildStatus: "worktree-failed",
+        error: error.message,
+      });
+    } finally {
       try {
-        runtime = extractRuntime();
-      } catch (error) {
-        buildStatus = "runtime-read-failed";
-        buildOutput += `\n${error.message}`;
+        git(["worktree", "remove", "--force", worktree], rootRepo);
+      } catch {
+        // Preserve the forensic result even if cleanup has to be recovered manually.
       }
     }
-
-    const phase2dMatch = buildOutput.match(/Phase 2D generated (\d+) Anatolia provinces from (\d+) cartographic sites\./);
-    const fallbackMatches = [...buildOutput.matchAll(/\[Phase2D\]\[[^\]]+\]\[fallback-resolved\]/g)].length;
-    const allAreas = runtime?.polygons?.map((polygon) => polygon.absArea) ?? [];
-    results.push({
-      checkpoint,
-      commit,
-      message,
-      buildStatus,
-      phase2d: phase2dMatch ? { provinces: Number(phase2dMatch[1]), sites: Number(phase2dMatch[2]) } : null,
-      fallbackResolvedCount: fallbackMatches,
-      runtime,
-      nearestTargetDistance: allAreas.length ? Math.min(...allAreas.map((area) => Math.abs(area - TARGET_TINY))) : null,
-      tinyTargetHit: allAreas.some((area) => Math.abs(area - TARGET_TINY) <= 1e-15),
-      buildOutputTail: buildOutput.slice(-2000),
-    });
   }
 } finally {
-  git(["checkout", "--detach", original]);
+  try {
+    git(["checkout", "--detach", originalHead], rootRepo);
+  } catch {
+    // The root checkout was never intentionally changed; this is a defensive restore.
+  }
+  try {
+    git(["worktree", "prune"], rootRepo);
+  } catch {
+    // Non-fatal forensic cleanup.
+  }
+  rmSync(worktreeRoot, { recursive: true, force: true });
 }
 
 const report = {
   target: TARGET,
   targetTinyArea: TARGET_TINY,
+  tinyThreshold: TINY_THRESHOLD,
   areaToleranceForExactHit: 1e-15,
+  harness: "immutable-root-checkout + detached git worktree per historical checkpoint",
   geometryLookup: "runtime.geometries[].identity.provinceId / identity.id / province.references.geometryId",
   checkpoints: results,
 };
