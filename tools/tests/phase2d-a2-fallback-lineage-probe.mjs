@@ -19,6 +19,7 @@ function runGit(args, cwd = root) {
   return r.stdout.trim();
 }
 function area(poly) {
+  if (!Array.isArray(poly) || poly.length < 3) return null;
   let s = 0;
   for (let i = 0; i < poly.length; i += 1) {
     const n = poly[(i + 1) % poly.length];
@@ -28,6 +29,66 @@ function area(poly) {
 }
 function round(poly, digits = 5) {
   return poly.map(([x, y]) => [Number(x.toFixed(digits)), Number(y.toFixed(digits))]);
+}
+function samePoint(a, b, epsilon = 1e-9) {
+  return Math.abs(a[0] - b[0]) <= epsilon && Math.abs(a[1] - b[1]) <= epsilon;
+}
+function normalizeRingLikeImporter(ring) {
+  const points = [];
+  for (const coordinate of ring ?? []) {
+    if (!Array.isArray(coordinate) || coordinate.length < 2) continue;
+    const point = [Number(coordinate[0]), Number(coordinate[1])];
+    if (!Number.isFinite(point[0]) || !Number.isFinite(point[1])) continue;
+    const previous = points[points.length - 1];
+    if (previous && samePoint(previous, point)) continue;
+    points.push(point);
+  }
+  if (points.length > 1 && samePoint(points[0], points[points.length - 1])) points.pop();
+  if (points.length < 3 || area(points) <= 1e-12) return [];
+  points.push([...points[0]]);
+  return points;
+}
+function normalizeMapBinLike(polygon) {
+  const points = [];
+  for (const point of polygon ?? []) {
+    const x = Number(point?.[0]);
+    const y = Number(point?.[1]);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+    const normalized = [x, y];
+    const previous = points[points.length - 1];
+    if (previous && samePoint(previous, normalized, 1e-9)) continue;
+    points.push(normalized);
+  }
+  if (points.length > 1 && samePoint(points[0], points[points.length - 1], 1e-9)) points.pop();
+  if (points.length < 3 || area(points) <= 1e-12) return [];
+  points.push([...points[0]]);
+  return points;
+}
+function float32RoundTrip(polygon) {
+  if (!polygon.length) return [];
+  const flat = new Float32Array(polygon.flat());
+  const result = [];
+  for (let i = 0; i < flat.length; i += 2) result.push([flat[i], flat[i + 1]]);
+  return result;
+}
+function representationTrace(polygon) {
+  const rounded5 = round(polygon, 5);
+  const importer = normalizeRingLikeImporter(rounded5);
+  const mapbin = normalizeMapBinLike(importer);
+  const float32 = float32RoundTrip(mapbin);
+  return {
+    raw: { vertexCount: polygon.length, area: area(polygon) },
+    rounded5: { vertexCount: rounded5.length, area: area(rounded5) },
+    importerNormalized: { vertexCount: importer.length, area: area(importer) },
+    mapbinNormalized: { vertexCount: mapbin.length, area: area(mapbin) },
+    float32: { vertexCount: float32.length, area: area(float32) },
+    collapse: {
+      rounded5: !Number.isFinite(area(rounded5)) || area(rounded5) <= 1e-10,
+      importerNormalized: !Number.isFinite(area(importer)) || area(importer) <= 1e-10,
+      mapbinNormalized: !Number.isFinite(area(mapbin)) || area(mapbin) <= 1e-10,
+      float32: !Number.isFinite(area(float32)) || area(float32) <= 1e-10,
+    },
+  };
 }
 function normalizeResult(label, sha, result, api) {
   const polygon = result?.polygon ?? result ?? null;
@@ -42,6 +103,7 @@ function normalizeResult(label, sha, result, api) {
     rawArea: Array.isArray(polygon) && polygon.length ? area(polygon) : null,
     roundedArea5: Array.isArray(polygon) && polygon.length ? area(round(polygon, 5)) : null,
     roundedArea6: Array.isArray(polygon) && polygon.length ? area(round(polygon, 6)) : null,
+    representationTrace: Array.isArray(polygon) && polygon.length ? representationTrace(polygon) : null,
     polygon,
   };
 }
@@ -85,14 +147,17 @@ try {
 }
 
 const tiny = results.filter((r) => Number.isFinite(r.rawArea) && r.rawArea <= 1e-10);
+const representationTiny = results.filter((r) => Object.values(r.representationTrace?.collapse ?? {}).some(Boolean));
 const output = {
-  probe: "A2 historical fallback API lineage for Amisos metadata centroid",
+  probe: "A2 historical fallback API and representation-boundary lineage for Amisos metadata centroid",
   target,
   targetArea: 2.27e-13,
   tinyEpsilon: 1e-10,
+  representationBoundary: ["raw", "round(5)", "HistoricalGeometryImporter.normalizeRing", "MapBin.normalizePolygon", "Float32Array"],
   results,
   tinyHits: tiny,
-  rootCauseCandidate: tiny.length > 0 ? "historical fallback representation" : null,
+  representationTinyHits: representationTiny,
+  rootCauseCandidate: tiny.length > 0 || representationTiny.length > 0 ? "historical fallback or representation boundary" : null,
 };
 writeFileSync(join(root, "forensic-output/a2-fallback-lineage.json"), JSON.stringify(output, null, 2));
 process.stdout.write(JSON.stringify(output, null, 2));
