@@ -30,16 +30,28 @@ function signedArea(polygon) {
 function extractRuntime() {
   const runtimePath = resolve("src/world/map/assets/historical/1300/runtime.json");
   const runtime = JSON.parse(readFileSync(runtimePath, "utf8"));
-  const province = (runtime.provinces ?? []).find((entry) => entry.id === TARGET);
-  if (!province) return { runtimePolygonCount: 0, polygons: [] };
-  const polygons = (province.geometry?.polygons ?? []).map((polygon, polygonIndex) => ({
+  const province = (runtime.provinces ?? []).find((entry) => entry?.identity?.id === TARGET || entry?.id === TARGET);
+  const geometryId = province?.references?.geometryId ?? TARGET;
+  const geometry = (runtime.geometries ?? []).find((entry) => (
+    entry?.identity?.provinceId === TARGET
+    || entry?.identity?.id === TARGET
+    || entry?.identity?.id === geometryId
+  ));
+  if (!geometry) return { runtimePolygonCount: 0, polygons: [], geometryId, geometryFound: false };
+
+  const polygons = (geometry.polygons ?? []).map((polygon, polygonIndex) => ({
     polygonIndex,
     vertices: polygon.length,
     signedArea: signedArea(polygon),
     absArea: Math.abs(signedArea(polygon)),
     tiny: Math.abs(signedArea(polygon)) <= 1e-10,
   }));
-  return { runtimePolygonCount: polygons.length, polygons };
+  return {
+    runtimePolygonCount: polygons.length,
+    polygons,
+    geometryId,
+    geometryFound: true,
+  };
 }
 
 const results = [];
