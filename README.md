@@ -107,7 +107,7 @@ tools/              GIS/build/validation/forensic tooling
 ### Under controlled migration
 
 - A1 provenance closure
-- A2 runtime → MapBin → GPU forensic lineage
+- A2 historical `2.27e-13` artifact provenance/stage-lineage closure; the currently replayed runtime → MapBin → GPU → LOD path is cleared for the anomaly
 - C / Amasya Edge-3 authoritative binding
 - shared physical authority extraction
 - EARG / T3-A integration
