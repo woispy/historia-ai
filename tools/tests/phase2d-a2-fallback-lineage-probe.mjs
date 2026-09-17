@@ -7,6 +7,14 @@ const root = process.env.CANONICAL_ROOT;
 assert.ok(root, "CANONICAL_ROOT is required");
 const worktree = "/tmp/a2-fallback-lineage";
 const target = [36.33, 41.29];
+const HISTORICAL_E67_CONTROL = [
+  [35.96245, 41.13693],
+  [35.96145, 41.13866],
+  [35.95945, 41.13866],
+  [35.95845, 41.13693],
+  [35.95945, 41.13519],
+  [35.96145, 41.13519],
+];
 const commits = [
   ["fallback-introduced", "0dd1dadb90103b5706fd87c470b8d4a6dc85f496"],
   ["historical-candidate-search", "2fbab59d49825d122edabb31de86cc4ecdeb09b2"],
@@ -146,6 +154,7 @@ try {
   rmSync(worktree, { recursive: true, force: true });
 }
 
+const controlTrace = representationTrace(HISTORICAL_E67_CONTROL);
 const tiny = results.filter((r) => Number.isFinite(r.rawArea) && r.rawArea <= 1e-10);
 const representationTiny = results.filter((r) => Object.values(r.representationTrace?.collapse ?? {}).some(Boolean));
 const output = {
@@ -154,6 +163,11 @@ const output = {
   targetArea: 2.27e-13,
   tinyEpsilon: 1e-10,
   representationBoundary: ["raw", "round(5)", "HistoricalGeometryImporter.normalizeRing", "MapBin.normalizePolygon", "Float32Array"],
+  historicalE67Control: {
+    source: "35267020164 / e67cdd3f7a3b89631c497f0d2ec1ac9d24444364 retained fallback geometry",
+    polygon: HISTORICAL_E67_CONTROL,
+    trace: controlTrace,
+  },
   results,
   tinyHits: tiny,
   representationTinyHits: representationTiny,
