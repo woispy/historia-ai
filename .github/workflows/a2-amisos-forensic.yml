@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -25,9 +27,12 @@ jobs:
         run: npm run build:historical-gis:1300
       - name: Trace Amisos runtime-to-GPU area lineage
         run: node tools/forensics/a2-amisos-pipeline-trace.mjs
-      - name: Upload forensic report
+      - name: Replay historical A2 checkpoints
+        run: node tools/forensics/a2-amisos-checkpoint-replay.mjs
+      - name: Upload forensic reports
         uses: actions/upload-artifact@v4
         with:
-          name: a2-amisos-forensic-report
-          path: a2-amisos-forensic-report.json
-          if-no-files-found: error
+          name: a2-amisos-forensic-reports
+          path: |
+            a2-amisos-forensic-report.json
+            a2-amisos-checkpoint-replay.json
