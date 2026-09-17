@@ -32,12 +32,12 @@ jobs:
         run: |
           mkdir -p forensic-output
           {
-            echo "branch=$${GITHUB_REF_NAME}"
-            echo "head=$$(git rev-parse HEAD)"
-            echo "targetArea=$${A2_TARGET_AREA}"
-            echo "tinyEpsilon=$${A2_TINY_EPSILON}"
-            echo "node=$$(node --version)"
-            echo "git=$$(git --version)"
+            echo "branch=${GITHUB_REF_NAME}"
+            echo "head=$(git rev-parse HEAD)"
+            echo "targetArea=${A2_TARGET_AREA}"
+            echo "tinyEpsilon=${A2_TINY_EPSILON}"
+            echo "node=$(node --version)"
+            echo "git=$(git --version)"
           } > forensic-output/execution-identity.txt
           cat forensic-output/execution-identity.txt
       - name: Fetch canonical production branch
@@ -48,10 +48,10 @@ jobs:
         id: clip_lineage
         run: |
           node tools/tests/phase2d-a2-clip-lineage-probe.mjs > forensic-output/a2-clip-lineage.json 2> forensic-output/a2-clip-lineage.stderr
-          status=$$?
+          status=$?
           cat forensic-output/a2-clip-lineage.json
           if [ -s forensic-output/a2-clip-lineage.stderr ]; then cat forensic-output/a2-clip-lineage.stderr; fi
-          exit $$status
+          exit $status
       - name: Upload clip lineage artifact
         if: always()
         uses: actions/upload-artifact@v4
