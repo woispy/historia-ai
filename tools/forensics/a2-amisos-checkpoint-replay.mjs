@@ -96,6 +96,8 @@ const originalHead = git(["rev-parse", "HEAD"]);
 try {
   for (const checkpoint of CHECKPOINTS) {
     const worktree = resolve(worktreeRoot, checkpoint.slice(0, 8));
+    let hydrographyFetchStatus = "skipped";
+    let hydrographyFetchOutput = "";
     let hydrographyBuildStatus = "skipped";
     let hydrographyOutput = "";
     let buildStatus = "success";
@@ -108,15 +110,34 @@ try {
       const message = git(["log", "-1", "--pretty=%s"], worktree);
 
       try {
-        hydrographyOutput = run(
+        // The Natural Earth source files are intentionally not tracked in git.
+        // Recreate the exact pinned source inputs used by the historical builder.
+        hydrographyFetchOutput = run(
           "node",
-          ["tools/asset-builder/cli/build-anatolia-hydrography-10m.js"],
+          ["tools/asset-builder/cli/fetch-natural-earth-hydrography-10m.js"],
           worktree,
         );
-        hydrographyBuildStatus = "success";
+        hydrographyFetchStatus = "success";
       } catch (error) {
-        hydrographyBuildStatus = "failed";
-        hydrographyOutput = `${error.stdout ?? ""}\n${error.stderr ?? ""}`;
+        hydrographyFetchStatus = "failed";
+        hydrographyFetchOutput = `${error.stdout ?? ""}\n${error.stderr ?? ""}`;
+      }
+
+      if (hydrographyFetchStatus === "success") {
+        try {
+          hydrographyOutput = run(
+            "node",
+            ["tools/asset-builder/cli/build-anatolia-hydrography-10m.js"],
+            worktree,
+          );
+          hydrographyBuildStatus = "success";
+        } catch (error) {
+          hydrographyBuildStatus = "failed";
+          hydrographyOutput = `${error.stdout ?? ""}\n${error.stderr ?? ""}`;
+        }
+      } else {
+        hydrographyBuildStatus = "blocked-by-fetch";
+        hydrographyOutput = "Historical GIS replay skipped because pinned Natural Earth source inputs could not be fetched.";
       }
 
       if (hydrographyBuildStatus === "success") {
@@ -151,6 +172,8 @@ try {
         checkpoint,
         commit,
         message,
+        hydrographyFetchStatus,
+        hydrographyFetchOutputTail: hydrographyFetchOutput.slice(-2000),
         hydrographyBuildStatus,
         hydrographyOutputTail: hydrographyOutput.slice(-2000),
         buildStatus,
@@ -194,7 +217,7 @@ const report = {
   targetTinyArea: TARGET_TINY,
   tinyThreshold: TINY_THRESHOLD,
   areaToleranceForExactHit: 1e-15,
-  harness: "immutable-root-checkout + detached git worktree per historical checkpoint + deterministic hydrography rebuild",
+  harness: "immutable-root-checkout + detached git worktree per historical checkpoint + pinned Natural Earth source fetch + deterministic hydrography rebuild",
   geometryLookup: "runtime.geometries[].identity.provinceId / identity.id / province.references.geometryId",
   checkpoints: results,
 };
