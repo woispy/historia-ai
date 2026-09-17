@@ -12,7 +12,7 @@ env:
 jobs:
   trace:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,6 +32,8 @@ jobs:
         run: node tools/forensics/a2-amisos-pipeline-trace.mjs
       - name: Replay historical A2 checkpoints
         run: node tools/forensics/a2-amisos-checkpoint-replay.mjs
+      - name: Replay historical A2 Stage A-B-C
+        run: node tools/forensics/a2-amisos-stage-replay.mjs
       - name: Upload forensic reports
         uses: actions/upload-artifact@v4
         with:
@@ -39,3 +41,4 @@ jobs:
           path: |
             a2-amisos-forensic-report.json
             a2-amisos-checkpoint-replay.json
+            a2-amisos-stage-replay.json
