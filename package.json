@@ -109,7 +109,10 @@
     "validate:historical-gis:1300": "node tools/historical-gis/cli/validate-1300.js",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:cartography-foundation": "node tools/tests/cartography-foundation.test.js"
+    "test:cartography-foundation": "node tools/tests/cartography-foundation.test.js",
+    "assert:production-scenario": "node tools/build/assert-production-scenario.js",
+    "build:legacy-map": "npm run build:assets && node tools/historical-gis/cli/import-1300.js && HISTORIA_MAP_RUNTIME_JSON=src/world/map/assets/historical/1300/runtime.json npm run build:mapbin",
+    "build:production": "npm run assert:production-scenario && HISTORIA_MAP_RUNTIME_JSON=src/world/map/assets/historical/1326/runtime.json npm run build:mapbin && vite build"
   },
   "dependencies": {
     "react": "^19.2.7",
