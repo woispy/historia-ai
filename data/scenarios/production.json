@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "scenarioId": "1326",
+  "startDate": "1326-04-07",
+  "productionDate": "1326-04-07",
+  "runtimePath": "src/world/map/assets/historical/1326/runtime.json",
+  "sourceRoot": "data/gis/1326",
+  "authorityRequired": true,
+  "status": "blocked-until-provenance-qualified-runtime-exists",
+  "rules": [
+    "Production map/runtime selection must resolve to the 1326 runtime path.",
+    "The 1300 runtime is legacy/forensic and is never a production fallback.",
+    "A missing 1326 runtime is a hard production-build failure.",
+    "Candidate/evidence-only 1326 data must not be promoted implicitly."
+  ]
+}
