@@ -257,33 +257,3 @@ Priority next:
 3. preserve the clip-lineage Run #9 evidence as a negative reproduction result.
 
 Neither branch is authorized as the root cause until the exact historical artifact or an exact numerical reproduction is obtained.
-
-
-## Early fallback clip-boundary probe — instrumentation added
-
-Forensic commit `0b99cc0472f69ba4d0c248d987a3d0dfd59dd3f4` extends the dedicated fallback-lineage probe with a representation trace for the earliest fallback API that uses `clipCellToLand()`. For historical radii `0.03`, `0.015`, and `0.008`, the probe records raw area, clipped area, six-decimal `uniquePoints()` area, five-decimal `roundPolygon()` area, vertex counts, and tiny-threshold crossings.
-
-This is instrumentation only. No production geometry, `MIN_AREA`, importer, MapBin, or GPU behavior is changed. The exact-head Actions execution for this new commit has **not yet been independently verified**, so the new probe is test capability rather than execution evidence.
-
-The acceptance question is whether the early `clip → unique(6) → round(5)` chain produces a tiny representation before the later fallback/search family. A positive result would identify a historical representation boundary; a negative result further narrows the search toward the original artifact identity or another serialization path.
-
-## A2 tracking gate
-
-The remaining execution/provenance gate is tracked in GitHub Issue **#104 — `A2 forensic checkpoint: exact execution artifact gate`**. The issue body is now stale with respect to exact execution identity because the retained `35267020164` artifact exists; however, the substantive acceptance requirement remains open: retained V0/V1/V2 and authority-isolation evidence must establish a common lineage to the historical `~2.27e-13` observation.
-
-No production mutation or merge is authorized by the forensic work.
-
-## Remaining question
-
-```text
-Which historical artifact first contained ~2.27e-13,
-and what exact geometry representation did that artifact measure?
-```
-
-## Locked decisions
-
-- Do not change `MIN_AREA`.
-- Do not change normalization constants or repair depth.
-- Do not alter MapBin/GPU behavior.
-- Do not promote checkpoint behavior to canonical authority.
-- Do not merge `codex/phase2.8-c-a2-edge-trace` into production.
