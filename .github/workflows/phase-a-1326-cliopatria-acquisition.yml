@@ -78,6 +78,12 @@ jobs:
           input=$(cat data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted/selected-input.txt)
           npm run extract:1326-cliopatria -- --input "$input"
 
+      - name: Run 1326 entity reconciliation
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run reconcile:1326-cliopatria -- --input data/build/gis/1326/cliopatria-1326-candidates.json
+
       - name: Emit independent checksum
         shell: bash
         run: |
@@ -85,7 +91,7 @@ jobs:
           sha256sum data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip
           stat -c '%n %s bytes' data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip
 
-      - name: Upload acquisition and temporal extraction evidence
+      - name: Upload acquisition and intake evidence
         uses: actions/upload-artifact@v4
         with:
           name: phase-a-1326-cliopatria-acquisition
@@ -93,6 +99,7 @@ jobs:
             data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip
             data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.acquisition.json
             data/build/gis/1326/cliopatria-1326-candidates.json
+            data/build/gis/1326/cliopatria-entity-reconciliation.json
             data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted/selected-input.txt
           if-no-files-found: error
           retention-days: 14
