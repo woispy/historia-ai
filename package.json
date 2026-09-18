@@ -113,7 +113,8 @@
     "assert:production-scenario": "node tools/build/assert-production-scenario.js",
     "build:legacy-map": "npm run build:assets && node tools/historical-gis/cli/import-1300.js && node tools/build/build-mapbin.js --input src/world/map/assets/historical/1300/runtime.json",
     "build:production": "npm run assert:production-scenario && node tools/build/build-mapbin.js --input src/world/map/assets/historical/1326/runtime.json && vite build",
-    "test:production-scenario-contract": "node tools/tests/production-scenario-contract.test.js"
+    "test:production-scenario-contract": "node tools/tests/production-scenario-contract.test.js",
+    "validate:1326-source-intake": "node tools/historical-gis/cli/validate-1326-acquisition-manifest.js"
   },
   "dependencies": {
     "react": "^19.2.7",
