@@ -17,6 +17,7 @@ const HISTORICAL_E67_CONTROL = [
 ];
 const commits = [
   ["fallback-introduced", "0dd1dadb90103b5706fd87c470b8d4a6dc85f496"],
+  ["tiny-anchor-allowance", "8fb70748e0da3624103b554c040c0a9d972c719b"],
   ["historical-candidate-search", "2fbab59d49825d122edabb31de86cc4ecdeb09b2"],
   ["physical-containment-fix", "e67cdd3f7a3b89631c497f0d2ec1ac9d24444364"],
 ];
