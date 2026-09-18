@@ -1,6 +1,6 @@
 # Phase A — 1326 Source Intake Contract
 
-Status: **byte acquisition, temporal extraction and mechanical entity reconciliation gates evidenced for Cliopatria; 5/8 Tier-1 entities have candidate matches, 3 remain explicit source gaps; promotion remains BLOCKED**  
+Status: **byte acquisition, temporal extraction and mechanical entity reconciliation gates evidenced for Cliopatria; 5/8 Tier-1 entities have candidate matches, 1 cross-polity label requires manual review, 2 remain explicit source gaps; promotion remains BLOCKED**  
 Date: **2026-09-18**  
 Canonical branch: `integration/phase-a-h-production`
 
@@ -153,7 +153,7 @@ The stage consumes the extracted candidate report plus the canonical 1326 eviden
 
 The three unmatched entities are not treated as absent from history; they are explicit **reconciliation gaps in this source's 1326 candidate set under the current name/alias matching policy**. The five matched entities are only candidate identity matches and are not geometry authority. The current matched set is Byzantine Empire, Ilkhanate, Karesi, Saruhan and Aydın. Ottoman Beylik, Eşrefoğulları and Alâiye remain unmatched in this source.
 
-The successful workflow retained the combined acquisition/intake evidence as artifact **10562704435** (uploaded-artifact ZIP digest `sha256:6746314cb22629b8ad755f7de19ba9c3ca1950b1807a0f3c819fc3a7dc8157fe`). The reconciliation report records schemaVersion **2**, with alias matches for `beylik of karasi`, `beylik of saruhan` and `beylik of aydin`.
+The subsequent successful forensic workflow **35396664319** (run #34, head **b7b21117ca32f7a1c71e76958b9247e3b325defb**) re-ran acquisition, temporal extraction, reconciliation, independent checksum and artifact retention. Reconciliation again produced **8 required / 5 matched / 3 unmatched / 0 ambiguous / promotion BLOCKED**. The report now records schemaVersion **3** and explicitly separates cross-polity labels into `manualReview` rather than treating them as automatic entity matches. The Cliopatria candidate `Ottoman Empire` (Wikidata **Q12560**, 1326–1332) is recorded for `ottoman-beylik` with reason `cross-polity-label`; this is a manual-review candidate, not a sixth matched entity. Eşrefoğulları and Alâiye remain unmatched source gaps. The workflow retained the combined acquisition/intake evidence as artifact **10566919811** with uploaded-artifact ZIP digest `sha256:c08bedf1c18a31d05d18d88ece6a62453ab4e9b6e9566e8ab40cd462a1459cdc`. The independently hashed retained source remains SHA-256 `d01ae3a20d358cc5d54f69d9d725d390767d9c8759ac89ad6f90c58d106f3370` and `44,231,317` bytes.
 
 This establishes that the source can now be mechanically evaluated against the Tier-1 matrix, while the unresolved three-entity gap remains the active forensic work item.
 
@@ -177,7 +177,7 @@ temporal match
     ≠ canonical authority
 ```
 
-The next executable gate is therefore **evidence-backed closure of the three remaining Tier-1 reconciliation gaps** (Ottoman Beylik, Eşrefoğulları, Alâiye), using source identifiers and/or additional historical sources plus the evidence matrix, without relaxing the promotion locks.
+The next executable gate is therefore **manual-review closure of the Ottoman cross-polity label plus evidence-backed closure of the two remaining Cliopatria source gaps** (Eşrefoğulları, Alâiye), using source identifiers and/or additional historical sources plus the evidence matrix, without relaxing the promotion locks.
 
 ## Reproducible Cliopatria byte-acquisition path
 
@@ -221,4 +221,4 @@ This verifies the manifest/registry/evidence contracts. It intentionally does **
 
 Source intake is complete only when each production-relevant source has a pinned snapshot identity, raw hash, license/provenance record, reproducible extraction parameters, and a retained artifact that can be independently revalidated.
 
-For Cliopatria, byte acquisition, temporal extraction and mechanical reconciliation are now evidenced. The next stage is **closing the three remaining Tier-1 reconciliation gaps with stronger source identifiers/additional historical evidence**, followed by candidate geometry review and topology/physical validation — not automatic geometry promotion.
+For Cliopatria, byte acquisition, temporal extraction and mechanical reconciliation are now evidenced. The next stage is **manual review of the Ottoman cross-polity label plus closure of the two genuine source gaps with additional historical evidence**, followed by candidate geometry review and topology/physical validation — not automatic geometry promotion.
