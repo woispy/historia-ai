@@ -35,6 +35,22 @@ jobs:
       - name: Verify retained bytes
         run: npm run verify:1326-cliopatria
 
+      - name: Extract pinned GeoJSON payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted
+          unzip -q data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip -d data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted
+          find data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted -type f -maxdepth 2 -print
+
+      - name: Run 1326 temporal extraction
+        shell: bash
+        run: |
+          set -euo pipefail
+          input=$(find data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted -type f -name '*.geojson' -o -name '*.json' | head -n 1)
+          test -n "$input"
+          npm run extract:1326-cliopatria -- --input "$input"
+
       - name: Emit independent checksum
         shell: bash
         run: |
