@@ -79,6 +79,21 @@ const results = REQUIRED_ENTITIES.map((entity) => {
   };
 });
 
+const manualReview = Object.entries(MANUAL_REVIEW_IDENTIFIERS).flatMap(([entityId, rule]) => {
+  const matches = (candidates.candidates ?? []).filter(candidate => candidate.wikidataId === rule.wikidataId);
+  return matches.map(candidate => ({
+    entityId,
+    reason: rule.reason,
+    sourceFeatureIndex: candidate.sourceFeatureIndex,
+    sourceFeatureId: candidate.sourceFeatureId,
+    name: candidate.name,
+    wikidataId: candidate.wikidataId,
+    fromYear: candidate.fromYear,
+    toYear: candidate.toYear,
+    geometryAuthorityStatus: candidate.geometryAuthorityStatus,
+  }));
+});
+
 const report = {
   schemaVersion: 3,
   scenarioDate: SCENARIO_DATE,
