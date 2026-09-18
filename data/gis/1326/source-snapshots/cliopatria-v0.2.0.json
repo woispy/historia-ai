@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "sourceId": "cliopatria-v0.2.0",
+  "provider": "Seshat Global History Databank",
+  "dataset": "Cliopatria",
+  "version": "v0.2.0",
+  "sourceRepository": "https://github.com/Seshat-Global-History-Databank/cliopatria",
+  "sourceTag": "v0.2.0",
+  "immutableReference": {
+    "type": "git-commit",
+    "sha": "ad28a69",
+    "verifiedFrom": "https://github.com/Seshat-Global-History-Databank/cliopatria/releases/tag/v0.2.0"
+  },
+  "sourceFile": "cliopatria.geojson.zip",
+  "format": "GeoJSON archive",
+  "projection": "EPSG:4326",
+  "temporalExtraction": {
+    "scenarioDate": "1326-04-07",
+    "rule": "FromYear <= 1326 <= ToYear"
+  },
+  "license": {
+    "type": "CC BY 4.0",
+    "sourceLicenseFile": "LICENSE.md",
+    "licenseReference": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "acquisition": {
+    "status": "reference-pinned-not-acquired",
+    "rawSha256": null,
+    "acquiredAt": null,
+    "retainedArtifact": null,
+    "recordCount": null
+  },
+  "importer": {
+    "version": null,
+    "commit": null
+  },
+  "validation": {
+    "status": "reference-identity-verified",
+    "rawBytesVerified": false,
+    "temporalExtractionVerified": false,
+    "retainedArtifactVerified": false
+  },
+  "promotion": "BLOCKED"
+}
