@@ -64,6 +64,14 @@ For every acquired dataset, record:
 
 Until these fields exist, the source remains **acquisition-required** and cannot enter the canonical promotion path.
 
+## Acquisition decision
+
+The first acquisition target is **Cliopatria v0.2.0** because it is a versioned, downloadable GeoJSON source with explicit temporal intervals and Wikidata/Seshat identifiers. Its role remains candidate political evidence; it cannot directly become canonical province geometry.
+
+The second operational source is **OpenHistoricalMap**, but the repository should acquire a reproducible bulk snapshot rather than rely on an interactive area export. The current service documentation points to Planet OHM and Overpass for bulk acquisition.
+
+**WHG is reconciliation-only for the current phase.** Its API documentation requires tokens for most endpoints, so no authenticated WHG acquisition is claimed until credentials and an actual pinned response/export are available.
+
 ## External verification notes
 
 Current external documentation confirms that Cliopatria publishes a versioned GeoJSON dataset with temporal `FromYear/ToYear` records and explicitly warns that its maps represent one historical interpretation with border and territorial uncertainty. It is therefore candidate evidence, not automatic province authority.
