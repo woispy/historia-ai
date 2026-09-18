@@ -150,7 +150,8 @@ try {
     try {
       const file = join(worktree, "tools/historical-gis/AnatoliaPhase2DGeometryBuilder.js");
       let source = readFileSync(file, "utf8");
-      const sourceFingerprint = checkpointGeometrySource(label, source);\n      const hasAnchorFallback = source.includes("createAnchorFallbackPolygon");
+      const sourceFingerprint = checkpointGeometrySource(label, source);
+      const hasAnchorFallback = source.includes("createAnchorFallbackPolygon");
       const hasPhysicalFallback = source.includes("resolvePhysicalFallback");
       if (!hasAnchorFallback && !hasPhysicalFallback) {
         results.push({ label, sha, status: "no-supported-fallback-api", sourceFingerprint });
@@ -163,9 +164,13 @@ try {
       writeFileSync(file, source);
       const mod = await import(`file://${file}?fallback=${sha}`);
       if (hasPhysicalFallback) {
-        const result = normalizeResult(label, sha, mod.resolvePhysicalFallback({ id: "pontus-amisos", centroid: target }), "resolvePhysicalFallback");\n        result.sourceFingerprint = sourceFingerprint;\n        results.push(result);
+        const result = normalizeResult(label, sha, mod.resolvePhysicalFallback({ id: "pontus-amisos", centroid: target }), "resolvePhysicalFallback");
+        result.sourceFingerprint = sourceFingerprint;
+        results.push(result);
       } else {
-        const result = normalizeResult(label, sha, mod.createAnchorFallbackPolygon(target), "createAnchorFallbackPolygon");\n        result.sourceFingerprint = sourceFingerprint;\n        results.push(result);
+        const result = normalizeResult(label, sha, mod.createAnchorFallbackPolygon(target), "createAnchorFallbackPolygon");
+        result.sourceFingerprint = sourceFingerprint;
+        results.push(result);
       }
     } catch (error) {
       results.push({ label, sha, status: "error", error: String(error?.stack || error) });
