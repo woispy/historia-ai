@@ -304,3 +304,34 @@ Decision:
 This disposition does **not** mark A2 as solved. It marks the historical numeric observation as non-blocking for production repair while preserving the evidence required for future forensic reopening.
 
 Locked decisions remain unchanged: `SAFE TO DELETE = 0`, `MIN_AREA = 0.00005`, no 1300→1326 geometry copy, no forensic-to-production promotion, and local convergence remains gated by the authoritative GIS acceptance criteria.
+
+
+## Run #30 — canonical-pinned V4 checkpoint replay retained (2026-09-18)
+
+The clean forensic branch `codex/a2-forensic-canonical-d485` executed the canonical-pinned V4 historical checkpoint lineage workflow at HEAD `d9b0120becf542ae27513a5743033eb642bdfacc`.
+
+Workflow run: `35371612874`  
+Artifact: `phase2d-a2-historical-lineage-v4`  
+Artifact SHA-256: `7fd80727635a31d928825388db3946ef11ac6d27bf7425ceb145d6b2ec302839`
+
+The retained result reports:
+
+| Checkpoint | Result |
+|---|---|
+| `5f48731e...` V0 | build aborted on unrelated `caria-halikarnassos` physical-validity failure; no Amisos numerical result established |
+| `bdf166a4...` V1 | Amisos stage/final area observed at `0.5015050788261988` for the traced target occurrence and completed build output area `4.057109021412884`; no tiny hit |
+| `3021b2d1...` V2 | completed build output area `4.057109021412884`; no tiny hit |
+| `d485105d...` canonical | instrumentation unavailable because the expected historical raw-clip marker is absent in the current canonical builder; no numerical claim made |
+
+The artifact-wide target search reports:
+
+```targetArea     = 2.27e-13
+tinyAreaHits   = 0
+conclusion     = No executed checkpoint reproduced the target tiny-area value; producer lineage remains open.
+```
+
+This is now **executed and retained negative evidence** for the V0/V1/V2 checkpoint hypothesis. It does not solve A2, because V0 did not complete, the current canonical builder requires a different instrumentation path, and the original producer/artifact of `~2.27e-13` remains unidentified.
+
+The result does, however, close the previously pending execution gate for this V4 harness: the workflow itself completed successfully and retained its artifact. No production geometry, authority semantics, MIN_AREA, MapBin behavior, or GPU behavior was changed.
+
+Next A2 disposition remains the locked Run #29 decision: do not continue speculative numeric reproduction unless new provenance evidence appears. Continue the main Phase A production-repair chain and preserve this artifact as forensic negative evidence.
