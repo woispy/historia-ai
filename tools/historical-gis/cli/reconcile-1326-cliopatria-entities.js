@@ -85,8 +85,8 @@ const report = {
     aliasMatch: "candidate-only",
     ambiguity: "manual-review-required",
     geometryAuthority: "never-derived-from-name-match-alone",
-    cross-polity-label: "manual-review-required",
-    missing-source-record: "explicit-gap",
+    "cross-polity-label": "manual-review-required",
+    "missing-source-record": "explicit-gap",
   },
   counts: {
     requiredEntities: results.length,
