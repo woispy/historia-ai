@@ -61,6 +61,8 @@ jobs:
         run: npm run test:phase-ah-legacy-cleanliness
       - name: Validate explicit 1326 production scenario contract
         run: npm run test:production-scenario-contract
+      - name: Validate 1326 source intake contract
+        run: npm run validate:1326-source-intake
       - name: Generate world physical geometry assets
         run: npm run build:assets
       - name: Verify repository cleanliness after physical assets
