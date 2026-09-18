@@ -88,7 +88,7 @@ The first acquisition target, **Cliopatria v0.2.0**, now has a pinned immutable 
 
 `data/gis/1326/source-snapshots/cliopatria-v0.2.0.json`
 
-The public v0.2.0 release resolves to commit **ad28a69**. The source repository identifies the payload as `cliopatria.geojson.zip`, and its v0.2.0 license file declares **CC BY 4.0**. This establishes source identity and licensing metadata, but it does **not** establish byte acquisition: the raw SHA-256, acquisition timestamp, retained artifact, and record count remain intentionally unset until the actual archive bytes are acquired and hashed.
+The public v0.2.0 release resolves to commit **ad28a69**. The exact repository blob for `cliopatria.geojson.zip` is also addressable as Git blob **`cefab0f4b622e2e7fb3daf68d4f461f83991204c`**. This is a Git object identity, **not** a raw SHA-256 checksum. The source repository identifies the payload as `cliopatria.geojson.zip`, and its v0.2.0 license file declares **CC BY 4.0**. This establishes source identity and licensing metadata, but it does **not** establish byte acquisition: the raw SHA-256, acquisition timestamp, retained artifact, and record count remain intentionally unset until the actual archive bytes are acquired and hashed.
 
 The source documentation describes Cliopatria as a historical political-entity dataset with EPSG:4326 geometry and inclusive `FromYear/ToYear` intervals. For Historia AI, the extraction rule remains `FromYear <= 1326 <= ToYear`; the resulting records remain candidate evidence and require entity reconciliation and review before any geometry promotion.
 
