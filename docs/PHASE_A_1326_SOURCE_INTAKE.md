@@ -1,6 +1,6 @@
 # Phase A — 1326 Source Intake Contract
 
-Status: **byte acquisition and temporal extraction gates closed for Cliopatria; entity reconciliation remains open with 2/8 Tier-1 candidates matched**  
+Status: **byte acquisition, temporal extraction and mechanical entity reconciliation gates evidenced for Cliopatria; 5/8 Tier-1 entities have candidate matches, 3 remain explicit source gaps; promotion remains BLOCKED**  
 Date: **2026-09-18**  
 Canonical branch: `integration/phase-a-h-production`
 
@@ -140,22 +140,22 @@ The workflow artifact for this extraction is **10562680169** with uploaded-artif
 
 ## Verified 1326 entity reconciliation evidence
 
-The fail-closed reconciliation stage was executed after temporal extraction in successful workflow run **35381208107**.
+The fail-closed reconciliation stage was re-executed after temporal extraction in successful workflow run **35383554275** (head **3b7abc8593d6b623e3d68b303dabec372622e15b**).
 
 The stage consumes the extracted candidate report plus the canonical 1326 evidence matrix and evaluates only the eight established Tier-1 entities. Result:
 
 - required Tier-1 entities: **8**
-- entities with at least one name/alias candidate: **2**
-- unmatched: **6**
+- entities with at least one name/alias candidate: **5**
+- unmatched: **3**
 - ambiguous: **0**
 - automatic promotion: **false**
 - overall promotion state: **BLOCKED**
 
-The six unmatched entities are not treated as absent from history; they are explicit **reconciliation gaps in this source's 1326 candidate set under the current name/alias matching policy**. Likewise, the two matched entities are only candidate identity matches and are not geometry authority.
+The three unmatched entities are not treated as absent from history; they are explicit **reconciliation gaps in this source's 1326 candidate set under the current name/alias matching policy**. The five matched entities are only candidate identity matches and are not geometry authority. The current matched set is Byzantine Empire, Ilkhanate, Karesi, Saruhan and Aydın. Ottoman Beylik, Eşrefoğulları and Alâiye remain unmatched in this source.
 
-The workflow retained the reconciliation report as artifact **10562795366** (uploaded-artifact ZIP digest `sha256:96440d2ec05f5e8e102b1d5049f50369f3e8274848e76015f31354cafdf67ca1`).
+The successful workflow retained the combined acquisition/intake evidence as artifact **10562704435** (uploaded-artifact ZIP digest `sha256:6746314cb22629b8ad755f7de19ba9c3ca1950b1807a0f3c819fc3a7dc8157fe`). The reconciliation report records schemaVersion **2**, with alias matches for `beylik of karasi`, `beylik of saruhan` and `beylik of aydin`.
 
-This establishes that the source can now be mechanically evaluated against the Tier-1 matrix, while the unresolved six-entity gap remains the active forensic work item.
+This establishes that the source can now be mechanically evaluated against the Tier-1 matrix, while the unresolved three-entity gap remains the active forensic work item.
 
 ## Entity reconciliation gate
 
@@ -177,7 +177,7 @@ temporal match
     ≠ canonical authority
 ```
 
-The next executable gate is therefore **reconciliation expansion for the six unmatched Tier-1 entities**, using source identifiers/aliases and the evidence matrix without relaxing the promotion locks.
+The next executable gate is therefore **evidence-backed closure of the three remaining Tier-1 reconciliation gaps** (Ottoman Beylik, Eşrefoğulları, Alâiye), using source identifiers and/or additional historical sources plus the evidence matrix, without relaxing the promotion locks.
 
 ## Reproducible Cliopatria byte-acquisition path
 
@@ -221,4 +221,4 @@ This verifies the manifest/registry/evidence contracts. It intentionally does **
 
 Source intake is complete only when each production-relevant source has a pinned snapshot identity, raw hash, license/provenance record, reproducible extraction parameters, and a retained artifact that can be independently revalidated.
 
-For Cliopatria, byte acquisition and temporal extraction are evidenced and the reconciliation machinery has now been executed. The next stage is **closing the six Tier-1 reconciliation gaps with stronger source identifiers/evidence**, followed by candidate geometry review and topology/physical validation — not automatic geometry promotion.
+For Cliopatria, byte acquisition, temporal extraction and mechanical reconciliation are now evidenced. The next stage is **closing the three remaining Tier-1 reconciliation gaps with stronger source identifiers/additional historical evidence**, followed by candidate geometry review and topology/physical validation — not automatic geometry promotion.
