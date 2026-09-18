@@ -82,6 +82,16 @@ WHG provides machine-readable historical-place records and reconciliation servic
 
 These observations validate the intake design; they do **not** constitute an acquisition of source data into this repository.
 
+## First source identity pin
+
+The first acquisition target, **Cliopatria v0.2.0**, now has a pinned immutable source reference in:
+
+`data/gis/1326/source-snapshots/cliopatria-v0.2.0.json`
+
+The public v0.2.0 release resolves to commit **ad28a69**. The source repository identifies the payload as `cliopatria.geojson.zip`, and its v0.2.0 license file declares **CC BY 4.0**. This establishes source identity and licensing metadata, but it does **not** establish byte acquisition: the raw SHA-256, acquisition timestamp, retained artifact, and record count remain intentionally unset until the actual archive bytes are acquired and hashed.
+
+The source documentation describes Cliopatria as a historical political-entity dataset with EPSG:4326 geometry and inclusive `FromYear/ToYear` intervals. For Historia AI, the extraction rule remains `FromYear <= 1326 <= ToYear`; the resulting records remain candidate evidence and require entity reconciliation and review before any geometry promotion.
+
 ## Promotion locks
 
 The following remain locked:
