@@ -286,3 +286,21 @@ The retained artifact contains five checkpoint results for `pontus-amisos`:
 This inspection strengthens the historical fallback finding but does **not** reproduce `2.27e-13`. It also prevents the earlier failed checkpoint builds from being incorrectly interpreted as tiny-area observations. The e67 fallback remains approximately `1.041e-5`, roughly eight orders of magnitude above the target tiny value.
 
 The artifact is therefore negative evidence for the specific `2.27e-13` producer and positive evidence that the historical fallback representation is a real, independently retained geometry lineage. The exact target remains unidentified.
+
+
+## Run #29 — A2 forensic disposition: park provenance chase, resume production repair (2026-09-18)
+
+The historical `~2.27e-13` observation remains unproven and provenance-disconnected from the reproducible canonical/V15/runtime lineages recorded above. The project therefore does **not** treat the value as a required target, acceptance criterion, or production defect by itself.
+
+Decision:
+
+- Keep the forensic artifacts and branch history intact.
+- Do not modify `MIN_AREA`, MapBin normalization, GPU behavior, fallback authority, or canonical geometry to reproduce the historical number.
+- Do not merge the dedicated A2 forensic branches into production.
+- Park further A2 producer archaeology unless new evidence identifies the original artifact/execution or a reproducible production failure depends on it.
+- Resume the main Phase A objective: make the existing source → importer → dataset builder → authority validator → publisher → runtime pipeline correct and contract-complete for the 1326 scenario.
+- The next production-facing work is pipeline repair, followed by verified 1326 Historical Anchor Graph / candidate-surface work; no canonical political geometry is promoted without its authority gates.
+
+This disposition does **not** mark A2 as solved. It marks the historical numeric observation as non-blocking for production repair while preserving the evidence required for future forensic reopening.
+
+Locked decisions remain unchanged: `SAFE TO DELETE = 0`, `MIN_AREA = 0.00005`, no 1300→1326 geometry copy, no forensic-to-production promotion, and local convergence remains gated by the authoritative GIS acceptance criteria.
