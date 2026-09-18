@@ -35,7 +35,11 @@ function normalize(value) {
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
-const byName = new Map();
+
+const MANUAL_REVIEW_IDENTIFIERS = {
+  "ottoman-beylik": { wikidataId: "Q12560", reason: "cross-polity-label" },
+};
+\nconst byName = new Map();
 for (const candidate of candidates.candidates ?? []) {
   const key = normalize(candidate.name);
   if (!key) continue;
