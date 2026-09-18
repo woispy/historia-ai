@@ -92,6 +92,25 @@ The public v0.2.0 release resolves to commit **ad28a69**. The exact repository b
 
 The source documentation describes Cliopatria as a historical political-entity dataset with EPSG:4326 geometry and inclusive `FromYear/ToYear` intervals. For Historia AI, the extraction rule remains `FromYear <= 1326 <= ToYear`; the resulting records remain candidate evidence and require entity reconciliation and review before any geometry promotion.
 
+## Verified Cliopatria acquisition evidence
+
+The acquisition-only forensic workflow completed successfully on **2026-09-18** (workflow run **35374512708**, head **b97653c23688998ce44f5179f20a362cec306ec6**).
+
+Verified retained source bytes:
+
+- source: `cliopatria-v0.2.0`
+- immutable source commit: `ad28a69`
+- source Git blob: `cefab0f4b622e2e7fb3daf68d4f461f83991204c` (Git object identity, not raw SHA-256)
+- raw SHA-256: `d01ae3a20d358cc5d54f69d9d725d390767d9c8759ac89ad6f90c58d106f3370`
+- byte length: `44231317`
+- ZIP signature validation: PASS
+- independent retained-byte verification: PASS
+- acquisition timestamp: `2026-09-18T17:28:53.478Z`
+- retained outside canonical runtime as GitHub Actions artifact **10559198772**
+- artifact ZIP digest: `sha256:fc93ba2c4481344269ab3d731fd4899f8425eb8cc395aadf4da96e1625c88c11`
+
+This closes the **byte-acquisition gate only**. Temporal extraction, entity reconciliation, candidate geometry review, topology/physical validation and canonical promotion remain blocked until their respective gates pass.
+
 ## Entity reconciliation gate
 
 A dedicated fail-closed reconciliation stage now exists at:
