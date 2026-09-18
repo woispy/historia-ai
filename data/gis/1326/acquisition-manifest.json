@@ -31,7 +31,19 @@
         "Ilkhanid candidate extent",
         "Other Tier 1 polity candidates where matching temporal records exist"
       ],
-      "reconciliationWarning": "Cliopatria documents that its maps represent one historical interpretation and contain border, naming, territorial-change, and duration uncertainties."
+      "reconciliationWarning": "Cliopatria documents that its maps represent one historical interpretation and contain border, naming, territorial-change, and duration uncertainties.",
+      "snapshot": {
+        "status": "reference-pinned-not-acquired",
+        "sourceTag": "v0.2.0",
+        "immutableReference": {
+          "type": "git-commit",
+          "sha": "ad28a69"
+        },
+        "sourceFile": "cliopatria.geojson.zip",
+        "rawSha256": null,
+        "acquiredAt": null,
+        "retainedArtifact": null
+      }
     },
     {
       "id": "medieval-europe-digital-atlas",
