@@ -98,6 +98,16 @@ function representationTrace(polygon) {
     },
   };
 }
+function candidateFingerprint(candidate) {
+  if (!candidate?.point) return null;
+  const [x, y] = candidate.point;
+  return {
+    point: [Number(x.toFixed(5)), Number(y.toFixed(5))],
+    source: candidate.source ?? null,
+    expectedE67: Math.abs(x - HISTORICAL_E67_CONTROL[0][0] + 0.002) < 5e-5
+      && Math.abs(y - HISTORICAL_E67_CONTROL[0][1]) < 5e-5,
+  };
+}
 function normalizeResult(label, sha, result, api) {
   const polygon = result?.polygon ?? result ?? null;
   return {
@@ -105,6 +115,7 @@ function normalizeResult(label, sha, result, api) {
     sha,
     api,
     candidate: result?.candidate ?? null,
+    candidateFingerprint: candidateFingerprint(result?.candidate),
     diagnostics: result?.diagnostics ?? null,
     target,
     vertexCount: Array.isArray(polygon) ? polygon.length : 0,
@@ -172,6 +183,12 @@ const output = {
   tinyHits: tiny,
   representationTinyHits: representationTiny,
   rootCauseCandidate: tiny.length > 0 || representationTiny.length > 0 ? "historical fallback or representation boundary" : null,
+  historicalCandidateConclusion: results.map((result) => ({
+    label: result.label,
+    candidate: result.candidateFingerprint,
+    rawArea: result.rawArea,
+    targetRatio: Number.isFinite(result.rawArea) && result.rawArea > 0 ? result.rawArea / 2.27e-13 : null,
+  })),
 };
 writeFileSync(join(root, "forensic-output/a2-fallback-lineage.json"), JSON.stringify(output, null, 2));
 process.stdout.write(JSON.stringify(output, null, 2));
