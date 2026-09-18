@@ -4,8 +4,28 @@ import { fileURLToPath } from "node:url";
 import { encodeMapBin } from "./mapbin-encoder.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-const INPUT = process.env.HISTORIA_MAP_RUNTIME_JSON ?? path.join(ROOT, "src/world/map/assets/historical/1300/runtime.json");
-const OUTPUT = process.env.HISTORIA_MAPBIN_OUTPUT ?? path.join(ROOT, "public/assets/world.mapbin");
+
+function readArg(name) {
+  const index = process.argv.indexOf(name);
+  return index >= 0 ? process.argv[index + 1] : null;
+}
+
+const inputArg = readArg("--input");
+const INPUT = inputArg
+  ? path.resolve(process.cwd(), inputArg)
+  : process.env.HISTORIA_MAP_RUNTIME_JSON
+    ? path.resolve(process.cwd(), process.env.HISTORIA_MAP_RUNTIME_JSON)
+    : null;
+const OUTPUT = process.env.HISTORIA_MAPBIN_OUTPUT
+  ? path.resolve(process.cwd(), process.env.HISTORIA_MAPBIN_OUTPUT)
+  : path.join(ROOT, "public/assets/world.mapbin");
+
+if (!INPUT) {
+  throw new Error(
+    "MapBin input is required. Pass --input <runtime.json> or HISTORIA_MAP_RUNTIME_JSON. No historical year is selected implicitly.",
+  );
+}
+
 const runtime = JSON.parse(await fs.readFile(INPUT, "utf8"));
 const provinces = Array.isArray(runtime.provinces) ? runtime.provinces : [];
 const geometries = Array.isArray(runtime.geometries) ? runtime.geometries : [];
