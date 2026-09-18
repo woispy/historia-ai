@@ -114,6 +114,7 @@ const HISTORICAL_E67_CENTER = [35.96045, 41.13693];
 const HISTORICAL_E67_RADIUS = 0.4;
 const HISTORICAL_E67_DIRECTION_INDEX = 36;
 const HISTORICAL_E67_DIRECTION_COUNT = 64;
+const EARLY_CLIP_RADII = [0.03, 0.015, 0.008];
 
 function candidateFingerprint(candidate) {
   if (!candidate?.point) return null;
@@ -167,11 +168,35 @@ try {
         continue;
       }
       const exports = [];
-      if (hasAnchorFallback) exports.push("createAnchorFallbackPolygon");
+      if (hasAnchorFallback) exports.push("createAnchorFallbackPolygon", "clipCellToLand", "uniquePoints", "roundPolygon");
       if (hasPhysicalFallback) exports.push("resolvePhysicalFallback");
       source += `\nexport { ${exports.join(", ")} };\n`;
       writeFileSync(file, source);
       const mod = await import(`file://${file}?fallback=${sha}`);
+      if (hasAnchorFallback) {
+        const clipTrace = EARLY_CLIP_RADII.map((radius) => {
+          const rawPolygon = Array.from({ length: 6 }, (_, index) => {
+            const angle = (index / 6) * Math.PI * 2;
+            return [target[0] + Math.cos(angle) * radius, target[1] + Math.sin(angle) * radius];
+          });
+          const clipped = mod.clipCellToLand(rawPolygon);
+          const unique6 = mod.uniquePoints(clipped);
+          const rounded5 = mod.roundPolygon(unique6);
+          return {
+            radius,
+            rawVertexCount: rawPolygon.length,
+            rawArea: area(rawPolygon),
+            clippedVertexCount: clipped.length,
+            clippedArea: area(clipped),
+            unique6VertexCount: unique6.length,
+            unique6Area: area(unique6),
+            rounded5VertexCount: rounded5.length,
+            rounded5Area: area(rounded5),
+            tinyAtBoundary: [area(clipped), area(unique6), area(rounded5)].map((value) => Number.isFinite(value) && value <= 1e-10),
+          };
+        });
+        results.push({ label, sha, api: "early-anchor-clip-trace", target, clipTrace, sourceFingerprint });
+      }
       if (hasPhysicalFallback) {
         const result = normalizeResult(label, sha, mod.resolvePhysicalFallback({ id: "pontus-amisos", centroid: target }), "resolvePhysicalFallback");
         result.sourceFingerprint = sourceFingerprint;
