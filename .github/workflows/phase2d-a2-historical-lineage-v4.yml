@@ -1,0 +1,38 @@
+name: Phase 2D A2 Historical Lineage Execution
+
+on:
+  push:
+    branches:
+      - codex/a2-forensic-canonical-d485
+  pull_request:
+    branches:
+      - integration/phase-a-h-production
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  a2-lineage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout forensic branch
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build runtime fixture
+        run: npm run build:assets
+      - name: Execute historical checkpoint lineage
+        run: node tools/tests/phase2d-a2-historical-lineage-v4.mjs | tee a2-lineage-result.json
+      - name: Upload forensic result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2d-a2-historical-lineage-v4
+          path: a2-lineage-result.json
+          retention-days: 14
