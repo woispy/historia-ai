@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - codex/phase-a-1326-cliopatria-acquisition
+  pull_request:
+    branches:
+      - integration/phase-a-h-production
   workflow_dispatch:
 
 permissions:
