@@ -39,7 +39,7 @@ function normalize(value) {
 const MANUAL_REVIEW_IDENTIFIERS = {
   "ottoman-beylik": { wikidataId: "Q12560", reason: "cross-polity-label" },
 };
-\nconst byName = new Map();
+const byName = new Map();
 for (const candidate of candidates.candidates ?? []) {
   const key = normalize(candidate.name);
   if (!key) continue;
@@ -80,7 +80,7 @@ const results = REQUIRED_ENTITIES.map((entity) => {
 });
 
 const report = {
-  schemaVersion: 2,
+  schemaVersion: 3,
   scenarioDate: SCENARIO_DATE,
   sourceId: SOURCE_ID,
   reconciliationPolicy: {
@@ -92,6 +92,7 @@ const report = {
     "cross-polity-label": "manual-review-required",
     "missing-source-record": "explicit-gap",
   },
+  manualReview,
   counts: {
     requiredEntities: results.length,
     matched: results.filter(x => x.candidateCount > 0).length,
