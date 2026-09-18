@@ -92,6 +92,24 @@ The public v0.2.0 release resolves to commit **ad28a69**. The exact repository b
 
 The source documentation describes Cliopatria as a historical political-entity dataset with EPSG:4326 geometry and inclusive `FromYear/ToYear` intervals. For Historia AI, the extraction rule remains `FromYear <= 1326 <= ToYear`; the resulting records remain candidate evidence and require entity reconciliation and review before any geometry promotion.
 
+## Reproducible Cliopatria byte-acquisition path
+
+A dedicated local acquisition helper now exists at:
+
+`tools/historical-gis/cli/acquire-1326-cliopatria.js`
+
+The intended operator sequence is:
+
+```powershell
+npm run acquire:1326-cliopatria
+npm run verify:1326-cliopatria
+```
+
+The helper downloads the pinned v0.2.0 payload, requires a ZIP signature, retains the exact bytes outside the canonical runtime, records acquisition time, byte length and raw SHA-256, and provides an independent re-hash verification path. It does not perform temporal extraction or canonical promotion.
+
+This command is intentionally a local acquisition operation. The repository tooling in this environment cannot materialize the binary GitHub blob because binary repository content is not returned as UTF-8; therefore no raw SHA-256 is claimed until the command is actually executed against the external source and the resulting bytes are retained.
+
+
 ## Promotion locks
 
 The following remain locked:
