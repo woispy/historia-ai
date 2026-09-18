@@ -40,6 +40,7 @@ for (const source of manifest.sources) {
     assert(source.snapshot.immutableReference?.type === "git-commit", `1326 source ${source.id} snapshot must use an immutable git-commit reference.`);
     assert(/^[0-9a-f]{7,40}$/.test(source.snapshot.immutableReference?.sha ?? ""), `1326 source ${source.id} snapshot commit must be a hexadecimal git SHA.`);
     assert(source.snapshot.rawSha256 === null, `1326 source ${source.id} raw SHA-256 must remain null before byte acquisition.`);
+    assert(/^[0-9a-f]{40}$/.test(source.snapshot.immutableReference.sourceBlobSha ?? ""), `1326 source ${source.id} snapshot must record the exact Git blob SHA when source bytes are addressable.`);
     assert(source.snapshot.retainedArtifact === null, `1326 source ${source.id} retained artifact must remain null before acquisition.`);
   }
 }
