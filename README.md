@@ -107,7 +107,7 @@ tools/              GIS/build/validation/forensic tooling
 ### Under controlled migration
 
 - A1 provenance closure
-- A2 historical `2.27e-13` artifact provenance/stage-lineage closure; the currently replayed runtime → MapBin → GPU → LOD path is cleared for the anomaly
+- A2 historical anomaly remains a forensic/provenance discontinuity; the replayed runtime → MapBin → GPU → LOD path is cleared for the anomaly, and the unresolved numeric observation is parked rather than treated as a production target
 - C / Amasya Edge-3 authoritative binding
 - shared physical authority extraction
 - EARG / T3-A integration
@@ -125,6 +125,10 @@ The earlier migration wording that described a direct `0.006755 → ~2.27e-13` V
 ### A2 Run #24 artifact verification
 
 The historical execution associated with PR #89's **Run #24** was traced to GitHub Actions workflow run `34398688728` (workflow run number `11`) on head `78c70ec516852c461c42ceee18c7e64e904843ac`. Its retained artifact `phase2.8-c-a2-amisos-edge-telemetry` is still available and has digest `sha256:cc697c0973a5a8ed4efb8b305dba013f782b9f85d03a91a5588ee734663920f9`. The artifact records the pinned V15 source SHA `3575c1bccf94a322fed175958ce786531b142497`, `rawArea = 0.5023951571206453`, `normalizedArea = 0.5023951571206453`, and `collapseObserved = false`. Therefore the exact retained Run #24 artifact does **not** contain the claimed `~2.27e-13` collapse. This is stronger evidence that the `~2.27e-13` observation originated from a different historical artifact, representation, or execution lineage that has not yet been identified. The provenance search remains open; no production mutation is authorized by this finding.
+
+### A2 forensic disposition — 2026-09-18
+
+The historical `~2.27e-13` observation is not reproduced by the retained canonical producer, V15 producer, checkpoint replay, MapBin/runtime, or GPU evidence. It is therefore **not a production acceptance target**. The forensic evidence remains retained, but further producer archaeology is parked unless new evidence identifies the original artifact/execution or a reproducible production failure depends on it. Production work resumes on the source → importer → dataset builder → authority validator → publisher → runtime chain for the 1326 scenario.
 
 ### Locked rules
 
