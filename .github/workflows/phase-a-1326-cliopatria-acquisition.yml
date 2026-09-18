@@ -1,0 +1,50 @@
+name: Phase A — 1326 Cliopatria Acquisition
+
+on:
+  push:
+    branches:
+      - codex/phase-a-1326-cliopatria-acquisition
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  acquire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Acquire pinned Cliopatria bytes
+        run: npm run acquire:1326-cliopatria
+
+      - name: Verify retained bytes
+        run: npm run verify:1326-cliopatria
+
+      - name: Emit independent checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip
+          stat -c '%n %s bytes' data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip
+
+      - name: Upload acquisition evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-a-1326-cliopatria-acquisition
+          path: |
+            data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip
+            data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.acquisition.json
+          if-no-files-found: error
+          retention-days: 14
