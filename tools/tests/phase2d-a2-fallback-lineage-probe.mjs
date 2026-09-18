@@ -99,6 +99,17 @@ function representationTrace(polygon) {
     },
   };
 }
+function checkpointGeometrySource(label, source) {
+  const lines = source.split("\n");
+  const fallbackLines = lines.filter((line) =>
+    /createAnchorFallbackPolygon|resolvePhysicalFallback|FALLBACK_RADII|FALLBACK_DIRECTIONS|polygonRadii|searchPasses/.test(line),
+  );
+  return {
+    label,
+    fallbackSymbols: fallbackLines,
+  };
+}
+
 function candidateFingerprint(candidate) {
   if (!candidate?.point) return null;
   const [x, y] = candidate.point;
@@ -139,10 +150,10 @@ try {
     try {
       const file = join(worktree, "tools/historical-gis/AnatoliaPhase2DGeometryBuilder.js");
       let source = readFileSync(file, "utf8");
-      const hasAnchorFallback = source.includes("createAnchorFallbackPolygon");
+      const sourceFingerprint = checkpointGeometrySource(label, source);\n      const hasAnchorFallback = source.includes("createAnchorFallbackPolygon");
       const hasPhysicalFallback = source.includes("resolvePhysicalFallback");
       if (!hasAnchorFallback && !hasPhysicalFallback) {
-        results.push({ label, sha, status: "no-supported-fallback-api" });
+        results.push({ label, sha, status: "no-supported-fallback-api", sourceFingerprint });
         continue;
       }
       const exports = [];
@@ -152,9 +163,9 @@ try {
       writeFileSync(file, source);
       const mod = await import(`file://${file}?fallback=${sha}`);
       if (hasPhysicalFallback) {
-        results.push(normalizeResult(label, sha, mod.resolvePhysicalFallback({ id: "pontus-amisos", centroid: target }), "resolvePhysicalFallback"));
+        const result = normalizeResult(label, sha, mod.resolvePhysicalFallback({ id: "pontus-amisos", centroid: target }), "resolvePhysicalFallback");\n        result.sourceFingerprint = sourceFingerprint;\n        results.push(result);
       } else {
-        results.push(normalizeResult(label, sha, mod.createAnchorFallbackPolygon(target), "createAnchorFallbackPolygon"));
+        const result = normalizeResult(label, sha, mod.createAnchorFallbackPolygon(target), "createAnchorFallbackPolygon");\n        result.sourceFingerprint = sourceFingerprint;\n        results.push(result);
       }
     } catch (error) {
       results.push({ label, sha, status: "error", error: String(error?.stack || error) });
