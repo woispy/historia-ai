@@ -39,6 +39,7 @@ This is the post-conquest Bursa starting state. The 1300 pipeline remains as leg
 ### Production pipeline finding — 2026-09-18
 
 A concrete Phase A mismatch was identified independently of the parked A2 forensic work: the canonical `build` path still invokes the legacy 1300 GIS importer, and the MapBin builder defaults to the 1300 runtime when no explicit input is supplied. Because production is defined as 1326-04-07, this must be repaired before 1326 geometry can be treated as a production build input. GitHub Issue #107 tracks the fail-closed 1326 source/build migration. No 1300 geometry is being copied into 1326.
+The Phase A build contract is recorded in `docs/PHASE_A_1326_PRODUCTION_BUILD_CONTRACT.md`. The MapBin builder now requires an explicit runtime input, while `build:legacy-map` is the named 1300 path and `build:production` is fail-closed until the provenance-qualified 1326 runtime exists.
 
 # Current Architecture
 
