@@ -110,14 +110,23 @@ function checkpointGeometrySource(label, source) {
   };
 }
 
+const HISTORICAL_E67_CENTER = [35.96045, 41.13693];
+const HISTORICAL_E67_RADIUS = 0.4;
+const HISTORICAL_E67_DIRECTION_INDEX = 36;
+const HISTORICAL_E67_DIRECTION_COUNT = 64;
+
 function candidateFingerprint(candidate) {
   if (!candidate?.point) return null;
   const [x, y] = candidate.point;
   return {
     point: [Number(x.toFixed(5)), Number(y.toFixed(5))],
     source: candidate.source ?? null,
-    expectedE67: Math.abs(x - HISTORICAL_E67_CONTROL[0][0] + 0.002) < 5e-5
-      && Math.abs(y - HISTORICAL_E67_CONTROL[0][1]) < 5e-5,
+    expectedE67: Math.abs(x - HISTORICAL_E67_CENTER[0]) < 5e-5
+      && Math.abs(y - HISTORICAL_E67_CENTER[1]) < 5e-5,
+    derivedRadius: Math.hypot(x - target[0], y - target[1]),
+    derivedDirectionIndex: Math.round((Math.atan2(y - target[1], x - target[0]) / (Math.PI * 2)) * HISTORICAL_E67_DIRECTION_COUNT + HISTORICAL_E67_DIRECTION_COUNT) % HISTORICAL_E67_DIRECTION_COUNT,
+    expectedRadius: HISTORICAL_E67_RADIUS,
+    expectedDirectionIndex: HISTORICAL_E67_DIRECTION_INDEX,
   };
 }
 function normalizeResult(label, sha, result, api) {
