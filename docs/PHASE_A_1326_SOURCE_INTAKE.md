@@ -92,6 +92,27 @@ The public v0.2.0 release resolves to commit **ad28a69**. The exact repository b
 
 The source documentation describes Cliopatria as a historical political-entity dataset with EPSG:4326 geometry and inclusive `FromYear/ToYear` intervals. For Historia AI, the extraction rule remains `FromYear <= 1326 <= ToYear`; the resulting records remain candidate evidence and require entity reconciliation and review before any geometry promotion.
 
+## Entity reconciliation gate
+
+A dedicated fail-closed reconciliation stage now exists at:
+
+`tools/historical-gis/cli/reconcile-1326-cliopatria-entities.js`
+
+It consumes only the extracted 1326 candidate report and the canonical 1326 evidence matrix. The current gate covers the eight Tier-1 entities already established by the matrix: Ottoman Beylik, Byzantine Empire, Eşrefoğulları, Ilkhanate, Karesi, Saruhan, Aydın and Alâiye.
+
+Name/alias matches are recorded as **candidate matches only**. An exact name, Wikidata/Seshat identifier, or alias match cannot promote geometry. Multiple matches become `manual-review-required`; unmatched entities remain explicit gaps. Geometry authority is never derived from a name match alone.
+
+This keeps the required distinction intact:
+
+```text
+temporal match
+    ≠ entity identity
+    ≠ political control
+    ≠ province geometry
+    ≠ canonical authority
+```
+
+
 ## Reproducible Cliopatria byte-acquisition path
 
 A dedicated local acquisition helper now exists at:
