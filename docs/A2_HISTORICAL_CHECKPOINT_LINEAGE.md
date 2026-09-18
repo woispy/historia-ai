@@ -268,3 +268,21 @@ Neither branch is authorized as the root cause until the exact historical artifa
 - Purpose: obtain an auditable Actions execution artifact tied to the exact instrumentation HEAD. This is an execution mechanism change only; it does not alter production geometry, authority, MIN_AREA, or runtime behavior.
 - Observation at checkpoint recording time: the GitHub connector exposes no workflow run or status for `1f410f7...` yet. Therefore no execution result or artifact is claimed from this arm until independently retrieved.
 - Next evidence gate: retrieve the exact-head `phase2d-a2-fallback-lineage` artifact and inspect raw → round(5) → importer → MapBin → Float32 traces, including the early fallback clip boundary trace.
+
+
+## Run #28 — retained artifact inspection: historical-builder lineage (2026-09-18)
+
+Artifact `phase2d-a2-historical-builder-lineage` from workflow run `35267020164` was downloaded and independently inspected. Artifact id: `10517520075`; digest: `sha256:eaef589377ceb1a919de4005ee74a6229646653715fc139a3b7063dc5a746a21`.
+
+The retained artifact contains five checkpoint results for `pontus-amisos`:
+
+- `837ec8dd...`: build aborts earlier on unrelated `bithynia-nicaea` physical validity failure; no Amisos numerical result is established.
+- `532e52f9...`: build aborts earlier on unrelated `bithynia-nicomedia` physical validity failure; no Amisos numerical result is established.
+- `402685fc...`: same unrelated Nicomedia physical-validity failure; no Amisos numerical result is established.
+- `0095f32a...`: same unrelated Nicomedia physical-validity failure after candidate search; no Amisos numerical result is established.
+- `e67cdd3f...`: Amisos produces the six-vertex fallback polygon with area `0.00001040999984525115`.
+- canonical `6b742412...`: Amisos produces the five-vertex canonical polygon with area `0.0067547530500178254`.
+
+This inspection strengthens the historical fallback finding but does **not** reproduce `2.27e-13`. It also prevents the earlier failed checkpoint builds from being incorrectly interpreted as tiny-area observations. The e67 fallback remains approximately `1.041e-5`, roughly eight orders of magnitude above the target tiny value.
+
+The artifact is therefore negative evidence for the specific `2.27e-13` producer and positive evidence that the historical fallback representation is a real, independently retained geometry lineage. The exact target remains unidentified.
