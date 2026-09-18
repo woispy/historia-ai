@@ -57,7 +57,7 @@ async function acquire() {
     },
     promotion: "BLOCKED_UNTIL_EXTRACTION_RECONCILIATION_REVIEW"
   };
-  await fs.writeFile(RECORD_MANIFEST, `${JSON.stringify(record, null, 2)}\\n`);
+  await fs.writeFile(RECORD_MANIFEST, `${JSON.stringify(record, null, 2)}\n`);
   console.log(JSON.stringify(record, null, 2));
 }
 
