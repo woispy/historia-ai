@@ -257,3 +257,14 @@ Priority next:
 3. preserve the clip-lineage Run #9 evidence as a negative reproduction result.
 
 Neither branch is authorized as the root cause until the exact historical artifact or an exact numerical reproduction is obtained.
+
+
+## Run #27 — canonical-targeted producer-lineage execution arm (2026-09-18)
+
+- Forensic branch: `codex/phase2.8-c-a2-edge-trace`
+- Instrumentation head: `1f410f7a3f2e93a8c7302c81d7c54baee616cfe6`
+- Change: `.github/workflows/phase2d-a2-producer-lineage.yml` gained a `pull_request` trigger targeting `integration/phase-a-h-production`, in addition to the existing branch-push and manual triggers.
+- Forensic PR: #106, draft, base `integration/phase-a-h-production`, explicitly marked no-merge / no-production-mutation.
+- Purpose: obtain an auditable Actions execution artifact tied to the exact instrumentation HEAD. This is an execution mechanism change only; it does not alter production geometry, authority, MIN_AREA, or runtime behavior.
+- Observation at checkpoint recording time: the GitHub connector exposes no workflow run or status for `1f410f7...` yet. Therefore no execution result or artifact is claimed from this arm until independently retrieved.
+- Next evidence gate: retrieve the exact-head `phase2d-a2-fallback-lineage` artifact and inspect raw → round(5) → importer → MapBin → Float32 traces, including the early fallback clip boundary trace.
