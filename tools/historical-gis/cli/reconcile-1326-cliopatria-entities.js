@@ -90,5 +90,5 @@ const report = {
 };
 const output = path.resolve(process.cwd(), readArg("--output") ?? "data/build/gis/1326/cliopatria-entity-reconciliation.json");
 await fs.mkdir(path.dirname(output), { recursive: true });
-await fs.writeFile(output, `${JSON.stringify(report, null, 2)}\\n`);
+await fs.writeFile(output, JSON.stringify(report, null, 2) + "\n");
 console.log(JSON.stringify({ scenarioDate: SCENARIO_DATE, ...report.counts, output, promotion: "BLOCKED" }, null, 2));
