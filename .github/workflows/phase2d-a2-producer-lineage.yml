@@ -70,7 +70,9 @@ jobs:
           status=$?
           cat forensic-output/a2-canonical-v15-normalization-probe.json
           exit $status
-      # Forensic-only rearm: keep fallback lineage execution on every branch push so the retained artifact is tied to the exact HEAD.\n      - name: Run A2 historical fallback lineage probe\n        id: fallback_lineage
+      # Forensic-only rearm: keep fallback lineage execution on every branch push so the retained artifact is tied to the exact HEAD.
+      - name: Run A2 historical fallback lineage probe
+        id: fallback_lineage
         continue-on-error: true
         run: |
           node tools/tests/phase2d-a2-fallback-lineage-probe.mjs > forensic-output/a2-fallback-lineage.json 2> forensic-output/a2-fallback-lineage.stderr
