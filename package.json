@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prepare:legacy-map": "npm run build:assets && node tools/historical-gis/cli/import-1300.js && npm run build:mapbin",
+    "prepare:legacy-map": "npm run build:assets && node tools/historical-gis/cli/import-1300.js && node tools/build/build-mapbin.js --input src/world/map/assets/historical/1300/runtime.json",
     "publish:political-authority-map": "node tools/historical-gis/cli/publish-political-authority-map.js",
     "build": "npm run build:legacy-map && vite build",
     "build:assets": "node tools/asset-builder/cli/fetch-natural-earth-50m.js && node tools/asset-builder/cli/fetch-natural-earth-hydrography-10m.js && node tools/asset-builder/cli/build-assets.js && node tools/asset-builder/cli/build-anatolia-hydrography-10m.js",
@@ -115,7 +115,7 @@
     "build:production": "npm run assert:production-scenario && node tools/build/build-mapbin.js --input src/world/map/assets/historical/1326/runtime.json && vite build",
     "test:production-scenario-contract": "node tools/tests/production-scenario-contract.test.js",
     "validate:1326-source-intake": "node tools/historical-gis/cli/validate-1326-acquisition-manifest.js",
-    "acquire:1326-cliopatria": "node tools/historical-gis/cli/acquire-1326-cliopatria.js",
+    "acquire:1326-cliopatria": "node tools/historical-gis/cli/acquire-1326-cliopatria.js --download",
     "verify:1326-cliopatria": "node tools/historical-gis/cli/acquire-1326-cliopatria.js --verify",
     "extract:1326-cliopatria": "node tools/historical-gis/cli/extract-1326-cliopatria-candidates.js",
     "reconcile:1326-cliopatria": "node tools/historical-gis/cli/reconcile-1326-cliopatria-entities.js"
