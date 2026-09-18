@@ -37,7 +37,8 @@
         "sourceTag": "v0.2.0",
         "immutableReference": {
           "type": "git-commit",
-          "sha": "ad28a69"
+          "sha": "ad28a69",
+          "sourceBlobSha": "cefab0f4b622e2e7fb3daf68d4f461f83991204c"
         },
         "sourceFile": "cliopatria.geojson.zip",
         "rawSha256": null,
