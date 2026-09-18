@@ -1,6 +1,6 @@
 # Phase A — 1326 Source Intake Contract
 
-Status: **byte acquisition and temporal extraction gates closed for Cliopatria; entity reconciliation remains blocked**  
+Status: **byte acquisition and temporal extraction gates closed for Cliopatria; entity reconciliation remains open with 2/8 Tier-1 candidates matched**  
 Date: **2026-09-18**  
 Canonical branch: `integration/phase-a-h-production`
 
@@ -138,9 +138,28 @@ This closes the **Cliopatria temporal extraction gate**. It does not close entit
 
 The workflow artifact for this extraction is **10562680169** with uploaded-artifact ZIP digest `sha256:727b3c7bf53b53f411439aaf5565c800519dddf49f4c6c42f79e0296f8b322c0`. The raw source ZIP remains outside canonical runtime.
 
+## Verified 1326 entity reconciliation evidence
+
+The fail-closed reconciliation stage was executed after temporal extraction in successful workflow run **35381208107**.
+
+The stage consumes the extracted candidate report plus the canonical 1326 evidence matrix and evaluates only the eight established Tier-1 entities. Result:
+
+- required Tier-1 entities: **8**
+- entities with at least one name/alias candidate: **2**
+- unmatched: **6**
+- ambiguous: **0**
+- automatic promotion: **false**
+- overall promotion state: **BLOCKED**
+
+The six unmatched entities are not treated as absent from history; they are explicit **reconciliation gaps in this source's 1326 candidate set under the current name/alias matching policy**. Likewise, the two matched entities are only candidate identity matches and are not geometry authority.
+
+The workflow retained the reconciliation report as artifact **10562795366** (uploaded-artifact ZIP digest `sha256:96440d2ec05f5e8e102b1d5049f50369f3e8274848e76015f31354cafdf67ca1`).
+
+This establishes that the source can now be mechanically evaluated against the Tier-1 matrix, while the unresolved six-entity gap remains the active forensic work item.
+
 ## Entity reconciliation gate
 
-A dedicated fail-closed reconciliation stage now exists at:
+A dedicated fail-closed reconciliation stage exists at:
 
 `tools/historical-gis/cli/reconcile-1326-cliopatria-entities.js`
 
@@ -158,7 +177,7 @@ temporal match
     ≠ canonical authority
 ```
 
-The next executable gate is therefore **entity reconciliation against the canonical evidence matrix**, not geometry promotion.
+The next executable gate is therefore **reconciliation expansion for the six unmatched Tier-1 entities**, using source identifiers/aliases and the evidence matrix without relaxing the promotion locks.
 
 ## Reproducible Cliopatria byte-acquisition path
 
@@ -202,4 +221,4 @@ This verifies the manifest/registry/evidence contracts. It intentionally does **
 
 Source intake is complete only when each production-relevant source has a pinned snapshot identity, raw hash, license/provenance record, reproducible extraction parameters, and a retained artifact that can be independently revalidated.
 
-For Cliopatria, byte acquisition and temporal extraction are now evidenced. The next stage is **entity reconciliation**, followed by candidate geometry review and topology/physical validation — not automatic geometry promotion.
+For Cliopatria, byte acquisition and temporal extraction are evidenced and the reconciliation machinery has now been executed. The next stage is **closing the six Tier-1 reconciliation gaps with stronger source identifiers/evidence**, followed by candidate geometry review and topology/physical validation — not automatic geometry promotion.
