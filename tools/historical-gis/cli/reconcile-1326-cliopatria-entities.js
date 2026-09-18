@@ -8,9 +8,9 @@ const REQUIRED_ENTITIES = [
   { entityId: "byzantine-empire", aliases: ["byzantine", "byzantine empire", "bizans", "bizans imparatorluğu"] },
   { entityId: "esrefogullari", aliases: ["esrefogullari", "eşrefoğulları", "eşref"] },
   { entityId: "ilkhanate", aliases: ["ilkhanate", "il-khanate", "ilhanate", "ilhanlı", "ilhanlilar", "ilhanlılar"] },
-  { entityId: "karasi", aliases: ["karasi", "karasi beylik", "karesi", "karesi beyligi", "karesi beyliği"] },
-  { entityId: "saruhan", aliases: ["saruhan", "saruhan beylik", "saruhan beyliği"] },
-  { entityId: "aydin", aliases: ["aydin", "aydın", "aydinoğulları", "aydinoğullari"] },
+  { entityId: "karasi", aliases: ["karasi", "karasi beylik", "karesi", "karesi beyligi", "karesi beyliği", "beylik of karasi"] },
+  { entityId: "saruhan", aliases: ["saruhan", "saruhan beylik", "saruhan beyliği", "beylik of saruhan"] },
+  { entityId: "aydin", aliases: ["aydin", "aydın", "aydinoğulları", "aydinoğullari", "beylik of aydin"] },
   { entityId: "alaye", aliases: ["alaye", "alâiye", "alâiye beyliği", "ala iye"] },
 ];
 
@@ -46,14 +46,21 @@ for (const candidate of candidates.candidates ?? []) {
 
 const results = REQUIRED_ENTITIES.map((entity) => {
   const matches = [];
+  const matchedAliases = [];
   for (const alias of entity.aliases) {
     const bucket = byName.get(normalize(alias)) ?? [];
-    for (const candidate of bucket) if (!matches.some(x => x.sourceFeatureIndex === candidate.sourceFeatureIndex)) matches.push(candidate);
+    for (const candidate of bucket) {
+      if (!matches.some(x => x.sourceFeatureIndex === candidate.sourceFeatureIndex)) {
+        matches.push(candidate);
+        matchedAliases.push(alias);
+      }
+    }
   }
   return {
     entityId: entity.entityId,
     status: matches.length === 0 ? "unmatched" : matches.length === 1 ? "single-candidate" : "ambiguous",
     candidateCount: matches.length,
+    matchedAliases,
     candidates: matches.map(candidate => ({
       sourceFeatureIndex: candidate.sourceFeatureIndex,
       sourceFeatureId: candidate.sourceFeatureId,
@@ -69,7 +76,7 @@ const results = REQUIRED_ENTITIES.map((entity) => {
 });
 
 const report = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   scenarioDate: SCENARIO_DATE,
   sourceId: SOURCE_ID,
   reconciliationPolicy: {
@@ -78,6 +85,8 @@ const report = {
     aliasMatch: "candidate-only",
     ambiguity: "manual-review-required",
     geometryAuthority: "never-derived-from-name-match-alone",
+    cross-polity-label: "manual-review-required",
+    missing-source-record: "explicit-gap",
   },
   counts: {
     requiredEntities: results.length,
