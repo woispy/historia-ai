@@ -34,6 +34,14 @@ for (const source of manifest.sources) {
     `1326 source ${source.id} has unexpected intake status: ${source.status}.`,
   );
   assert(!source.url.startsWith("file:"), `1326 source ${source.id} must retain an external source URL.`);
+  if (source.snapshot) {
+    assert(source.snapshot.status === "reference-pinned-not-acquired", `1326 source ${source.id} snapshot must remain reference-pinned-not-acquired until raw acquisition is verified.`);
+    assert(typeof source.snapshot.sourceTag === "string" && source.snapshot.sourceTag.length > 0, `1326 source ${source.id} snapshot must record its source tag.`);
+    assert(source.snapshot.immutableReference?.type === "git-commit", `1326 source ${source.id} snapshot must use an immutable git-commit reference.`);
+    assert(/^[0-9a-f]{7,40}$/.test(source.snapshot.immutableReference?.sha ?? ""), `1326 source ${source.id} snapshot commit must be a hexadecimal git SHA.`);
+    assert(source.snapshot.rawSha256 === null, `1326 source ${source.id} raw SHA-256 must remain null before byte acquisition.`);
+    assert(source.snapshot.retainedArtifact === null, `1326 source ${source.id} retained artifact must remain null before acquisition.`);
+  }
 }
 
 const manifestText = JSON.stringify(manifest).toLowerCase();
