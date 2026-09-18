@@ -9,7 +9,8 @@
   "immutableReference": {
     "type": "git-commit",
     "sha": "ad28a69",
-    "verifiedFrom": "https://github.com/Seshat-Global-History-Databank/cliopatria/releases/tag/v0.2.0"
+    "verifiedFrom": "https://github.com/Seshat-Global-History-Databank/cliopatria/releases/tag/v0.2.0",
+    "sourceBlobSha": "cefab0f4b622e2e7fb3daf68d4f461f83991204c"
   },
   "sourceFile": "cliopatria.geojson.zip",
   "format": "GeoJSON archive",
@@ -28,17 +29,19 @@
     "rawSha256": null,
     "acquiredAt": null,
     "retainedArtifact": null,
-    "recordCount": null
+    "recordCount": null,
+    "note": "GitHub source blob is addressable and its blob SHA is recorded; raw bytes are still not available to this tool, so raw SHA-256 remains null."
   },
   "importer": {
     "version": null,
     "commit": null
   },
   "validation": {
-    "status": "reference-identity-verified",
+    "status": "reference-and-source-blob-identity-verified",
     "rawBytesVerified": false,
     "temporalExtractionVerified": false,
-    "retainedArtifactVerified": false
+    "retainedArtifactVerified": false,
+    "binaryRepositoryBlobIdentityVerified": true
   },
   "promotion": "BLOCKED"
 }
