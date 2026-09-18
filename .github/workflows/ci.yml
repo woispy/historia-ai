@@ -59,6 +59,8 @@ jobs:
         run: node tools/tests/world-wrap-synchronization.test.js
       - name: Validate Phase A-H legacy cleanliness
         run: npm run test:phase-ah-legacy-cleanliness
+      - name: Validate explicit 1326 production scenario contract
+        run: npm run test:production-scenario-contract
       - name: Generate world physical geometry assets
         run: npm run build:assets
       - name: Verify repository cleanliness after physical assets
