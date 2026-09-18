@@ -66,7 +66,7 @@ Until these fields exist, the source remains **acquisition-required** and cannot
 
 ## Acquisition decision
 
-The first acquisition target is **Cliopatria v0.2.0** because it is a versioned, downloadable GeoJSON source with explicit temporal intervals and Wikidata/Seshat identifiers. Its role remains candidate political evidence; it cannot directly become canonical province geometry.
+The first acquisition target is **Cliopatria v0.2.0** because it is a versioned, downloadable GeoJSON source with explicit temporal intervals and Wikidata/Seshat identifiers. Its role remains candidate political evidence; it cannot directly become canonical province geometry. The repository command `npm run acquire:1326-cliopatria` now explicitly performs the byte acquisition path; `npm run verify:1326-cliopatria` verifies the retained artifact hash. Neither command promotes geometry.
 
 The second operational source is **OpenHistoricalMap**, but the repository should acquire a reproducible bulk snapshot rather than rely on an interactive area export. The current service documentation points to Planet OHM and Overpass for bulk acquisition.
 
