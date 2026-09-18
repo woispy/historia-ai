@@ -1,6 +1,6 @@
 # Phase A — 1326 Source Intake Contract
 
-Status: **intake contract established; acquisition and promotion remain blocked**  
+Status: **byte acquisition and temporal extraction gates closed for Cliopatria; entity reconciliation remains blocked**  
 Date: **2026-09-18**  
 Canonical branch: `integration/phase-a-h-production`
 
@@ -66,7 +66,9 @@ Until these fields exist, the source remains **acquisition-required** and cannot
 
 ## Acquisition decision
 
-The first acquisition target is **Cliopatria v0.2.0** because it is a versioned, downloadable GeoJSON source with explicit temporal intervals and Wikidata/Seshat identifiers. Its role remains candidate political evidence; it cannot directly become canonical province geometry. The repository command `npm run acquire:1326-cliopatria` now explicitly performs the byte acquisition path; `npm run verify:1326-cliopatria` verifies the retained artifact hash. Neither command promotes geometry.
+The first acquisition target is **Cliopatria v0.2.0** because it is a versioned, downloadable GeoJSON source with explicit temporal intervals and Wikidata/Seshat identifiers. Its role remains candidate political evidence; it cannot directly become canonical province geometry. The repository command `npm run acquire:1326-cliopatria` explicitly performs the byte acquisition path; `npm run verify:1326-cliopatria` verifies the retained artifact hash. Neither command promotes geometry.
+
+The acquisition workflow also performs deterministic archive extraction and selects the first valid GeoJSON FeatureCollection rather than assuming an archive filename.
 
 The second operational source is **OpenHistoricalMap**, but the repository should acquire a reproducible bulk snapshot rather than rely on an interactive area export. The current service documentation points to Planet OHM and Overpass for bulk acquisition.
 
@@ -111,6 +113,31 @@ Verified retained source bytes:
 
 This closes the **byte-acquisition gate only**. Temporal extraction, entity reconciliation, candidate geometry review, topology/physical validation and canonical promotion remain blocked until their respective gates pass.
 
+## Verified 1326 temporal extraction evidence
+
+The same forensic acquisition workflow was extended to perform the first deterministic temporal extraction without promoting any geometry. Successful workflow run **35381065057** executed from PR #108's merge ref and completed all extraction steps.
+
+The archive was unpacked and the selected input was validated as a GeoJSON **FeatureCollection** before invoking the repository extractor. The selected file was:
+
+`cliopatria_polities_only.geojson`
+
+Extractor result:
+
+- scenario date: **1326-04-07**
+- input features: **13,765**
+- temporal candidates: **150**
+- excluded outside temporal range: **13,608**
+- excluded non-polity: **7**
+- missing geometry: **0**
+- output: `data/build/gis/1326/cliopatria-1326-candidates.json`
+- authority status: **candidate-evidence-only**
+- retained source ZIP SHA-256: `d01ae3a20d358cc5d54f69d9d725d390767d9c8759ac89ad6f90c58d106f3370`
+- retained source ZIP byte length: `44,231,317`
+
+This closes the **Cliopatria temporal extraction gate**. It does not close entity identity, political-control, geometry-authority, topology, physical validation, or canonical promotion.
+
+The workflow artifact for this extraction is **10562680169** with uploaded-artifact ZIP digest `sha256:727b3c7bf53b53f411439aaf5565c800519dddf49f4c6c42f79e0296f8b322c0`. The raw source ZIP remains outside canonical runtime.
+
 ## Entity reconciliation gate
 
 A dedicated fail-closed reconciliation stage now exists at:
@@ -131,10 +158,11 @@ temporal match
     ≠ canonical authority
 ```
 
+The next executable gate is therefore **entity reconciliation against the canonical evidence matrix**, not geometry promotion.
 
 ## Reproducible Cliopatria byte-acquisition path
 
-A dedicated local acquisition helper now exists at:
+A dedicated local acquisition helper exists at:
 
 `tools/historical-gis/cli/acquire-1326-cliopatria.js`
 
@@ -147,8 +175,7 @@ npm run verify:1326-cliopatria
 
 The helper downloads the pinned v0.2.0 payload, requires a ZIP signature, retains the exact bytes outside the canonical runtime, records acquisition time, byte length and raw SHA-256, and provides an independent re-hash verification path. It does not perform temporal extraction or canonical promotion.
 
-This command is intentionally a local acquisition operation. The repository tooling in this environment cannot materialize the binary GitHub blob because binary repository content is not returned as UTF-8; therefore no raw SHA-256 is claimed until the command is actually executed against the external source and the resulting bytes are retained.
-
+This command is intentionally a local acquisition operation. The repository tooling in this environment cannot materialize the binary GitHub blob because binary repository content is not returned as UTF-8; therefore no raw SHA-256 is claimed until the command is actually executed against the external source and the resulting bytes are retained. The successful GitHub Actions run now provides that independent execution evidence.
 
 ## Promotion locks
 
@@ -175,4 +202,4 @@ This verifies the manifest/registry/evidence contracts. It intentionally does **
 
 Source intake is complete only when each production-relevant source has a pinned snapshot identity, raw hash, license/provenance record, reproducible extraction parameters, and a retained artifact that can be independently revalidated.
 
-After that, the next stage is temporal/entity reconciliation — not automatic geometry promotion.
+For Cliopatria, byte acquisition and temporal extraction are now evidenced. The next stage is **entity reconciliation**, followed by candidate geometry review and topology/physical validation — not automatic geometry promotion.
