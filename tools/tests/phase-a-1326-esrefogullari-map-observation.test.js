@@ -11,4 +11,9 @@ assert.ok(d.legendSemantics.some(x=>x.geometryRole==="temporary-extent-reference
 assert.ok(d.visibleAnchorCandidates.includes("Beyşehir"));
 assert.ok(d.interpretationLocks.some(x=>x.includes("not a polygon vertex")));
 assert.equal(d.nextProofInput.status,"pending");
+assert.ok(d.historicalContext.some(x => x.role === "cartographic-semantics"));
+assert.ok(d.historicalContext.some(x => x.role === "temporal-context-only"));
+assert.equal(d.pixelExtraction.status,"not-performed");
+assert.ok(d.interpretationLocks.some(x => x.includes("1302–1320")));
+assert.ok(d.interpretationLocks.some(x => x.includes("1326-04-07")));
 console.log("Eşrefoğulları cartographic observation: PASS — reference-only, no geometry produced.");
