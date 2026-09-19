@@ -553,3 +553,18 @@ A newer scholarly source independently cites Alperen 2001 pp.29–36 for territo
 The new evidence strengthens the **historical constraint layer** but does not change the geometry gate. In particular, the 1302–1320 territorial narrative cannot be silently promoted to an exact 1326-04-07 boundary, and the map's approximate-widest-extent line cannot be treated as a canonical polygon without acquiring and reviewing the actual source artifact.
 
 State remains: `map-attribution-confirmed` → `map-page-unresolved` → `image-unretained` → `georeference-blocked`.
+
+
+## 2026-09-19 — New map-context finding: figure placement and source separation
+
+The directly accessible 2017 PDF confirms that **Harita 2** is embedded immediately before section 3.2 and is explicitly attributed to Alperen (2001). The figure's legend is preserved in the indexed source: centre, selected settlements, approximate widest extent, and temporarily attached territories. citeturn0search43turn0search0
+
+The same paper separately states that Mübarizüddin Mehmed Bey's 1302–1320 period involved a broad territorial expansion, while another scholarly source cites Alperen 2001 pp.29–36 for territorial context and p.36 for expansion toward Gelendost, Yalvaç, Sultandağı, Çay, İshaklı and Bolvadin. citeturn0search0turn0search4
+
+This improves the **secondary-source observation record**, but it still does not expose the original 2001 page number or a retained image of that original page. Therefore the figure remains observational evidence only.
+
+### Gate remains unchanged
+
+`map-attribution-confirmed` → `map-page-unresolved` → `image-unretained` → `georeference-blocked`
+
+No coordinates, control points, polygon vertices, or canonical geometry were added.
