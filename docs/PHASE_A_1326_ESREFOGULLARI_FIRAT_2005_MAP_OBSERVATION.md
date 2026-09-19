@@ -293,3 +293,34 @@ The evidence classification remains:
 **historical source ≠ cartographic source ≠ architectural plan ≠ canonical boundary geometry.**
 
 No polygon, control point, image-derived coordinate, MapBin, or canonical geometry was created.
+
+
+## 2026-09-19 — named-place historical boundary evidence pass
+
+A targeted review of official/academic historical summaries was used to separate **documented territorial reach** from **date-specific boundary geometry**.
+
+TDV's Eşrefoğulları entry establishes that the beylik began around Beyşehir/Seydişehir and that Süleyman Bey's early activity reached the Akşehir area; it also records that Mübarizüddin Mehmed Bey held Bolvadin and Akşehir by the early 14th century, including a Bolvadin mosque dated 1320. citeturn0search2
+
+An official Derbent district history gives a broader later summary: Beyşehir and Seydişehir, followed by Ilgın, Bolvadin and Akşehir, with Bozkır, Şarkikaraağaç, Yalvaç, Gelendost, Kıreli, Doğanhisar and even Çal described as places that were **“zaman zaman”** included. citeturn0search0
+
+### Forensic interpretation
+
+These sources can now be used as **named-place historical anchors**, but not as polygon vertices:
+
+- Beyşehir — core/central area evidence.
+- Seydişehir — core regional extent evidence.
+- Akşehir / Bolvadin — early-14th-century expansion evidence.
+- Ilgın — territorial association appears in later institutional summaries.
+- Bozkır / Şarkikaraağaç / Yalvaç / Gelendost / Kıreli / Doğanhisar / Çal — explicitly qualified as intermittent inclusion in the Derbent summary.
+
+The temporal qualification is critical. A place being associated with Eşrefoğulları territory at some point does **not** establish that it belonged to the polity on **1326-04-07**.
+
+The Ilgın source itself contains a conflicting chronology, stating that Ilgın passed to Eşrefoğulları and later attributes its transfer to Hamitoğulları to 1307. This is treated as a source-level historical claim requiring reconciliation rather than silently normalized into the 1326 model. citeturn0search1
+
+### Gate decision
+
+This pass upgrades the evidence base from generic regional descriptions to a **named-place anchor inventory**, while preserving the hard distinction:
+
+**named-place evidence ≠ boundary vertex ≠ date-specific polygon.**
+
+No coordinate was derived from these place names, no synthetic edge was constructed, and no canonical geometry was changed.
