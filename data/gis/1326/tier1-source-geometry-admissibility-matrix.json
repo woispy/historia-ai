@@ -3,19 +3,254 @@
   "scenarioDate": "1326-04-07",
   "authorityStatus": "evidence-only",
   "purpose": "Machine-verifiable admissibility classification for Tier-1 historical evidence. Classification never promotes evidence to canonical geometry.",
-  "admissibilityClasses": ["boundary-evidence-candidate","control-point-candidate","temporal-extent-constraint","context-only","prohibited-for-geometry"],
+  "admissibilityClasses": [
+    "boundary-evidence-candidate",
+    "control-point-candidate",
+    "temporal-extent-constraint",
+    "context-only",
+    "prohibited-for-geometry"
+  ],
   "promotionRule": "No record in this matrix authorizes polygon generation or canonical promotion.",
   "records": [
-    {"entityId":"esrefogullari","source":"Tekkanat & Yavuz 2017 / Alperen 2001 map reproduction","admissibility":["boundary-evidence-candidate","control-point-candidate"],"geometryUse":"cross-check only; approximate widest extent and short-period attached territories must not be treated as exact 1326-04-07 boundary","controlPointUse":"named places may support georeferencing only when a documented pixel↔geo correspondence is created","temporalUse":"broad historical extent; scenario-date mismatch remains unresolved","requiredProvenance":["sourceRef","artifactRetention","rightsReview","mapDateInterpretation"],"forbiddenInterpretations":["automatic polygon vertices","exact-1326 relabel","undocumented tracing"],"status":"candidate-evidence-only"},
-    {"entityId":"esrefogullari","source":"Kofoğlu 2009, SUTAD","admissibility":["temporal-extent-constraint","control-point-candidate"],"geometryUse":"constrains chronology and regional extent; does not define a polygon","controlPointUse":"named regions/places may be geographic anchors after source-backed correspondence review","temporalUse":"pre-1326 expansion events, including Bolvadin in 1320","requiredProvenance":["sourceRef","anchorIdentity","geographicCoordinate"],"forbiddenInterpretations":["full-control inference from expansion statement","boundary vertex inference"],"status":"constraint-evidence-only"},
-    {"entityId":"esrefogullari","source":"Erbakan repository study","admissibility":["control-point-candidate","context-only"],"geometryUse":"regional context only","controlPointUse":"Beyşehir and other explicitly identified places may support georeferencing","temporalUse":"historical-period context; not exact boundary","requiredProvenance":["sourceRef","anchorIdentity","geographicCoordinate"],"forbiddenInterpretations":["boundary vertex inference","extent inference beyond documented findings"],"status":"constraint-evidence-only"},
-    {"entityId":"esrefogullari","source":"Wikimedia Commons — Beylicats d’Anatolie vers 1330-tr.svg","admissibility":["context-only","boundary-evidence-candidate"],"geometryUse":"near-scenario cross-check only; approximately 1330, not 1326-04-07","controlPointUse":"only after documented map correspondence and provenance review","temporalUse":"near-scenario contextual reference","requiredProvenance":["sourceRef","artifactRetention","rightsReview","mapDateInterpretation"],"forbiddenInterpretations":["1326 relabel","direct polygon import","undocumented tracing"],"status":"reference-only"},
-    {"entityId":"esrefogullari","source":"TDV İslâm Ansiklopedisi — Eşrefoğulları","admissibility":["temporal-extent-constraint"],"geometryUse":"no direct geometry","controlPointUse":"no direct control-point authority","temporalUse":"strong scenario-date constraint: II. Süleyman died 1326-10-09 and territorial division occurred after that event","requiredProvenance":["sourceRef","scenarioDate"],"forbiddenInterpretations":["post-1326 division projected backward","boundary reconstruction from existence statement"],"status":"constraint-evidence-only"},
-    {"entityId":"alaye","source":"TDV — Alâiye Beyliği","admissibility":["temporal-extent-constraint","control-point-candidate"],"geometryUse":"historical existence/regional context only","controlPointUse":"Alanya may be a georeference anchor when independently corresponded","temporalUse":"late-13th-century to 1471 existence interval; post-1293 Karamanid affiliation and Mamluk suzerainty","requiredProvenance":["sourceRef","anchorIdentity","geographicCoordinate"],"forbiddenInterpretations":["period interval as exact boundary","Alanya city centre as boundary vertex"],"status":"constraint-evidence-only"},
-    {"entityId":"alaye","source":"TDV — Anadolu Beylikleri","admissibility":["temporal-extent-constraint","context-only"],"geometryUse":"regional placement only","controlPointUse":"no direct boundary authority","temporalUse":"1293–1471 interval and southern Anatolian coast placement","requiredProvenance":["sourceRef"],"forbiddenInterpretations":["period interval as polygon"],"status":"constraint-evidence-only"},
-    {"entityId":"alaye","source":"TTK / Alâiye bibliography record","admissibility":["context-only"],"geometryUse":"source discovery only","controlPointUse":"none","temporalUse":"research lead only","requiredProvenance":["sourceRef"],"forbiddenInterpretations":["boundary authority from bibliography metadata"],"status":"reference-only"},
-    {"entityId":"alaye","source":"Wikimedia Commons — Beylicats d’Anatolie vers 1330-tr.svg","admissibility":["context-only","boundary-evidence-candidate"],"geometryUse":"near-scenario cross-check only; approximately 1330","controlPointUse":"only after documented map correspondence and provenance review","temporalUse":"not exact 1326-04-07","requiredProvenance":["sourceRef","artifactRetention","rightsReview","mapDateInterpretation"],"forbiddenInterpretations":["1326 relabel","direct polygon import","undocumented tracing"],"status":"reference-only"},
-    {"entityId":"alaye","source":"The Pursuit of History / İSAM article on Karamanids and Alanya","admissibility":["temporal-extent-constraint","context-only"],"geometryUse":"dated political/monetary context only","controlPointUse":"no direct boundary authority","temporalUse":"coins dated 1321/1326/1329 and 1333 Ibn Battuta context","requiredProvenance":["sourceRef","dateInterpretation"],"forbiddenInterpretations":["coin minting authority as boundary polygon","1333 evidence projected backward as exact 1326 boundary"],"status":"constraint-evidence-only"}
+    {
+      "entityId": "esrefogullari",
+      "source": "Tekkanat & Yavuz 2017 / Alperen 2001 map reproduction",
+      "admissibility": [
+        "boundary-evidence-candidate",
+        "control-point-candidate"
+      ],
+      "geometryUse": "cross-check only; approximate widest extent and short-period attached territories must not be treated as exact 1326-04-07 boundary",
+      "controlPointUse": "named places may support georeferencing only when a documented pixel↔geo correspondence is created",
+      "temporalUse": "broad historical extent; scenario-date mismatch remains unresolved",
+      "requiredProvenance": [
+        "sourceRef",
+        "artifactRetention",
+        "rightsReview",
+        "mapDateInterpretation"
+      ],
+      "forbiddenInterpretations": [
+        "automatic polygon vertices",
+        "exact-1326 relabel",
+        "undocumented tracing"
+      ],
+      "status": "candidate-evidence-only"
+    },
+    {
+      "entityId": "esrefogullari",
+      "source": "Kofoğlu 2009, SUTAD",
+      "admissibility": [
+        "temporal-extent-constraint",
+        "control-point-candidate"
+      ],
+      "geometryUse": "constrains chronology and regional extent; does not define a polygon",
+      "controlPointUse": "named regions/places may be geographic anchors after source-backed correspondence review",
+      "temporalUse": "pre-1326 expansion events, including Bolvadin in 1320",
+      "requiredProvenance": [
+        "sourceRef",
+        "anchorIdentity",
+        "geographicCoordinate"
+      ],
+      "forbiddenInterpretations": [
+        "full-control inference from expansion statement",
+        "boundary vertex inference"
+      ],
+      "status": "constraint-evidence-only"
+    },
+    {
+      "entityId": "esrefogullari",
+      "source": "Erbakan repository study",
+      "admissibility": [
+        "control-point-candidate",
+        "context-only"
+      ],
+      "geometryUse": "regional context only",
+      "controlPointUse": "Beyşehir and other explicitly identified places may support georeferencing",
+      "temporalUse": "historical-period context; not exact boundary",
+      "requiredProvenance": [
+        "sourceRef",
+        "anchorIdentity",
+        "geographicCoordinate"
+      ],
+      "forbiddenInterpretations": [
+        "boundary vertex inference",
+        "extent inference beyond documented findings"
+      ],
+      "status": "constraint-evidence-only"
+    },
+    {
+      "entityId": "esrefogullari",
+      "source": "Wikimedia Commons — Beylicats d’Anatolie vers 1330-tr.svg",
+      "admissibility": [
+        "context-only",
+        "boundary-evidence-candidate"
+      ],
+      "geometryUse": "near-scenario cross-check only; approximately 1330, not 1326-04-07",
+      "controlPointUse": "only after documented map correspondence and provenance review",
+      "temporalUse": "near-scenario contextual reference",
+      "requiredProvenance": [
+        "sourceRef",
+        "artifactRetention",
+        "rightsReview",
+        "mapDateInterpretation"
+      ],
+      "forbiddenInterpretations": [
+        "1326 relabel",
+        "direct polygon import",
+        "undocumented tracing"
+      ],
+      "status": "reference-only"
+    },
+    {
+      "entityId": "esrefogullari",
+      "source": "TDV İslâm Ansiklopedisi — Eşrefoğulları",
+      "admissibility": [
+        "temporal-extent-constraint"
+      ],
+      "geometryUse": "no direct geometry",
+      "controlPointUse": "no direct control-point authority",
+      "temporalUse": "strong scenario-date constraint: II. Süleyman died 1326-10-09 and territorial division occurred after that event",
+      "requiredProvenance": [
+        "sourceRef",
+        "scenarioDate"
+      ],
+      "forbiddenInterpretations": [
+        "post-1326 division projected backward",
+        "boundary reconstruction from existence statement"
+      ],
+      "status": "constraint-evidence-only"
+    },
+    {
+      "entityId": "alaye",
+      "source": "TDV — Alâiye Beyliği",
+      "admissibility": [
+        "temporal-extent-constraint",
+        "control-point-candidate"
+      ],
+      "geometryUse": "historical existence/regional context only",
+      "controlPointUse": "Alanya may be a georeference anchor when independently corresponded",
+      "temporalUse": "late-13th-century to 1471 existence interval; post-1293 Karamanid affiliation and Mamluk suzerainty",
+      "requiredProvenance": [
+        "sourceRef",
+        "anchorIdentity",
+        "geographicCoordinate"
+      ],
+      "forbiddenInterpretations": [
+        "period interval as exact boundary",
+        "Alanya city centre as boundary vertex"
+      ],
+      "status": "constraint-evidence-only"
+    },
+    {
+      "entityId": "alaye",
+      "source": "TDV — Anadolu Beylikleri",
+      "admissibility": [
+        "temporal-extent-constraint",
+        "context-only"
+      ],
+      "geometryUse": "regional placement only",
+      "controlPointUse": "no direct boundary authority",
+      "temporalUse": "1293–1471 interval and southern Anatolian coast placement",
+      "requiredProvenance": [
+        "sourceRef"
+      ],
+      "forbiddenInterpretations": [
+        "period interval as polygon"
+      ],
+      "status": "constraint-evidence-only"
+    },
+    {
+      "entityId": "alaye",
+      "source": "TTK / Alâiye bibliography record",
+      "admissibility": [
+        "context-only"
+      ],
+      "geometryUse": "source discovery only",
+      "controlPointUse": "none",
+      "temporalUse": "research lead only",
+      "requiredProvenance": [
+        "sourceRef"
+      ],
+      "forbiddenInterpretations": [
+        "boundary authority from bibliography metadata"
+      ],
+      "status": "reference-only"
+    },
+    {
+      "entityId": "alaye",
+      "source": "Wikimedia Commons — Beylicats d’Anatolie vers 1330-tr.svg",
+      "admissibility": [
+        "context-only",
+        "boundary-evidence-candidate"
+      ],
+      "geometryUse": "near-scenario cross-check only; approximately 1330",
+      "controlPointUse": "only after documented map correspondence and provenance review",
+      "temporalUse": "not exact 1326-04-07",
+      "requiredProvenance": [
+        "sourceRef",
+        "artifactRetention",
+        "rightsReview",
+        "mapDateInterpretation"
+      ],
+      "forbiddenInterpretations": [
+        "1326 relabel",
+        "direct polygon import",
+        "undocumented tracing"
+      ],
+      "status": "reference-only"
+    },
+    {
+      "entityId": "alaye",
+      "source": "The Pursuit of History / İSAM article on Karamanids and Alanya",
+      "admissibility": [
+        "temporal-extent-constraint",
+        "context-only"
+      ],
+      "geometryUse": "dated political/monetary context only",
+      "controlPointUse": "no direct boundary authority",
+      "temporalUse": "coins dated 1321/1326/1329 and 1333 Ibn Battuta context",
+      "requiredProvenance": [
+        "sourceRef",
+        "dateInterpretation"
+      ],
+      "forbiddenInterpretations": [
+        "coin minting authority as boundary polygon",
+        "1333 evidence projected backward as exact 1326 boundary"
+      ],
+      "status": "constraint-evidence-only"
+    },
+    {
+      "entityId": "esrefogullari",
+      "source": "Wikimedia Commons — Eşrefoğulları Beyliği'nin konumu.png (Kılıç46, 2014)",
+      "admissibility": [
+        "context-only",
+        "control-point-candidate"
+      ],
+      "geometryUse": "contextual map cross-check only; modern rendering is not a date-specific 1326-04-07 boundary artifact",
+      "controlPointUse": "possible visual anchor support only after a documented image frame and independent geographic correspondences are established",
+      "temporalUse": "broad late-13th/early-14th-century beylik-location context; exact scenario-date applicability unresolved",
+      "requiredProvenance": [
+        "sourceRef",
+        "artifactRetention",
+        "rightsReview",
+        "mapDateInterpretation",
+        "sourceMethodReview"
+      ],
+      "forbiddenInterpretations": [
+        "exact-1326 relabel",
+        "direct polygon import",
+        "boundary inference from coloured region alone",
+        "undocumented tracing"
+      ],
+      "status": "candidate-evidence-only"
+    }
   ],
-  "globalExclusions":["Narrative extent cannot become polygon geometry without an explicit reconstruction method.","Named places cannot become automatic polygon vertices.","Near-scenario maps cannot be relabelled as 1326-04-07.","Post-scenario territorial statements cannot be projected backward.","Image tracing is prohibited unless georeference, provenance, rights, residuals, and review are recorded.","No record authorizes canonical MapBin mutation.","SAFE TO DELETE remains 0."]
+  "globalExclusions": [
+    "Narrative extent cannot become polygon geometry without an explicit reconstruction method.",
+    "Named places cannot become automatic polygon vertices.",
+    "Near-scenario maps cannot be relabelled as 1326-04-07.",
+    "Post-scenario territorial statements cannot be projected backward.",
+    "Image tracing is prohibited unless georeference, provenance, rights, residuals, and review are recorded.",
+    "No record authorizes canonical MapBin mutation.",
+    "SAFE TO DELETE remains 0."
+  ]
 }
