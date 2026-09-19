@@ -120,7 +120,8 @@
     "extract:1326-cliopatria": "node tools/historical-gis/cli/extract-1326-cliopatria-candidates.js",
     "reconcile:1326-cliopatria": "node tools/historical-gis/cli/reconcile-1326-cliopatria-entities.js",
     "build:1326-reviewed-staging": "node tools/historical-gis/cli/build-1326-reviewed-staging.js",
-    "test:1326-reviewed-staging": "node tools/tests/phase-a-1326-reviewed-staging.test.js"
+    "test:1326-reviewed-staging": "node tools/tests/phase-a-1326-reviewed-staging.test.js",
+    "test:1326-tier1-geometry-adapter": "node tools/tests/phase-a-1326-tier1-geometry-adapter.test.js"
   },
   "dependencies": {
     "react": "^19.2.7",
