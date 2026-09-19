@@ -1,0 +1,82 @@
+name: Phase A — 1326 Reviewed Evidence Staging
+
+on:
+  push:
+    branches:
+      - codex/phase-a-1326-reviewed-staging
+  workflow_dispatch:
+
+jobs:
+  reviewed-staging:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Acquire Cliopatria
+        run: npm run acquire:1326-cliopatria
+
+      - name: Verify retained bytes
+        run: npm run verify:1326-cliopatria
+
+      - name: Extract archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted
+          unzip -q data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip -d data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted
+
+      - name: Select and validate GeoJSON FeatureCollection
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          input="$(find data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted -type f \( -name '*.geojson' -o -name '*.json' \) -print | sort | head -n 1)"
+          test -n "$input"
+          node - "$input" <<'NODE'
+          const fs = require("node:fs");
+          const input = process.argv[2];
+          const data = JSON.parse(fs.readFileSync(input, "utf8"));
+          if (data.type !== "FeatureCollection" || !Array.isArray(data.features)) {
+            throw new Error("Selected source is not a GeoJSON FeatureCollection.");
+          }
+          console.log(JSON.stringify({ input, featureCount: data.features.length }));
+          NODE
+          echo "input=$input" >> "$GITHUB_OUTPUT"
+
+      - name: Extract 1326 candidates
+        run: npm run extract:1326-cliopatria -- --input "${{ steps.source.outputs.input }}"
+
+      - name: Reconcile Tier-1 entities
+        run: npm run reconcile:1326-cliopatria -- --input data/build/gis/1326/cliopatria-1326-candidates.json
+
+      - name: Build reviewed evidence staging
+        run: npm run build:1326-reviewed-staging
+
+      - name: Contract test
+        run: npm run test:1326-reviewed-staging
+
+      - name: Independent source checksum
+        shell: bash
+        run: sha256sum data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip
+
+      - name: Upload staging evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-a-1326-reviewed-evidence-staging
+          path: |
+            data/build/gis/1326/cliopatria-1326-candidates.json
+            data/build/gis/1326/cliopatria-entity-reconciliation.json
+            data/build/gis/1326/reviewed-staging/manifest.json
+            data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.acquisition.json
+          if-no-files-found: error
+          retention-days: 14
