@@ -268,3 +268,28 @@ The negative result is recorded deliberately: **absence of indexed content descr
 ### Gate decision
 
 Yavuz 1934 remains a **bibliographic/cartographic lead**, not a geometry source. The project will not infer the fold-out's content from the existence of a “plan”, “tablo”, illustration, or visual component alone.
+
+
+## 2026-09-19 — adjacent early-cartography exclusion test
+
+A search for earlier Eşrefoğulları cartographic material surfaced Yusuf Akyurt's **“Beyşehri Kitabeleri ve Eşrefoğlu Camii ve Türbesi”**. The 1936 fieldwork account states that Akyurt prepared **plans of the buildings** and recorded inscriptions during his Beyşehir investigation. This is architectural documentation, not evidence of a territorial-boundary map. citeturn0search61
+
+This is useful as a negative source-classification result because it prevents an adjacent “plan” reference from being conflated with the unresolved fold-out in Yavuz (1934):
+
+- Akyurt 1936 → building/site plans;
+- Yavuz 1934 → one fold-out/table is catalogued, content unresolved;
+- Aydın 2005 Annex 1 → regional political depiction, underlying cartographic source unresolved.
+
+No common cartographic lineage is established between these three artifacts.
+
+### Additional source-lineage observation
+
+A modern scholarly treatment of Eşrefoğulları cites Yavuz 1934 directly for historical narrative material (for example, discussion around the early history of Seyfeddin Süleyman), confirming that the 1934 work functions as a substantive historical source. It does not, however, identify a map or boundary plate from Yavuz as the source of later regional maps. citeturn0search57
+
+### Gate decision
+
+The evidence classification remains:
+
+**historical source ≠ cartographic source ≠ architectural plan ≠ canonical boundary geometry.**
+
+No polygon, control point, image-derived coordinate, MapBin, or canonical geometry was created.
