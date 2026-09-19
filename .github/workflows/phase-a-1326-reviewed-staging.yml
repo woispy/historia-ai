@@ -77,6 +77,9 @@ jobs:
       - name: Eşrefoğulları control-point candidate contract test
         run: npm run test:1326-esrefogullari-control-point-candidates
 
+      - name: Alâiye source observation contract test
+        run: npm run test:1326-alaiye-source-observation
+
       - name: Historical control-point proof contract test
         run: npm run test:1326-historical-control-point-proof
 
