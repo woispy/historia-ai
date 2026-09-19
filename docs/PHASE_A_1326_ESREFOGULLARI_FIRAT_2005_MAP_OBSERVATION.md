@@ -168,3 +168,25 @@ This distinction is now treated as a hard provenance boundary:
 The Fırat 2005 source-method gate remains **OPEN**, but the search space is now narrower: future provenance work should only promote a candidate if an explicit source-to-map relationship is found. Merely matching a bibliography title or visually similar map is insufficient.
 
 No polygon, control-point coordinate, MapBin, or canonical geometry was created.
+
+
+## 2026-09-19 — comparative bibliography finding
+
+A further comparison pass found that later Beyşehir scholarship cites several historical-geography works around Eşrefoğulları, including **Memduh Yavuz, _Eşrefoğulları Tarihi-Beyşehir Kılavuzu_ (1934)**, **İ. H. Uzunçarşılı**, and other regional-history references. These references establish a plausible historical-literature lineage around the subject, but the current evidence does **not** establish that any one of them is the cartographic source of Aydın (2005) Annex 1. citeturn0search4turn0search0
+
+The 2017 Alperen-derived map is separately and explicitly attributed to **Alperen (2001)**. Its own legend says the widest extent is approximate and distinguishes temporarily attached territory. citeturn0search25
+
+### Forensic interpretation
+
+This means the current evidence supports a **literature lineage**, but not a **map-source lineage**. The distinction is retained in the dossier:
+
+- historical works cited around Eşrefoğulları → contextual/provenance leads;
+- explicit figure attribution → admissible source lineage;
+- visual similarity alone → insufficient;
+- bibliography co-occurrence alone → insufficient.
+
+No candidate has yet crossed the threshold required to authorize georeferencing of the Fırat annex.
+
+### Gate decision
+
+The source-method gate remains **OPEN**. The next operation should be to test the named historical-geography candidates only for an explicit connection to Annex 1, rather than treating them as assumed map sources.
