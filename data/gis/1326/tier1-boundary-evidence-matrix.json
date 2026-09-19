@@ -27,6 +27,13 @@
           "finding": "The reproduced map and narrative identify Beyşehir as the centre and provide regional place references.",
           "temporalPrecision": "historical period; not exact boundary",
           "geometryAuthority": false
+        },
+        {
+          "source": "Wikimedia Commons — Beylicats d’Anatolie vers 1330-tr.svg",
+          "role": "near-scenario contextual cartography",
+          "finding": "A published-atlas-derived regional map is labelled approximately 1330; it may provide a cross-check of regional polity relationships but is not date-specific to 1326-04-07.",
+          "temporalPrecision": "near-scenario contextual reference; not exact 1326-04-07",
+          "geometryAuthority": false
         }
       ],
       "reconstructionStatus": "candidate-evidence-only",
@@ -54,6 +61,13 @@
           "role": "source discovery",
           "finding": "TTK catalogue exposes scholarship specifically addressing the emergence of Alâiye Beyliği and the Ottoman-Mamluk-Karamanid struggle over Alâiye.",
           "temporalPrecision": "research lead; not a boundary artifact",
+          "geometryAuthority": false
+        },
+        {
+          "source": "Wikimedia Commons — Beylicats d’Anatolie vers 1330-tr.svg",
+          "role": "near-scenario contextual cartography",
+          "finding": "The map is labelled approximately 1330 and therefore cannot be relabelled as a 1326-04-07 boundary.",
+          "temporalPrecision": "near-scenario contextual reference; not exact 1326-04-07",
           "geometryAuthority": false
         }
       ],
