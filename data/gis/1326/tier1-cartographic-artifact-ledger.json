@@ -62,6 +62,24 @@
       "binaryRetention": "not-retained-in-repository",
       "sha256": null,
       "inspection": "web-inspected 2026-09-19"
+    },
+    {
+      "id": "esrefogullari-alperen-2001-bibliographic-lead",
+      "entityScope": [
+        "esrefogullari"
+      ],
+      "title": "Beyşehir ve Tarihi",
+      "provider": "Bilal Bülent Alperen",
+      "publicationYear": 2001,
+      "publicationPlace": "Konya",
+      "bibliographicStatus": "independently corroborated",
+      "artifactUrl": null,
+      "authorityRole": "bibliographic-acquisition-lead",
+      "geometryUse": "blocked",
+      "reason": "The underlying work is identified, but this review did not locate a clearly reusable downloadable binary of the 2001 book or an independently retained original map artifact. It therefore cannot supply image bytes, SHA-256, or transformation rights for georeferencing.",
+      "binaryRetention": "not-acquired",
+      "sha256": null,
+      "inspection": "web-researched 2026-09-19"
     }
   ],
   "promotionLocks": [
