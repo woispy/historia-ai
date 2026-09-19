@@ -487,3 +487,18 @@ A separate local-government bibliography identifies the work as Alperen, B. B. (
 The 2017 reproduction remains the directly inspected evidence for boundary-map semantics: it labels the figure “Harita 2. Eşrefoğulları Beyliği Sınırları (Alperen, 2001)” and explains that the solid line is an approximate widest extent while the dashed line represents territories briefly attached. citeturn0search41
 
 No geometry was digitized from the reproduction.
+
+
+## 2026-09-19 — Stronger page-location evidence, but map page remains unresolved
+
+A new source pass confirms that Alperen (2001) is cited at multiple specific internal pages for different content: p.3 for a Beyşehir naming tradition, pp.28–32 for early Eşrefoğulları chronology, and p.84 for the Eşrefoğlu Mosque inscription/construction date. These references demonstrate that the 2001 edition is being cited at page level in secondary scholarship, but none identifies the page containing **Harita 2 / Eşrefoğulları Beyliği Sınırları**. citeturn0search42turn0search1turn0search6
+
+The 2017 reproduction remains the strongest publicly inspectable evidence that the boundary figure exists and is explicitly attributed to Alperen 2001. Its legend distinguishes centre, settlements, approximate widest extent, and briefly attached territories. citeturn0search41turn0search0
+
+A further bibliography trail points to a Google Books catalogue record for the 2001 edition, but the accessible scholarly record does not establish that the boundary-map page is available as a readable digital page. citeturn0search4turn0search44
+
+### Gate decision
+
+**Do not georeference yet.** The evidence is now sufficient to register a page-level acquisition lead, but not sufficient to identify and retain the actual map page. No control point, polygon vertex, or geometry transformation is permitted from the 2017 reproduction alone.
+
+Current state: `book-confirmed` → `map-attribution-confirmed` → `page-unresolved` → `image-unretained` → `georeference-blocked`.
