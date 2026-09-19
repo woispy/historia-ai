@@ -129,7 +129,8 @@
     "test:1326-esrefogullari-map-observation": "node tools/tests/phase-a-1326-esrefogullari-map-observation.test.js",
     "test:1326-esrefogullari-control-point-candidates": "node tools/tests/phase-a-1326-esrefogullari-control-point-candidates.test.js",
     "test:1326-alaiye-source-observation": "node tools/tests/phase-a-1326-alaiye-source-observation.test.js",
-    "test:1326-source-geometry-admissibility": "node tools/tests/phase-a-1326-source-geometry-admissibility.test.js"
+    "test:1326-source-geometry-admissibility": "node tools/tests/phase-a-1326-source-geometry-admissibility.test.js",
+    "test:1326-esrefogullari-map-georeference-observation": "node tools/tests/phase-a-1326-esrefogullari-map-georeference-observation.test.js"
   },
   "dependencies": {
     "react": "^19.2.7",
