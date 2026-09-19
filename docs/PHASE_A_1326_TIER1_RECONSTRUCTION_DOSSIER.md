@@ -115,3 +115,34 @@ A second independent historical source, Hüseyin Muşmal's demographic study, re
 The Eşrefoğulları source is now **artifact-confirmed as a visual research reference**, but remains **geometry-blocked**. No coordinates are inferred from the image and no polygon is generated.
 
 The next admissible action is to construct a non-geometric source-proof record (artifact identity, visible labels, temporal interpretation, rights status, and provenance) and then seek a clearly reusable, date-appropriate boundary artifact before georeferencing.
+
+
+## 2026-09-19 — Eşrefoğulları cartographic observation proof
+
+The first non-geometric observation record is now committed at:
+`data/gis/1326/esrefogullari-alperen-2001-map-observation.json`
+
+The record binds the visible figure to document page 8 and preserves the map legend semantics without converting the drawing into geometry:
+
+- the double-circle denotes the beylik centre;
+- filled circles denote selected settlements;
+- the solid line is explicitly an **approximate drawing of the widest extent**;
+- the dashed line denotes territories attached for a short period.
+
+The visible place labels are retained as anchor candidates only. In particular, Beyşehir is retained as a historical-location anchor candidate, while Seydişehir, Bozkır, Çarşamba Çayı, Akşehir, Ilgın, Doğanhisar, Çay, Bolvadin, Yalvaç, Gelendost, Eğirdir, Kıreli, Hüyük and Konya are retained as map-observation candidates.
+
+This record deliberately contains **no pixel-to-geographic coordinates, no ring, no polygon, and no MapBin output**. A successful observation is therefore not being interpreted as a successful georeference.
+
+The corresponding contract test is:
+`tools/tests/phase-a-1326-esrefogullari-map-observation.test.js`
+
+### Gate decision
+
+The Eşrefoğulları visual source-proof layer is now structurally captured. The geometry gate remains blocked because:
+
+1. the figure is an approximate widest-extent depiction rather than a date-specific 1326 survey;
+2. the source artifact is not yet retained with a project-controlled raw SHA-256;
+3. rights/provenance for transformation remain unresolved;
+4. no independently sourced geographic coordinate set has yet been bound to image-space control points.
+
+The next proof operation must therefore create **source-backed correspondence evidence**, not a political boundary.
