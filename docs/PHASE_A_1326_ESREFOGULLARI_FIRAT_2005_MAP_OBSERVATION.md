@@ -525,3 +525,16 @@ The directly inspectable 2017 reproduction remains the only retained public evid
 - `canonicalGeometry`: untouched
 
 No geometry was inferred from page references or from the reproduced figure. The next gate remains acquisition of the actual map image/page with provenance sufficient for a retained evidence artifact.
+
+
+## 2026-09-19 — Page-location search result: map attribution confirmed, exact page still unresolved
+
+A broader indexed-source search did not reveal a new page number for **Harita 2**. The 2017 article reproduces the figure and its complete legend, but the accessible text around the figure does not provide an internal page citation to the 2001 source. citeturn0search33turn0search1
+
+A 2024 TÜBA-KED article independently cites Alperen (2001) through the Google Books catalogue identifier `RX0sAQAAIAAJ`, confirming the bibliographic record remains discoverable, but it does not expose the boundary-map page. citeturn0search0turn0search4
+
+The search also confirms that secondary scholarship cites Alperen 2001 for narrative territorial chronology (for example pp. 28–32), while the reproduced map is separately attributed to the same book. This distinction is retained: **narrative-page evidence is not map-page evidence**. citeturn0search3turn0search5
+
+### Forensic decision
+
+The acquisition gate remains closed for geometry extraction. The current public evidence supports `map-attribution-confirmed`, but not `map-page-identified` or `image-retained`. No control points or polygon coordinates were added.
