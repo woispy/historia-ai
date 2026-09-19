@@ -417,3 +417,24 @@ No visual line has been digitized. No pixel coordinate has been promoted. No int
 - `directPolygonImport = false`
 - `georeference = blocked`
 - `canonicalPromotion = BLOCKED`
+
+## 2026-09-19 — Alperen artifact acquisition status re-check
+
+A fresh bibliographic acquisition pass confirms that **Bilal Bülent Alperen, _Beyşehir ve Tarihi_ (Konya, 2001)** is a real 196-page self-published work and that multiple current second-hand catalogue records exist. citeturn0search0turn0search3
+
+The 2017 academic reproduction remains the only currently indexed artifact in this project that exposes the **Alperen-attributed boundary figure itself** and its solid/dashed line semantics. citeturn0search34
+
+The new acquisition pass did **not** locate a public digital scan of the 2001 book or a stable image-level record of the original map. Therefore:
+
+- bibliographic existence: **confirmed**;
+- original book availability: **confirmed through current catalogue listings**;
+- original map binary: **not acquired**;
+- original map SHA-256: **none**;
+- page/image provenance: **not yet controlled by the project**;
+- direct digitization: **blocked**.
+
+### Provenance consequence
+
+The project may continue to cite the reproduced figure as a **boundary-shape observation**, but must not silently promote the reproduction to the original 2001 map artifact. A future acquisition of the physical book or a rights-cleared scan must first produce a retained source artifact and provenance manifest before any georeferencing workflow is opened.
+
+No coordinates, control points, polygon, MapBin, or canonical geometry were created.
