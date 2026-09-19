@@ -80,6 +80,30 @@
       "binaryRetention": "not-acquired",
       "sha256": null,
       "inspection": "web-researched 2026-09-19"
+    },
+    {
+      "id": "wikimedia-esrefogullari-konumu-2014",
+      "entityScope": [
+        "esrefogullari"
+      ],
+      "title": "Eşrefoğulları Beyliği'nin konumu.png",
+      "provider": "Wikimedia Commons",
+      "recordUrl": "https://commons.wikimedia.org/wiki/File:E%C5%9Frefo%C4%9Fullar%C4%B1_Beyli%C4%9Fi%27nin_konumu.png",
+      "artifactUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b5/E%C5%9Frefo%C4%9Fullar%C4%B1_Beyli%C4%9Fi%27nin_konumu.png",
+      "format": "PNG",
+      "dimensions": "1538x772",
+      "fileSizeBytes": 288707,
+      "sourceDate": "2014-10-19",
+      "author": "Kılıç46",
+      "rights": "CC BY-SA 2.5",
+      "authorityRole": "contextual-cartography-and-georeference-candidate",
+      "geometryUse": "blocked-until-source-method-and-date-scope-review",
+      "reason": "The artifact is openly licensed for adaptation, but it is a modern cartographic rendering of the beylik location rather than a date-specific 1326-04-07 boundary artifact. Its geographic construction/source methodology is not independently established in the current review, so it may support visual/cartographic cross-checks but cannot be treated as canonical boundary geometry.",
+      "binaryRetention": "web-address-confirmed; project-controlled binary not retained",
+      "sha256": null,
+      "sourcePageChecksum": "2426d36189083c00bf31f2a9e3e77ae392acb4b8",
+      "sourcePageChecksumType": "SHA-1",
+      "inspection": "web-inspected 2026-09-19"
     }
   ],
   "promotionLocks": [
