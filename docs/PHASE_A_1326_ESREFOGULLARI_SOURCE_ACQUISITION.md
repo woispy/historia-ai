@@ -54,3 +54,31 @@ Before any pixel↔geo calibration:
 7. keep the result evidence-only until boundary, physical-land, and topology review.
 
 No polygon, ring, MapBin, or canonical authority is created by this review.
+
+## 2026-09-19 — independent availability check
+
+A further web search found current second-hand catalogue records for the 2001 book, consistently identifying:
+
+- title: **Beyşehir ve Tarihi**
+- author: **Bilal Bülent Alperen**
+- publication year: **2001**
+- place: **Konya**
+- length: **196 pages**
+
+These records demonstrate that physical copies are currently catalogued, but they do not provide a reusable digital map artifact or establish permission to transform the map into project geometry. The project therefore keeps the acquisition state unchanged.
+
+A separate academic bibliography also cites the same work as **Büyük Sistem Dershanesi Matbaası, Konya, 2001**, providing an additional bibliographic corroboration.
+
+### Decision
+
+The new evidence strengthens **source identity and acquisition feasibility**, but does not satisfy the artifact gate:
+
+- physical bibliographic availability: **confirmed**
+- reusable digital map artifact: **not located**
+- raw source SHA-256: **not available**
+- transformation rights: **not established**
+- georeference calibration: **blocked**
+- geometry generation: **blocked**
+
+No attempt is made to treat a catalogue listing, bibliographic citation, or web-rendered reproduction as the map bytes required for calibration.
+
