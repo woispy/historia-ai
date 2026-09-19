@@ -100,3 +100,18 @@ The artifact-discovery gate is now **partially closed**:
 - canonical geometry promotion: BLOCKED.
 
 No polygon was created from either artifact.
+
+
+## 2026-09-19 source-artifact feasibility review
+
+A fresh source review confirms that the Erbakan University repository exposes the full 2017 paper and its downloadable PDF. The indexed PDF explicitly identifies **“Harita 2. Eşrefoğulları Beyliği Sınırları (Alperen, 2001)”** and describes the map symbology: centre, settlements, an **approximate widest extent**, and territories attached for a short period. It also exposes the geographic labels visible on the map, including Beyşehir, Eber Gölü, Akşehir Gölü, Çavuşçu Gölü, Sultan Dağı, Çay, Yalvaç, Akşehir, Ilgın, Kadınhanı, Doğanhisar, Derbent, Hüyük, Kıreli, Seydişehir, Bozkır, Çarşamba Çayı, Konya, Hamitoğulları, Karamanoğulları and Eğirdir. This confirms that the figure is a usable **research/reconstruction reference**, but does not establish an exact 1326 boundary. citeturn0search16turn0search0
+
+The repository metadata marks the paper as open access, but the current repository evidence does not establish a separate, unrestricted licence for extracting and transforming the embedded historical map into a production geometry. Therefore the project continues to treat the figure as **reference-only until artifact-rights review is explicit**.
+
+A second independent historical source, Hüseyin Muşmal's demographic study, reproduces a late-13th-century description of Eşrefoğulları's neighbouring polities and identifies Beyşehri as its capital. This is useful for historical context and control-point interpretation, but it is not a boundary polygon and is not being used to manufacture one. citeturn0search3
+
+### Gate decision
+
+The Eşrefoğulları source is now **artifact-confirmed as a visual research reference**, but remains **geometry-blocked**. No coordinates are inferred from the image and no polygon is generated.
+
+The next admissible action is to construct a non-geometric source-proof record (artifact identity, visible labels, temporal interpretation, rights status, and provenance) and then seek a clearly reusable, date-appropriate boundary artifact before georeferencing.
