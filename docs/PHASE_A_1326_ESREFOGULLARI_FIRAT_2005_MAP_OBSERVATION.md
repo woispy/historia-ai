@@ -538,3 +538,18 @@ The search also confirms that secondary scholarship cites Alperen 2001 for narra
 ### Forensic decision
 
 The acquisition gate remains closed for geometry extraction. The current public evidence supports `map-attribution-confirmed`, but not `map-page-identified` or `image-retained`. No control points or polygon coordinates were added.
+
+
+## 2026-09-19 — Secondary-source map-context cross-check
+
+A broader literature pass confirms that the 2017 study embeds **Harita 2** immediately before section 3.2 and attributes it explicitly to Alperen (2001). The accessible text reproduces the legend semantics: centre, selected settlements, approximate widest extent, and territories temporarily attached. citeturn0search33turn0search0
+
+The same study's narrative states that during Mübarizüddin Mehmed Bey's period (1302–1320), the beylik is described as controlling a broad set of districts including Ilgın, Akşehir, Doğanhisar, Çay, Bolvadin, Şarkikaraağaç, Yalvaç and Gelendost, citing Alperen 2001. This is treated strictly as **secondary narrative constraint evidence**, not as a 1326 boundary polygon. citeturn0search0
+
+A newer scholarly source independently cites Alperen 2001 pp.29–36 for territorial expansion, including Şarkikaraağaç, Seydişehir, Bozkır and Ilgın, and p.36 for the Mehmed Bey expansion toward Gelendost, Yalvaç, Sultandağı, Çay, İshaklı and Bolvadin. These references corroborate the historical narrative trail but do not identify the original map page. citeturn0search4turn0search3
+
+### Forensic interpretation
+
+The new evidence strengthens the **historical constraint layer** but does not change the geometry gate. In particular, the 1302–1320 territorial narrative cannot be silently promoted to an exact 1326-04-07 boundary, and the map's approximate-widest-extent line cannot be treated as a canonical polygon without acquiring and reviewing the actual source artifact.
+
+State remains: `map-attribution-confirmed` → `map-page-unresolved` → `image-unretained` → `georeference-blocked`.
