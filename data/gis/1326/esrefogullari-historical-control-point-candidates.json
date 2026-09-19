@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "recordId": "esrefogullari-historical-control-point-candidates-v1",
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "constraint-evidence-only",
+  "promotion": "BLOCKED",
+  "sourceObservation": "data/gis/1326/esrefogullari-alperen-2001-map-observation.json",
+  "geographicCoordinateSource": {
+    "sourceModule": "src/map/data/AnatoliaCityAtlas.js",
+    "role": "geographic coordinate reference only",
+    "temporalWarning": "The atlas is labelled 1300 cartographic metadata. Its coordinates are used here only as geographic anchor coordinates; no 1326 political-control claim is inherited."
+  },
+  "anchors": [
+    {
+      "anchorId": "beysehir-centre",
+      "historicalSourceLabel": "Beyşehir",
+      "atlasId": "beysehir",
+      "geo": [31.7244, 37.6774],
+      "geoStatus": "independent-coordinate-candidate",
+      "pixel": null,
+      "politicalExtentConfidence": "none",
+      "geometryRole": "control-point-candidate-only"
+    },
+    {
+      "anchorId": "egirdir-map-label",
+      "historicalSourceLabel": "Eğirdir",
+      "atlasId": "egirdir",
+      "geo": [30.85, 37.874],
+      "geoStatus": "independent-coordinate-candidate",
+      "pixel": null,
+      "politicalExtentConfidence": "none",
+      "geometryRole": "map-correspondence-candidate-only"
+    },
+    {
+      "anchorId": "konya-map-label",
+      "historicalSourceLabel": "Konya",
+      "atlasId": "konya",
+      "geo": [32.4925, 37.8746],
+      "geoStatus": "independent-coordinate-candidate",
+      "pixel": null,
+      "politicalExtentConfidence": "none",
+      "geometryRole": "map-correspondence-candidate-only"
+    }
+  ],
+  "requiredNextEvidence": [
+    "retained image artifact or immutable artifact identity",
+    "image dimensions",
+    "documented pixel coordinate frame",
+    "manually reviewed pixel locations for the same visible anchors",
+    "source reference for each correspondence",
+    "affine calibration and residuals",
+    "independent anchor sanity validation"
+  ],
+  "locks": [
+    "Null pixel means no pixel-to-geo correspondence has been asserted.",
+    "These geographic coordinates are not polygon vertices.",
+    "No boundary line may be generated from these anchors.",
+    "No political extent confidence may be inferred from geographic coordinate availability.",
+    "No canonical MapBin mutation is permitted."
+  ]
+}
