@@ -1,0 +1,12 @@
+import fs from "node:fs/promises"; import path from "node:path"; import assert from "node:assert/strict";
+const p=path.resolve("data/gis/1326/historical-control-point-proof-adapter.json");
+const d=JSON.parse(await fs.readFile(p,"utf8"));
+assert.equal(d.scenarioDate,"1326-04-07");
+assert.equal(d.authorityStatus,"evidence-only");
+assert.equal(d.promotion,"BLOCKED");
+assert.equal(d.output.geometry.status,"not-created");
+assert.ok(d.rules.some(x=>x.includes("politicalExtentConfidence")));
+assert.ok(d.rules.some(x=>x.includes("Two-point calibration")));
+assert.ok(d.rules.some(x=>x.includes("canonical")));
+assert.ok(d.rules.some(x=>x.includes("MapBin")));
+console.log("1326 historical control-point proof adapter: PASS — georeference proof cannot grant boundary/canonical authority.");
