@@ -213,6 +213,8 @@ This closes the **historical existence/control evidence gap**, not the geometry 
 
 The next gate is therefore candidate/cross-source **geometry acquisition and review**, followed by topology and physical validation.
 
+The geometry-stage working record is now maintained in `docs/PHASE_A_1326_GEOMETRY_ACQUISITION_REVIEW.md`. It classifies Eşrefoğulları/Alâiye cartographic references as research candidates only and explicitly prevents 1300 material, late maps, or local GIS layers from becoming 1326 canonical geometry.
+
 ## Promotion locks
 
 The following remain locked:
