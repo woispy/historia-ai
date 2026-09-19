@@ -161,11 +161,11 @@ No candidate has crossed the threshold required to authorize georeferencing of t
 
 ## 2026-09-19 — historical-source lineage result
 
-A targeted search of institutional catalogues and later scholarship confirms **Memduh Yavuz Süslü, _Eşref Oğulları Tarihi: Beyşehir Kılavuzu_ (Konya, 1934)** as an established Eşrefoğulları historical source. The Turkish Historical Society catalogue records the 1934 publication and explicitly describes **one fold-out table** alongside images, portraits and facsimiles.
+A targeted search of institutional catalogues and later scholarship confirms **Memduh Yavuz Süslü, _Eşref Oğulları Tarihi: Beyşehir Kılavuzu_ (Konya, 1934)** as an established Eşrefoğulları historical source. The Turkish Historical Society catalogue explicitly records **one fold-out table** alongside images, portraits, facsimiles and a table. The catalogue also records that one library copy is missing the fold-out component and that requested material is for in-library use only. citeturn0search0
 
-The catalogue also records that one library copy is missing the fold-out component and that requested material is for in-library use only. This confirms the component's existence in at least one physical copy but does not identify its content.
+This confirms the component's existence in at least one physical copy but does not identify its content.
 
-TDV's Eşrefoğulları bibliography also lists the same 1934 work.
+TDV's Eşrefoğulları bibliography independently lists the same 1934 work. citeturn0search1
 
 This establishes **historical-source lineage**, but not **cartographic-source lineage** for Aydın (2005) Annex 1.
 
@@ -185,9 +185,11 @@ This upgrades the lead from “physical-copy-only” to **digitization record ex
 
 ## 2026-09-19 — contemporary bibliographic cross-check
 
-A separate bibliographic index of Konya publications records the 1934 Yavuz work as an 86-page illustrated publication. A 1937 Konya periodical index also records a contemporary **book review/presentation** titled “Eşref Oğulları Tarihi ve Beyşehir Kılavuzu,” published in *Konya [Halkevi]*, Year 1, Issue 10, June 1937, supplement 1.
+A separate bibliographic index of Konya publications records a contemporary book presentation/review titled **“Eşref Oğulları Tarihi ve Beyşehir Kılavuzu (Memduh Yavuz Süslü)”**, published in *Konya [Halkevi]*, Year 1, Issue 10, June 1937, supplement 1. citeturn0search43
 
-The existence of a contemporary review is useful because it creates a new source-access route for determining how the 1934 work was presented and what its supplementary material contained. However, the indexed bibliographic entry does not expose the review's full text or identify the fold-out as a map.
+A contemporary 1934 newspaper record also discusses the newly published work and describes it as covering **Beyşehir's geographical, historical, natural and geological situation**, together with Eşrefoğulları-related material and collected valuable works. The newspaper record is useful as contemporary evidence of the book's scope, but the indexed text does **not** identify the fold-out component as a map. citeturn0search46
+
+A later scholarly catalogue of Atatürk's library holdings independently records the 1934 book as **D.19/a, catalogue no. 4204, Anıtkabir no. 2009**, establishing an additional institutional provenance trail for a surviving copy associated with Atatürk's library. citeturn1search0turn0search47
 
 ### Acquisition interpretation
 
@@ -196,20 +198,22 @@ The existence of a contemporary review is useful because it creates a new source
 | 1934 Yavuz work exists | **Confirmed** |
 | Fold-out component exists in at least one catalogue record | **Confirmed** |
 | Digitized record exists | **Confirmed** |
+| Contemporary evidence describes book's geographical/historical scope | **Confirmed** |
+| Contemporary 1937 review exists | **Confirmed** |
+| Atatürk-library copy provenance trail exists | **Confirmed** |
 | Public page-image/eBook access | **Not confirmed; Google Books says “No eBook available”** |
 | Indexed common terms identify a map | **No** |
 | Fold-out content is a boundary map | **Not established** |
 | Fold-out is source of Aydın 2005 Annex 1 | **Not established** |
-| Contemporary 1937 review exists | **Confirmed** |
 | Project-controlled binary acquired | **No** |
 | Raw SHA-256 | **None** |
 | Transformation rights | **Not established** |
 
 ### Gate decision
 
-The Yavuz 1934 item remains a **bibliographic/cartographic research lead**. The evidence has become more precise, but the decisive artifact is still missing.
+The Yavuz 1934 item remains a **bibliographic/cartographic research lead**. The new contemporary evidence improves understanding of the work's scope and surviving-copy provenance, but it still does not expose the decisive fold-out content.
 
-The next admissible operation is to inspect the accessible bibliographic trail around the **1937 contemporary review** and any institutional digitization metadata for the Indiana University-origin copy, specifically for an explicit description of the fold-out component. If that route still does not expose the component, the lead remains provenance-only.
+The next admissible operation is therefore to pursue the **surviving institutional copy / digitization metadata** specifically for the fold-out component. If no image-level access or explicit content description can be established, the lead remains provenance-only.
 
 No page image, fold-out scan, control point, polygon, MapBin, or transformed derivative has been acquired.
 
