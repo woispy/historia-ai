@@ -70,3 +70,33 @@ No source discovered in this pass changes the canonical geometry gate.
 ## Next gate
 
 Acquire/retain the actual cartographic artifact for the first reconstruction candidate, hash it, register provenance, then run georeference calibration before producing any polygon.
+
+
+## Cartographic artifact ledger — 2026-09-19
+
+A dedicated provenance ledger now exists at:
+`data/gis/1326/tier1-cartographic-artifact-ledger.json`
+
+### SALT Research — TASUDOC0286
+
+The SALT record exposes the original JPEG and identifies it as a beginning-of-14th-century Anatolian beyliks map. The record states Open Access but also specifies **CC BY-NC-ND 4.0** terms and prohibits transformed/derived documents. Therefore this artifact is retained in the project ledger as **contextual cartography only**; it is not an unrestricted georeferencing/digitization source.
+
+This closes a useful research question: the map can inform historical interpretation, but its current rights/date scope do not justify turning it into a 1326 polygon.
+
+### Eşrefoğulları — Alperen (2001) reproduction
+
+The Tekkanat & Yavuz paper reproduces “Harita 2. Eşrefoğulları Beyliği Sınırları (Alperen, 2001)” and explicitly labels the widest extent as approximate, while also distinguishing temporarily attached territory. The paper gives the Eşrefoğulları regional extent as south: Seydişehir/Bozkır; north: Doğanhisar/Ilgın; west: Yalvaç/Şarkikaraağaç/Gelendost; northwest: Akşehir/Çay/Bolvadin.
+
+This is a **candidate reconstruction source**, not a precise 7 April 1326 polygon. The underlying artifact still requires retention and rights/provenance review before any georeferencing or digitization.
+
+### Gate decision
+
+The artifact-discovery gate is now **partially closed**:
+
+- contextual map evidence: registered;
+- provenance ledger: registered;
+- date-specific 1326 machine-readable geometry: still absent;
+- unrestricted reconstruction artifact: still absent;
+- canonical geometry promotion: BLOCKED.
+
+No polygon was created from either artifact.
