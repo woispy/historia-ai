@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "observationId": "esrefogullari-alperen-2001-map-observation-v1",
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "evidence-only",
+  "promotion": "BLOCKED",
+  "sourceArtifact": {
+    "artifactLedgerId": "esrefogullari-alperen-2001-reproduction",
+    "recordUrl": "https://acikerisim.erbakan.edu.tr/items/58a1c752-ce62-4eff-9266-4e25098f8d1c",
+    "artifactUrl": "https://acikerisim.erbakan.edu.tr/bitstreams/6e490eae-f0bc-48ae-a64b-73384e835b5b/download",
+    "documentPage": 8,
+    "figureLabel": "Harita 2. Eşrefoğulları Beyliği Sınırları (Alperen, 2001)",
+    "inspectionDate": "2026-09-19"
+  },
+  "legendSemantics": [
+    {
+      "symbol": "double-circle",
+      "meaning": "Beyliğin merkezi",
+      "geometryRole": "historical-location-anchor"
+    },
+    {
+      "symbol": "filled-circle",
+      "meaning": "Bazı yerleşim birimleri",
+      "geometryRole": "historical-location-anchor"
+    },
+    {
+      "symbol": "solid-line",
+      "meaning": "Beyliğin ulaştığı en geniş sınırların yaklaşık çizimi",
+      "geometryRole": "approximate-extent-reference-only"
+    },
+    {
+      "symbol": "dashed-line",
+      "meaning": "Beyliğe kısa bir süre bağlı kalan topraklar",
+      "geometryRole": "temporary-extent-reference-only"
+    }
+  ],
+  "visibleAnchorCandidates": [
+    "Beyşehir",
+    "Seydişehir",
+    "Bozkır",
+    "Çarşamba Çayı",
+    "Akşehir",
+    "Ilgın",
+    "Doğanhisar",
+    "Çay",
+    "Bolvadin",
+    "Yalvaç",
+    "Gelendost",
+    "Eğirdir",
+    "Kıreli",
+    "Hüyük",
+    "Konya"
+  ],
+  "interpretationLocks": [
+    "The solid line is explicitly an approximate drawing of the widest extent, not a surveyed boundary.",
+    "The dashed line denotes territories temporarily attached and must not be merged into the widest-extent line.",
+    "A visible settlement is an anchor candidate only; it is not a polygon vertex.",
+    "The figure is not date-specific to 1326-04-07.",
+    "No pixel-to-geographic correspondence is asserted by this observation alone.",
+    "No polygon, ring, or MapBin output is created."
+  ],
+  "nextProofInput": {
+    "required": [
+      "retained source artifact or immutable reviewable artifact identity",
+      "documented image/page coordinate frame",
+      "independently sourced geographic coordinates for selected anchors",
+      "pixel-to-geo correspondence records",
+      "affine/georeference residuals",
+      "independent sanity validation"
+    ],
+    "status": "pending"
+  }
+}
