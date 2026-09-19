@@ -80,6 +80,9 @@ jobs:
       - name: Alâiye source observation contract test
         run: npm run test:1326-alaiye-source-observation
 
+      - name: Source-to-geometry admissibility matrix contract test
+        run: npm run test:1326-source-geometry-admissibility
+
       - name: Historical control-point proof contract test
         run: npm run test:1326-historical-control-point-proof
 
