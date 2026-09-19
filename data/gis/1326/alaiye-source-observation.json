@@ -35,6 +35,18 @@
       ],
       "geometryAuthority": false,
       "temporalDiscrepancy": "Phersu chronology is not identical to the TDV 1293–1471 chronology; this discrepancy is retained for source reconciliation and is not resolved by this record."
+    },
+    {
+      "sourceId": "isam-pursuit-history-karamanids-alanya",
+      "role": "dated-political-and-monetary-context",
+      "url": "https://makale.isam.org.tr/server/api/core/bitstreams/3c4a7758-86ef-41a1-9eba-e63a8a6dfbb5/content",
+      "supportedClaims": [
+        "The study records Alanya coins dated 721/1321, 726/1326 and 729/1329 minted in the name of Mamluk Sultan Nasir Muhammad.",
+        "The study cites Ibn Battuta's 1333 Alanya account naming Karamanid Yusuf Bey."
+      ],
+      "geometryAuthority": false,
+      "geometryUse": "blocked",
+      "temporalRole": "dated-context-only"
     }
   ],
   "1326Interpretation": {
@@ -79,5 +91,11 @@
     ],
     "outcome": "No source met all 1326-04-07 date-specific artifact, traceability, machine-readable/reconstructable boundary, rights/provenance and independent review requirements.",
     "gate": "1326 boundary-artifact gate remains BLOCKED"
+  },
+  "datedContextGate": {
+    "scenarioDate": "1326-04-07",
+    "status": "strengthened-context",
+    "interpretation": "A dated 1326 Alanya monetary reference supports scenario-period political context, but does not identify a territorial boundary or polygon.",
+    "noBoundaryInference": true
   }
 }
