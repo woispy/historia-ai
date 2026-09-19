@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "evidence-only",
+  "purpose": "Record boundary-relevant historical evidence without converting narrative extent into polygon geometry.",
+  "records": [
+    {
+      "entityId": "esrefogullari",
+      "evidence": [
+        {
+          "source": "Tekkanat & Yavuz 2017 / Alperen 2001 map reproduction",
+          "role": "cartographic extent reference",
+          "finding": "Map shows an approximate widest extent and separately marks territories attached for a short period.",
+          "temporalPrecision": "broad historical extent; not exact 1326-04-07",
+          "geometryAuthority": false
+        },
+        {
+          "source": "Kofoğlu 2009, SUTAD",
+          "role": "chronological territorial expansion",
+          "finding": "Expansion is described toward Seydişehir/Bozkır, Doğanhisar/Şarkikaraağaç, and Bolvadin was acquired in 1320.",
+          "temporalPrecision": "pre-1326 events; useful for reconstruction constraints",
+          "geometryAuthority": false
+        },
+        {
+          "source": "Erbakan repository study",
+          "role": "regional political context",
+          "finding": "The reproduced map and narrative identify Beyşehir as the centre and provide regional place references.",
+          "temporalPrecision": "historical period; not exact boundary",
+          "geometryAuthority": false
+        }
+      ],
+      "reconstructionStatus": "candidate-evidence-only",
+      "polygon": null
+    },
+    {
+      "entityId": "alaye",
+      "evidence": [
+        {
+          "source": "TDV — Alâiye Beyliği",
+          "role": "historical existence/control context",
+          "finding": "Alâiye/Alanya region was ruled by a Turkish polity from the late 13th century to 1471; after 1293 the city and region were ruled by beys affiliated with the Karamanids and under Mamluk suzerainty.",
+          "temporalPrecision": "period-level; not exact boundary",
+          "geometryAuthority": false
+        },
+        {
+          "source": "TDV — Anadolu Beylikleri",
+          "role": "polity interval and regional context",
+          "finding": "Alâiye Beyliği is dated 1293–1471 and placed on the southern Anatolian coast.",
+          "temporalPrecision": "period-level",
+          "geometryAuthority": false
+        },
+        {
+          "source": "TTK / Alâiye bibliography record",
+          "role": "source discovery",
+          "finding": "TTK catalogue exposes scholarship specifically addressing the emergence of Alâiye Beyliği and the Ottoman-Mamluk-Karamanid struggle over Alâiye.",
+          "temporalPrecision": "research lead; not a boundary artifact",
+          "geometryAuthority": false
+        }
+      ],
+      "reconstructionStatus": "candidate-evidence-only",
+      "polygon": null
+    }
+  ],
+  "globalRules": [
+    "Narrative extent is not polygon geometry.",
+    "Polity existence is not boundary authority.",
+    "A post-1326 territorial statement cannot be projected backward.",
+    "No polygon is generated until a traceable date-appropriate boundary artifact or explicitly documented reconstruction method is available."
+  ]
+}
