@@ -269,3 +269,34 @@ The Tier-1 evidence matrix is now stronger on **temporal applicability**, while 
 A 2017 Necmettin Erbakan University repository PDF was inspected at PDF page 8 / printed page 211. It contains **Harita 2. Eşrefoğulları Beyliği Sınırları (Alperen, 2001)** with an explicit legend separating the centre, selected settlements, an **approximate** maximum extent, and short-term attached territories.
 
 This improves source traceability and makes the visual artifact suitable for a future documented georeference proof. It does not create a 1326-04-07 polygon, and no pixel coordinates have been committed from visual estimation. The machine-readable observation is `data/gis/1326/esrefogullari-map-georeference-observation.json`.
+
+## 2026-09-19 — Alperen (2001) source-acquisition closure
+
+A dedicated acquisition review was completed for the cartographic source behind **“Harita 2. Eşrefoğulları Beyliği Sınırları (Alperen, 2001)”**.
+
+The underlying work is independently corroborated as **Bilal Bülent Alperen, Beyşehir ve Tarihi, Konya, 2001**. The 2017 Tekkanat & Yavuz reproduction remains the only directly page-addressed visual artifact located in this pass. Independent bibliographic records confirm the 2001 work exists, but no clearly reusable downloadable binary of the original book or independently retained original map artifact was located.
+
+Accordingly, the project now distinguishes three evidence levels:
+
+- **visual reproduction:** available and page-addressed;
+- **bibliographic source:** identified and corroborated;
+- **project-controlled map bytes:** not acquired.
+
+The acquisition review is recorded in `docs/PHASE_A_1326_ESREFOGULLARI_SOURCE_ACQUISITION.md` and the bibliographic lead is registered in `data/gis/1326/tier1-cartographic-artifact-ledger.json`.
+
+### Gate decision
+
+This closes the bibliographic-identification sub-gate but **does not close the geometry gate**:
+
+- source identity: confirmed;
+- visual reproduction: confirmed;
+- original/source artifact bytes: not acquired;
+- raw SHA-256: unavailable;
+- transformation rights: unresolved;
+- image-space control frame: unavailable;
+- pixel↔geo calibration: not performed;
+- polygon/ring: none;
+- canonical MapBin: untouched.
+
+The next admissible operation remains acquisition of a stable, reusable map artifact followed by documented control-point calibration. No pixel coordinates are inferred from the web-rendered figure.
+
