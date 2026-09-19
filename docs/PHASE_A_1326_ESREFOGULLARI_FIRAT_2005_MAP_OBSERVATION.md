@@ -218,3 +218,22 @@ The next admissible operation is therefore to pursue the **surviving institution
 No page image, fold-out scan, control point, polygon, MapBin, or transformed derivative has been acquired.
 
 No canonical geometry, physical authority, or runtime map asset is changed by this research pass.
+
+
+## 2026-09-19 — digitized-copy content probe
+
+The public Google Books record for the 1934 Yavuz work was rechecked directly. It identifies the book as **86 pages**, original from **Indiana University**, digitized **2010-10-04**, and exposes a partial contents view plus indexed common terms. The public record does not expose an eBook/page-image viewer and does not identify the fold-out component as a map. citeturn2search0
+
+A separate used-book catalogue/listing describes the same 1934 item as **“Fotoğraf Ve Şekilli 88 Sayfa Metin + 1 Plan”**. This is useful corroborative evidence that a plan/visual component was associated with a surviving physical copy, but the listing is not an institutional descriptive record and does not identify the plan's subject, scale, date, or source. It therefore cannot be used to classify the fold-out as an Eşrefoğulları boundary map. citeturn0search2
+
+### Result
+
+The evidence now supports the following narrower chain:
+
+**Yavuz 1934 exists → an institutional catalogue records one fold-out component → a digitized bibliographic record exists → a secondary listing calls out one plan → fold-out/plan content remains unobserved → cartographic-source relationship to Aydın 2005 remains unproven.**
+
+No page image, fold-out scan, map-source attribution, control point, polygon, or transformed derivative has been acquired.
+
+### Gate decision
+
+The Yavuz lead remains **bibliographic/cartographic research lead**. The decisive next evidence is still image-level access to the fold-out or an institutional description identifying its contents. Until that evidence exists, no georeferencing or boundary reconstruction is admissible.
