@@ -190,3 +190,22 @@ No candidate has yet crossed the threshold required to authorize georeferencing 
 ### Gate decision
 
 The source-method gate remains **OPEN**. The next operation should be to test the named historical-geography candidates only for an explicit connection to Annex 1, rather than treating them as assumed map sources.
+
+
+## 2026-09-19 — historical-source lineage result
+
+A targeted search of institutional catalogues and later scholarship confirms **Memduh Yavuz Süslü, _Eşref Oğulları Tarihi: Beyşehir Kılavuzu_ (Konya, 1934)** as an established Eşrefoğulları historical source. The Turkish Historical Society catalogue records the 1934 publication and notes that one copy includes a fold-out table. citeturn0search0
+
+TDV's Eşrefoğulları bibliography also lists the same 1934 work, alongside Uzunçarşılı and primary/secondary historical sources. citeturn0search1 A later Beyşehir publication independently cites Yavuz's 1934 work for Eşrefoğulları-era historical statements. citeturn0search31
+
+This establishes **historical-source lineage**, but not **cartographic-source lineage** for Aydın (2005) Annex 1. The TTK catalogue's “1 katlı tablo” is bibliographically notable, but the current evidence does not identify that fold-out table as the source of Aydın's Annex 1 map. It must therefore remain a research lead, not a map-source assertion.
+
+### New research lead
+
+The highest-value provenance lead is now the **1934 Yavuz work and its fold-out table**, because the institutional catalogue confirms that a fold-out visual/table component existed. However, access to the physical copy is restricted to in-library use according to the catalogue, and no project-controlled binary or image hash has been acquired. citeturn0search0
+
+### Gate decision
+
+The provenance gate remains **OPEN**. The Yavuz 1934 fold-out is registered as a **bibliographic/cartographic research lead only**. No claim is made that it is the source of Aydın 2005 Annex 1.
+
+No geometry, control-point coordinates, polygon, MapBin, or canonical authority was created.
