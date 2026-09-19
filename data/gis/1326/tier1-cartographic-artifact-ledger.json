@@ -6,7 +6,10 @@
   "records": [
     {
       "id": "salt-tasudoc0286",
-      "entityScope": ["esrefogullari", "alaye"],
+      "entityScope": [
+        "esrefogullari",
+        "alaye"
+      ],
       "title": "14. yüzyıl başında Anadolu Türk Beylikleri haritası",
       "provider": "SALT Research",
       "identifier": "TASUDOC0286",
@@ -26,7 +29,9 @@
     },
     {
       "id": "esrefogullari-alperen-2001-reproduction",
-      "entityScope": ["esrefogullari"],
+      "entityScope": [
+        "esrefogullari"
+      ],
       "title": "Harita 2. Eşrefoğulları Beyliği Sınırları (Alperen, 2001)",
       "provider": "Tekkanat & Yavuz, 2017 reproduction",
       "sourceWork": "B.B. Alperen, Beyşehir ve Tarihi, 2001",
@@ -41,7 +46,10 @@
     },
     {
       "id": "wikimedia-anatolian-beyliks-1330-tr",
-      "entityScope": ["esrefogullari", "alaye"],
+      "entityScope": [
+        "esrefogullari",
+        "alaye"
+      ],
       "title": "Beylicats d’Anatolie vers 1330-tr.svg",
       "provider": "Wikimedia Commons",
       "recordUrl": "https://commons.wikimedia.org/wiki/File:Beylicats_d%E2%80%99Anatolie_vers_1330-tr.svg",
@@ -57,7 +65,9 @@
     },
     {
       "id": "esrefogullari-alperen-2001-bibliographic-lead",
-      "entityScope": ["esrefogullari"],
+      "entityScope": [
+        "esrefogullari"
+      ],
       "title": "Beyşehir ve Tarihi",
       "provider": "Bilal Bülent Alperen",
       "publicationYear": 2001,
@@ -73,7 +83,9 @@
     },
     {
       "id": "wikimedia-esrefogullari-konumu-2014",
-      "entityScope": ["esrefogullari"],
+      "entityScope": [
+        "esrefogullari"
+      ],
       "title": "Eşrefoğulları Beyliği'nin konumu.png",
       "provider": "Wikimedia Commons",
       "recordUrl": "https://commons.wikimedia.org/wiki/File:E%C5%9Frefo%C4%9Fullar%C4%B1_Beyli%C4%9Fi%27nin_konumu.png",
@@ -95,7 +107,9 @@
     },
     {
       "id": "esrefogullari-firat-2005-annex1",
-      "entityScope": ["esrefogullari"],
+      "entityScope": [
+        "esrefogullari"
+      ],
       "title": "Ek 1: Eşrefoğulları Beyliğinin Yayıldığı Coğrafi Alan",
       "provider": "Fırat University Open Access repository",
       "sourceWork": "Nebahat Aydın, Eşrefoğulları Beyliğinin İlmi ve Kültürel Faaliyetleri",
@@ -113,7 +127,9 @@
     },
     {
       "id": "esrefogullari-yavuz-1934-google-books-record",
-      "entityScope": ["esrefogullari"],
+      "entityScope": [
+        "esrefogullari"
+      ],
       "title": "Eşref Oğulları tarihi: Beyşehir klavuzu [sic]",
       "provider": "Google Books / Indiana University origin",
       "sourceWork": "Memduh Yavuz, Eşref Oğulları Tarihi: Beyşehir Kılavuzu",
@@ -126,10 +142,16 @@
       "listedLengthPages": 86,
       "authorityRole": "bibliographic-digitization-lead",
       "geometryUse": "blocked",
-      "reason": "The public Google Books record confirms a digitized copy exists and identifies Indiana University as the original source, but the current interface states 'No eBook available'. Page-image access to the fold-out component is therefore unresolved. The record does not establish that the fold-out is a boundary map or the source of Aydın (2005) Annex 1.",
+      "reason": "The public Google Books record confirms a digitized copy exists, identifies Indiana University as the original source, and exposes partial contents/common-term metadata, but the current public interface does not expose page images and reports no eBook available. A secondary used-book listing describes the item as having one plan, which corroborates a visual/plan component but does not identify its subject, date, scale, or cartographic source. The fold-out/plan therefore cannot be classified as a boundary map or linked to Aydın (2005) Annex 1.",
       "binaryRetention": "not-acquired",
       "sha256": null,
-      "inspection": "web-inspected 2026-09-19"
+      "inspection": "web-inspected 2026-09-19",
+      "secondaryCorroboration": {
+        "description": "Secondary used-book listing: “Fotoğraf Ve Şekilli 88 Sayfa Metin + 1 Plan”",
+        "url": "https://groups.google.com/g/turk-tarihciler/c/9FOdligiEAE",
+        "authorityRole": "non-authoritative corroboration",
+        "inspection": "web-inspected 2026-09-19"
+      }
     }
   ],
   "promotionLocks": [
