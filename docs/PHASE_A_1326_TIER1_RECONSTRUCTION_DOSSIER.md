@@ -1,215 +1,72 @@
 # Phase A — 1326 Tier-1 Reviewed Reconstruction Dossier
 
-Status: **authoring preparation complete; geometry intentionally pending**
+Status: **source-discovery gate completed; no geometry promoted**
 
 Scenario date: **1326-04-07**
 
 ## Purpose
 
-This dossier is the first reviewable reconstruction artifact for the two Cliopatria source-gap entities:
+This dossier defines the admissible reconstruction path for the two current Tier-1 source gaps:
 
 - Eşrefoğulları
 - Alâiye Beyliği
 
-It is an authoring specification, not a polygon and not canonical authority.
+It remains an authoring/review artifact. It is not canonical political geometry.
 
-The dossier records what is currently supported by the project evidence matrix and prior source research, then defines exactly what must be supplied before a reviewed reconstruction can carry geometry.
+## Eşrefoğulları — source discovery
 
-## Non-negotiable temporal rule
+A web research pass identified a directly viewable reproduction of **“Harita 2. Eşrefoğulları Beyliği Sınırları (Alperen, 2001)”** in a Beyşehir historical-urban study. The page describes the map's legend as including the beylik centre, settlements, an approximate drawing of the widest extent, and territories attached for a short period. citeturn0search1
 
-The scenario state is evaluated at the start of **7 April 1326**.
+This is therefore useful as a **cartographic reconstruction candidate**, but its description explicitly prevents treating it as an exact 7 April 1326 boundary.
 
-Evidence describing territorial changes after that instant may be used only to establish a later change boundary. It must not be projected backward into the scenario.
+Required next action is acquisition/retention of the underlying map artifact with provenance before any digitization.
 
----
+## Alâiye — source discovery
 
-## Eşrefoğulları
+A public Phersu Atlas record exists for Alaiye and provides time-oriented political-control maps and a polity chronology. Its listed chronology is 1294–1493. This is useful as an independent temporal/cartographic cross-check, but no immutable 1326 machine-readable polygon artifact has been acquired. citeturn0search5
 
-### Historical state
+TDV's Alâiye entry independently establishes the polity in the Alâiye/Alanya region from the late 13th century to 1471 and describes the political context after 1293. This supports historical existence/context, not a canonical 1326 polygon. citeturn0search8
 
-- Entity: `esrefogullari`
-- Display name: Eşrefoğulları
-- Region: Anatolia
-- Tier: 1
-- Existence at scenario start: supported
-- Control at scenario start: supported
-- Current geometry status: `pending-source-acquisition`
-- Evidence-matrix confidence: 0.90
+A SALT Research item titled **“14. yüzyıl başında Anadolu Türk Beylikleri haritası”** is openly accessible as a scanned JPEG and is potentially useful as contextual cartography. However, its title places it at the beginning of the 14th century, so it cannot be silently promoted to an exact 1326 boundary. citeturn0search0
 
-### Evidence currently accepted
+## Current source classification
 
-1. **TDV — Eşrefoğulları**
-   - II Süleyman was killed on **9 October 1326**.
-   - Therefore the polity had not yet ended on **7 April 1326**.
-   - Role: temporal-existence bound.
+| Source | Entity | Role | Geometry authority |
+|---|---|---|---|
+| Alperen (2001) map reproduction | Eşrefoğulları | cartographic reconstruction candidate | No |
+| Phersu Alaiye record | Alâiye | temporal/cartographic cross-check | No |
+| TDV Alâiye | Alâiye | historical existence/control context | No |
+| SALT early-14th-c. map | regional | contextual cartography | No |
 
-2. **Alperen (2001) map as reproduced in the Beyşehir-focused academic study**
-   - Provides a historical depiction of Eşrefoğulları's territorial extent.
-   - The reproduced map is explicitly described as an **approximate widest extent**.
-   - Role: cartographic reconstruction candidate.
-   - It must not be treated as an exact 7 April 1326 boundary.
+## Reconstruction rule
 
-3. **Independent regional historical references**
-   - Support Beyşehir/Seydişehir and wider territorial context.
-   - Role: place/extent cross-check.
-   - Not a machine-readable polygon authority.
+No polygon may be created merely because a map image exists.
 
-### Reconstruction interpretation
+Before digitization the retained source record must contain:
 
-The admissible reconstruction question is:
-
-> What boundary representation best explains the historical evidence applicable immediately before 7 April 1326, while explicitly exposing uncertainty?
-
-It is **not**:
-
-> What is the exact historical polygon?
-
-### Required geometry evidence
-
-At least one of the following must be acquired:
-
-- traceable machine-readable historical geometry;
-- an explicitly authored georeferenced reconstruction from a traceable historical map;
-- a multi-source reconstruction with documented control points and assumptions.
-
-If a historical map is used, the reconstruction record must retain:
-
-- source identity;
+- source identity and URL/reference;
+- artifact file and raw SHA-256;
+- rights/licence information where available;
 - map date/context;
-- license/usage;
-- image/artifact identity;
-- raw SHA-256 where a retained artifact exists;
 - image dimensions;
-- CRS/geographic extent;
-- control points;
-- affine-fit residual;
-- digitization method;
-- uncertainty;
-- reviewer.
+- geographic extent or control-point basis;
+- temporal applicability decision;
+- entity reconciliation decision;
+- georeference method;
+- control points and residuals;
+- assumptions and uncertainty.
 
-### Forbidden shortcuts
+## Scenario protection
 
-- 1300 polygon relabelled as 1326;
-- 1400 polygon relabelled as 1326;
-- capital-radius geometry;
-- Voronoi/fallback geometry;
-- unrecorded hand coordinates;
-- image tracing without georeference/provenance.
+The project scenario remains **1326-04-07**. Evidence from later periods may establish later change but must not be projected backward.
 
----
+## Promotion lock
 
-## Alâiye Beyliği
+`authorityStatus = reviewed-reconstruction`  
+`promotion = BLOCKED`
 
-### Historical state
+No source discovered in this pass changes the canonical geometry gate.
 
-- Entity: `alaye`
-- Display name: Alâiye Beyliği
-- Region: Southern Anatolia
-- Tier: 1
-- Existence at scenario start: supported
-- Control at scenario start: supported-in-general
-- Current geometry status: `pending-source-acquisition`
-- Evidence-matrix confidence: 0.80
+## Next gate
 
-### Evidence currently accepted
-
-1. **TDV — Anadolu Beylikleri**
-   - Dates Alâiye to **1293–1471**.
-   - Role: polity-existence interval.
-
-2. **TDV — Alâiye Beyliği**
-   - Places the polity in the Alanya region.
-   - Describes the post-1293 political context and later continuity.
-   - Role: historical-control/geographic context.
-
-3. **Phersu Atlas**
-   - Public Alaiye polity record spans **1294–1493**.
-   - Provides time-dependent territorial views.
-   - Role: independent temporal/cartographic cross-check.
-   - No immutable 1326 machine-readable geometry has been acquired.
-
-4. **Euratlas / TTK / Salt Research / local GIS references**
-   - Useful for geographic and place-name reconciliation.
-   - None is currently accepted as a direct 1326 political polygon.
-
-### Reconstruction interpretation
-
-The admissible question is:
-
-> What geographically and historically defensible boundary reconstruction can be produced for Alâiye at 7 April 1326 from traceable evidence?
-
-It is not acceptable to copy a 1300 or 1400 boundary and rename it 1326.
-
-### Required geometry evidence
-
-The preferred path is a traceable machine-readable source.
-
-If unavailable, a reviewed reconstruction may be authored from date-appropriate cartographic evidence, provided that:
-
-- the source artifact is retained;
-- georeferencing is reproducible;
-- control points are recorded;
-- temporal interpretation is explicit;
-- uncertainty is quantified/declared;
-- the reconstruction is marked `reviewed-reconstruction`, never `canonical` at this stage.
-
----
-
-## Reconstruction source record
-
-The first actual geometry artifact must use this minimum structure:
-
-```json
-{
-  "entityId": "esrefogullari | alaye",
-  "scenarioDate": "1326-04-07",
-  "authorityStatus": "reviewed-reconstruction",
-  "promotion": "BLOCKED",
-  "sourceIdentity": {},
-  "temporalApplicability": {},
-  "entityReconciliation": {},
-  "georeference": {
-    "method": "affine",
-    "controlPoints": [],
-    "rmsResidual": null
-  },
-  "geometry": {
-    "status": "pending",
-    "ring": []
-  },
-  "assumptions": [],
-  "uncertainty": {},
-  "review": {
-    "status": "draft"
-  }
-}
-```
-
-An empty ring is intentional at this stage.
-
-## Gate for entering geometry
-
-A polygon may be inserted only after its source artifact and reconstruction method are recorded.
-
-The sequence is:
-
-1. source artifact acquired;
-2. source hash recorded;
-3. temporal interpretation recorded;
-4. entity identity reconciled;
-5. georeference fitted;
-6. control-point residual checked;
-7. boundary digitized;
-8. Province Source Studio ring validation;
-9. proof-group/topology validation;
-10. physical-land validation;
-11. reviewer decision;
-12. canonical promotion review.
-
-## Current decision
-
-**No geometry has been fabricated.**
-
-The dossier therefore closes the reconstruction-definition gate but intentionally leaves the geometry gate open.
-
-Next admissible action: acquire or retain the first traceable cartographic artifact for Eşrefoğulları and Alâiye, then build the corresponding georeferenced reconstruction proof.
+Acquire/retain the actual cartographic artifact for the first reconstruction candidate, hash it, register provenance, then run georeference calibration before producing any polygon.
