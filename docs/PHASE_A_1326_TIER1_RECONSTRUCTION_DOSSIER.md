@@ -217,3 +217,23 @@ Therefore:
 - no synthetic or later-period geometry is admitted;
 - canonical MapBin remains untouched.
 \n
+
+## 2026-09-19 — near-scenario 1330 map cross-check
+
+A Wikimedia Commons record for **“Beylicats d’Anatolie vers 1330-tr.svg”** was reviewed as a near-scenario regional reference. The record identifies the map as approximately 1330 and cites published historical atlases as source material. citeturn0search4
+
+This is useful only as a **contextual cross-check** for regional polity relationships around the scenario period. It is not exact to 1326-04-07 and therefore cannot be relabelled as a 1326 boundary artifact.
+
+The artifact has been added to the cartographic ledger with geometry use blocked. No binary was retained and no geometry was extracted.
+
+### Gate decision
+
+The near-scenario source improves the evidence matrix but does not change the geometry gate:
+
+- no 1326-04-07 boundary polygon has been acquired;
+- no 1330 geometry is relabelled to 1326;
+- no image pixels are converted to control points;
+- no polygon/ring/MapBin is generated.
+
+The reconstruction chain therefore remains evidence → source qualification → georeference proof → physical/topology validation, with canonical promotion still blocked.
+
