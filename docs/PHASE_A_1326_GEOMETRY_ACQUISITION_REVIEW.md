@@ -131,3 +131,44 @@ canonical promotion review
 ```
 
 No production geometry mutation is authorized by this document.
+
+
+## Research update — 2026-09-19
+
+A second external research pass found additional cartographic evidence, but it does not change the promotion state.
+
+### Eşrefoğulları
+
+A published Beyşehir study reproduces **“Harita 2. Eşrefoğulları Beyliği Sınırları (Alperen, 2001)”** and labels the depicted boundary as an **approximate drawing of the beylik's widest extent**. The study also frames Eşrefoğulları as existing in **1280–1326**. This makes the map useful for regional extent reconstruction, but the “widest extent” qualifier prevents treating it as an exact 1326-04-07 boundary without further temporal reconciliation. citeturn0search0
+
+### Alâiye
+
+TDV's *Alâiye Beyliği* article states that the beylik ruled the Alanya region from the late 13th century until 1471 and records Karamanoğlu-linked rule after 1293. It also cites Ibn Battuta's visit around 1333 and identifies Yusuf b. Karaman as ruler at that time. This strengthens the historical/control evidence but does not provide a machine-readable 1326 boundary. citeturn0search5
+
+A historical-map archive at SALT Research contains a map titled **“14. yüzyıl başında Anadolu Türk Beylikleri haritası”** and marks it as an open-access scanned map. It is useful as a cross-check for early-14th-century regional cartography, but its metadata does not establish that its boundary depiction is specifically 1326, so it remains reference evidence rather than canonical geometry. citeturn0search1
+
+A later Piri Reis map of the Anatolian coast as far as Alanya is preserved by the Walters Art Museum and is CC0, but its date is centuries later than the target scenario; it can only support geographic/place-name reconciliation, not a 1326 political boundary. citeturn0search7
+
+### Research conclusion
+
+The evidence set is now sufficient to define **cartographic research candidates**, but still insufficient to create a reviewed 1326 polygon for either source-gap entity.
+
+The active gate therefore remains:
+
+```
+cartographic candidate
+    ↓
+source artifact / immutable reference
+    ↓
+temporal semantics
+    ↓
+entity semantics
+    ↓
+traceable geometry extraction
+    ↓
+physical + topology validation
+    ↓
+human review
+```
+
+No candidate geometry has been promoted.
