@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "observationId": "alaiye-source-observation-v1",
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "evidence-only",
+  "promotion": "BLOCKED",
+  "historicalEntity": "Alâiye Beyliği",
+  "sources": [
+    {
+      "sourceId": "tdv-alaiye-beyligi",
+      "url": "https://islamansiklopedisi.org.tr/alaiye-beyligi",
+      "role": "historical-existence-and-political-context",
+      "supportedClaims": [
+        "Alâiye/Alanya yöresinde XIII. yüzyıl sonlarından 1471 yılına kadar hüküm süren bir beylik olarak tanımlanır.",
+        "1293 sonrasında Alâiye şehir ve yöresinde Karamanoğulları'na bağlı beylerin, Memlük hâkimiyeti altında hüküm sürdüğü aktarılır."
+      ],
+      "geometryAuthority": false
+    },
+    {
+      "sourceId": "tdv-anadolu-beylikleri",
+      "url": "https://islamansiklopedisi.org.tr/anadolu-beylikleri",
+      "role": "historical-chronology-and-regional-context",
+      "supportedClaims": [
+        "Alâiye Beyliği 1293–1471 olarak güney Anadolu sahillerinde konumlandırılır."
+      ],
+      "geometryAuthority": false
+    },
+    {
+      "sourceId": "phersu-alaiye",
+      "url": "https://phersu-atlas.com/chronology/polity3679.html",
+      "role": "independent-temporal-and-cartographic-cross-check",
+      "supportedClaims": [
+        "Phersu kaydı Alaiye için 1294–1493 kronolojisi verir.",
+        "Kayıt, zaman içinde siyasi kontrol haritaları ve azami genişleme görselleri bulunduğunu belirtir."
+      ],
+      "geometryAuthority": false,
+      "temporalDiscrepancy": "Phersu chronology is not identical to the TDV 1293–1471 chronology; this discrepancy is retained for source reconciliation and is not resolved by this record."
+    }
+  ],
+  "1326Interpretation": {
+    "status": "historical-context-only",
+    "rule": "The sources establish existence and regional political context but do not provide an immutable, date-specific 1326-04-07 polygon.",
+    "noBackwardProjection": true,
+    "noPolygonGenerated": true
+  },
+  "geometryStatus": "pending-source-acquisition",
+  "requiredNextEvidence": [
+    "traceable date-appropriate boundary artifact or explicitly documented reconstruction basis",
+    "artifact identity and raw SHA-256 where retained",
+    "rights/licence review",
+    "entity reconciliation",
+    "georeference/control-point proof if cartographic reconstruction is used",
+    "physical-land validation",
+    "topology validation"
+  ],
+  "locks": [
+    "No polygon may be inferred from the Alanya city location alone.",
+    "No later-period maximum extent may be projected backward to 1326-04-07.",
+    "No Phersu visualization is promoted as canonical geometry without an immutable machine-readable artifact and review.",
+    "No canonical MapBin mutation is permitted."
+  ]
+}
