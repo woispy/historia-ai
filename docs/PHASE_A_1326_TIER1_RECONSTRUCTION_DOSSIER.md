@@ -185,3 +185,35 @@ The Alâiye historical-existence/context gate is strengthened, but the geometry 
 
 The next admissible operation is source-artifact acquisition/reconstruction-proof work, followed by entity/temporal review and only then georeference/physical/topology validation.
 
+## 2026-09-19 — Alâiye independent cartographic-source pass
+
+A further external-source pass was performed specifically to test whether a date-appropriate, traceable Alâiye boundary artifact could be acquired.
+
+The strongest newly confirmed items are:
+
+- SALT Research's **“14. yüzyıl başında Anadolu Türk Beylikleri haritası”** exposes a scanned JPEG and identifies the coverage as the 14th century. It is still the already-registered early-14th-century contextual map, not an exact 1326-04-07 boundary. citeturn0search0
+- Phersu's Alaiye record exposes a chronology of 1294–1493 and political-control/maximal-extension map products. It is useful as an independent temporal/cartographic cross-check, but no immutable 1326 machine-readable geometry artifact was acquired in this pass. citeturn0search7
+- TDV's Alâiye Beyliği entry independently confirms the polity's presence in the Alâiye/Alanya region and the post-1293 political context. citeturn0search6
+- Later Piri Reis / Walters material concerns much later cartography and therefore cannot define the 1326 political boundary. It is explicitly excluded from boundary reconstruction for this scenario. citeturn0search4turn0search5
+- Later Ottoman Alâiyye administrative maps are likewise contextual only and are not projected backward into 1326.
+
+### Gate decision
+
+This pass increases the **source/context evidence**, but does not close the **1326 boundary-artifact gate**.
+
+No new source met all of the required conditions simultaneously:
+
+1. date-appropriate to 1326-04-07;
+2. traceable retained artifact identity;
+3. machine-readable or explicitly reconstructable boundary evidence;
+4. rights/provenance suitable for the intended transformation;
+5. independent temporal/entity review.
+
+Therefore:
+
+- `geometryStatus = pending-source-acquisition` remains;
+- no polygon/ring is created;
+- no control-point pixels are asserted;
+- no synthetic or later-period geometry is admitted;
+- canonical MapBin remains untouched.
+\n
