@@ -71,6 +71,9 @@ jobs:
       - name: Historical control-point proof adapter contract test
         run: npm run test:1326-historical-control-point-proof-adapter
 
+      - name: Eşrefoğulları map observation contract test
+        run: npm run test:1326-esrefogullari-map-observation
+
       - name: Historical control-point proof contract test
         run: npm run test:1326-historical-control-point-proof
 
