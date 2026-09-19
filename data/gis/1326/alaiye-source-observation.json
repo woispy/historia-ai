@@ -58,5 +58,26 @@
     "No later-period maximum extent may be projected backward to 1326-04-07.",
     "No Phersu visualization is promoted as canonical geometry without an immutable machine-readable artifact and review.",
     "No canonical MapBin mutation is permitted."
-  ]
+  ],
+  "independentCartographicPass": {
+    "inspectionDate": "2026-09-19",
+    "sources": [
+      {
+        "sourceId": "salt-14c-early-anatolian-beyliks-map",
+        "role": "contextual-cartography-only",
+        "url": "https://archives.saltresearch.org/handle/123456789/68897",
+        "dateScope": "beginning of 14th century",
+        "geometryAuthority": false
+      },
+      {
+        "sourceId": "phersu-alaiye",
+        "role": "temporal-cartographic-cross-check",
+        "url": "https://phersu-atlas.com/metrics_summary/polity/3679.html",
+        "dateScope": "1294-1493 catalogue chronology",
+        "geometryAuthority": false
+      }
+    ],
+    "outcome": "No source met all 1326-04-07 date-specific artifact, traceability, machine-readable/reconstructable boundary, rights/provenance and independent review requirements.",
+    "gate": "1326 boundary-artifact gate remains BLOCKED"
+  }
 }
