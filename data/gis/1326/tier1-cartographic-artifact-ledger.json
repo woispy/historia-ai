@@ -104,6 +104,26 @@
       "sourcePageChecksum": "2426d36189083c00bf31f2a9e3e77ae392acb4b8",
       "sourcePageChecksumType": "SHA-1",
       "inspection": "web-inspected 2026-09-19"
+    },
+    {
+      "id": "esrefogullari-firat-2005-annex1",
+      "entityScope": [
+        "esrefogullari"
+      ],
+      "title": "Ek 1: Eşrefoğulları Beyliğinin Yayıldığı Coğrafi Alan",
+      "provider": "Fırat University Open Access repository",
+      "sourceWork": "Nebahat Aydın, Eşrefoğulları Beyliğinin İlmi ve Kültürel Faaliyetleri",
+      "publicationYear": 2005,
+      "repositoryArtifact": "160425.pdf",
+      "artifactUrl": "https://openaccess.firat.edu.tr/xmlui/bitstream/handle/11508/16025/160425.pdf?isAllowed=true&sequence=1",
+      "format": "PDF with embedded raster map",
+      "pdfPageIndex": 115,
+      "authorityRole": "contextual-cartography-only",
+      "geometryUse": "blocked-until-source-method-and-date-scope-review",
+      "reason": "The annex provides an independent regional depiction of Eşrefoğulları, but the current evidence does not establish the map's underlying cartographic source, exact temporal interpretation for 1326-04-07, transformation rights for the embedded figure, or a project-controlled map-image SHA-256. It is therefore cross-source evidence only.",
+      "binaryRetention": "not-retained-in-repository",
+      "sha256": null,
+      "inspection": "web-inspected 2026-09-19"
     }
   ],
   "promotionLocks": [
