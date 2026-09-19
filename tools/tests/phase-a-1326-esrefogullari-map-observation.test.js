@@ -1,0 +1,14 @@
+import fs from "node:fs/promises"; import path from "node:path"; import assert from "node:assert/strict";
+const p=path.resolve("data/gis/1326/esrefogullari-alperen-2001-map-observation.json");
+const d=JSON.parse(await fs.readFile(p,"utf8"));
+assert.equal(d.scenarioDate,"1326-04-07");
+assert.equal(d.authorityStatus,"evidence-only");
+assert.equal(d.promotion,"BLOCKED");
+assert.equal(d.sourceArtifact.documentPage,8);
+assert.equal(d.sourceArtifact.figureLabel,"Harita 2. Eşrefoğulları Beyliği Sınırları (Alperen, 2001)");
+assert.ok(d.legendSemantics.some(x=>x.geometryRole==="approximate-extent-reference-only"));
+assert.ok(d.legendSemantics.some(x=>x.geometryRole==="temporary-extent-reference-only"));
+assert.ok(d.visibleAnchorCandidates.includes("Beyşehir"));
+assert.ok(d.interpretationLocks.some(x=>x.includes("not a polygon vertex")));
+assert.equal(d.nextProofInput.status,"pending");
+console.log("Eşrefoğulları cartographic observation: PASS — reference-only, no geometry produced.");
