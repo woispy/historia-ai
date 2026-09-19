@@ -53,13 +53,40 @@
           "sourceRefs": [
             "Kofoğlu 2009"
           ]
+        },
+        {
+          "id": "aksehir-bolvadin-1320-expansion",
+          "type": "dated-territorial-expansion",
+          "status": "candidate",
+          "temporalApplicability": "pre-scenario evidence; establishes presence before 1326-04-07, not exact scenario-date boundary",
+          "locationConfidence": "high",
+          "politicalExtentConfidence": "medium-low",
+          "geometryRole": "temporal-constraint-not-vertex",
+          "sourceRefs": [
+            "Kofoğlu 2009",
+            "TTK Osmanlı Tarihine Giriş"
+          ]
+        },
+        {
+          "id": "post-1326-collapse-window",
+          "type": "temporal-exclusion",
+          "status": "constraint",
+          "temporalApplicability": "post-9-Oct-1326 only",
+          "locationConfidence": "high",
+          "politicalExtentConfidence": "not-applicable",
+          "geometryRole": "temporal-exclusion-only",
+          "sourceRefs": [
+            "TDV — Eşrefoğulları",
+            "Konya Ticaret Odası — Derbent history"
+          ]
         }
       ],
       "forbiddenInterpretations": [
         "Do not convert any anchor directly into a polygon vertex.",
         "Do not infer a straight boundary between named places.",
         "Do not interpret a regional expansion statement as full political control of every intervening location.",
-        "Do not project later territorial extent backward into 1326-04-07."
+        "Do not project later territorial extent backward into 1326-04-07.",
+        "Do not treat the 9 October 1326 collapse event as occurring on the 1326-04-07 scenario date."
       ]
     },
     "alaye": {
@@ -101,6 +128,7 @@
     "Anchor location confidence is independent from political extent confidence.",
     "Named places are constraints, not automatically boundary vertices.",
     "Historical anchor registry is not canonical geography.",
-    "Every future georeference control point must retain its historical source reference and residual."
+    "Every future georeference control point must retain its historical source reference and residual.",
+    "A dated acquisition before 1326-04-07 is evidence of prior territorial control but does not by itself prove the exact 1326-04-07 boundary shape."
   ]
 }
