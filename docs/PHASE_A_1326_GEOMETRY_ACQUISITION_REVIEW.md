@@ -66,6 +66,72 @@ Euratlas is useful as a **historical political context cross-check**, not as an 
 
 Its 1300 material explicitly identifies both Eshref and Alaiye and provides map-level political context. That is valuable for regional reconciliation, but the project scenario is **1326-04-07**, so a 1300 map cannot be copied, relabeled, or promoted as a 1326 boundary.
 
+## AtlasPI / historical-basemaps forensic result — 2026-09-19
+
+The requested inspection of AtlasPI's raw/processed data and boundary-ingestion path is complete.
+
+### AtlasPI raw/processed state
+
+AtlasPI tracks `data/raw/historical-basemaps/` snapshots including `world_1300.geojson`, `world_1500.geojson`, `world_1700.geojson`, `world_1800.geojson`, and `world_1900.geojson`. There is no tracked `world_1326.geojson`.
+
+AtlasPI's tracked `data/processed/` directory is empty apart from `.gitkeep`, so it does not contain a hidden second boundary dataset that would independently solve the 1326 gap.
+
+AtlasPI's `src/ingestion/extract_boundaries.py` explicitly maps pre-1800 entities to aourednik/historical-basemaps snapshots. `src/ingestion/aourednik_match.py` applies name/variant matching and uses upstream `BORDERPRECISION` to influence confidence.
+
+### Upstream snapshot coverage
+
+The upstream `aourednik/historical-basemaps/index.json` was scanned across all timestamped snapshots for the target-name family.
+
+Relevant results:
+
+| Snapshot | Target labels found |
+| --- | --- |
+| 1279 | Byzantine Empire, Ilkhanate |
+| 1300 | Byzantine Empire, Ilkhanate |
+| **1326** | **No snapshot exists** |
+| 1400 | Beylik of Aydin, Byzantine Empire, Ottoman Empire |
+| 1492–1914 | Ottoman Empire |
+| 1920 | Ottoman Sultanate |
+
+Direct inspection of `world_1300.geojson` found 237 features. The only target-family polygons there are:
+
+- `Ilkhanate` — `BORDERPRECISION=1`
+- `Byzantine Empire` — `BORDERPRECISION=1`
+
+There is no Ottoman, Eşrefoğulları, Alâiye, Karesi, Saruhan or Aydın polygon in that 1300 snapshot under the inspected labels.
+
+The 1400 index does contain `Beylik of Aydin` and `Ottoman Empire`, but it is **74 years after the target date** and therefore cannot be relabelled as a 1326 boundary.
+
+### Consequence for Historia AI
+
+AtlasPI is now classified as:
+
+**structured provenance/reference layer — NOT a direct 1326 geometry authority.**
+
+Its upstream lineage is:
+
+```
+AtlasPI
+  ↓
+aourednik/historical-basemaps
+  ↓
+timestamped world_YYYY snapshot
+  ↓
+academic/approximate historical boundary
+```
+
+The upstream repository itself describes these maps as work in progress and instructs users to verify them against other sources before academic use. It also records WGS 84 / EPSG:4326 and exposes `BORDERPRECISION` to distinguish approximate from more precise boundaries.
+
+This is directly compatible with the Historia AI rule that historical cartography must remain candidate evidence until temporal, entity, physical and topology review is complete.
+
+### Generated-boundary exclusion
+
+AtlasPI also contains a separate `approximate_generated` enrichment path that can construct a polygon from capital coordinates when no real polygon exists. This is explicitly marked as computational approximation.
+
+That path is **forensically excluded** from Historia AI authority.
+
+No capital-radius polygon, generated shape, jitter, Voronoi cell, or other synthetic filler may close the current geometry gap.
+
 ## Source classification
 
 | Source/evidence | Role | 1326 geometry authority |
@@ -76,6 +142,9 @@ Its 1300 material explicitly identifies both Eshref and Alaiye and provides map-
 | Euratlas 1300 | Historical political context | No |
 | TTK Alâiye 1915/16 map | Geographic/cartographic reference | No |
 | Alanya university GIS | Modern/local historical-site GIS | No |
+| AtlasPI | Structured historical-geography/reference layer | No |
+| aourednik/historical-basemaps 1300 | Upstream historical reference | No |
+| aourednik/historical-basemaps 1400 | Later-period reference | No |
 
 ## Required geometry review record
 
@@ -100,6 +169,7 @@ The following remain unchanged:
 
 - no 1300 → 1326 copy/relabel;
 - no synthetic Voronoi/jitter/anchor/filler authority;
+- no generated capital-radius geometry as authority;
 - no image-to-polygon conversion without traceable provenance and review;
 - no candidate source promoted directly to canonical;
 - `SAFE TO DELETE = 0`;
@@ -108,9 +178,11 @@ The following remain unchanged:
 
 ## Next executable gate
 
-The immediate work item is now:
+AtlasPI has now completed its useful role for this sub-stage: it established the upstream provenance chain and a **negative 1326-coverage result**.
 
-**Acquire or identify traceable machine-readable geometry for Eşrefoğulları and Alâiye, while simultaneously reviewing the Cliopatria Ottoman candidate under the cross-polity rule.**
+The immediate work item is therefore:
+
+**Acquire or identify traceable machine-readable geometry for Eşrefoğulları and Alâiye from an independent date-appropriate source, while separately reviewing the Cliopatria Ottoman candidate under the cross-polity rule.**
 
 After candidate geometry is available:
 
@@ -131,44 +203,3 @@ canonical promotion review
 ```
 
 No production geometry mutation is authorized by this document.
-
-
-## Research update — 2026-09-19
-
-A second external research pass found additional cartographic evidence, but it does not change the promotion state.
-
-### Eşrefoğulları
-
-A published Beyşehir study reproduces **“Harita 2. Eşrefoğulları Beyliği Sınırları (Alperen, 2001)”** and labels the depicted boundary as an **approximate drawing of the beylik's widest extent**. The study also frames Eşrefoğulları as existing in **1280–1326**. This makes the map useful for regional extent reconstruction, but the “widest extent” qualifier prevents treating it as an exact 1326-04-07 boundary without further temporal reconciliation. citeturn0search0
-
-### Alâiye
-
-TDV's *Alâiye Beyliği* article states that the beylik ruled the Alanya region from the late 13th century until 1471 and records Karamanoğlu-linked rule after 1293. It also cites Ibn Battuta's visit around 1333 and identifies Yusuf b. Karaman as ruler at that time. This strengthens the historical/control evidence but does not provide a machine-readable 1326 boundary. citeturn0search5
-
-A historical-map archive at SALT Research contains a map titled **“14. yüzyıl başında Anadolu Türk Beylikleri haritası”** and marks it as an open-access scanned map. It is useful as a cross-check for early-14th-century regional cartography, but its metadata does not establish that its boundary depiction is specifically 1326, so it remains reference evidence rather than canonical geometry. citeturn0search1
-
-A later Piri Reis map of the Anatolian coast as far as Alanya is preserved by the Walters Art Museum and is CC0, but its date is centuries later than the target scenario; it can only support geographic/place-name reconciliation, not a 1326 political boundary. citeturn0search7
-
-### Research conclusion
-
-The evidence set is now sufficient to define **cartographic research candidates**, but still insufficient to create a reviewed 1326 polygon for either source-gap entity.
-
-The active gate therefore remains:
-
-```
-cartographic candidate
-    ↓
-source artifact / immutable reference
-    ↓
-temporal semantics
-    ↓
-entity semantics
-    ↓
-traceable geometry extraction
-    ↓
-physical + topology validation
-    ↓
-human review
-```
-
-No candidate geometry has been promoted.
