@@ -466,3 +466,24 @@ The current state is therefore:
 A physical-copy lead is useful for future controlled acquisition, but **the project has not acquired or transformed the book**. No coordinate or geometry may be inferred from the commercial listing.
 
 No polygon, control point, MapBin, or canonical geometry was created.
+
+
+## 2026-09-19 — Bibliographic page-level lead: Alperen 2001
+
+A fresh source pass found an independent scholarly citation that gives a concrete internal page reference to Alperen's book: a study on the historical context of the Great Mosque at Beyşehir cites Alperen (2001), pp. 28–32 for the Eşrefoğlu foundation/early-period discussion and related chronology. This is an acquisition/navigation lead, not evidence for the boundary-map page. citeturn0search8
+
+A separate local-government bibliography identifies the work as Alperen, B. B. (2001), Beyşehir ve tarihi, Büyük Sistem Dershanesi Matbaası. citeturn0search43 Another scholarly bibliography independently records the same 196-page edition. citeturn0search42
+
+### Evidence classification
+
+- book identity: corroborated
+- known internal pages: 28–32 (historical narrative citation only)
+- boundary-map page: unresolved
+- map image: not acquired
+- raw SHA-256: unavailable
+- georeference: blocked
+- polygon authority: blocked
+
+The 2017 reproduction remains the directly inspected evidence for boundary-map semantics: it labels the figure “Harita 2. Eşrefoğulları Beyliği Sınırları (Alperen, 2001)” and explains that the solid line is an approximate widest extent while the dashed line represents territories briefly attached. citeturn0search41
+
+No geometry was digitized from the reproduction.
