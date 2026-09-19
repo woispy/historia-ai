@@ -333,3 +333,37 @@ The source-to-geometry admissibility matrix now records this distinction explici
 
 The next useful operation is therefore **method/provenance analysis of the licensed map**, not tracing its coloured region into a boundary. If its geographic construction can be independently established and tied to reliable anchors, it may become a georeference cross-check; otherwise it remains contextual evidence.
 
+
+
+## 2026-09-19 — independent Fırat 2005 cartographic cross-check
+
+A separate Fırat University Open Access thesis was inspected: **Nebahat Aydın, _Eşrefoğulları Beyliğinin İlmi ve Kültürel Faaliyetleri_ (2005)**. The repository identifies it as a master's thesis and the PDF contains **“Ek 1: Eşrefoğulları Beyliğinin Yayıldığı Coğrafi Alan.”** citeturn6search2turn1search9
+
+The annex map was visually inspected at PDF page index 115. It depicts Eşrefoğulları in a regional political-map context alongside Candaroğulları, Osmanoğulları, Karamanoğulları, Hamidoğulları, Tekeoğulları, Aydınoğulları, Menteşe and other surrounding entities. citeturn5view0
+
+This is now registered as a **second, independent visual reference**. It is deliberately not treated as equivalent to the Alperen (2001) map: the current evidence does not establish that the two maps share a source, date model, construction method, or boundary definition.
+
+The project therefore records:
+
+- source identity: **confirmed**;
+- visual artifact: **page-addressable**;
+- exact 1326-04-07 interpretation: **not established**;
+- map construction/source method: **not established**;
+- project-controlled raw SHA-256 of embedded map: **not acquired**;
+- transformation rights for the embedded map: **not established**;
+- pixel↔geo control points: **none**;
+- polygon/ring: **none**;
+- canonical MapBin: **untouched**.
+
+The observation record is:
+`data/gis/1326/esrefogullari-firat-2005-map-observation.json`
+
+The corresponding source-proof note is:
+`docs/PHASE_A_1326_ESREFOGULLARI_FIRAT_2005_MAP_OBSERVATION.md`
+
+### Gate decision
+
+The Fırat map strengthens **cross-source visual evidence**, but does not close the boundary-artifact gate. No tracing, averaging, intersection, synthetic reconstruction, or relabelling to 1326 is permitted.
+
+The next admissible operation is **method/provenance comparison** between the Fırat 2005 and Alperen 2001-derived maps. If either source identifies a traceable historical atlas, date, or reproducible cartographic method, that evidence can be promoted into the georeference-proof layer. Otherwise both remain evidence-only references.
+
