@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "constraint-evidence-only",
+  "purpose": "Record historical place/extent anchors without treating them as polygon vertices or canonical boundaries.",
+  "entities": {
+    "esrefogullari": {
+      "anchors": [
+        {
+          "id": "beysehir-centre",
+          "type": "historical-centre",
+          "status": "candidate",
+          "temporalApplicability": "historical period; exact 1326 centre requires source confirmation",
+          "locationConfidence": "high",
+          "politicalExtentConfidence": "none",
+          "geometryRole": "control-point-candidate-only",
+          "sourceRefs": [
+            "Tekkanat & Yavuz 2017 / Alperen 2001"
+          ]
+        },
+        {
+          "id": "seydisehir-bogazir",
+          "type": "territorial-expansion-region",
+          "status": "candidate",
+          "temporalApplicability": "pre-1326 expansion context",
+          "locationConfidence": "medium-high",
+          "politicalExtentConfidence": "low",
+          "geometryRole": "constraint-region-not-vertex",
+          "sourceRefs": [
+            "Kofoğlu 2009"
+          ]
+        },
+        {
+          "id": "doganhisar-sarkikaragac",
+          "type": "territorial-expansion-region",
+          "status": "candidate",
+          "temporalApplicability": "pre-1326 expansion context",
+          "locationConfidence": "medium",
+          "politicalExtentConfidence": "low",
+          "geometryRole": "constraint-region-not-vertex",
+          "sourceRefs": [
+            "Kofoğlu 2009"
+          ]
+        },
+        {
+          "id": "bolvadin-1320",
+          "type": "dated-territorial-event",
+          "status": "candidate",
+          "temporalApplicability": "1320 acquisition; valid as pre-scenario historical constraint",
+          "locationConfidence": "high",
+          "politicalExtentConfidence": "medium-low",
+          "geometryRole": "temporal-constraint-not-vertex",
+          "sourceRefs": [
+            "Kofoğlu 2009"
+          ]
+        }
+      ],
+      "forbiddenInterpretations": [
+        "Do not convert any anchor directly into a polygon vertex.",
+        "Do not infer a straight boundary between named places.",
+        "Do not interpret a regional expansion statement as full political control of every intervening location.",
+        "Do not project later territorial extent backward into 1326-04-07."
+      ]
+    },
+    "alaye": {
+      "anchors": [
+        {
+          "id": "alanya-centre",
+          "type": "historical-centre",
+          "status": "candidate",
+          "temporalApplicability": "late-13th-century through 1326 context",
+          "locationConfidence": "high",
+          "politicalExtentConfidence": "none",
+          "geometryRole": "control-point-candidate-only",
+          "sourceRefs": [
+            "TDV — Alâiye Beyliği"
+          ]
+        },
+        {
+          "id": "southern-anatolia-coast",
+          "type": "regional-location",
+          "status": "candidate",
+          "temporalApplicability": "period-level",
+          "locationConfidence": "medium-high",
+          "politicalExtentConfidence": "none",
+          "geometryRole": "regional-constraint-only",
+          "sourceRefs": [
+            "TDV — Anadolu Beylikleri"
+          ]
+        }
+      ],
+      "forbiddenInterpretations": [
+        "Do not treat Alanya centre as the polity boundary.",
+        "Do not infer coastal extent from centre location alone.",
+        "Do not use 1293-1471 existence interval as a polygon.",
+        "Do not import a later Alâiye boundary into 1326."
+      ]
+    }
+  },
+  "globalRules": [
+    "Anchor location confidence is independent from political extent confidence.",
+    "Named places are constraints, not automatically boundary vertices.",
+    "Historical anchor registry is not canonical geography.",
+    "Every future georeference control point must retain its historical source reference and residual."
+  ]
+}
