@@ -196,6 +196,23 @@ The helper downloads the pinned v0.2.0 payload, requires a ZIP signature, retain
 
 This command is intentionally a local acquisition operation. The repository tooling in this environment cannot materialize the binary GitHub blob because binary repository content is not returned as UTF-8; therefore no raw SHA-256 is claimed until the command is actually executed against the external source and the resulting bytes are retained. The successful GitHub Actions run now provides that independent execution evidence.
 
+
+## Tier-1 historical evidence closure
+
+A dedicated evidence note now records the historical closure of the three reconciliation gaps:
+
+`docs/PHASE_A_1326_TIER1_GAP_CLOSURE.md`
+
+At scenario date **1326-04-07**:
+
+- **Ottoman Beylik:** Cliopatria's `Ottoman Empire` / Q12560 record remains a **cross-polity manual-review candidate**. Independent Bursa/Orhan chronology places Ottoman control immediately before the scenario date.
+- **Eşrefoğulları:** the source remains a genuine Cliopatria candidate gap, but independent historical evidence places the polity in existence until **9 October 1326**, after the scenario date.
+- **Alâiye:** the source remains a genuine Cliopatria candidate gap, while independent historical references document Alâiye Beyliği as **1293–1471** and its rule in the Alanya region across the scenario date.
+
+This closes the **historical existence/control evidence gap**, not the geometry gap. No polygon is promoted by this evidence and all production promotion locks remain active.
+
+The next gate is therefore candidate/cross-source **geometry acquisition and review**, followed by topology and physical validation.
+
 ## Promotion locks
 
 The following remain locked:
