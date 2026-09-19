@@ -267,3 +267,35 @@ This verifies the manifest/registry/evidence contracts. It intentionally does **
 Source intake is complete only when each production-relevant source has a pinned snapshot identity, raw hash, license/provenance record, reproducible extraction parameters, and a retained artifact that can be independently revalidated.
 
 For Cliopatria, byte acquisition, temporal extraction and mechanical reconciliation are now evidenced. The next stage is **manual review of the Ottoman cross-polity label plus closure of the two genuine source gaps with additional historical evidence**, followed by candidate geometry review and topology/physical validation — not automatic geometry promotion.
+
+
+## Reviewed-evidence staging — 2026-09-19
+
+The production integration track is now implemented as a separate fail-closed staging layer.
+
+Contract:
+`docs/PHASE_A_1326_REVIEWED_EVIDENCE_STAGING.md`
+
+Builder:
+`tools/historical-gis/cli/build-1326-reviewed-staging.js`
+
+The staging builder consumes the 1326 evidence matrix and Cliopatria reconciliation report and emits:
+
+`data/build/gis/1326/reviewed-staging/manifest.json`
+
+The staging manifest is explicitly:
+- `authorityStatus: reviewed-evidence-staging`
+- `promotion: BLOCKED`
+- `canonicalMapbinMutation: false`
+- `syntheticGeometry: false`
+
+It therefore allows the production pipeline to carry the reviewed historical evidence and unresolved geometry state forward without changing canonical geometry.
+
+The new workflow:
+`.github/workflows/phase-a-1326-reviewed-staging.yml`
+
+repeats acquisition, verification, temporal extraction and entity reconciliation before building the staging manifest. It does not publish a MapBin or write canonical political geometry.
+
+This closes the **production-side evidence staging integration gate**, not the canonical geometry gate.
+
+The next executable work remains geometry-specific: obtain or author a traceable 1326 boundary representation for Eşrefoğulları and Alâiye, while completing the Ottoman Q12560 cross-polity review, then run physical-land and topology validation.
