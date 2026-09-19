@@ -4,15 +4,41 @@
   "scenarioDate": "1326-04-07",
   "authorityStatus": "reviewed-reconstruction",
   "promotion": "BLOCKED",
+  "sourceDiscovery": {
+    "esrefogullari": [
+      {
+        "source": "Alperen (2001) map reproduction",
+        "role": "cartographic reconstruction candidate",
+        "temporalStatus": "approximate widest extent; not exact 1326",
+        "artifactStatus": "not-retained"
+      }
+    ],
+    "alaye": [
+      {
+        "source": "Phersu Alaiye",
+        "role": "temporal/cartographic cross-check",
+        "temporalStatus": "polity chronology 1294-1493; no immutable 1326 geometry acquired",
+        "artifactStatus": "not-retained"
+      },
+      {
+        "source": "TDV Alâiye Beyliği",
+        "role": "historical existence/control context",
+        "temporalStatus": "late-13th-century to 1471 context",
+        "artifactStatus": "reference-only"
+      },
+      {
+        "source": "SALT Research early-14th-century Anatolian beyliks map",
+        "role": "regional contextual cartography",
+        "temporalStatus": "early 14th century; not exact 1326",
+        "artifactStatus": "reference-only"
+      }
+    ]
+  },
   "entities": {
     "esrefogullari": {
       "geometryStatus": "pending-source-acquisition",
       "sourceArtifacts": [],
       "controlPoints": [],
-      "assumptions": [],
-      "uncertainty": {
-        "status": "not-yet-quantified"
-      },
       "reviewStatus": "draft",
       "ring": []
     },
@@ -20,10 +46,6 @@
       "geometryStatus": "pending-source-acquisition",
       "sourceArtifacts": [],
       "controlPoints": [],
-      "assumptions": [],
-      "uncertainty": {
-        "status": "not-yet-quantified"
-      },
       "reviewStatus": "draft",
       "ring": []
     }
