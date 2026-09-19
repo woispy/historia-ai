@@ -4,79 +4,67 @@ Status: **API/data model confirmed; target entity geometry not yet acquired**
 
 Scenario date: **1326-04-07**
 
-## Probe result
+## Probe result — 2026-09-19
 
-AtlasPI documentation confirms a public REST API with no API key and explicit GeoJSON export. The documented endpoints include entity search, full entity lookup, year snapshots, evolution, and GeoJSON export. citeturn0search1turn0search2
+AtlasPI's current public documentation identifies a structured historical-geography API with entity search, year snapshots, entity details, evolution, and GeoJSON export. It reports current version **v6.30.0**, and the project README describes the repository as containing source entity JSON, raw source data, processed data, and boundary extraction pipelines. citeturn0search0turn4search0turn4search3
 
-The public documentation also states that historical boundary provenance is represented explicitly and identifies `aourednik/historical-basemaps` as the pre-1800 upstream boundary source. citeturn0search2
+The repository's public `data/entities/` tree is directly accessible through GitHub. The Asia batch was inspected because the target Anatolian entities should be geographically represented there if present. A direct text scan of `batch_02_asia.json` found **no occurrences** of:
 
-A direct retrieval of the live `/v1/search` and `/v1/snapshot/1326` endpoints was not available through the current retrieval path. Repository code search also did not surface indexed Alaiye, Eshref, or Ottoman entity records in the public AtlasPI repository.
+- Alaiye / Alâiye
+- Eşref / Eshref
+- Eşrefoğulları
+- Ottoman
+- Q12560
 
-Therefore no target entity ID or geometry bytes are claimed from this probe.
+Repository-wide GitHub code search likewise returned no indexed matches for the target Alaiye/Eşrefoğulları spellings.
 
-## What is now established
+This is **not evidence that the live API lacks the entities**. It only establishes that the inspected public seed files and indexed repository search did not expose the target records under those spellings.
 
-AtlasPI is stronger than a rendered-map-only source because:
+## Provenance finding
 
-- it exposes structured entity records;
-- it exposes GeoJSON export;
-- it carries confidence metadata;
-- it records boundary provenance;
-- it has a versioned software/data release and Zenodo DOI;
-- its documentation distinguishes imported source licenses.
+AtlasPI explicitly states that pre-1800 boundaries derive from **aourednik/historical-basemaps**, and the upstream project is separately credited as a source. AtlasPI also states that imported datasets retain their original licenses. citeturn0search0turn4search0
 
-These properties make it suitable for a controlled acquisition attempt.
+Therefore any future AtlasPI geometry acquisition must preserve the two-level provenance chain:
 
-## What is still missing
-
-Before Historia AI can retain AtlasPI geometry as candidate evidence, we need an actual response/export containing the target entity and must capture:
-
-- exact request URL;
-- response bytes;
-- acquisition timestamp;
-- AtlasPI version;
-- entity ID/name;
-- geometry;
-- CRS;
-- boundary provenance;
-- confidence;
-- temporal semantics;
-- upstream source identity;
-- applicable license;
-- SHA-256.
-
-Only then can the candidate enter geometry validation.
-
-## Provenance rule
-
-AtlasPI must remain a transformation layer in the evidence chain:
-
-AtlasPI entity/boundary
+AtlasPI record
     ↓
-AtlasPI provenance metadata
+AtlasPI boundary provenance
     ↓
 upstream historical-basemaps/source record
     ↓
 Historia AI candidate review
 
-AtlasPI's own documentation states that pre-1800 boundaries use aourednik/historical-basemaps. The upstream project describes its data as approximate historical basemaps requiring verification. citeturn0search2turn0search3
+AtlasPI itself should not be treated as an independent historical boundary authority merely because it exports GeoJSON.
 
-Consequently, even a successful AtlasPI acquisition does not automatically become canonical geometry.
+## Current decision
 
-## Decision
+The acquisition gate remains **OPEN but NOT PASSED**.
 
-**Acquisition gate: OPEN for a controlled probe, but not yet passed.**
+No AtlasPI geometry has been copied into Historia AI.
 
-No geometry has been imported or promoted.
+No synthetic Alâiye or Eşrefoğulları polygon has been created.
 
-## Next executable step
+No canonical political-geography data has been changed.
 
-Obtain a reproducible AtlasPI entity/export response for:
+## Next executable gate
 
-1. Alâiye;
-2. Eşrefoğulları;
-3. Ottoman Q12560 cross-polity review.
+The next efficient probe is to inspect AtlasPI's public **raw source / processed data directories and boundary-ingestion code** for the exact source record path and entity naming conventions, rather than repeatedly guessing live API queries.
 
-Then independently hash and archive the raw response before any geometry processing.
+If a target record is found, capture:
+
+1. immutable GitHub commit/ref;
+2. exact source file;
+3. entity ID;
+4. raw record;
+5. boundary payload;
+6. temporal semantics;
+7. confidence;
+8. upstream source/provenance;
+9. applicable license;
+10. SHA-256;
+11. geometry format/CRS;
+12. physical/topology validation result.
+
+Only then may it enter the Historia AI candidate-source pipeline.
 
 Promotion remains **BLOCKED** and SAFE TO DELETE remains 0.
