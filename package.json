@@ -124,7 +124,8 @@
     "test:1326-tier1-geometry-adapter": "node tools/tests/phase-a-1326-tier1-geometry-adapter.test.js",
     "test:1326-tier1-reconstruction-dossier": "node tools/tests/phase-a-1326-tier1-reconstruction-dossier.test.js",
     "test:1326-cartographic-artifact-ledger": "node tools/tests/phase-a-1326-cartographic-artifact-ledger.test.js",
-    "test:1326-historical-control-point-proof": "node tools/tests/phase-a-1326-historical-control-point-proof.test.js"
+    "test:1326-historical-control-point-proof": "node tools/tests/phase-a-1326-historical-control-point-proof.test.js",
+    "test:1326-historical-control-point-proof-adapter": "node tools/tests/phase-a-1326-historical-control-point-proof-adapter.test.js"
   },
   "dependencies": {
     "react": "^19.2.7",
