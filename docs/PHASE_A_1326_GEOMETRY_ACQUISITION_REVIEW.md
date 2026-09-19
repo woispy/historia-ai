@@ -132,6 +132,65 @@ That path is **forensically excluded** from Historia AI authority.
 
 No capital-radius polygon, generated shape, jitter, Voronoi cell, or other synthetic filler may close the current geometry gap.
 
+
+
+## Phersu Atlas — independent candidate-source probe — 2026-09-19
+
+A new independent historical-geography candidate was evaluated: **Phersu Atlas**.
+
+The public Western Asia catalogue explicitly lists both **Eshrefids** and **Alaiye** under Anatolian Beyliks. The public Alaiye data page identifies Alaiye as a polity with a recorded span of **1294–1493** and exposes maps of political control over time, including maximal extension and territory-by-year views.
+
+This is materially different from the AtlasPI result: Phersu has explicit polity-level temporal data for the two current source-gap entities.
+
+However, this does **not** yet close the geometry gate.
+
+### Why Phersu is a candidate, not an acquired geometry source
+
+The public pages expose rendered/interactive maps and historical territorial data, but the currently accessible public material does not provide a directly downloadable, immutable GeoJSON/Shapefile payload for the **1326-04-07** geometry.
+
+The public site also describes its map system as a historical atlas with daily-resolution data, while access to the complete historical atlas/API is subscription/API-key controlled. Therefore:
+
+- no geometry bytes have been acquired;
+- no raw SHA-256 can be claimed;
+- no CRS/coordinate payload has been independently captured;
+- no boundary vertex set has been imported;
+- no polygon has been promoted.
+
+Phersu is therefore recorded as a **high-value external candidate/reference source**, not as canonical authority.
+
+### Temporal relevance
+
+The Alaiye public record spans 1294–1493, which covers the Historia AI scenario date **1326-04-07**. The Phersu Western Asia catalogue also places Alaiye and Eshrefids within the Anatolian Beyliks group.
+
+For Eshrefids, Phersu's public chronology material records the polity as an Anatolian frontier principality and separately records a termination/change event in 1327. This is temporally relevant to the scenario, but the exact historical end date and territorial reconstruction must remain subject to source reconciliation; Phersu is not allowed to override the project's independent historical evidence.
+
+### Required next action
+
+Do **not** convert a rendered Phersu map image into a polygon.
+
+Instead, investigate whether a traceable machine-readable export can be obtained under an explicit public/API-access path and, if so, capture:
+
+1. exact polity identifier;
+2. exact scenario date or nearest supported date;
+3. geometry payload;
+4. CRS;
+5. source/provenance metadata;
+6. licensing/usage terms;
+7. raw artifact SHA-256;
+8. temporal/control semantics;
+9. geometry precision/uncertainty;
+10. reproducible acquisition command or endpoint.
+
+If machine-readable access cannot be obtained without relying on a rendered image or an unverifiable extraction, Phersu remains a **reference-only source** and the geometry gate continues to the next independent source.
+
+### Current classification
+
+| Source | Entity coverage | Temporal relevance | Machine-readable geometry acquired | Authority |
+| --- | --- | --- | --- | --- |
+| Phersu Atlas | Eshrefids + Alaiye | Yes; Alaiye span covers 1326 | **No** | Candidate/reference only |
+
+This probe therefore improves the source map substantially but does **not** change the promotion state.
+
 ## Source classification
 
 | Source/evidence | Role | 1326 geometry authority |
