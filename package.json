@@ -122,7 +122,8 @@
     "build:1326-reviewed-staging": "node tools/historical-gis/cli/build-1326-reviewed-staging.js",
     "test:1326-reviewed-staging": "node tools/tests/phase-a-1326-reviewed-staging.test.js",
     "test:1326-tier1-geometry-adapter": "node tools/tests/phase-a-1326-tier1-geometry-adapter.test.js",
-    "test:1326-tier1-reconstruction-dossier": "node tools/tests/phase-a-1326-tier1-reconstruction-dossier.test.js"
+    "test:1326-tier1-reconstruction-dossier": "node tools/tests/phase-a-1326-tier1-reconstruction-dossier.test.js",
+    "test:1326-cartographic-artifact-ledger": "node tools/tests/phase-a-1326-cartographic-artifact-ledger.test.js"
   },
   "dependencies": {
     "react": "^19.2.7",
