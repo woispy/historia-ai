@@ -135,3 +135,36 @@ The two maps therefore remain separate evidence records. No shared geometry is i
 ### Next admissible research target
 
 The highest-value next search is the **bibliographic/source lineage inside Aydın (2005)**: references, appendix notes, captions and preceding pages should be checked for a cited atlas, historian, prior map, or explicit source statement attached to Annex 1. If such a source is identified, that source—not the rendered annex itself—becomes the next provenance candidate.
+
+
+## 2026-09-19 — Annex/source-chain inspection result
+
+A targeted inspection of the Fırat University PDF was performed around the annex section and the thesis bibliography. The indexed PDF explicitly labels the map **“Ek 1: Eşrefoğulları Beyliğinin Yayıldığı Coğrafi Alan”** and shows the regional polity labels directly in the annex. citeturn0search8
+
+The available annex/bibliographic evidence does **not** expose an explicit statement such as “map redrawn from [named atlas/source]” attached to Annex 1. The bibliography contains numerous general historical and historical-geography works, but the current indexed evidence does not establish which, if any, was the cartographic source for this specific figure.
+
+This distinction is now treated as a hard provenance boundary:
+
+- **Bibliography presence ≠ map-source attribution.**
+- A work appearing in the thesis references cannot be assumed to be the source of Annex 1 without an explicit textual or figure-level linkage.
+- The regional labels visible in the map are observations, not coordinate control points.
+- The annex remains unsuitable for direct tracing or polygon extraction.
+
+### Updated provenance state
+
+| Question | Result |
+|---|---|
+| Thesis identity | Confirmed |
+| Annex identity | Confirmed |
+| Visual regional content | Confirmed |
+| Explicit cartographic source attribution | **Not found in inspected evidence** |
+| Exact 1326-04-07 date | Not established |
+| Machine-readable geometry | None |
+| Project-controlled map SHA-256 | None |
+| Transformation rights for embedded figure | Not established |
+
+### Gate decision
+
+The Fırat 2005 source-method gate remains **OPEN**, but the search space is now narrower: future provenance work should only promote a candidate if an explicit source-to-map relationship is found. Merely matching a bibliography title or visually similar map is insufficient.
+
+No polygon, control-point coordinate, MapBin, or canonical geometry was created.
