@@ -350,3 +350,35 @@ This does **not** create a polygon or prove every named place was under Eşrefo�
 ### Gate decision
 
 The named-place inventory is now treated as a **temporal constraint set**, not geometry. No place name has been converted into a coordinate, vertex, or boundary edge.
+
+
+## 2026-09-19 — 1326-04-07 boundary-window reconciliation
+
+A focused source comparison now gives a more precise temporal reading of the Eşrefoğulları evidence.
+
+The Süleyman Demirel University study records that Seyfeddin Süleyman had expanded as far as Şarkikaraağaç by 1299 and that Mübarizüddin Mehmed subsequently took Bolvadin in 1320. It dates II. Süleyman's death to **9 October 1326**. citeturn0search1
+
+The Turkish Historical Society's *Osmanlı Tarihine Giriş* likewise states that Mehmed Bey seized the Akşehir and Bolvadin areas, while placing the collapse of the beylik under Demirtaş in the subsequent phase. citeturn0search3
+
+A separate academic treatment states that after Demirtaş's flight, **Beyşehir, Akşehir and Seydişehir** were taken by Hamidoğlu Hızır Bey in 1328. citeturn0search45
+
+### Reconciled constraint set
+
+For **1326-04-07**, the evidence currently supports:
+
+1. **Beyşehir/Seydişehir** — core Eşrefoğulları sphere.
+2. **Şarkikaraağaç** — documented expansion by the Süleyman Bey phase; exact 1326 control geometry remains unproven.
+3. **Akşehir/Bolvadin** — documented under Mehmed Bey before the scenario date; Bolvadin has a 1320 anchor.
+4. **Ilgın** — historically associated with Eşrefoğulları in several summaries, but one institutional chronology places its transfer to Hamidoğulları in 1307; therefore it remains a **source-conflict item**, not a forced 1326 inclusion.
+5. **Post-9 October 1326 transfers** — excluded from backward projection into 1326-04-07.
+6. **1328 Hamidoğlu capture** — treated as a later control-state observation, not a 1326 boundary.
+
+This is deliberately a **constraint set**, not a reconstructed boundary.
+
+### New forensic conclusion
+
+The current evidence is now sufficient to reject a common failure mode: taking a later “Eşrefoğulları territory” map and relabelling its entire depicted extent as **1326-04-07**.
+
+The remaining missing evidence is specifically **boundary-shape evidence**: a source that both has an identifiable provenance and provides enough spatial information to distinguish the 1326 state from later/generalized extent.
+
+No coordinate, polygon, control point, MapBin, or canonical geometry was created.
