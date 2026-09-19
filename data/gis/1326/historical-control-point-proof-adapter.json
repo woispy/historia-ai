@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "historical-control-point-proof-adapter-1326",
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "evidence-only",
+  "promotion": "BLOCKED",
+  "purpose": "Carry source-backed historical control-point correspondences into georeference authoring without granting political-boundary authority.",
+  "inputRequirements": [
+    "entityId",
+    "anchorId",
+    "sourceRef",
+    "sourceArtifactId",
+    "pixel",
+    "geo",
+    "locationConfidence",
+    "politicalExtentConfidence",
+    "calibrationMethod"
+  ],
+  "rules": [
+    "sourceArtifactId must resolve to a retained or explicitly reference-only artifact record.",
+    "sourceRef must resolve to the historical anchor registry.",
+    "pixel and geo are correspondence evidence, not polygon vertices.",
+    "politicalExtentConfidence is never promoted by successful georeference.",
+    "Two-point calibration is provisional and requires independent anchor sanity validation.",
+    "Three-or-more inconsistent correspondences must fail closed.",
+    "No adapter output may set authorityStatus to canonical.",
+    "No adapter output may write MapBin or canonical political geometry."
+  ],
+  "output": {
+    "proofStatus": "pending",
+    "georeference": {
+      "method": null,
+      "controlPoints": [],
+      "rmsResidual": null,
+      "validation": "pending"
+    },
+    "review": {
+      "status": "draft",
+      "reviewer": null
+    },
+    "geometry": {
+      "status": "not-created"
+    }
+  }
+}
