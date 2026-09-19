@@ -161,3 +161,27 @@ The page was visually inspected, but no rendered-page/UI pixel coordinates were 
 The source-proof layer is stronger than before because the figure page and temporal context are now explicitly bound. The georeference gate remains blocked until a stable image artifact/coordinate frame and independently reviewed image-space correspondences are available.
 
 No polygon, ring, MapBin, or canonical authority was created.
+
+## 2026-09-19 — Alâiye source-observation pass
+
+A parallel source pass now records Alâiye evidence without creating geometry.
+
+TDV's **Alâiye Beyliği** entry identifies the polity in the Alâiye/Alanya region from the late 13th century to 1471 and states that after 1293 the city and surrounding area were governed by beys affiliated with the Karamanoğulları and under Mamluk suzerainty. TDV's broader **Anadolu Beylikleri** entry independently gives Alâiye as 1293–1471 in the southern Anatolian coastal region.
+
+Phersu's public Alaiye record gives a different chronology, 1294–1493, and exposes time-oriented political-control/maximum-extension map products. This is retained as an independent cross-check, not as canonical geometry. The chronology discrepancy is deliberately left unresolved for source reconciliation rather than silently choosing one source.
+
+The resulting non-geometric observation record is:
+`data/gis/1326/alaiye-source-observation.json`
+
+### Gate decision
+
+The Alâiye historical-existence/context gate is strengthened, but the geometry gate remains **BLOCKED**:
+
+- no immutable 1326-04-07 machine-readable polygon has been acquired;
+- no later-period extent is projected backward;
+- Alanya city location is not treated as a political boundary;
+- Phersu visualizations are not promoted without an immutable artifact and review;
+- no polygon, ring, MapBin, or canonical authority was created.
+
+The next admissible operation is source-artifact acquisition/reconstruction-proof work, followed by entity/temporal review and only then georeference/physical/topology validation.
+
