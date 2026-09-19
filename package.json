@@ -118,7 +118,9 @@
     "acquire:1326-cliopatria": "node tools/historical-gis/cli/acquire-1326-cliopatria.js --download",
     "verify:1326-cliopatria": "node tools/historical-gis/cli/acquire-1326-cliopatria.js --verify",
     "extract:1326-cliopatria": "node tools/historical-gis/cli/extract-1326-cliopatria-candidates.js",
-    "reconcile:1326-cliopatria": "node tools/historical-gis/cli/reconcile-1326-cliopatria-entities.js"
+    "reconcile:1326-cliopatria": "node tools/historical-gis/cli/reconcile-1326-cliopatria-entities.js",
+    "build:1326-reviewed-staging": "node tools/historical-gis/cli/build-1326-reviewed-staging.js",
+    "test:1326-reviewed-staging": "node tools/tests/phase-a-1326-reviewed-staging.test.js"
   },
   "dependencies": {
     "react": "^19.2.7",
@@ -126,13 +128,13 @@
     "react-router-dom": "^7.18.2"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@eslint/js": "^10.0.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
     "eslint": "^10.6.0",
-    "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-react-refresh": "^0.5.3",
+    "eslint-plugin-react-hooks": "^7.1.0",
+    "eslint-plugin-react-refresh": "^0.5.0",
     "globals": "^17.7.0",
     "vite": "^8.1.1"
   }
