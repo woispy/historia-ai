@@ -15,17 +15,17 @@ A Fırat University Open Access repository PDF was inspected as an independent E
 - Year: **2005**
 - Repository artifact: `160425.pdf`
 
-The repository search record identifies the thesis and its 2005 date. The PDF contains an annex titled **“Ek 1: Eşrefoğulları Beyliğinin Yayıldığı Coğrafi Alan”**. citeturn6search2turn1search9
+The repository search record identifies the thesis and its 2005 date. The PDF contains an annex titled **“Ek 1: Eşrefoğulları Beyliğinin Yayıldığı Coğrafi Alan”**.
 
 ## Visual observation
 
-The annex map was visually inspected at PDF page index 115. It is a regional political map showing Eşrefoğulları among neighbouring political entities, including Candaroğulları, Osmanoğulları, Karamanoğulları, Hamidoğulları, Tekeoğulları, Aydınoğulları and Menteşe, with Byzantine and Mamluk context. citeturn5view0
+The annex map was visually inspected at PDF page index 115. It is a regional political map showing Eşrefoğulları among neighbouring political entities, including Candaroğulları, Osmanoğulları, Karamanoğulları, Hamidoğulları, Tekeoğulları, Aydınoğulları and Menteşe, with Byzantine and Mamluk context.
 
 The map is useful as an **independent visual cross-check** because it is materially different from the previously reviewed Alperen (2001) reproduction. It must not, however, be assumed to share the same cartographic source, date model, or boundary methodology.
 
 ## What the artifact does establish
 
-It establishes that a later research work contains a visual regional depiction of Eşrefoğulları's geographical area. It also provides a second map image against which future source-backed observations may be compared. citeturn5view0
+It establishes that a later research work contains a visual regional depiction of Eşrefoğulları's geographical area. It also provides a second map image against which future source-backed observations may be compared.
 
 ## What it does not establish
 
@@ -76,28 +76,17 @@ The observation record is stored at:
 
 `data/gis/1326/esrefogullari-firat-2005-map-observation.json`
 
-## Next admissible operation
-
-The next step is **method/provenance comparison** between the Fırat 2005 map and the Alperen 2001-derived map. The purpose is to determine whether either artifact identifies an underlying historical atlas, source map, date, or reproducible cartographic method.
-
-If no such provenance is established, both remain reference evidence and the project must continue searching for a traceable, date-appropriate boundary artifact.
-
-No canonical geometry, MapBin, physical authority, or runtime map asset is changed by this observation.
-
-
 ## 2026-09-19 — provenance/source-method refinement
 
-A targeted literature pass was used to test whether the Fırat 2005 annex can be traced to a named cartographic source or method.
-
-The thesis identity is independently corroborated as **Nebahat Aydın, _Eşrefoğulları Beyliğinin İlmi ve Kültürel Faaliyetleri_, Fırat University, 2005**. The repository PDF is 124 pages in the current indexed copy. citeturn0search31
+A targeted literature pass tested whether the Fırat 2005 annex can be traced to a named cartographic source or method.
 
 No explicit statement identifying the construction source or cartographic method of **“Ek 1: Eşrefoğulları Beyliğinin Yayıldığı Coğrafi Alan”** was found in the available indexed evidence. The current pass therefore cannot promote the annex to a source-derived boundary artifact.
 
-A separate 2017 study gives a useful comparison point: its Eşrefoğulları map is explicitly attributed to **Alperen (2001)** and its bibliography identifies *Beyşehir ve Tarihi* by Bilal Bülent Alperen. The study's narrative separately describes the regional extent and cites Alperen, Çaycı and Uzunçarşılı. citeturn1view1turn2view0 This does not establish that the Fırat 2005 annex uses the same map or source.
+A separate 2017 study gives a useful comparison point: its Eşrefoğulları map is explicitly attributed to **Alperen (2001)** and its bibliography identifies *Beyşehir ve Tarihi* by Bilal Bülent Alperen. This does not establish that the Fırat 2005 annex uses the same map or source.
 
 ### Method-reconciliation result
 
-The two visual references are therefore currently classified as **independent observations with unresolved source lineage**:
+The two visual references are currently classified as **independent observations with unresolved source lineage**:
 
 | Evidence | What is established | What is not established |
 |---|---|---|
@@ -108,46 +97,34 @@ No intersection, averaging, tracing, or common-boundary inference is admissible 
 
 ### Gate decision
 
-The method/provenance sub-gate remains **OPEN**. The new evidence confirms a second independent visual reference but does not identify a common authoritative cartographic lineage.
-
-No polygon, control-point coordinate, MapBin, or canonical geometry was created.
-
+The method/provenance sub-gate remains **OPEN**. No polygon, control-point coordinate, MapBin, or canonical geometry was created.
 
 ## 2026-09-19 — bibliographic lineage pass
 
-The external literature pass found an important distinction in the surrounding bibliography. The 2017 Beyşehir study explicitly captions its map as **“Harita 2. Eşrefoğulları Beyliği Sınırları (Alperen, 2001)”**, and its bibliography identifies Bilal Alperen's *Beyşehir ve Tarihi* (Konya, 2001). citeturn0search30turn0search2
+The 2017 Beyşehir study explicitly captions its map as **“Harita 2. Eşrefoğulları Beyliği Sınırları (Alperen, 2001)”**, identifying Bilal Alperen's *Beyşehir ve Tarihi* (Konya, 2001).
 
-A separate Beyşehir municipal publication also cites Alperen (2001) for historical statements about Beyşehir, confirming that the work is reused as a historical reference beyond the 2017 map reproduction. citeturn0search32
-
-The Fırat 2005 annex, by contrast, is indexed as **“Ek 1: Eşrefoğulları Beyliğinin Yayıldığı Coğrafi Alan”** and lists a regional political-map composition, but the indexed artifact does not expose an explicit cartographic-source attribution in the map caption itself. citeturn0search31
+The Fırat 2005 annex, by contrast, is indexed as **“Ek 1: Eşrefoğulları Beyliğinin Yayıldığı Coğrafi Alan”** but does not expose an explicit cartographic-source attribution in the indexed map evidence.
 
 ### Result
 
-This pass strengthens the provenance asymmetry rather than resolving it:
+This pass strengthens the provenance asymmetry:
 
 - **Alperen-derived map:** named underlying work is identifiable.
 - **Fırat 2005 annex:** thesis and map are identifiable, but underlying map source remains unidentified.
 - **Common lineage:** not demonstrated.
 - **1326-04-07 exactness:** not demonstrated for either visual artifact.
 
-The two maps therefore remain separate evidence records. No shared geometry is inferred.
-
-### Next admissible research target
-
-The highest-value next search is the **bibliographic/source lineage inside Aydın (2005)**: references, appendix notes, captions and preceding pages should be checked for a cited atlas, historian, prior map, or explicit source statement attached to Annex 1. If such a source is identified, that source—not the rendered annex itself—becomes the next provenance candidate.
-
+The two maps remain separate evidence records.
 
 ## 2026-09-19 — Annex/source-chain inspection result
 
-A targeted inspection of the Fırat University PDF was performed around the annex section and the thesis bibliography. The indexed PDF explicitly labels the map **“Ek 1: Eşrefoğulları Beyliğinin Yayıldığı Coğrafi Alan”** and shows the regional polity labels directly in the annex. citeturn0search8
+A targeted inspection of the Fırat University PDF around the annex and bibliography did not expose an explicit statement such as “map redrawn from [named atlas/source]” attached to Annex 1.
 
-The available annex/bibliographic evidence does **not** expose an explicit statement such as “map redrawn from [named atlas/source]” attached to Annex 1. The bibliography contains numerous general historical and historical-geography works, but the current indexed evidence does not establish which, if any, was the cartographic source for this specific figure.
-
-This distinction is now treated as a hard provenance boundary:
+This distinction is treated as a hard provenance boundary:
 
 - **Bibliography presence ≠ map-source attribution.**
-- A work appearing in the thesis references cannot be assumed to be the source of Annex 1 without an explicit textual or figure-level linkage.
-- The regional labels visible in the map are observations, not coordinate control points.
+- A work appearing in the thesis references cannot be assumed to be the source of Annex 1 without explicit textual or figure-level linkage.
+- Regional labels are observations, not coordinate control points.
 - The annex remains unsuitable for direct tracing or polygon extraction.
 
 ### Updated provenance state
@@ -165,47 +142,71 @@ This distinction is now treated as a hard provenance boundary:
 
 ### Gate decision
 
-The Fırat 2005 source-method gate remains **OPEN**, but the search space is now narrower: future provenance work should only promote a candidate if an explicit source-to-map relationship is found. Merely matching a bibliography title or visually similar map is insufficient.
-
-No polygon, control-point coordinate, MapBin, or canonical geometry was created.
-
+The Fırat 2005 source-method gate remains **OPEN**, but future promotion requires an explicit source-to-map relationship.
 
 ## 2026-09-19 — comparative bibliography finding
 
-A further comparison pass found that later Beyşehir scholarship cites several historical-geography works around Eşrefoğulları, including **Memduh Yavuz, _Eşrefoğulları Tarihi-Beyşehir Kılavuzu_ (1934)**, **İ. H. Uzunçarşılı**, and other regional-history references. These references establish a plausible historical-literature lineage around the subject, but the current evidence does **not** establish that any one of them is the cartographic source of Aydın (2005) Annex 1. citeturn0search4turn0search0
+Later Beyşehir scholarship cites **Memduh Yavuz, _Eşrefoğulları Tarihi-Beyşehir Kılavuzu_ (1934)**, **İ. H. Uzunçarşılı**, and other regional-history references around Eşrefoğulları. These establish a plausible historical-literature lineage, but not a cartographic-source lineage for Aydın (2005) Annex 1.
 
-The 2017 Alperen-derived map is separately and explicitly attributed to **Alperen (2001)**. Its own legend says the widest extent is approximate and distinguishes temporarily attached territory. citeturn0search25
+The 2017 Alperen-derived map remains separately and explicitly attributed to **Alperen (2001)**. Its legend describes the widest extent as approximate and distinguishes temporarily attached territory.
 
 ### Forensic interpretation
-
-This means the current evidence supports a **literature lineage**, but not a **map-source lineage**. The distinction is retained in the dossier:
 
 - historical works cited around Eşrefoğulları → contextual/provenance leads;
 - explicit figure attribution → admissible source lineage;
 - visual similarity alone → insufficient;
 - bibliography co-occurrence alone → insufficient.
 
-No candidate has yet crossed the threshold required to authorize georeferencing of the Fırat annex.
-
-### Gate decision
-
-The source-method gate remains **OPEN**. The next operation should be to test the named historical-geography candidates only for an explicit connection to Annex 1, rather than treating them as assumed map sources.
-
+No candidate has crossed the threshold required to authorize georeferencing of the Fırat annex.
 
 ## 2026-09-19 — historical-source lineage result
 
-A targeted search of institutional catalogues and later scholarship confirms **Memduh Yavuz Süslü, _Eşref Oğulları Tarihi: Beyşehir Kılavuzu_ (Konya, 1934)** as an established Eşrefoğulları historical source. The Turkish Historical Society catalogue records the 1934 publication and notes that one copy includes a fold-out table. citeturn0search0
+A targeted search of institutional catalogues and later scholarship confirms **Memduh Yavuz Süslü, _Eşref Oğulları Tarihi: Beyşehir Kılavuzu_ (Konya, 1934)** as an established Eşrefoğulları historical source. The Turkish Historical Society catalogue records the 1934 publication and notes that one copy includes a fold-out table.
 
-TDV's Eşrefoğulları bibliography also lists the same 1934 work, alongside Uzunçarşılı and primary/secondary historical sources. citeturn0search1 A later Beyşehir publication independently cites Yavuz's 1934 work for Eşrefoğulları-era historical statements. citeturn0search31
+TDV's Eşrefoğulları bibliography also lists the same 1934 work.
 
-This establishes **historical-source lineage**, but not **cartographic-source lineage** for Aydın (2005) Annex 1. The TTK catalogue's “1 katlı tablo” is bibliographically notable, but the current evidence does not identify that fold-out table as the source of Aydın's Annex 1 map. It must therefore remain a research lead, not a map-source assertion.
+This establishes **historical-source lineage**, but not **cartographic-source lineage** for Aydın (2005) Annex 1. The TTK catalogue's “1 katlı tablo” is notable, but the evidence did not identify that fold-out table as the source of Aydın's Annex 1 map.
 
 ### New research lead
 
-The highest-value provenance lead is now the **1934 Yavuz work and its fold-out table**, because the institutional catalogue confirms that a fold-out visual/table component existed. However, access to the physical copy is restricted to in-library use according to the catalogue, and no project-controlled binary or image hash has been acquired. citeturn0search0
+The highest-value provenance lead became the **1934 Yavuz work and its fold-out table** because the institutional catalogue confirms that a fold-out visual/table component existed.
+
+## 2026-09-19 — digitization/access discovery
+
+A new institutional-platform discovery materially changes the acquisition picture without changing the geometry gate.
+
+**Google Books** has a bibliographic/digitized record for:
+
+- **Memduh Yavuz, _Eşref Oğulları Tarihi: Beyşehir Kılavuzu_**
+- Babalık Matbaası, 1934
+- 86 pages
+- original from **Indiana University**
+- digitized **4 October 2010**
+
+The current Google Books record exposes bibliographic metadata and searchable common terms, but explicitly reports **“No eBook available”** in the current public view. Therefore the existence of a digitized record is confirmed, but page-image access to the fold-out component is **not** confirmed from the available public interface.
+
+This is important because it upgrades the lead from “physical-copy-only” to **digitization exists / public page access unresolved**. It still does **not** establish that the fold-out table is a map, that it is the source of Aydın (2005) Annex 1, or that transformation rights are available.
+
+The TTK catalogue independently records the physical publication and its fold-out-table component, including that one copy lacks the fold-out. The TTK record also states that requested material is for in-library use only.
+
+### Acquisition interpretation
+
+| Question | Result |
+|---|---|
+| 1934 Yavuz work exists | **Confirmed** |
+| Fold-out component exists in at least one catalogue record | **Confirmed** |
+| Digitized record exists | **Confirmed** |
+| Current public page-image/eBook access | **Not confirmed; Google Books says “No eBook available”** |
+| Fold-out content is a boundary map | **Not established** |
+| Fold-out is source of Aydın 2005 Annex 1 | **Not established** |
+| Project-controlled binary acquired | **No** |
+| Raw SHA-256 | **None** |
+| Transformation rights | **Not established** |
 
 ### Gate decision
 
-The provenance gate remains **OPEN**. The Yavuz 1934 fold-out is registered as a **bibliographic/cartographic research lead only**. No claim is made that it is the source of Aydın 2005 Annex 1.
+The Yavuz 1934 item remains a **bibliographic/cartographic research lead**. No page image, fold-out scan, control point, polygon, or transformed derivative has been acquired.
 
-No geometry, control-point coordinates, polygon, MapBin, or canonical authority was created.
+The next admissible operation is to determine whether the Indiana University-origin digitization has an accessible page-image pathway or catalogue metadata describing the fold-out component. If access remains unavailable, the lead should be retained as provenance evidence rather than converted into assumed geometry.
+
+No canonical geometry, MapBin, physical authority, or runtime map asset is changed by this discovery.
