@@ -262,3 +262,10 @@ The Tier-1 evidence matrix is now stronger on **temporal applicability**, while 
 - physical/topology validation: not started on historical candidate geometry;
 - canonical promotion: BLOCKED.
 
+
+
+### Eşrefoğulları — page-addressable visual map evidence
+
+A 2017 Necmettin Erbakan University repository PDF was inspected at PDF page 8 / printed page 211. It contains **Harita 2. Eşrefoğulları Beyliği Sınırları (Alperen, 2001)** with an explicit legend separating the centre, selected settlements, an **approximate** maximum extent, and short-term attached territories.
+
+This improves source traceability and makes the visual artifact suitable for a future documented georeference proof. It does not create a 1326-04-07 polygon, and no pixel coordinates have been committed from visual estimation. The machine-readable observation is `data/gis/1326/esrefogullari-map-georeference-observation.json`.
