@@ -1,0 +1,105 @@
+name: Phase A — 1326 Cliopatria Acquisition
+
+on:
+  push:
+    branches:
+      - codex/phase-a-1326-cliopatria-acquisition
+  pull_request:
+    branches:
+      - integration/phase-a-h-production
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  acquire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Acquire pinned Cliopatria bytes
+        run: npm run acquire:1326-cliopatria
+
+      - name: Verify retained bytes
+        run: npm run verify:1326-cliopatria
+
+      - name: Extract pinned GeoJSON payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip"
+          extract_dir="data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted"
+          rm -rf "$extract_dir"
+          mkdir -p "$extract_dir"
+          unzip -q "$archive" -d "$extract_dir"
+
+          input=""
+          while IFS= read -r -d '' candidate; do
+            if node --input-type=module -e '
+              import fs from "node:fs";
+              const p = process.argv[1];
+              try {
+                const v = JSON.parse(fs.readFileSync(p, "utf8"));
+                process.exit(v?.type === "FeatureCollection" && Array.isArray(v?.features) ? 0 : 1);
+              } catch {
+                process.exit(1);
+              }
+            ' "$candidate"; then
+              input="$candidate"
+              break
+            fi
+          done < <(find "$extract_dir" -type f \( -name "*.geojson" -o -name "*.json" \) -print0 | sort -z)
+
+          if [ -z "$input" ]; then
+            echo "ERROR: no GeoJSON FeatureCollection found in Cliopatria archive"
+            find "$extract_dir" -type f -print | sort
+            exit 1
+          fi
+
+          echo "Selected temporal input: $input"
+          printf '%s\n' "$input" > "$extract_dir/selected-input.txt"
+
+      - name: Run 1326 temporal extraction
+        shell: bash
+        run: |
+          set -euo pipefail
+          input=$(cat data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted/selected-input.txt)
+          npm run extract:1326-cliopatria -- --input "$input"
+
+      - name: Run 1326 entity reconciliation
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run reconcile:1326-cliopatria -- --input data/build/gis/1326/cliopatria-1326-candidates.json
+
+      - name: Emit independent checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip
+          stat -c '%n %s bytes' data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip
+
+      - name: Upload acquisition and intake evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-a-1326-cliopatria-acquisition
+          path: |
+            data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip
+            data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.acquisition.json
+            data/build/gis/1326/cliopatria-1326-candidates.json
+            data/build/gis/1326/cliopatria-entity-reconciliation.json
+            data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted/selected-input.txt
+          if-no-files-found: error
+          retention-days: 14
