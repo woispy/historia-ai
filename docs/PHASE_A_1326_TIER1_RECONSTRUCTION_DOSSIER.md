@@ -300,3 +300,36 @@ This closes the bibliographic-identification sub-gate but **does not close the g
 
 The next admissible operation remains acquisition of a stable, reusable map artifact followed by documented control-point calibration. No pixel coordinates are inferred from the web-rendered figure.
 
+## 2026-09-19 — openly licensed Eşrefoğulları cartographic candidate
+
+A new openly licensed cartographic candidate was identified on Wikimedia Commons: **“Eşrefoğulları Beyliği'nin konumu.png”**, authored/uploaded under the name Kılıç46 and dated 19 October 2014. The Commons record exposes a 1538×772 PNG and states **CC BY-SA 2.5**, permitting adaptation subject to attribution and share-alike requirements. citeturn1view1
+
+The visual map shows Eşrefoğulları as a coloured regional polity alongside neighbouring Anatolian beyliks. It is useful because the artifact itself is addressable and openly licensed, unlike the previously reviewed Alperen reproduction. citeturn2view0
+
+However, the current evidence does **not** establish:
+
+- an exact 1326-04-07 temporal interpretation;
+- the cartographic construction method used to derive the coloured region;
+- a source-to-coordinate transformation;
+- an authoritative historical boundary basis;
+- a project-controlled raw SHA-256 of the downloaded binary.
+
+The Commons page exposes a SHA-1 checksum, but that is **not** treated as a substitute for the required raw SHA-256. citeturn1view1
+
+### Gate decision
+
+The new candidate changes the evidence picture but **does not open polygon generation**.
+
+Classification:
+
+- rights: **adaptation permitted under CC BY-SA 2.5, subject to its terms**;
+- temporal authority: **not established for 1326-04-07**;
+- geometry authority: **no**;
+- control-point role: **candidate only**;
+- direct polygon import: **forbidden**;
+- canonical promotion: **BLOCKED**.
+
+The source-to-geometry admissibility matrix now records this distinction explicitly.
+
+The next useful operation is therefore **method/provenance analysis of the licensed map**, not tracing its coloured region into a boundary. If its geographic construction can be independently established and tied to reliable anchors, it may become a georeference cross-check; otherwise it remains contextual evidence.
+
