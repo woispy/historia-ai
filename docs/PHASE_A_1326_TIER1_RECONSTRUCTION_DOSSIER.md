@@ -146,3 +146,18 @@ The Eşrefoğulları visual source-proof layer is now structurally captured. The
 4. no independently sourced geographic coordinate set has yet been bound to image-space control points.
 
 The next proof operation must therefore create **source-backed correspondence evidence**, not a political boundary.
+
+
+## 2026-09-19 — source-page inspection and temporal lock
+
+The source PDF was inspected at the actual figure page. The figure is on PDF page 8 and is explicitly captioned **“Harita 2. Eşrefoğulları Beyliği Sınırları (Alperen, 2001)”**. Its legend distinguishes the beylik centre, selected settlements, an approximate widest-extent line, and temporarily attached territory. The source page confirms these semantics. citeturn1view0
+
+The surrounding historical text also states that the paper treats Eşrefoğulları rule in Beyşehir as 1280–1326 and describes a 1302–1320 territorial-administration period. Those statements are retained as **temporal/extent context only**; they are not converted into a 1326-04-07 boundary. citeturn1view0
+
+The page was visually inspected, but no rendered-page/UI pixel coordinates were promoted into the control-point record. A PDF viewer screenshot is not a retained map-image coordinate frame. The observation record therefore explicitly keeps pixel extraction as not performed.
+
+### Gate decision
+
+The source-proof layer is stronger than before because the figure page and temporal context are now explicitly bound. The georeference gate remains blocked until a stable image artifact/coordinate frame and independently reviewed image-space correspondences are available.
+
+No polygon, ring, MapBin, or canonical authority was created.
