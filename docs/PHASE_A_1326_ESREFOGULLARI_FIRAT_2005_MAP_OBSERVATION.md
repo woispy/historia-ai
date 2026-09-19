@@ -438,3 +438,31 @@ The new acquisition pass did **not** locate a public digital scan of the 2001 bo
 The project may continue to cite the reproduced figure as a **boundary-shape observation**, but must not silently promote the reproduction to the original 2001 map artifact. A future acquisition of the physical book or a rights-cleared scan must first produce a retained source artifact and provenance manifest before any georeferencing workflow is opened.
 
 No coordinates, control points, polygon, MapBin, or canonical geometry were created.
+
+## 2026-09-19 — Alperen 2001 acquisition lead: institutional vs. commercial evidence
+
+A further acquisition pass found multiple current commercial listings for the physical 2001 edition. They consistently identify **Bilal Bülent Alperen, _Beyşehir ve Tarihi_, Konya, 2001, 196 pages**, including current stock listings. citeturn0search0turn0search2
+
+Independent scholarly bibliographies also consistently identify the work as **Büyük Sistem Dershanesi Matbaası, Konya (2001), 196 pages**. citeturn1search29turn1search30
+
+This establishes a stronger **physical-artifact acquisition lead**, but it does not establish access to the specific map page. Commercial listings are not treated as authoritative source metadata for the map itself.
+
+### Acquisition gate
+
+The current state is therefore:
+
+| Item | State |
+|---|---|
+| 2001 book identity | Confirmed |
+| 196-page physical edition | Independently corroborated |
+| Current physical copies located | Yes |
+| Original map page located | No |
+| Original map image retained | No |
+| Source artifact SHA-256 | None |
+| Map page number | Unresolved |
+| Rights for image transformation | Unresolved |
+| Georeference | Blocked |
+
+A physical-copy lead is useful for future controlled acquisition, but **the project has not acquired or transformed the book**. No coordinate or geometry may be inferred from the commercial listing.
+
+No polygon, control point, MapBin, or canonical geometry was created.
