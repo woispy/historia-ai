@@ -126,7 +126,8 @@
     "test:1326-cartographic-artifact-ledger": "node tools/tests/phase-a-1326-cartographic-artifact-ledger.test.js",
     "test:1326-historical-control-point-proof": "node tools/tests/phase-a-1326-historical-control-point-proof.test.js",
     "test:1326-historical-control-point-proof-adapter": "node tools/tests/phase-a-1326-historical-control-point-proof-adapter.test.js",
-    "test:1326-esrefogullari-map-observation": "node tools/tests/phase-a-1326-esrefogullari-map-observation.test.js"
+    "test:1326-esrefogullari-map-observation": "node tools/tests/phase-a-1326-esrefogullari-map-observation.test.js",
+    "test:1326-esrefogullari-control-point-candidates": "node tools/tests/phase-a-1326-esrefogullari-control-point-candidates.test.js"
   },
   "dependencies": {
     "react": "^19.2.7",
