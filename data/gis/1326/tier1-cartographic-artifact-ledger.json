@@ -6,7 +6,10 @@
   "records": [
     {
       "id": "salt-tasudoc0286",
-      "entityScope": ["esrefogullari", "alaye"],
+      "entityScope": [
+        "esrefogullari",
+        "alaye"
+      ],
       "title": "14. yüzyıl başında Anadolu Türk Beylikleri haritası",
       "provider": "SALT Research",
       "identifier": "TASUDOC0286",
@@ -26,7 +29,9 @@
     },
     {
       "id": "esrefogullari-alperen-2001-reproduction",
-      "entityScope": ["esrefogullari"],
+      "entityScope": [
+        "esrefogullari"
+      ],
       "title": "Harita 2. Eşrefoğulları Beyliği Sınırları (Alperen, 2001)",
       "provider": "Tekkanat & Yavuz, 2017 reproduction",
       "sourceWork": "B.B. Alperen, Beyşehir ve Tarihi, 2001",
@@ -35,6 +40,25 @@
       "authorityRole": "cartographic-reconstruction-candidate",
       "geometryUse": "blocked-until-artifact-retention-and-rights-review",
       "description": "The published figure distinguishes the beylik centre, settlements, an approximate widest extent and territories temporarily attached. The paper also reports the broad regional extent in narrative form.",
+      "binaryRetention": "not-retained-in-repository",
+      "sha256": null,
+      "inspection": "web-inspected 2026-09-19"
+    },
+    {
+      "id": "wikimedia-anatolian-beyliks-1330-tr",
+      "entityScope": [
+        "esrefogullari",
+        "alaye"
+      ],
+      "title": "Beylicats d’Anatolie vers 1330-tr.svg",
+      "provider": "Wikimedia Commons",
+      "recordUrl": "https://commons.wikimedia.org/wiki/File:Beylicats_d%E2%80%99Anatolie_vers_1330-tr.svg",
+      "format": "SVG",
+      "coverage": "vers 1330",
+      "authorityRole": "contextual-cartography-only",
+      "geometryUse": "blocked",
+      "rights": "Wikimedia Commons page states source references to published historical atlases; current record is treated as reference-only until source provenance and transformation rights are independently reviewed.",
+      "reason": "The map is approximately 1330, not scenario-date 1326-04-07. It may provide regional cross-checks but cannot be relabelled as a 1326 boundary artifact.",
       "binaryRetention": "not-retained-in-repository",
       "sha256": null,
       "inspection": "web-inspected 2026-09-19"
