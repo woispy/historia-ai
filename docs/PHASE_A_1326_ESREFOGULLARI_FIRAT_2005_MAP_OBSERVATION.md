@@ -568,3 +568,18 @@ This improves the **secondary-source observation record**, but it still does not
 `map-attribution-confirmed` → `map-page-unresolved` → `image-unretained` → `georeference-blocked`
 
 No coordinates, control points, polygon vertices, or canonical geometry were added.
+
+
+## 2026-09-20 — New page-level citation found, but it is not the boundary map
+
+A newly surfaced scholarly PDF cites Alperen, *Beyşehir ve Tarihi* (2001) at **p.48** for an image/description of a Beyşehir Government House building. This confirms that the book is cited with page-level precision in secondary literature, but the cited material is architectural/urban-history evidence, not the Eşrefoğulları boundary map. citeturn0search44
+
+The 2017 source still provides the directly inspectable figure attributed to Alperen 2001, with the four-part legend and named-place set, but no original-page number is exposed in the indexed text. citeturn0search0turn0search42
+
+### Acquisition conclusion
+
+The search now has multiple verified internal page references (including pp.29–36 and p.48) yet **none identifies the Harita 2 page**. This is evidence that page-level citations exist, not evidence that the map page can be inferred from nearby citations.
+
+State remains: `map-attribution-confirmed` → `map-page-unresolved` → `image-unretained` → `georeference-blocked`.
+
+No geometry, control point, polygon vertex, MapBin, or canonical authority was changed.
