@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "dossierId": "historia_ai_1326_tier1_reviewed_reconstruction",
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "reviewed-reconstruction",
+  "promotion": "BLOCKED",
+  "entities": {
+    "esrefogullari": {
+      "geometryStatus": "pending-source-acquisition",
+      "sourceArtifacts": [],
+      "controlPoints": [],
+      "assumptions": [],
+      "uncertainty": {
+        "status": "not-yet-quantified"
+      },
+      "reviewStatus": "draft",
+      "ring": []
+    },
+    "alaye": {
+      "geometryStatus": "pending-source-acquisition",
+      "sourceArtifacts": [],
+      "controlPoints": [],
+      "assumptions": [],
+      "uncertainty": {
+        "status": "not-yet-quantified"
+      },
+      "reviewStatus": "draft",
+      "ring": []
+    }
+  }
+}
