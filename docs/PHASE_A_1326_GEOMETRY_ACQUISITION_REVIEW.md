@@ -37,6 +37,7 @@ Independent research located a published historical map specifically depicting t
 - Beyşehir-focused academic study reproduces **“Harita 2. Eşrefoğulları Beyliği Sınırları (Alperen, 2001)”** and describes it as an approximate representation of the beylik's widest extent.
 - The same study describes Beyşehir as the beylik centre and discusses its territorial/political context.
 - A Wikimedia Commons reproduction identifies a dedicated Eşrefoğulları location map and its license as **CC BY-SA 2.5**.
+- An official Derbent district history page records the beylik's wider territorial claims and identifies the polity as ending after Süleyman Şah's killing; this is supporting historical/cartographic context, not a machine-readable boundary.
 
 These are useful **cartographic research candidates**, but they are not yet machine-readable 1326 geometry. In particular, an image showing the widest extent must not be silently converted into a precise 7 April 1326 polygon.
 
@@ -53,12 +54,13 @@ Research located several geographically useful references:
 - Euratlas Periodis includes **Alaiye** as a dated historical polity in its 1300 map material and places it in the wider Anatolian political context.
 - The Turkish Historical Society catalogue contains a historical cartographic item titled **Alâiye**, at 1:400,000 scale, but it is an Ottoman-era 1915/16 map. It is therefore a geographic/cartographic reference, **not a 1326 political-boundary source**.
 - Alanya's university GIS service provides modern/historical-site GIS layers for Alanya, but these concern local physical/historical structures rather than the 1326 beylik boundary.
+- A Salt Research item titled **Alanya (Alâiye)** provides an open-access digitized historical map, but its cartographic date/context is modern relative to the scenario and its rights statement restricts transformation. It is therefore a place/topography reference only, not a 1326 boundary artifact.
 
 ### Alâiye review rule
 
 None of these sources is sufficient by itself to create a 1326 political polygon.
 
-The 1915/16 map can help with place-name/topographic reconciliation only. Modern Alanya GIS can provide coordinate/place anchors only. A 1326 boundary must come from date-appropriate historical evidence or a reviewed reconstruction whose assumptions are explicitly recorded.
+The 1915/16 and Salt Research maps can help with place-name/topographic reconciliation only. Modern Alanya GIS can provide coordinate/place anchors only. A 1326 boundary must come from date-appropriate historical evidence or a reviewed reconstruction whose assumptions are explicitly recorded.
 
 ## Euratlas handling
 
@@ -132,8 +134,6 @@ That path is **forensically excluded** from Historia AI authority.
 
 No capital-radius polygon, generated shape, jitter, Voronoi cell, or other synthetic filler may close the current geometry gap.
 
-
-
 ## Phersu Atlas — independent candidate-source probe — 2026-09-19
 
 A new independent historical-geography candidate was evaluated: **Phersu Atlas**.
@@ -189,7 +189,20 @@ If machine-readable access cannot be obtained without relying on a rendered imag
 | --- | --- | --- | --- | --- |
 | Phersu Atlas | Eshrefids + Alaiye | Yes; Alaiye span covers 1326 | **No** | Candidate/reference only |
 
-This probe therefore improves the source map substantially but does **not** change the promotion state.
+## Additional cartographic probe — Eşrefoğulları digital map candidates — 2026-09-19
+
+A second-pass search located two useful but non-authoritative digital map representations:
+
+- Scribble Maps hosts a map titled **“Eşrefoğulları en geniş sınırlar”** / **“En geniş sınırlar”**. The public page exposes the map through an embedded viewer, but the accessible page did not expose a traceable GeoJSON/KML payload or provenance sufficient for canonical acquisition.
+- Wikimedia Commons hosts an Eşrefoğulları location map whose metadata identifies the file as a CC BY-SA 2.5 derivative and describes it as a map of Turkmen principalities in late 13th/early 14th-century Anatolia. This confirms a reusable cartographic reference, but not a precise 1326 boundary.
+
+An official Derbent district history page also states that Eşrefoğulları territory extended beyond Beyşehir/Seydişehir to areas including Ilgın, Bolvadin and Akşehir, with other settlements entering the borders at different times. This is useful as a **historical extent cross-check**, not as a polygon source.
+
+The independent academic chronology remains important: a 2009 Süleyman Demirel University article states that Eşrefoğulları expanded to Seydişehir/Bozkır and north toward Doğanhisar/Şarkikaraağaç, acquired Bolvadin in 1320, and that II Süleyman was killed on 9 October 1326. These facts support temporal review but do not define a machine-readable boundary.
+
+### Result
+
+The new digital-map candidates improve the evidence chain but **do not close the geometry source gap**. No image is to be raster-traced or converted into canonical geometry.
 
 ## Source classification
 
@@ -198,12 +211,15 @@ This probe therefore improves the source map substantially but does **not** chan
 | Cliopatria v0.2.0 | Candidate political-entity geometry | Candidate only |
 | Eşrefoğulları map reproduced in Beyşehir study | Cartographic research evidence | Not yet |
 | Wikimedia Commons Eşrefoğulları map | Secondary cartographic reproduction | Not yet |
+| Scribble Maps Eşrefoğulları map | Digital cartographic candidate | Not yet |
 | Euratlas 1300 | Historical political context | No |
 | TTK Alâiye 1915/16 map | Geographic/cartographic reference | No |
+| Salt Research Alanya (Alâiye) map | Geographic/place-name reference | No |
 | Alanya university GIS | Modern/local historical-site GIS | No |
 | AtlasPI | Structured historical-geography/reference layer | No |
 | aourednik/historical-basemaps 1300 | Upstream historical reference | No |
 | aourednik/historical-basemaps 1400 | Later-period reference | No |
+| Phersu Atlas | Structured historical-geography/reference candidate | No |
 
 ## Required geometry review record
 
@@ -237,11 +253,9 @@ The following remain unchanged:
 
 ## Next executable gate
 
-AtlasPI has now completed its useful role for this sub-stage: it established the upstream provenance chain and a **negative 1326-coverage result**.
+The immediate work item is:
 
-The immediate work item is therefore:
-
-**Acquire or identify traceable machine-readable geometry for Eşrefoğulları and Alâiye from an independent date-appropriate source, while separately reviewing the Cliopatria Ottoman candidate under the cross-polity rule.**
+**Determine whether Phersu or another independent source exposes a traceable machine-readable boundary artifact for Eşrefoğulları and Alâiye; if not, record a clean negative result and proceed to the next independent source. In parallel, review the Cliopatria Ottoman candidate under the cross-polity rule.**
 
 After candidate geometry is available:
 
