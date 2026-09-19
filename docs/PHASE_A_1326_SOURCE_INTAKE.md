@@ -215,6 +215,32 @@ The next gate is therefore candidate/cross-source **geometry acquisition and rev
 
 The geometry-stage working record is now maintained in `docs/PHASE_A_1326_GEOMETRY_ACQUISITION_REVIEW.md`. It classifies Eşrefoğulları/Alâiye cartographic references as research candidates only and explicitly prevents 1300 material, late maps, or local GIS layers from becoming 1326 canonical geometry.
 
+
+
+## AtlasPI geometry-path closure — 2026-09-19
+
+The AtlasPI forensic probe is now recorded in:
+
+`docs/PHASE_A_1326_ATLASPI_ACQUISITION_PROBE.md`
+
+and the geometry-stage implications are recorded in:
+
+`docs/PHASE_A_1326_GEOMETRY_ACQUISITION_REVIEW.md`
+
+The inspected AtlasPI repository does **not** contain a tracked `world_1326.geojson` snapshot. Its `data/processed/` tree is empty apart from `.gitkeep`; the pre-1800 boundary path resolves to `aourednik/historical-basemaps`.
+
+The upstream snapshot index contains relevant target labels at 1300 and 1400 but no 1326 snapshot:
+
+- 1300: Byzantine Empire, Ilkhanate;
+- 1400: Beylik of Aydin, Byzantine Empire, Ottoman Empire;
+- no 1326 snapshot.
+
+Direct inspection of `world_1300.geojson` found only Byzantine Empire and Ilkhanate among the target-family entities. AtlasPI's separate `approximate_generated` capital-radius boundary path is explicitly computational approximation and remains excluded from Historia AI authority.
+
+Therefore AtlasPI is closed for the current **direct 1326 geometry acquisition** attempt and retained as a provenance/reference layer. This is a negative acquisition result, not a failure of the source: the source lineage simply does not expose a date-appropriate 1326 polygon snapshot for the missing Tier-1 entities.
+
+The active geometry gate is now narrowed to **independent date-appropriate machine-readable evidence for Eşrefoğulları and Alâiye plus review of the Cliopatria Ottoman candidate**.
+
 ## Promotion locks
 
 The following remain locked:
