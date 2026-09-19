@@ -382,3 +382,38 @@ The current evidence is now sufficient to reject a common failure mode: taking a
 The remaining missing evidence is specifically **boundary-shape evidence**: a source that both has an identifiable provenance and provides enough spatial information to distinguish the 1326 state from later/generalized extent.
 
 No coordinate, polygon, control point, MapBin, or canonical geometry was created.
+
+## 2026-09-19 — boundary-shape evidence pass: Alperen 2001 map semantics
+
+The 2017 Tekkanat & Yavuz publication exposes the most useful currently indexed description of the Alperen-derived map. Its caption explicitly identifies the figure as **“Harita 2. Eşrefoğulları Beyliği Sınırları (Alperen, 2001)”**. The indexed visual description also records a legend distinction between:
+
+- a central marker for the beylik centre;
+- point symbols for settlements;
+- a **solid line representing the approximate widest extent**;
+- a **dashed line representing territories temporarily attached to the beylik**. citeturn0search46
+
+The same indexed map description exposes a concrete spatial context including Beyşehir, Akşehir, Ilgın, Doğanhisar, Derbent, Hüyük, Kıreli, Seydişehir, Bozkır, Çarşamba Çayı, Eber Gölü, Akşehir Gölü, Çavuşçu Gölü, Sultan Dağı, Yalvaç, Konya, Hamîtoğulları and Karamanoğulları. citeturn0search46
+
+### Forensic interpretation
+
+This is materially stronger than a generic historical summary because the figure itself distinguishes **widest extent** from **temporarily attached territory**. However:
+
+1. the map is still a **reproduction** of Alperen (2001), not the retained original artifact;
+2. the indexed description calls the widest boundary **approximate**;
+3. the map's exact temporal semantics are not established as **1326-04-07**;
+4. the original 2001 map bytes, image SHA-256, calibration points and transformation rights are still unresolved.
+
+Therefore the solid/dashed lines are now admissible as **boundary-shape observations**, but not as coordinates or canonical geometry.
+
+### Cross-check against temporal constraints
+
+The visible map context is broadly compatible with the previously established historical constraint set for Beyşehir/Seydişehir and the Akşehir/Bolvadin expansion. It also demonstrates why Ilgın and other outer locations cannot be interpreted without the map's own line semantics and date model.
+
+No visual line has been digitized. No pixel coordinate has been promoted. No intersection or averaging with the Aydın 2005 map has been performed.
+
+### Gate decision
+
+- `boundaryShapeEvidence = observed-but-unresolved`
+- `directPolygonImport = false`
+- `georeference = blocked`
+- `canonicalPromotion = BLOCKED`
