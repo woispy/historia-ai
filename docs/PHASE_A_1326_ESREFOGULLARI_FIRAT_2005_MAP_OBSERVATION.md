@@ -502,3 +502,26 @@ A further bibliography trail points to a Google Books catalogue record for the 2
 **Do not georeference yet.** The evidence is now sufficient to register a page-level acquisition lead, but not sufficient to identify and retain the actual map page. No control point, polygon vertex, or geometry transformation is permitted from the 2017 reproduction alone.
 
 Current state: `book-confirmed` → `map-attribution-confirmed` → `page-unresolved` → `image-unretained` → `georeference-blocked`.
+
+
+## 2026-09-19 — Google Books catalogue identity and page-reference refinement
+
+A current scholarly bibliography provides a direct Google Books identifier for the 2001 edition: `RX0sAQAAIAAJ`. The record is bibliographic evidence for the edition, not evidence that the boundary map is viewable in the digital record. citeturn0search3
+
+A separate scholarly article cites Alperen 2001 at pp. 29–36 for Eşrefoğulları territorial context, and p.36 specifically for Mübarizüddin Mehmed Bey's expansion to Gelendost, Yalvaç, Sultandağı, Çay, İshaklı and Bolvadin. citeturn0search4 This strengthens the page-navigation trail around the historical territorial narrative, but still does not identify the page containing **Harita 2**.
+
+The directly inspectable 2017 reproduction remains the only retained public evidence for the map's legend and named-place set. citeturn0search36
+
+### Updated acquisition state
+
+- `editionIdentity`: confirmed
+- `googleBooksCatalogueId`: `RX0sAQAAIAAJ`
+- `territorialNarrativePages`: 29–36 corroborated
+- `boundaryMapPage`: unresolved
+- `mapImageRetained`: false
+- `rawSha256`: none
+- `controlPoints`: none
+- `georeference`: blocked
+- `canonicalGeometry`: untouched
+
+No geometry was inferred from page references or from the reproduced figure. The next gate remains acquisition of the actual map image/page with provenance sufficient for a retained evidence artifact.
