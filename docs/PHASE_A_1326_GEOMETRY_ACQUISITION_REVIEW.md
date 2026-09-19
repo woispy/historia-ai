@@ -334,3 +334,20 @@ No adapter record may call the canonical publisher. The intended path is:
 `adapter → provenance/temporal/entity review → source-document ring validation → physical-land validation → proof-group/topology → canonical review`.
 
 This closes the **adapter architecture gate**. It does not close the **geometry evidence gate**.
+
+
+## 1326 source-to-geometry admissibility gate
+
+The Tier-1 evidence set is now classified by a machine-readable admissibility matrix at `data/gis/1326/tier1-source-geometry-admissibility-matrix.json`.
+
+The matrix distinguishes:
+
+- `boundary-evidence-candidate`
+- `control-point-candidate`
+- `temporal-extent-constraint`
+- `context-only`
+- `prohibited-for-geometry`
+
+This classification is deliberately stricter than a generic source list. A source can support georeferencing without becoming boundary authority; a temporal statement can constrain a reconstruction without supplying polygon coordinates; and a near-scenario cartographic source cannot be relabelled as 1326-04-07.
+
+Current result remains unchanged: Eşrefoğulları and Alâiye have no immutable, date-exact 1326 boundary artifact in the retained evidence set, so no polygon is generated. Canonical promotion remains BLOCKED and SAFE TO DELETE remains 0.
