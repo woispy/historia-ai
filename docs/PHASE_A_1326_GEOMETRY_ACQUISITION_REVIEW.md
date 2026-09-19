@@ -189,6 +189,21 @@ If machine-readable access cannot be obtained without relying on a rendered imag
 | --- | --- | --- | --- | --- |
 | Phersu Atlas | Eshrefids + Alaiye | Yes; Alaiye span covers 1326 | **No** | Candidate/reference only |
 
+### Phersu machine-readable export probe — result
+
+A targeted public-web probe was performed for an explicit Phersu API/GeoJSON export path. The accessible public results expose polity-level data and interactive territorial maps, but no public, immutable 1326 GeoJSON/Shapefile payload was identified.
+
+The probe did establish a useful distinction:
+
+- Phersu has a dedicated **Alaiye** polity record spanning **1294–1493** and exposes political-control maps over time. citeturn0search0turn0search4
+- The Western Asia catalogue explicitly includes **Eshrefids**, **Ottoman Beylik**, and **Alaiye** among Anatolian Beyliks. citeturn0search12
+- Phersu's chronology records Eshrefids as an Anatolian frontier principality and separately records a 1327 termination/change event in its chronology. citeturn0search11turn0search13
+
+These findings strengthen temporal/entity provenance but still do not supply a traceable geometry artifact. Therefore the Phersu acquisition attempt is now **closed as a negative machine-readable acquisition result** for this sub-stage.
+
+No image extraction, screen scraping, raster tracing, or synthetic reconstruction is authorized as a substitute.
+
+
 ## Additional cartographic probe — Eşrefoğulları digital map candidates — 2026-09-19
 
 A second-pass search located two useful but non-authoritative digital map representations:
@@ -255,7 +270,7 @@ The following remain unchanged:
 
 The immediate work item is:
 
-**Determine whether Phersu or another independent source exposes a traceable machine-readable boundary artifact for Eşrefoğulları and Alâiye; if not, record a clean negative result and proceed to the next independent source. In parallel, review the Cliopatria Ottoman candidate under the cross-polity rule.**
+**Proceed to the next independent geometry-source family for Eşrefoğulları and Alâiye, while separately reviewing the Cliopatria Ottoman candidate under the cross-polity rule. Phersu is now reference-only for this acquisition gate unless a future explicit public export becomes available.**
 
 After candidate geometry is available:
 
