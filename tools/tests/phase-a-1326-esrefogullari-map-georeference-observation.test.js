@@ -1,0 +1,12 @@
+import fs from "node:fs";
+import assert from "node:assert/strict";
+const p="data/gis/1326/esrefogullari-map-georeference-observation.json";
+const d=JSON.parse(fs.readFileSync(p,"utf8"));
+assert.equal(d.schemaVersion,1); assert.equal(d.scenarioDate,"1326-04-07"); assert.equal(d.authorityStatus,"reference-only");
+assert.equal(d.source.pdfPage,8); assert.equal(d.source.printedPage,211);
+assert.equal(d.visualObservation.mapPresent,true); assert.equal(d.visualObservation.legendPresent,true);
+assert.equal(d.visualObservation.legendSemantics.maximumExtent,"Beyliğin ulaştığı en geniş sınırların yaklaşık çizimi");
+assert.equal(d.georeferenceStatus,"not-yet-calibrated"); assert.equal(d.controlPointStatus,"candidate-only"); assert.equal(d.geometryStatus,"blocked");
+assert.ok(d.rules.some(v=>v.includes("No pixel coordinate")));
+assert.ok(d.rules.some(v=>v.includes("No polygon")));
+console.log("Phase A 1326 Eşrefoğulları map georeference observation: PASS");
