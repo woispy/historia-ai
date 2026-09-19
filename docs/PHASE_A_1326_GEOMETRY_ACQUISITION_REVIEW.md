@@ -1,6 +1,6 @@
 # Phase A — 1326 Geometry Acquisition & Review
 
-Status: **geometry authority remains BLOCKED; candidate/research sources identified, no polygon promoted**
+Status: **production integration can begin in staging; canonical geometry promotion remains BLOCKED until Tier-1 boundary evidence is complete**
 
 Scenario date: **1326-04-07**
 
@@ -19,6 +19,20 @@ historical existence/control evidence
 ```
 
 No source listed below is treated as canonical geometry.
+
+## Production transition decision — 2026-09-19
+
+The available evidence is now sufficient to begin the **production-side integration/staging work**: source manifests, candidate provenance, entity identities, temporal semantics, review records and fail-closed publication machinery can be wired into the production pipeline without changing canonical geometry.
+
+This is intentionally **not** the same as declaring the 1326 political polygons authoritative.
+
+The production transition is therefore split into two tracks:
+
+1. **Production integration track — OPEN:** build/validate the reviewed-source contract, ingestion adapters, provenance manifests, candidate geometry staging and validation reports.
+2. **Canonical geometry promotion track — BLOCKED:** Eşrefoğulları and Alâiye still lack an acquired, traceable 1326 machine-readable boundary artifact; the Ottoman Q12560 cross-polity mapping still requires explicit review.
+
+This lets implementation proceed now without manufacturing missing historical geometry.
+
 
 ## Current Tier-1 geometry state
 
@@ -268,9 +282,14 @@ The following remain unchanged:
 
 ## Next executable gate
 
-The immediate work item is:
+**Production staging may proceed now:** connect the acquired source/evidence manifests to the fail-closed reviewed-source pipeline and generate a non-canonical 1326 candidate dataset/report.
 
-**Proceed to the next independent geometry-source family for Eşrefoğulları and Alâiye, while separately reviewing the Cliopatria Ottoman candidate under the cross-polity rule. Phersu is now reference-only for this acquisition gate unless a future explicit public export becomes available.**
+In parallel, the canonical geometry gate remains:
+
+**obtain traceable 1326 geometry for Eşrefoğulları and Alâiye and complete explicit review of the Cliopatria Ottoman Q12560 cross-polity mapping.**
+
+The staging dataset must remain explicitly marked `candidate-evidence-only` / `promotion: BLOCKED` and must never overwrite the canonical political-authority MapBin.
+
 
 After candidate geometry is available:
 
