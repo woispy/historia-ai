@@ -83,3 +83,31 @@ The next step is **method/provenance comparison** between the Fırat 2005 map an
 If no such provenance is established, both remain reference evidence and the project must continue searching for a traceable, date-appropriate boundary artifact.
 
 No canonical geometry, MapBin, physical authority, or runtime map asset is changed by this observation.
+
+
+## 2026-09-19 — provenance/source-method refinement
+
+A targeted literature pass was used to test whether the Fırat 2005 annex can be traced to a named cartographic source or method.
+
+The thesis identity is independently corroborated as **Nebahat Aydın, _Eşrefoğulları Beyliğinin İlmi ve Kültürel Faaliyetleri_, Fırat University, 2005**. The repository PDF is 124 pages in the current indexed copy. citeturn0search31
+
+No explicit statement identifying the construction source or cartographic method of **“Ek 1: Eşrefoğulları Beyliğinin Yayıldığı Coğrafi Alan”** was found in the available indexed evidence. The current pass therefore cannot promote the annex to a source-derived boundary artifact.
+
+A separate 2017 study gives a useful comparison point: its Eşrefoğulları map is explicitly attributed to **Alperen (2001)** and its bibliography identifies *Beyşehir ve Tarihi* by Bilal Bülent Alperen. The study's narrative separately describes the regional extent and cites Alperen, Çaycı and Uzunçarşılı. citeturn1view1turn2view0 This does not establish that the Fırat 2005 annex uses the same map or source.
+
+### Method-reconciliation result
+
+The two visual references are therefore currently classified as **independent observations with unresolved source lineage**:
+
+| Evidence | What is established | What is not established |
+|---|---|---|
+| Alperen 2001 reproduction | named source work; approximate widest-extent semantics | exact 1326 boundary; original map bytes; transformation provenance |
+| Fırat 2005 Annex 1 | named thesis and page-addressable regional map | underlying cartographic source; exact date semantics; transformation provenance |
+
+No intersection, averaging, tracing, or common-boundary inference is admissible from this comparison.
+
+### Gate decision
+
+The method/provenance sub-gate remains **OPEN**. The new evidence confirms a second independent visual reference but does not identify a common authoritative cartographic lineage.
+
+No polygon, control-point coordinate, MapBin, or canonical geometry was created.
