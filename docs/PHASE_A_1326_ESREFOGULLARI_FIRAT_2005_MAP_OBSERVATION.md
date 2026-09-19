@@ -324,3 +324,29 @@ This pass upgrades the evidence base from generic regional descriptions to a **n
 **named-place evidence ≠ boundary vertex ≠ date-specific polygon.**
 
 No coordinate was derived from these place names, no synthetic edge was constructed, and no canonical geometry was changed.
+
+
+## 2026-09-19 — temporal constraint refinement: 1320–1328
+
+A new source pass separates the Eşrefoğulları territorial evidence into a pre-1326 expansion phase and a post-1326 transfer phase.
+
+TDV states that Mübarizüddin Mehmed Bey expanded northward into the Akşehir and Bolvadin area and records his 1320 Bolvadin construction; it then dates II. Süleyman's death at Beyşehir to **9 October 1326** and states that after this event Beyşehir, Seydişehir, Akşehir and their vicinity were taken by Hamîdoğulları, while other territories were divided among Sâhib Ataoğulları and Karamanoğulları. citeturn0search0turn0search4
+
+A separate academic text records a later transfer of the **Beyşehir–Akşehir–Seydişehir** area to Hamidoğlu Hızır Bey in **1328**, which is compatible with the need to distinguish the 1326 collapse event from subsequent effective territorial transfer. citeturn0search38
+
+The Fırat 2005 thesis itself describes a broad Eşrefoğulları sphere including **Beyşehir, Seydişehir, Akşehir, Ilgın, Ladik, Doğanhisar, Şarkikaraağaç, Kıreli and Bolvadin**, but cites a secondary source for this summary and therefore does not by itself establish a date-specific 1326 boundary. citeturn0search39
+
+### Constraint interpretation
+
+For the scenario date **1326-04-07**, the strongest current temporal constraint is:
+
+- **1320:** Bolvadin is independently evidenced under Mehmed Bey.
+- **1320–1326:** Eşrefoğulları territorial expansion is documented in the Akşehir/Bolvadin direction.
+- **1326-04-07:** the polity has **not yet reached the 9 October 1326 destruction event** recorded by TDV.
+- **post-9 October 1326:** territorial control begins changing; later 1328 transfer evidence must not be projected backward to 7 April 1326.
+
+This does **not** create a polygon or prove every named place was under Eşrefoğulları on 1326-04-07. It creates a bounded temporal evidence window for later cartographic reconciliation.
+
+### Gate decision
+
+The named-place inventory is now treated as a **temporal constraint set**, not geometry. No place name has been converted into a coordinate, vertex, or boundary edge.
