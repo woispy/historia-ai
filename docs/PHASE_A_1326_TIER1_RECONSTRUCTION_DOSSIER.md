@@ -237,3 +237,28 @@ The near-scenario source improves the evidence matrix but does not change the ge
 
 The reconstruction chain therefore remains evidence → source qualification → georeference proof → physical/topology validation, with canonical promotion still blocked.
 
+## 2026-09-19 — dated temporal evidence refinement
+
+The source review now adds two dated constraints without converting either into geometry.
+
+### Eşrefoğulları
+
+TDV's Eşrefoğulları entry records II. Süleyman's death in Beyşehir on **9 October 1326** and states that the beylik's territories were divided among neighbouring powers after that event. This gives a stronger temporal constraint for the scenario date **1326-04-07**: the documented post-9-October territorial breakup cannot be projected backward to the April scenario. citeturn0search0
+
+This does **not** reveal the April boundary. It only prevents an incorrect temporal interpretation.
+
+### Alâiye
+
+An İSAM-hosted historical study records Alanya coins dated **1321, 1326 and 1329** minted in the name of Mamluk Sultan Nasir Muhammad, and also cites Ibn Battuta's 1333 account naming Karamanid Yusuf Bey in Alanya. This is useful dated political/monetary context around the scenario period, but it is not a territorial boundary artifact. citeturn0search40
+
+### Gate decision
+
+The Tier-1 evidence matrix is now stronger on **temporal applicability**, while the geometry gate remains unchanged:
+
+- temporal evidence: strengthened;
+- exact 1326-04-07 boundary artifact: still absent;
+- boundary polygon: none;
+- georeference control points: none;
+- physical/topology validation: not started on historical candidate geometry;
+- canonical promotion: BLOCKED.
+
