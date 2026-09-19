@@ -242,6 +242,31 @@
         "undocumented tracing"
       ],
       "status": "candidate-evidence-only"
+    },
+    {
+      "entityId": "esrefogullari",
+      "source": "Fırat University Open Access — Nebahat Aydın 2005, Ek 1",
+      "admissibility": [
+        "context-only",
+        "control-point-candidate"
+      ],
+      "geometryUse": "independent regional cross-check only; no exact 1326 boundary semantics established",
+      "controlPointUse": "possible future visual anchor support only after a stable image frame and independently verified geographic correspondence",
+      "temporalUse": "historical Eşrefoğulları regional depiction; exact scenario-date applicability unresolved",
+      "requiredProvenance": [
+        "sourceRef",
+        "artifactRetention",
+        "rightsReview",
+        "mapDateInterpretation",
+        "sourceMethodReview"
+      ],
+      "forbiddenInterpretations": [
+        "exact-1326 relabel",
+        "direct polygon import",
+        "boundary inference from regional fill",
+        "undocumented tracing"
+      ],
+      "status": "candidate-evidence-only"
     }
   ],
   "globalExclusions": [
