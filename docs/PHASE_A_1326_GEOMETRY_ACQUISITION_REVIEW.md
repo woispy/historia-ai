@@ -310,3 +310,27 @@ canonical promotion review
 ```
 
 No production geometry mutation is authorized by this document.
+
+## Tier-1 geometry adapter implementation — 2026-09-19
+
+The production staging track now has a dedicated adapter contract:
+
+- `docs/PHASE_A_1326_TIER1_GEOMETRY_ADAPTER.md`
+- `data/gis/1326/tier1-geometry-adapter-registry.json`
+- `tools/tests/phase-a-1326-tier1-geometry-adapter.test.js`
+
+The adapter registry deliberately carries the current three Tier-1 geometry states without inventing coordinates:
+
+- Ottoman Beylik: `candidate`, Q12560 cross-polity manual review.
+- Eşrefoğulları: `source-gap`, geometry acquisition/reconstruction pending.
+- Alâiye: `source-gap`, geometry acquisition/reconstruction pending.
+
+The adapter is compatible with the existing Province Source Studio but adds the 1326 historical-GIS provenance gate. A reviewed reconstruction must identify its historical sources, contribution of each source, reconstruction method, assumptions, uncertainty/confidence and reviewer status.
+
+Map Studio georeferencing/control-point automation is explicitly treated as authoring infrastructure, not as historical evidence. If used for a reconstruction, control points and residuals become part of the proof artifact.
+
+No adapter record may call the canonical publisher. The intended path is:
+
+`adapter → provenance/temporal/entity review → source-document ring validation → physical-land validation → proof-group/topology → canonical review`.
+
+This closes the **adapter architecture gate**. It does not close the **geometry evidence gate**.
