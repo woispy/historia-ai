@@ -237,3 +237,34 @@ No page image, fold-out scan, map-source attribution, control point, polygon, or
 ### Gate decision
 
 The Yavuz lead remains **bibliographic/cartographic research lead**. The decisive next evidence is still image-level access to the fold-out or an institutional description identifying its contents. Until that evidence exists, no georeferencing or boundary reconstruction is admissible.
+
+
+## 2026-09-19 — fold-out content identification pass
+
+A further catalogue-focused search was performed specifically for the **1934 Yavuz work's fold-out/plan content**. The Turkish Historical Society catalogue remains the strongest institutional description: it records **“1 katlı tablo”** but does not name the subject of that component. citeturn0search0
+
+A national-library-oriented bibliography also describes the 1934 work as **86 pages with illustrations**, but does not identify the fold-out/plan as a map or boundary document. citeturn1search27
+
+No newly located indexed catalogue or bibliographic record provides the missing decisive description: **what the fold-out depicts**. In particular, no evidence was found that identifies it as an Eşrefoğulları territorial-boundary map, a Beyşehir plan, a historical-geography map, or the source of Aydın (2005) Annex 1.
+
+### Forensic result
+
+The evidence threshold therefore remains unchanged:
+
+| Test | Result |
+|---|---|
+| 1934 work identity | Confirmed |
+| Fold-out/visual component | Confirmed |
+| Fold-out subject | **Unresolved** |
+| Fold-out = boundary map | **Not established** |
+| Fold-out = Aydın 2005 source | **Not established** |
+| Image-level artifact acquired | No |
+| Source SHA-256 | None |
+| Georeferencing | Not permitted |
+| Polygon reconstruction | Not permitted |
+
+The negative result is recorded deliberately: **absence of indexed content description is not treated as evidence that the fold-out is a map**.
+
+### Gate decision
+
+Yavuz 1934 remains a **bibliographic/cartographic lead**, not a geometry source. The project will not infer the fold-out's content from the existence of a “plan”, “tablo”, illustration, or visual component alone.
