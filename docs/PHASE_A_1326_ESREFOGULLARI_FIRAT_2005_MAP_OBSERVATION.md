@@ -111,3 +111,27 @@ No intersection, averaging, tracing, or common-boundary inference is admissible 
 The method/provenance sub-gate remains **OPEN**. The new evidence confirms a second independent visual reference but does not identify a common authoritative cartographic lineage.
 
 No polygon, control-point coordinate, MapBin, or canonical geometry was created.
+
+
+## 2026-09-19 — bibliographic lineage pass
+
+The external literature pass found an important distinction in the surrounding bibliography. The 2017 Beyşehir study explicitly captions its map as **“Harita 2. Eşrefoğulları Beyliği Sınırları (Alperen, 2001)”**, and its bibliography identifies Bilal Alperen's *Beyşehir ve Tarihi* (Konya, 2001). citeturn0search30turn0search2
+
+A separate Beyşehir municipal publication also cites Alperen (2001) for historical statements about Beyşehir, confirming that the work is reused as a historical reference beyond the 2017 map reproduction. citeturn0search32
+
+The Fırat 2005 annex, by contrast, is indexed as **“Ek 1: Eşrefoğulları Beyliğinin Yayıldığı Coğrafi Alan”** and lists a regional political-map composition, but the indexed artifact does not expose an explicit cartographic-source attribution in the map caption itself. citeturn0search31
+
+### Result
+
+This pass strengthens the provenance asymmetry rather than resolving it:
+
+- **Alperen-derived map:** named underlying work is identifiable.
+- **Fırat 2005 annex:** thesis and map are identifiable, but underlying map source remains unidentified.
+- **Common lineage:** not demonstrated.
+- **1326-04-07 exactness:** not demonstrated for either visual artifact.
+
+The two maps therefore remain separate evidence records. No shared geometry is inferred.
+
+### Next admissible research target
+
+The highest-value next search is the **bibliographic/source lineage inside Aydın (2005)**: references, appendix notes, captions and preceding pages should be checked for a cited atlas, historian, prior map, or explicit source statement attached to Annex 1. If such a source is identified, that source—not the rendered annex itself—becomes the next provenance candidate.
