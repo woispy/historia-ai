@@ -68,6 +68,9 @@ jobs:
       - name: Tier-1 geometry adapter contract test
         run: npm run test:1326-tier1-geometry-adapter
 
+      - name: Tier-1 reconstruction dossier contract test
+        run: npm run test:1326-tier1-reconstruction-dossier
+
       - name: Independent source checksum
         shell: bash
         run: sha256sum data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip
