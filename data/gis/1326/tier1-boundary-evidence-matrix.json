@@ -34,6 +34,13 @@
           "finding": "A published-atlas-derived regional map is labelled approximately 1330; it may provide a cross-check of regional polity relationships but is not date-specific to 1326-04-07.",
           "temporalPrecision": "near-scenario contextual reference; not exact 1326-04-07",
           "geometryAuthority": false
+        },
+        {
+          "source": "TDV İslâm Ansiklopedisi — Eşrefoğulları",
+          "role": "scenario-date temporal existence/control context",
+          "finding": "TDV records II. Süleyman's death in Beyşehir on 9 October 1326 and states that only after this event the beylik's territories were divided among neighbouring powers.",
+          "temporalPrecision": "strong scenario-date constraint: the polity had not yet undergone the documented post-9-October territorial division on 1326-04-07",
+          "geometryAuthority": false
         }
       ],
       "reconstructionStatus": "candidate-evidence-only",
@@ -68,6 +75,13 @@
           "role": "near-scenario contextual cartography",
           "finding": "The map is labelled approximately 1330 and therefore cannot be relabelled as a 1326-04-07 boundary.",
           "temporalPrecision": "near-scenario contextual reference; not exact 1326-04-07",
+          "geometryAuthority": false
+        },
+        {
+          "source": "The Pursuit of History / İSAM article on Karamanids and Alanya",
+          "role": "dated political/monetary context",
+          "finding": "The study notes Alanya coins dated 721/1321, 726/1326 and 729/1329 minted in the name of Mamluk Sultan Nasir Muhammad, and cites Ibn Battuta's 1333 Alanya account naming Karamanid Yusuf Bey.",
+          "temporalPrecision": "dated context spanning 1321/1326/1329; not a 1326 boundary artifact",
           "geometryAuthority": false
         }
       ],
