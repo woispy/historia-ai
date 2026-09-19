@@ -68,6 +68,9 @@ jobs:
       - name: Tier-1 geometry adapter contract test
         run: npm run test:1326-tier1-geometry-adapter
 
+      - name: Historical control-point proof adapter contract test
+        run: npm run test:1326-historical-control-point-proof-adapter
+
       - name: Historical control-point proof contract test
         run: npm run test:1326-historical-control-point-proof
 
