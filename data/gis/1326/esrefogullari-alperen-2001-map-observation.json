@@ -57,7 +57,9 @@
     "A visible settlement is an anchor candidate only; it is not a polygon vertex.",
     "The figure is not date-specific to 1326-04-07.",
     "No pixel-to-geographic correspondence is asserted by this observation alone.",
-    "No polygon, ring, or MapBin output is created."
+    "No polygon, ring, or MapBin output is created.",
+    "The paper's 1302–1320 territorial narrative cannot be treated as the 1326-04-07 boundary.",
+    "The map's widest-extent line is not date-specific to 1326-04-07."
   ],
   "nextProofInput": {
     "required": [
@@ -69,5 +71,29 @@
       "independent sanity validation"
     ],
     "status": "pending"
+  },
+  "historicalContext": [
+    {
+      "claim": "The paper frames Eşrefoğulları rule in Beyşehir as 1280–1326.",
+      "sourcePage": "7",
+      "sourceLines": "turn1view0:L270-L289",
+      "role": "temporal-context-only"
+    },
+    {
+      "claim": "The paper states that during Mübarizüddin Mehmet Bey's 1302–1320 period the beylik administered villages and districts including Ilgın, Akşehir, Doğanhisar, Çay, Bolvadin, Şarkikaraağaç, Yalvaç and Gelendost.",
+      "sourcePage": "7",
+      "sourceLines": "turn1view0:L277-L280",
+      "role": "historical-extent-context-only"
+    },
+    {
+      "claim": "The map legend explicitly describes the solid boundary as an approximate drawing of the widest extent and the dashed line as territories attached for a short period.",
+      "sourcePage": "8",
+      "sourceLines": "turn1view0:L296-L302",
+      "role": "cartographic-semantics"
+    }
+  ],
+  "pixelExtraction": {
+    "status": "not-performed",
+    "reason": "The PDF page screenshot is a rendered document view, not a retained source-image coordinate frame. UI/rendered-page pixels are not promoted to map-image correspondences."
   }
 }
