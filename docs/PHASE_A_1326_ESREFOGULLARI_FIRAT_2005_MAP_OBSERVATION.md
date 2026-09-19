@@ -15,11 +15,11 @@ A Fırat University Open Access repository PDF was inspected as an independent E
 - Year: **2005**
 - Repository artifact: `160425.pdf`
 
-The repository search record identifies the thesis and its 2005 date. The PDF contains an annex titled **“Ek 1: Eşrefoğulları Beyliğinin Yayıldığı Coğrafi Alan”**.
+The PDF contains an annex titled **“Ek 1: Eşrefoğulları Beyliğinin Yayıldığı Coğrafi Alan”**.
 
 ## Visual observation
 
-The annex map was visually inspected at PDF page index 115. It is a regional political map showing Eşrefoğulları among neighbouring political entities, including Candaroğulları, Osmanoğulları, Karamanoğulları, Hamidoğulları, Tekeoğulları, Aydınoğulları and Menteşe, with Byzantine and Mamluk context.
+The annex map is a regional political map showing Eşrefoğulları among neighbouring political entities, including Candaroğulları, Osmanoğulları, Karamanoğulları, Hamidoğulları, Tekeoğulları, Aydınoğulları and Menteşe, with Byzantine and Mamluk context.
 
 The map is useful as an **independent visual cross-check** because it is materially different from the previously reviewed Alperen (2001) reproduction. It must not, however, be assumed to share the same cartographic source, date model, or boundary methodology.
 
@@ -59,7 +59,7 @@ A named region, coastline, or neighbouring polity visible in this map is not aut
 
 The project now has two distinct visual Eşrefoğulları references:
 
-1. **Alperen (2001) reproduction** in the 2017 Tekkanat & Yavuz study — explicitly describes an approximate widest extent and temporarily attached territories.
+1. **Alperen (2001) reproduction** in the 2017 Tekkanat & Yavuz study — explicitly describes an approximate widest territorial extent and temporarily attached territories.
 2. **Aydın (2005) thesis, Ek 1** — independently depicts the geographical area of Eşrefoğulları.
 
 The existence of two visual references increases the opportunity for **cross-source consistency checking**, but it does not authorize intersection, averaging, tracing, or synthetic boundary construction.
@@ -161,21 +161,17 @@ No candidate has crossed the threshold required to authorize georeferencing of t
 
 ## 2026-09-19 — historical-source lineage result
 
-A targeted search of institutional catalogues and later scholarship confirms **Memduh Yavuz Süslü, _Eşref Oğulları Tarihi: Beyşehir Kılavuzu_ (Konya, 1934)** as an established Eşrefoğulları historical source. The Turkish Historical Society catalogue records the 1934 publication and notes that one copy includes a fold-out table.
+A targeted search of institutional catalogues and later scholarship confirms **Memduh Yavuz Süslü, _Eşref Oğulları Tarihi: Beyşehir Kılavuzu_ (Konya, 1934)** as an established Eşrefoğulları historical source. The Turkish Historical Society catalogue records the 1934 publication and explicitly describes **one fold-out table** alongside images, portraits and facsimiles.
+
+The catalogue also records that one library copy is missing the fold-out component and that requested material is for in-library use only. This confirms the component's existence in at least one physical copy but does not identify its content.
 
 TDV's Eşrefoğulları bibliography also lists the same 1934 work.
 
-This establishes **historical-source lineage**, but not **cartographic-source lineage** for Aydın (2005) Annex 1. The TTK catalogue's “1 katlı tablo” is notable, but the evidence did not identify that fold-out table as the source of Aydın's Annex 1 map.
-
-### New research lead
-
-The highest-value provenance lead became the **1934 Yavuz work and its fold-out table** because the institutional catalogue confirms that a fold-out visual/table component existed.
+This establishes **historical-source lineage**, but not **cartographic-source lineage** for Aydın (2005) Annex 1.
 
 ## 2026-09-19 — digitization/access discovery
 
-A new institutional-platform discovery materially changes the acquisition picture without changing the geometry gate.
-
-**Google Books** has a bibliographic/digitized record for:
+A Google Books record exists for:
 
 - **Memduh Yavuz, _Eşref Oğulları Tarihi: Beyşehir Kılavuzu_**
 - Babalık Matbaası, 1934
@@ -183,11 +179,15 @@ A new institutional-platform discovery materially changes the acquisition pictur
 - original from **Indiana University**
 - digitized **4 October 2010**
 
-The current Google Books record exposes bibliographic metadata and searchable common terms, but explicitly reports **“No eBook available”** in the current public view. Therefore the existence of a digitized record is confirmed, but page-image access to the fold-out component is **not** confirmed from the available public interface.
+The current public Google Books view explicitly reports **“No eBook available”** while exposing bibliographic metadata and searchable common terms. The indexed common-term list does not itself identify a map or cartographic figure.
 
-This is important because it upgrades the lead from “physical-copy-only” to **digitization exists / public page access unresolved**. It still does **not** establish that the fold-out table is a map, that it is the source of Aydın (2005) Annex 1, or that transformation rights are available.
+This upgrades the lead from “physical-copy-only” to **digitization record exists / public page-image access unresolved**. It does **not** establish that the fold-out table is a map, that it is the source of Aydın (2005) Annex 1, or that transformation rights are available.
 
-The TTK catalogue independently records the physical publication and its fold-out-table component, including that one copy lacks the fold-out. The TTK record also states that requested material is for in-library use only.
+## 2026-09-19 — contemporary bibliographic cross-check
+
+A separate bibliographic index of Konya publications records the 1934 Yavuz work as an 86-page illustrated publication. A 1937 Konya periodical index also records a contemporary **book review/presentation** titled “Eşref Oğulları Tarihi ve Beyşehir Kılavuzu,” published in *Konya [Halkevi]*, Year 1, Issue 10, June 1937, supplement 1.
+
+The existence of a contemporary review is useful because it creates a new source-access route for determining how the 1934 work was presented and what its supplementary material contained. However, the indexed bibliographic entry does not expose the review's full text or identify the fold-out as a map.
 
 ### Acquisition interpretation
 
@@ -196,17 +196,21 @@ The TTK catalogue independently records the physical publication and its fold-ou
 | 1934 Yavuz work exists | **Confirmed** |
 | Fold-out component exists in at least one catalogue record | **Confirmed** |
 | Digitized record exists | **Confirmed** |
-| Current public page-image/eBook access | **Not confirmed; Google Books says “No eBook available”** |
+| Public page-image/eBook access | **Not confirmed; Google Books says “No eBook available”** |
+| Indexed common terms identify a map | **No** |
 | Fold-out content is a boundary map | **Not established** |
 | Fold-out is source of Aydın 2005 Annex 1 | **Not established** |
+| Contemporary 1937 review exists | **Confirmed** |
 | Project-controlled binary acquired | **No** |
 | Raw SHA-256 | **None** |
 | Transformation rights | **Not established** |
 
 ### Gate decision
 
-The Yavuz 1934 item remains a **bibliographic/cartographic research lead**. No page image, fold-out scan, control point, polygon, or transformed derivative has been acquired.
+The Yavuz 1934 item remains a **bibliographic/cartographic research lead**. The evidence has become more precise, but the decisive artifact is still missing.
 
-The next admissible operation is to determine whether the Indiana University-origin digitization has an accessible page-image pathway or catalogue metadata describing the fold-out component. If access remains unavailable, the lead should be retained as provenance evidence rather than converted into assumed geometry.
+The next admissible operation is to inspect the accessible bibliographic trail around the **1937 contemporary review** and any institutional digitization metadata for the Indiana University-origin copy, specifically for an explicit description of the fold-out component. If that route still does not expose the component, the lead remains provenance-only.
 
-No canonical geometry, MapBin, physical authority, or runtime map asset is changed by this discovery.
+No page image, fold-out scan, control point, polygon, MapBin, or transformed derivative has been acquired.
+
+No canonical geometry, physical authority, or runtime map asset is changed by this research pass.
