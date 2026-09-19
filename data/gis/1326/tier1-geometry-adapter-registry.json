@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "historia_ai_1326_tier1_geometry_adapter_registry",
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "reviewed-evidence-staging",
+  "promotion": "BLOCKED",
+  "records": [
+    {
+      "entityId": "ottoman-beylik",
+      "state": "candidate",
+      "sourceIdentity": {
+        "sourceId": "cliopatria-v0.2.0",
+        "wikidataId": "Q12560",
+        "sourceLabel": "Ottoman Empire"
+      },
+      "temporalApplicability": {
+        "fromYear": 1326,
+        "toYear": 1332,
+        "scenarioDate": "1326-04-07"
+      },
+      "geometry": {
+        "status": "candidate",
+        "generation": "forbidden"
+      },
+      "review": {
+        "status": "manual-review-required",
+        "reason": "cross-polity-label"
+      }
+    },
+    {
+      "entityId": "esrefogullari",
+      "state": "source-gap",
+      "sourceIdentity": {
+        "sourceId": null
+      },
+      "temporalApplicability": {
+        "scenarioDate": "1326-04-07",
+        "historicalExistence": "supported"
+      },
+      "geometry": {
+        "status": "pending-source-acquisition",
+        "generation": "forbidden"
+      },
+      "review": {
+        "status": "pending"
+      }
+    },
+    {
+      "entityId": "alaye",
+      "state": "source-gap",
+      "sourceIdentity": {
+        "sourceId": null
+      },
+      "temporalApplicability": {
+        "scenarioDate": "1326-04-07",
+        "historicalExistence": "supported"
+      },
+      "geometry": {
+        "status": "pending-source-acquisition",
+        "generation": "forbidden"
+      },
+      "review": {
+        "status": "pending"
+      }
+    }
+  ]
+}
