@@ -37,22 +37,28 @@ jobs:
 
       - name: Select and validate GeoJSON FeatureCollection
         id: source
-        shell: bash
         run: |
           set -euo pipefail
-          input="$(find data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted -type f \( -name '*.geojson' -o -name '*.json' \) -print | sort | head -n 1)"
-          test -n "$input"
-          node - "$input" <<'NODE'
-          const fs = require("node:fs");
-          const input = process.argv[2];
-          const data = JSON.parse(fs.readFileSync(input, "utf8"));
-          if (data.type !== "FeatureCollection" || !Array.isArray(data.features)) {
-            throw new Error("Selected source is not a GeoJSON FeatureCollection.");
-          }
-          console.log(JSON.stringify({ input, featureCount: data.features.length }));
-          NODE
-          echo "input=$input" >> "$GITHUB_OUTPUT"
-
+          mapfile -t candidates < <(find data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted -type f -name '*.geojson' -print | sort)
+          test "${#candidates[@]}" -gt 0
+          selected=""
+          for candidate in "${candidates[@]}"; do
+            if node - "$candidate" <<'NODE'
+const fs = require("node:fs");
+const input = process.argv[2];
+const data = JSON.parse(fs.readFileSync(input, "utf8"));
+if (data.type !== "FeatureCollection" || !Array.isArray(data.features)) {
+  throw new Error("Selected source is not a GeoJSON FeatureCollection.");
+}
+console.log(JSON.stringify({ input, featureCount: data.features.length }));
+NODE
+            then
+              selected="$candidate"
+              break
+            fi
+          done
+          test -n "$selected"
+          echo "input=$selected" >> "$GITHUB_OUTPUT"
       - name: Extract 1326 candidates
         run: npm run extract:1326-cliopatria -- --input "${{ steps.source.outputs.input }}"
 
