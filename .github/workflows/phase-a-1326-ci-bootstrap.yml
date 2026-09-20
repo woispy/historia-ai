@@ -1,0 +1,22 @@
+name: Phase A — 1326 CI Bootstrap
+
+on:
+  push:
+    branches:
+      - codex/phase-a-1326-reviewed-staging
+  workflow_dispatch:
+
+jobs:
+  bootstrap:
+    name: Runner Bootstrap
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Runner probe
+        run: |
+          set -euo pipefail
+          echo "runner=started"
+          echo "ref=${GITHUB_REF}"
+          echo "sha=${GITHUB_SHA}"
+          node --version
