@@ -10,9 +10,13 @@
         {
           "source": "Tekkanat & Yavuz 2017 / Alperen 2001 map reproduction",
           "role": "cartographic extent reference",
-          "finding": "Map shows an approximate widest extent and separately marks territories attached for a short period.",
+          "finding": "Map shows an approximate widest extent and separately marks territories attached for a short period. Secondary reproduction is page-addressed at printed p.211; original Alperen 2001 map page remains unresolved.",
           "temporalPrecision": "broad historical extent; not exact 1326-04-07",
-          "geometryAuthority": false
+          "geometryAuthority": false,
+          "secondaryPage": "2017 printed p.211",
+          "originalMapPage": "unresolved",
+          "artifactRetention": false,
+          "rightsReview": "unresolved"
         },
         {
           "source": "Kofoğlu 2009, SUTAD",
