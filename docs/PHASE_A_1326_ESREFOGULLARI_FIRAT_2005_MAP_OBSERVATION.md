@@ -598,3 +598,26 @@ The search also surfaced further page-specific citations to Alperen 2001 for nar
 `book-identity-confirmed` → `map-attribution-confirmed` → `map-page-unresolved` → `image-unretained` → `georeference-blocked`
 
 No coordinates, control points, polygon vertices, MapBin, or canonical geometry were changed.
+
+
+## 2026-09-20 — Secondary reproduction page fixed: 2017 article p.211
+
+A fresh indexed PDF pass establishes a concrete page number for the **secondary reproduction**: the figure is on **p.211** of the 2017 *Türk İslâm Medeniyeti Akademik Araştırmalar Dergisi*, Vol.12 No.24, and is captioned **“Harita 2. Eşrefoğulları Beyliği Sınırları (Alperen, 2001)”**. The indexed visual element also preserves the four legend semantics and the named-place set. citeturn0search41
+
+This resolves the location of the **2017 reproduction**, not the original Alperen 2001 page. The distinction is now explicit in the evidence model:
+
+- `secondaryReproductionPage`: 2017 article p.211 — confirmed
+- `originalAlperenMapPage`: unresolved
+- `originalMapImageRetained`: false
+- `sourceArtifactSha256`: none
+- `georeference`: blocked
+
+The same indexed article's bibliography identifies Alperen as *Beyşehir ve Tarihi*, Sistem Matbaası, Konya, 2001. citeturn0search0
+
+A separate scholarly article cites Alperen 2001 pp.28–32 for the Eşrefoğulları foundation period and pp.29–36 for territorial context, including later expansion claims. These remain narrative constraints rather than exact 1326 boundary geometry. citeturn0search4
+
+### Gate decision
+
+The acquisition gate remains closed for geometry extraction. We now have a reproducible page reference for the **secondary source figure**, which is useful for provenance and future artifact retention, but it does not authorize digitization as canonical geography.
+
+No control points, polygon vertices, MapBin, runtime assets, or canonical geometry were changed.
