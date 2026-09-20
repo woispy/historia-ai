@@ -41,6 +41,18 @@ jobs:
         run: npm install --no-save --package-lock=false globals@17.8.0
       - name: Lint
         run: npm run lint
+      - name: Validate 1326 historical source acquisition contracts
+        run: npm run test:historical-source-acquisition
+      - name: Validate 1326 Cliopatria candidate extraction
+        run: node tools/tests/cliopatria-candidate-extraction.test.js
+      - name: Validate 1326 entity reconciliation
+        run: npm run test:historical-entity-reconciliation
+      - name: Validate 1326 entity evidence audit
+        run: npm run test:historical-entity-evidence-audit
+      - name: Validate 1326 geometry evidence inventory
+        run: npm run test:historical-geometry-evidence-inventory
+      - name: Validate 1326 cross-source geometry reconciliation
+        run: npm run test:historical-geometry-reconciliation
       - name: Validate map render diagnostics and depth context contracts
         run: npm run test:map-render-diagnostics
       - name: Validate camera world-wrap continuity
@@ -133,6 +145,10 @@ jobs:
         run: npm run test:p6.2-river-evidence-integration
       - name: Run P6.2 boundary solver foundation tests
         run: npm run test:p6.2-boundary-solver
+      - name: Run deterministic DEM sampling benchmark contract
+        run: npm run test:dem-sampling-benchmark
+      - name: Run Amasya boundary authority semantics contract
+        run: npm run test:amasya-boundary-authority
       - name: Run Anatolia seed + physical-cost stress
         run: npm run test:anatolia-seed-physical-cost-stress
       - name: Run adaptive ridge boundary quality
