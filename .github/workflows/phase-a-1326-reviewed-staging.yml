@@ -35,3 +35,16 @@ jobs:
 
       - name: Verify retained bytes
         run: npm run verify:1326-cliopatria
+
+      - name: Extract archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted
+          unzip -q data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip -d data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted
+
+      - name: Inventory extracted files
+        shell: bash
+        run: |
+          set -euo pipefail
+          find data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted -type f -printf '%p %s bytes\\n' | sort
