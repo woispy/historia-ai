@@ -75,3 +75,25 @@ No automatic repair is allowed during this proof.
 ## Next step
 
 Implement a read-only Amasya C probe against the current physical atlas/runtime authority. The probe must expose the missing boundary-recovery distinction rather than invent a replacement repair rule. If the current runtime has no explicit boundary semantic, record that as the remaining architecture gap and do not modify production authority.
+
+
+## Read-only Amasya probe — 2026-09-20
+
+A CI probe is now registered against the current production-side `isPhysicalLandPoint` contract.
+
+The probe evaluates the historical edge at `pontus-amasya / edgeIndex 3` at a fixed diagnostic step of 0.005 degrees. It records:
+
+- start/end current physical-land result;
+- every sampled physical-land failure;
+- first failure location;
+- absence of a current explicit geometry-boundary predicate;
+- zero mutation/repair authority.
+
+The historical start/end TRUE/FALSE values are retained as **historical observations only**. The probe does not assume that those older results remain numerically identical under the current authority.
+
+Output:
+
+`data/build/gis/1326/c-amasya-physical-boundary-probe.json`
+
+The result remains promotion-blocking until CI execution produces the actual current-authority evidence.
+
