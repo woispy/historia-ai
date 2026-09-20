@@ -132,7 +132,8 @@
     "test:1326-source-geometry-admissibility": "node tools/tests/phase-a-1326-source-geometry-admissibility.test.js",
     "test:1326-esrefogullari-map-georeference-observation": "node tools/tests/phase-a-1326-esrefogullari-map-georeference-observation.test.js",
     "test:1326-q12560-physical-authority": "node tools/tests/phase-a-1326-q12560-physical-authority.test.js",
-    "test:1326-c-amasya-physical-boundary": "node tools/tests/phase-a-1326-c-amasya-physical-boundary-probe.test.js"
+    "test:1326-c-amasya-physical-boundary": "node tools/tests/phase-a-1326-c-amasya-physical-boundary-probe.test.js",
+    "test:1326-c-boundary-contract": "node tools/tests/phase-a-1326-c-boundary-contract.test.js"
   },
   "dependencies": {
     "react": "^19.2.7",
