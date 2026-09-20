@@ -29,3 +29,6 @@ jobs:
           echo "reviewed-staging-job=started"
           node --version
           test -f package.json
+
+      - name: Acquire Cliopatria
+        run: npm run acquire:1326-cliopatria
