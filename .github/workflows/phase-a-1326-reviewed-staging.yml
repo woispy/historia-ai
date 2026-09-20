@@ -35,6 +35,12 @@ jobs:
           mkdir -p data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted
           unzip -q data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip -d data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted
 
+      - name: Inspect extracted Cliopatria files
+        shell: bash
+        run: |
+          set -euo pipefail
+          find data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted -maxdepth 2 -type f -printf '%p %s bytes\n' | sort
+
       - name: Select and validate GeoJSON FeatureCollection
         id: source
         shell: bash
