@@ -1,0 +1,33 @@
+name: Phase A — 1326 Reviewed Staging Smoke
+
+on:
+  push:
+    branches:
+      - codex/phase-a-1326-reviewed-staging
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    name: Reviewed Staging Smoke
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Smoke probe
+        run: |
+          set -euo pipefail
+          echo "smoke=started"
+          node --version
+          test -f package.json
