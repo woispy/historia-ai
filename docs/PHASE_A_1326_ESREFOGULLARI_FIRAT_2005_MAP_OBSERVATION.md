@@ -583,3 +583,18 @@ The search now has multiple verified internal page references (including pp.29�
 State remains: `map-attribution-confirmed` → `map-page-unresolved` → `image-unretained` → `georeference-blocked`.
 
 No geometry, control point, polygon vertex, MapBin, or canonical authority was changed.
+
+
+## 2026-09-20 — Search pass: no original map page exposed; Google Books remains catalogue-only
+
+A targeted search for the exact title, the figure title, and page-level references found no newly exposed original-page image or page number for **Harita 2**. The 2017 source remains the directly inspectable reproduction and explicitly attributes the figure to Alperen (2001). citeturn0search42turn0search0
+
+The Google Books identifier `RX0sAQAAIAAJ` is independently cited in a recent scholarly bibliography, confirming the catalogue record, but the indexed source does not expose the boundary-map page. citeturn0search3
+
+The search also surfaced further page-specific citations to Alperen 2001 for narrative or architectural material, reinforcing that page-level citation exists but cannot be used to infer the location of Harita 2.
+
+### Evidence gate
+
+`book-identity-confirmed` → `map-attribution-confirmed` → `map-page-unresolved` → `image-unretained` → `georeference-blocked`
+
+No coordinates, control points, polygon vertices, MapBin, or canonical geometry were changed.
