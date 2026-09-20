@@ -32,3 +32,6 @@ jobs:
 
       - name: Acquire Cliopatria
         run: npm run acquire:1326-cliopatria
+
+      - name: Verify retained bytes
+        run: npm run verify:1326-cliopatria
