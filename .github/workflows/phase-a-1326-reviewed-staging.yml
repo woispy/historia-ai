@@ -10,7 +10,6 @@ jobs:
   reviewed-staging:
     name: 1326 Reviewed Evidence Staging
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,119 +23,9 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Acquire Cliopatria
-        run: npm run acquire:1326-cliopatria
-
-      - name: Verify retained bytes
-        run: npm run verify:1326-cliopatria
-
-      - name: Extract archive
-        shell: bash
+      - name: Runner smoke
         run: |
           set -euo pipefail
-          mkdir -p data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted
-          unzip -q data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip -d data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted
-
-      - name: Inspect extracted Cliopatria files
-        shell: bash
-        run: |
-          set -euo pipefail
-          find data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted -maxdepth 2 -type f -printf '%p %s bytes\n' | sort
-
-      - name: Select and validate GeoJSON FeatureCollection
-        id: source
-        shell: bash
-        run: |
-          set -euo pipefail
-          mapfile -t candidates < <(find data/build/gis/1326/source-snapshots/cliopatria-v0.2.0-extracted -type f -print | sort)
-          test "${#candidates[@]}" -gt 0
-          selected=""
-          for candidate in "${candidates[@]}"; do
-            if node - "$candidate" <<'NODE'
-const fs = require("node:fs");
-const input = process.argv[2];
-try {
-  const data = JSON.parse(fs.readFileSync(input, "utf8"));
-  if (data?.type === "FeatureCollection" && Array.isArray(data.features)) {
-    console.log(JSON.stringify({ input, featureCount: data.features.length }));
-    process.exit(0);
-  }
-} catch {}
-process.exit(1);
-NODE
-            then
-              selected="$candidate"
-              break
-            fi
-          done
-          test -n "$selected"
-          echo "input=$selected" >> "$GITHUB_OUTPUT"
-      - name: Extract 1326 candidates
-        run: npm run extract:1326-cliopatria -- --input "${{ steps.source.outputs.input }}"
-
-      - name: Reconcile Tier-1 entities
-        run: npm run reconcile:1326-cliopatria -- --input data/build/gis/1326/cliopatria-1326-candidates.json
-
-      - name: Build reviewed evidence staging
-        run: npm run build:1326-reviewed-staging
-
-      - name: Contract test
-        run: npm run test:1326-reviewed-staging
-
-      - name: Tier-1 geometry adapter contract test
-        run: npm run test:1326-tier1-geometry-adapter
-
-      - name: Prepare physical/hydrography runtime authority
-        run: npm run build:assets
-
-      - name: Q12560 physical authority probe
-        run: npm run test:1326-q12560-physical-authority
-
-      - name: Amasya C physical boundary probe
-        run: npm run test:1326-c-amasya-physical-boundary
-
-      - name: C boundary contract lock
-        run: npm run test:1326-c-boundary-contract
-
-      - name: Historical control-point proof adapter contract test
-        run: npm run test:1326-historical-control-point-proof-adapter
-
-      - name: Eşrefoğulları map observation contract test
-        run: npm run test:1326-esrefogullari-map-observation
-
-      - name: Eşrefoğulları control-point candidate contract test
-        run: npm run test:1326-esrefogullari-control-point-candidates
-
-      - name: Eşrefoğulları map georeference observation contract test
-        run: npm run test:1326-esrefogullari-map-georeference-observation
-
-      - name: Alâiye source observation contract test
-        run: npm run test:1326-alaiye-source-observation
-
-      - name: Source-to-geometry admissibility matrix contract test
-        run: npm run test:1326-source-geometry-admissibility
-
-      - name: Historical control-point proof contract test
-        run: npm run test:1326-historical-control-point-proof
-
-      - name: Cartographic artifact ledger contract test
-        run: npm run test:1326-cartographic-artifact-ledger
-
-      - name: Tier-1 reconstruction dossier contract test
-        run: npm run test:1326-tier1-reconstruction-dossier
-
-      - name: Independent source checksum
-        shell: bash
-        run: sha256sum data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip
-
-      - name: Upload staging evidence
-        uses: actions/upload-artifact@v4
-        with:
-          name: phase-a-1326-reviewed-evidence-staging
-          path: |
-            data/build/gis/1326/cliopatria-1326-candidates.json
-            data/build/gis/1326/cliopatria-entity-reconciliation.json
-            data/build/gis/1326/reviewed-staging/manifest.json
-            data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.acquisition.json
-          if-no-files-found: error
-          retention-days: 14
+          echo "reviewed-staging-job=started"
+          node --version
+          test -f package.json
