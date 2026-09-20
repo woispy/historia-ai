@@ -87,6 +87,13 @@
           "finding": "The study notes Alanya coins dated 721/1321, 726/1326 and 729/1329 minted in the name of Mamluk Sultan Nasir Muhammad, and cites Ibn Battuta's 1333 Alanya account naming Karamanid Yusuf Bey.",
           "temporalPrecision": "dated context spanning 1321/1326/1329; not a 1326 boundary artifact",
           "geometryAuthority": false
+        },
+        {
+          "source": "Varlık, Alaiye Beyleri / 14. Yüzyılda Haçlılar ve Türkler secondary synthesis",
+          "role": "scenario-date political-context cross-check",
+          "finding": "Secondary historical synthesis reports Alaiye coins dated 1321 and 1326 struck in the name of Mamluk Sultan Nasir Muhammad, while the same synthesis places the polity under changing Karamanid/Mamluk/Ilkhanid relationships.",
+          "temporalPrecision": "dated 1321/1326 context; not a boundary artifact",
+          "geometryAuthority": false
         }
       ],
       "reconstructionStatus": "candidate-evidence-only",
