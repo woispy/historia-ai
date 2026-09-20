@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "entityId": "ottoman-beylik",
+  "sourceIdentity": {
+    "sourceId": "cliopatria-v0.2.0",
+    "wikidataId": "Q12560",
+    "sourceFeatureIndex": 6204
+  },
+  "inputIntegrity": {
+    "candidateArtifactSha256": "dfc1658bde6c565a8dcb0a36b39de265a530b22408f2f9c863dfefe794d7b589",
+    "geometryType": "Polygon",
+    "ringCount": 1,
+    "distinctVertices": 23,
+    "closed": true,
+    "crs": "EPSG:4326"
+  },
+  "topologyDiagnostics": {
+    "selfIntersection": false,
+    "simpleBoundary": true,
+    "validGeometry": true,
+    "validityExplanation": "Valid Geometry",
+    "exteriorOrientation": "counter-clockwise",
+    "interiorRings": 0,
+    "coordinateCountIncludingClosure": 24
+  },
+  "areaDiagnostics": {
+    "planarCoordinateAreaDegreesSquared": 2.8685291447145573,
+    "bbox": [28.67632484436035, 39.64360046386719, 32.03867721557617, 40.93837356567383],
+    "interpretation": "Diagnostic only; not a geodesic or canonical political area."
+  },
+  "physicalLandValidation": {
+    "status": "NOT_RUN",
+    "reason": "The current reviewed-staging branch does not expose the canonical physical-land authority module as a directly available source file. The candidate is therefore not tested against a substituted or reconstructed authority."
+  },
+  "mutationPolicy": {
+    "geometryModified": false,
+    "repairApplied": false,
+    "simplificationApplied": false,
+    "snapApplied": false,
+    "canonicalMapBinModified": false
+  },
+  "decision": {
+    "geometryIntegrity": "PASS",
+    "physicalLandGate": "BLOCKED_PENDING_AUTHORITY_BINDING",
+    "entitySemantics": "MANUAL_REVIEW_REQUIRED",
+    "promotion": "BLOCKED"
+  }
+}
