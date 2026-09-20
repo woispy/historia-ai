@@ -82,3 +82,16 @@ The new evidence strengthens **source identity and acquisition feasibility**, bu
 
 No attempt is made to treat a catalogue listing, bibliographic citation, or web-rendered reproduction as the map bytes required for calibration.
 
+
+
+## 2026-09-20 — Evidence-model consistency checkpoint
+
+The three Tier-1 evidence layers are now aligned on the Alperen map distinction:
+
+- `tier1-cartographic-artifact-ledger`: secondary reproduction = 2017 printed p.211; original Alperen map page unresolved; no retained original bytes.
+- `tier1-boundary-evidence-matrix`: the same reproduction is boundary-evidence/control-point candidate only; the p.211 reference is explicitly secondary and does not close the 1326 date/geometry gate.
+- `tier1-source-geometry-admissibility-matrix`: provenance, artifact retention, rights review and map-date interpretation remain prerequisites before any pixel↔geo calibration.
+
+This closes a documentation-consistency gap: **p.211 is now treated consistently as the location of the 2017 reproduction, never as the location of the 2001 original map.**
+
+No geometry was generated, no control point was promoted, and no canonical asset was modified.
