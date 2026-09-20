@@ -351,3 +351,25 @@ The matrix distinguishes:
 This classification is deliberately stricter than a generic source list. A source can support georeferencing without becoming boundary authority; a temporal statement can constrain a reconstruction without supplying polygon coordinates; and a near-scenario cartographic source cannot be relabelled as 1326-04-07.
 
 Current result remains unchanged: Eşrefoğulları and Alâiye have no immutable, date-exact 1326 boundary artifact in the retained evidence set, so no polygon is generated. Canonical promotion remains BLOCKED and SAFE TO DELETE remains 0.
+
+
+## Q12560 physical-authority binding — 2026-09-20
+
+The Cliopatria Ottoman Q12560 candidate has passed source-geometry integrity and topology diagnostics, but its physical-land gate required an explicit authority rebinding pass.
+
+The current staging ref does **not** contain the older forensic `tools/historical-gis/recovery/physical-land-authority.mjs`. The active production-side physical predicate is exported from `tools/historical-gis/AnatoliaPhase2DGeometryBuilder.js` as `isPhysicalLandPoint`, backed by the curated Anatolia physical atlas and runtime 10m hydrography.
+
+A read-only CI probe has therefore been added. It does not repair, snap, simplify, or mutate the Q12560 candidate and does not modify canonical MapBin. The probe samples every candidate vertex and points along every candidate edge at the existing 0.03° diagnostic step.
+
+The probe must execute after the normal `build:assets` path prepares the runtime hydrography authority. Its output is retained as:
+
+`data/build/gis/1326/ottoman-q12560-physical-authority.json`
+
+The older forensic distinction between `isPhysicalGeometryBoundaryPoint` and `isFinalPhysicalGeometryBoundaryPoint` remains intentionally unbound to this staging result. No claim about those semantics is imported until the current authority exposes an explicit equivalent contract.
+
+**Current gate:** physical-land result pending CI execution.  
+**Candidate mutation:** none.  
+**Canonical mutation:** none.  
+**Promotion:** BLOCKED.  
+**SAFE TO DELETE:** 0.
+
