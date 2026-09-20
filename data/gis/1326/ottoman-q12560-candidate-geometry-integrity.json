@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "candidate-evidence-only",
+  "source": {
+    "sourceId": "cliopatria-v0.2.0",
+    "immutableReference": {
+      "type": "git-commit",
+      "sha": "ad28a69",
+      "sourceBlobSha": "cefab0f4b622e2e7fb3daf68d4f461f83991204c"
+    },
+    "rawArtifactSha256": "d01ae3a20d358cc5d54f69d9d725d390767d9c8759ac89ad6f90c58d106f3370",
+    "rawArtifactByteLength": 44231317
+  },
+  "derivedCandidateArtifact": {
+    "workflowRunId": 35383554275,
+    "artifactId": 10562704435,
+    "artifactDigest": "sha256:6746314cb22629b8ad755f7de19ba9c3ca1950b1807a0f3c819fc3a7dc8157fe",
+    "candidateFileSha256": "dfc1658bde6c565a8dcb0a36b39de265a530b22408f2f9c863dfefe794d7b589",
+    "candidateFile": "cliopatria-1326-candidates.json"
+  },
+  "feature": {
+    "sourceFeatureIndex": 6204,
+    "sourceFeatureId": null,
+    "name": "Ottoman Empire",
+    "wikidataId": "Q12560",
+    "seshatId": null,
+    "fromYear": 1326,
+    "toYear": 1332,
+    "type": "POLITY",
+    "geometryAuthorityStatus": "candidate-evidence-only"
+  },
+  "geometryIntegrity": {
+    "geometryType": "Polygon",
+    "ringCount": 1,
+    "vertexCountIncludingClosure": 24,
+    "closedRing": true,
+    "bbox": [28.67632484436035, 39.64360046386719, 32.03867721557617, 40.93837356567383],
+    "signedPlanarAreaDegrees2": 2.8685291447145573,
+    "selfIntersectionCheck": "not-yet-run",
+    "topologyCheck": "not-yet-run",
+    "physicalLandCheck": "not-yet-run",
+    "crs": "EPSG:4326 by Cliopatria source contract"
+  },
+  "observations": [
+    "The candidate is a single closed Polygon with 23 distinct coordinate positions plus closure.",
+    "The geometry contains several long straight segments and repeated latitude/longitude increments; this is recorded as an observation, not interpreted as an error.",
+    "The bbox is approximately longitude 28.6763–32.0387 and latitude 39.6436–40.9384.",
+    "The source feature has no explicit feature ID in the extracted candidate.",
+    "No coordinate was edited, snapped, repaired, simplified, or regenerated during this inspection."
+  ],
+  "semanticStatus": {
+    "entityEquivalence": "manual-review-required",
+    "boundaryMeaning": "not-yet-resolved",
+    "promotion": "BLOCKED"
+  },
+  "nextGate": "Run geometry-integrity/topology diagnostics against the unchanged candidate, then compare its boundary with the existing physical-land authority without mutating that authority."
+}
