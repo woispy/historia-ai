@@ -621,3 +621,20 @@ A separate scholarly article cites Alperen 2001 pp.28–32 for the Eşrefoğulla
 The acquisition gate remains closed for geometry extraction. We now have a reproducible page reference for the **secondary source figure**, which is useful for provenance and future artifact retention, but it does not authorize digitization as canonical geography.
 
 No control points, polygon vertices, MapBin, runtime assets, or canonical geometry were changed.
+
+
+## 2026-09-20 — Catalogue-only conclusion strengthened
+
+A fresh exact-title search confirms the Google Books identifier `RX0sAQAAIAAJ` through an independent scholarly bibliography, while the current indexed record still exposes no readable boundary-map page. citeturn0search3turn0search38
+
+The municipal research publication independently cites Alperen 2001 for specific narrative material (including p.3 for a Beyşehir naming tradition), confirming that the edition is actively used in page-level scholarship. citeturn0search37 Another scholarly work cites Alperen 2001 p.85 for Eşrefoğlu Mosque chronology, again demonstrating page-level citation without exposing the boundary map. citeturn0search36
+
+The 2017 reproduction remains the only directly inspectable public figure and is fixed at p.211. citeturn0search33
+
+### Gate / next evidence class
+
+The search has now exhausted the currently indexed page-level trails without locating the original map page. The evidence should therefore remain classified as:
+
+`original-book-confirmed` + `secondary-map-reproduction-confirmed` + `original-map-page-unresolved` + `image-unretained`.
+
+No geometry extraction is authorized. The next admissible evidence class is an actual retained scan/photo of the original map page or an institutional record that explicitly identifies the map plate/page. General narrative citations will not close this gate.
