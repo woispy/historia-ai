@@ -26,12 +26,26 @@
   },
   "areaDiagnostics": {
     "planarCoordinateAreaDegreesSquared": 2.8685291447145573,
-    "bbox": [28.67632484436035, 39.64360046386719, 32.03867721557617, 40.93837356567383],
+    "bbox": [
+      28.67632484436035,
+      39.64360046386719,
+      32.03867721557617,
+      40.93837356567383
+    ],
     "interpretation": "Diagnostic only; not a geodesic or canonical political area."
   },
   "physicalLandValidation": {
-    "status": "NOT_RUN",
-    "reason": "The current reviewed-staging branch does not expose the canonical physical-land authority module as a directly available source file. The candidate is therefore not tested against a substituted or reconstructed authority."
+    "status": "BLOCKED_PENDING_REPRODUCIBLE_AUTHORITY_BINDING",
+    "authorityIdentity": {
+      "implementation": "tools/historical-gis/AnatoliaPhase2DGeometryBuilder.js",
+      "predicate": "isPhysicalLandPoint",
+      "physicalAtlas": "src/map/data/AnatoliaPhysicalAtlas.js",
+      "runtimeHydrography": "src/map/data/generated/anatolia-hydrography-10m.json"
+    },
+    "reason": "Current staging does not expose the older forensic recovery authority module. The current production-side predicate is exported by AnatoliaPhase2DGeometryBuilder, but its runtime lake authority is generated hydrography that is not directly available through the repository file interface on this ref. No substitute, reconstruction, repair, or inferred physical-land result was used.",
+    "olderForensicContract": "isPhysicalGeometryBoundaryPoint/isFinalPhysicalGeometryBoundaryPoint are not imported into this result.",
+    "execution": "not-run",
+    "nextGate": "Bind a read-only CI test to the normal physical/hydrography asset preparation path and record vertex/edge samples against the unchanged candidate."
   },
   "mutationPolicy": {
     "geometryModified": false,
@@ -42,7 +56,7 @@
   },
   "decision": {
     "geometryIntegrity": "PASS",
-    "physicalLandGate": "BLOCKED_PENDING_AUTHORITY_BINDING",
+    "physicalLandGate": "BLOCKED_PENDING_REPRODUCIBLE_AUTHORITY_BINDING",
     "entitySemantics": "MANUAL_REVIEW_REQUIRED",
     "promotion": "BLOCKED"
   }
