@@ -42,7 +42,10 @@
       "description": "The published figure distinguishes the beylik centre, settlements, an approximate widest extent and territories temporarily attached. The paper also reports the broad regional extent in narrative form.",
       "binaryRetention": "not-retained-in-repository",
       "sha256": null,
-      "inspection": "web-inspected 2026-09-19"
+      "inspection": "web-inspected 2026-09-20",
+      "secondaryPage": "2017 journal p.211",
+      "pageEvidence": "Harita 2 is directly inspectable on printed p.211 of Tekkanat & Yavuz 2017; this is the secondary reproduction page, not the original Alperen 2001 page.",
+      "originalPageStatus": "unresolved"
     },
     {
       "id": "wikimedia-anatolian-beyliks-1330-tr",
@@ -79,7 +82,9 @@
       "reason": "The underlying work is identified, but this review did not locate a clearly reusable downloadable binary of the 2001 book or an independently retained original map artifact. It therefore cannot supply image bytes, SHA-256, or transformation rights for georeferencing.",
       "binaryRetention": "not-acquired",
       "sha256": null,
-      "inspection": "web-researched 2026-09-19"
+      "inspection": "web-researched 2026-09-20",
+      "physicalAvailability": "current second-hand catalogues show multiple listed copies",
+      "originalMapPage": "unresolved"
     },
     {
       "id": "wikimedia-esrefogullari-konumu-2014",
