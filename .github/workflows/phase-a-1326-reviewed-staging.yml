@@ -74,6 +74,9 @@ jobs:
       - name: Q12560 physical authority probe
         run: npm run test:1326-q12560-physical-authority
 
+      - name: Amasya C physical boundary probe
+        run: npm run test:1326-c-amasya-physical-boundary
+
       - name: Historical control-point proof adapter contract test
         run: npm run test:1326-historical-control-point-proof-adapter
 
