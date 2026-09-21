@@ -108,6 +108,26 @@ function cancellationRatio(poly) {
   const h = area(hull);
   return h > 0 ? a / h : null;
 }
+function orderLikeClipCellToLand(points) {
+  const unique = [];
+  const seen = new Set();
+  for (const point of points ?? []) {
+    const key = `${point[0].toFixed(9)},${point[1].toFixed(9)}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(point);
+  }
+  if (unique.length < 3) return unique;
+  const center = unique.reduce(
+    (sum, [x, y]) => [sum[0] + x, sum[1] + y],
+    [0, 0],
+  );
+  center[0] /= unique.length;
+  center[1] /= unique.length;
+  unique.sort((a, b) => Math.atan2(a[1] - center[1], a[0] - center[0]) - Math.atan2(b[1] - center[1], a[0] - center[0]));
+  return unique;
+}
+
 function selfIntersections(poly) {
   const hits = [];
   if (!Array.isArray(poly) || poly.length < 4) return hits;
@@ -175,6 +195,7 @@ try {
       }
     }
     const uniqueClipPoints = mod.uniquePoints(rawClipPoints.map((entry) => entry.point));
+    const orderedUniqueClipPoints = orderLikeClipCellToLand(uniqueClipPoints);
     const clipped = mod.clipCellToLand(cell);
     candidates.push({
       siteIndex: index,
@@ -186,6 +207,12 @@ try {
         unique6Decimal: uniqueClipPoints,
         unique6DecimalArea: area(uniqueClipPoints),
         unique6DecimalTranslatedArea: translatedArea(uniqueClipPoints),
+        unique6DecimalOrderedArea: area(orderedUniqueClipPoints),
+        unique6DecimalOrderedTranslatedArea: translatedArea(orderedUniqueClipPoints),
+        unique6DecimalOrderedSelfIntersections: selfIntersections(orderedUniqueClipPoints),
+        unique6DecimalOrderedConvexHullArea: area(convexHull(orderedUniqueClipPoints)),
+        unique6DecimalOrderedCancellationRatio: cancellationRatio(orderedUniqueClipPoints),
+        unique6DecimalOrderedShoelace: shoelaceDiagnostics(orderedUniqueClipPoints),
         unique6DecimalConvexHullArea: area(convexHull(uniqueClipPoints)),
         unique6DecimalCancellationRatio: cancellationRatio(uniqueClipPoints),
         unique6DecimalShoelace: shoelaceDiagnostics(uniqueClipPoints),
