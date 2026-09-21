@@ -118,6 +118,15 @@ jobs:
           status=$?
           cat forensic-output/a2-authority-isolation.stderr
           exit $status
+      - name: Run A2 clip lineage cancellation topology probe
+        id: clip_lineage
+        continue-on-error: true
+        run: |
+          node tools/tests/phase2d-a2-clip-lineage-probe.mjs > forensic-output/a2-clip-lineage.json 2> forensic-output/a2-clip-lineage.stderr
+          status=$?
+          cat forensic-output/a2-clip-lineage.json
+          if [ -s forensic-output/a2-clip-lineage.stderr ]; then cat forensic-output/a2-clip-lineage.stderr; fi
+          exit $status
       - name: Upload A2 forensic artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -138,6 +147,8 @@ jobs:
             forensic-output/a2-counterfactual.stderr
             forensic-output/a2-authority-isolation.json
             forensic-output/a2-authority-isolation.stderr
+            forensic-output/a2-clip-lineage.json
+            forensic-output/a2-clip-lineage.stderr
           if-no-files-found: warn
           retention-days: 7
       - name: Upload A2 fallback lineage artifact
