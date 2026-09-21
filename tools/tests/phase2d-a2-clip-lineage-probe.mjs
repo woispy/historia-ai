@@ -112,7 +112,7 @@ function orderLikeClipCellToLand(points) {
   const unique = [];
   const seen = new Set();
   for (const point of points ?? []) {
-    const key = `${point[0].toFixed(9)},${point[1].toFixed(9)}`;
+    const key = `${point[0].toFixed(6)}:${point[1].toFixed(6)}`;
     if (seen.has(key)) continue;
     seen.add(key);
     unique.push(point);
