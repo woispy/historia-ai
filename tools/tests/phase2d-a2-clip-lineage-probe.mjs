@@ -102,6 +102,26 @@ function convexHull(points) {
   upper.pop();
   return lower.concat(upper);
 }
+function polygonEquivalent(a, b, epsilon = 1e-12) {
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+  const samePoint = (p, q) => Math.abs(p[0] - q[0]) <= epsilon && Math.abs(p[1] - q[1]) <= epsilon;
+  for (let offset = 0; offset < b.length; offset += 1) {
+    if (!samePoint(a[0], b[offset])) continue;
+    let forward = true;
+    for (let i = 0; i < a.length; i += 1) {
+      if (!samePoint(a[i], b[(offset + i) % b.length])) { forward = false; break; }
+    }
+    if (forward) return true;
+    let reverse = true;
+    for (let i = 0; i < a.length; i += 1) {
+      const index = (offset - i + b.length) % b.length;
+      if (!samePoint(a[i], b[index])) { reverse = false; break; }
+    }
+    if (reverse) return true;
+  }
+  return false;
+}
+
 function cancellationRatio(poly) {
   const a = area(poly);
   const hull = convexHull(poly);
@@ -213,6 +233,9 @@ try {
         unique6DecimalOrderedConvexHullArea: area(convexHull(orderedUniqueClipPoints)),
         unique6DecimalOrderedCancellationRatio: cancellationRatio(orderedUniqueClipPoints),
         unique6DecimalOrderedShoelace: shoelaceDiagnostics(orderedUniqueClipPoints),
+        canonicalClipPolygonEquivalent: polygonEquivalent(clipped, orderedUniqueClipPoints),
+        canonicalClipAreaDelta: clipped.length >= 3 ? mod.polygonArea(clipped) - area(orderedUniqueClipPoints) : null,
+        canonicalClipTranslatedAreaDelta: clipped.length >= 3 ? translatedArea(clipped) - translatedArea(orderedUniqueClipPoints) : null,
         unique6DecimalConvexHullArea: area(convexHull(uniqueClipPoints)),
         unique6DecimalCancellationRatio: cancellationRatio(uniqueClipPoints),
         unique6DecimalShoelace: shoelaceDiagnostics(uniqueClipPoints),
