@@ -28,8 +28,10 @@ The forensic workflow must retain:
 - Forensic harness exists and reconstructs the historical `uniquePoints` six-decimal identity and centroid/`atan2` ordering.
 - Canonical polygon parity diagnostics are implemented.
 - The workflow is wired to execute the clip-lineage probe and upload `a2-clip-lineage.json`.
-- No retained GitHub Actions execution artifact has yet been verified for the clip-lineage workflow.
-- Therefore the historical `~2.27e-13` producer/artifact lineage remains unidentified.
+- The workflow has both `push` and `pull_request` triggers plus `workflow_dispatch`.
+- The available GitHub workflow-run connector exposes pull-request-triggered runs only; therefore an empty result from that connector does **not** prove that a push-triggered run did not execute.
+- No retained execution artifact has been retrieved and inspected in this investigation session.
+- Therefore the historical `~2.27e-13` producer/artifact lineage remains unidentified from retained execution evidence.
 - This document must not be interpreted as A2 closure evidence.
 
 ## Closure rules
