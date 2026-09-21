@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "source": {"sourceId":"cliopatria-v0.2.0","sourceTag":"v0.2.0"},
+  "candidates": [
+    {
+      "sourceFeatureIndex":1,"sourceFeatureId":"near-bursa","name":"Candidate A",
+      "fromYear":1200,"toYear":1400,"type":"POLITY","wikidataId":null,"seshatId":null,
+      "geometry":{"type":"Polygon","coordinates":[[[28.9,40.1],[29.2,40.1],[29.2,40.3],[28.9,40.3],[28.9,40.1]]]},
+      "geometryAuthorityStatus":"candidate-evidence-only"
+    },
+    {
+      "sourceFeatureIndex":2,"sourceFeatureId":"far-away","name":"Candidate B",
+      "fromYear":1200,"toYear":1400,"type":"POLITY","wikidataId":null,"seshatId":null,
+      "geometry":{"type":"Polygon","coordinates":[[[40,35],[41,35],[41,36],[40,36],[40,35]]]},
+      "geometryAuthorityStatus":"candidate-evidence-only"
+    }
+  ]
+}
