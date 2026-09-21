@@ -1,0 +1,83 @@
+# Historia AI — 1326 Candidate Surface Screening
+
+## Status
+
+**Evidence-layer tooling only.** This work branch is not a production promotion.
+
+The screening stage narrows source candidates around an explicitly supplied 1326 anchor set. It does not create, clip, reshape, or promote political geometry.
+
+## Position in the migration chain
+
+```
+source acquisition
+  -> temporal extraction
+  -> entity reconciliation
+  -> candidate surface screening
+  -> geometry reconciliation
+  -> topology validation
+  -> review / provenance / confidence
+  -> canonical political geography
+```
+
+The tool is intentionally placed before geometry reconciliation.
+
+## Input
+
+- Cliopatria candidate output from `extract-1326-cliopatria-candidates.js`.
+- A separate anchor document with `scenarioDate = 1326-04-07` and WGS84 `[longitude, latitude]` coordinates.
+
+The tool does not derive anchors from the legacy 1300 political builder.
+
+## Screening rule
+
+For each candidate geometry:
+
+1. calculate its finite WGS84 bounding box;
+2. create an influence rectangle around each supplied anchor;
+3. retain candidates whose bounding box intersects an influence rectangle;
+4. record matching anchor IDs and conservative bbox distance;
+5. preserve the source candidate geometry unchanged.
+
+The default influence radius is 120 km and is configurable.
+
+This is deliberately a conservative screening operation. False positives are acceptable at this stage; silently dropping evidence is not.
+
+## Explicit non-authority rules
+
+The tool must never:
+
+- construct Voronoi cells;
+- synthesize missing borders;
+- infer ownership from proximity;
+- clip a candidate polygon to an anchor;
+- alter physical geography;
+- write a 1326 production runtime;
+- publish MapBin;
+- mark evidence as reviewed or canonical.
+
+Every screened result is marked:
+
+```text
+screeningOnly = true
+promotion = BLOCKED
+```
+
+## Why this step exists
+
+Cliopatria provides political-entity evidence, but its temporal match does not establish an exact 1326 political province boundary. The screening layer therefore answers only the spatial-relevance question before historical geometry review.
+
+The intended authority chain remains:
+
+```
+Evidence -> Candidate -> Reviewed -> Canonical
+```
+
+## Verification
+
+The branch contains a deterministic fixture and:
+
+```text
+npm run test:1326-candidate-surface-screening
+```
+
+The test checks that nearby evidence is retained, distant evidence is rejected, the source identity/date are preserved, and promotion remains blocked.
