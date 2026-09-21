@@ -81,3 +81,21 @@ npm run test:1326-candidate-surface-screening
 ```
 
 The test checks that nearby evidence is retained, distant evidence is rejected, the source identity/date are preserved, and promotion remains blocked.
+
+## Integrated candidate pipeline
+
+Once a verified Cliopatria GeoJSON artifact exists locally, the extraction, entity reconciliation, and screening stages can be run as one deterministic chain:
+
+```text
+npm run run:1326-cliopatria-candidate-pipeline -- --input <1326-cliopatria.geojson> --anchors <1326-anchor-registry.json>
+```
+
+The orchestrator writes three evidence-layer reports under `data/build/gis/1326/`:
+
+1. `cliopatria-1326-candidates.json` — temporal candidate extraction with source SHA-256;
+2. `cliopatria-entity-reconciliation.json` — entity matching against the 1326 evidence matrix;
+3. `cliopatria-candidate-surface-screening.json` — spatial relevance screening against an explicitly supplied 1326 anchor registry.
+
+The anchor registry is an explicit input. It is **not** generated from the 1300 political builder, and the pipeline refuses to promote any result to reviewed or canonical geometry.
+
+This branch does not claim that the raw Cliopatria artifact has been acquired. Acquisition remains a separate provenance gate; `acquire:1326-cliopatria` must produce and verify the retained artifact before its contents are treated as an acquired source snapshot.
