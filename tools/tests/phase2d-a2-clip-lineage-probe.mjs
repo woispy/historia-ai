@@ -190,6 +190,10 @@ try {
   mod.addPhysicalBarrierSites(sites, seen);
   mod.addCoastInteriorSites(sites, seen);
   mod.addSourceShapeSites(sites, seen, []);
+  let parityChecked = 0;
+  let parityFailures = 0;
+  let maxAreaDelta = 0;
+  let maxTranslatedAreaDelta = 0;
   const candidates = [];
   for (let index = 0; index < sites.length; index += 1) {
     if (sites[index].provinceId !== targetId) continue;
@@ -217,6 +221,13 @@ try {
     const uniqueClipPoints = mod.uniquePoints(rawClipPoints.map((entry) => entry.point));
     const orderedUniqueClipPoints = orderLikeClipCellToLand(uniqueClipPoints);
     const clipped = mod.clipCellToLand(cell);
+    const canonicalParity = clipped.length >= 3 && polygonEquivalent(clipped, orderedUniqueClipPoints);
+    if (clipped.length >= 3) {
+      parityChecked += 1;
+      if (!canonicalParity) parityFailures += 1;
+      maxAreaDelta = Math.max(maxAreaDelta, Math.abs(mod.polygonArea(clipped) - area(orderedUniqueClipPoints)));
+      maxTranslatedAreaDelta = Math.max(maxTranslatedAreaDelta, Math.abs(translatedArea(clipped) - translatedArea(orderedUniqueClipPoints)));
+    }
     candidates.push({
       siteIndex: index,
       site: sites[index],
@@ -260,6 +271,7 @@ try {
     siteCount: sites.length,
     targetSiteCount: candidates.length,
     qualifyingCount: qualifying.length,
+    paritySummary: { checked: parityChecked, failures: parityFailures, allEquivalent: parityChecked > 0 && parityFailures === 0, maxAreaDelta, maxTranslatedAreaDelta },
     smallest,
     tinyHits: candidates.filter((c) => c.collapse.clipped || c.collapse.roundedClipped),
     filterBeforeRoundButTinyAfter: candidates.filter((c) => c.collapse.filterBeforeRoundButTinyAfter),
