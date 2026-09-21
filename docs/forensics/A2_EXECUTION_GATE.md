@@ -23,6 +23,15 @@ The forensic workflow must retain:
 6. self-intersection diagnostics;
 7. five-decimal representation diagnostics.
 
+## Current evidence state
+
+- Forensic harness exists and reconstructs the historical `uniquePoints` six-decimal identity and centroid/`atan2` ordering.
+- Canonical polygon parity diagnostics are implemented.
+- The workflow is wired to execute the clip-lineage probe and upload `a2-clip-lineage.json`.
+- No retained GitHub Actions execution artifact has yet been verified for the clip-lineage workflow.
+- Therefore the historical `~2.27e-13` producer/artifact lineage remains unidentified.
+- This document must not be interpreted as A2 closure evidence.
+
 ## Closure rules
 
 A2 is not closed unless the retained artifact establishes a common lineage from:
