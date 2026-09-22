@@ -99,3 +99,23 @@ The orchestrator writes three evidence-layer reports under `data/build/gis/1326/
 The anchor registry is an explicit input. It is **not** generated from the 1300 political builder, and the pipeline refuses to promote any result to reviewed or canonical geometry.
 
 This branch does not claim that the raw Cliopatria artifact has been acquired. Acquisition remains a separate provenance gate; `acquire:1326-cliopatria` must produce and verify the retained artifact before its contents are treated as an acquired source snapshot.
+
+## Acquisition gate
+
+The Cliopatria acquisition contract is independently guarded by:
+
+    npm run test:1326-cliopatria-acquisition-contract
+
+This contract verifies that the downloader and data/gis/1326/acquisition-manifest.json agree on the pinned v0.2.0 source URL, source ID, immutable Git blob reference, and blocked promotion state. It does not claim that network acquisition has succeeded.
+
+The actual acquisition sequence remains:
+
+    npm run acquire:1326-cliopatria
+            ↓
+    retained ZIP + acquisition record
+            ↓
+    npm run verify:1326-cliopatria
+            ↓
+    extract → reconcile → screen
+
+Until the retained artifact has a recorded SHA-256 and passes verification, no candidate count from an external acquisition is treated as repository evidence.
