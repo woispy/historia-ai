@@ -121,7 +121,8 @@
     "reconcile:1326-cliopatria": "node tools/historical-gis/cli/reconcile-1326-cliopatria-entities.js",
     "screen:1326-candidate-surface": "node tools/historical-gis/cli/screen-1326-political-candidate-surface.js",
     "test:1326-candidate-surface-screening": "node tools/tests/1326-candidate-surface-screening.test.js",
-    "run:1326-cliopatria-candidate-pipeline": "node tools/historical-gis/cli/run-1326-cliopatria-candidate-pipeline.js"
+    "run:1326-cliopatria-candidate-pipeline": "node tools/historical-gis/cli/run-1326-cliopatria-candidate-pipeline.js",
+    "test:1326-cliopatria-acquisition-contract": "node tools/tests/1326-cliopatria-acquisition-contract.test.js"
   },
   "dependencies": {
     "react": "^19.2.7",
