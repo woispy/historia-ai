@@ -19,14 +19,18 @@ const expectedUrl = "https://raw.githubusercontent.com/Seshat-Global-History-Dat
 const expectedSourceId = "cliopatria-v0.2.0";
 const expectedBlobSha = source.snapshot?.immutableReference?.sourceBlobSha;
 
-assert.equal(source.status, "acquisition-required");
-assert.equal(source.snapshot?.status, "reference-pinned-not-acquired");
+assert.ok(["acquisition-required", "acquired"].includes(source.status), "Cliopatria source status must remain acquisition-state controlled.");
+assert.ok(["reference-pinned-not-acquired", "acquired"].includes(source.snapshot?.status), "Cliopatria snapshot status must remain acquisition-state controlled.");
 assert.equal(source.url, "https://github.com/Seshat-Global-History-Databank/cliopatria/releases/tag/v0.2.0");
 assert.match(expectedBlobSha ?? "", /^[0-9a-f]{40}$/);
 
 assert.ok(script.includes(`const SOURCE_URL = "${expectedUrl}";`), "Acquisition script URL drifted from the pinned v0.2.0 source.");
 assert.ok(script.includes(`const SOURCE_ID = "${expectedSourceId}";`), "Acquisition script source ID drifted.");
 assert.ok(script.includes(`const SOURCE_BLOB_SHA = "${expectedBlobSha}";`), "Acquisition script immutable source blob SHA drifted.");
+assert.ok(script.includes('const ACQUISITION_MANIFEST = path.resolve("data/gis/1326/acquisition-manifest.json");'), "Acquisition must update the tracked 1326 acquisition manifest.");
+assert.ok(script.includes('source.status = "acquired";'), "Successful acquisition must promote the source record from acquisition-required to acquired.");
+assert.ok(script.includes('rawSha256: record.rawSha256'), "Successful acquisition must persist the retained artifact SHA-256 in the acquisition manifest.");
+assert.ok(script.includes('source.snapshot?.rawSha256 !== record.rawSha256'), "Verification must cross-check the tracked manifest SHA-256.");
 assert.ok(script.includes('promotion: "BLOCKED_UNTIL_EXTRACTION_RECONCILIATION_REVIEW"'), "Acquisition must remain promotion-blocked.");
 
 console.log("1326 Cliopatria acquisition contract passed: manifest/script provenance is aligned and acquisition remains blocked until verification.");
