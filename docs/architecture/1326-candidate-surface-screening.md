@@ -121,3 +121,47 @@ The actual acquisition sequence remains:
     extract → reconcile → screen
 
 Until the retained artifact has a recorded SHA-256 and passes verification, no candidate count from an external acquisition is treated as repository evidence. Successful acquisition changes only source provenance state (`acquired`); it does not change `authorityStatus`, and candidate geometry remains blocked from promotion.
+
+
+## T3-B Geometry Reconciliation Contract
+
+The next stage is now defined as a **review-queue preparation step**, not an automatic polygon generator.
+
+Command:
+
+    npm run prepare:1326-geometry-reconciliation -- --screening <screening-report> --reconciliation <entity-reconciliation-report>
+
+Output:
+
+    data/build/gis/1326/cliopatria-geometry-reconciliation.json
+
+The stage performs only evidence packaging:
+
+1. consumes the already-screened candidate surface;
+2. links source features to any entity-reconciliation matches;
+3. records temporal applicability and spatial anchor evidence;
+4. records a SHA-256 identity for the source candidate packet;
+5. creates a pending review record with explicit historical/physical/topological/provenance gates.
+
+The contract deliberately forbids:
+
+- modifying source candidate geometry;
+- constructing a new polygon;
+- clipping a candidate to an anchor;
+- inferring a boundary from proximity;
+- treating controller evidence as geometry authority;
+- synthetic/Voronoi/fallback geometry;
+- reviewed or canonical promotion.
+
+Each review item therefore has:
+
+    sourceGeometry.immutable = true
+    reviewedGeometry = null
+    reviewStatus = pending
+    promotion = BLOCKED
+
+The contract test is:
+
+    npm run test:1326-geometry-reconciliation
+
+This creates the missing bridge between **T3-B candidate surface screening** and the future human/research-backed **geometry reconciliation** stage without prematurely opening canonical geometry authority.
