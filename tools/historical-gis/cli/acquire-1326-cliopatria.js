@@ -8,6 +8,7 @@ const SOURCE_BLOB_SHA = "cefab0f4b622e2e7fb3daf68d4f461f83991204c";
 const OUTPUT_DIR = path.resolve("data/build/gis/1326/source-snapshots");
 const OUTPUT_FILE = path.join(OUTPUT_DIR, "cliopatria-v0.2.0.geojson.zip");
 const RECORD_MANIFEST = path.join(OUTPUT_DIR, "cliopatria-v0.2.0.acquisition.json");
+const ACQUISITION_MANIFEST = path.resolve("data/gis/1326/acquisition-manifest.json");
 
 function parseArgs(argv) {
   const args = new Set(argv.slice(2));
@@ -25,6 +26,33 @@ function assertZip(bytes) {
     || signature.equals(Buffer.from([0x50, 0x4b, 0x05, 0x06]))
     || signature.equals(Buffer.from([0x50, 0x4b, 0x07, 0x08]));
   if (!valid) throw new Error("Cliopatria payload does not have a ZIP signature.");
+}
+
+async function writeJsonAtomic(filePath, value) {
+  const tempPath = `${filePath}.tmp-${process.pid}`;
+  await fs.writeFile(tempPath, `${JSON.stringify(value, null, 2)}\\n`);
+  await fs.rename(tempPath, filePath);
+}
+
+async function updateAcquisitionManifest(record) {
+  const manifest = JSON.parse(await fs.readFile(ACQUISITION_MANIFEST, "utf8"));
+  const source = manifest.sources.find(item => item.id === SOURCE_ID);
+  if (!source) throw new Error(`Acquisition manifest is missing source ${SOURCE_ID}.`);
+
+  source.status = "acquired";
+  source.snapshot = {
+    ...(source.snapshot ?? {}),
+    status: "acquired",
+    sourceTag: "v0.2.0",
+    immutableReference: record.immutableReference,
+    sourceFile: record.sourceFile,
+    rawSha256: record.rawSha256,
+    byteLength: record.byteLength,
+    acquiredAt: record.acquiredAt,
+    retainedArtifact: record.retainedArtifact
+  };
+
+  await writeJsonAtomic(ACQUISITION_MANIFEST, manifest);
 }
 
 async function acquire() {
@@ -57,7 +85,8 @@ async function acquire() {
     },
     promotion: "BLOCKED_UNTIL_EXTRACTION_RECONCILIATION_REVIEW"
   };
-  await fs.writeFile(RECORD_MANIFEST, `${JSON.stringify(record, null, 2)}\\n`);
+  await writeJsonAtomic(RECORD_MANIFEST, record);
+  await updateAcquisitionManifest(record);
   console.log(JSON.stringify(record, null, 2));
 }
 
@@ -65,6 +94,12 @@ async function verify() {
   const bytes = await fs.readFile(OUTPUT_FILE);
   assertZip(bytes);
   const record = JSON.parse(await fs.readFile(RECORD_MANIFEST, "utf8"));
+  const acquisitionManifest = JSON.parse(await fs.readFile(ACQUISITION_MANIFEST, "utf8"));
+  const source = acquisitionManifest.sources.find(item => item.id === SOURCE_ID);
+  if (!source) throw new Error(`Acquisition manifest is missing source ${SOURCE_ID}.`);
+  if (source.snapshot?.status !== "acquired") throw new Error("Acquisition manifest is not marked acquired.");
+  if (source.snapshot?.rawSha256 !== record.rawSha256) throw new Error("Acquisition manifest SHA-256 does not match the retained acquisition record.");
+  if (source.snapshot?.byteLength !== record.byteLength) throw new Error("Acquisition manifest byte length does not match the retained acquisition record.");
   const actual = sha256(bytes);
   if (actual !== record.rawSha256) throw new Error(`SHA-256 mismatch: expected ${record.rawSha256}, got ${actual}`);
   if (bytes.length !== record.byteLength) throw new Error("Retained artifact byte length mismatch.");
