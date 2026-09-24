@@ -106,7 +106,9 @@ The Cliopatria acquisition contract is independently guarded by:
 
     npm run test:1326-cliopatria-acquisition-contract
 
-This contract verifies that the downloader and data/gis/1326/acquisition-manifest.json agree on the pinned v0.2.0 source URL, source ID, immutable Git blob reference, and blocked promotion state. It does not claim that network acquisition has succeeded.
+This contract verifies that the downloader and `data/gis/1326/acquisition-manifest.json` agree on the pinned v0.2.0 source URL, source ID, immutable Git blob reference, and blocked promotion state. It accepts both the pre-acquisition and post-acquisition manifest states without treating either state as canonical geometry authority.
+
+On successful `--download`, the acquisition script now records the retained ZIP SHA-256, byte length, acquisition timestamp, and repository-relative artifact path back into the tracked acquisition manifest. `--verify` then cross-checks the retained ZIP against both the acquisition record and the tracked manifest before reporting PASS.
 
 The actual acquisition sequence remains:
 
@@ -118,4 +120,4 @@ The actual acquisition sequence remains:
             ↓
     extract → reconcile → screen
 
-Until the retained artifact has a recorded SHA-256 and passes verification, no candidate count from an external acquisition is treated as repository evidence.
+Until the retained artifact has a recorded SHA-256 and passes verification, no candidate count from an external acquisition is treated as repository evidence. Successful acquisition changes only source provenance state (`acquired`); it does not change `authorityStatus`, and candidate geometry remains blocked from promotion.
