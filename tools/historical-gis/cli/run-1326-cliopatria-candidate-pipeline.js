@@ -39,7 +39,13 @@ const outputDir = path.resolve(
 );
 
 const manifestPath = path.resolve(process.cwd(), readArg("--manifest", "data/gis/1326/acquisition-manifest.json"));
-const acquisitionPath = readArg("--acquisition") ? path.resolve(process.cwd(), readArg("--acquisition")) : null;
+const suppliedAcquisitionPath = readArg("--acquisition");
+let acquisitionPath = suppliedAcquisitionPath ? path.resolve(process.cwd(), suppliedAcquisitionPath) : null;
+if (!acquisitionPath && extractionInput) {
+  const extractionRecord = JSON.parse(await fs.readFile(extractionInput, "utf8"));
+  if (!extractionRecord.archive?.acquisitionRecord) throw new Error("Extraction input must retain its acquisition record for the operational state gate.");
+  acquisitionPath = path.resolve(process.cwd(), extractionRecord.archive.acquisitionRecord);
+}
 const operationalStateArgs = ["--manifest", manifestPath, "--require-candidate-ready", "false"];
 if (acquisitionPath) operationalStateArgs.push("--acquisition", acquisitionPath);
 if (extractionInput) operationalStateArgs.push("--extraction-input", extractionInput);
