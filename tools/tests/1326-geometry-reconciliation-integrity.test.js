@@ -25,7 +25,7 @@ function makeReport(sourceGeometry = geometry, sourceGeometrySha = geometrySha) 
       reviewId: "cliopatria-1326-feature-7-" + recordSha.slice(0,16),
       sourceFeatureIndex: 7,
       sourceGeometry: { geometry: sourceGeometry, sha256: sourceGeometrySha, immutable: true, mutationPolicy: "immutable-source-evidence" },
-      sourceEvidence: { candidatePacketSha256: packetSha, candidateRecordSha256: recordSha, reviewIdDerivation: "cliopatria-1326-feature-" + "$"+"{sourceFeatureIndex}" + "-" + "$"+"{candidatePacketSha256.slice(0,16)}" },
+      sourceEvidence: { candidatePacketSha256: packetSha, candidateRecordSha256: recordSha, reviewIdDerivation: "cliopatria-1326-feature-" + "$"+"{sourceFeatureIndex}" + "-" + "$"+"{candidateRecordSha256.slice(0,16)}" },
       reviewedGeometry: null, reviewStatus: "pending", promotion: "BLOCKED"
     }]
   };
