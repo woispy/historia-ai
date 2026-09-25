@@ -65,7 +65,7 @@ for (const item of queue) {
   }
   const expectedReviewId = `cliopatria-1326-feature-${item.sourceFeatureIndex}-${item.sourceEvidence.candidateRecordSha256.slice(0, 16)}`;
   if (item.reviewId !== expectedReviewId) {
-    throw new Error(`Review ID is not bound to candidate packet identity: ${item.reviewId}`);
+    throw new Error(`Review ID is not bound to candidate record identity: ${item.reviewId}`);
   }
   if (item.sourceEvidence.reviewIdDerivation !== "cliopatria-1326-feature-${sourceFeatureIndex}-${candidateRecordSha256.slice(0,16)}") {
     throw new Error(`Review ID derivation contract missing: ${item.reviewId}`);
