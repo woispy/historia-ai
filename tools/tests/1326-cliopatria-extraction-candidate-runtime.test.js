@@ -22,12 +22,22 @@ const geojson = {
 const geojsonRaw = JSON.stringify(geojson);
 const extractedPath = path.join(temp, "cliopatria.geojson");
 await fs.writeFile(extractedPath, geojsonRaw);
+const acquisitionPath = path.join(temp, "acquisition.json");
+const acquisition = {
+  sourceId: "cliopatria-v0.2.0",
+  sourceTag: "v0.2.0",
+  immutableReference: { type: "git-commit", sha: "ad28a69", sourceBlobSha: "cefab0f4b622e2e7fb3daf68d4f461f83991204c" },
+  retainedArtifact: "archive.zip",
+  rawSha256: "a".repeat(64),
+  byteLength: 1,
+};
+await fs.writeFile(acquisitionPath, JSON.stringify(acquisition));
 const extractionInputPath = path.join(temp, "extraction-input.json");
 await fs.writeFile(extractionInputPath, JSON.stringify({
   schemaVersion: 1,
   sourceId: "cliopatria-v0.2.0",
   scenarioDate: "1326-04-07",
-  archive: { path: "archive.zip", rawSha256: "a".repeat(64), byteLength: 1, acquisitionRecord: "acquisition.json" },
+  archive: { path: "archive.zip", rawSha256: "a".repeat(64), byteLength: 1, acquisitionRecord: acquisitionPath },
   member: { path: "cliopatria.geojson", extractedPath: extractedPath, sha256: sha256(Buffer.from(geojsonRaw)), format: "GeoJSON", featureCollectionValidated: true },
   immutableReference: { type: "git-commit", sha: "ad28a69", sourceBlobSha: "cefab0f4b622e2e7fb3daf68d4f461f83991204c" },
   extractionPolicy: "Exactly one .geojson archive member; cross-platform extraction; no inferred member selection.",
