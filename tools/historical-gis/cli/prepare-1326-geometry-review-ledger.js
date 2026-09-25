@@ -70,7 +70,7 @@ const records = (queue.reviewQueue ?? []).map(item => ({
 }));
 
 const report = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   kind: "historical-1326-geometry-review-ledger",
   scenarioDate: SCENARIO_DATE,
   authorityStatus: "review-ledger-only",
