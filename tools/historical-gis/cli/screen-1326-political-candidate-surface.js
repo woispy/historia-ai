@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import crypto from "node:crypto";
 
 const SCENARIO_DATE = "1326-04-07";
 const SCENARIO_YEAR = 1326;
@@ -157,6 +158,7 @@ for (const candidate of candidates.candidates) {
     // geometry and must never be mutated in-place; downstream reconciliation works on a
     // separate reviewedGeometry field.
     geometry: candidate.geometry,
+    sourceGeometrySha256: crypto.createHash("sha256").update(JSON.stringify(candidate.geometry)).digest("hex"),
     geometryBbox: bbox,
     geometryBboxCenter: center,
     anchorHits,
