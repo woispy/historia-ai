@@ -53,7 +53,8 @@ const records = (queue.reviewQueue ?? []).map(item => ({
   },
   provenance: {
     sourceId: SOURCE_ID,
-    candidatePacketSha256: item.sourceEvidence?.candidatePacketSha256 ?? "",
+    candidatePacketSha256: queue.candidatePacketSha256 ?? "",
+    candidateRecordSha256: item.sourceEvidence?.candidateRecordSha256 ?? "",
   },
   confidence: {
     existence: 0,
