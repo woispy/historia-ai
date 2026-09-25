@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
 import { spawn } from "node:child_process";
+import os from "node:os";
 
 const SOURCE_ID = "cliopatria-v0.2.0";
 const SCENARIO_DATE = "1326-04-07";
@@ -50,28 +51,93 @@ const archiveSha = sha256(archive);
 if (archiveSha !== acquisition.rawSha256) throw new Error(`Archive SHA-256 mismatch: expected ${acquisition.rawSha256}, got ${archiveSha}`);
 if (archive.length !== acquisition.byteLength) throw new Error("Archive byte length mismatch.");
 
-let listing;
-try {
-  listing = await run("tar", ["-tf", archivePath]);
-} catch (error) {
-  throw new Error(`Deterministic archive inspection requires the system 'tar' command: ${error.message}`);
-}
-const members = listing.split(/\r?\n/).map(value => value.trim()).filter(Boolean);
-const geojsonMembers = members.filter(value => value.toLowerCase().endsWith(".geojson"));
-if (geojsonMembers.length !== 1) {
-  throw new Error(`Expected exactly one GeoJSON member in Cliopatria archive; found ${geojsonMembers.length}: ${geojsonMembers.join(", ")}`);
-}
-const member = geojsonMembers[0];
-
 const extractDir = path.resolve(process.cwd(), "data/build/gis/1326/source-snapshots/cliopatria-v0.2.0");
 await fs.rm(extractDir, { recursive: true, force: true });
 await fs.mkdir(extractDir, { recursive: true });
-await run("tar", ["-xf", archivePath, "-C", extractDir, member]);
 
-const extractedPath = path.join(extractDir, member);
-const extracted = await fs.readFile(extractedPath, "utf8");
-JSON.parse(extracted);
-const extractedSha = sha256(Buffer.from(extracted, "utf8"));
+const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "historia-cliopatria-"));
+try {
+  const expandedDir = path.join(tempDir, "expanded");
+  await fs.mkdir(expandedDir, { recursive: true });
+
+  if (process.platform === "win32") {
+    await run("powershell.exe", [
+      "-NoProfile", "-NonInteractive", "-Command",
+      "Expand-Archive -LiteralPath $args[0] -DestinationPath $args[1] -Force",
+      archivePath, expandedDir,
+    ]);
+  } else {
+    try {
+      await run("unzip", ["-q", archivePath, "-d", expandedDir]);
+    } catch (error) {
+      await run("tar", ["-xf", archivePath, "-C", expandedDir]);
+    }
+  }
+
+  const files = [];
+  async function collectFiles(dir, relative = "") {
+    for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+      const rel = relative ? path.posix.join(relative.replaceAll("\\", "/"), entry.name) : entry.name;
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) await collectFiles(full, rel);
+      else if (entry.isFile()) files.push({ relative: rel, full });
+    }
+  }
+  await collectFiles(expandedDir);
+
+  const geojsonFiles = files.filter(item => item.relative.toLowerCase().endsWith(".geojson"));
+  if (geojsonFiles.length !== 1) {
+    throw new Error(`Expected exactly one GeoJSON member in Cliopatria archive; found ${geojsonFiles.length}: ${geojsonFiles.map(item => item.relative).join(", ")}`);
+  }
+
+  const member = geojsonFiles[0].relative;
+  const extractedPath = path.join(extractDir, member);
+  await fs.mkdir(path.dirname(extractedPath), { recursive: true });
+  await fs.copyFile(geojsonFiles[0].full, extractedPath);
+
+  const extracted = await fs.readFile(extractedPath, "utf8");
+  const parsed = JSON.parse(extracted);
+  if (parsed?.type !== "FeatureCollection" || !Array.isArray(parsed.features)) {
+    throw new Error("Extracted Cliopatria member must be a GeoJSON FeatureCollection.");
+  }
+  const extractedSha = sha256(Buffer.from(extracted, "utf8"));
+
+  const record = {
+    schemaVersion: 1,
+    sourceId: SOURCE_ID,
+    scenarioDate: SCENARIO_DATE,
+    archive: {
+      path: archivePath.replace(/\\/g, "/"),
+      rawSha256: archiveSha,
+      byteLength: archive.length,
+      acquisitionRecord: acquisitionPath.replace(/\\/g, "/")
+    },
+    member: {
+      path: member,
+      extractedPath: extractedPath.replace(/\\/g, "/"),
+      sha256: extractedSha,
+      format: "GeoJSON",
+      featureCollectionValidated: true
+    },
+    immutableReference: acquisition.immutableReference,
+    extractionPolicy: "Exactly one .geojson archive member; cross-platform extraction; no inferred member selection.",
+    promotion: "BLOCKED_UNTIL_TEMPORAL_EXTRACTION_RECONCILIATION_REVIEW"
+  };
+
+  await fs.mkdir(path.dirname(outputPath), { recursive: true });
+  await fs.writeFile(outputPath, JSON.stringify(record, null, 2) + "\n", "utf8");
+  console.log(JSON.stringify({
+    sourceId: SOURCE_ID,
+    scenarioDate: SCENARIO_DATE,
+    archiveSha256: archiveSha,
+    member,
+    extractedSha256: extractedSha,
+    outputPath,
+    promotion: record.promotion
+  }, null, 2));
+} finally {
+  await fs.rm(tempDir, { recursive: true, force: true });
+}
 
 const record = {
   schemaVersion: 1,
