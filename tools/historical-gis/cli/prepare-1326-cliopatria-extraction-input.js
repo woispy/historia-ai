@@ -90,8 +90,11 @@ try {
     throw new Error(`Expected exactly one GeoJSON member in Cliopatria archive; found ${geojsonFiles.length}: ${geojsonFiles.map(item => item.relative).join(", ")}`);
   }
 
-  const member = geojsonFiles[0].relative;
-  const extractedPath = path.join(extractDir, member);
+  const member = geojsonFiles[0].relative.replaceAll("\\", "/");
+  if (path.posix.isAbsolute(member) || member.split("/").includes("..")) {
+    throw new Error(`Unsafe archive member path: ${member}`);
+  }
+  const extractedPath = path.join(extractDir, ...member.split("/"));
   await fs.mkdir(path.dirname(extractedPath), { recursive: true });
   await fs.copyFile(geojsonFiles[0].full, extractedPath);
 
