@@ -80,5 +80,17 @@ assert.equal(report.records[0].decision.reviewedGeometry, null);
 assert.equal(report.records[0].decision.status, "pending");
 assert.equal(report.bridge.mutationPolicy, "evidence-reference-copy-only");
 
-await run("tools/historical-gis/cli/validate-1326-geometry-review-ledger.js", ["--input", output]);
+
+const driftLedger = path.join(dir, "test-edge-bridge-drift-ledger.json");
+const drift = JSON.parse(await fs.readFile(ledger, "utf8"));
+drift.records[0].provenance.candidatePacketSha256 = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+await fs.writeFile(driftLedger, JSON.stringify(drift, null, 2));
+const driftResult = await new Promise(resolve => {
+  const child = spawn(process.execPath, ["tools/historical-gis/cli/bridge-1326-edge-evidence.js",
+    "--ledger", driftLedger, "--evidence", evidence, "--bindings", bindings, "--output", output
+  ], { cwd: root, stdio: ["ignore", "pipe", "pipe"] });
+  child.on("close", code => resolve(code));
+});
+assert.notEqual(driftResult, 0);
+\nawait run("tools/historical-gis/cli/validate-1326-geometry-review-ledger.js", ["--input", output]);
 console.log("1326 edge evidence bridge contract passed: explicit bindings only; authority and promotion remain blocked.");
