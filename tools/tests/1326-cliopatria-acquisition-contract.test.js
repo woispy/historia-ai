@@ -45,5 +45,6 @@ assert.ok(script.includes('source.snapshot?.immutableReference?.sourceBlobSha !=
 assert.ok(script.includes('source.snapshot?.retainedArtifact !== record.retainedArtifact'), "Verification must cross-check the retained artifact path.");
 assert.ok(script.includes('record.sourceUrl !== SOURCE_URL'), "Verification must cross-check the pinned source URL.");
 assert.ok(script.includes('promotion: "BLOCKED_UNTIL_EXTRACTION_RECONCILIATION_REVIEW"'), "Acquisition must remain promotion-blocked.");
+assert.ok(script.includes('JSON.stringify(value, null, 2)}\\n`'), "Acquisition JSON writer must emit a real newline, not a literal \\n sequence.");
 
 console.log("1326 Cliopatria acquisition contract passed: manifest/script provenance is aligned and acquisition remains blocked until verification.");
