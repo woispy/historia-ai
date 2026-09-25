@@ -7,7 +7,11 @@ const manifest = JSON.parse(fs.readFileSync(
   path.join(root, "data/gis/1326/acquisition-manifest.json"),
   "utf8",
 ));
-const preflight = fs.readFileSync(\n  path.join(root, "tools/historical-gis/cli/validate-1326-cliopatria-acquisition-ready.js"),\n  "utf8",\n);\nconst script = fs.readFileSync(
+const preflight = fs.readFileSync(
+  path.join(root, "tools/historical-gis/cli/validate-1326-cliopatria-acquisition-ready.js"),
+  "utf8",
+);
+const script = fs.readFileSync(
   path.join(root, "tools/historical-gis/cli/acquire-1326-cliopatria.js"),
   "utf8",
 );
