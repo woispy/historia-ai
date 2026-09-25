@@ -85,6 +85,7 @@ const reviewQueue = (screening.candidates ?? []).map(candidate => {
       type: candidate.geometryAuthorityStatus,
       geometry: candidate.geometry,
       sha256: sha256(candidate.geometry),
+      screeningSourceGeometrySha256: candidate.sourceGeometrySha256 ?? null,
       immutable: true,
       mutationPolicy: "immutable-source-evidence"
     },
