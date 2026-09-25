@@ -76,6 +76,11 @@ for (const binding of bindings.reviewBindings) {
   boundReviewIds.add(binding.reviewId);
   const record = recordById.get(binding.reviewId);
   if (!record) fail(`Binding references unknown reviewId: ${binding.reviewId}`);
+  if (!/^[0-9a-f]{64}$/.test(record.provenance?.candidateRecordSha256 ?? "")) {
+    fail(`Ledger candidateRecordSha256 missing or invalid: ${binding.reviewId}`);
+  }
+  const expectedReviewId = `cliopatria-1326-feature-${record.sourceFeatureIndex}-${record.provenance.candidateRecordSha256.slice(0, 16)}`;
+  if (binding.reviewId !== expectedReviewId) fail(`Binding reviewId is not bound to candidate record identity: ${binding.reviewId}`);
   if (!Array.isArray(binding.edgeEvidenceIds) || binding.edgeEvidenceIds.length === 0) {
     fail(`edgeEvidenceIds[] must contain at least one edge: ${binding.reviewId}`);
   }
