@@ -51,6 +51,9 @@ for (const item of queue) {
   if (item.sourceGeometry.sha256 !== geometrySha) {
     throw new Error(`Source geometry SHA-256 mismatch: ${item.reviewId}`);
   }
+  if (item.sourceGeometry.screeningSourceGeometrySha256 !== null && item.sourceGeometry.screeningSourceGeometrySha256 !== geometrySha) {
+    throw new Error(`Screening/source geometry SHA-256 mismatch: ${item.reviewId}`);
+  }
   if (!/^[0-9a-f]{64}$/.test(item.sourceEvidence?.candidatePacketSha256 ?? "")) {
     throw new Error(`Candidate packet SHA-256 missing or invalid: ${item.reviewId}`);
   }
