@@ -453,3 +453,18 @@ This gate requires:
 The ledger preparation step also refuses a reconciliation queue whose review items do not carry the queue-level packet hash or a valid candidate-record hash. This prevents the review ledger from becoming a second, independently mutable identity layer between geometry reconciliation and research review.
 
 The ledger remains `authorityStatus: review-ledger-only` and `promotion: BLOCKED`; this binding establishes provenance continuity only and does not approve or generate geometry.
+
+
+### Explicit Edge Evidence → Pilot Readiness Hardening
+
+The T3-B readiness gate now validates the evidence side of an explicit binding rather than only its review ID syntax. Every bound `edgeEvidenceId` must exist in the supplied pilot evidence registry, pilot edge IDs must be unique, and each ledger record's `candidateRecordSha256` must independently match the corresponding screened candidate record.
+
+The edge bridge also refuses to attach evidence to a review record that has already left the pending state or already contains reviewed geometry. This preserves the intended order:
+
+    candidate/review provenance
+      → pending research ledger
+      → explicit evidence binding
+      → evidence-reference bridge
+      → later human/research review
+
+An evidence binding therefore cannot be used to bypass the pending-review gate or silently attach an edge to an already-reviewed geometry record. All authority and promotion guards remain blocked.
