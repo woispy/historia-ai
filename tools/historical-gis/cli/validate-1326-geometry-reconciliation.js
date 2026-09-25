@@ -57,6 +57,9 @@ for (const item of queue) {
   if (!/^[0-9a-f]{64}$/.test(item.sourceEvidence?.candidatePacketSha256 ?? "")) {
     throw new Error(`Candidate packet SHA-256 missing or invalid: ${item.reviewId}`);
   }
+  if (item.sourceEvidence.candidatePacketSha256 !== report.candidatePacketSha256) {
+    throw new Error(`Candidate packet provenance drift: ${item.reviewId}`);
+  }
   if (!/^[0-9a-f]{64}$/.test(item.sourceEvidence?.candidateRecordSha256 ?? "")) {
     throw new Error(`Candidate record SHA-256 missing or invalid: ${item.reviewId}`);
   }
