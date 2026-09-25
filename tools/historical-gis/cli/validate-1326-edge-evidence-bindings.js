@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 const SCENARIO_DATE = "1326-04-07";
-const EDGE_ID = /^[A-Za-z0-9._:-]+$/;
+const EDGE_ID = /^[A-Za-z0-9._:-]+$/;\nconst REVIEW_ID = /^cliopatria-1326-feature-[0-9]+-[0-9a-f]{16}$/;
 
 const input = process.argv.indexOf("--input");
 if (input < 0 || !process.argv[input + 1]) throw new Error("--input <edge-evidence-bindings.json> is required.");
@@ -19,7 +19,7 @@ if (!Array.isArray(report.reviewBindings)) throw new Error("reviewBindings[] is 
 
 const reviews = new Set();
 for (const binding of report.reviewBindings) {
-  if (!binding?.reviewId || reviews.has(binding.reviewId)) throw new Error(`Duplicate/missing reviewId: ${binding?.reviewId}`);
+  if (!binding?.reviewId || !REVIEW_ID.test(binding.reviewId) || reviews.has(binding.reviewId)) throw new Error(`Invalid/duplicate/missing candidate-bound reviewId: ${binding?.reviewId}`);
   reviews.add(binding.reviewId);
   if (!Array.isArray(binding.edgeEvidenceIds) || binding.edgeEvidenceIds.length === 0) throw new Error(`Empty edgeEvidenceIds: ${binding.reviewId}`);
   const edges = new Set();
