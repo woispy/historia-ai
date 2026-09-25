@@ -47,6 +47,9 @@ if (acquisition.sourceUrl !== "https://raw.githubusercontent.com/Seshat-Global-H
 if (acquisition.immutableReference?.sourceBlobSha !== "cefab0f4b622e2e7fb3daf68d4f461f83991204c") throw new Error("Immutable source blob mismatch.");
 if (acquisition.promotion !== "BLOCKED_UNTIL_EXTRACTION_RECONCILIATION_REVIEW") throw new Error("Acquisition must remain promotion-blocked.");
 if (source?.status !== "acquired" || source?.snapshot?.status !== "acquired") throw new Error("Tracked acquisition manifest does not contain a verified acquired snapshot.");
+if (source.snapshot?.sourceTag !== acquisition.sourceTag) throw new Error("Tracked acquisition source tag does not match the acquisition record.");
+if (source.snapshot?.retainedArtifact !== acquisition.retainedArtifact) throw new Error("Tracked acquisition retained artifact does not match the acquisition record.");
+if (source.snapshot?.acquiredAt !== acquisition.acquiredAt) throw new Error("Tracked acquisition timestamp does not match the acquisition record.");
 if (source.snapshot.rawSha256 !== acquisition.rawSha256) throw new Error("Acquisition manifest SHA-256 does not match the acquisition record.");
 if (source.snapshot.byteLength !== acquisition.byteLength) throw new Error("Acquisition manifest byte length does not match the acquisition record.");
 
