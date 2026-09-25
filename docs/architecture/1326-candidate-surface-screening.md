@@ -273,3 +273,10 @@ This keeps edge evidence attachment referentially tied to the immutable candidat
 
 The resulting artifact remains `authorityStatus: bridge-reference-only` and `promotion: BLOCKED`. A real Bithynia binding file must not be fabricated until the actual acquired Cliopatria candidate queue contains the corresponding review IDs.
 
+
+### Acquisition-state gate correction
+
+The 1326 acquisition manifest validator now accepts both lifecycle states: `reference-pinned-not-acquired` and verified `acquired`. Once a raw snapshot is acquired, the validator requires the retained raw SHA-256, artifact path, and acquisition timestamp. It does not promote the source beyond the evidence layer.
+
+This keeps the intake validator usable before and after the first real source download instead of making successful acquisition itself look like a contract failure.
+
