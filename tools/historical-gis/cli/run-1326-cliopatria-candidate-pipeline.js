@@ -29,8 +29,10 @@ function run(script, args) {
   });
 }
 
-const input = requireArg("--input");
+const input = readArg("--input") ? path.resolve(process.cwd(), readArg("--input")) : null;
+const extractionInput = readArg("--extraction-input") ? path.resolve(process.cwd(), readArg("--extraction-input")) : null;
 const anchors = requireArg("--anchors");
+if (!input && !extractionInput) throw new Error("--input <geojson> or --extraction-input <record> is required.");
 const outputDir = path.resolve(
   process.cwd(),
   readArg("--output-dir", "data/build/gis/1326"),
@@ -43,7 +45,7 @@ const reconciliationOutput = path.join(outputDir, "cliopatria-entity-reconciliat
 const screeningOutput = path.join(outputDir, "cliopatria-candidate-surface-screening.json");
 
 await run("tools/historical-gis/cli/extract-1326-cliopatria-candidates.js", [
-  "--input", input,
+  ...(extractionInput ? ["--extraction-input", extractionInput] : ["--input", input]),
   "--output", candidateOutput,
 ]);
 
