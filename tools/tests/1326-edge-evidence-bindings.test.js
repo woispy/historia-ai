@@ -8,6 +8,7 @@ const dir = path.join(root, "data/build/gis/1326");
 const ledger = path.join(dir, "test-explicit-binding-ledger.json");
 const mapping = path.join(dir, "test-explicit-binding-input.json");
 const output = path.join(dir, "test-explicit-binding-output.json");
+const evidence = path.join(root, "data/gis/1326/pilot-edge-evidence/bithynia-core-01.json");
 
 await fs.mkdir(dir, { recursive: true });
 await fs.writeFile(ledger, JSON.stringify({
@@ -57,7 +58,7 @@ async function expectFailure(script, args) {
     });
   });
 }
-await run("tools/historical-gis/cli/prepare-1326-edge-evidence-bindings.js", ["--ledger", ledger, "--mapping", mapping, "--output", output]);
+await run("tools/historical-gis/cli/prepare-1326-edge-evidence-bindings.js", ["--ledger", ledger, "--mapping", mapping, "--evidence", evidence, "--output", output]);
 await run("tools/historical-gis/cli/validate-1326-edge-evidence-bindings.js", ["--input", output]);
 const report = JSON.parse(await fs.readFile(output, "utf8"));
 assert.equal(report.authorityStatus, "bridge-reference-only");
@@ -70,5 +71,5 @@ await fs.writeFile(invalidMapping, JSON.stringify({
   policy: { automaticReviewMatching: false, geometryGeneration: false, controllerInference: false, canonicalPromotion: false },
   reviewBindings: [{ reviewId: "review-bithynia-pilot-001", edgeEvidenceIds: ["bursa-nicaea-frontier-1326"] }]
 }, null, 2));
-await expectFailure("tools/historical-gis/cli/prepare-1326-edge-evidence-bindings.js", ["--ledger", ledger, "--mapping", invalidMapping, "--output", output]);
+await expectFailure("tools/historical-gis/cli/prepare-1326-edge-evidence-bindings.js", ["--ledger", ledger, "--mapping", invalidMapping, "--evidence", evidence, "--output", output]);
 console.log("1326 explicit edge-evidence binding contract passed: candidate-bound review identity and fail-closed negative case.");
