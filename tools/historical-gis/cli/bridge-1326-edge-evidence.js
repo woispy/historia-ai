@@ -70,6 +70,13 @@ for (const edge of evidence.edges ?? []) {
 
 const recordById = new Map(ledger.records.map(record => [record.reviewId, record]));
 const boundReviewIds = new Set();
+let packetHash = null;
+for (const record of ledger.records ?? []) {
+  const candidatePacketSha256 = record.provenance?.candidatePacketSha256;
+  if (!/^[0-9a-f]{64}$/.test(candidatePacketSha256 ?? "")) fail(`Ledger candidatePacketSha256 missing or invalid: ${record.reviewId}`);
+  if (packetHash === null) packetHash = candidatePacketSha256;
+  if (candidatePacketSha256 !== packetHash) fail(`Candidate packet hash drift across ledger records: ${record.reviewId}`);
+}
 
 for (const binding of bindings.reviewBindings) {
   if (!binding?.reviewId || boundReviewIds.has(binding.reviewId)) fail(`Duplicate/missing review binding: ${binding?.reviewId}`);
