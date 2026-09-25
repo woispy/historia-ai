@@ -405,3 +405,11 @@ It verifies the complete evidence lineage from candidate packet â†’ screening â†
 Readiness does not mean canonical promotion. With the current guarded Bithynia pilot binding placeholder, the expected state is `WAITING_FOR_EXPLICIT_REVIEW_BINDINGS` and `promotion: BLOCKED`. Real bindings remain deferred until real 1326 acquisition and candidate-bound review IDs exist.
 
 The gate rejects fake review IDs, packet provenance drift, non-pending review records, broken candidate/review identity, and policy drift that would permit automatic matching, geometry generation, controller inference, or canonical promotion.
+
+### Cliopatria acquisition preflight and verification
+
+Before byte acquisition, `validate-1326-cliopatria-acquisition-ready.js` verifies the pinned v0.2.0 release URL, immutable commit `ad28a69`, exact source blob SHA, source tag, scenario date, and legal acquisition-state transitions.
+
+After acquisition, `acquire-1326-cliopatria.js --verify` now cross-checks the retained artifact SHA/length plus the immutable commit, source blob SHA, source tag, retained artifact path, and pinned source URL recorded in the acquisition manifest.
+
+This keeps the acquisition chain fail-closed before extraction. Acquisition remains evidence-only and promotion-blocked; extraction is still a separate gate.
