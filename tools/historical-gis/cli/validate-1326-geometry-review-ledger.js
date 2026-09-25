@@ -16,8 +16,16 @@ function arg(name) {
 }
 const input = arg("--input");
 if (!input) throw new Error("--input <geometry-review-ledger.json> is required.");
+const queueInput = arg("--queue");
 const inputPath = path.resolve(process.cwd(), input);
 const report = JSON.parse(await fs.readFile(inputPath, "utf8"));
+const queue = queueInput ? JSON.parse(await fs.readFile(path.resolve(process.cwd(), queueInput), "utf8")) : null;
+if (queue) {
+  if (queue.kind !== "historical-1326-political-geometry-reconciliation-queue") throw new Error("Unexpected reconciliation queue kind.");
+  if (queue.scenarioDate !== SCENARIO_DATE || queue.source?.sourceId !== SOURCE_ID) throw new Error("Ledger/queue identity mismatch.");
+  if (queue.promotion !== "BLOCKED") throw new Error("Reconciliation queue must remain promotion-blocked.");
+  if (queue.candidatePacketSha256 !== report.records?.[0]?.provenance?.candidatePacketSha256 && report.records?.length) throw new Error("Ledger/queue candidate packet mismatch.");
+}
 
 if (report?.kind !== "historical-1326-geometry-review-ledger") throw new Error("Unexpected review ledger kind.");
 if (report.schemaVersion !== 2) throw new Error("Review ledger schemaVersion must be 2.");
@@ -28,8 +36,19 @@ if (!Array.isArray(report.records)) throw new Error("records[] is required.");
 
 let edgeCount = 0;
 let packetHash = null;
+const seenReviewIds = new Set();
+const queueByReviewId = new Map((queue?.reviewQueue ?? []).map(item => [item.reviewId, item]));
 for (const record of report.records) {
   if (!record.reviewId) throw new Error("reviewId is required.");
+  if (seenReviewIds.has(record.reviewId)) throw new Error(`Duplicate reviewId: ${record.reviewId}`);
+  seenReviewIds.add(record.reviewId);
+  if (queue) {
+    const queueItem = queueByReviewId.get(record.reviewId);
+    if (!queueItem) throw new Error(`Ledger record is not present in reconciliation queue: ${record.reviewId}`);
+    if (record.sourceFeatureIndex !== queueItem.sourceFeatureIndex || record.provenance.candidateRecordSha256 !== queueItem.sourceEvidence?.candidateRecordSha256) {
+      throw new Error(`Ledger candidate identity drift: ${record.reviewId}`);
+    }
+  }
   if (record.provenance?.sourceId !== SOURCE_ID) throw new Error(`Source identity mismatch: ${record.reviewId}`);
   if (!/^[0-9a-f]{64}$/.test(record.provenance?.candidatePacketSha256 ?? "")) throw new Error(`Candidate packet hash missing or invalid: ${record.reviewId}`);
   if (!/^[0-9a-f]{64}$/.test(record.provenance?.candidateRecordSha256 ?? "")) throw new Error(`Candidate record hash missing or invalid: ${record.reviewId}`);
@@ -52,6 +71,8 @@ for (const record of report.records) {
     edgeCount++;
   }
 }
+
+if (queue && report.records.length !== queue.reviewQueue.length) throw new Error("Ledger/queue record count mismatch.");
 
 console.log(JSON.stringify({
   schemaVersion: report.schemaVersion,
