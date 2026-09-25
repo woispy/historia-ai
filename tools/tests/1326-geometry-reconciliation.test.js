@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { spawn } from "node:child_process";
+import crypto from "node:crypto";
 
 const root = process.cwd();
 const fixture = path.join(root, "tools/tests/fixtures/1326-candidate-surface");
@@ -83,5 +84,7 @@ assert.equal(report.reviewQueue[0].sourceGeometry.immutable, true);
 assert.equal(report.reviewQueue[0].sourceGeometry.mutationPolicy, "immutable-source-evidence");
 assert.deepEqual(report.reviewQueue[0].sourceGeometry.geometry, near.geometry);
 assert.match(report.reviewQueue[0].sourceGeometry.sha256, /^[0-9a-f]{64}$/);
+assert.equal(report.reviewQueue[0].sourceGeometry.sha256, crypto.createHash("sha256").update(JSON.stringify(near.geometry)).digest("hex"));
+assert.equal(report.reviewQueue[0].sourceEvidence.sourceFeatureIndex, near.sourceFeatureIndex);
 assert.deepEqual(report.reviewQueue[0].spatialScreening.geometryBbox, b);
 console.log("1326 geometry reconciliation contract passed: source geometry is immutable, review-only, provenance-bound, and promotion-blocked.");
