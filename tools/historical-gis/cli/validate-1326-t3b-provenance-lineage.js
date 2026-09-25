@@ -56,6 +56,9 @@ for (const entity of reconciliation.results ?? []) {
     const screened = screenByIndex.get(candidate.sourceFeatureIndex);
     if (!screened) fail(`Reconciliation references non-screened candidate: ${candidate.sourceFeatureIndex}`);
     if (candidate.sourceFeatureId !== screened.sourceFeatureId) fail(`Reconciliation identity drift: ${candidate.sourceFeatureIndex}`);
+    if (!/^[0-9a-f]{64}$/.test(candidate.candidateRecordSha256 ?? "")) fail(`Reconciliation candidate record hash missing: ${candidate.sourceFeatureIndex}`);
+    const sourceCandidate = sourceByIndex.get(candidate.sourceFeatureIndex);
+    if (candidate.candidateRecordSha256 !== sha(sourceCandidate)) fail(`Reconciliation candidate record hash drift: ${candidate.sourceFeatureIndex}`);
   }
 }
 
