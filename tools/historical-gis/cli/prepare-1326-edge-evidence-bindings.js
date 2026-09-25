@@ -16,7 +16,7 @@ function fail(message) { throw new Error(message); }
 
 const ledgerPath = required("--ledger");
 const mappingPath = required("--mapping");
-const evidencePath = required("--evidence");
+const evidencePath = path.resolve(process.cwd(), arg("--evidence", "data/gis/1326/pilot-edge-evidence/bithynia-core-01.json"));
 const outputPath = path.resolve(process.cwd(), arg("--output", "data/build/gis/1326/edge-evidence-bindings.json"));
 
 const ledger = JSON.parse(await fs.readFile(ledgerPath, "utf8"));
