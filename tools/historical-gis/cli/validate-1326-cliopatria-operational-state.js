@@ -27,6 +27,7 @@ const manifestPath = abs(arg("--manifest", "data/gis/1326/acquisition-manifest.j
 const acquisitionPathArg = arg("--acquisition");
 const extractionPathArg = arg("--extraction-input");
 const candidatesPathArg = arg("--candidates");
+const requireCandidateReady = arg("--require-candidate-ready", "false") === "true";
 
 const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
 if (manifest.scenarioDate !== SCENARIO_DATE) throw new Error("Scenario date mismatch.");
@@ -99,7 +100,8 @@ if (extractionPathArg) {
   state = "EXTRACTED";
 }
 
-if (candidatesPathArg) {
+if (candidatesPathArg || requireCandidateReady) {
+  if (!candidatesPathArg) throw new Error("Candidate-ready validation requires --candidates.");
   if (state !== "EXTRACTED") throw new Error("Illegal transition: candidate-ready requires a validated extraction input.");
   const candidates = JSON.parse(await fs.readFile(abs(candidatesPathArg), "utf8"));
   if (candidates.source?.sourceId !== SOURCE_ID || candidates.scenarioDate !== SCENARIO_DATE) throw new Error("Candidate packet identity mismatch.");
