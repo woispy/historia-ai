@@ -44,6 +44,16 @@ if (evidence.policy?.geometryGeneration !== false ||
     evidence.policy?.canonicalPromotion !== false) {
   fail("Pilot evidence policy must forbid geometry generation, controller inference, and canonical promotion.");
 }
+if (bindings?.schemaVersion !== 1) fail("Edge evidence bridge schemaVersion must be 1.");
+if (bindings.scenarioDate !== SCENARIO_DATE) fail("Binding scenario date mismatch.");
+if (bindings.authorityStatus !== "bridge-reference-only") fail("Binding authority status must remain bridge-reference-only.");
+if (bindings.promotion !== "BLOCKED") fail("Binding promotion must remain BLOCKED.");
+if (bindings.policy?.automaticReviewMatching !== false ||
+    bindings.policy?.geometryGeneration !== false ||
+    bindings.policy?.controllerInference !== false ||
+    bindings.policy?.canonicalPromotion !== false) {
+  fail("Binding policy must forbid automatic matching, geometry generation, controller inference, and canonical promotion.");
+}
 if (!Array.isArray(bindings?.reviewBindings)) fail("reviewBindings[] is required.");
 
 const edgeById = new Map();
