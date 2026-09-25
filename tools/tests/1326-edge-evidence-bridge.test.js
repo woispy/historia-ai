@@ -43,7 +43,7 @@ await fs.writeFile(bindings, JSON.stringify({
     canonicalPromotion: false
   },
   reviewBindings: [{
-    reviewId: "review-bithynia-pilot-001",
+    reviewId: "cliopatria-1326-feature-7-0123456789abcdef",
     edgeEvidenceIds: [
       "bursa-nicaea-frontier-1326",
       "nicaea-sangarius-corridor-1326",
