@@ -70,13 +70,13 @@ function makeStoredZip(filename, data) {
   return Buffer.concat([local, data, central, end]);
 }
 
-async function runNode(script, args) {
+async function runNode(script, args, expectFailure = false) {
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [script, ...args], { cwd: root, stdio: ["ignore", "pipe", "pipe"] });
     let stderr = "";
     child.stderr.on("data", chunk => { stderr += chunk; });
     child.on("error", reject);
-    child.on("close", code => code === 0 ? resolve() : reject(new Error(stderr || `${script} exited with code ${code}`)));
+    child.on("close", code => {\n      if (expectFailure) {\n        if (code === 0) reject(new Error(`Expected ${script} to fail.`));\n        else resolve(stderr);\n      } else if (code === 0) resolve();\n      else reject(new Error(stderr || `${script} exited with code ${code}`));\n    });
   });
 }
 
@@ -158,9 +158,7 @@ try {
   assert.equal(queue.promotion, "BLOCKED");
   assert.equal(queue.candidatePacketSha256, candidates.candidatePacketSha256);
   assert.equal(queue.reviewQueue[0].reviewStatus, "pending");
-  assert.equal(queue.reviewQueue[0].reviewedGeometry, null);
-
-  console.log("1326 integrated acquisition-to-T3-B runtime contract passed.");
+  assert.equal(queue.reviewQueue[0].reviewedGeometry, null);\n\n  const extractionRecord = JSON.parse(await fs.readFile(extractionInputPath, "utf8"));\n  extractionRecord.member.sha256 = "0".repeat(64);\n  const tamperedExtractionPath = path.join(temp, "tampered-extraction-input.json");\n  await fs.writeFile(tamperedExtractionPath, JSON.stringify(extractionRecord, null, 2));\n  await runNode(pipeline, [\n    "--extraction-input", tamperedExtractionPath,\n    "--anchors", anchors,\n    "--output-dir", path.join(temp, "tampered-pipeline-output")\n  ], true);\n\n  const tamperedCandidate = JSON.parse(JSON.stringify(candidates));\n  tamperedCandidate.candidates[0].name = "Tampered Candidate";\n  const tamperedCandidatePath = path.join(temp, "tampered-candidates.json");\n  await fs.writeFile(tamperedCandidatePath, JSON.stringify(tamperedCandidate, null, 2));\n  const operationalState = path.join(root, "tools/historical-gis/cli/validate-1326-cliopatria-operational-state.js");\n  await runNode(operationalState, [\n    "--manifest", manifestPath,\n    "--acquisition", acquisitionPath,\n    "--extraction-input", extractionInputPath,\n    "--candidates", tamperedCandidatePath,\n    "--require-candidate-ready", "true"\n  ], true);\n\n  console.log("1326 integrated acquisition-to-T3-B runtime contract passed.");
 } finally {
   await fs.rm(temp, { recursive: true, force: true });
 }
