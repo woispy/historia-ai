@@ -8,7 +8,6 @@ import crypto from "node:crypto";
 const root = process.cwd();
 const temp = await fs.mkdtemp(path.join(os.tmpdir(), "historia-1326-pilot-readiness-"));
 const validator = path.join(root, "tools/historical-gis/cli/validate-1326-t3b-pilot-readiness.js");
-const sha = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 const geometry = { type: "Polygon", coordinates: [[[29,40],[29.1,40],[29.1,40.1],[29,40.1],[29,40]]] };
 const candidate = { sourceFeatureIndex: 7, sourceFeatureId: "feature-7", geometry };
 const packetSha = crypto.createHash("sha256").update(JSON.stringify([candidate])).digest("hex");
