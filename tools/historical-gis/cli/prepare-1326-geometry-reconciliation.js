@@ -63,8 +63,16 @@ for (const entity of reconciliation.results ?? []) {
     const screened = candidateIndex.get(candidate.sourceFeatureIndex);
     if (!screened) throw new Error(`Reconciliation references unknown screened sourceFeatureIndex: ${candidate.sourceFeatureIndex}`);
     if (candidate.sourceFeatureId !== screened.sourceFeatureId) throw new Error(`Reconciliation sourceFeatureId mismatch: ${candidate.sourceFeatureIndex}`);
+    const expectedCandidateRecordSha256 = sha256(screened);
+    if (candidate.candidateRecordSha256 !== expectedCandidateRecordSha256) {
+      throw new Error(`Reconciliation candidate record SHA-256 mismatch: ${candidate.sourceFeatureIndex}`);
+    }
     const list = reconciliationIndex.get(candidate.sourceFeatureIndex) ?? [];
-    list.push({ entityId: entity.entityId, status: entity.status });
+    list.push({
+      entityId: entity.entityId,
+      status: entity.status,
+      candidateRecordSha256: candidate.candidateRecordSha256
+    });
     reconciliationIndex.set(candidate.sourceFeatureIndex, list);
   }
 }
@@ -72,6 +80,10 @@ for (const entity of reconciliation.results ?? []) {
 const reviewQueue = (screening.candidates ?? []).map(candidate => {
   const entityMatches = reconciliationIndex.get(candidate.sourceFeatureIndex) ?? [];
   const candidateRecordSha256 = sha256(candidate);
+  const reconciliationHashes = [...new Set(entityMatches.map(match => match.candidateRecordSha256).filter(Boolean))];
+  if (reconciliationHashes.length > 0 && (reconciliationHashes.length !== 1 || reconciliationHashes[0] !== candidateRecordSha256)) {
+    throw new Error(`Reconciliation candidate identity drift detected: ${candidate.sourceFeatureIndex}`);
+  }
   return {
     reviewId: `cliopatria-1326-feature-${candidate.sourceFeatureIndex}-${candidateRecordSha256.slice(0, 16)}`,
     sourceFeatureIndex: candidate.sourceFeatureIndex,
@@ -102,8 +114,8 @@ const reviewQueue = (screening.candidates ?? []).map(candidate => {
     },
     sourceEvidence: {
       candidateRecordSha256,
-      candidatePacketSha256: candidateRecordSha256,
-      reviewIdDerivation: "cliopatria-1326-feature-${sourceFeatureIndex}-${candidatePacketSha256.slice(0,16)}",
+      candidatePacketSha256: screening.candidatePacketSha256,
+      reviewIdDerivation: "cliopatria-1326-feature-${sourceFeatureIndex}-${candidateRecordSha256.slice(0,16)}",
       sourceFeatureIndex: candidate.sourceFeatureIndex,
       sourceFeatureId: candidate.sourceFeatureId
     },
