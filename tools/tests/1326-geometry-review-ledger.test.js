@@ -61,7 +61,7 @@ assert.deepEqual(report.records[0].confidence, {
 });
 
 await run("tools/historical-gis/cli/validate-1326-geometry-review-ledger.js", [
-  "--input", output
+  "--input", output, "--queue", input
 ]);
 
 report.records[0].edgeAssessments = [{
@@ -80,4 +80,12 @@ await run("tools/historical-gis/cli/validate-1326-geometry-review-ledger.js", [
 const validated = JSON.parse(await fs.readFile(output, "utf8"));
 assert.equal(validated.records[0].edgeAssessments[0].edgeType, "FRONTIER");
 assert.equal(validated.records[0].edgeAssessments[0].confidence, 0.25);
-console.log("1326 geometry review ledger contract passed: v2 schema, empty edge initialization, and edge validation are enforced.");
+const drifted = JSON.parse(JSON.stringify(report));
+drifted.records[0].sourceFeatureIndex = 999;
+await fs.writeFile(output, JSON.stringify(drifted, null, 2));
+await assert.rejects(
+  () => run("tools/historical-gis/cli/validate-1326-geometry-review-ledger.js", ["--input", output, "--queue", input]),
+  /exit/
+);
+
+console.log("1326 geometry review ledger contract passed: v2 schema, queue binding, empty edge initialization, and edge validation are enforced.");
