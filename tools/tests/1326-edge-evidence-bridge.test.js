@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { spawn } from "node:child_process";
+import { spawn } from "node:child_process";\nimport os from "node:os";
 
 const root = process.cwd();
-const dir = path.join(root, "data/build/gis/1326");
+const temp = await fs.mkdtemp(path.join(os.tmpdir(), "historia-1326-edge-bridge-"));\nconst dir = temp;
 const ledger = path.join(dir, "test-edge-bridge-ledger.json");
 const evidence = path.join(root, "data/gis/1326/pilot-edge-evidence/bithynia-core-01.json");
 const bindings = path.join(dir, "test-edge-bridge-bindings.json");
@@ -105,5 +105,4 @@ const reviewedResult = await new Promise(resolve => {
 });
 assert.notEqual(reviewedResult, 0);
 
-await run("tools/historical-gis/cli/validate-1326-geometry-review-ledger.js", ["--input", output]);
-console.log("1326 edge evidence bridge contract passed: explicit bindings only; authority and promotion remain blocked.");
+const driftRecordLedger = JSON.parse(await fs.readFile(ledger, "utf8"));\ndriftRecordLedger.records[0].provenance.candidateRecordSha256 = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";\nconst driftRecordPath = path.join(dir, "test-edge-bridge-record-drift-ledger.json");\nawait fs.writeFile(driftRecordPath, JSON.stringify(driftRecordLedger, null, 2));\nconst driftRecordResult = await new Promise(resolve => {\n  const child = spawn(process.execPath, ["tools/historical-gis/cli/bridge-1326-edge-evidence.js", "--ledger", driftRecordPath, "--evidence", evidence, "--bindings", bindings, "--output", output], { cwd: root, stdio: ["ignore", "pipe", "pipe"] });\n  child.on("close", code => resolve(code));\n});\nassert.notEqual(driftRecordResult, 0);\n\nconst duplicateEdgeBindings = JSON.parse(await fs.readFile(bindings, "utf8"));\nduplicateEdgeBindings.reviewBindings[0].edgeEvidenceIds = ["bursa-nicaea-frontier-1326", "bursa-nicaea-frontier-1326"];\nconst duplicateBindingsPath = path.join(dir, "test-edge-bridge-duplicate-bindings.json");\nawait fs.writeFile(duplicateBindingsPath, JSON.stringify(duplicateEdgeBindings, null, 2));\nconst duplicateBindingResult = await new Promise(resolve => {\n  const child = spawn(process.execPath, ["tools/historical-gis/cli/bridge-1326-edge-evidence.js", "--ledger", ledger, "--evidence", evidence, "--bindings", duplicateBindingsPath, "--output", output], { cwd: root, stdio: ["ignore", "pipe", "pipe"] });\n  child.on("close", code => resolve(code));\n});\nassert.notEqual(duplicateBindingResult, 0);\n\nawait run("tools/historical-gis/cli/validate-1326-geometry-review-ledger.js", ["--input", output]);\nawait fs.rm(temp, { recursive: true, force: true });\nconsole.log("1326 edge evidence bridge contract passed: explicit bindings only; authority and promotion remain blocked.");
