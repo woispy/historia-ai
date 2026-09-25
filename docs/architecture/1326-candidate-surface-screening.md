@@ -524,3 +524,12 @@ Extraction preparation also accepts --extract-dir, allowing runtime fixtures to 
 The integrated Cliopatria candidate pipeline now invokes the operational state gate before temporal extraction and again after candidate packet creation. When an extraction-input record is supplied without an explicit acquisition argument, the pipeline derives the acquisition record path from the extraction input's retained acquisition provenance. This prevents the pipeline from bypassing acquisition verification while keeping the acquisition record as the single provenance source.
 
 The final pipeline state check requires CANDIDATE_READY before the T3-B geometry review queue handoff. Missing acquisition, missing extraction, or candidate packet provenance drift therefore fails the integrated command before it can report a successful T3-B handoff.
+
+### Integrated provenance tamper contract
+
+The acquisition-to-T3-B runtime fixture now exercises two fail-closed mutation paths after a successful baseline handoff:
+
+- a tampered extracted-GeoJSON SHA in the extraction-input record must prevent the integrated candidate pipeline from starting;
+- a mutated candidate record with the original packet SHA must be rejected by the operational CANDIDATE_READY gate.
+
+This keeps the runtime contract aligned with the production chain: byte/extraction provenance must be intact before candidate extraction, and candidate packet identity must remain immutable before the geometry-review queue handoff. The fixture remains synthetic test evidence and does not alter the production acquisition manifest.
