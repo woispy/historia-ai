@@ -7,7 +7,7 @@ import crypto from "node:crypto";
 const root = process.cwd();
 const fixture = path.join(root, "tools/tests/fixtures/1326-candidate-surface");
 const screening = path.join(root, "data/build/gis/1326/test-candidate-surface-screening.json");
-const reconciliation = path.join(root, "data/build/gis/1326/test-entity-reconciliation.json");
+const reconciliationPath = path.join(root, "data/build/gis/1326/test-entity-reconciliation.json");
 const output = path.join(root, "data/build/gis/1326/test-geometry-reconciliation.json");
 
 await fs.mkdir(path.dirname(output), { recursive: true });
@@ -62,7 +62,7 @@ const reconciliation = {
   }]
 };
 await fs.writeFile(screening, JSON.stringify(screen));
-await fs.writeFile(reconciliation, JSON.stringify(reconciliation));
+await fs.writeFile(reconciliationPath, JSON.stringify(reconciliation));
 
 function run(script, args) {
   return new Promise((resolve, reject) => {
@@ -71,7 +71,7 @@ function run(script, args) {
     child.on("exit", code => code === 0 ? resolve() : reject(new Error(`exit ${code}`)));
   });
 }
-await run("tools/historical-gis/cli/prepare-1326-geometry-reconciliation.js", ["--screening", screening, "--reconciliation", reconciliation, "--output", output]);
+await run("tools/historical-gis/cli/prepare-1326-geometry-reconciliation.js", ["--screening", screening, "--reconciliation", reconciliationPath, "--output", output]);
 await run("tools/historical-gis/cli/validate-1326-geometry-reconciliation.js", ["--input", output]);
 await run("tools/historical-gis/cli/validate-1326-reviewed-geometry.js", ["--input", output]);
 
@@ -80,13 +80,13 @@ async function expectFailure(args) {
 }
 const unknownReconciliation = JSON.parse(JSON.stringify(reconciliation));
 unknownReconciliation.results[0].candidates[0].sourceFeatureIndex = 999;
-const unknownPath = path.join(path.dirname(reconciliation), "test-entity-reconciliation-unknown.json");
+const unknownPath = path.join(path.dirname(reconciliationPath), "test-entity-reconciliation-unknown.json");
 await fs.writeFile(unknownPath, JSON.stringify(unknownReconciliation));
 await expectFailure(["--screening", screening, "--reconciliation", unknownPath, "--output", output]);
 
 const mismatchedReconciliation = JSON.parse(JSON.stringify(reconciliation));
 mismatchedReconciliation.results[0].candidates[0].sourceFeatureId = "wrong-id";
-const mismatchPath = path.join(path.dirname(reconciliation), "test-entity-reconciliation-mismatch.json");
+const mismatchPath = path.join(path.dirname(reconciliationPath), "test-entity-reconciliation-mismatch.json");
 await fs.writeFile(mismatchPath, JSON.stringify(mismatchedReconciliation));
 await expectFailure(["--screening", screening, "--reconciliation", mismatchPath, "--output", output]);
 
