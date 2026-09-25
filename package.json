@@ -131,7 +131,10 @@
     "validate:1326-geometry-review-ledger": "node tools/historical-gis/cli/validate-1326-geometry-review-ledger.js",
     "test:1326-geometry-review-ledger": "node tools/tests/1326-geometry-review-ledger.test.js",
     "bridge:1326-edge-evidence": "node tools/historical-gis/cli/bridge-1326-edge-evidence.js",
-    "test:1326-edge-evidence-bridge": "node tools/tests/1326-edge-evidence-bridge.test.js"
+    "test:1326-edge-evidence-bridge": "node tools/tests/1326-edge-evidence-bridge.test.js",
+    "prepare:1326-edge-evidence-bindings": "node tools/historical-gis/cli/prepare-1326-edge-evidence-bindings.js",
+    "validate:1326-edge-evidence-bindings": "node tools/historical-gis/cli/validate-1326-edge-evidence-bindings.js",
+    "test:1326-edge-evidence-bindings": "node tools/tests/1326-edge-evidence-bindings.test.js"
   },
   "dependencies": {
     "react": "^19.2.7",
