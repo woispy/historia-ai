@@ -124,6 +124,7 @@
     "run:1326-cliopatria-candidate-pipeline": "node tools/historical-gis/cli/run-1326-cliopatria-candidate-pipeline.js",
     "test:1326-cliopatria-acquisition-contract": "node tools/tests/1326-cliopatria-acquisition-contract.test.js",
     "prepare:1326-geometry-reconciliation": "node tools/historical-gis/cli/prepare-1326-geometry-reconciliation.js",
+    "validate:1326-geometry-reconciliation": "node tools/historical-gis/cli/validate-1326-geometry-reconciliation.js",
     "test:1326-geometry-reconciliation": "node tools/tests/1326-geometry-reconciliation.test.js"
   },
   "dependencies": {
