@@ -78,9 +78,14 @@ const reviewQueue = (screening.candidates ?? []).map(candidate => {
     sourceGeometry: {
       type: candidate.geometryAuthorityStatus,
       geometry: candidate.geometry,
-      sha256: sha256(candidate),
+      sha256: sha256(candidate.geometry),
       immutable: true,
       mutationPolicy: "immutable-source-evidence"
+    },
+    sourceEvidence: {
+      candidatePacketSha256: sha256(candidate),
+      sourceFeatureIndex: candidate.sourceFeatureIndex,
+      sourceFeatureId: candidate.sourceFeatureId
     },
     reviewRequirements: [
       "historical-entity-identity",
