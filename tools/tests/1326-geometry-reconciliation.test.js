@@ -75,6 +75,21 @@ await run("tools/historical-gis/cli/prepare-1326-geometry-reconciliation.js", ["
 await run("tools/historical-gis/cli/validate-1326-geometry-reconciliation.js", ["--input", output]);
 await run("tools/historical-gis/cli/validate-1326-reviewed-geometry.js", ["--input", output]);
 
+async function expectFailure(args) {
+  await assert.rejects(() => run("tools/historical-gis/cli/prepare-1326-geometry-reconciliation.js", args));
+}
+const unknownReconciliation = JSON.parse(JSON.stringify(reconciliation));
+unknownReconciliation.results[0].candidates[0].sourceFeatureIndex = 999;
+const unknownPath = path.join(path.dirname(reconciliation), "test-entity-reconciliation-unknown.json");
+await fs.writeFile(unknownPath, JSON.stringify(unknownReconciliation));
+await expectFailure(["--screening", screening, "--reconciliation", unknownPath, "--output", output]);
+
+const mismatchedReconciliation = JSON.parse(JSON.stringify(reconciliation));
+mismatchedReconciliation.results[0].candidates[0].sourceFeatureId = "wrong-id";
+const mismatchPath = path.join(path.dirname(reconciliation), "test-entity-reconciliation-mismatch.json");
+await fs.writeFile(mismatchPath, JSON.stringify(mismatchedReconciliation));
+await expectFailure(["--screening", screening, "--reconciliation", mismatchPath, "--output", output]);
+
 const report = JSON.parse(await fs.readFile(output, "utf8"));
 assert.equal(report.scenarioDate, "1326-04-07");
 assert.equal(report.authorityStatus, "candidate-review-only");
