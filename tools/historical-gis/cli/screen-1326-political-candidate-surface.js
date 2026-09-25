@@ -20,6 +20,7 @@ function requireArg(name) {
 function assertCandidateReport(report) {
   if (report?.scenarioDate !== SCENARIO_DATE) throw new Error("Candidate scenario date mismatch.");
   if (report?.source?.sourceId !== SOURCE_ID) throw new Error("Candidate source identity mismatch.");
+  if (!/^[0-9a-f]{64}$/.test(report?.source?.extractedGeojsonSha256 ?? "")) throw new Error("Candidate report must carry extracted GeoJSON SHA-256.");
   if (!/^[0-9a-f]{64}$/.test(report?.source?.extractedGeojsonSha256 ?? "")) {
     throw new Error("Candidate report must carry the verified extracted GeoJSON SHA-256.");
   }
