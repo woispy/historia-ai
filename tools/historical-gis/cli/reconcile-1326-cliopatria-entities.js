@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import crypto from "node:crypto";
 
 const SCENARIO_DATE = "1326-04-07";
 const SOURCE_ID = "cliopatria-v0.2.0";
@@ -27,6 +28,21 @@ const matrix = JSON.parse(await fs.readFile(matrixPath, "utf8"));
 if (candidates.scenarioDate !== SCENARIO_DATE) throw new Error("Candidate scenario date mismatch.");
 if (candidates.source?.sourceId !== SOURCE_ID) throw new Error("Candidate source identity mismatch.");
 if (!/^[0-9a-f]{64}$/.test(candidates.candidatePacketSha256 ?? "")) throw new Error("Candidate packet SHA-256 is required.");
+if (!Array.isArray(candidates.candidates)) throw new Error("Candidate report must contain candidates[].");
+const recomputedCandidatePacketSha256 = crypto.createHash("sha256").update(JSON.stringify(candidates.candidates)).digest("hex");
+if (recomputedCandidatePacketSha256 !== candidates.candidatePacketSha256) {
+  throw new Error("Candidate packet SHA-256 does not match candidates[].");
+}
+const seenFeatureIndexes = new Set();
+for (const candidate of candidates.candidates) {
+  if (!Number.isInteger(candidate.sourceFeatureIndex) || candidate.sourceFeatureIndex < 0) {
+    throw new Error("Candidate sourceFeatureIndex must be a non-negative integer.");
+  }
+  if (seenFeatureIndexes.has(candidate.sourceFeatureIndex)) {
+    throw new Error("Duplicate candidate sourceFeatureIndex detected.");
+  }
+  seenFeatureIndexes.add(candidate.sourceFeatureIndex);
+}
 if (!/^[0-9a-f]{64}$/.test(candidates.source?.extractedGeojsonSha256 ?? "")) {
   throw new Error("Candidate report must carry the verified extracted GeoJSON SHA-256.");
 }
