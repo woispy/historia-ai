@@ -25,6 +25,7 @@ function assertCandidateReport(report) {
     throw new Error("Candidate report must carry the verified extracted GeoJSON SHA-256.");
   }
   if (!Array.isArray(report?.candidates)) throw new Error("Candidate report must contain candidates[].");
+  if (!/^[0-9a-f]{64}$/.test(report?.candidatePacketSha256 ?? "")) throw new Error("Candidate report must carry candidate packet SHA-256.");
 }
 
 function assertAnchorReport(report) {
@@ -179,6 +180,7 @@ const report = {
   scenarioDate: SCENARIO_DATE,
   scenarioYear: SCENARIO_YEAR,
   source: candidates.source,
+  candidatePacketSha256: candidates.candidatePacketSha256,
   provenance: {
     extractedGeojsonSha256: candidates.source.extractedGeojsonSha256,
     inputSha256: candidates.source.inputSha256
