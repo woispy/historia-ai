@@ -413,3 +413,16 @@ Before byte acquisition, `validate-1326-cliopatria-acquisition-ready.js` verifie
 After acquisition, `acquire-1326-cliopatria.js --verify` now cross-checks the retained artifact SHA/length plus the immutable commit, source blob SHA, source tag, retained artifact path, and pinned source URL recorded in the acquisition manifest.
 
 This keeps the acquisition chain fail-closed before extraction. Acquisition remains evidence-only and promotion-blocked; extraction is still a separate gate.
+
+### Extraction → candidate runtime integrity gate
+
+The extraction-to-candidate boundary now has a dedicated runtime contract. Candidate extraction with `--extraction-input` re-hashes the retained extracted GeoJSON before reading candidate features, and fails closed if the recorded extracted-member SHA or the retained bytes differ.
+
+The candidate validator additionally requires `source.extractedGeojsonSha256 === source.inputSha256`, preventing provenance fields from silently diverging inside the candidate packet.
+
+The runtime contract covers:
+- baseline extraction success,
+- extraction-record hash tampering,
+- retained GeoJSON byte/content tampering.
+
+No candidate packet is considered valid unless the extracted bytes and recorded provenance agree.
