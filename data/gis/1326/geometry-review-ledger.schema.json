@@ -184,13 +184,18 @@
             "additionalProperties": false,
             "required": [
               "sourceId",
-              "candidatePacketSha256"
+              "candidatePacketSha256",
+              "candidateRecordSha256"
             ],
             "properties": {
               "sourceId": {
                 "const": "cliopatria-v0.2.0"
               },
               "candidatePacketSha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "candidateRecordSha256": {
                 "type": "string",
                 "pattern": "^[0-9a-f]{64}$"
               },
