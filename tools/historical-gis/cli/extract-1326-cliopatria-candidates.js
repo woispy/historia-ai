@@ -54,6 +54,15 @@ if (extractionInput) {
   if (extractionInput.scenarioDate !== SCENARIO_DATE) throw new Error("Extraction input scenario date mismatch.");
   if (extractionInput.promotion !== "BLOCKED_UNTIL_TEMPORAL_EXTRACTION_RECONCILIATION_REVIEW") throw new Error("Extraction input must remain promotion-blocked.");
   if (extractionInput.member?.format !== "GeoJSON" || extractionInput.member?.featureCollectionValidated !== true) throw new Error("Extraction input must identify a validated GeoJSON member.");
+  if (!extractionInput.archive?.acquisitionRecord) throw new Error("Extraction input must retain an acquisition record.");
+  const acquisitionPath = path.resolve(process.cwd(), extractionInput.archive.acquisitionRecord);
+  const acquisition = JSON.parse(await fs.readFile(acquisitionPath, "utf8"));
+  if (acquisition.sourceId !== extractionInput.sourceId) throw new Error("Extraction input acquisition source identity mismatch.");
+  if (acquisition.immutableReference?.sha !== extractionInput.immutableReference?.sha ||
+      acquisition.immutableReference?.sourceBlobSha !== extractionInput.immutableReference?.sourceBlobSha) throw new Error("Extraction input acquisition immutable reference mismatch.");
+  if (acquisition.rawSha256 !== extractionInput.archive.rawSha256 ||
+      acquisition.byteLength !== extractionInput.archive.byteLength) throw new Error("Extraction input acquisition archive provenance mismatch.");
+  if (acquisition.retainedArtifact !== extractionInput.archive.path) throw new Error("Extraction input archive path does not match the retained acquisition artifact.");
 }
 const inputPath = extractionInput
   ? path.resolve(process.cwd(), extractionInput.member.extractedPath)
