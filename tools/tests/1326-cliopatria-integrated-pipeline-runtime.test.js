@@ -224,6 +224,61 @@ try {
     "--evidence", evidencePath
   ]);
 
+  const tamperLedger = async (name, mutate) => {
+    const value = JSON.parse(await fs.readFile(ledgerPath, "utf8"));
+    mutate(value);
+    const file = path.join(temp, name);
+    await fs.writeFile(file, JSON.stringify(value, null, 2));
+    return file;
+  };
+  const tamperBinding = async (name, mutate) => {
+    const value = JSON.parse(await fs.readFile(bindingOutput, "utf8"));
+    mutate(value);
+    const file = path.join(temp, name);
+    await fs.writeFile(file, JSON.stringify(value, null, 2));
+    return file;
+  };
+  const bridgeScript = path.join(root, "tools/historical-gis/cli/bridge-1326-edge-evidence.js");
+  const readinessScript = path.join(root, "tools/historical-gis/cli/validate-1326-t3b-pilot-readiness.js");
+
+  const packetDriftLedger = await tamperLedger("tampered-ledger-packet.json", value => {
+    value.records[0].provenance.candidatePacketSha256 = "f".repeat(64);
+  });
+  await runNode(bridgeScript, ["--ledger", packetDriftLedger, "--evidence", evidencePath, "--bindings", bindingOutput, "--output", path.join(temp, "packet-drift-bridge.json")], true);
+
+  const recordDriftLedger = await tamperLedger("tampered-ledger-record.json", value => {
+    value.records[0].provenance.candidateRecordSha256 = "e".repeat(64);
+  });
+  await runNode(bridgeScript, ["--ledger", recordDriftLedger, "--evidence", evidencePath, "--bindings", bindingOutput, "--output", path.join(temp, "record-drift-bridge.json")], true);
+
+  const reviewIdDriftLedger = await tamperLedger("tampered-ledger-review-id.json", value => {
+    value.records[0].reviewId = "cliopatria-1326-feature-1-ffffffffffffffff";
+  });
+  await runNode(bridgeScript, ["--ledger", reviewIdDriftLedger, "--evidence", evidencePath, "--bindings", bindingOutput, "--output", path.join(temp, "review-id-drift-bridge.json")], true);
+
+  const bindingReviewDrift = await tamperBinding("tampered-binding-review-id.json", value => {
+    value.reviewBindings[0].reviewId = "cliopatria-1326-feature-1-ffffffffffffffff";
+  });
+  await runNode(bridgeScript, ["--ledger", ledgerPath, "--evidence", evidencePath, "--bindings", bindingReviewDrift, "--output", path.join(temp, "binding-review-drift-bridge.json")], true);
+
+  const bindingEdgeDrift = await tamperBinding("tampered-binding-edge-id.json", value => {
+    value.reviewBindings[0].edgeEvidenceIds[0] = "unknown-edge-id";
+  });
+  await runNode(bridgeScript, ["--ledger", ledgerPath, "--evidence", evidencePath, "--bindings", bindingEdgeDrift, "--output", path.join(temp, "binding-edge-drift-bridge.json")], true);
+
+  const readinessLedgerDrift = await tamperLedger("tampered-ledger-readiness.json", value => {
+    value.records[0].provenance.candidateRecordSha256 = "d".repeat(64);
+  });
+  await runNode(readinessScript, [
+    "--candidates", path.join(outputDir, "cliopatria-1326-candidates.json"),
+    "--screening", path.join(outputDir, "cliopatria-candidate-surface-screening.json"),
+    "--reconciliation", path.join(outputDir, "cliopatria-entity-reconciliation.json"),
+    "--review", path.join(outputDir, "1326-geometry-reconciliation-queue.json"),
+    "--ledger", readinessLedgerDrift,
+    "--bindings", bindingOutput,
+    "--evidence", evidencePath
+  ], true);
+
   const extractionRecord = JSON.parse(await fs.readFile(extractionInputPath, "utf8"));\n  extractionRecord.member.sha256 = "0".repeat(64);\n  const tamperedExtractionPath = path.join(temp, "tampered-extraction-input.json");\n  await fs.writeFile(tamperedExtractionPath, JSON.stringify(extractionRecord, null, 2));\n  await runNode(pipeline, [\n    "--extraction-input", tamperedExtractionPath,\n    "--anchors", anchors,\n    "--output-dir", path.join(temp, "tampered-pipeline-output")\n  ], true);\n\n  const tamperedCandidate = JSON.parse(JSON.stringify(candidates));\n  tamperedCandidate.candidates[0].name = "Tampered Candidate";\n  const tamperedCandidatePath = path.join(temp, "tampered-candidates.json");\n  await fs.writeFile(tamperedCandidatePath, JSON.stringify(tamperedCandidate, null, 2));\n  const operationalState = path.join(root, "tools/historical-gis/cli/validate-1326-cliopatria-operational-state.js");\n  await runNode(operationalState, [\n    "--manifest", manifestPath,\n    "--acquisition", acquisitionPath,\n    "--extraction-input", extractionInputPath,\n    "--candidates", tamperedCandidatePath,\n    "--require-candidate-ready", "true"\n  ], true);\n\n  console.log("1326 integrated acquisition-to-T3-B runtime contract passed.");
 } finally {
   await fs.rm(temp, { recursive: true, force: true });
