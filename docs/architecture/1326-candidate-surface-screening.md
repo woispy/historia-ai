@@ -533,3 +533,13 @@ The acquisition-to-T3-B runtime fixture now exercises two fail-closed mutation p
 - a mutated candidate record with the original packet SHA must be rejected by the operational CANDIDATE_READY gate.
 
 This keeps the runtime contract aligned with the production chain: byte/extraction provenance must be intact before candidate extraction, and candidate packet identity must remain immutable before the geometry-review queue handoff. The fixture remains synthetic test evidence and does not alter the production acquisition manifest.
+
+### T3-B review identity tamper runtime coverage
+
+The pilot-readiness runtime contract now exercises the review-side identity boundary in addition to packet and evidence drift. Synthetic readiness fixtures must fail closed when:
+
+- a ledger `candidateRecordSha256` is changed while the screened candidate remains unchanged;
+- a review item's candidate-bound `reviewId` is changed without changing the underlying candidate record;
+- a binding references an unknown pilot evidence edge.
+
+This keeps the review identity chain fail-closed at the point where candidate-derived identity becomes ledger and explicit binding identity. The test remains synthetic and does not create production review bindings.
