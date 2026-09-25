@@ -10,12 +10,17 @@ const pipeline = fs.readFileSync(path.join(root, "tools/historical-gis/cli/run-1
 const review = fs.readFileSync(path.join(root, "tools/historical-gis/cli/prepare-1326-geometry-reconciliation.js"), "utf8");
 
 assert.match(extract, /extractedGeojsonSha256/);
+assert.match(extract, /candidatePacketSha256/);
+assert.match(reconcile, /candidatePacketSha256/);
 assert.match(reconcile, /sourceProvenance/);
 assert.match(reconcile, /extractedGeojsonSha256/);
+assert.match(screen, /candidatePacketSha256/);
 assert.match(screen, /provenance/);
 assert.match(screen, /extractedGeojsonSha256/);
 assert.match(pipeline, /Candidate\/reconciliation extraction provenance mismatch/);
 assert.match(pipeline, /Candidate\/screening extraction provenance mismatch/);
+assert.match(review, /candidateRecordSha256/);
+assert.match(review, /candidatePacketSha256/);
 assert.match(review, /sourceProvenance/);
 assert.match(review, /Reconciliation\/extraction provenance mismatch/);
 
