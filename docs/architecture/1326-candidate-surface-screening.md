@@ -366,3 +366,14 @@ The legacy `sourceEvidence.candidatePacketSha256` field is retained for compatib
 
 The screening layer also preserves the complete source geometry without mutation. Geometry SHA and candidate-record SHA remain separate integrity values.
 
+
+### Screening → review geometry integrity
+
+Screening now records `sourceGeometrySha256` for each preserved candidate geometry. Geometry reconciliation carries this value into `sourceGeometry.screeningSourceGeometrySha256` and validates it against the recomputed review-queue geometry SHA.
+
+This closes the runtime lineage:
+
+`source geometry → screening geometry hash → review geometry hash`
+
+A mismatch is fatal. The hash is an integrity/provenance mechanism only; it does not make candidate geometry authoritative or permit canonical promotion.
+
