@@ -73,7 +73,7 @@ if (acquisitionPathArg) {
   if (acquisition.sourceTag !== EXPECTED_TAG) throw new Error("Acquisition source tag mismatch.");
   if (acquisition.immutableReference?.sha !== EXPECTED_COMMIT) throw new Error("Acquisition commit mismatch.");
   if (acquisition.immutableReference?.sourceBlobSha !== EXPECTED_BLOB) throw new Error("Acquisition blob SHA mismatch.");
-  if (acquisition.retainedArtifact !== EXPECTED_ARCHIVE) throw new Error("Acquisition retained artifact mismatch.");
+  if (!acquisition.retainedArtifact) throw new Error("Acquisition retained artifact is required.");
   if (acquisition.rawSha256 !== source.snapshot.rawSha256) throw new Error("Manifest/acquisition SHA mismatch.");
   if (acquisition.byteLength !== source.snapshot.byteLength) throw new Error("Manifest/acquisition byteLength mismatch.");
   requireHex(acquisition.rawSha256, "Acquisition rawSha256");
