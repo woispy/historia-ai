@@ -17,7 +17,7 @@ await fs.writeFile(ledger, JSON.stringify({
   authorityStatus: "review-ledger-only",
   promotion: "BLOCKED",
   records: [{
-    reviewId: "review-test-bursa-001",
+    reviewId: "cliopatria-1326-feature-7-0123456789abcdef",
     sourceFeatureIndex: 7,
     provenance: { candidatePacketSha256: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" }
   }]
