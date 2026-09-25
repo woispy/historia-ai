@@ -10,18 +10,18 @@ const temp = await fs.mkdtemp(path.join(os.tmpdir(), "historia-1326-pilot-readin
 const validator = path.join(root, "tools/historical-gis/cli/validate-1326-t3b-pilot-readiness.js");
 const sha = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 const recordSha = "abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd";
-const packetSha = crypto.createHash("sha256").update(JSON.stringify([candidate])).digest("hex");
-const geometrySha = crypto.createHash("sha256").update(JSON.stringify(geometry)).digest("hex");
 const geometry = { type: "Polygon", coordinates: [[[29,40],[29.1,40],[29.1,40.1],[29,40.1],[29,40]]] };
 const candidate = { sourceFeatureIndex: 7, sourceFeatureId: "feature-7", geometry };
+const packetSha = crypto.createHash("sha256").update(JSON.stringify([candidate])).digest("hex");
+const geometrySha = crypto.createHash("sha256").update(JSON.stringify(geometry)).digest("hex");
 const reviewId = "cliopatria-1326-feature-7-" + recordSha.slice(0,16);
 
 const reports = {
   candidates: { scenarioDate:"1326-04-07", source:{sourceId:"cliopatria-v0.2.0"}, candidates:[candidate], candidatePacketSha256:packetSha, promotion:"BLOCKED" },
-  screening: { scenarioDate:"1326-04-07", source:{sourceId:"cliopatria-v0.2.0"}, candidates:[{...candidate,sourceGeometrySha256:geometrySha}], candidatePacketSha:packetSha, promotion:"BLOCKED" },
+  screening: { scenarioDate:"1326-04-07", source:{sourceId:"cliopatria-v0.2.0"}, candidates:[{...candidate,sourceGeometrySha256:geometrySha}], candidatePacketSha256:packetSha, promotion:"BLOCKED" },
   reconciliation: { scenarioDate:"1326-04-07", sourceId:"cliopatria-v0.2.0", candidatePacketSha256:packetSha, results:[{candidates:[{sourceFeatureIndex:7,sourceFeatureId:"feature-7"}]}], promotion:"BLOCKED" },
-  review: { scenarioDate:"1326-04-07", source:{sourceId:"cliopatria-v0.2.0"}, candidatePacketSha256:sha, reviewQueue:[{sourceFeatureIndex:7,sourceFeatureId:"feature-7",reviewId,reviewedGeometry:null,reviewStatus:"pending",promotion:"BLOCKED",sourceEvidence:{candidateRecordSha256:recordSha}}], promotion:"BLOCKED" },
-  ledger: {schemaVersion:2,authorityStatus:"review-ledger-only",promotion:"BLOCKED",records:[{sourceFeatureIndex:7,reviewId,provenance:{candidatePacketSha256:sha,candidateRecordSha256:recordSha},decision:{status:"pending"}}]},
+  review: { scenarioDate:"1326-04-07", source:{sourceId:"cliopatria-v0.2.0"}, candidatePacketSha256:packetSha, reviewQueue:[{sourceFeatureIndex:7,sourceFeatureId:"feature-7",reviewId,reviewedGeometry:null,reviewStatus:"pending",promotion:"BLOCKED",sourceEvidence:{candidateRecordSha256:recordSha}}], promotion:"BLOCKED" },
+  ledger: {schemaVersion:2,authorityStatus:"review-ledger-only",promotion:"BLOCKED",records:[{sourceFeatureIndex:7,reviewId,provenance:{candidatePacketSha256:packetSha,candidateRecordSha256:recordSha},decision:{status:"pending"}}]},
   evidence: {schemaVersion:1,authorityStatus:"evidence-reference-only",promotion:"BLOCKED",policy:{geometryGeneration:false,controllerInference:false,canonicalPromotion:false},edges:[{edgeId:"e1"}]},
   bindings: {schemaVersion:1,authorityStatus:"bridge-reference-only",promotion:"BLOCKED",policy:{automaticReviewMatching:false,geometryGeneration:false,controllerInference:false,canonicalPromotion:false},reviewBindings:[]}
 };
