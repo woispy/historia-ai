@@ -8,6 +8,7 @@ const extractor = fs.readFileSync(path.join(root, "tools/historical-gis/cli/extr
 const pipeline = fs.readFileSync(path.join(root, "tools/historical-gis/cli/run-1326-cliopatria-candidate-pipeline.js"), "utf8");
 
 assert.match(script, /candidatePacketSha256/);
+assert.match(script, /extractedGeojsonSha256 !== report.source.inputSha256/);
 assert.match(script, /Duplicate sourceFeatureIndex/);
 assert.match(script, /Duplicate sourceFeatureId/);
 assert.match(script, /FromYear <= 1326 <= ToYear/);
