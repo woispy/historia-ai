@@ -27,6 +27,7 @@ const matrix = JSON.parse(await fs.readFile(matrixPath, "utf8"));
 
 if (candidates.scenarioDate !== SCENARIO_DATE) throw new Error("Candidate scenario date mismatch.");
 if (candidates.source?.sourceId !== SOURCE_ID) throw new Error("Candidate source identity mismatch.");
+if (candidates.source?.extractedGeojsonSha256 !== candidates.source?.inputSha256) throw new Error("Candidate extracted/input SHA-256 provenance drifted.");
 if (!/^[0-9a-f]{64}$/.test(candidates.candidatePacketSha256 ?? "")) throw new Error("Candidate packet SHA-256 is required.");
 if (!Array.isArray(candidates.candidates)) throw new Error("Candidate report must contain candidates[].");
 const recomputedCandidatePacketSha256 = crypto.createHash("sha256").update(JSON.stringify(candidates.candidates)).digest("hex");
@@ -83,7 +84,7 @@ const results = REQUIRED_ENTITIES.map((entity) => {
       seshatId: candidate.seshatId,
       fromYear: candidate.fromYear,
       toYear: candidate.toYear,
-      geometryAuthorityStatus: candidate.geometryAuthorityStatus,
+      geometryAuthorityStatus: candidate.geometryAuthorityStatus,\n      candidateRecordSha256: crypto.createHash("sha256").update(JSON.stringify(candidate)).digest("hex"),
     })),
     autoPromotion: false,
   };
