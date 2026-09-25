@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "evidence-reference-only",
+  "promotion": "BLOCKED",
+  "pilot": "bithynia-core-01",
+  "policy": {
+    "geometryGeneration": false,
+    "controllerInference": false,
+    "canonicalPromotion": false,
+    "sourceEvidenceRequired": true,
+    "humanReviewRequired": true
+  },
+  "edges": [
+    {
+      "edgeId": "bursa-nicaea-frontier-1326",
+      "source": "bursa_1326",
+      "target": "nicaea_1326",
+      "edgeType": "FRONTIER",
+      "status": "uncertain",
+      "confidence": 0.25,
+      "evidenceRefs": ["inventory:1326-gecis-envanteri#17"],
+      "notes": "Bursa-Nicaea frontier is modeled as a transition/frontier surface; exact boundary remains low/medium confidence and is not canonical."
+    },
+    {
+      "edgeId": "bursa-nicaea-regional-proximity-1326",
+      "source": "bursa_1326",
+      "target": "nicaea_1326",
+      "edgeType": "REGIONAL_PROXIMITY",
+      "status": "supported",
+      "confidence": 0.75,
+      "evidenceRefs": ["inventory:1326-gecis-envanteri#17"],
+      "notes": "Regional relationship is retained separately from exact political boundary."
+    },
+    {
+      "edgeId": "nicaea-sangarius-corridor-1326",
+      "source": "nicaea_1326",
+      "target": "sangarius",
+      "edgeType": "RIVER_CORRIDOR",
+      "status": "supported",
+      "confidence": 0.9,
+      "evidenceRefs": ["inventory:1326-gecis-envanteri#15"],
+      "notes": "Sangarius is treated as an access corridor; corridor evidence does not imply political ownership."
+    },
+    {
+      "edgeId": "nicaea-sangarius-barrier-1326",
+      "source": "nicaea_1326",
+      "target": "sangarius",
+      "edgeType": "RIVER_CORRIDOR",
+      "status": "partial",
+      "confidence": 0.7,
+      "evidenceRefs": ["inventory:1326-gecis-envanteri#1"],
+      "notes": "The source describes the river valley as an access route while some gorge sections act as physical barriers. This record remains a physical constraint, not a political border."
+    },
+    {
+      "edgeId": "nicaea-lefke-route-1326",
+      "source": "nicaea_1326",
+      "target": "lefke_sangarius_corridor",
+      "edgeType": "ROAD_CORRIDOR",
+      "status": "supported",
+      "confidence": 0.8,
+      "evidenceRefs": ["inventory:1326-gecis-envanteri#15"],
+      "notes": "Lower-cost/high-connectivity corridor evidence; route presence does not imply controller."
+    },
+    {
+      "edgeId": "nicomedia-nicaea-network-1326",
+      "source": "nicomedia_1326",
+      "target": "nicaea_1326",
+      "edgeType": "REGIONAL_PROXIMITY",
+      "status": "supported",
+      "confidence": 0.7,
+      "evidenceRefs": ["inventory:1326-gecis-envanteri#18"],
+      "notes": "Coast, gulf, terrain and road network prevent treating the relationship as a simple straight political line."
+    },
+    {
+      "edgeId": "nicomedia-nicaea-crossing-1326",
+      "source": "nicomedia_1326",
+      "target": "nicaea_1326",
+      "edgeType": "STRATEGIC_CROSSING",
+      "status": "uncertain",
+      "confidence": 0.35,
+      "evidenceRefs": ["inventory:1326-gecis-envanteri#18"],
+      "notes": "Strategic crossing is retained as a review hypothesis only; no exact crossing point is asserted by this ledger."
+    }
+  ]
+}
