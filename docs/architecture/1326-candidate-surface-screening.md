@@ -247,3 +247,14 @@ The test binds three pilot edges to a synthetic review record, validates the res
 ### Schema integrity correction
 
 The Geometry Review Ledger implementation and validator use schemaVersion = 2. The JSON Schema contract had a stale top-level schemaVersion constant of 1 while the document root declared schemaVersion = 2. That contradiction is now corrected so the schema contract matches the generator and validator.
+
+### Candidate-bound review identity
+
+The geometry reconciliation queue now derives each review ID from the immutable candidate packet:
+
+    cliopatria-1326-feature-<sourceFeatureIndex>-<candidatePacketSha256[0:16]>
+
+This prevents a review record from silently referring to a different candidate after source content changes. The queue also records the derivation contract explicitly. The queue validator recomputes the expected review ID from the stored candidate packet SHA-256 and rejects mismatches.
+
+This is an identity/provenance guard only. It does not establish historical ownership, political boundaries, or geometry authority.
+
