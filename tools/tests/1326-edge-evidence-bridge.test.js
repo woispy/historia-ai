@@ -34,6 +34,14 @@ await fs.writeFile(ledger, JSON.stringify({
 await fs.writeFile(bindings, JSON.stringify({
   schemaVersion: 1,
   scenarioDate: "1326-04-07",
+  authorityStatus: "bridge-reference-only",
+  promotion: "BLOCKED",
+  policy: {
+    automaticReviewMatching: false,
+    geometryGeneration: false,
+    controllerInference: false,
+    canonicalPromotion: false
+  },
   reviewBindings: [{
     reviewId: "review-bithynia-pilot-001",
     edgeEvidenceIds: [
@@ -69,6 +77,8 @@ assert.equal(report.records[0].edgeAssessments[0].status, "uncertain");
 assert.equal(report.records[0].edgeAssessments[1].edgeType, "RIVER_CORRIDOR");
 assert.equal(report.records[0].edgeAssessments[2].edgeType, "ROAD_CORRIDOR");
 assert.equal(report.records[0].decision.reviewedGeometry, null);
+assert.equal(report.records[0].decision.status, "pending");
+assert.equal(report.bridge.mutationPolicy, "evidence-reference-copy-only");
 
 await run("tools/historical-gis/cli/validate-1326-geometry-review-ledger.js", ["--input", output]);
 console.log("1326 edge evidence bridge contract passed: explicit bindings only; authority and promotion remain blocked.");
