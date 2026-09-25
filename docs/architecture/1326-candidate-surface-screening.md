@@ -188,3 +188,19 @@ The ledger separates four confidence axes:
 It also records temporal applicability, boundary evidence, physical constraints, topology state, source provenance, and an explicit review decision. Initial records are always `pending`; boundary evidence starts `uncertain`; topology starts `not-run`; reviewed geometry remains `null`; and promotion remains `BLOCKED`.
 
 This ledger is a **review evidence contract**, not a geometry generator. A controller match or source polygon cannot populate canonical geometry by itself. The existing 1326 registry requirement remains unchanged: temporal, entity, geometry, topology, provenance, confidence, and historical review gates must all pass before canonical promotion.
+
+
+### Edge-level evidence contract
+
+The ledger is now edge-aware. A review record may contain multiple independent edge assessments, each with:
+
+- `edgeId`
+- `edgeType`
+- `status`
+- `confidence`
+- `evidenceRefs`
+- optional review notes
+
+Supported edge types follow the 1326 transition inventory: `POLITICAL_ADJACENCY`, `FRONTIER`, `REGIONAL_PROXIMITY`, `ROAD_CORRIDOR`, `RIVER_CORRIDOR`, `MOUNTAIN_BARRIER`, `LAKE_BARRIER`, `COASTAL_ACCESS`, `STRATEGIC_PASS`, and `STRATEGIC_CROSSING`. `UNKNOWN` is retained for unresolved relationships.
+
+Confidence is deliberately split into `existence`, `controller`, `frontier`, `exactBoundary`, and `geometry`. No aggregate score is generated and no edge assessment grants canonical authority. An unresolved or buffered frontier can therefore remain explicitly uncertain instead of being forced into a sharp political boundary.
