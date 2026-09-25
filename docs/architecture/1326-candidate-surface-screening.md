@@ -162,6 +162,12 @@ Each review item therefore has:
     reviewStatus = pending
     promotion = BLOCKED
 
+The queue has a dedicated integrity validator:
+
+    npm run validate:1326-geometry-reconciliation -- --input <geometry-reconciliation-queue>
+
+It verifies the scenario/source identity, blocked promotion policy, immutable source geometry, geometry SHA-256, pending review state, and null reviewed geometry.
+
 The contract test is:
 
     npm run test:1326-geometry-reconciliation
