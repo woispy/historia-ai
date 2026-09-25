@@ -30,7 +30,7 @@ function assertZip(bytes) {
 
 async function writeJsonAtomic(filePath, value) {
   const tempPath = `${filePath}.tmp-${process.pid}`;
-  await fs.writeFile(tempPath, `${JSON.stringify(value, null, 2)}\\n`);
+  await fs.writeFile(tempPath, `${JSON.stringify(value, null, 2)}\n`);
   await fs.rename(tempPath, filePath);
 }
 
