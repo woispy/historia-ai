@@ -2,7 +2,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 const SCENARIO_DATE = "1326-04-07";
-const EDGE_ID = /^[A-Za-z0-9._:-]+$/;\nconst REVIEW_ID = /^cliopatria-1326-feature-[0-9]+-[0-9a-f]{16}$/;
+const EDGE_ID = /^[A-Za-z0-9._:-]+$/;
+const REVIEW_ID = /^cliopatria-1326-feature-[0-9]+-[0-9a-f]{16}$/;
 
 const input = process.argv.indexOf("--input");
 if (input < 0 || !process.argv[input + 1]) throw new Error("--input <edge-evidence-bindings.json> is required.");
