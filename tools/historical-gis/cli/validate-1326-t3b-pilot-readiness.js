@@ -32,6 +32,9 @@ for (const key of ["automaticReviewMatching","geometryGeneration","controllerInf
   if (bindings.policy?.[key] !== false) fail(`Binding policy ${key} must remain false: ${key}`);
 }
 if (evidence.policy?.geometryGeneration !== false || evidence.policy?.controllerInference !== false || evidence.policy?.canonicalPromotion !== false) fail("Evidence policy guard drifted.");
+const evidenceIds = new Set((evidence.edges ?? []).map(edge => edge.edgeId));
+if (evidenceIds.size !== (evidence.edges ?? []).length) fail("Duplicate pilot evidence edge IDs.");
+
 
 const packetSha = candidates.candidatePacketSha256;
 if (!/^[0-9a-f]{64}$/.test(packetSha ?? "")) fail("Candidate packet SHA is missing/invalid.");
@@ -64,6 +67,8 @@ for (const record of ledger.records ?? []) {
   if (!reviewItem || record.reviewId !== reviewItem.reviewId) fail(`Ledger/review identity mismatch at ${record.sourceFeatureIndex}.`);
   if (record.provenance?.candidatePacketSha256 !== packetSha) fail(`Ledger packet provenance mismatch: ${record.reviewId}`);
   if (record.provenance?.candidateRecordSha256 !== reviewItem.sourceEvidence?.candidateRecordSha256) fail(`Ledger record provenance mismatch: ${record.reviewId}`);
+  const expectedRecordSha = sha(screening.candidates.find(candidate => candidate.sourceFeatureIndex === record.sourceFeatureIndex));
+  if (record.provenance?.candidateRecordSha256 !== expectedRecordSha) fail(`Ledger candidate record hash does not match screened candidate: ${record.reviewId}`);
   if (record.decision?.status !== "pending") fail(`Ledger decision is not pending: ${record.reviewId}`);
 }
 const bindingIds = new Set((bindings.reviewBindings ?? []).map(x => x.reviewId));
@@ -71,6 +76,9 @@ for (const binding of bindings.reviewBindings ?? []) {
   if (!reviewByIndex.has(Number(binding.reviewId.split("-")[3]))) fail(`Binding references an unavailable review: ${binding.reviewId}`);
   if (!/^cliopatria-1326-feature-[0-9]+-[0-9a-f]{16}$/.test(binding.reviewId)) fail(`Binding reviewId is not candidate-bound: ${binding.reviewId}`);
   if (!Array.isArray(binding.edgeEvidenceIds) || binding.edgeEvidenceIds.length === 0) fail(`Empty edge binding: ${binding.reviewId}`);
+  for (const edgeId of binding.edgeEvidenceIds) {
+    if (!evidenceIds.has(edgeId)) fail(`Binding references unknown pilot evidence edge: ${edgeId}`);
+  }
 }
 if (bindingIds.size !== (bindings.reviewBindings ?? []).length) fail("Duplicate binding review IDs.");
 if ((bindings.reviewBindings ?? []).length > 0) {
