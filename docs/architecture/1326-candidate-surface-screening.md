@@ -395,3 +395,13 @@ The Bithynia pilot edge-evidence set remains research/evidence-only. A guarded b
 It intentionally contains zero `reviewBindings`. No production review ID is fabricated. Real bindings may be added only after the verified 1326 candidate acquisition, screening, reconciliation, and geometry review queue produce candidate-bound review IDs.
 
 The pilot evidence therefore remains usable as a research constraint set without creating false provenance or silently attaching evidence to an unverified candidate.
+
+### T3-B Pilot Readiness Gate
+
+The pilot now has a single fail-closed readiness validator: `validate-1326-t3b-pilot-readiness.js`.
+
+It verifies the complete evidence lineage from candidate packet → screening → reconciliation → review → review ledger → explicit edge bindings, while preserving the separation between `candidatePacketSha256` (complete packet identity) and `candidateRecordSha256` (individual review identity).
+
+Readiness does not mean canonical promotion. With the current guarded Bithynia pilot binding placeholder, the expected state is `WAITING_FOR_EXPLICIT_REVIEW_BINDINGS` and `promotion: BLOCKED`. Real bindings remain deferred until real 1326 acquisition and candidate-bound review IDs exist.
+
+The gate rejects fake review IDs, packet provenance drift, non-pending review records, broken candidate/review identity, and policy drift that would permit automatic matching, geometry generation, controller inference, or canonical promotion.
