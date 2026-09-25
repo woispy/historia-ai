@@ -25,7 +25,7 @@ function makeReport(sourceGeometry = geometry, sourceGeometrySha = geometrySha) 
       reviewId: "cliopatria-1326-feature-7-" + recordSha.slice(0,16),
       sourceFeatureIndex: 7,
       sourceGeometry: { geometry: sourceGeometry, sha256: sourceGeometrySha, immutable: true, mutationPolicy: "immutable-source-evidence" },
-      sourceEvidence: { candidatePacketSha256: recordSha, candidateRecordSha256: recordSha, reviewIdDerivation: "cliopatria-1326-feature-" + "$"+"{sourceFeatureIndex}" + "-" + "$"+"{candidatePacketSha256.slice(0,16)}" },
+      sourceEvidence: { candidatePacketSha256: packetSha, candidateRecordSha256: recordSha, reviewIdDerivation: "cliopatria-1326-feature-" + "$"+"{sourceFeatureIndex}" + "-" + "$"+"{candidatePacketSha256.slice(0,16)}" },
       reviewedGeometry: null, reviewStatus: "pending", promotion: "BLOCKED"
     }]
   };
@@ -47,5 +47,9 @@ await runCase("baseline", makeReport(), true);
 const mutatedGeometry = { type: "Polygon", coordinates: [[[29,40],[29.2,40],[29.1,40.1],[29,40.1],[29,40]]] };
 await runCase("geometry-mutated", makeReport(mutatedGeometry, geometrySha), false);
 await runCase("geometry-hash-mutated", makeReport(geometry, "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"), false);
+const packetDrift = makeReport();
+packetDrift.sourceEvidence = undefined;
+packetDrift.reviewQueue[0].sourceEvidence.candidatePacketSha256 = recordSha;
+await runCase("packet-provenance-drift", packetDrift, false);
 
 console.log("1326 geometry reconciliation integrity contract passed.");
