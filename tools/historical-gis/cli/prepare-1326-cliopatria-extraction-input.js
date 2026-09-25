@@ -35,6 +35,7 @@ const archivePath = required("--archive");
 const acquisitionPath = path.resolve(process.cwd(), arg("--acquisition", "data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.acquisition.json"));
 const manifestPath = path.resolve(process.cwd(), arg("--manifest", "data/gis/1326/acquisition-manifest.json"));
 const outputPath = path.resolve(process.cwd(), arg("--output", "data/build/gis/1326/cliopatria-extraction-input.json"));
+const extractDir = path.resolve(process.cwd(), arg("--extract-dir", "data/build/gis/1326/source-snapshots/cliopatria-v0.2.0"));
 
 const acquisition = JSON.parse(await fs.readFile(acquisitionPath, "utf8"));
 const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
@@ -58,7 +59,6 @@ const archiveSha = sha256(archive);
 if (archiveSha !== acquisition.rawSha256) throw new Error(`Archive SHA-256 mismatch: expected ${acquisition.rawSha256}, got ${archiveSha}`);
 if (archive.length !== acquisition.byteLength) throw new Error("Archive byte length mismatch.");
 
-const extractDir = path.resolve(process.cwd(), "data/build/gis/1326/source-snapshots/cliopatria-v0.2.0");
 await fs.rm(extractDir, { recursive: true, force: true });
 await fs.mkdir(extractDir, { recursive: true });
 
@@ -146,9 +146,9 @@ try {
     member,
     extractedSha256: extractedSha,
     outputPath,
+    extractDir,
     promotion: record.promotion
   }, null, 2));
 } finally {
   await fs.rm(tempDir, { recursive: true, force: true });
 }
-
