@@ -7,7 +7,6 @@ import { spawn } from "node:child_process";
 
 const root = process.cwd();
 const temp = await fs.mkdtemp(path.join(os.tmpdir(), "historia-1326-t3b-pipeline-"));
-const sourceDir = path.join(root, "data/build/gis/1326/source-snapshots/cliopatria-v0.2.0");
 const prepare = path.join(root, "tools/historical-gis/cli/prepare-1326-cliopatria-extraction-input.js");
 const pipeline = path.join(root, "tools/historical-gis/cli/run-1326-cliopatria-candidate-pipeline.js");
 const anchors = path.join(root, "tools/tests/fixtures/1326-candidate-surface/anchors.json");
@@ -141,7 +140,8 @@ try {
     "--archive", archivePath,
     "--acquisition", acquisitionPath,
     "--manifest", manifestPath,
-    "--output", extractionInputPath
+    "--output", extractionInputPath,
+    "--extract-dir", path.join(temp, "extracted-cliopatria")
   ]);
 
   const outputDir = path.join(temp, "pipeline-output");
@@ -162,6 +162,5 @@ try {
 
   console.log("1326 integrated acquisition-to-T3-B runtime contract passed.");
 } finally {
-  await fs.rm(sourceDir, { recursive: true, force: true });
   await fs.rm(temp, { recursive: true, force: true });
 }
