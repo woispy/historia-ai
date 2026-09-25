@@ -84,7 +84,8 @@ const results = REQUIRED_ENTITIES.map((entity) => {
       seshatId: candidate.seshatId,
       fromYear: candidate.fromYear,
       toYear: candidate.toYear,
-      geometryAuthorityStatus: candidate.geometryAuthorityStatus,\n      candidateRecordSha256: crypto.createHash("sha256").update(JSON.stringify(candidate)).digest("hex"),
+      geometryAuthorityStatus: candidate.geometryAuthorityStatus,
+      candidateRecordSha256: crypto.createHash("sha256").update(JSON.stringify(candidate)).digest("hex"),
     })),
     autoPromotion: false,
   };
