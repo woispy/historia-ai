@@ -80,6 +80,8 @@ assert.equal(report.counts.entityLinkedCandidates, 1);
 assert.equal(report.reviewQueue[0].reviewStatus, "pending");
 assert.equal(report.reviewQueue[0].reviewedGeometry, null);
 assert.equal(report.reviewQueue[0].sourceGeometry.immutable, true);
+assert.equal(report.reviewQueue[0].sourceGeometry.mutationPolicy, "immutable-source-evidence");
+assert.deepEqual(report.reviewQueue[0].sourceGeometry.geometry, near.geometry);
 assert.match(report.reviewQueue[0].sourceGeometry.sha256, /^[0-9a-f]{64}$/);
 assert.deepEqual(report.reviewQueue[0].spatialScreening.geometryBbox, b);
 console.log("1326 geometry reconciliation contract passed: source geometry is immutable, review-only, provenance-bound, and promotion-blocked.");
