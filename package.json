@@ -138,7 +138,8 @@
     "prepare:1326-cliopatria-extraction-input": "node tools/historical-gis/cli/prepare-1326-cliopatria-extraction-input.js",
     "test:1326-cliopatria-extraction-input": "node tools/tests/1326-cliopatria-extraction-input.test.js",
     "test:1326-candidate-provenance-lineage": "node tools/tests/1326-candidate-provenance-lineage.test.js",
-    "validate:1326-cliopatria-candidates": "node tools/historical-gis/cli/validate-1326-cliopatria-candidates.js"
+    "validate:1326-cliopatria-candidates": "node tools/historical-gis/cli/validate-1326-cliopatria-candidates.js",
+    "test:1326-cliopatria-candidate-validator": "node tools/tests/1326-cliopatria-candidate-validator.test.js"
   },
   "dependencies": {
     "react": "^19.2.7",
