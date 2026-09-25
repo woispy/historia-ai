@@ -46,7 +46,9 @@ for (const binding of mapping.reviewBindings) {
   seenReviews.add(binding.reviewId);
   const record = records.get(binding.reviewId);
   if (!record) fail(`Unknown reviewId: ${binding.reviewId}`);
-  const expected = `cliopatria-1326-feature-${record.sourceFeatureIndex}-${record.provenance?.candidatePacketSha256?.slice(0, 16)}`;
+  const recordSha = record.provenance?.candidateRecordSha256;
+  if (!/^[0-9a-f]{64}$/.test(recordSha ?? "")) fail(`Ledger candidateRecordSha256 missing or invalid: ${binding.reviewId}`);
+  const expected = `cliopatria-1326-feature-${record.sourceFeatureIndex}-${recordSha.slice(0, 16)}`;
   if (binding.reviewId !== expected) {
     fail(`Review ID is not candidate-bound or explicit test ID: ${binding.reviewId}`);
   }
