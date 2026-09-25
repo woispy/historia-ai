@@ -44,17 +44,28 @@ if (screening.candidatePacketSha256 !== packetSha || reconciliation.candidatePac
 const candidateByIndex = new Map(candidates.candidates.map(x => [x.sourceFeatureIndex, x]));
 const screenedByIndex = new Map(screening.candidates.map(x => [x.sourceFeatureIndex, x]));
 const reviewByIndex = new Map((review.reviewQueue ?? []).map(x => [x.sourceFeatureIndex, x]));
+const reconciliationByIndex = new Map();
+for (const result of reconciliation.results ?? []) {
+  for (const candidate of result.candidates ?? []) {
+    if (reconciliationByIndex.has(candidate.sourceFeatureIndex)) fail(`Duplicate reconciliation candidate sourceFeatureIndex: ${candidate.sourceFeatureIndex}`);
+    reconciliationByIndex.set(candidate.sourceFeatureIndex, candidate);
+  }
+}
 if (candidateByIndex.size !== candidates.candidates.length) fail("Duplicate candidate sourceFeatureIndex.");
 if (ledger.records.length !== review.reviewQueue.length) fail("Ledger/review record count mismatch.");
 if (screenedByIndex.size !== screening.candidates.length) fail("Duplicate screened sourceFeatureIndex.");
 if (reviewByIndex.size !== review.reviewQueue.length) fail("Duplicate review sourceFeatureIndex.");
+if (reconciliationByIndex.size === 0 && candidates.candidates.length > 0) fail("Reconciliation results contain no candidate identities.");
 
 for (const [index, screened] of screenedByIndex) {
   const source = candidateByIndex.get(index);
   const item = reviewByIndex.get(index);
   if (!source || !item) fail(`Broken candidate -> review identity at ${index}.`);
   if (screened.sourceFeatureId !== source.sourceFeatureId || item.sourceFeatureId !== screened.sourceFeatureId) fail(`Source identity drift at ${index}.`);
+  const reconciled = reconciliationByIndex.get(index);
+  if (!reconciled || reconciled.sourceFeatureId !== source.sourceFeatureId) fail(`Candidate -> reconciliation identity drift at ${index}.`);
   if (screened.sourceGeometrySha256 !== sha(source.geometry)) fail(`Screening geometry provenance drift at ${index}.`);
+  if (item.sourceEvidence?.sourceGeometry?.sha256 !== sha(source.geometry)) fail(`Review geometry provenance drift at ${index}.`);
   if (item.reviewedGeometry !== null || item.reviewStatus !== "pending" || item.promotion !== "BLOCKED") fail(`Review item is not pending/blocked at ${index}.`);
   const recordSha = item.sourceEvidence?.candidateRecordSha256;
   if (!/^[0-9a-f]{64}$/.test(recordSha ?? "")) fail(`Candidate record SHA invalid at ${index}.`);
