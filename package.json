@@ -150,7 +150,8 @@
     "validate:1326-cliopatria-acquisition-ready": "node tools/historical-gis/cli/validate-1326-cliopatria-acquisition-ready.js",
     "validate:1326-cliopatria-extraction-input": "node tools/historical-gis/cli/validate-1326-cliopatria-extraction-input.js",
     "test:1326-cliopatria-extraction-candidate-runtime": "node tools/tests/1326-cliopatria-extraction-candidate-runtime.test.js",
-    "validate:1326-candidate-reconciliation": "node tools/historical-gis/cli/validate-1326-candidate-reconciliation.js"
+    "validate:1326-candidate-reconciliation": "node tools/historical-gis/cli/validate-1326-candidate-reconciliation.js",
+    "test:1326-candidate-reconciliation-validator": "node tools/tests/1326-candidate-reconciliation-validator.test.js"
   },
   "dependencies": {
     "react": "^19.2.7",
