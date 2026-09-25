@@ -42,9 +42,13 @@ const source = manifest.sources?.find(item => item.id === SOURCE_ID);
 
 if (acquisition.sourceId !== SOURCE_ID) throw new Error("Acquisition source ID mismatch.");
 if (acquisition.immutableReference?.sha !== "ad28a69") throw new Error("Immutable source commit mismatch.");
+if (acquisition.sourceTag !== "v0.2.0") throw new Error("Acquisition source tag mismatch.");
+if (acquisition.sourceUrl !== "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.0/cliopatria.geojson.zip") throw new Error("Acquisition source URL mismatch.");
 if (acquisition.immutableReference?.sourceBlobSha !== "cefab0f4b622e2e7fb3daf68d4f461f83991204c") throw new Error("Immutable source blob mismatch.");
 if (acquisition.promotion !== "BLOCKED_UNTIL_EXTRACTION_RECONCILIATION_REVIEW") throw new Error("Acquisition must remain promotion-blocked.");
-if (source?.snapshot?.status !== "acquired") throw new Error("Tracked acquisition manifest does not contain a verified acquired snapshot.");
+if (source?.status !== "acquired" || source?.snapshot?.status !== "acquired") throw new Error("Tracked acquisition manifest does not contain a verified acquired snapshot.");
+if (source.snapshot.rawSha256 !== acquisition.rawSha256) throw new Error("Acquisition manifest SHA-256 does not match the acquisition record.");
+if (source.snapshot.byteLength !== acquisition.byteLength) throw new Error("Acquisition manifest byte length does not match the acquisition record.");
 
 const archive = await fs.readFile(archivePath);
 const archiveSha = sha256(archive);
@@ -105,7 +109,7 @@ try {
   }
   const extractedSha = sha256(Buffer.from(extracted, "utf8"));
 
-  const record = {
+  const relativeArchivePath = path.relative(process.cwd(), archivePath).replace(/\\\\/g, "/");\n  const relativeExtractedPath = path.relative(process.cwd(), extractedPath).replace(/\\\\/g, "/");\n\n  const record = {
     schemaVersion: 1,
     sourceId: SOURCE_ID,
     scenarioDate: SCENARIO_DATE,
