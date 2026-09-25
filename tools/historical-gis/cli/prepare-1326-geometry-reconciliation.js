@@ -29,6 +29,14 @@ function assertScreening(report) {
   if (report?.screening?.noSyntheticGeometry !== true) throw new Error("Screening must remain synthetic-geometry-free.");
   if (!Array.isArray(report?.candidates)) throw new Error("Screening report must contain candidates[].");
   if (!/^[0-9a-f]{64}$/.test(report?.candidatePacketSha256 ?? "")) throw new Error("Screening must carry candidate packet SHA-256.");
+  const seen = new Set();
+  for (const candidate of report.candidates) {
+    if (!Number.isInteger(candidate.sourceFeatureIndex) || candidate.sourceFeatureIndex < 0) throw new Error("Screening candidate sourceFeatureIndex must be a non-negative integer.");
+    if (seen.has(candidate.sourceFeatureIndex)) throw new Error("Duplicate screening sourceFeatureIndex detected.");
+    seen.add(candidate.sourceFeatureIndex);
+    if (!/^[0-9a-f]{64}$/.test(candidate.sourceGeometrySha256 ?? "")) throw new Error("Screening candidate must carry source geometry SHA-256.");
+    if (candidate.sourceGeometrySha256 !== sha256(candidate.geometry)) throw new Error("Screening candidate source geometry SHA-256 mismatch.");
+  }
 }
 function assertReconciliation(report) {
   if (report?.scenarioDate !== SCENARIO_DATE) throw new Error("Entity reconciliation scenario date mismatch.");
@@ -52,6 +60,9 @@ const candidateIndex = new Map((screening.candidates ?? []).map(candidate => [ca
 const reconciliationIndex = new Map();
 for (const entity of reconciliation.results ?? []) {
   for (const candidate of entity.candidates ?? []) {
+    const screened = candidateIndex.get(candidate.sourceFeatureIndex);
+    if (!screened) throw new Error(`Reconciliation references unknown screened sourceFeatureIndex: ${candidate.sourceFeatureIndex}`);
+    if (candidate.sourceFeatureId !== screened.sourceFeatureId) throw new Error(`Reconciliation sourceFeatureId mismatch: ${candidate.sourceFeatureIndex}`);
     const list = reconciliationIndex.get(candidate.sourceFeatureIndex) ?? [];
     list.push({ entityId: entity.entityId, status: entity.status });
     reconciliationIndex.set(candidate.sourceFeatureIndex, list);
