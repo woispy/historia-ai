@@ -28,6 +28,7 @@ function assertScreening(report) {
   if (report?.screening?.notGeometryAuthority !== true) throw new Error("Screening must remain non-authoritative.");
   if (report?.screening?.noSyntheticGeometry !== true) throw new Error("Screening must remain synthetic-geometry-free.");
   if (!Array.isArray(report?.candidates)) throw new Error("Screening report must contain candidates[].");
+  if (!/^[0-9a-f]{64}$/.test(report?.candidatePacketSha256 ?? "")) throw new Error("Screening must carry candidate packet SHA-256.");
 }
 function assertReconciliation(report) {
   if (report?.scenarioDate !== SCENARIO_DATE) throw new Error("Entity reconciliation scenario date mismatch.");
@@ -45,6 +46,7 @@ const reconciliation = JSON.parse(await fs.readFile(reconciliationPath, "utf8"))
 assertScreening(screening);
 assertReconciliation(reconciliation);
 if (reconciliation.sourceProvenance.extractedGeojsonSha256 !== screening.source.extractedGeojsonSha256) throw new Error("Reconciliation/extraction provenance mismatch.");
+if (reconciliation.candidatePacketSha256 !== screening.candidatePacketSha256) throw new Error("Reconciliation/screening candidate packet mismatch.");
 
 const candidateIndex = new Map((screening.candidates ?? []).map(candidate => [candidate.sourceFeatureIndex, candidate]));
 const reconciliationIndex = new Map();
@@ -110,6 +112,7 @@ const report = {
   kind: "historical-1326-political-geometry-reconciliation-queue",
   scenarioDate: SCENARIO_DATE,
   source: screening.source,
+  candidatePacketSha256: screening.candidatePacketSha256,
   sourceProvenance: {
     extractedGeojsonSha256: screening.source.extractedGeojsonSha256,
     inputSha256: screening.source.inputSha256
