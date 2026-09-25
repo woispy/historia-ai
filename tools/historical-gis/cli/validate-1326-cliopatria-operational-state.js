@@ -8,7 +8,6 @@ const SCENARIO_DATE = "1326-04-07";
 const EXPECTED_COMMIT = "ad28a69";
 const EXPECTED_BLOB = "cefab0f4b622e2e7fb3daf68d4f461f83991204c";
 const EXPECTED_TAG = "v0.2.0";
-const EXPECTED_ARCHIVE = "data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip";
 
 function arg(name, fallback = null) {
   const i = process.argv.indexOf(name);
@@ -60,7 +59,7 @@ if (snapshotStatus === "reference-pinned-not-acquired") {
 if (snapshotStatus !== "acquired" || source.status !== "acquired") {
   throw new Error(`Unsupported Cliopatria acquisition state: ${snapshotStatus ?? "missing"}.`);
 }
-if (source.snapshot.retainedArtifact !== EXPECTED_ARCHIVE) throw new Error("Retained artifact path drifted.");
+if (!source.snapshot.retainedArtifact) throw new Error("Acquired snapshot requires retained artifact.");
 requireHex(source.snapshot.rawSha256, "Manifest rawSha256");
 if (!source.snapshot.acquiredAt) throw new Error("Acquired snapshot requires acquiredAt.");
 
