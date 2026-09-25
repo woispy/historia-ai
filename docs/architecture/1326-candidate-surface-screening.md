@@ -468,3 +468,16 @@ The edge bridge also refuses to attach evidence to a review record that has alre
       → later human/research review
 
 An evidence binding therefore cannot be used to bypass the pending-review gate or silently attach an edge to an already-reviewed geometry record. All authority and promotion guards remain blocked.
+
+
+### Integrated Cliopatria → T3-B candidate pipeline gate
+
+The integrated 1326 candidate pipeline now extends beyond temporal extraction, reconciliation, and candidate-surface screening into the geometry review queue preparation/validation boundary.
+
+The command sequence is:
+
+    extraction → candidate validation → entity reconciliation → candidate-surface screening → reconciliation validation → geometry review queue preparation → geometry review queue validation
+
+The integrated gate requires the geometry review queue to retain the same candidate-packet SHA-256 as the candidate report, remain promotion-blocked, and contain exactly the screened candidate count. It does not perform historical review or canonical promotion; it establishes a deterministic fail-closed handoff into the pending geometry-review layer.
+
+The package exposes this as `validate:1326-cliopatria-candidate-pipeline` alongside the existing `run:1326-cliopatria-candidate-pipeline` entry point.
