@@ -354,3 +354,15 @@ The independent validator also rejects duplicate `sourceFeatureIndex` values and
 
 This remains an evidence-layer integrity gate only; it does not make source geometry authoritative and does not permit canonical promotion.
 
+
+### Provenance naming boundary
+
+Two hash levels are now explicitly distinguished:
+
+- `candidatePacketSha256`: SHA-256 of the complete ordered `candidates[]` packet emitted by temporal extraction.
+- `candidateRecordSha256`: SHA-256 of one screened candidate record used to derive its candidate-bound review ID.
+
+The legacy `sourceEvidence.candidatePacketSha256` field is retained for compatibility and is required to equal `candidateRecordSha256` inside each review item. This prevents the top-level packet hash from being confused with the per-review candidate identity hash.
+
+The screening layer also preserves the complete source geometry without mutation. Geometry SHA and candidate-record SHA remain separate integrity values.
+
