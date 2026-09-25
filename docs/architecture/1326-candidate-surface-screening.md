@@ -481,3 +481,12 @@ The command sequence is:
 The integrated gate requires the geometry review queue to retain the same candidate-packet SHA-256 as the candidate report, remain promotion-blocked, and contain exactly the screened candidate count. It does not perform historical review or canonical promotion; it establishes a deterministic fail-closed handoff into the pending geometry-review layer.
 
 The package exposes this as `validate:1326-cliopatria-candidate-pipeline` alongside the existing `run:1326-cliopatria-candidate-pipeline` entry point.
+
+
+### Acquisition → T3-B integration runtime contract
+
+A dedicated runtime fixture now exercises the full pre-review chain without downloading the real Cliopatria snapshot. The fixture creates a deterministic ZIP containing one GeoJSON member, constructs a temporary acquired acquisition record and acquisition manifest, runs the verified archive → extraction-input preparation, then runs the integrated candidate pipeline against that extraction input.
+
+The contract asserts that the resulting candidate packet reaches the geometry reconciliation queue with matching `candidatePacketSha256`, exactly one pending review item, `reviewedGeometry: null`, and `promotion: BLOCKED`. The fixture is synthetic test evidence only; it does not alter the production acquisition manifest or claim that the real Cliopatria bytes have been acquired.
+
+Registered command: `npm run test:1326-cliopatria-integrated-pipeline-runtime`.
