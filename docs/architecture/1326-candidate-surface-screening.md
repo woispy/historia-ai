@@ -302,3 +302,25 @@ This gate binds:
 
 without treating acquisition or extraction as historical geometry authority.
 
+
+### End-to-end candidate provenance lineage
+
+The extracted GeoJSON SHA-256 is now propagated through every T3-B evidence stage:
+
+    extraction input
+      → candidate report
+      → entity reconciliation
+      → candidate surface screening
+      → geometry reconciliation queue
+
+Each stage validates the expected source identity and the shared extracted GeoJSON SHA-256. The candidate pipeline also rejects reconciliation/screening reports whose source hash differs from the candidate report.
+
+The geometry review queue retains this source-level hash alongside its candidate-packet SHA-256. Therefore the provenance chain distinguishes:
+
+- source/extracted dataset identity;
+- candidate packet identity;
+- source geometry identity;
+- candidate-bound review identity.
+
+None of these hashes confer historical authority or permit automatic canonical promotion.
+
