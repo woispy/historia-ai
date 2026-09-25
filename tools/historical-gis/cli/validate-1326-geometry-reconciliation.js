@@ -21,6 +21,7 @@ if (report?.kind !== "historical-1326-political-geometry-reconciliation-queue") 
 if (report?.scenarioDate !== SCENARIO_DATE) throw new Error("Scenario date mismatch.");
 if (report?.source?.sourceId !== SOURCE_ID) throw new Error("Source identity mismatch.");
 if (!/^[0-9a-f]{64}$/.test(report?.sourceProvenance?.extractedGeojsonSha256 ?? "")) throw new Error("Review queue must carry extracted GeoJSON SHA-256.");
+if (!/^[0-9a-f]{64}$/.test(report?.candidatePacketSha256 ?? "")) throw new Error("Review queue must carry candidate packet SHA-256.");
 if (report?.authorityStatus !== "candidate-review-only") throw new Error("Queue must remain candidate-review-only.");
 if (report?.promotion !== "BLOCKED") throw new Error("Queue promotion must remain blocked.");
 
@@ -53,7 +54,13 @@ for (const item of queue) {
   if (!/^[0-9a-f]{64}$/.test(item.sourceEvidence?.candidatePacketSha256 ?? "")) {
     throw new Error(`Candidate packet SHA-256 missing or invalid: ${item.reviewId}`);
   }
-  const expectedReviewId = `cliopatria-1326-feature-${item.sourceFeatureIndex}-${item.sourceEvidence.candidatePacketSha256.slice(0, 16)}`;
+  if (!/^[0-9a-f]{64}$/.test(item.sourceEvidence?.candidateRecordSha256 ?? "")) {
+    throw new Error(`Candidate record SHA-256 missing or invalid: ${item.reviewId}`);
+  }
+  if (item.sourceEvidence.candidateRecordSha256 !== item.sourceEvidence.candidatePacketSha256) {
+    throw new Error(`Candidate record/packet hash drifted: ${item.reviewId}`);
+  }
+  const expectedReviewId = `cliopatria-1326-feature-${item.sourceFeatureIndex}-${item.sourceEvidence.candidateRecordSha256.slice(0, 16)}`;
   if (item.reviewId !== expectedReviewId) {
     throw new Error(`Review ID is not bound to candidate packet identity: ${item.reviewId}`);
   }
