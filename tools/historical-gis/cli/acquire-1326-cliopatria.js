@@ -98,6 +98,11 @@ async function verify() {
   const source = acquisitionManifest.sources.find(item => item.id === SOURCE_ID);
   if (!source) throw new Error(`Acquisition manifest is missing source ${SOURCE_ID}.`);
   if (source.snapshot?.status !== "acquired") throw new Error("Acquisition manifest is not marked acquired.");
+  if (source.snapshot?.sourceTag !== record.sourceTag) throw new Error("Acquisition manifest source tag does not match the retained acquisition record.");
+  if (source.snapshot?.immutableReference?.sha !== record.immutableReference?.sha) throw new Error("Acquisition manifest immutable commit does not match the retained acquisition record.");
+  if (source.snapshot?.immutableReference?.sourceBlobSha !== record.immutableReference?.sourceBlobSha) throw new Error("Acquisition manifest source blob SHA does not match the retained acquisition record.");
+  if (source.snapshot?.retainedArtifact !== record.retainedArtifact) throw new Error("Acquisition manifest retained artifact does not match the retained acquisition record.");
+  if (record.sourceUrl !== SOURCE_URL) throw new Error("Acquisition record source URL drifted from the pinned source.");
   if (source.snapshot?.rawSha256 !== record.rawSha256) throw new Error("Acquisition manifest SHA-256 does not match the retained acquisition record.");
   if (source.snapshot?.byteLength !== record.byteLength) throw new Error("Acquisition manifest byte length does not match the retained acquisition record.");
   const actual = sha256(bytes);
