@@ -68,6 +68,7 @@ function run(script, args) {
 }
 await run("tools/historical-gis/cli/prepare-1326-geometry-reconciliation.js", ["--screening", screening, "--reconciliation", reconciliation, "--output", output]);
 await run("tools/historical-gis/cli/validate-1326-geometry-reconciliation.js", ["--input", output]);
+await run("tools/historical-gis/cli/validate-1326-reviewed-geometry.js", ["--input", output]);
 
 const report = JSON.parse(await fs.readFile(output, "utf8"));
 assert.equal(report.scenarioDate, "1326-04-07");
