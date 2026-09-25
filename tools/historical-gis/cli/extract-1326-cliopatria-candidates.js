@@ -45,7 +45,24 @@ function sha256Text(text) {
   return crypto.createHash("sha256").update(text).digest("hex");
 }
 
-const inputPath = requireInput();
+const extractionInputPath = readArg("--extraction-input");
+const extractionInput = extractionInputPath
+  ? JSON.parse(await fs.readFile(path.resolve(process.cwd(), extractionInputPath), "utf8"))
+  : null;
+if (extractionInput) {
+  if (extractionInput.sourceId !== "cliopatria-v0.2.0") throw new Error("Extraction input source identity mismatch.");
+  if (extractionInput.scenarioDate !== SCENARIO_DATE) throw new Error("Extraction input scenario date mismatch.");
+  if (extractionInput.promotion !== "BLOCKED_UNTIL_TEMPORAL_EXTRACTION_RECONCILIATION_REVIEW") throw new Error("Extraction input must remain promotion-blocked.");
+  if (extractionInput.member?.format !== "GeoJSON" || extractionInput.member?.featureCollectionValidated !== true) throw new Error("Extraction input must identify a validated GeoJSON member.");
+}
+const inputPath = extractionInput
+  ? path.resolve(process.cwd(), extractionInput.member.extractedPath)
+  : requireInput();
+if (extractionInput) {
+  const extractedRaw = await fs.readFile(inputPath);
+  const actualSha = sha256Text(extractedRaw);
+  if (actualSha !== extractionInput.member.sha256) throw new Error("Extracted GeoJSON SHA-256 does not match the extraction input record.");
+}
 const outputPath = path.resolve(
   process.cwd(),
   readArg("--output", "data/build/gis/1326/cliopatria-1326-candidates.json"),
@@ -109,6 +126,8 @@ const report = {
       sourceBlobSha: "cefab0f4b622e2e7fb3daf68d4f461f83991204c",
     },
     inputPath: inputPath.replace(/\\/g, "/"),
+    extractionInput: extractionInputPath ? path.resolve(process.cwd(), extractionInputPath).replace(/\\/g, "/") : null,
+    extractedGeojsonSha256: sha256Text(raw),
     inputSha256: sha256Text(raw),
   },
   scenarioDate: SCENARIO_DATE,
