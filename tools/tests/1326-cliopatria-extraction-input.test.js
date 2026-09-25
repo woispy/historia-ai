@@ -10,6 +10,10 @@ const pipeline = fs.readFileSync(path.join(root, "tools/historical-gis/cli/run-1
 assert.match(prep, /const SOURCE_ID = "cliopatria-v0\.2\.0"/);
 assert.match(prep, /archiveSha/);
 assert.match(prep, /Expected exactly one GeoJSON member/);
+assert.match(prep, /powershell\.exe/);
+assert.match(prep, /Expand-Archive/);
+assert.match(prep, /FeatureCollection/);
+assert.match(prep, /Unsafe archive member path/);
 assert.match(prep, /extractedSha/);
 assert.match(prep, /BLOCKED_UNTIL_TEMPORAL_EXTRACTION_RECONCILIATION_REVIEW/);
 assert.match(extract, /--extraction-input/);
