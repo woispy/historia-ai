@@ -7,14 +7,17 @@ const root = process.cwd();
 const input = path.join(root, "data/build/gis/1326/test-geometry-review-ledger-input.json");
 const output = path.join(root, "data/build/gis/1326/test-geometry-review-ledger.json");
 
+const packetSha = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+const recordSha = "abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd";
 const queue = {
   kind: "historical-1326-political-geometry-reconciliation-queue",
   scenarioDate: "1326-04-07",
   source: { sourceId: "cliopatria-v0.2.0" },
+  candidatePacketSha256: packetSha,
   authorityStatus: "candidate-review-only",
   promotion: "BLOCKED",
   reviewQueue: [{
-    reviewId: "review-test-bursa-001",
+    reviewId: "cliopatria-1326-feature-7-" + recordSha.slice(0, 16),
     sourceFeatureIndex: 7,
     entityReconciliation: {
       status: "single-match",
@@ -22,7 +25,8 @@ const queue = {
     },
     temporalApplicability: { passes: true },
     sourceEvidence: {
-      candidatePacketSha256: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      candidatePacketSha256: packetSha,
+      candidateRecordSha256: recordSha
     }
   }]
 };
