@@ -19,9 +19,14 @@ assert.match(prep, /extractedSha/);
 assert.match(prep, /BLOCKED_UNTIL_TEMPORAL_EXTRACTION_RECONCILIATION_REVIEW/);
 assert.match(extract, /--extraction-input/);
 assert.match(extract, /Extracted GeoJSON SHA-256 does not match the extraction input record/);
-assert.match(validator, /immutableReference/);\nassert.match(validator, /sourceBlobSha/);
+assert.match(validator, /immutableReference/);
+assert.match(validator, /sourceBlobSha/);
 assert.match(validator, /acquisition record is missing/);
 assert.match(validator, /archive SHA differs from acquisition record/);
-assert.match(validator, /archive path differs from the retained acquisition artifact/);\nassert.match(validator, /member\.sha256/);\nassert.match(validator, /FeatureCollection/);\nassert.match(validator, /BLOCKED/);\nassert.match(pipeline, /--extraction-input/);
+assert.match(validator, /archive path differs from the retained acquisition artifact/);
+assert.match(validator, /member\.sha256/);
+assert.match(validator, /FeatureCollection/);
+assert.match(validator, /BLOCKED/);
+assert.match(pipeline, /--extraction-input/);
 
 console.log("1326 extraction-input contract passed: extraction is bound to the verified archive snapshot and extracted-member hash.");
