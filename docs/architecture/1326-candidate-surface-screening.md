@@ -204,3 +204,10 @@ The ledger is now edge-aware. A review record may contain multiple independent e
 Supported edge types follow the 1326 transition inventory: `POLITICAL_ADJACENCY`, `FRONTIER`, `REGIONAL_PROXIMITY`, `ROAD_CORRIDOR`, `RIVER_CORRIDOR`, `MOUNTAIN_BARRIER`, `LAKE_BARRIER`, `COASTAL_ACCESS`, `STRATEGIC_PASS`, and `STRATEGIC_CROSSING`. `UNKNOWN` is retained for unresolved relationships.
 
 Confidence is deliberately split into `existence`, `controller`, `frontier`, `exactBoundary`, and `geometry`. No aggregate score is generated and no edge assessment grants canonical authority. An unresolved or buffered frontier can therefore remain explicitly uncertain instead of being forced into a sharp political boundary.
+
+
+### Pilot edge evidence registry — Bithynia core
+
+The first pilot edge registry is stored separately from the review ledger at `data/gis/1326/pilot-edge-evidence/bithynia-core-01.json`. It records evidence relationships only; it does not generate geometry or infer controller ownership.
+
+The pilot deliberately distinguishes Bursa–Nicaea frontier evidence from regional proximity, Nicaea–Sangarius river/corridor evidence, the Lefke route corridor, and the Nicomedia–Nicaea network relationship. Where the source describes a relationship as physical accessibility, the registry does not promote it to political control. Where exact boundary evidence is weak, the edge remains uncertain rather than being converted into a hard boundary.
