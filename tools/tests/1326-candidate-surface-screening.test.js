@@ -37,5 +37,6 @@ assert.equal(report.counts.rejectedCandidates, 1);
 assert.equal(report.candidates[0].sourceFeatureId, "near-bursa");
 assert.equal(report.candidates[0].anchorHits[0].anchorId, "bursa-core");
 assert.equal(report.candidates[0].promotion, "BLOCKED");
+assert.deepEqual(report.candidates[0].geometry, JSON.parse(await fs.readFile(path.join(fixture, "candidates.json"), "utf8")).candidates[0].geometry);
 
 console.log("1326 candidate surface screening contract passed.");
