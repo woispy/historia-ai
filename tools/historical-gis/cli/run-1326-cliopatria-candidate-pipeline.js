@@ -74,6 +74,8 @@ if (candidates.scenarioDate !== SCENARIO_DATE) throw new Error("Candidate report
 if (reconciliation.scenarioDate !== SCENARIO_DATE) throw new Error("Reconciliation report date drifted.");
 if (screening.scenarioDate !== SCENARIO_DATE) throw new Error("Screening report date drifted.");
 if (screening.promotion !== "BLOCKED") throw new Error("Candidate surface must remain blocked from promotion.");
+if (candidates.candidatePacketSha256 !== reconciliation.candidatePacketSha256) throw new Error("Candidate/reconciliation packet provenance mismatch.");
+if (candidates.candidatePacketSha256 !== screening.candidatePacketSha256) throw new Error("Candidate/screening packet provenance mismatch.");
 if (candidates.source.extractedGeojsonSha256 !== reconciliation.sourceProvenance?.extractedGeojsonSha256) throw new Error("Candidate/reconciliation extraction provenance mismatch.");
 if (candidates.source.extractedGeojsonSha256 !== screening.provenance?.extractedGeojsonSha256) throw new Error("Candidate/screening extraction provenance mismatch.");
 if (screening.screening?.notGeometryAuthority !== true) {
