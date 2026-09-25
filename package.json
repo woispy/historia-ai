@@ -143,7 +143,8 @@
     "test:1326-candidate-packet-integrity-runtime": "node tools/tests/1326-candidate-packet-integrity-runtime.test.js",
     "test:1326-geometry-reconciliation-integrity": "node tools/tests/1326-geometry-reconciliation-integrity.test.js",
     "test:1326-candidate-reconciliation-integrity": "node tools/tests/1326-candidate-reconciliation-integrity.test.js",
-    "validate:1326-t3b-provenance-lineage": "node tools/historical-gis/cli/validate-1326-t3b-provenance-lineage.js"
+    "validate:1326-t3b-provenance-lineage": "node tools/historical-gis/cli/validate-1326-t3b-provenance-lineage.js",
+    "test:1326-t3b-provenance-lineage": "node tools/tests/1326-t3b-provenance-lineage.test.js"
   },
   "dependencies": {
     "react": "^19.2.7",
