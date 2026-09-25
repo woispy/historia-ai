@@ -18,7 +18,7 @@ await fs.writeFile(ledger, JSON.stringify({
   authorityStatus: "review-ledger-only",
   promotion: "BLOCKED",
   records: [{
-    reviewId: "review-bithynia-pilot-001",
+    reviewId: "cliopatria-1326-feature-7-0123456789abcdef",
     sourceFeatureIndex: 7,
     entityIdentity: { status: "single-match", entityIds: ["ottoman-beylik"] },
     temporalEvidence: { scenarioDate: "1326-04-07", applicability: "supported", sourceRefs: ["test"] },
@@ -26,7 +26,7 @@ await fs.writeFile(ledger, JSON.stringify({
     edgeAssessments: [],
     physicalConstraints: { status: "uncertain", sourceRefs: [] },
     topologyGate: { status: "not-run", checks: [] },
-    provenance: { sourceId: "cliopatria-v0.2.0", candidatePacketSha256: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" },
+    provenance: { sourceId: "cliopatria-v0.2.0", candidatePacketSha256: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef", candidateRecordSha256: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" },
     confidence: { existence: 0, controller: 0, frontier: 0, exactBoundary: 0, geometry: 0 },
     decision: { status: "pending", reviewedGeometry: null }
   }]
