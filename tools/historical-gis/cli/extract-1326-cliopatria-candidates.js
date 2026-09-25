@@ -139,6 +139,7 @@ const report = {
     excluded,
   },
   candidates,
+  candidatePacketSha256: sha256Text(JSON.stringify(candidates)),
 };
 
 await fs.mkdir(path.dirname(outputPath), { recursive: true });
