@@ -33,7 +33,7 @@ const anchor = anchors.anchors[0];
 const screen = {
   schemaVersion: 1,
   scenarioDate: "1326-04-07",
-  source: { sourceId: "cliopatria-v0.2.0", sourceTag: "v0.2.0" },
+  source: { sourceId: "cliopatria-v0.2.0", sourceTag: "v0.2.0", extractedGeojsonSha256: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef", inputSha256: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" },
   screening: { notGeometryAuthority: true, noSyntheticGeometry: true },
   promotion: "BLOCKED",
   candidates: [{
@@ -49,6 +49,7 @@ const reconciliation = {
   schemaVersion: 1,
   scenarioDate: "1326-04-07",
   sourceId: "cliopatria-v0.2.0",
+  sourceProvenance: { extractedGeojsonSha256: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" },
   promotion: "BLOCKED",
   results: [{
     entityId: "ottoman-beylik",
