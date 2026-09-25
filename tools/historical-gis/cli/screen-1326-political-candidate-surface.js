@@ -24,6 +24,8 @@ function assertCandidateReport(report) {
   if (!/^[0-9a-f]{64}$/.test(report?.source?.extractedGeojsonSha256 ?? "")) throw new Error("Candidate report must carry extracted GeoJSON SHA-256.");
   if (!Array.isArray(report?.candidates)) throw new Error("Candidate report must contain candidates[].");
   if (!/^[0-9a-f]{64}$/.test(report?.candidatePacketSha256 ?? "")) throw new Error("Candidate report must carry candidate packet SHA-256.");
+  const expectedPacketSha = crypto.createHash("sha256").update(JSON.stringify(report.candidates)).digest("hex");
+  if (report.candidatePacketSha256 !== expectedPacketSha) throw new Error("Candidate packet SHA-256 mismatch.");
 }
 
 function assertAnchorReport(report) {
