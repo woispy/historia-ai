@@ -324,3 +324,22 @@ The geometry review queue retains this source-level hash alongside its candidate
 
 None of these hashes confer historical authority or permit automatic canonical promotion.
 
+
+### Independent candidate packet validation
+
+The temporal extraction output now carries `candidatePacketSha256`, computed from the deterministic serialized `candidates[]` packet.
+
+A separate `validate:1326-cliopatria-candidates` gate checks:
+- source identity and immutable source reference;
+- verified extracted GeoJSON SHA-256 presence;
+- the locked `FromYear <= 1326 <= ToYear` rule;
+- POLITY-only candidate classification;
+- Polygon/MultiPolygon geometry presence;
+- pending reconciliation and candidate-evidence-only authority state;
+- candidate count consistency;
+- candidate packet SHA-256 integrity.
+
+The integrated candidate pipeline executes this validator before entity reconciliation.
+
+The packet hash is then propagated into reconciliation, screening, and geometry review preparation. Cross-stage packet-hash mismatches are fatal. This makes the candidate packet itself an immutable provenance boundary rather than relying only on the underlying source hash.
+
