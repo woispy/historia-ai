@@ -52,6 +52,11 @@ const counted = report.candidates.length;
 if (report.counts.candidates !== counted) fail("Candidate count does not match candidates[].length.");
 if (report.counts.inputFeatures < counted) fail("Input feature count cannot be below candidate count.");
 
+const excludedTotal = excluded.outsideTemporalRange + excluded.nonPolity + excluded.missingGeometry;
+if (report.counts.inputFeatures !== counted + excludedTotal) {
+  fail("Candidate accounting is incomplete: inputFeatures must equal candidates + all exclusion buckets.");
+}
+
 console.log(JSON.stringify({
   scenarioDate: SCENARIO_DATE,
   candidateCount: counted,
