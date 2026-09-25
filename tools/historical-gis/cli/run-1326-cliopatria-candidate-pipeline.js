@@ -43,6 +43,7 @@ await fs.mkdir(outputDir, { recursive: true });
 const candidateOutput = path.join(outputDir, "cliopatria-1326-candidates.json");
 const reconciliationOutput = path.join(outputDir, "cliopatria-entity-reconciliation.json");
 const screeningOutput = path.join(outputDir, "cliopatria-candidate-surface-screening.json");
+const geometryQueueOutput = path.join(outputDir, "1326-geometry-reconciliation-queue.json");
 
 await run("tools/historical-gis/cli/extract-1326-cliopatria-candidates.js", [
   ...(extractionInput ? ["--extraction-input", extractionInput] : ["--input", input]),
@@ -64,16 +65,35 @@ await run("tools/historical-gis/cli/screen-1326-political-candidate-surface.js",
   "--output", screeningOutput,
 ]);
 
-const [candidates, reconciliation, screening] = await Promise.all([
+await run("tools/historical-gis/cli/validate-1326-candidate-reconciliation.js", [
+  "--input", reconciliationOutput,
+  "--candidates", candidateOutput,
+]);
+
+await run("tools/historical-gis/cli/prepare-1326-geometry-reconciliation.js", [
+  "--screening", screeningOutput,
+  "--reconciliation", reconciliationOutput,
+  "--output", geometryQueueOutput,
+]);
+
+await run("tools/historical-gis/cli/validate-1326-geometry-reconciliation.js", [
+  "--input", geometryQueueOutput,
+]);
+
+const [candidates, reconciliation, screening, geometryQueue] = await Promise.all([
   fs.readFile(candidateOutput, "utf8").then(JSON.parse),
   fs.readFile(reconciliationOutput, "utf8").then(JSON.parse),
   fs.readFile(screeningOutput, "utf8").then(JSON.parse),
+  fs.readFile(geometryQueueOutput, "utf8").then(JSON.parse),
 ]);
 
 if (candidates.scenarioDate !== SCENARIO_DATE) throw new Error("Candidate report date drifted.");
 if (reconciliation.scenarioDate !== SCENARIO_DATE) throw new Error("Reconciliation report date drifted.");
 if (screening.scenarioDate !== SCENARIO_DATE) throw new Error("Screening report date drifted.");
 if (screening.promotion !== "BLOCKED") throw new Error("Candidate surface must remain blocked from promotion.");
+if (geometryQueue.promotion !== "BLOCKED") throw new Error("Geometry reconciliation must remain blocked from promotion.");
+if (geometryQueue.candidatePacketSha256 !== candidates.candidatePacketSha256) throw new Error("Candidate/geometry queue packet provenance mismatch.");
+if (geometryQueue.reviewQueue?.length !== screening.screening?.screenedCandidates) throw new Error("Geometry queue count does not match screened candidate count.");
 if (candidates.candidatePacketSha256 !== reconciliation.candidatePacketSha256) throw new Error("Candidate/reconciliation packet provenance mismatch.");
 if (candidates.candidatePacketSha256 !== screening.candidatePacketSha256) throw new Error("Candidate/screening packet provenance mismatch.");
 if (candidates.source.extractedGeojsonSha256 !== reconciliation.sourceProvenance?.extractedGeojsonSha256) throw new Error("Candidate/reconciliation extraction provenance mismatch.");
@@ -99,6 +119,10 @@ console.log(JSON.stringify({
       screenedCandidates: screening.counts.screenedCandidates,
       rejectedCandidates: screening.counts.rejectedCandidates,
       output: screeningOutput.replace(/\\/g, "/"),
+    },
+    geometryReviewQueue: {
+      reviewItems: geometryQueue.reviewQueue.length,
+      output: geometryQueueOutput.replace(/\\/g, "/"),
     },
   },
   promotion: "BLOCKED",
