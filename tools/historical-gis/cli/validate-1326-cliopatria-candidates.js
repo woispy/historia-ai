@@ -25,6 +25,7 @@ if (report.source?.immutableReference?.type !== "git-commit") fail("Candidate im
 if (report.source?.immutableReference?.sha !== "ad28a69") fail("Candidate immutable commit mismatch.");
 if (report.source?.immutableReference?.sourceBlobSha !== "cefab0f4b622e2e7fb3daf68d4f461f83991204c") fail("Candidate source blob mismatch.");
 if (!/^[0-9a-f]{64}$/.test(report.source?.extractedGeojsonSha256 ?? "")) fail("Candidate report requires extracted GeoJSON SHA-256.");
+if (!/^[0-9a-f]{64}$/.test(report.source?.inputSha256 ?? "")) fail("Candidate report requires input SHA-256.");
 if (report.temporalRule !== "FromYear <= 1326 <= ToYear") fail("Candidate temporal rule drifted.");
 if (!Array.isArray(report.candidates)) fail("Candidate report must contain candidates[].");
 if (!report.counts || report.counts.inputFeatures !== undefined && !Number.isInteger(report.counts.inputFeatures)) fail("Candidate counts are invalid.");
