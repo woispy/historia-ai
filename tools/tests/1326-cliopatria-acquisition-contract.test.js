@@ -32,6 +32,10 @@ assert.ok(script.includes('const ACQUISITION_MANIFEST = path.resolve("data/gis/1
 assert.ok(script.includes('source.status = "acquired";'), "Successful acquisition must promote the source record from acquisition-required to acquired.");
 assert.ok(script.includes('rawSha256: record.rawSha256'), "Successful acquisition must persist the retained artifact SHA-256 in the acquisition manifest.");
 assert.ok(script.includes('source.snapshot?.rawSha256 !== record.rawSha256'), "Verification must cross-check the tracked manifest SHA-256.");
+assert.ok(script.includes('source.snapshot?.immutableReference?.sha !== record.immutableReference?.sha'), "Verification must cross-check the immutable commit reference.");
+assert.ok(script.includes('source.snapshot?.immutableReference?.sourceBlobSha !== record.immutableReference?.sourceBlobSha'), "Verification must cross-check the immutable source blob SHA.");
+assert.ok(script.includes('source.snapshot?.retainedArtifact !== record.retainedArtifact'), "Verification must cross-check the retained artifact path.");
+assert.ok(script.includes('record.sourceUrl !== SOURCE_URL'), "Verification must cross-check the pinned source URL.");
 assert.ok(script.includes('promotion: "BLOCKED_UNTIL_EXTRACTION_RECONCILIATION_REVIEW"'), "Acquisition must remain promotion-blocked.");
 
 console.log("1326 Cliopatria acquisition contract passed: manifest/script provenance is aligned and acquisition remains blocked until verification.");
