@@ -267,9 +267,9 @@ The bridge now has a separate preparation/validation contract:
 
 The binding validator requires candidate-bound review IDs in the form:
 
-    cliopatria-1326-feature-<sourceFeatureIndex>-<candidatePacketSha256[0:16]>
+    cliopatria-1326-feature-<sourceFeatureIndex>-<candidateRecordSha256[0:16]>
 
-This keeps edge evidence attachment referentially tied to the immutable candidate packet identity.
+This keeps edge evidence attachment referentially tied to the immutable per-candidate record identity. The top-level `candidatePacketSha256` remains the dataset-level provenance hash and is validated separately.
 
 The resulting artifact remains `authorityStatus: bridge-reference-only` and `promotion: BLOCKED`. A real Bithynia binding file must not be fabricated until the actual acquired Cliopatria candidate queue contains the corresponding review IDs.
 
