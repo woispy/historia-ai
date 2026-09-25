@@ -125,7 +125,8 @@
     "test:1326-cliopatria-acquisition-contract": "node tools/tests/1326-cliopatria-acquisition-contract.test.js",
     "prepare:1326-geometry-reconciliation": "node tools/historical-gis/cli/prepare-1326-geometry-reconciliation.js",
     "validate:1326-geometry-reconciliation": "node tools/historical-gis/cli/validate-1326-geometry-reconciliation.js",
-    "validate:1326-reviewed-geometry": "node tools/historical-gis/cli/validate-1326-reviewed-geometry.js",
+        "prepare:1326-geometry-review-ledger": "node tools/historical-gis/cli/prepare-1326-geometry-review-ledger.js",
+"validate:1326-reviewed-geometry": "node tools/historical-gis/cli/validate-1326-reviewed-geometry.js",
     "test:1326-geometry-reconciliation": "node tools/tests/1326-geometry-reconciliation.test.js"
   },
   "dependencies": {
