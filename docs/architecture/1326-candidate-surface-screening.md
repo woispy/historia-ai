@@ -506,3 +506,15 @@ The preflight remains non-destructive: it does not download bytes and does not m
       → validate:1326-cliopatria-candidate-pipeline
 
 No step in this sequence promotes candidate geometry to canonical authority.
+
+### Acquisition operational state gate
+
+A derived fail-closed operational state gate now models the 1326 Cliopatria chain without adding new authority states to the production manifest:
+
+REFERENCE_PINNED_NOT_ACQUIRED → ACQUIRED_UNVERIFIED → VERIFIED → EXTRACTED → CANDIDATE_READY → REVIEW_QUEUE_READY
+
+Run: npm run validate:1326-cliopatria-operational-state
+
+The gate rejects downstream artifacts while the manifest is still reference-pinned, requires retained-byte SHA/length verification before extraction, requires verified extraction provenance before candidate readiness, independently recomputes the candidate packet SHA, and keeps promotion BLOCKED at every state. The production manifest may therefore remain reference-pinned-not-acquired until the real snapshot is intentionally acquired.
+
+Extraction preparation also accepts --extract-dir, allowing runtime fixtures to isolate their extracted member directory instead of deleting a pre-existing production extraction directory.
