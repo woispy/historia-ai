@@ -71,7 +71,6 @@ const results = REQUIRED_ENTITIES.map((entity) => {
     const bucket = byName.get(normalize(alias)) ?? [];
     for (const candidate of bucket) if (!matches.some(x => x.sourceFeatureIndex === candidate.sourceFeatureIndex)) matches.push(candidate);
   }
-  const exact = matches.filter(candidate => normalize(candidate.name) === normalize(entity.aliases[0]));
   return {
     entityId: entity.entityId,
     status: matches.length === 0 ? "unmatched" : matches.length === 1 ? "single-candidate" : "ambiguous",
