@@ -109,19 +109,22 @@ try {
   }
   const extractedSha = sha256(Buffer.from(extracted, "utf8"));
 
-  const relativeArchivePath = path.relative(process.cwd(), archivePath).replace(/\\\\/g, "/");\n  const relativeExtractedPath = path.relative(process.cwd(), extractedPath).replace(/\\\\/g, "/");\n\n  const record = {
+  const relativeArchivePath = path.relative(process.cwd(), archivePath).replace(/\\/g, "/");
+  const relativeExtractedPath = path.relative(process.cwd(), extractedPath).replace(/\\/g, "/");
+
+  const record = {
     schemaVersion: 1,
     sourceId: SOURCE_ID,
     scenarioDate: SCENARIO_DATE,
     archive: {
-      path: archivePath.replace(/\\/g, "/"),
+      path: relativeArchivePath,
       rawSha256: archiveSha,
       byteLength: archive.length,
       acquisitionRecord: acquisitionPath.replace(/\\/g, "/")
     },
     member: {
       path: member,
-      extractedPath: extractedPath.replace(/\\/g, "/"),
+      extractedPath: relativeExtractedPath,
       sha256: extractedSha,
       format: "GeoJSON",
       featureCollectionValidated: true
