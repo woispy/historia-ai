@@ -432,3 +432,24 @@ No candidate packet is considered valid unless the extracted bytes and recorded 
 Entity reconciliation now carries a per-candidate `candidateRecordSha256` derived from the exact candidate object. The independent reconciliation validator checks packet hash continuity, extracted GeoJSON/input SHA continuity, source feature identity, temporal identity, geometry-authority state, candidate-record hash, entity result counts, and the permanent no-auto-promotion policy.
 
 The end-to-end T3-B lineage gate also recomputes the candidate record hash from the original candidate packet and requires the reconciliation result to carry the same hash. This prevents a reconciliation layer from silently substituting or mutating a candidate while retaining the original packet hash.
+
+
+### Geometry Review Ledger → Reconciliation Queue Binding
+
+The review ledger is now validated against its exact geometry-reconciliation queue when the queue is supplied to the validator:
+
+    npm run validate:1326-geometry-review-ledger -- --input <geometry-review-ledger> --queue <geometry-reconciliation-queue>
+
+This gate requires:
+
+- the same scenario/source identity;
+- the same top-level `candidatePacketSha256`;
+- every ledger `reviewId` to exist in the reconciliation queue;
+- the same `sourceFeatureIndex`;
+- the same `candidateRecordSha256`;
+- identical record counts;
+- unique ledger review IDs.
+
+The ledger preparation step also refuses a reconciliation queue whose review items do not carry the queue-level packet hash or a valid candidate-record hash. This prevents the review ledger from becoming a second, independently mutable identity layer between geometry reconciliation and research review.
+
+The ledger remains `authorityStatus: review-ledger-only` and `promotion: BLOCKED`; this binding establishes provenance continuity only and does not approve or generate geometry.
