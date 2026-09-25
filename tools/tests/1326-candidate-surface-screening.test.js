@@ -46,5 +46,10 @@ assert.equal(report.candidates[0].sourceFeatureId, "near-bursa");
 assert.equal(report.candidates[0].anchorHits[0].anchorId, "bursa-core");
 assert.equal(report.candidates[0].promotion, "BLOCKED");
 assert.deepEqual(report.candidates[0].geometry, JSON.parse(await fs.readFile(path.join(fixture, "candidates.json"), "utf8")).candidates[0].geometry);
+assert.match(report.candidates[0].sourceGeometrySha256, /^[0-9a-f]{64}$/);
+assert.equal(
+  report.candidates[0].sourceGeometrySha256,
+  crypto.createHash("sha256").update(JSON.stringify(report.candidates[0].geometry)).digest("hex")
+);
 
 console.log("1326 candidate surface screening contract passed.");
