@@ -55,4 +55,11 @@ await fs.writeFile(extractionInputPath, JSON.stringify(mutated));
 await fs.writeFile(extractedPath, geojsonRaw.replace("Pilot Polity", "Mutated Polity"));
 await run("tampered-bytes", false);
 
+mutated.member.sha256 = sha256(Buffer.from(geojsonRaw));
+await fs.writeFile(extractionInputPath, JSON.stringify(mutated));
+const acquisitionDrift = JSON.parse(await fs.readFile(extractionInputPath, "utf8"));
+acquisitionDrift.archive.rawSha256 = "c".repeat(64);
+await fs.writeFile(extractionInputPath, JSON.stringify(acquisitionDrift));
+await run("tampered-acquisition-provenance", false);
+
 console.log("1326 extraction-to-candidate runtime integrity contract passed.");
