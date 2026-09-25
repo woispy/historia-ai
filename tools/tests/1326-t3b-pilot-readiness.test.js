@@ -29,8 +29,9 @@ async function writeSet(name, set) {
   for(const [k,v] of Object.entries(set)){paths[k]=path.join(dir,k+".json");await fs.writeFile(paths[k],JSON.stringify(v));}
   return paths;
 }
+let caseNo = 0;
 async function run(set, ok) {
-  const p=await writeSet(Math.random().toString(16).slice(2),set);
+  const p=await writeSet(`case-${++caseNo}`,set);
   const args=["--candidates",p.candidates,"--screening",p.screening,"--reconciliation",p.reconciliation,"--review",p.review,"--ledger",p.ledger,"--bindings",p.bindings,"--evidence",p.evidence];
   const result=await new Promise(resolve=>{const child=spawn(process.execPath,[validator,...args],{cwd:root,stdio:["ignore","pipe","pipe"]});let err="";child.stderr.on("data",d=>err+=d);child.on("close",code=>resolve({code,err}));});
   assert.equal(result.code===0,ok,result.err);
