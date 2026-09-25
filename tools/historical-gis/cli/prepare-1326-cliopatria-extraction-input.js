@@ -76,7 +76,7 @@ try {
   } else {
     try {
       await run("unzip", ["-q", archivePath, "-d", expandedDir]);
-    } catch (error) {
+    } catch {
       await run("tar", ["-xf", archivePath, "-C", expandedDir]);
     }
   }
