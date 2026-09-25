@@ -387,3 +387,11 @@ A dedicated lineage validator now checks the complete evidence chain without pro
 The gate independently recomputes the candidate packet SHA, requires extracted GeoJSON SHA continuity, binds screening and review records by `sourceFeatureIndex/sourceFeatureId`, verifies source geometry identity continuity, and verifies the candidate-record-derived review ID. Packet drift, geometry drift, or reconciliation identity drift is fatal.
 
 The validator is evidence-integrity only. `promotion` remains `BLOCKED`, and no geometry generation, controller inference, or canonical promotion is performed.
+
+### Bithynia Pilot 01 binding readiness
+
+The Bithynia pilot edge-evidence set remains research/evidence-only. A guarded binding-input placeholder is now tracked at `data/gis/1326/pilot-edge-evidence/bithynia-core-01.review-bindings.json`.
+
+It intentionally contains zero `reviewBindings`. No production review ID is fabricated. Real bindings may be added only after the verified 1326 candidate acquisition, screening, reconciliation, and geometry review queue produce candidate-bound review IDs.
+
+The pilot evidence therefore remains usable as a research constraint set without creating false provenance or silently attaching evidence to an unverified candidate.
