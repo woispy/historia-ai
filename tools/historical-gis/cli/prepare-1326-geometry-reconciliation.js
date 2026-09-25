@@ -33,6 +33,7 @@ function assertReconciliation(report) {
   if (report?.scenarioDate !== SCENARIO_DATE) throw new Error("Entity reconciliation scenario date mismatch.");
   if (report?.sourceId !== SOURCE_ID) throw new Error("Entity reconciliation source mismatch.");
   if (report?.promotion !== "BLOCKED") throw new Error("Entity reconciliation must remain promotion-blocked.");
+  if (!/^[0-9a-f]{64}$/.test(report?.sourceProvenance?.extractedGeojsonSha256 ?? "")) throw new Error("Entity reconciliation must carry extracted GeoJSON SHA-256.");
 }
 
 const screeningPath = required("--screening");
@@ -43,6 +44,7 @@ const screening = JSON.parse(await fs.readFile(screeningPath, "utf8"));
 const reconciliation = JSON.parse(await fs.readFile(reconciliationPath, "utf8"));
 assertScreening(screening);
 assertReconciliation(reconciliation);
+if (reconciliation.sourceProvenance.extractedGeojsonSha256 !== screening.source.extractedGeojsonSha256) throw new Error("Reconciliation/extraction provenance mismatch.");
 
 const candidateIndex = new Map((screening.candidates ?? []).map(candidate => [candidate.sourceFeatureIndex, candidate]));
 const reconciliationIndex = new Map();
