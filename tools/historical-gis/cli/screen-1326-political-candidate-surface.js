@@ -151,6 +151,10 @@ for (const candidate of candidates.candidates) {
     wikidataId: candidate.wikidataId,
     seshatId: candidate.seshatId,
     geometryAuthorityStatus: candidate.geometryAuthorityStatus,
+    // Preserve the exact source geometry in the evidence packet. This is not a reviewed
+    // geometry and must never be mutated in-place; downstream reconciliation works on a
+    // separate reviewedGeometry field.
+    geometry: candidate.geometry,
     geometryBbox: bbox,
     geometryBboxCenter: center,
     anchorHits,
