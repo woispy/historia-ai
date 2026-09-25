@@ -549,3 +549,9 @@ This keeps the review identity chain fail-closed at the point where candidate-de
 The synthetic acquisition runtime contract now continues past the geometry reconciliation queue into the research-review boundary. After the verified archive → extraction → candidate pipeline handoff, the fixture prepares and queue-validates the geometry review ledger, creates an explicit candidate-bound edge-evidence mapping against the pilot evidence registry, validates the generated bridge bindings, runs the evidence-reference bridge, and finally runs the T3-B pilot-readiness gate with the generated artifacts.
 
 The contract asserts that the generated review ID and both provenance hashes remain identical from the geometry review queue through the ledger and bridge, that bound edge evidence is attached only through explicit IDs, and that reviewedGeometry remains null and promotion remains BLOCKED. This is synthetic runtime evidence only; it does not acquire real Cliopatria bytes or create a production canonical binding.
+
+### T3-B end-to-end provenance tamper closure
+
+The integrated acquisition-to-T3-B runtime fixture now exercises fail-closed mutations after the successful review/edge bridge handoff. The runtime contract must reject ledger candidate-packet drift, ledger candidate-record drift, ledger review-ID drift, explicit binding review-ID drift, and explicit binding edge-ID drift at the bridge boundary. It also passes a tampered ledger candidate-record hash through the final pilot-readiness gate and requires rejection there.
+
+This closes the synthetic runtime path from acquired bytes through review identity and explicit evidence binding. These cases verify provenance integrity only; they do not approve historical geometry, infer political control, or promote candidate evidence to canonical authority.
