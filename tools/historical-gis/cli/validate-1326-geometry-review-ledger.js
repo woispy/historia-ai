@@ -30,6 +30,10 @@ let edgeCount = 0;
 for (const record of report.records) {
   if (!record.reviewId) throw new Error("reviewId is required.");
   if (record.provenance?.sourceId !== SOURCE_ID) throw new Error(`Source identity mismatch: ${record.reviewId}`);
+  if (!/^[0-9a-f]{64}$/.test(record.provenance?.candidatePacketSha256 ?? "")) throw new Error(`Candidate packet hash missing or invalid: ${record.reviewId}`);
+  if (!/^[0-9a-f]{64}$/.test(record.provenance?.candidateRecordSha256 ?? "")) throw new Error(`Candidate record hash missing or invalid: ${record.reviewId}`);
+  const expectedReviewId = `cliopatria-1326-feature-${record.sourceFeatureIndex}-${record.provenance.candidateRecordSha256.slice(0, 16)}`;
+  if (record.reviewId !== expectedReviewId) throw new Error(`Review ID is not bound to candidate record identity: ${record.reviewId}`);
   const edges = record.edgeAssessments;
   if (!Array.isArray(edges)) throw new Error(`edgeAssessments[] is required: ${record.reviewId}`);
   const ids = new Set();
