@@ -76,7 +76,13 @@ async function runNode(script, args, expectFailure = false) {
     let stderr = "";
     child.stderr.on("data", chunk => { stderr += chunk; });
     child.on("error", reject);
-    child.on("close", code => {\n      if (expectFailure) {\n        if (code === 0) reject(new Error(`Expected ${script} to fail.`));\n        else resolve(stderr);\n      } else if (code === 0) resolve();\n      else reject(new Error(stderr || `${script} exited with code ${code}`));\n    });
+    child.on("close", code => {
+      if (expectFailure) {
+        if (code === 0) reject(new Error(`Expected ${script} to fail.`));
+        else resolve(stderr);
+      } else if (code === 0) resolve();
+      else reject(new Error(stderr || `${script} exited with code ${code}`));
+    });
   });
 }
 
@@ -279,7 +285,30 @@ try {
     "--evidence", evidencePath
   ], true);
 
-  const extractionRecord = JSON.parse(await fs.readFile(extractionInputPath, "utf8"));\n  extractionRecord.member.sha256 = "0".repeat(64);\n  const tamperedExtractionPath = path.join(temp, "tampered-extraction-input.json");\n  await fs.writeFile(tamperedExtractionPath, JSON.stringify(extractionRecord, null, 2));\n  await runNode(pipeline, [\n    "--extraction-input", tamperedExtractionPath,\n    "--anchors", anchors,\n    "--output-dir", path.join(temp, "tampered-pipeline-output")\n  ], true);\n\n  const tamperedCandidate = JSON.parse(JSON.stringify(candidates));\n  tamperedCandidate.candidates[0].name = "Tampered Candidate";\n  const tamperedCandidatePath = path.join(temp, "tampered-candidates.json");\n  await fs.writeFile(tamperedCandidatePath, JSON.stringify(tamperedCandidate, null, 2));\n  const operationalState = path.join(root, "tools/historical-gis/cli/validate-1326-cliopatria-operational-state.js");\n  await runNode(operationalState, [\n    "--manifest", manifestPath,\n    "--acquisition", acquisitionPath,\n    "--extraction-input", extractionInputPath,\n    "--candidates", tamperedCandidatePath,\n    "--require-candidate-ready", "true"\n  ], true);\n\n  console.log("1326 integrated acquisition-to-T3-B runtime contract passed.");
+  const extractionRecord = JSON.parse(await fs.readFile(extractionInputPath, "utf8"));
+  extractionRecord.member.sha256 = "0".repeat(64);
+  const tamperedExtractionPath = path.join(temp, "tampered-extraction-input.json");
+  await fs.writeFile(tamperedExtractionPath, JSON.stringify(extractionRecord, null, 2));
+  await runNode(pipeline, [
+    "--extraction-input", tamperedExtractionPath,
+    "--anchors", anchors,
+    "--output-dir", path.join(temp, "tampered-pipeline-output")
+  ], true);
+
+  const tamperedCandidate = JSON.parse(JSON.stringify(candidates));
+  tamperedCandidate.candidates[0].name = "Tampered Candidate";
+  const tamperedCandidatePath = path.join(temp, "tampered-candidates.json");
+  await fs.writeFile(tamperedCandidatePath, JSON.stringify(tamperedCandidate, null, 2));
+  const operationalState = path.join(root, "tools/historical-gis/cli/validate-1326-cliopatria-operational-state.js");
+  await runNode(operationalState, [
+    "--manifest", manifestPath,
+    "--acquisition", acquisitionPath,
+    "--extraction-input", extractionInputPath,
+    "--candidates", tamperedCandidatePath,
+    "--require-candidate-ready", "true"
+  ], true);
+
+  console.log("1326 integrated acquisition-to-T3-B runtime contract passed.");
 } finally {
   await fs.rm(temp, { recursive: true, force: true });
 }
