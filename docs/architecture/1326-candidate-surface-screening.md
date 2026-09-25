@@ -258,3 +258,18 @@ This prevents a review record from silently referring to a different candidate a
 
 This is an identity/provenance guard only. It does not establish historical ownership, political boundaries, or geometry authority.
 
+
+### Explicit Edge Evidence Binding Pipeline
+
+The bridge now has a separate preparation/validation contract:
+
+`prepare:1326-edge-evidence-bindings` accepts an explicit `reviewId → edgeEvidenceIds[]` mapping. It does not discover relationships, match candidates automatically, infer controller, generate geometry, or promote anything.
+
+The binding validator requires candidate-bound review IDs in the form:
+
+    cliopatria-1326-feature-<sourceFeatureIndex>-<candidatePacketSha256[0:16]>
+
+This keeps edge evidence attachment referentially tied to the immutable candidate packet identity.
+
+The resulting artifact remains `authorityStatus: bridge-reference-only` and `promotion: BLOCKED`. A real Bithynia binding file must not be fabricated until the actual acquired Cliopatria candidate queue contains the corresponding review IDs.
+
