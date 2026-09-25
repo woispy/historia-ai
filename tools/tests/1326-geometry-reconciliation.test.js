@@ -89,9 +89,8 @@ assert.equal(
   report.reviewQueue[0].reviewId,
   `cliopatria-1326-feature-${near.sourceFeatureIndex}-${report.reviewQueue[0].sourceEvidence.candidateRecordSha256.slice(0, 16)}`
 );
+assert.equal(report.reviewQueue[0].sourceEvidence.candidateRecordSha256, report.reviewQueue[0].sourceEvidence.candidatePacketSha256);
 assert.equal(
-  report.reviewQueue[0].sourceEvidence.candidateRecordSha256,
-  report.reviewQueue[0].sourceEvidence.candidatePacketSha256,
   report.reviewQueue[0].sourceEvidence.reviewIdDerivation,
   "cliopatria-1326-feature-${sourceFeatureIndex}-${candidatePacketSha256.slice(0,16)}"
 );
