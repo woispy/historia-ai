@@ -33,6 +33,51 @@ const pinnedManifest = path.join(root, "data/gis/1326/acquisition-manifest.json"
 await runNode(stateGate, ["--manifest", pinnedManifest]);
 await runNode(stateGate, ["--manifest", pinnedManifest, "--extraction-input", path.join(temp, "forbidden.json")], true);
 
+function crc32(buffer) {
+  let crc = 0xffffffff;
+  for (const byte of buffer) {
+    crc ^= byte;
+    for (let i = 0; i < 8; i += 1) crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0);
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+function makeStoredZip(filename, data) {
+  const name = Buffer.from(filename, "utf8");
+  const crc = crc32(data);
+  const local = Buffer.alloc(30 + name.length);
+  local.writeUInt32LE(0x04034b50, 0);
+  local.writeUInt16LE(20, 4);
+  local.writeUInt16LE(0, 6);
+  local.writeUInt16LE(0, 8);
+  local.writeUInt16LE(0, 10);
+  local.writeUInt16LE(0, 12);
+  local.writeUInt32LE(crc, 14);
+  local.writeUInt32LE(data.length, 18);
+  local.writeUInt32LE(data.length, 22);
+  local.writeUInt16LE(name.length, 26);
+  name.copy(local, 30);
+  const central = Buffer.alloc(46 + name.length);
+  central.writeUInt32LE(0x02014b50, 0);
+  central.writeUInt16LE(20, 4);
+  central.writeUInt16LE(20, 6);
+  central.writeUInt16LE(0, 8);
+  central.writeUInt16LE(0, 10);
+  central.writeUInt16LE(0, 12);
+  central.writeUInt16LE(0, 14);
+  central.writeUInt32LE(crc, 16);
+  central.writeUInt32LE(data.length, 20);
+  central.writeUInt32LE(data.length, 24);
+  central.writeUInt16LE(name.length, 28);
+  name.copy(central, 46);
+  const end = Buffer.alloc(22);
+  end.writeUInt32LE(0x06054b50, 0);
+  end.writeUInt16LE(1, 8);
+  end.writeUInt16LE(1, 10);
+  end.writeUInt32LE(central.length, 12);
+  end.writeUInt32LE(local.length, 16);
+  return Buffer.concat([local, data, central, end]);
+}
+
 const geojson = {
   type: "FeatureCollection",
   features: [{
@@ -44,10 +89,7 @@ const geojson = {
 };
 const geojsonRaw = Buffer.from(JSON.stringify(geojson), "utf8");
 const archivePath = path.join(temp, "cliopatria.geojson.zip");
-const zip = Buffer.concat([
-  Buffer.from([0x50,0x4b,0x03,0x04,0x14,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]),
-  geojsonRaw
-]);
+const zip = makeStoredZip("cliopatria.geojson", geojsonRaw);
 await fs.writeFile(archivePath, zip);
 const archiveSha = sha256(zip);
 const relativeArchive = path.relative(root, archivePath).replace(/\\/g, "/");
