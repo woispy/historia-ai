@@ -81,6 +81,14 @@ assert.equal(report.promotion, "BLOCKED");
 assert.equal(report.counts.screenedCandidates, 1);
 assert.equal(report.counts.entityLinkedCandidates, 1);
 assert.equal(report.reviewQueue[0].reviewStatus, "pending");
+assert.equal(
+  report.reviewQueue[0].reviewId,
+  `cliopatria-1326-feature-${near.sourceFeatureIndex}-${report.reviewQueue[0].sourceEvidence.candidatePacketSha256.slice(0, 16)}`
+);
+assert.equal(
+  report.reviewQueue[0].sourceEvidence.reviewIdDerivation,
+  "cliopatria-1326-feature-${sourceFeatureIndex}-${candidatePacketSha256.slice(0,16)}"
+);
 assert.equal(report.reviewQueue[0].reviewedGeometry, null);
 assert.equal(report.reviewQueue[0].sourceGeometry.immutable, true);
 assert.equal(report.reviewQueue[0].sourceGeometry.mutationPolicy, "immutable-source-evidence");
