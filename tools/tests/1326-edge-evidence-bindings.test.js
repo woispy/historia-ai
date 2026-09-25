@@ -19,7 +19,7 @@ await fs.writeFile(ledger, JSON.stringify({
   records: [{
     reviewId: "cliopatria-1326-feature-7-0123456789abcdef",
     sourceFeatureIndex: 7,
-    provenance: { candidatePacketSha256: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" }
+    provenance: { candidatePacketSha256: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef", candidateRecordSha256: "0123456789abcdef" + "0123456789abcdef0123456789abcdef0123456789abcdef" }
   }]
 }, null, 2));
 await fs.writeFile(mapping, JSON.stringify({
@@ -34,7 +34,7 @@ await fs.writeFile(mapping, JSON.stringify({
     canonicalPromotion: false
   },
   reviewBindings: [{
-    reviewId: "review-test-bursa-001",
+    reviewId: "cliopatria-1326-feature-7-0123456789abcdef",
     edgeEvidenceIds: ["bursa-nicaea-frontier-1326", "nicaea-sangarius-corridor-1326"]
   }]
 }, null, 2));
