@@ -146,7 +146,8 @@
     "validate:1326-t3b-provenance-lineage": "node tools/historical-gis/cli/validate-1326-t3b-provenance-lineage.js",
     "test:1326-t3b-provenance-lineage": "node tools/tests/1326-t3b-provenance-lineage.test.js",
     "validate:1326-t3b-pilot-readiness": "node tools/historical-gis/cli/validate-1326-t3b-pilot-readiness.js",
-    "test:1326-t3b-pilot-readiness": "node tools/tests/1326-t3b-pilot-readiness.test.js"
+    "test:1326-t3b-pilot-readiness": "node tools/tests/1326-t3b-pilot-readiness.test.js",
+    "validate:1326-cliopatria-acquisition-ready": "node tools/historical-gis/cli/validate-1326-cliopatria-acquisition-ready.js"
   },
   "dependencies": {
     "react": "^19.2.7",
