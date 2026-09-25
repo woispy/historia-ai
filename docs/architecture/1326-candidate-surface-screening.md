@@ -140,8 +140,9 @@ The stage performs only evidence packaging:
 1. consumes the already-screened candidate surface;
 2. links source features to any entity-reconciliation matches;
 3. records temporal applicability and spatial anchor evidence;
-4. records a SHA-256 identity for the source candidate packet;
-5. creates a pending review record with explicit historical/physical/topological/provenance gates.
+4. preserves the exact source geometry inside the evidence packet without mutation;
+5. records a SHA-256 identity for the source candidate packet;
+6. creates a pending review record with explicit historical/physical/topological/provenance gates.
 
 The contract deliberately forbids:
 
@@ -156,6 +157,7 @@ The contract deliberately forbids:
 Each review item therefore has:
 
     sourceGeometry.immutable = true
+    sourceGeometry.mutationPolicy = immutable-source-evidence
     reviewedGeometry = null
     reviewStatus = pending
     promotion = BLOCKED
