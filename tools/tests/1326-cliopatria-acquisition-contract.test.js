@@ -23,6 +23,7 @@ assert.ok(["acquisition-required", "acquired"].includes(source.status), "Cliopat
 assert.ok(source.status === "acquisition-required" || /^[0-9a-f]{64}$/.test(source.snapshot?.rawSha256 ?? ""), "Acquired Cliopatria snapshot must carry a raw SHA-256.");
 assert.ok(["reference-pinned-not-acquired", "acquired"].includes(source.snapshot?.status), "Cliopatria snapshot status must remain acquisition-state controlled.");
 assert.equal(source.url, "https://github.com/Seshat-Global-History-Databank/cliopatria/releases/tag/v0.2.0");
+assert.ok(preflight.includes('source.snapshot.sourceFile !== "cliopatria.geojson.zip"'), "Acquisition preflight must pin the source file name.");
 assert.match(expectedBlobSha ?? "", /^[0-9a-f]{40}$/);
 
 assert.ok(preflight.includes('source.snapshot.immutableReference.sha !== "ad28a69"'), "Acquisition preflight must pin the immutable commit.");\nassert.ok(preflight.includes('source.snapshot.immutableReference.sourceBlobSha !== "cefab0f4b622e2e7fb3daf68d4f461f83991204c"'), "Acquisition preflight must pin the source blob SHA.");\n\nassert.ok(script.includes(`const SOURCE_URL = "${expectedUrl}";`), "Acquisition script URL drifted from the pinned v0.2.0 source.");
