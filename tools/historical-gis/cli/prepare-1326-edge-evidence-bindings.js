@@ -16,10 +16,12 @@ function fail(message) { throw new Error(message); }
 
 const ledgerPath = required("--ledger");
 const mappingPath = required("--mapping");
+const evidencePath = required("--evidence");
 const outputPath = path.resolve(process.cwd(), arg("--output", "data/build/gis/1326/edge-evidence-bindings.json"));
 
 const ledger = JSON.parse(await fs.readFile(ledgerPath, "utf8"));
 const mapping = JSON.parse(await fs.readFile(mappingPath, "utf8"));
+const evidence = JSON.parse(await fs.readFile(evidencePath, "utf8"));
 
 if (ledger?.kind !== "historical-1326-geometry-review-ledger") fail("Unexpected review ledger kind.");
 if (ledger.schemaVersion !== 2) fail("Review ledger schemaVersion must be 2.");
@@ -37,6 +39,16 @@ if (mapping.policy?.automaticReviewMatching !== false ||
   fail("Binding mapping policy must forbid automatic matching, geometry generation, controller inference, and canonical promotion.");
 }
 if (!Array.isArray(mapping.reviewBindings)) fail("reviewBindings[] is required.");
+if (evidence?.schemaVersion !== 1 || evidence.scenarioDate !== SCENARIO_DATE) fail("Evidence registry schema/date mismatch.");
+if (evidence.authorityStatus !== "evidence-reference-only" || evidence.promotion !== "BLOCKED") fail("Evidence registry must remain evidence-reference-only and promotion-blocked.");
+if (evidence.policy?.geometryGeneration !== false ||
+    evidence.policy?.controllerInference !== false ||
+    evidence.policy?.canonicalPromotion !== false) fail("Evidence registry policy must forbid geometry generation, controller inference, and canonical promotion.");
+const evidenceIds = new Set();
+for (const edge of evidence.edges ?? []) {
+  if (!edge?.edgeId || evidenceIds.has(edge.edgeId)) fail(`Duplicate/missing evidence edgeId: ${edge?.edgeId}`);
+  evidenceIds.add(edge.edgeId);
+}
 
 const records = new Map((ledger.records ?? []).map(record => [record.reviewId, record]));
 const seenReviews = new Set();
@@ -54,6 +66,9 @@ for (const binding of mapping.reviewBindings) {
   }
   if (!Array.isArray(binding.edgeEvidenceIds) || binding.edgeEvidenceIds.length === 0) fail(`edgeEvidenceIds[] is empty: ${binding.reviewId}`);
   if (new Set(binding.edgeEvidenceIds).size !== binding.edgeEvidenceIds.length) fail(`Duplicate edge evidence ID in binding: ${binding.reviewId}`);
+  for (const edgeId of binding.edgeEvidenceIds) {
+    if (!evidenceIds.has(edgeId)) fail(`Unknown evidence edge ID: ${edgeId}`);
+  }
 }
 
 const report = {
@@ -74,6 +89,7 @@ const report = {
   provenance: {
     ledgerSource: ledgerPath.replace(/\\/g, "/"),
     explicitMappingSource: mappingPath.replace(/\\/g, "/"),
+    evidenceSource: evidencePath.replace(/\\/g, "/"),
     generationMode: "explicit-review-id-and-edge-id-only"
   }
 };
