@@ -5,9 +5,12 @@
   "additionalProperties": false,
   "required": [
     "schemaVersion",
+    "kind",
     "scenarioDate",
     "authorityStatus",
     "promotion",
+    "policy",
+    "sourceQueue",
     "records"
   ],
   "properties": {
@@ -322,6 +325,93 @@
               }
             }
           }
+        }
+      }
+    },
+    "kind": {
+      "const": "historical-1326-geometry-review-ledger"
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "geometryGeneration",
+        "controllerImpliesGeometry",
+        "canonicalPromotion",
+        "confidenceRequired",
+        "topologyRequired",
+        "provenanceRequired"
+      ],
+      "properties": {
+        "geometryGeneration": {
+          "const": false
+        },
+        "controllerImpliesGeometry": {
+          "const": false
+        },
+        "canonicalPromotion": {
+          "const": false
+        },
+        "confidenceRequired": {
+          "const": true
+        },
+        "topologyRequired": {
+          "const": true
+        },
+        "provenanceRequired": {
+          "const": true
+        }
+      }
+    },
+    "sourceQueue": {
+      "type": "string",
+      "minLength": 1
+    },
+    "bridge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "evidenceSource",
+        "bindingsSource",
+        "boundReviewRecords",
+        "boundEdges",
+        "mutationPolicy",
+        "geometryGeneration",
+        "controllerInference",
+        "canonicalPromotion"
+      ],
+      "properties": {
+        "kind": {
+          "const": "1326-pilot-edge-evidence-reference-bridge"
+        },
+        "evidenceSource": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bindingsSource": {
+          "type": "string",
+          "minLength": 1
+        },
+        "boundReviewRecords": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "boundEdges": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "mutationPolicy": {
+          "const": "evidence-reference-copy-only"
+        },
+        "geometryGeneration": {
+          "const": false
+        },
+        "controllerInference": {
+          "const": false
+        },
+        "canonicalPromotion": {
+          "const": false
         }
       }
     }
