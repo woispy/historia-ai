@@ -426,3 +426,9 @@ The runtime contract covers:
 - retained GeoJSON byte/content tampering.
 
 No candidate packet is considered valid unless the extracted bytes and recorded provenance agree.
+
+### Candidate → reconciliation integrity gate
+
+Entity reconciliation now carries a per-candidate `candidateRecordSha256` derived from the exact candidate object. The independent reconciliation validator checks packet hash continuity, extracted GeoJSON/input SHA continuity, source feature identity, temporal identity, geometry-authority state, candidate-record hash, entity result counts, and the permanent no-auto-promotion policy.
+
+The end-to-end T3-B lineage gate also recomputes the candidate record hash from the original candidate packet and requires the reconciliation result to carry the same hash. This prevents a reconciliation layer from silently substituting or mutating a candidate while retaining the original packet hash.
