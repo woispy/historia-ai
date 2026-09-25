@@ -30,7 +30,10 @@ assert.equal(source.url, "https://github.com/Seshat-Global-History-Databank/clio
 assert.ok(preflight.includes('source.snapshot.sourceFile !== "cliopatria.geojson.zip"'), "Acquisition preflight must pin the source file name.");
 assert.match(expectedBlobSha ?? "", /^[0-9a-f]{40}$/);
 
-assert.ok(preflight.includes('source.snapshot.immutableReference.sha !== "ad28a69"'), "Acquisition preflight must pin the immutable commit.");\nassert.ok(preflight.includes('source.snapshot.immutableReference.sourceBlobSha !== "cefab0f4b622e2e7fb3daf68d4f461f83991204c"'), "Acquisition preflight must pin the source blob SHA.");\n\nassert.ok(script.includes(`const SOURCE_URL = "${expectedUrl}";`), "Acquisition script URL drifted from the pinned v0.2.0 source.");
+assert.ok(preflight.includes('source.snapshot.immutableReference.sha !== "ad28a69"'), "Acquisition preflight must pin the immutable commit.");
+assert.ok(preflight.includes('source.snapshot.immutableReference.sourceBlobSha !== "cefab0f4b622e2e7fb3daf68d4f461f83991204c"'), "Acquisition preflight must pin the source blob SHA.");
+
+assert.ok(script.includes(`const SOURCE_URL = "${expectedUrl}";`), "Acquisition script URL drifted from the pinned v0.2.0 source.");
 assert.ok(script.includes(`const SOURCE_ID = "${expectedSourceId}";`), "Acquisition script source ID drifted.");
 assert.ok(script.includes(`const SOURCE_BLOB_SHA = "${expectedBlobSha}";`), "Acquisition script immutable source blob SHA drifted.");
 assert.ok(script.includes('const ACQUISITION_MANIFEST = path.resolve("data/gis/1326/acquisition-manifest.json");'), "Acquisition must update the tracked 1326 acquisition manifest.");
