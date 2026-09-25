@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "bridge-reference-only",
+  "promotion": "BLOCKED",
+  "policy": {
+    "automaticReviewMatching": false,
+    "geometryGeneration": false,
+    "controllerInference": false,
+    "canonicalPromotion": false
+  },
+  "reviewBindings": []
+}
