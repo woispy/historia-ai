@@ -39,6 +39,8 @@ async function run(packet, expected) {
 }
 await run(report, true);
 await run({ ...report, candidatePacketSha256: sha }, false);
+const inputDrift = { ...report, source: { ...report.source, inputSha256: "f".repeat(64) } };
+await run(inputDrift, false);
 const duplicate = { ...report, candidates: [candidate, { ...candidate, sourceFeatureIndex: 7, sourceFeatureId: "feature-7b" }] };
 await run({ ...duplicate, candidatePacketSha256: crypto.createHash("sha256").update(JSON.stringify(duplicate.candidates)).digest("hex") }, false);
 assert.equal(matrix.scenarioDate, "1326-04-07");
