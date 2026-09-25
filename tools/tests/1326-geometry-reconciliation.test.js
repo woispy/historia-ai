@@ -59,15 +59,15 @@ const reconciliation = {
 await fs.writeFile(screening, JSON.stringify(screen));
 await fs.writeFile(reconciliation, JSON.stringify(reconciliation));
 
-function run(args) {
+function run(script, args) {
   return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, ["tools/historical-gis/cli/prepare-1326-geometry-reconciliation.js", ...args], { cwd: root, stdio: "inherit" });
+    const child = spawn(process.execPath, [script, ...args], { cwd: root, stdio: "inherit" });
     child.on("error", reject);
     child.on("exit", code => code === 0 ? resolve() : reject(new Error(`exit ${code}`)));
   });
 }
-await run(["--screening", screening, "--reconciliation", reconciliation, "--output", output]);
-await run(["tools/historical-gis/cli/validate-1326-geometry-reconciliation.js", "--input", output]);
+await run("tools/historical-gis/cli/prepare-1326-geometry-reconciliation.js", ["--screening", screening, "--reconciliation", reconciliation, "--output", output]);
+await run("tools/historical-gis/cli/validate-1326-geometry-reconciliation.js", ["--input", output]);
 
 const report = JSON.parse(await fs.readFile(output, "utf8"));
 assert.equal(report.scenarioDate, "1326-04-07");
