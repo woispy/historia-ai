@@ -60,8 +60,9 @@ for (const entity of reconciliation.results ?? []) {
 
 const reviewQueue = (screening.candidates ?? []).map(candidate => {
   const entityMatches = reconciliationIndex.get(candidate.sourceFeatureIndex) ?? [];
+  const candidateRecordSha256 = sha256(candidate);
   return {
-    reviewId: `cliopatria-1326-feature-${candidate.sourceFeatureIndex}-${sha256(candidate).slice(0, 16)}`,
+    reviewId: `cliopatria-1326-feature-${candidate.sourceFeatureIndex}-${candidateRecordSha256.slice(0, 16)}`,
     sourceFeatureIndex: candidate.sourceFeatureIndex,
     sourceFeatureId: candidate.sourceFeatureId,
     name: candidate.name,
@@ -88,7 +89,8 @@ const reviewQueue = (screening.candidates ?? []).map(candidate => {
       mutationPolicy: "immutable-source-evidence"
     },
     sourceEvidence: {
-      candidatePacketSha256: sha256(candidate),
+      candidateRecordSha256,
+      candidatePacketSha256: candidateRecordSha256,
       reviewIdDerivation: "cliopatria-1326-feature-${sourceFeatureIndex}-${candidatePacketSha256.slice(0,16)}",
       sourceFeatureIndex: candidate.sourceFeatureIndex,
       sourceFeatureId: candidate.sourceFeatureId
