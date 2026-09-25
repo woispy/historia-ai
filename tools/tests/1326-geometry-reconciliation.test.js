@@ -27,12 +27,14 @@ function bbox(geometry) {
   walk(geometry.coordinates);
   return [Math.min(...values.filter((_, i) => i % 2 === 0)), Math.min(...values.filter((_, i) => i % 2 === 1)), Math.max(...values.filter((_, i) => i % 2 === 0)), Math.max(...values.filter((_, i) => i % 2 === 1))];
 }
+const candidatePacketSha256 = crypto.createHash("sha256").update(JSON.stringify(candidates.candidates)).digest("hex");
 const near = candidates.candidates[0];
 const b = bbox(near.geometry);
 const anchor = anchors.anchors[0];
 const screen = {
   schemaVersion: 1,
   scenarioDate: "1326-04-07",
+  candidatePacketSha256,
   source: { sourceId: "cliopatria-v0.2.0", sourceTag: "v0.2.0", extractedGeojsonSha256: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef", inputSha256: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" },
   screening: { notGeometryAuthority: true, noSyntheticGeometry: true },
   promotion: "BLOCKED",
@@ -49,6 +51,7 @@ const reconciliation = {
   schemaVersion: 1,
   scenarioDate: "1326-04-07",
   sourceId: "cliopatria-v0.2.0",
+  candidatePacketSha256,
   sourceProvenance: { extractedGeojsonSha256: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" },
   promotion: "BLOCKED",
   results: [{
@@ -84,14 +87,17 @@ assert.equal(report.counts.entityLinkedCandidates, 1);
 assert.equal(report.reviewQueue[0].reviewStatus, "pending");
 assert.equal(
   report.reviewQueue[0].reviewId,
-  `cliopatria-1326-feature-${near.sourceFeatureIndex}-${report.reviewQueue[0].sourceEvidence.candidatePacketSha256.slice(0, 16)}`
+  `cliopatria-1326-feature-${near.sourceFeatureIndex}-${report.reviewQueue[0].sourceEvidence.candidateRecordSha256.slice(0, 16)}`
 );
 assert.equal(
+  report.reviewQueue[0].sourceEvidence.candidateRecordSha256,
+  report.reviewQueue[0].sourceEvidence.candidatePacketSha256,
   report.reviewQueue[0].sourceEvidence.reviewIdDerivation,
   "cliopatria-1326-feature-${sourceFeatureIndex}-${candidatePacketSha256.slice(0,16)}"
 );
 assert.equal(report.reviewQueue[0].reviewedGeometry, null);
 assert.equal(report.reviewQueue[0].sourceGeometry.immutable, true);
+assert.equal(report.reviewQueue[0].sourceEvidence.candidateRecordSha256, report.reviewQueue[0].sourceEvidence.candidatePacketSha256);
 assert.equal(report.reviewQueue[0].sourceGeometry.mutationPolicy, "immutable-source-evidence");
 assert.deepEqual(report.reviewQueue[0].sourceGeometry.geometry, near.geometry);
 assert.match(report.reviewQueue[0].sourceGeometry.sha256, /^[0-9a-f]{64}$/);
