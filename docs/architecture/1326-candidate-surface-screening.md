@@ -490,3 +490,19 @@ A dedicated runtime fixture now exercises the full pre-review chain without down
 The contract asserts that the resulting candidate packet reaches the geometry reconciliation queue with matching `candidatePacketSha256`, exactly one pending review item, `reviewedGeometry: null`, and `promotion: BLOCKED`. The fixture is synthetic test evidence only; it does not alter the production acquisition manifest or claim that the real Cliopatria bytes have been acquired.
 
 Registered command: `npm run test:1326-cliopatria-integrated-pipeline-runtime`.
+
+
+### Acquisition operational gate
+
+The acquisition preflight now pins the expected source file name (`cliopatria.geojson.zip`) and, once acquired, the expected retained artifact path. This prevents a valid-looking acquisition record from silently pointing to a different artifact location.
+
+The preflight remains non-destructive: it does not download bytes and does not mutate the acquisition manifest. The operational sequence remains:
+
+    validate:1326-cliopatria-operational-gate
+      → acquire:1326-cliopatria (only when snapshot is still reference-pinned-not-acquired)
+      → verify:1326-cliopatria
+      → prepare:1326-cliopatria-extraction-input
+      → validate:1326-cliopatria-extraction-input
+      → validate:1326-cliopatria-candidate-pipeline
+
+No step in this sequence promotes candidate geometry to canonical authority.
