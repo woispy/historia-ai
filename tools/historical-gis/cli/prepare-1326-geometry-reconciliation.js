@@ -56,7 +56,7 @@ for (const entity of reconciliation.results ?? []) {
 const reviewQueue = (screening.candidates ?? []).map(candidate => {
   const entityMatches = reconciliationIndex.get(candidate.sourceFeatureIndex) ?? [];
   return {
-    reviewId: `cliopatria-1326-feature-${candidate.sourceFeatureIndex}`,
+    reviewId: `cliopatria-1326-feature-${candidate.sourceFeatureIndex}-${sha256(candidate).slice(0, 16)}`,
     sourceFeatureIndex: candidate.sourceFeatureIndex,
     sourceFeatureId: candidate.sourceFeatureId,
     name: candidate.name,
@@ -84,6 +84,7 @@ const reviewQueue = (screening.candidates ?? []).map(candidate => {
     },
     sourceEvidence: {
       candidatePacketSha256: sha256(candidate),
+      reviewIdDerivation: "cliopatria-1326-feature-${sourceFeatureIndex}-${candidatePacketSha256.slice(0,16)}",
       sourceFeatureIndex: candidate.sourceFeatureIndex,
       sourceFeatureId: candidate.sourceFeatureId
     },
