@@ -158,7 +158,73 @@ try {
   assert.equal(queue.promotion, "BLOCKED");
   assert.equal(queue.candidatePacketSha256, candidates.candidatePacketSha256);
   assert.equal(queue.reviewQueue[0].reviewStatus, "pending");
-  assert.equal(queue.reviewQueue[0].reviewedGeometry, null);\n\n  const extractionRecord = JSON.parse(await fs.readFile(extractionInputPath, "utf8"));\n  extractionRecord.member.sha256 = "0".repeat(64);\n  const tamperedExtractionPath = path.join(temp, "tampered-extraction-input.json");\n  await fs.writeFile(tamperedExtractionPath, JSON.stringify(extractionRecord, null, 2));\n  await runNode(pipeline, [\n    "--extraction-input", tamperedExtractionPath,\n    "--anchors", anchors,\n    "--output-dir", path.join(temp, "tampered-pipeline-output")\n  ], true);\n\n  const tamperedCandidate = JSON.parse(JSON.stringify(candidates));\n  tamperedCandidate.candidates[0].name = "Tampered Candidate";\n  const tamperedCandidatePath = path.join(temp, "tampered-candidates.json");\n  await fs.writeFile(tamperedCandidatePath, JSON.stringify(tamperedCandidate, null, 2));\n  const operationalState = path.join(root, "tools/historical-gis/cli/validate-1326-cliopatria-operational-state.js");\n  await runNode(operationalState, [\n    "--manifest", manifestPath,\n    "--acquisition", acquisitionPath,\n    "--extraction-input", extractionInputPath,\n    "--candidates", tamperedCandidatePath,\n    "--require-candidate-ready", "true"\n  ], true);\n\n  console.log("1326 integrated acquisition-to-T3-B runtime contract passed.");
+  assert.equal(queue.reviewQueue[0].reviewedGeometry, null);
+
+  const ledgerPath = path.join(outputDir, "1326-geometry-review-ledger.json");
+  await runNode(path.join(root, "tools/historical-gis/cli/prepare-1326-geometry-review-ledger.js"), [
+    "--input", path.join(outputDir, "1326-geometry-reconciliation-queue.json"),
+    "--output", ledgerPath
+  ]);
+  await runNode(path.join(root, "tools/historical-gis/cli/validate-1326-geometry-review-ledger.js"), [
+    "--input", ledgerPath,
+    "--queue", path.join(outputDir, "1326-geometry-reconciliation-queue.json")
+  ]);
+  const ledger = JSON.parse(await fs.readFile(ledgerPath, "utf8"));
+  assert.equal(ledger.records.length, 1);
+  assert.equal(ledger.records[0].reviewId, queue.reviewQueue[0].reviewId);
+  assert.equal(ledger.records[0].provenance.candidatePacketSha256, candidates.candidatePacketSha256);
+  assert.equal(ledger.records[0].provenance.candidateRecordSha256, queue.reviewQueue[0].sourceEvidence.candidateRecordSha256);
+
+  const mappingPath = path.join(outputDir, "1326-edge-evidence-mapping.json");
+  const bindingOutput = path.join(outputDir, "1326-edge-evidence-bindings.json");
+  const bridgeOutput = path.join(outputDir, "1326-edge-evidence-bridge.json");
+  const evidencePath = path.join(root, "data/gis/1326/pilot-edge-evidence/bithynia-core-01.json");
+  const mapping = {
+    schemaVersion: 1,
+    scenarioDate: "1326-04-07",
+    authorityStatus: "explicit-binding-input",
+    promotion: "BLOCKED",
+    policy: { automaticReviewMatching: false, geometryGeneration: false, controllerInference: false, canonicalPromotion: false },
+    reviewBindings: [{
+      reviewId: queue.reviewQueue[0].reviewId,
+      edgeEvidenceIds: ["bursa-nicaea-frontier-1326", "nicaea-sangarius-corridor-1326"]
+    }]
+  };
+  await fs.writeFile(mappingPath, JSON.stringify(mapping, null, 2));
+  await runNode(path.join(root, "tools/historical-gis/cli/prepare-1326-edge-evidence-bindings.js"), [
+    "--ledger", ledgerPath,
+    "--mapping", mappingPath,
+    "--evidence", evidencePath,
+    "--output", bindingOutput
+  ]);
+  await runNode(path.join(root, "tools/historical-gis/cli/validate-1326-edge-evidence-bindings.js"), ["--input", bindingOutput]);
+  await runNode(path.join(root, "tools/historical-gis/cli/bridge-1326-edge-evidence.js"), [
+    "--ledger", ledgerPath,
+    "--evidence", evidencePath,
+    "--bindings", bindingOutput,
+    "--output", bridgeOutput
+  ]);
+  const bridge = JSON.parse(await fs.readFile(bridgeOutput, "utf8"));
+  assert.equal(bridge.bridge.boundReviewRecords, 1);
+  assert.equal(bridge.bridge.boundEdges, 2);
+  assert.equal(bridge.promotion, "BLOCKED");
+  assert.equal(bridge.records[0].reviewId, queue.reviewQueue[0].reviewId);
+  assert.equal(bridge.records[0].decision.status, "pending");
+  assert.equal(bridge.records[0].decision.reviewedGeometry, null);
+  assert.equal(bridge.records[0].provenance.candidatePacketSha256, candidates.candidatePacketSha256);
+  assert.equal(bridge.records[0].provenance.candidateRecordSha256, queue.reviewQueue[0].sourceEvidence.candidateRecordSha256);
+
+  await runNode(path.join(root, "tools/historical-gis/cli/validate-1326-t3b-pilot-readiness.js"), [
+    "--candidates", path.join(outputDir, "cliopatria-1326-candidates.json"),
+    "--screening", path.join(outputDir, "cliopatria-candidate-surface-screening.json"),
+    "--reconciliation", path.join(outputDir, "cliopatria-entity-reconciliation.json"),
+    "--review", path.join(outputDir, "1326-geometry-reconciliation-queue.json"),
+    "--ledger", ledgerPath,
+    "--bindings", bindingOutput,
+    "--evidence", evidencePath
+  ]);
+
+  const extractionRecord = JSON.parse(await fs.readFile(extractionInputPath, "utf8"));\n  extractionRecord.member.sha256 = "0".repeat(64);\n  const tamperedExtractionPath = path.join(temp, "tampered-extraction-input.json");\n  await fs.writeFile(tamperedExtractionPath, JSON.stringify(extractionRecord, null, 2));\n  await runNode(pipeline, [\n    "--extraction-input", tamperedExtractionPath,\n    "--anchors", anchors,\n    "--output-dir", path.join(temp, "tampered-pipeline-output")\n  ], true);\n\n  const tamperedCandidate = JSON.parse(JSON.stringify(candidates));\n  tamperedCandidate.candidates[0].name = "Tampered Candidate";\n  const tamperedCandidatePath = path.join(temp, "tampered-candidates.json");\n  await fs.writeFile(tamperedCandidatePath, JSON.stringify(tamperedCandidate, null, 2));\n  const operationalState = path.join(root, "tools/historical-gis/cli/validate-1326-cliopatria-operational-state.js");\n  await runNode(operationalState, [\n    "--manifest", manifestPath,\n    "--acquisition", acquisitionPath,\n    "--extraction-input", extractionInputPath,\n    "--candidates", tamperedCandidatePath,\n    "--require-candidate-ready", "true"\n  ], true);\n\n  console.log("1326 integrated acquisition-to-T3-B runtime contract passed.");
 } finally {
   await fs.rm(temp, { recursive: true, force: true });
 }
