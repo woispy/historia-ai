@@ -10,6 +10,7 @@ const pipeline = fs.readFileSync(path.join(root, "tools/historical-gis/cli/run-1
 assert.match(script, /candidatePacketSha256/);
 assert.match(script, /FromYear <= 1326 <= ToYear/);
 assert.match(script, /candidate-evidence-only/);
+assert.match(script, /inputFeatures !== counted \+ excludedTotal/);
 assert.match(extractor, /candidatePacketSha256/);
 assert.match(pipeline, /validate-1326-cliopatria-candidates\.js/);
 
