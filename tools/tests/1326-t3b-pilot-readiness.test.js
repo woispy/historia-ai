@@ -43,5 +43,7 @@ async function run(set, ok) {
 await run(reports,true);
 await run({...reports,bindings:{...reports.bindings,reviewBindings:[{reviewId:"review-bithynia-pilot-001",edgeEvidenceIds:["e1"]}]}},false);
 await run({...reports,ledger:{...reports.ledger,records:[{...reports.ledger.records[0],provenance:{...reports.ledger.records[0].provenance,candidatePacketSha256:"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"}}]}},false);
+await run({...reports,ledger:{...reports.ledger,records:[{...reports.ledger.records[0],provenance:{...reports.ledger.records[0].provenance,candidateRecordSha256:"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"}}]}},false);
+await run({...reports,review:{...reports.review,reviewQueue:[{...reports.review.reviewQueue[0],reviewId:"cliopatria-1326-feature-7-ffffffffffffffff"}]}},false);
 await run({...reports,bindings:{...reports.bindings,reviewBindings:[{reviewId,edgeEvidenceIds:["unknown-edge"]}]}},false);
 console.log("1326 T3-B pilot readiness gate contract passed.");
