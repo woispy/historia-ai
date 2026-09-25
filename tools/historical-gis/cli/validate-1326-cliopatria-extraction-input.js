@@ -19,6 +19,15 @@ assert(record.archive?.path, "Extraction input must retain archive path.");
 assert(/^[0-9a-f]{64}$/.test(record.archive.rawSha256 ?? ""), "Extraction input archive SHA-256 is invalid.");
 assert(Number.isInteger(record.archive.byteLength) && record.archive.byteLength > 0, "Extraction input archive byte length is invalid.");
 assert(record.archive.acquisitionRecord, "Extraction input must retain its acquisition record path.");
+const acquisitionPath = path.resolve(root, record.archive.acquisitionRecord);
+assert(fs.existsSync(acquisitionPath), "Extraction input acquisition record is missing.");
+const acquisition = JSON.parse(fs.readFileSync(acquisitionPath, "utf8"));
+assert(acquisition.sourceId === record.sourceId, "Extraction input acquisition source identity drifted.");
+assert(acquisition.immutableReference?.sha === record.immutableReference?.sha, "Extraction input acquisition commit drifted.");
+assert(acquisition.immutableReference?.sourceBlobSha === record.immutableReference?.sourceBlobSha, "Extraction input acquisition source blob drifted.");
+assert(/^[0-9a-f]{64}$/.test(acquisition.rawSha256 ?? ""), "Acquisition record raw SHA-256 is invalid.");
+assert(acquisition.rawSha256 === record.archive.rawSha256, "Extraction input archive SHA differs from acquisition record.");
+assert(acquisition.byteLength === record.archive.byteLength, "Extraction input archive byte length differs from acquisition record.");
 assert(record.member?.format === "GeoJSON", "Extraction input member format must be GeoJSON.");
 assert(record.member?.featureCollectionValidated === true, "Extraction input must record FeatureCollection validation.");
 assert(typeof record.member.path === "string" && record.member.path.length > 0, "Extraction input member path is missing.");
@@ -28,6 +37,7 @@ assert(/^[0-9a-f]{64}$/.test(record.member.sha256 ?? ""), "Extraction input extr
 assert(record.extractionPolicy === "Exactly one .geojson archive member; cross-platform extraction; no inferred member selection.", "Extraction policy drifted.");
 assert(record.promotion === "BLOCKED_UNTIL_TEMPORAL_EXTRACTION_RECONCILIATION_REVIEW", "Extraction input must remain promotion-blocked.");
 
+assert(record.archive.path === acquisition.retainedArtifact, "Extraction input archive path differs from the retained acquisition artifact.");
 const extractedPath = path.resolve(root, record.member.extractedPath);
 const extracted = fs.readFileSync(extractedPath);
 assert(sha256(extracted) === record.member.sha256, "Extracted GeoJSON SHA-256 does not match the extraction input record.");
