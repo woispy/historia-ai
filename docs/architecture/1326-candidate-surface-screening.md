@@ -518,3 +518,9 @@ Run: npm run validate:1326-cliopatria-operational-state
 The gate rejects downstream artifacts while the manifest is still reference-pinned, requires retained-byte SHA/length verification before extraction, requires verified extraction provenance before candidate readiness, independently recomputes the candidate packet SHA, and keeps promotion BLOCKED at every state. The production manifest may therefore remain reference-pinned-not-acquired until the real snapshot is intentionally acquired.
 
 Extraction preparation also accepts --extract-dir, allowing runtime fixtures to isolate their extracted member directory instead of deleting a pre-existing production extraction directory.
+
+### Operational state gate binding
+
+The integrated Cliopatria candidate pipeline now invokes the operational state gate before temporal extraction and again after candidate packet creation. When an extraction-input record is supplied without an explicit acquisition argument, the pipeline derives the acquisition record path from the extraction input's retained acquisition provenance. This prevents the pipeline from bypassing acquisition verification while keeping the acquisition record as the single provenance source.
+
+The final pipeline state check requires CANDIDATE_READY before the T3-B geometry review queue handoff. Missing acquisition, missing extraction, or candidate packet provenance drift therefore fails the integrated command before it can report a successful T3-B handoff.
