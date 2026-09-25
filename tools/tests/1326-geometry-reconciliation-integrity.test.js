@@ -48,7 +48,6 @@ const mutatedGeometry = { type: "Polygon", coordinates: [[[29,40],[29.2,40],[29.
 await runCase("geometry-mutated", makeReport(mutatedGeometry, geometrySha), false);
 await runCase("geometry-hash-mutated", makeReport(geometry, "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"), false);
 const packetDrift = makeReport();
-packetDrift.sourceEvidence = undefined;
 packetDrift.reviewQueue[0].sourceEvidence.candidatePacketSha256 = recordSha;
 await runCase("packet-provenance-drift", packetDrift, false);
 
