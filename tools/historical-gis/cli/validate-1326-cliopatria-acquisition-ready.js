@@ -12,6 +12,8 @@ if (source.snapshot.immutableReference.sha !== "ad28a69") throw new Error("Cliop
 if (source.snapshot.immutableReference.sourceBlobSha !== "cefab0f4b622e2e7fb3daf68d4f461f83991204c") throw new Error("Cliopatria source blob reference drifted.");
 if (source.snapshot.sourceTag !== "v0.2.0") throw new Error("Cliopatria source tag drifted.");
 if (source.url !== "https://github.com/Seshat-Global-History-Databank/cliopatria/releases/tag/v0.2.0") throw new Error("Cliopatria release URL drifted.");
+if (source.snapshot.sourceFile !== "cliopatria.geojson.zip") throw new Error("Cliopatria source file drifted.");
+if (source.snapshot.status === "acquired" && source.snapshot.retainedArtifact !== "data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip") throw new Error("Cliopatria retained artifact path drifted.");
 if (source.snapshot.status === "reference-pinned-not-acquired") {
   if (source.snapshot.rawSha256 !== null || source.snapshot.retainedArtifact !== null) throw new Error("Unacquired snapshot must not claim retained bytes.");
 } else if (source.snapshot.status === "acquired") {
