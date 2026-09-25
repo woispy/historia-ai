@@ -26,6 +26,9 @@ const matrix = JSON.parse(await fs.readFile(matrixPath, "utf8"));
 
 if (candidates.scenarioDate !== SCENARIO_DATE) throw new Error("Candidate scenario date mismatch.");
 if (candidates.source?.sourceId !== SOURCE_ID) throw new Error("Candidate source identity mismatch.");
+if (!/^[0-9a-f]{64}$/.test(candidates.source?.extractedGeojsonSha256 ?? "")) {
+  throw new Error("Candidate report must carry the verified extracted GeoJSON SHA-256.");
+}
 if (matrix.scenarioDate !== SCENARIO_DATE || matrix.authorityStatus !== "evidence-only") {
   throw new Error("1326 evidence matrix is not in the expected evidence-only state.");
 }
@@ -73,6 +76,12 @@ const report = {
   schemaVersion: 1,
   scenarioDate: SCENARIO_DATE,
   sourceId: SOURCE_ID,
+  sourceProvenance: {
+    sourceTag: candidates.source.sourceTag,
+    immutableReference: candidates.source.immutableReference,
+    extractedGeojsonSha256: candidates.source.extractedGeojsonSha256,
+    inputSha256: candidates.source.inputSha256
+  },
   reconciliationPolicy: {
     exactExternalId: "candidate-only",
     exactName: "candidate-only",
