@@ -543,3 +543,9 @@ The pilot-readiness runtime contract now exercises the review-side identity boun
 - a binding references an unknown pilot evidence edge.
 
 This keeps the review identity chain fail-closed at the point where candidate-derived identity becomes ledger and explicit binding identity. The test remains synthetic and does not create production review bindings.
+
+### Acquisition → T3-B → review/edge bridge end-to-end runtime contract
+
+The synthetic acquisition runtime contract now continues past the geometry reconciliation queue into the research-review boundary. After the verified archive → extraction → candidate pipeline handoff, the fixture prepares and queue-validates the geometry review ledger, creates an explicit candidate-bound edge-evidence mapping against the pilot evidence registry, validates the generated bridge bindings, runs the evidence-reference bridge, and finally runs the T3-B pilot-readiness gate with the generated artifacts.
+
+The contract asserts that the generated review ID and both provenance hashes remain identical from the geometry review queue through the ledger and bridge, that bound edge evidence is attached only through explicit IDs, and that reviewedGeometry remains null and promotion remains BLOCKED. This is synthetic runtime evidence only; it does not acquire real Cliopatria bytes or create a production canonical binding.
