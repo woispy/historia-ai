@@ -173,3 +173,18 @@ The contract test is:
     npm run test:1326-geometry-reconciliation
 
 This creates the missing bridge between **T3-B candidate surface screening** and the future human/research-backed **geometry reconciliation** stage without prematurely opening canonical geometry authority.
+
+
+## T3-B Geometry Review Ledger
+
+The review queue is now convertible into a dedicated research ledger:
+
+    npm run prepare:1326-geometry-review-ledger -- --input <geometry-reconciliation-queue>
+
+The ledger separates four confidence axes:
+
+    existence / controller / boundary / geometry
+
+It also records temporal applicability, boundary evidence, physical constraints, topology state, source provenance, and an explicit review decision. Initial records are always `pending`; boundary evidence starts `uncertain`; topology starts `not-run`; reviewed geometry remains `null`; and promotion remains `BLOCKED`.
+
+This ledger is a **review evidence contract**, not a geometry generator. A controller match or source polygon cannot populate canonical geometry by itself. The existing 1326 registry requirement remains unchanged: temporal, entity, geometry, topology, provenance, confidence, and historical review gates must all pass before canonical promotion.
