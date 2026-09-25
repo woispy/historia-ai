@@ -23,6 +23,7 @@ function sha256(value) {
 function assertScreening(report) {
   if (report?.scenarioDate !== SCENARIO_DATE) throw new Error("Screening scenario date mismatch.");
   if (report?.source?.sourceId !== SOURCE_ID) throw new Error("Screening source identity mismatch.");
+  if (!/^[0-9a-f]{64}$/.test(report?.source?.extractedGeojsonSha256 ?? "")) throw new Error("Screening must carry extracted GeoJSON SHA-256.");
   if (report?.promotion !== "BLOCKED") throw new Error("Screening must remain promotion-blocked.");
   if (report?.screening?.notGeometryAuthority !== true) throw new Error("Screening must remain non-authoritative.");
   if (report?.screening?.noSyntheticGeometry !== true) throw new Error("Screening must remain synthetic-geometry-free.");
