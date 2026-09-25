@@ -27,11 +27,14 @@ if (report.promotion !== "BLOCKED") throw new Error("Ledger promotion must remai
 if (!Array.isArray(report.records)) throw new Error("records[] is required.");
 
 let edgeCount = 0;
+let packetHash = null;
 for (const record of report.records) {
   if (!record.reviewId) throw new Error("reviewId is required.");
   if (record.provenance?.sourceId !== SOURCE_ID) throw new Error(`Source identity mismatch: ${record.reviewId}`);
   if (!/^[0-9a-f]{64}$/.test(record.provenance?.candidatePacketSha256 ?? "")) throw new Error(`Candidate packet hash missing or invalid: ${record.reviewId}`);
   if (!/^[0-9a-f]{64}$/.test(record.provenance?.candidateRecordSha256 ?? "")) throw new Error(`Candidate record hash missing or invalid: ${record.reviewId}`);
+  if (packetHash === null) packetHash = record.provenance.candidatePacketSha256;
+  if (record.provenance.candidatePacketSha256 !== packetHash) throw new Error(`Candidate packet hash drift across ledger records: ${record.reviewId}`);
   const expectedReviewId = `cliopatria-1326-feature-${record.sourceFeatureIndex}-${record.provenance.candidateRecordSha256.slice(0, 16)}`;
   if (record.reviewId !== expectedReviewId) throw new Error(`Review ID is not bound to candidate record identity: ${record.reviewId}`);
   const edges = record.edgeAssessments;
