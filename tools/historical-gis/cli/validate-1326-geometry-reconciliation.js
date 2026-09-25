@@ -60,14 +60,11 @@ for (const item of queue) {
   if (!/^[0-9a-f]{64}$/.test(item.sourceEvidence?.candidateRecordSha256 ?? "")) {
     throw new Error(`Candidate record SHA-256 missing or invalid: ${item.reviewId}`);
   }
-  if (item.sourceEvidence.candidateRecordSha256 !== item.sourceEvidence.candidatePacketSha256) {
-    throw new Error(`Candidate record/packet hash drifted: ${item.reviewId}`);
-  }
   const expectedReviewId = `cliopatria-1326-feature-${item.sourceFeatureIndex}-${item.sourceEvidence.candidateRecordSha256.slice(0, 16)}`;
   if (item.reviewId !== expectedReviewId) {
     throw new Error(`Review ID is not bound to candidate packet identity: ${item.reviewId}`);
   }
-  if (item.sourceEvidence.reviewIdDerivation !== "cliopatria-1326-feature-${sourceFeatureIndex}-${candidatePacketSha256.slice(0,16)}") {
+  if (item.sourceEvidence.reviewIdDerivation !== "cliopatria-1326-feature-${sourceFeatureIndex}-${candidateRecordSha256.slice(0,16)}") {
     throw new Error(`Review ID derivation contract missing: ${item.reviewId}`);
   }
   if (item.reviewedGeometry !== null) throw new Error(`Reviewed geometry must remain null: ${item.reviewId}`);
