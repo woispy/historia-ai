@@ -377,3 +377,13 @@ This closes the runtime lineage:
 
 A mismatch is fatal. The hash is an integrity/provenance mechanism only; it does not make candidate geometry authoritative or permit canonical promotion.
 
+
+### T3-B end-to-end provenance lineage gate
+
+A dedicated lineage validator now checks the complete evidence chain without promoting geometry:
+
+`candidate packet → screening → entity reconciliation → geometry review queue`
+
+The gate independently recomputes the candidate packet SHA, requires extracted GeoJSON SHA continuity, binds screening and review records by `sourceFeatureIndex/sourceFeatureId`, verifies source geometry identity continuity, and verifies the candidate-record-derived review ID. Packet drift, geometry drift, or reconciliation identity drift is fatal.
+
+The validator is evidence-integrity only. `promotion` remains `BLOCKED`, and no geometry generation, controller inference, or canonical promotion is performed.
