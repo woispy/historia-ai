@@ -343,3 +343,14 @@ The integrated candidate pipeline executes this validator before entity reconcil
 
 The packet hash is then propagated into reconciliation, screening, and geometry review preparation. Cross-stage packet-hash mismatches are fatal. This makes the candidate packet itself an immutable provenance boundary rather than relying only on the underlying source hash.
 
+
+### Candidate exclusion accounting gate
+
+Candidate extraction is now required to account for every input feature exactly once:
+
+`inputFeatures = candidates + outsideTemporalRange + nonPolity + missingGeometry`
+
+The independent validator also rejects duplicate `sourceFeatureIndex` values and duplicate non-null `sourceFeatureId` values. This prevents silent feature loss and identity collapse between temporal extraction and downstream review.
+
+This remains an evidence-layer integrity gate only; it does not make source geometry authoritative and does not permit canonical promotion.
+
