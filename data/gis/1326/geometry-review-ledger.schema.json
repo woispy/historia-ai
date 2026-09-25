@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Historia AI 1326 Geometry Review Ledger",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "scenarioDate", "authorityStatus", "promotion", "records"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "scenarioDate": { "const": "1326-04-07" },
+    "authorityStatus": { "const": "review-ledger-only" },
+    "promotion": { "const": "BLOCKED" },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reviewId",
+          "sourceFeatureIndex",
+          "entityIdentity",
+          "temporalEvidence",
+          "boundaryEvidence",
+          "physicalConstraints",
+          "topologyGate",
+          "provenance",
+          "confidence",
+          "decision"
+        ],
+        "properties": {
+          "reviewId": { "type": "string", "minLength": 1 },
+          "sourceFeatureIndex": { "type": "integer", "minimum": 0 },
+          "entityIdentity": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["status", "entityIds"],
+            "properties": {
+              "status": { "enum": ["unmatched", "single-match", "multiple-matches", "reviewed"] },
+              "entityIds": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "temporalEvidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["scenarioDate", "applicability", "sourceRefs"],
+            "properties": {
+              "scenarioDate": { "const": "1326-04-07" },
+              "applicability": { "enum": ["supported", "uncertain", "unsupported"] },
+              "sourceRefs": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "boundaryEvidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["status", "sourceRefs"],
+            "properties": {
+              "status": { "enum": ["supported", "partial", "uncertain", "unsupported"] },
+              "sourceRefs": { "type": "array", "items": { "type": "string" } },
+              "edgeNotes": { "type": "string" }
+            }
+          },
+          "physicalConstraints": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["status"],
+            "properties": {
+              "status": { "enum": ["not-applicable", "compatible", "conflict", "uncertain"] },
+              "sourceRefs": { "type": "array", "items": { "type": "string" } },
+              "notes": { "type": "string" }
+            }
+          },
+          "topologyGate": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["status"],
+            "properties": {
+              "status": { "enum": ["not-run", "pass", "fail"] },
+              "checks": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "provenance": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["sourceId", "candidatePacketSha256"],
+            "properties": {
+              "sourceId": { "const": "cliopatria-v0.2.0" },
+              "candidatePacketSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+              "reviewer": { "type": "string" },
+              "reviewedAt": { "type": "string" }
+            }
+          },
+          "confidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["existence", "controller", "boundary", "geometry"],
+            "properties": {
+              "existence": { "type": "number", "minimum": 0, "maximum": 1 },
+              "controller": { "type": "number", "minimum": 0, "maximum": 1 },
+              "boundary": { "type": "number", "minimum": 0, "maximum": 1 },
+              "geometry": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          },
+          "decision": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["status", "reviewedGeometry"],
+            "properties": {
+              "status": { "enum": ["pending", "reviewed", "rejected"] },
+              "reviewedGeometry": { "type": ["object", "null"] },
+              "reason": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
