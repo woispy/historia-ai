@@ -211,3 +211,39 @@ Confidence is deliberately split into `existence`, `controller`, `frontier`, `ex
 The first pilot edge registry is stored separately from the review ledger at `data/gis/1326/pilot-edge-evidence/bithynia-core-01.json`. It records evidence relationships only; it does not generate geometry or infer controller ownership.
 
 The pilot deliberately distinguishes Bursa–Nicaea frontier evidence from regional proximity, Nicaea–Sangarius river/corridor evidence, the Lefke route corridor, and the Nicomedia–Nicaea network relationship. Where the source describes a relationship as physical accessibility, the registry does not promote it to political control. Where exact boundary evidence is weak, the edge remains uncertain rather than being converted into a hard boundary.
+
+### Edge evidence-reference bridge
+
+The pilot edge registry is intentionally kept separate from the Geometry Review Ledger. A controlled bridge is now available through:
+
+    npm run bridge:1326-edge-evidence -- --ledger <review-ledger> --evidence <pilot-edge-evidence> --bindings <explicit-bindings>
+
+The bridge requires an explicit reviewId -> edgeEvidenceIds[] binding. It never matches records by proximity, entity name, coordinates, or controller. This is important because the pilot registry contains relationship evidence while the review ledger contains candidate-specific review records; silently joining the two would turn an evidence relationship into an implicit historical inference.
+
+The bridge performs a reference-copy only:
+
+- copies the selected edge ID, type, status, confidence, evidence references, and notes;
+- preserves the review record's existing decision and reviewedGeometry;
+- rejects unknown review IDs or unknown evidence edge IDs;
+- rejects duplicate edge IDs within a review record;
+- keeps geometryGeneration = false;
+- keeps controllerInference = false;
+- keeps canonicalPromotion = false;
+- keeps ledger authorityStatus = review-ledger-only;
+- keeps promotion = BLOCKED.
+
+The binding contract is stored at:
+
+    data/gis/1326/edge-evidence-bridge.schema.json
+
+No real Bithynia review binding is asserted yet because the currently verified repository state does not contain an acquired Cliopatria candidate set with stable candidate-specific review IDs. The pilot evidence registry therefore remains a standalone evidence reference until a real review queue supplies those IDs.
+
+A deterministic contract test covers the bridge:
+
+    npm run test:1326-edge-evidence-bridge
+
+The test binds three pilot edges to a synthetic review record, validates the resulting ledger, and verifies that no reviewed geometry or promotion state changes.
+
+### Schema integrity correction
+
+The Geometry Review Ledger implementation and validator use schemaVersion = 2. The JSON Schema contract had a stale top-level schemaVersion constant of 1 while the document root declared schemaVersion = 2. That contradiction is now corrected so the schema contract matches the generator and validator.
