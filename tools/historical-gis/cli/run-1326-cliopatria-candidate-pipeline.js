@@ -49,6 +49,10 @@ await run("tools/historical-gis/cli/extract-1326-cliopatria-candidates.js", [
   "--output", candidateOutput,
 ]);
 
+await run("tools/historical-gis/cli/validate-1326-cliopatria-candidates.js", [
+  "--input", candidateOutput,
+]);
+
 await run("tools/historical-gis/cli/reconcile-1326-cliopatria-entities.js", [
   "--input", candidateOutput,
   "--output", reconciliationOutput,
