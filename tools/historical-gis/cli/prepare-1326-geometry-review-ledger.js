@@ -41,6 +41,7 @@ const records = (queue.reviewQueue ?? []).map(item => ({
     sourceRefs: [`cliopatria:${item.sourceFeatureIndex}`],
     edgeNotes: "Candidate geometry is evidence only; historical boundary authority is still pending review."
   },
+  edgeAssessments: [],
   physicalConstraints: {
     status: "uncertain",
     sourceRefs: [],
@@ -57,7 +58,8 @@ const records = (queue.reviewQueue ?? []).map(item => ({
   confidence: {
     existence: 0,
     controller: 0,
-    boundary: 0,
+    frontier: 0,
+    exactBoundary: 0,
     geometry: 0
   },
   decision: {
