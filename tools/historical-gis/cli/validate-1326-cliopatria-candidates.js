@@ -34,7 +34,15 @@ for (const key of ["outsideTemporalRange", "nonPolity", "missingGeometry"]) {
   if (!Number.isInteger(excluded[key]) || excluded[key] < 0) fail(`Invalid exclusion count: ${key}`);
 }
 
+const seenIndexes = new Set();
+const seenIds = new Set();
 for (const candidate of report.candidates) {
+  if (seenIndexes.has(candidate.sourceFeatureIndex)) fail(`Duplicate sourceFeatureIndex: ${candidate.sourceFeatureIndex}`);
+  seenIndexes.add(candidate.sourceFeatureIndex);
+  if (candidate.sourceFeatureId !== null) {
+    if (seenIds.has(candidate.sourceFeatureId)) fail(`Duplicate sourceFeatureId: ${candidate.sourceFeatureId}`);
+    seenIds.add(candidate.sourceFeatureId);
+  }
   if (!Number.isInteger(candidate.sourceFeatureIndex) || candidate.sourceFeatureIndex < 0) fail("Candidate sourceFeatureIndex must be a non-negative integer.");
   if (candidate.fromYear > 1326 || candidate.toYear < 1326) fail(`Candidate ${candidate.sourceFeatureIndex} violates temporal applicability.`);
   if (candidate.type !== "POLITY") fail(`Candidate ${candidate.sourceFeatureIndex} is not POLITY.`);
