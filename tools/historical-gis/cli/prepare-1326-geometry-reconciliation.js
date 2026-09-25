@@ -108,6 +108,10 @@ const report = {
   kind: "historical-1326-political-geometry-reconciliation-queue",
   scenarioDate: SCENARIO_DATE,
   source: screening.source,
+  sourceProvenance: {
+    extractedGeojsonSha256: screening.source.extractedGeojsonSha256,
+    inputSha256: screening.source.inputSha256
+  },
   authorityStatus: "candidate-review-only",
   policy: {
     purpose: "Prepare evidence packets for manual/research-backed geometry reconciliation without changing source geometry.",
