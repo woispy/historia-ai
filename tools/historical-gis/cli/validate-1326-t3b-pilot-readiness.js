@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import crypto from "node:crypto";
 
 const DATE = "1326-04-07";
 const SOURCE = "cliopatria-v0.2.0";
@@ -7,6 +8,7 @@ const arg = name => { const i = process.argv.indexOf(name); return i < 0 ? null 
 const required = name => { const v = arg(name); if (!v) throw new Error(`${name} <path> is required.`); return path.resolve(process.cwd(), v); };
 const read = async name => JSON.parse(await fs.readFile(required(name), "utf8"));
 const fail = message => { throw new Error(message); };
+const sha = value => crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");
 
 const candidates = await read("--candidates");
 const screening = await read("--screening");
@@ -33,12 +35,14 @@ if (evidence.policy?.geometryGeneration !== false || evidence.policy?.controller
 
 const packetSha = candidates.candidatePacketSha256;
 if (!/^[0-9a-f]{64}$/.test(packetSha ?? "")) fail("Candidate packet SHA is missing/invalid.");
+if (sha(candidates.candidates) !== packetSha) fail("Candidate packet SHA does not match the candidate array.");
 if (screening.candidatePacketSha256 !== packetSha || reconciliation.candidatePacketSha256 !== packetSha || review.candidatePacketSha256 !== packetSha) fail("Candidate packet SHA continuity failed.");
 
 const candidateByIndex = new Map(candidates.candidates.map(x => [x.sourceFeatureIndex, x]));
 const screenedByIndex = new Map(screening.candidates.map(x => [x.sourceFeatureIndex, x]));
 const reviewByIndex = new Map((review.reviewQueue ?? []).map(x => [x.sourceFeatureIndex, x]));
 if (candidateByIndex.size !== candidates.candidates.length) fail("Duplicate candidate sourceFeatureIndex.");
+if (ledger.records.length !== review.reviewQueue.length) fail("Ledger/review record count mismatch.");
 if (screenedByIndex.size !== screening.candidates.length) fail("Duplicate screened sourceFeatureIndex.");
 if (reviewByIndex.size !== review.reviewQueue.length) fail("Duplicate review sourceFeatureIndex.");
 
@@ -47,6 +51,7 @@ for (const [index, screened] of screenedByIndex) {
   const item = reviewByIndex.get(index);
   if (!source || !item) fail(`Broken candidate -> review identity at ${index}.`);
   if (screened.sourceFeatureId !== source.sourceFeatureId || item.sourceFeatureId !== screened.sourceFeatureId) fail(`Source identity drift at ${index}.`);
+  if (screened.sourceGeometrySha256 !== sha(source.geometry)) fail(`Screening geometry provenance drift at ${index}.`);
   if (item.reviewedGeometry !== null || item.reviewStatus !== "pending" || item.promotion !== "BLOCKED") fail(`Review item is not pending/blocked at ${index}.`);
   const recordSha = item.sourceEvidence?.candidateRecordSha256;
   if (!/^[0-9a-f]{64}$/.test(recordSha ?? "")) fail(`Candidate record SHA invalid at ${index}.`);
