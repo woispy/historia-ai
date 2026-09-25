@@ -40,6 +40,7 @@ const screen = {
   promotion: "BLOCKED",
   candidates: [{
     ...near,
+    sourceGeometrySha256: crypto.createHash("sha256").update(JSON.stringify(near.geometry)).digest("hex"),
     geometryBbox: b,
     geometryBboxCenter: [(b[0]+b[2])/2,(b[1]+b[3])/2],
     anchorHits: [{ anchorId: anchor.id, role: anchor.role, bboxDistanceKm: 0 }],
@@ -96,6 +97,7 @@ assert.equal(
 );
 assert.equal(report.reviewQueue[0].reviewedGeometry, null);
 assert.equal(report.reviewQueue[0].sourceGeometry.immutable, true);
+assert.equal(report.reviewQueue[0].sourceGeometry.screeningSourceGeometrySha256, report.reviewQueue[0].sourceGeometry.sha256);
 assert.equal(report.reviewQueue[0].sourceEvidence.candidateRecordSha256, report.reviewQueue[0].sourceEvidence.candidatePacketSha256);
 assert.equal(report.reviewQueue[0].sourceGeometry.mutationPolicy, "immutable-source-evidence");
 assert.deepEqual(report.reviewQueue[0].sourceGeometry.geometry, near.geometry);
