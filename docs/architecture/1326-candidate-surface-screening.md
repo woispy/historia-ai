@@ -141,7 +141,7 @@ The stage performs only evidence packaging:
 2. links source features to any entity-reconciliation matches;
 3. records temporal applicability and spatial anchor evidence;
 4. preserves the exact source geometry inside the evidence packet without mutation;
-5. records a SHA-256 identity for the source candidate packet;
+5. records both the complete candidate-packet SHA-256 and the per-candidate record SHA-256;
 6. creates a pending review record with explicit historical/physical/topological/provenance gates.
 
 The contract deliberately forbids:
@@ -250,11 +250,11 @@ The Geometry Review Ledger implementation and validator use schemaVersion = 2. T
 
 ### Candidate-bound review identity
 
-The geometry reconciliation queue now derives each review ID from the immutable candidate packet:
+The geometry reconciliation queue now derives each review ID from the immutable per-candidate record:
 
-    cliopatria-1326-feature-<sourceFeatureIndex>-<candidatePacketSha256[0:16]>
+    cliopatria-1326-feature-<sourceFeatureIndex>-<candidateRecordSha256[0:16]>
 
-This prevents a review record from silently referring to a different candidate after source content changes. The queue also records the derivation contract explicitly. The queue validator recomputes the expected review ID from the stored candidate packet SHA-256 and rejects mismatches.
+This prevents a review record from silently referring to a different candidate after source content changes. The queue also records the derivation contract explicitly. The queue validator binds the review item to the top-level candidate-packet SHA-256 and derives the review ID from the per-candidate record SHA-256. Reconciliation preparation independently checks that its candidateRecordSha256 matches the screened candidate before the review queue is created.
 
 This is an identity/provenance guard only. It does not establish historical ownership, political boundaries, or geometry authority.
 
