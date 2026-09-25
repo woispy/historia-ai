@@ -38,6 +38,13 @@ const outputDir = path.resolve(
   readArg("--output-dir", "data/build/gis/1326"),
 );
 
+const manifestPath = path.resolve(process.cwd(), readArg("--manifest", "data/gis/1326/acquisition-manifest.json"));
+const acquisitionPath = readArg("--acquisition") ? path.resolve(process.cwd(), readArg("--acquisition")) : null;
+const operationalStateArgs = ["--manifest", manifestPath, "--require-candidate-ready", "false"];
+if (acquisitionPath) operationalStateArgs.push("--acquisition", acquisitionPath);
+if (extractionInput) operationalStateArgs.push("--extraction-input", extractionInput);
+await run("tools/historical-gis/cli/validate-1326-cliopatria-operational-state.js", operationalStateArgs);
+
 await fs.mkdir(outputDir, { recursive: true });
 
 const candidateOutput = path.join(outputDir, "cliopatria-1326-candidates.json");
@@ -79,6 +86,14 @@ await run("tools/historical-gis/cli/prepare-1326-geometry-reconciliation.js", [
 await run("tools/historical-gis/cli/validate-1326-geometry-reconciliation.js", [
   "--input", geometryQueueOutput,
 ]);
+
+await run("tools/historical-gis/cli/validate-1326-cliopatria-operational-state.js", [
+  "--manifest", manifestPath,
+  ...(acquisitionPath ? ["--acquisition", acquisitionPath] : []),
+  "--extraction-input", extractionInput ?? "",
+  "--candidates", candidateOutput,
+  "--require-candidate-ready", "true",
+].filter(value => value !== ""));
 
 const [candidates, reconciliation, screening, geometryQueue] = await Promise.all([
   fs.readFile(candidateOutput, "utf8").then(JSON.parse),
