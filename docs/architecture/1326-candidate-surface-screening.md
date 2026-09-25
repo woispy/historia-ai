@@ -280,3 +280,25 @@ The 1326 acquisition manifest validator now accepts both lifecycle states: `refe
 
 This keeps the intake validator usable before and after the first real source download instead of making successful acquisition itself look like a contract failure.
 
+
+### Verified archive → extraction input gate
+
+The Cliopatria acquisition chain now has an explicit extraction-input artifact between the retained ZIP and temporal candidate extraction.
+
+`prepare:1326-cliopatria-extraction-input`:
+- verifies the retained archive SHA-256 and byte length against the acquisition record;
+- requires the pinned immutable source reference;
+- inspects the archive and requires exactly one `.geojson` member;
+- extracts that member;
+- parses it as a GeoJSON FeatureCollection;
+- records the extracted member SHA-256;
+- remains promotion-blocked.
+
+Candidate extraction can consume this record with `--extraction-input`. The extractor re-hashes the extracted GeoJSON before processing, so a changed extraction file cannot silently enter the candidate pipeline.
+
+This gate binds:
+
+    immutable source snapshot → archive bytes → selected archive member → extracted GeoJSON → candidate report
+
+without treating acquisition or extraction as historical geometry authority.
+
