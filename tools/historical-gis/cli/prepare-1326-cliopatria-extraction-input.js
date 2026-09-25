@@ -139,36 +139,3 @@ try {
   await fs.rm(tempDir, { recursive: true, force: true });
 }
 
-const record = {
-  schemaVersion: 1,
-  sourceId: SOURCE_ID,
-  scenarioDate: SCENARIO_DATE,
-  archive: {
-    path: archivePath.replace(/\\/g, "/"),
-    rawSha256: archiveSha,
-    byteLength: archive.length,
-    acquisitionRecord: acquisitionPath.replace(/\\/g, "/")
-  },
-  member: {
-    path: member,
-    extractedPath: extractedPath.replace(/\\/g, "/"),
-    sha256: extractedSha,
-    format: "GeoJSON",
-    featureCollectionValidated: true
-  },
-  immutableReference: acquisition.immutableReference,
-  extractionPolicy: "Exactly one .geojson archive member; no inferred member selection.",
-  promotion: "BLOCKED_UNTIL_TEMPORAL_EXTRACTION_RECONCILIATION_REVIEW"
-};
-
-await fs.mkdir(path.dirname(outputPath), { recursive: true });
-await fs.writeFile(outputPath, JSON.stringify(record, null, 2) + "\n", "utf8");
-console.log(JSON.stringify({
-  sourceId: SOURCE_ID,
-  scenarioDate: SCENARIO_DATE,
-  archiveSha256: archiveSha,
-  member,
-  extractedSha256: extractedSha,
-  outputPath,
-  promotion: record.promotion
-}, null, 2));
