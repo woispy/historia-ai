@@ -47,7 +47,7 @@ for (const binding of mapping.reviewBindings) {
   const record = records.get(binding.reviewId);
   if (!record) fail(`Unknown reviewId: ${binding.reviewId}`);
   const expected = `cliopatria-1326-feature-${record.sourceFeatureIndex}-${record.provenance?.candidatePacketSha256?.slice(0, 16)}`;
-  if (binding.reviewId !== expected && !String(binding.reviewId).startsWith("review-")) {
+  if (binding.reviewId !== expected) {
     fail(`Review ID is not candidate-bound or explicit test ID: ${binding.reviewId}`);
   }
   if (!Array.isArray(binding.edgeEvidenceIds) || binding.edgeEvidenceIds.length === 0) fail(`edgeEvidenceIds[] is empty: ${binding.reviewId}`);
