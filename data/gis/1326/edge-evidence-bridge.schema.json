@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Historia AI 1326 Edge Evidence Bridge Bindings",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "scenarioDate", "authorityStatus", "promotion", "policy", "reviewBindings"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "scenarioDate": { "const": "1326-04-07" },
+    "authorityStatus": { "const": "bridge-reference-only" },
+    "promotion": { "const": "BLOCKED" },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["automaticReviewMatching", "geometryGeneration", "controllerInference", "canonicalPromotion"],
+      "properties": {
+        "automaticReviewMatching": { "const": false },
+        "geometryGeneration": { "const": false },
+        "controllerInference": { "const": false },
+        "canonicalPromotion": { "const": false }
+      }
+    },
+    "reviewBindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["reviewId", "edgeEvidenceIds"],
+        "properties": {
+          "reviewId": { "type": "string", "minLength": 1 },
+          "edgeEvidenceIds": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  }
+}

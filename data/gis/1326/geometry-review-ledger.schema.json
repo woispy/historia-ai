@@ -1,0 +1,425 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Historia AI 1326 Geometry Review Ledger",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "scenarioDate",
+    "authorityStatus",
+    "promotion",
+    "policy",
+    "sourceQueue",
+    "records"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 2
+    },
+    "scenarioDate": {
+      "const": "1326-04-07"
+    },
+    "authorityStatus": {
+      "const": "review-ledger-only"
+    },
+    "promotion": {
+      "const": "BLOCKED"
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reviewId",
+          "sourceFeatureIndex",
+          "entityIdentity",
+          "temporalEvidence",
+          "boundaryEvidence",
+          "edgeAssessments",
+          "physicalConstraints",
+          "topologyGate",
+          "provenance",
+          "confidence",
+          "decision"
+        ],
+        "properties": {
+          "reviewId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sourceFeatureIndex": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "entityIdentity": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "status",
+              "entityIds"
+            ],
+            "properties": {
+              "status": {
+                "enum": [
+                  "unmatched",
+                  "single-match",
+                  "multiple-matches",
+                  "reviewed"
+                ]
+              },
+              "entityIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "temporalEvidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "scenarioDate",
+              "applicability",
+              "sourceRefs"
+            ],
+            "properties": {
+              "scenarioDate": {
+                "const": "1326-04-07"
+              },
+              "applicability": {
+                "enum": [
+                  "supported",
+                  "uncertain",
+                  "unsupported"
+                ]
+              },
+              "sourceRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "boundaryEvidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "status",
+              "sourceRefs"
+            ],
+            "properties": {
+              "status": {
+                "enum": [
+                  "supported",
+                  "partial",
+                  "uncertain",
+                  "unsupported"
+                ]
+              },
+              "sourceRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "edgeNotes": {
+                "type": "string"
+              }
+            }
+          },
+          "physicalConstraints": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "status"
+            ],
+            "properties": {
+              "status": {
+                "enum": [
+                  "not-applicable",
+                  "compatible",
+                  "conflict",
+                  "uncertain"
+                ]
+              },
+              "sourceRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "notes": {
+                "type": "string"
+              }
+            }
+          },
+          "topologyGate": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "status"
+            ],
+            "properties": {
+              "status": {
+                "enum": [
+                  "not-run",
+                  "pass",
+                  "fail"
+                ]
+              },
+              "checks": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "provenance": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sourceId",
+              "candidatePacketSha256",
+              "candidateRecordSha256"
+            ],
+            "properties": {
+              "sourceId": {
+                "const": "cliopatria-v0.2.0"
+              },
+              "candidatePacketSha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "candidateRecordSha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "reviewer": {
+                "type": "string"
+              },
+              "reviewedAt": {
+                "type": "string"
+              }
+            }
+          },
+          "confidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "existence",
+              "controller",
+              "frontier",
+              "exactBoundary",
+              "geometry"
+            ],
+            "properties": {
+              "existence": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "controller": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "geometry": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "frontier": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "exactBoundary": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          },
+          "decision": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "status",
+              "reviewedGeometry"
+            ],
+            "properties": {
+              "status": {
+                "enum": [
+                  "pending",
+                  "reviewed",
+                  "rejected",
+                  "needs-more-evidence"
+                ]
+              },
+              "reviewedGeometry": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              },
+              "reason": {
+                "type": "string"
+              }
+            }
+          },
+          "edgeAssessments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "edgeId",
+                "edgeType",
+                "status",
+                "confidence",
+                "evidenceRefs"
+              ],
+              "properties": {
+                "edgeId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "edgeType": {
+                  "enum": [
+                    "POLITICAL_ADJACENCY",
+                    "FRONTIER",
+                    "REGIONAL_PROXIMITY",
+                    "ROAD_CORRIDOR",
+                    "RIVER_CORRIDOR",
+                    "MOUNTAIN_BARRIER",
+                    "LAKE_BARRIER",
+                    "COASTAL_ACCESS",
+                    "STRATEGIC_PASS",
+                    "STRATEGIC_CROSSING",
+                    "UNKNOWN"
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "supported",
+                    "partial",
+                    "uncertain",
+                    "unsupported",
+                    "not-applicable"
+                  ]
+                },
+                "confidence": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "evidenceRefs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "notes": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "kind": {
+      "const": "historical-1326-geometry-review-ledger"
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "geometryGeneration",
+        "controllerImpliesGeometry",
+        "canonicalPromotion",
+        "confidenceRequired",
+        "topologyRequired",
+        "provenanceRequired"
+      ],
+      "properties": {
+        "geometryGeneration": {
+          "const": false
+        },
+        "controllerImpliesGeometry": {
+          "const": false
+        },
+        "canonicalPromotion": {
+          "const": false
+        },
+        "confidenceRequired": {
+          "const": true
+        },
+        "topologyRequired": {
+          "const": true
+        },
+        "provenanceRequired": {
+          "const": true
+        }
+      }
+    },
+    "sourceQueue": {
+      "type": "string",
+      "minLength": 1
+    },
+    "bridge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "evidenceSource",
+        "bindingsSource",
+        "boundReviewRecords",
+        "boundEdges",
+        "mutationPolicy",
+        "geometryGeneration",
+        "controllerInference",
+        "canonicalPromotion"
+      ],
+      "properties": {
+        "kind": {
+          "const": "1326-pilot-edge-evidence-reference-bridge"
+        },
+        "evidenceSource": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bindingsSource": {
+          "type": "string",
+          "minLength": 1
+        },
+        "boundReviewRecords": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "boundEdges": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "mutationPolicy": {
+          "const": "evidence-reference-copy-only"
+        },
+        "geometryGeneration": {
+          "const": false
+        },
+        "controllerInference": {
+          "const": false
+        },
+        "canonicalPromotion": {
+          "const": false
+        }
+      }
+    }
+  },
+  "schemaVersion": 2
+}
