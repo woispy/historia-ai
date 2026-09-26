@@ -1,0 +1,13 @@
+{
+  "version":"4.4.9",
+  "snapshot":"1326-04-07",
+  "records":[
+    {"id":"saruhan-core","entity":"Saruhan","confidence":"HIGH","boundary":"OPEN","geometryAction":"constraint-corridor-only"},
+    {"id":"karesi-core","entity":"Karesi","confidence":"HIGH","boundary":"OPEN","geometryAction":"constraint-corridor-only"},
+    {"id":"aydinid-core","entity":"Aydinids","confidence":"MEDIUM-HIGH","boundary":"OPEN","geometryAction":"constraint-corridor-only"},
+    {"id":"germiyan-core","entity":"Germiyan","confidence":"HIGH","boundary":"OPEN","geometryAction":"constraint-corridor-only"},
+    {"id":"hamid-teke","entity":"Hamid/Teke","confidence":"HIGH","boundary":"DATE-SENSITIVE","geometryAction":"temporal-lock"},
+    {"id":"karaman-konya","entity":"Karaman/Konya","confidence":"HIGH","boundary":"CHRONOLOGY-SENSITIVE","geometryAction":"reject-post-start-backprojection"}
+  ],
+  "gate":{"exactCoordinatePromotions":0,"productionGeometryEdits":0,"unsupportedMerges":0}
+}
