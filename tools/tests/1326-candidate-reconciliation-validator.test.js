@@ -1,0 +1,13 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+const root = process.cwd();
+const script = fs.readFileSync(path.join(root, "tools/historical-gis/cli/validate-1326-candidate-reconciliation.js"), "utf8");
+const reconcile = fs.readFileSync(path.join(root, "tools/historical-gis/cli/reconcile-1326-cliopatria-entities.js"), "utf8");
+assert.match(script, /candidatePacketSha256/);
+assert.match(script, /candidateRecordSha256/);
+assert.match(script, /extractedGeojsonSha256/);
+assert.match(script, /never-derived-from-name-match-alone/);
+assert.match(reconcile, /candidateRecordSha256/);
+assert.match(reconcile, /inputSha256/);
+console.log("1326 candidate reconciliation validator contract passed.");
