@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
 
-const SOURCE_URL = "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.0/cliopatria.geojson.zip";
+const SOURCE_URL = "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/ad28a69/cliopatria.geojson.zip";
 const SOURCE_ID = "cliopatria-v0.2.0";
 const SOURCE_BLOB_SHA = "cefab0f4b622e2e7fb3daf68d4f461f83991204c";
 const OUTPUT_DIR = path.resolve("data/build/gis/1326/source-snapshots");
