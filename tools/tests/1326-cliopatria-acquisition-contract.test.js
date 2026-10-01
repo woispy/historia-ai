@@ -19,7 +19,7 @@ const script = fs.readFileSync(
 const source = manifest.sources.find(item => item.id === "cliopatria-v0.2.0");
 assert.ok(source, "Cliopatria source must exist in the 1326 acquisition manifest.");
 
-const expectedUrl = "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.0/cliopatria.geojson.zip";
+const expectedUrl = "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/ad28a69/cliopatria.geojson.zip";
 const expectedSourceId = "cliopatria-v0.2.0";
 const expectedBlobSha = source.snapshot?.immutableReference?.sourceBlobSha;
 
@@ -27,7 +27,9 @@ assert.ok(["acquisition-required", "acquired"].includes(source.status), "Cliopat
 assert.ok(source.status === "acquisition-required" || /^[0-9a-f]{64}$/.test(source.snapshot?.rawSha256 ?? ""), "Acquired Cliopatria snapshot must carry a raw SHA-256.");
 assert.ok(["reference-pinned-not-acquired", "acquired"].includes(source.snapshot?.status), "Cliopatria snapshot status must remain acquisition-state controlled.");
 assert.equal(source.url, "https://github.com/Seshat-Global-History-Databank/cliopatria/releases/tag/v0.2.0");
+assert.equal(source.downloadUrl, expectedUrl, "Manifest must pin the immutable download URL.");
 assert.ok(preflight.includes('source.snapshot.sourceFile !== "cliopatria.geojson.zip"'), "Acquisition preflight must pin the source file name.");
+assert.ok(preflight.includes("source.downloadUrl !== \"https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/ad28a69/cliopatria.geojson.zip\""), "Acquisition preflight must pin the immutable download URL.");
 assert.match(expectedBlobSha ?? "", /^[0-9a-f]{40}$/);
 
 assert.ok(preflight.includes('source.snapshot.immutableReference.sha !== "ad28a69"'), "Acquisition preflight must pin the immutable commit.");
