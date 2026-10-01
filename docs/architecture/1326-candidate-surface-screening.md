@@ -494,7 +494,7 @@ Registered command: `npm run test:1326-cliopatria-integrated-pipeline-runtime`.
 
 ### Acquisition operational gate
 
-The acquisition preflight now pins the expected source file name (`cliopatria.geojson.zip`) and, once acquired, the expected retained artifact path. This prevents a valid-looking acquisition record from silently pointing to a different artifact location.
+The acquisition preflight now pins the expected source file name (`cliopatria.geojson.zip`), the immutable commit-pinned download URL, and, once acquired, the expected retained artifact path. The release page remains the human-facing source reference, while the actual download is resolved from commit `ad28a69`; this prevents a mutable tag from silently changing the bytes behind an otherwise identical acquisition contract.
 
 The preflight remains non-destructive: it does not download bytes and does not mutate the acquisition manifest. The operational sequence remains:
 
