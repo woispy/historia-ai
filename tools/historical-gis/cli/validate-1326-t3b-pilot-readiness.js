@@ -27,7 +27,6 @@ if (candidates.source?.sourceId !== SOURCE || screening.source?.sourceId !== SOU
 if (ledger.schemaVersion !== 2 || ledger.authorityStatus !== "review-ledger-only" || ledger.promotion !== "BLOCKED") fail("Review ledger is not safely review-only.");
 if (evidence.schemaVersion !== 1 || evidence.authorityStatus !== "evidence-reference-only" || evidence.promotion !== "BLOCKED") fail("Pilot evidence is not safely evidence-only.");
 if (bindings.schemaVersion !== 1 || bindings.authorityStatus !== "bridge-reference-only" || bindings.promotion !== "BLOCKED") fail("Bindings are not safely bridge-reference-only.");
-if (bindings.candidatePacketSha256 !== packetSha) fail("Binding candidate packet SHA continuity failed.");
 
 for (const key of ["automaticReviewMatching","geometryGeneration","controllerInference","canonicalPromotion"]) {
   if (bindings.policy?.[key] !== false) fail(`Binding policy ${key} must remain false: ${key}`);
@@ -41,6 +40,7 @@ const packetSha = candidates.candidatePacketSha256;
 if (!/^[0-9a-f]{64}$/.test(packetSha ?? "")) fail("Candidate packet SHA is missing/invalid.");
 if (sha(candidates.candidates) !== packetSha) fail("Candidate packet SHA does not match the candidate array.");
 if (screening.candidatePacketSha256 !== packetSha || reconciliation.candidatePacketSha256 !== packetSha || review.candidatePacketSha256 !== packetSha) fail("Candidate packet SHA continuity failed.");
+if (bindings.candidatePacketSha256 !== packetSha) fail("Binding candidate packet SHA continuity failed.");
 
 const candidateByIndex = new Map(candidates.candidates.map(x => [x.sourceFeatureIndex, x]));
 const screenedByIndex = new Map(screening.candidates.map(x => [x.sourceFeatureIndex, x]));
