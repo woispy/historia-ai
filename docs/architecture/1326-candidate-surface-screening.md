@@ -555,3 +555,8 @@ The contract asserts that the generated review ID and both provenance hashes rem
 The integrated acquisition-to-T3-B runtime fixture now exercises fail-closed mutations after the successful review/edge bridge handoff. The runtime contract must reject ledger candidate-packet drift, ledger candidate-record drift, ledger review-ID drift, explicit binding review-ID drift, and explicit binding edge-ID drift at the bridge boundary. It also passes a tampered ledger candidate-record hash through the final pilot-readiness gate and requires rejection there.
 
 This closes the synthetic runtime path from acquired bytes through review identity and explicit evidence binding. These cases verify provenance integrity only; they do not approve historical geometry, infer political control, or promote candidate evidence to canonical authority.
+
+
+### ### Pilot readiness schema correction
+
+The T3-B pilot-readiness validator binds review geometry through the review item's top-level `sourceGeometry.sha256`, matching the geometry reconciliation queue schema. The readiness fixture uses the same structure. `sourceEvidence` remains limited to candidate-record provenance; geometry provenance is not nested beneath it.
