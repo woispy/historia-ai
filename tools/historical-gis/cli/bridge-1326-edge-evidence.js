@@ -54,6 +54,7 @@ if (bindings.policy?.automaticReviewMatching !== false ||
     bindings.policy?.canonicalPromotion !== false) {
   fail("Binding policy must forbid automatic matching, geometry generation, controller inference, and canonical promotion.");
 }
+if (!/^[0-9a-f]{64}$/.test(bindings.candidatePacketSha256 ?? "")) fail("Binding candidate packet SHA-256 must be present.");
 if (!Array.isArray(bindings?.reviewBindings)) fail("reviewBindings[] is required.");
 
 const edgeById = new Map();
@@ -77,6 +78,9 @@ for (const record of ledger.records ?? []) {
   if (packetHash === null) packetHash = candidatePacketSha256;
   if (candidatePacketSha256 !== packetHash) fail(`Candidate packet hash drift across ledger records: ${record.reviewId}`);
 }
+
+const ledgerPacketHash = packetHash;
+if (bindings.candidatePacketSha256 !== ledgerPacketHash) fail("Binding candidate packet SHA does not match ledger packet SHA.");
 
 for (const binding of bindings.reviewBindings) {
   if (!binding?.reviewId || boundReviewIds.has(binding.reviewId)) fail(`Duplicate/missing review binding: ${binding?.reviewId}`);
