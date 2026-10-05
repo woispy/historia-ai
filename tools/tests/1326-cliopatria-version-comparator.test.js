@@ -137,5 +137,6 @@ if (!report.classification.geometryChange1326) throw new Error("geometryChange13
 if (!report.classification.temporalChange1326) throw new Error("temporalChange1326 classification missing.");
 if (!report.geometryChanges1326) throw new Error("geometryChanges1326 report missing.");
 if (!report.classification.non1326TemporalCorrection) throw new Error("non1326TemporalCorrection classification missing.");
+if (!report.classification.sourceMetadataOrOtherChange) throw new Error("sourceMetadataOrOtherChange classification missing.");
 
 console.log("1326 Cliopatria version comparator: PASS");
