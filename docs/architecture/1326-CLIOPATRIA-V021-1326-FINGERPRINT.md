@@ -68,7 +68,7 @@ The comparator:
 - restricts the 1326 slice to `Type=POLITY` and `FromYear <= 1326 <= ToYear`;
 - uses deterministic `Wikidata` identity when available, with `Name` only as the fallback identity;
 - rejects ambiguous duplicate 1326 identities rather than silently choosing one;
-- compares identity presence, temporal ranges, geometry fingerprints, and non-temporal properties;\n
+- compares identity presence, temporal ranges, geometry fingerprints, and non-temporal properties;
 - rejects invalid temporal ranges where `FromYear > ToYear` or years are non-integer;
 - rejects duplicate 1326 identities instead of selecting one record implicitly;
 - separately detects temporal-range changes for identities that are not present in the 1326 slice;
