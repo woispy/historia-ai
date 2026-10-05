@@ -38,6 +38,8 @@ function is1326(feature) {
   const from = feature?.properties?.FromYear;
   const to = feature?.properties?.ToYear;
   return isPolity(feature) && Number.isFinite(from) && Number.isFinite(to)
+    && Number.isInteger(from) && Number.isInteger(to)
+    && from <= to
     && from <= SCENARIO_YEAR && SCENARIO_YEAR <= to;
 }
 
