@@ -156,7 +156,9 @@
     "validate:1326-candidate-reconciliation": "node tools/historical-gis/cli/validate-1326-candidate-reconciliation.js",
     "test:1326-candidate-reconciliation-validator": "node tools/tests/1326-candidate-reconciliation-validator.test.js",
     "validate:1326-cliopatria-operational-state": "node tools/historical-gis/cli/validate-1326-cliopatria-operational-state.js",
-    "test:1326-cliopatria-operational-state": "node tools/tests/1326-cliopatria-operational-state.test.js"
+    "test:1326-cliopatria-operational-state": "node tools/tests/1326-cliopatria-operational-state.test.js",
+    "compare:1326-cliopatria-versions": "node tools/historical-gis/cli/compare-1326-cliopatria-versions.js",
+    "test:1326-cliopatria-version-comparator": "node tools/tests/1326-cliopatria-version-comparator.test.js"
   },
   "dependencies": {
     "react": "^19.2.7",
