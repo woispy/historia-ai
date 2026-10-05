@@ -65,7 +65,7 @@ for (const [index, screened] of screenedByIndex) {
   const reconciled = reconciliationByIndex.get(index);
   if (!reconciled || reconciled.sourceFeatureId !== source.sourceFeatureId) fail(`Candidate -> reconciliation identity drift at ${index}.`);
   if (screened.sourceGeometrySha256 !== sha(source.geometry)) fail(`Screening geometry provenance drift at ${index}.`);
-  if (item.sourceEvidence?.sourceGeometry?.sha256 !== sha(source.geometry)) fail(`Review geometry provenance drift at ${index}.`);
+  if (item.sourceGeometry?.sha256 !== sha(source.geometry)) fail(`Review geometry provenance drift at ${index}.`);
   if (item.reviewedGeometry !== null || item.reviewStatus !== "pending" || item.promotion !== "BLOCKED") fail(`Review item is not pending/blocked at ${index}.`);
   const recordSha = item.sourceEvidence?.candidateRecordSha256;
   if (!/^[0-9a-f]{64}$/.test(recordSha ?? "")) fail(`Candidate record SHA invalid at ${index}.`);
