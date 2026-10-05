@@ -27,6 +27,7 @@ if (candidates.source?.sourceId !== SOURCE || screening.source?.sourceId !== SOU
 if (ledger.schemaVersion !== 2 || ledger.authorityStatus !== "review-ledger-only" || ledger.promotion !== "BLOCKED") fail("Review ledger is not safely review-only.");
 if (evidence.schemaVersion !== 1 || evidence.authorityStatus !== "evidence-reference-only" || evidence.promotion !== "BLOCKED") fail("Pilot evidence is not safely evidence-only.");
 if (bindings.schemaVersion !== 1 || bindings.authorityStatus !== "bridge-reference-only" || bindings.promotion !== "BLOCKED") fail("Bindings are not safely bridge-reference-only.");
+if (bindings.candidatePacketSha256 !== packetSha) fail("Binding candidate packet SHA continuity failed.");
 
 for (const key of ["automaticReviewMatching","geometryGeneration","controllerInference","canonicalPromotion"]) {
   if (bindings.policy?.[key] !== false) fail(`Binding policy ${key} must remain false: ${key}`);
@@ -85,6 +86,7 @@ for (const record of ledger.records ?? []) {
 const bindingIds = new Set((bindings.reviewBindings ?? []).map(x => x.reviewId));
 for (const binding of bindings.reviewBindings ?? []) {
   if (!reviewByIndex.has(Number(binding.reviewId.split("-")[3]))) fail(`Binding references an unavailable review: ${binding.reviewId}`);
+  if (reviewByIndex.get(Number(binding.reviewId.split("-")[3]))?.reviewId !== binding.reviewId) fail(`Binding reviewId does not exactly match review queue identity: ${binding.reviewId}`);
   if (!/^cliopatria-1326-feature-[0-9]+-[0-9a-f]{16}$/.test(binding.reviewId)) fail(`Binding reviewId is not candidate-bound: ${binding.reviewId}`);
   if (!Array.isArray(binding.edgeEvidenceIds) || binding.edgeEvidenceIds.length === 0) fail(`Empty edge binding: ${binding.reviewId}`);
   for (const edgeId of binding.edgeEvidenceIds) {
