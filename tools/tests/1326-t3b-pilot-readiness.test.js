@@ -23,7 +23,7 @@ const reports = {
   review: { scenarioDate:"1326-04-07", source:{sourceId:"cliopatria-v0.2.0"}, candidatePacketSha256:packetSha, reviewQueue:[{sourceFeatureIndex:7,sourceFeatureId:"feature-7",reviewId,reviewedGeometry:null,reviewStatus:"pending",promotion:"BLOCKED",sourceEvidence:{candidateRecordSha256:recordSha},sourceGeometry:{sha256:geometrySha}}], promotion:"BLOCKED" },
   ledger: {schemaVersion:2,authorityStatus:"review-ledger-only",promotion:"BLOCKED",records:[{sourceFeatureIndex:7,reviewId,provenance:{candidatePacketSha256:packetSha,candidateRecordSha256:recordSha},decision:{status:"pending"}}]},
   evidence: {schemaVersion:1,authorityStatus:"evidence-reference-only",promotion:"BLOCKED",policy:{geometryGeneration:false,controllerInference:false,canonicalPromotion:false},edges:[{edgeId:"e1"}]},
-  bindings: {schemaVersion:1,authorityStatus:"bridge-reference-only",promotion:"BLOCKED",policy:{automaticReviewMatching:false,geometryGeneration:false,controllerInference:false,canonicalPromotion:false},reviewBindings:[]}
+  bindings: {schemaVersion:1,candidatePacketSha256:packetSha,authorityStatus:"bridge-reference-only",promotion:"BLOCKED",policy:{automaticReviewMatching:false,geometryGeneration:false,controllerInference:false,canonicalPromotion:false},reviewBindings:[]}
 };
 
 async function writeSet(name, set) {
@@ -40,7 +40,9 @@ async function run(set, ok) {
   assert.equal(result.code===0,ok,result.err);
 }
 await run(reports,true);
-await run({...reports,bindings:{...reports.bindings,reviewBindings:[{reviewId:"review-bithynia-pilot-001",edgeEvidenceIds:["e1"]}]}},false);
+await run({...reports,bindings:{...reports.bindings,reviewBindings:[{reviewId,edgeEvidenceIds:["e1"]}]}},true);
+await run({...reports,bindings:{...reports.bindings,reviewBindings:[{reviewId:"cliopatria-1326-feature-7-ffffffffffffffff",edgeEvidenceIds:["e1"]}]}},false);
+await run({...reports,bindings:{...reports.bindings,candidatePacketSha256:"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"}},false);
 await run({...reports,ledger:{...reports.ledger,records:[{...reports.ledger.records[0],provenance:{...reports.ledger.records[0].provenance,candidatePacketSha256:"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"}}]}},false);
 await run({...reports,ledger:{...reports.ledger,records:[{...reports.ledger.records[0],provenance:{...reports.ledger.records[0].provenance,candidateRecordSha256:"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"}}]}},false);
 await run({...reports,review:{...reports.review,reviewQueue:[{...reports.review.reviewQueue[0],reviewId:"cliopatria-1326-feature-7-ffffffffffffffff"}]}},false);
