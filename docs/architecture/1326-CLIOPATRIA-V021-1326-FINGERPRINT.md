@@ -50,6 +50,32 @@ Those release notes do **not** establish that the 1326 geometries are unchanged.
 
 A byte-level v0.2.0 → v0.2.1 1326 comparison remains **OPEN** until the pinned v0.2.0 archive bytes are available in the same execution environment.
 
+
+
+## Deterministic comparison gate
+
+The pending v0.2.0 → v0.2.1 comparison is now represented by the repository tool:
+
+`tools/historical-gis/cli/compare-1326-cliopatria-versions.js`
+
+It accepts two extracted GeoJSON files:
+
+`npm run compare:1326-cliopatria-versions -- --base <v0.2.0.geojson> --head <v0.2.1.geojson> --output <report.json>`
+
+The comparator:
+
+- validates both inputs as GeoJSON FeatureCollections;
+- restricts the 1326 slice to `Type=POLITY` and `FromYear <= 1326 <= ToYear`;
+- uses deterministic `Wikidata + Name` identity when Wikidata exists, otherwise Name;
+- rejects ambiguous duplicate 1326 identities rather than silently choosing one;
+- compares identity presence, temporal ranges, geometry fingerprints, and non-temporal properties;
+- separately detects temporal-range changes for identities that are not present in the 1326 slice;
+- emits a SHA-256 fingerprint for the complete comparison report.
+
+The automated fixture is `tools/tests/1326-cliopatria-version-comparator.test.js` and is registered as `npm run test:1326-cliopatria-version-comparator`.
+
+This tool is a **comparison gate only**. It does not change the acquisition manifest, promote v0.2.1, or create canonical political geometry.
+
 ## Promotion decision
 
 **v0.2.1 is NOT substituted for v0.2.0 yet.**
