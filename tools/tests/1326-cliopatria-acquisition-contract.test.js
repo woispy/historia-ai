@@ -45,6 +45,7 @@ assert.ok(script.includes('source.snapshot?.rawSha256 !== record.rawSha256'), "V
 assert.ok(script.includes('source.snapshot?.immutableReference?.sha !== record.immutableReference?.sha'), "Verification must cross-check the immutable commit reference.");
 assert.ok(script.includes('source.snapshot?.immutableReference?.sourceBlobSha !== record.immutableReference?.sourceBlobSha'), "Verification must cross-check the immutable source blob SHA.");
 assert.ok(script.includes('source.snapshot?.retainedArtifact !== record.retainedArtifact'), "Verification must cross-check the retained artifact path.");
+assert.ok(script.includes('source.downloadUrl !== SOURCE_URL'), "Verification must cross-check the immutable download URL.");
 assert.ok(script.includes('record.sourceUrl !== SOURCE_URL'), "Verification must cross-check the pinned source URL.");
 assert.ok(script.includes('promotion: "BLOCKED_UNTIL_EXTRACTION_RECONCILIATION_REVIEW"'), "Acquisition must remain promotion-blocked.");
 assert.ok(script.includes('JSON.stringify(value, null, 2)}\\n`'), "Acquisition JSON writer must emit a real newline, not a literal \\n sequence.");
