@@ -81,6 +81,7 @@ const report = {
   scenarioDate: SCENARIO_DATE,
   authorityStatus: "review-ledger-only",
   promotion: "BLOCKED",
+  candidatePacketSha256: queue.candidatePacketSha256,
   policy: {
     geometryGeneration: false,
     controllerImpliesGeometry: false,
