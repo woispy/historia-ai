@@ -13,6 +13,7 @@ if (report.schemaVersion !== 1) throw new Error("Binding schemaVersion must be 1
 if (report.scenarioDate !== SCENARIO_DATE) throw new Error("Binding scenario date mismatch.");
 if (report.authorityStatus !== "bridge-reference-only") throw new Error("Binding authority status must be bridge-reference-only.");
 if (report.promotion !== "BLOCKED") throw new Error("Binding promotion must remain BLOCKED.");
+if (!/^[0-9a-f]{64}$/.test(report.candidatePacketSha256 ?? "")) throw new Error("Binding candidate packet SHA-256 must be present.");
 for (const key of ["automaticReviewMatching","geometryGeneration","controllerInference","canonicalPromotion"]) {
   if (report.policy?.[key] !== false) throw new Error(`Binding policy ${key} must be false.`);
 }
