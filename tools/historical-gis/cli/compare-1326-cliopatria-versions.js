@@ -62,15 +62,6 @@ function normalizeProperties(feature) {
   return p;
 }
 
-function sortedRecordSignature(feature) {
-  const p = feature.properties ?? {};
-  return JSON.stringify({
-    fromYear: p.FromYear,
-    toYear: p.ToYear,
-    properties: normalizeProperties(feature),
-    geometryFingerprint: geometryFingerprint(feature)
-  });
-}
 
 function indexFeatures(features) {
   const map = new Map();
