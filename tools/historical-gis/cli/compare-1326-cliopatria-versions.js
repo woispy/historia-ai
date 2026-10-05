@@ -208,7 +208,7 @@ const report = {
     temporalChange1326: temporalChanges.length > 0,
     geometryChange1326: geometryChanges.length > 0,
     non1326TemporalCorrection: non1326TemporalChanges.length > 0,
-    sourceMetadataOrOtherChange: false
+    sourceMetadataOrOtherChange: metadataChanges.length > 0
   },
   added1326: added,
   removed1326: removed,
