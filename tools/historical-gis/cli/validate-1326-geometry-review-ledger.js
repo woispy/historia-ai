@@ -24,7 +24,7 @@ if (queue) {
   if (queue.kind !== "historical-1326-political-geometry-reconciliation-queue") throw new Error("Unexpected reconciliation queue kind.");
   if (queue.scenarioDate !== SCENARIO_DATE || queue.source?.sourceId !== SOURCE_ID) throw new Error("Ledger/queue identity mismatch.");
   if (queue.promotion !== "BLOCKED") throw new Error("Reconciliation queue must remain promotion-blocked.");
-  if (queue.candidatePacketSha256 !== report.records?.[0]?.provenance?.candidatePacketSha256 && report.records?.length) throw new Error("Ledger/queue candidate packet mismatch.");
+  
 }
 
 if (report?.kind !== "historical-1326-geometry-review-ledger") throw new Error("Unexpected review ledger kind.");
@@ -32,6 +32,8 @@ if (report.schemaVersion !== 2) throw new Error("Review ledger schemaVersion mus
 if (report.scenarioDate !== SCENARIO_DATE) throw new Error("Scenario date mismatch.");
 if (report.authorityStatus !== "review-ledger-only") throw new Error("Ledger authority status must remain review-ledger-only.");
 if (report.promotion !== "BLOCKED") throw new Error("Ledger promotion must remain BLOCKED.");
+if (!/^[0-9a-f]{64}$/.test(report.candidatePacketSha256 ?? "")) throw new Error("Ledger candidate packet SHA-256 must be present.");
+if (queue && report.candidatePacketSha256 !== queue.candidatePacketSha256) throw new Error("Ledger/queue candidate packet mismatch.");
 if (!Array.isArray(report.records)) throw new Error("records[] is required.");
 
 let edgeCount = 0;
@@ -50,6 +52,7 @@ for (const record of report.records) {
     }
   }
   if (record.provenance?.sourceId !== SOURCE_ID) throw new Error(`Source identity mismatch: ${record.reviewId}`);
+  if (record.provenance?.candidatePacketSha256 !== report.candidatePacketSha256) throw new Error(`Candidate packet hash drift: ${record.reviewId}`);
   if (!/^[0-9a-f]{64}$/.test(record.provenance?.candidatePacketSha256 ?? "")) throw new Error(`Candidate packet hash missing or invalid: ${record.reviewId}`);
   if (!/^[0-9a-f]{64}$/.test(record.provenance?.candidateRecordSha256 ?? "")) throw new Error(`Candidate record hash missing or invalid: ${record.reviewId}`);
   if (packetHash === null) packetHash = record.provenance.candidatePacketSha256;
