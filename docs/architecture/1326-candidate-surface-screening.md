@@ -560,3 +560,7 @@ This closes the synthetic runtime path from acquired bytes through review identi
 ### ### Pilot readiness schema correction
 
 The T3-B pilot-readiness validator binds review geometry through the review item's top-level `sourceGeometry.sha256`, matching the geometry reconciliation queue schema. The readiness fixture uses the same structure. `sourceEvidence` remains limited to candidate-record provenance; geometry provenance is not nested beneath it.
+
+
+### T3-B binding provenance hardening
+The explicit edge-evidence binding contract now carries the review ledger's `candidatePacketSha256` into the bridge-reference binding report. Pilot readiness requires this hash to equal the candidate packet hash already propagated through screening, reconciliation, and review. Binding review IDs are also required to exactly match the review-queue identity for the referenced source-feature index; an index match with a different 16-character suffix is rejected. This remains evidence/reference-only: geometry generation, controller inference, automatic review matching, and canonical promotion remain disabled.
