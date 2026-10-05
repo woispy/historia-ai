@@ -571,6 +571,8 @@ The T3-B edge-evidence bridge now fail-closes unless the binding packet's `candi
 
 
 ### T3-B CI and production-artifact verification — 2026-10-05
-CI run 3302 passed on current HEAD `3fc99ac2199aa78f76f68645b68a1b3650d4f5e2`. The tracked pilot evidence registry `bithynia-core-01.json` remains `evidence-reference-only` with promotion `BLOCKED`. Generated build review/binding/bridge outputs are not treated as tracked production artefacts when absent from the branch. Therefore fixture/CI success is not interpreted as completed historical geometry review.
+CI run 3303 passed on current HEAD `5ae1dee5f1fccecfdf73ae7cf7ae2b56fa5ecc5c`. The tracked pilot evidence registry `bithynia-core-01.json` remains `evidence-reference-only` with promotion `BLOCKED`. Generated build review/binding/bridge outputs are not treated as tracked production artefacts when absent from the branch. Therefore fixture/CI success is not interpreted as completed historical geometry review.
 
 The current hard blocker is unchanged: the production acquisition manifest remains pinned to Cliopatria v0.2.0, while the verified v0.2.1 snapshot is comparison/research-only. The v0.2.0 archive bytes are still required before real candidate-specific review IDs and research-backed T3-B bindings can be created against the production source chain. No v0.2.1 geometry is substituted for v0.2.0. T3-B therefore remains **technical provenance PASS / historical review WAITING / canonical promotion BLOCKED**.
+
+The v0.2.0 binary acquisition remains externally blocked in this working environment: the GitHub repository connector can inspect the pinned blob identity but cannot decode the ZIP blob as UTF-8, and the web fetch layer cannot retrieve the binary archive. This is an access/tooling limitation, not evidence that the artifact is missing or changed. The production manifest therefore remains untouched at `reference-pinned-not-acquired`; no substitute byte source is accepted.
