@@ -62,6 +62,7 @@ await run("tools/historical-gis/cli/prepare-1326-edge-evidence-bindings.js", ["-
 await run("tools/historical-gis/cli/validate-1326-edge-evidence-bindings.js", ["--input", output]);
 const report = JSON.parse(await fs.readFile(output, "utf8"));
 assert.equal(report.authorityStatus, "bridge-reference-only");
+assert.equal(report.candidatePacketSha256, "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef");
 assert.equal(report.promotion, "BLOCKED");
 assert.equal(report.policy.automaticReviewMatching, false);
 assert.deepEqual(report.reviewBindings[0].edgeEvidenceIds, ["bursa-nicaea-frontier-1326", "nicaea-sangarius-corridor-1326"]);
