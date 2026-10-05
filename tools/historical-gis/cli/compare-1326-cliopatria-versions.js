@@ -169,12 +169,14 @@ for (const key of new Set([...baseAll.keys(), ...headAll.keys()])) {
   const headRanges = (headAll.get(key) ?? [])
     .map(f => [f.properties?.FromYear, f.properties?.ToYear])
     .sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
-  if (JSON.stringify(baseRanges) !== JSON.stringify(headRanges)) {
-    const base1326Present = baseSet.has(key);
-    const head1326Present = headSet.has(key);
-    if (!base1326Present && !head1326Present) {
-      non1326TemporalChanges.push({ identity: key, baseRanges, headRanges });
-    }
+  const baseNon1326Ranges = baseRanges.filter(([from, to]) => !(from <= SCENARIO_YEAR && SCENARIO_YEAR <= to));
+  const headNon1326Ranges = headRanges.filter(([from, to]) => !(from <= SCENARIO_YEAR && SCENARIO_YEAR <= to));
+  if (JSON.stringify(baseNon1326Ranges) !== JSON.stringify(headNon1326Ranges)) {
+    non1326TemporalChanges.push({
+      identity: key,
+      baseRanges: baseNon1326Ranges,
+      headRanges: headNon1326Ranges
+    });
   }
 }
 
