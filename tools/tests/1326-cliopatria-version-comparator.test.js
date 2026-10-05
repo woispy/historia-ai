@@ -130,11 +130,11 @@ expect(report.counts.added1326, 1, "added1326");
 expect(report.counts.removed1326, 1, "removed1326");
 expect(report.counts.temporalChanges1326, 1, "temporalChanges1326");
 expect(report.counts.geometryChanges1326, 1, "geometryChanges1326");
-expect(report.counts.metadataChanges1326, 0, "metadataChanges1326");
+expect(report.counts.metadataChanges1326, 1, "metadataChanges1326");
 expect(report.counts.non1326TemporalChanges, 1, "non1326TemporalChanges");
 if (!report.classification.identityChange) throw new Error("identityChange classification missing.");
 if (!report.classification.geometryChange1326) throw new Error("geometryChange1326 classification missing.");
-if (!report.classification.temporalChange1326) throw new Error("temporalChange1326 classification missing.");
+if (!report.classification.temporalChange1326) throw new Error("temporalChange1326 classification missing.");\nif (!report.geometryChanges1326) throw new Error("geometryChanges1326 report missing.");
 if (!report.classification.non1326TemporalCorrection) throw new Error("non1326TemporalCorrection classification missing.");
 
 console.log("1326 Cliopatria version comparator: PASS");
