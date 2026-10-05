@@ -66,7 +66,7 @@ The comparator:
 
 - validates both inputs as GeoJSON FeatureCollections;
 - restricts the 1326 slice to `Type=POLITY` and `FromYear <= 1326 <= ToYear`;
-- uses deterministic `Wikidata + Name` identity when Wikidata exists, otherwise Name;
+- uses deterministic `Wikidata` identity when available, with `Name` only as the fallback identity;
 - rejects ambiguous duplicate 1326 identities rather than silently choosing one;
 - compares identity presence, temporal ranges, geometry fingerprints, and non-temporal properties;
 - separately detects temporal-range changes for identities that are not present in the 1326 slice;
