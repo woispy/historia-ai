@@ -568,3 +568,7 @@ The explicit edge-evidence binding contract now carries the review ledger's `can
 
 ### Edge bridge packet-provenance guard
 The T3-B edge-evidence bridge now fail-closes unless the binding packet's `candidatePacketSha256` exactly matches the candidate-packet provenance carried by the review ledger. This prevents a standalone bridge invocation from accepting a binding set from a different candidate packet. The bridge remains reference-copy-only and cannot generate geometry, infer controllers, or promote canonical geography.
+
+
+### T3-B CI and production-artifact verification — 2026-10-05
+CI run 3301 passed on HEAD `b4dcc6d16f3e365f1e6626f5a141d60d51fe1297`. The tracked pilot evidence registry `bithynia-core-01.json` remains `evidence-reference-only` with promotion `BLOCKED`. Generated build review/binding/bridge outputs are not treated as tracked production artefacts when absent from the branch. Therefore fixture/CI success is not interpreted as completed historical geometry review. T3-B remains review-gated until explicit research-backed review bindings and corresponding tracked/operational artefacts exist.
