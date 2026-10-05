@@ -35,6 +35,7 @@ await fs.writeFile(ledger, JSON.stringify({
 }, null, 2));
 await fs.writeFile(bindings, JSON.stringify({
   schemaVersion: 1,
+  candidatePacketSha256: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
   scenarioDate: "1326-04-07",
   authorityStatus: "bridge-reference-only",
   promotion: "BLOCKED",
@@ -82,6 +83,16 @@ assert.equal(report.records[0].decision.reviewedGeometry, null);
 assert.equal(report.records[0].decision.status, "pending");
 assert.equal(report.bridge.mutationPolicy, "evidence-reference-copy-only");
 
+
+const bindingPacketDrift = JSON.parse(await fs.readFile(bindings, "utf8"));
+bindingPacketDrift.candidatePacketSha256 = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+const bindingPacketDriftPath = path.join(dir, "test-edge-bridge-binding-packet-drift.json");
+await fs.writeFile(bindingPacketDriftPath, JSON.stringify(bindingPacketDrift, null, 2));
+const bindingPacketDriftResult = await new Promise(resolve => {
+  const child = spawn(process.execPath, ["tools/historical-gis/cli/bridge-1326-edge-evidence.js", "--ledger", ledger, "--evidence", evidence, "--bindings", bindingPacketDriftPath, "--output", output], { cwd: root, stdio: ["ignore", "pipe", "pipe"] });
+  child.on("close", code => resolve(code));
+});
+assert.notEqual(bindingPacketDriftResult, 0);
 
 const driftLedger = path.join(dir, "test-edge-bridge-drift-ledger.json");
 const drift = JSON.parse(await fs.readFile(ledger, "utf8"));
