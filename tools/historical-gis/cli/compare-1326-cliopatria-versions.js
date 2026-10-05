@@ -46,7 +46,7 @@ function identityFor(feature) {
   const wikidata = typeof p.Wikidata === "string" && p.Wikidata.trim() ? p.Wikidata.trim() : null;
   const name = typeof p.Name === "string" && p.Name.trim() ? p.Name.trim() : null;
   if (!wikidata && !name) throw new Error("POLITY feature is missing both Wikidata and Name.");
-  return wikidata ? `wikidata:${wikidata}|name:${name ?? ""}` : `name:${name}`;
+  return wikidata ? `wikidata:${wikidata}` : `name:${name}`;
 }
 
 function geometryFingerprint(feature) {
