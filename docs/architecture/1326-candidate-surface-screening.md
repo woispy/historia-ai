@@ -623,3 +623,23 @@ canonical political geography = BLOCKED
 The production Cliopatria v0.2.0 acquisition manifest remains `reference-pinned-not-acquired` with `rawSha256 = null`. A direct fetch attempt against the exact pinned raw URL for commit `ad28a69` also returned an access-layer cache miss. This does not establish a byte-level change or disappearance of the source; it confirms only that the current environment still cannot retrieve the binary archive through that path.
 
 No v0.2.1 data is substituted, no synthetic geometry is introduced, and no production review bindings are fabricated. The next valid transition remains genuine v0.2.0 byte acquisition and verification, followed by the already-defined extraction → reconciliation → review chain.
+
+
+### T3-B CI checkpoint — 2026-10-06 / run 3306 and v0.2.0 secondary distribution discovery
+
+GitHub Actions **run 3306** completed successfully for HEAD `42887ba1c8c6428461b69b8491216b02c8f2bd33`. The full `validate` job again completed all 79 validation/build/test steps with `success`.
+
+A new provenance-relevant acquisition lead was also verified independently: the official Zenodo record for Cliopatria **v0.2.0** (DOI `10.5281/zenodo.20274630`) publishes a `Seshat-Global-History-Databank/cliopatria-v0.2.0.zip` file and identifies the related software release as GitHub `v0.2.0`. The record reports the archive as 297.1 MB and supplies MD5 `6d573d5a07dfcd5a2c6c9933d6401d48`.
+
+This is a legitimate secondary distribution of the same named v0.2.0 release, but the current working environment cannot retrieve the 297.1 MB binary into the workspace. Therefore this discovery is **not** treated as an acquired production snapshot, and the production acquisition manifest remains unchanged at `reference-pinned-not-acquired`. No SHA-256 byte identity has been established between the Zenodo file and the pinned GitHub blob `cefab0f4b622e2e7fb3daf68d4f461f83991204c`.
+
+The required next step is byte-level verification if/when the archive can be downloaded: compute the archive SHA-256 and Git blob identity, compare against the pinned source contract, and only then transition the acquisition manifest to `acquired`. Until that succeeds, v0.2.1 remains excluded as a substitute and no candidate/review geometry is promoted.
+
+Current authority state remains:
+
+```
+CI / technical repository gate = PASS
+v0.2.0 acquisition           = NOT YET VERIFIED
+historical geometry review   = WAITING
+canonical political geography = BLOCKED
+```
