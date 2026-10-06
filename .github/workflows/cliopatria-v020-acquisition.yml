@@ -55,3 +55,20 @@ jobs:
           path: /tmp/cliopatria-v0.2.0.zip
           retention-days: 7
           compression-level: 0
+
+
+      - name: Verify pinned GitHub raw acquisition path
+        run: |
+          node tools/historical-gis/cli/acquire-1326-cliopatria.js --download
+          node tools/historical-gis/cli/acquire-1326-cliopatria.js --verify
+          test "$(git hash-object data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip)" = "cefab0f4b622e2e7fb3daf68d4f461f83991204c"
+
+      - name: Publish directly acquired production snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: cliopatria-v0.2.0-production-snapshot
+          path: |
+            data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip
+            data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.acquisition.json
+          retention-days: 7
+          compression-level: 0
