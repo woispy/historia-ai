@@ -98,7 +98,7 @@ The orchestrator writes three evidence-layer reports under `data/build/gis/1326/
 
 The anchor registry is an explicit input. It is **not** generated from the 1300 political builder, and the pipeline refuses to promote any result to reviewed or canonical geometry.
 
-This branch does not claim that the raw Cliopatria artifact has been acquired. Acquisition remains a separate provenance gate; `acquire:1326-cliopatria` must produce and verify the retained artifact before its contents are treated as an acquired source snapshot.
+The pinned Cliopatria v0.2.0 raw snapshot has now been acquired and verified in CI. The retained artifact is still evidence-only and promotion remains blocked; acquisition does not establish historical political geometry authority.
 
 ## Acquisition gate
 
@@ -758,3 +758,20 @@ The extraction workflow extension is committed on the current branch but its pos
 CI acquisition verification run #6 exposed a contract mismatch in `prepare-1326-cliopatria-extraction-input.js`: the validator expected the mutable-looking tag URL `/v0.2.0/`, while the acquisition contract intentionally pins the immutable commit URL `/ad28a69/`. The source bytes, Git blob, SHA-256 and acquisition verification all passed; only this URL assertion failed.
 
 The validator has been corrected to require the same immutable URL already used by the acquisition script and manifest. No source data or historical interpretation was changed.
+
+### Extraction gate — macOS metadata correction
+
+The first post-acquisition extraction run (Cliopatria acquisition verification #8) failed only at archive-member enumeration. The verified source ZIP itself passed all acquisition checks, including the pinned Git blob, raw SHA-256, byte length, and retained-artifact verification. The failure was caused by a macOS Finder AppleDouble metadata member:
+
+    __MACOSX/._cliopatria_polities_only.geojson
+
+The extraction contract has therefore been tightened to exclude only known macOS metadata paths (`__MACOSX/` and AppleDouble `._*` members) before enforcing the exactly-one-production-GeoJSON rule. This is deterministic archive hygiene, not content-based source selection. The contract test was updated accordingly.
+
+The acquisition workflow now also re-runs when the acquisition/extraction scripts or their contract test changes, preventing a stale extraction implementation from remaining unverified against the pinned production snapshot.
+
+The failed run did **not** alter the source provenance verdict:
+
+    acquisition = VERIFIED
+    temporal extraction = NOT-YET-EXTRACTED
+    authorityStatus = evidence-only
+    promotion = BLOCKED
