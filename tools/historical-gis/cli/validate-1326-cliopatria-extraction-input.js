@@ -43,7 +43,7 @@ assert(/^[0-9a-f]{64}$/.test(record.member.sha256 ?? ""), "Extraction input extr
 assert(record.extractionPolicy === "Exactly one production .geojson archive member after excluding macOS metadata (__MACOSX and AppleDouble ._ files); cross-platform extraction; no content-based member guessing.", "Extraction policy drifted.");
 assert(record.promotion === "BLOCKED_UNTIL_TEMPORAL_EXTRACTION_RECONCILIATION_REVIEW", "Extraction input must remain promotion-blocked.");
 
-assert(record.archive.path === acquisition.retainedArtifact, "Extraction input archive path differs from the retained acquisition artifact.");
+assert(path.resolve(root, record.archive.path) === path.resolve(root, acquisition.retainedArtifact), "Extraction input archive path differs from the retained acquisition artifact.");
 const extractedPath = path.resolve(root, record.member.extractedPath);
 const extracted = fs.readFileSync(extractedPath);
 assert(sha256(extracted) === record.member.sha256, "Extracted GeoJSON SHA-256 does not match the extraction input record.");
