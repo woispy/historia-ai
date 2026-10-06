@@ -7,6 +7,10 @@ on:
     paths:
       - ".github/workflows/cliopatria-v020-acquisition.yml"
       - "data/gis/1326/acquisition-manifest.json"
+      - "tools/historical-gis/cli/acquire-1326-cliopatria.js"
+      - "tools/historical-gis/cli/prepare-1326-cliopatria-extraction-input.js"
+      - "tools/historical-gis/cli/validate-1326-cliopatria-extraction-input.js"
+      - "tools/tests/1326-cliopatria-extraction-input.test.js"
   workflow_dispatch:
 
 permissions:
