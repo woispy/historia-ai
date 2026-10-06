@@ -604,3 +604,22 @@ acquisition → extraction → candidate validation
 ```
 
 CI success is recorded here as a repository/gate checkpoint only; it is not treated as evidence that the historical province boundaries are correct.
+
+
+### T3-B CI checkpoint — 2026-10-06 / run 3305
+
+The CI checkpoint recorded on the preceding HEAD was revalidated after the documentation commit. GitHub Actions **run 3305** completed successfully for HEAD `5d270ac2a311fa7bd2403330dc1509970bf57a5c`. Its `validate` job completed all 79 validation/build/test steps with `success`.
+
+This confirms that the T3-B CI checkpoint itself is not stale: the repository remains technically green after recording the run-3304 evidence in this document. The successful run again covers the 1326 source-intake contract, historical GIS/runtime and identity checks, historical political map checks, province topology and authoritative generation contracts, physical/cartography/rendering/build checks, GPU province pack integrity, game runtime/startup checks, and 15K+ province scalability diagnostics.
+
+The state remains deliberately unchanged at the authority boundary:
+
+```
+technical repository gate = PASS
+historical geometry review = WAITING
+canonical political geography = BLOCKED
+```
+
+The production Cliopatria v0.2.0 acquisition manifest remains `reference-pinned-not-acquired` with `rawSha256 = null`. A direct fetch attempt against the exact pinned raw URL for commit `ad28a69` also returned an access-layer cache miss. This does not establish a byte-level change or disappearance of the source; it confirms only that the current environment still cannot retrieve the binary archive through that path.
+
+No v0.2.1 data is substituted, no synthetic geometry is introduced, and no production review bindings are fabricated. The next valid transition remains genuine v0.2.0 byte acquisition and verification, followed by the already-defined extraction → reconciliation → review chain.
