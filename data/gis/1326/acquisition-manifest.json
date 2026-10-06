@@ -23,7 +23,7 @@
       "format": "GeoJSON archive",
       "projection": "EPSG:4326",
       "temporalFilter": "Rows whose FromYear <= 1326 <= ToYear",
-      "status": "acquisition-required",
+      "status": "acquired",
       "licenseReview": "required-before-redistribution-or-embedding",
       "expectedEvidence": [
         "Ottoman Beylik candidate extent",
@@ -33,7 +33,7 @@
       ],
       "reconciliationWarning": "Cliopatria documents that its maps represent one historical interpretation and contain border, naming, territorial-change, and duration uncertainties.",
       "snapshot": {
-        "status": "reference-pinned-not-acquired",
+        "status": "acquired",
         "sourceTag": "v0.2.0",
         "immutableReference": {
           "type": "git-commit",
@@ -41,9 +41,10 @@
           "sourceBlobSha": "cefab0f4b622e2e7fb3daf68d4f461f83991204c"
         },
         "sourceFile": "cliopatria.geojson.zip",
-        "rawSha256": null,
-        "acquiredAt": null,
-        "retainedArtifact": null
+        "rawSha256": "d01ae3a20d358cc5d54f69d9d725d390767d9c8759ac89ad6f90c58d106f3370",
+        "acquiredAt": "2026-10-06T14:58:33.899Z",
+        "retainedArtifact": "data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip",
+        "byteLength": 44231317
       },
       "downloadUrl": "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/ad28a69/cliopatria.geojson.zip"
     },
