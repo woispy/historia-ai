@@ -62,7 +62,7 @@ if (extractionInput) {
       acquisition.immutableReference?.sourceBlobSha !== extractionInput.immutableReference?.sourceBlobSha) throw new Error("Extraction input acquisition immutable reference mismatch.");
   if (acquisition.rawSha256 !== extractionInput.archive.rawSha256 ||
       acquisition.byteLength !== extractionInput.archive.byteLength) throw new Error("Extraction input acquisition archive provenance mismatch.");
-  if (acquisition.retainedArtifact !== extractionInput.archive.path) throw new Error("Extraction input archive path does not match the retained acquisition artifact.");
+  if (path.resolve(process.cwd(), acquisition.retainedArtifact) !== path.resolve(process.cwd(), extractionInput.archive.path)) throw new Error("Extraction input archive path does not match the retained acquisition artifact.");
 }
 const inputPath = extractionInput
   ? path.resolve(process.cwd(), extractionInput.member.extractedPath)
