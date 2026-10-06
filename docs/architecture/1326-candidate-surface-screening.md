@@ -779,3 +779,26 @@ The failed run did **not** alter the source provenance verdict:
 ### Extraction validator CLI correction
 
 The first run that reached extraction preparation successfully produced the verified member `cliopatria_polities_only.geojson` and its extracted SHA-256. The following validation step failed because the validator accepted only a positional path while the workflow invoked the explicit `--input <path>` contract. The validator now accepts the named `--input` argument (while retaining positional/default compatibility), and its extraction-policy assertion matches the production metadata-exclusion policy. A regression assertion was added to the extraction-input contract test.
+
+
+### T3-B extraction gate correction — 2026-10-07 / CI run 3325 follow-up
+
+The first post-validator-fix acquisition verification run reached the real extraction-input validator and exposed a path-representation mismatch, not a source-data problem. The acquisition record stores the retained artifact as an absolute CI filesystem path, while the generated extraction-input record intentionally stores the repository-relative archive path. The validator previously compared these strings directly and therefore rejected an otherwise identical artifact.
+
+The validator is now path-semantics based: both values are resolved against the repository root before comparison. This preserves the provenance invariant without requiring CI-specific absolute path strings to be embedded in the tracked extraction-input contract.
+
+The same CI checkpoint also exposed a syntax error in the extraction-input regression test: the previous edit had inserted the two-character literal \\n sequence into JavaScript source instead of an actual line break. The test has been corrected so ESLint can parse the contract test normally.
+
+No source bytes, source identity, temporal rule, geometry, or authority state changed in these fixes. The intended state remains:
+
+```
+pinned v0.2.0 acquisition = ACQUIRED + VERIFIED
+extraction preparation    = PASS
+extraction validation     = rerun required after validator correction
+candidate extraction      = WAITING
+candidate screening       = WAITING FOR REAL 1326 ANCHOR REGISTRY
+historical review         = WAITING
+canonical promotion       = BLOCKED
+```
+
+The next gate is the fresh GitHub Actions execution on the corrected branch. Only after that run passes will the real extracted GeoJSON be allowed into temporal candidate extraction. No candidate count or review binding is inferred from the failed run.
