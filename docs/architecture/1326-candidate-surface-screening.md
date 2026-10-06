@@ -666,3 +666,22 @@ canonical political geography = BLOCKED
 ```
 
 The next valid transition remains exact v0.2.0 byte verification. The supplied archive has closed one uncertainty — we now have a locally inspectable Cliopatria snapshot — but its bytes are demonstrably not the pinned production artifact, so the acquisition manifest must remain unchanged.
+
+
+### T3-B source identity clarification — supplied archive is the current `main` snapshot, not v0.2.0
+
+The user-supplied `cliopatria-main.zip` was compared against the upstream repository's immutable file references. GitHub reports the `cliopatria.geojson.zip` blob at upstream `main` as `a1e7093b64990bf97cd3c31bda96de1cafed822c`, exactly matching the nested archive extracted from the supplied package. GitHub reports the same file at tag `v0.2.0` as `cefab0f4b622e2e7fb3daf68d4f461f83991204c`, which is the production source blob already pinned by the Historia AI acquisition manifest.
+
+This resolves the provenance ambiguity: the supplied archive is not an unknown damaged copy. It is the upstream **current `main` snapshot** (as packaged in `cliopatria-main.zip`), while the required production source is the immutable **`v0.2.0` tag snapshot**. The two source blobs are different and therefore cannot be interchanged.
+
+The official Zenodo v0.2.0 record independently identifies its related work as the GitHub `v0.2.0` tree and reports MD5 `6d573d5a07dfcd5a2c6c9933d6401d48`. citeturn0search1 The upstream repository documentation also states that each release is tagged and that the data archive is the repository's `cliopatria.geojson.zip` artifact. citeturn0search0
+
+Therefore:
+
+- supplied `cliopatria-main.zip` = valid upstream **main** snapshot, useful for research/comparison;
+- upstream `main` GeoJSON ZIP blob = `a1e7093b64990bf97cd3c31bda96de1cafed822c`;
+- required v0.2.0 GeoJSON ZIP blob = `cefab0f4b622e2e7fb3daf68d4f461f83991204c`;
+- production manifest remains pinned to v0.2.0 and remains **reference-pinned-not-acquired**;
+- no main-branch data is substituted for the historical acquisition target.
+
+This is a source-identity clarification, not an authority promotion. The next transition is still genuine acquisition/verification of the exact v0.2.0 bytes, after which the existing extraction → candidate → review chain can operate against the correct immutable source.
