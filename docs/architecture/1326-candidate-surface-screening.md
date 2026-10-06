@@ -731,3 +731,23 @@ candidate surface             = WAITING FOR REAL EXTRACTION
 historical geometry review    = WAITING
 canonical political geography = BLOCKED
 ```
+
+
+### Real-source extraction gate — workflow extension
+
+Following the verified v0.2.0 acquisition, the acquisition workflow now also executes the real extraction-input preparation against the retained production snapshot and validates the resulting extraction-input record. The workflow publishes that extraction-input record and the extracted GeoJSON as a short-lived CI artifact.
+
+This intentionally stops before candidate screening because the screening contract requires an explicit 1326 anchor registry. No anchor set is being fabricated from the legacy 1300 map, and no screening/candidate geometry is inferred merely because the source bytes are now available.
+
+The intended progression is therefore:
+
+```text
+ACQUIRED + VERIFIED
+  -> extraction-input preparation + validation
+  -> real temporal candidate extraction
+  -> explicit 1326 anchor registry
+  -> candidate surface screening
+  -> T3-B review queue
+```
+
+The extraction workflow extension is committed on the current branch but its post-change CI result is still pending; no success is claimed until GitHub Actions reports it.
