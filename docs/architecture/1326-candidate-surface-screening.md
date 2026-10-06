@@ -775,3 +775,7 @@ The failed run did **not** alter the source provenance verdict:
     temporal extraction = NOT-YET-EXTRACTED
     authorityStatus = evidence-only
     promotion = BLOCKED
+
+### Extraction validator CLI correction
+
+The first run that reached extraction preparation successfully produced the verified member `cliopatria_polities_only.geojson` and its extracted SHA-256. The following validation step failed because the validator accepted only a positional path while the workflow invoked the explicit `--input <path>` contract. The validator now accepts the named `--input` argument (while retaining positional/default compatibility), and its extraction-policy assertion matches the production metadata-exclusion policy. A regression assertion was added to the extraction-input contract test.
