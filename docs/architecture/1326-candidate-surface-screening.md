@@ -818,3 +818,11 @@ The candidate artifact is uploaded with the extraction evidence artifact for the
 The extractor still performs no spatial screening, controller inference, geometry alteration, or authority promotion. Candidate records remain reconciliationStatus = pending and geometryAuthorityStatus = candidate-evidence-only; the validator reports promotion = BLOCKED.
 
 The next gate remains the explicit 1326 anchor registry required by candidate surface screening. No anchor registry is generated from the 1300 builder and no test fixture is promoted into production evidence.
+
+### Candidate extraction path-normalization correction — 2026-10-07
+
+The first real temporal candidate extraction execution reached the new extraction gate but failed before candidate validation because the acquisition record retains the production snapshot as an absolute CI path while the validated extraction input records the same artifact as a repository-relative path. The earlier extraction-input validator already normalizes these two representations; the candidate extractor had not yet applied the same rule.
+
+The extractor now compares these artifact identities after `path.resolve(process.cwd(), ...)` normalization rather than raw string equality. This changes no source identity, archive hash, extracted GeoJSON hash, candidate geometry, temporal rule, or promotion state. A regression assertion was added to `tools/tests/1326-cliopatria-candidate-validator.test.js` for the normalization contract.
+
+The corrected gate must still prove, in CI, the real candidate count, exclusion accounting, candidate-packet SHA-256, and validator PASS. No candidate count is inferred from the failed execution.
