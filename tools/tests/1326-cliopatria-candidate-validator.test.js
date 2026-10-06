@@ -15,6 +15,7 @@ assert.match(script, /FromYear <= 1326 <= ToYear/);
 assert.match(script, /candidate-evidence-only/);
 assert.match(script, /inputFeatures !== counted \+ excludedTotal/);
 assert.match(extractor, /candidatePacketSha256/);
+assert.match(extractor, /path\.resolve\(process\.cwd\(\), acquisition\.retainedArtifact\) !== path\.resolve\(process\.cwd\(\), extractionInput\.archive\.path\)/);
 assert.match(pipeline, /validate-1326-cliopatria-candidates\.js/);
 
 console.log("1326 candidate packet validator contract passed: packet hash, temporal rule, geometry class, and evidence-only state are independently gated.");
