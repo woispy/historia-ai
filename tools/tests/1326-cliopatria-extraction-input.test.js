@@ -14,7 +14,8 @@ assert.match(prep, /Expected exactly one production GeoJSON member after excludi
 assert.match(prep, /powershell\.exe/);
 assert.match(prep, /Expand-Archive/);
 assert.match(prep, /FeatureCollection/);
-assert.match(prep, /__macosx|AppleDouble|metadata/);\nassert.match(prep, /Unsafe archive member path/);
+assert.match(prep, /__macosx|AppleDouble|metadata/);
+assert.match(prep, /Unsafe archive member path/);
 assert.match(prep, /extractedSha/);
 assert.match(prep, /BLOCKED_UNTIL_TEMPORAL_EXTRACTION_RECONCILIATION_REVIEW/);
 assert.match(extract, /--extraction-input/);
