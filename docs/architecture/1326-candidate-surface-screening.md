@@ -802,3 +802,19 @@ canonical promotion       = BLOCKED
 ```
 
 The next gate is the fresh GitHub Actions execution on the corrected branch. Only after that run passes will the real extracted GeoJSON be allowed into temporal candidate extraction. No candidate count or review binding is inferred from the failed run.
+
+
+### Real 1326 temporal candidate extraction gate — 2026-10-07
+
+The verified v0.2.0 acquisition workflow now advances one deterministic step beyond extraction-input validation: CI runs the actual temporal candidate extractor against the validated production extraction input and then runs the candidate validator.
+
+The gate is:
+
+    npm run extract:1326-cliopatria -- --extraction-input data/build/gis/1326/cliopatria-extraction-input.json --output data/build/gis/1326/cliopatria-1326-candidates.json
+    npm run validate:1326-cliopatria-candidates -- --input data/build/gis/1326/cliopatria-1326-candidates.json
+
+The candidate artifact is uploaded with the extraction evidence artifact for the same CI run. This establishes a real production-source temporal candidate packet rather than relying on a fixture-only candidate test.
+
+The extractor still performs no spatial screening, controller inference, geometry alteration, or authority promotion. Candidate records remain reconciliationStatus = pending and geometryAuthorityStatus = candidate-evidence-only; the validator reports promotion = BLOCKED.
+
+The next gate remains the explicit 1326 anchor registry required by candidate surface screening. No anchor registry is generated from the 1300 builder and no test fixture is promoted into production evidence.
