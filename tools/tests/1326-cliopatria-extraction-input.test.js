@@ -20,7 +20,7 @@ assert.match(prep, /extractedSha/);
 assert.match(prep, /BLOCKED_UNTIL_TEMPORAL_EXTRACTION_RECONCILIATION_REVIEW/);
 assert.match(extract, /--extraction-input/);
 assert.match(extract, /Extracted GeoJSON SHA-256 does not match the extraction input record/);
-assert.match(validator, /immutableReference/);
+assert.match(validator, /process\.argv\.indexOf\("--input"\)/);\nassert.match(validator, /immutableReference/);
 assert.match(validator, /sourceBlobSha/);
 assert.match(validator, /acquisition record is missing/);
 assert.match(validator, /archive SHA differs from acquisition record/);
