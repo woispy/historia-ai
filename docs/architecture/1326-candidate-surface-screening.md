@@ -643,3 +643,26 @@ v0.2.0 acquisition           = NOT YET VERIFIED
 historical geometry review   = WAITING
 canonical political geography = BLOCKED
 ```
+
+
+### T3-B CI checkpoint — 2026-10-06 / run 3307 and user-supplied Cliopatria archive forensic check
+
+GitHub Actions **run 3307** completed successfully for the current HEAD `d4d8561505c1af04266321ddc02e7eb98ab46c93`. The repository CI therefore remains technically green after the run-3306 documentation checkpoint.
+
+A user-supplied `cliopatria-main.zip` archive was also inspected locally as a potential acquisition source. The outer archive is 298,798,816 bytes; its own MD5 is `ee3cfa94bfb3d386d55130ee93d97982` and SHA-256 is `6f26816e8b7125a53239be3982a95d8baac42945cd15e15b782b1f612ae637ba`. It contains `cliopatria-main/cliopatria.geojson.zip` with 46,005,176 bytes. The nested source archive has MD5 `2681d49b59e8ff967f7c25dd4e51b57c`, SHA-256 `e10a4e429fca708788ff9e7572a95fce801fae55852d217cffabc1c59cd4eed4`, and Git blob SHA-1 `a1e7093b64990bf97cd3c31bda96de1cafed822c`.
+
+These byte identities do **not** match the pinned production source blob `cefab0f4b622e2e7fb3daf68d4f461f83991204c`, and the outer archive MD5 does not match the official Zenodo v0.2.0 archive MD5 `6d573d5a07dfcd5a2c6c9933d6401d48`. The archive README also describes the repository generally and does not itself establish that the supplied snapshot is the immutable GitHub `v0.2.0` release. Therefore the supplied archive is retained as **comparison/research evidence only** and is not accepted into `data/gis/1326/acquisition-manifest.json`.
+
+This check is important because the archive is useful enough to inspect, but it cannot safely replace the pinned source without byte-level identity. No v0.2.1/current-main geometry is substituted, no production SHA is overwritten, and no candidate/review geometry is promoted from this archive.
+
+The current authority state is therefore:
+
+```
+CI / technical repository gate = PASS (run 3307)
+user-supplied archive         = INSPECTED / NOT VERIFIED AS v0.2.0
+pinned v0.2.0 acquisition     = NOT YET VERIFIED
+historical geometry review    = WAITING
+canonical political geography = BLOCKED
+```
+
+The next valid transition remains exact v0.2.0 byte verification. The supplied archive has closed one uncertainty — we now have a locally inspectable Cliopatria snapshot — but its bytes are demonstrably not the pinned production artifact, so the acquisition manifest must remain unchanged.
