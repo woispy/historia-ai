@@ -3,7 +3,13 @@ import path from "node:path";
 import crypto from "node:crypto";
 
 const root = process.cwd();
-const inputPath = path.resolve(root, process.argv[2] ?? "data/build/gis/1326/cliopatria-extraction-input.json");
+const inputIndex = process.argv.indexOf("--input");
+const inputPath = path.resolve(
+  root,
+  inputIndex >= 0
+    ? (process.argv[inputIndex + 1] ?? "data/build/gis/1326/cliopatria-extraction-input.json")
+    : (process.argv[2] ?? "data/build/gis/1326/cliopatria-extraction-input.json"),
+);
 const record = JSON.parse(fs.readFileSync(inputPath, "utf8"));
 
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
@@ -34,7 +40,7 @@ assert(typeof record.member.path === "string" && record.member.path.length > 0, 
 assert(!path.posix.isAbsolute(record.member.path) && !record.member.path.split("/").includes(".."), "Extraction input member path is unsafe.");
 assert(typeof record.member.extractedPath === "string" && record.member.extractedPath.length > 0, "Extraction input extracted path is missing.");
 assert(/^[0-9a-f]{64}$/.test(record.member.sha256 ?? ""), "Extraction input extracted GeoJSON SHA-256 is invalid.");
-assert(record.extractionPolicy === "Exactly one .geojson archive member; cross-platform extraction; no inferred member selection.", "Extraction policy drifted.");
+assert(record.extractionPolicy === "Exactly one production .geojson archive member after excluding macOS metadata (__MACOSX and AppleDouble ._ files); cross-platform extraction; no content-based member guessing.", "Extraction policy drifted.");
 assert(record.promotion === "BLOCKED_UNTIL_TEMPORAL_EXTRACTION_RECONCILIATION_REVIEW", "Extraction input must remain promotion-blocked.");
 
 assert(record.archive.path === acquisition.retainedArtifact, "Extraction input archive path differs from the retained acquisition artifact.");
