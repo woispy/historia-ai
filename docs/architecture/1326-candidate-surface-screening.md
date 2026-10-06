@@ -751,3 +751,10 @@ ACQUIRED + VERIFIED
 ```
 
 The extraction workflow extension is committed on the current branch but its post-change CI result is still pending; no success is claimed until GitHub Actions reports it.
+
+
+### Extraction gate correction — pinned URL contract
+
+CI acquisition verification run #6 exposed a contract mismatch in `prepare-1326-cliopatria-extraction-input.js`: the validator expected the mutable-looking tag URL `/v0.2.0/`, while the acquisition contract intentionally pins the immutable commit URL `/ad28a69/`. The source bytes, Git blob, SHA-256 and acquisition verification all passed; only this URL assertion failed.
+
+The validator has been corrected to require the same immutable URL already used by the acquisition script and manifest. No source data or historical interpretation was changed.
