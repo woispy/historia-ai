@@ -576,3 +576,31 @@ CI run 3303 passed on current HEAD `5ae1dee5f1fccecfdf73ae7cf7ae2b56fa5ecc5c`. T
 The current hard blocker is unchanged: the production acquisition manifest remains pinned to Cliopatria v0.2.0, while the verified v0.2.1 snapshot is comparison/research-only. The v0.2.0 archive bytes are still required before real candidate-specific review IDs and research-backed T3-B bindings can be created against the production source chain. No v0.2.1 geometry is substituted for v0.2.0. T3-B therefore remains **technical provenance PASS / historical review WAITING / canonical promotion BLOCKED**.
 
 The v0.2.0 binary acquisition remains externally blocked in this working environment: the GitHub repository connector can inspect the pinned blob identity but cannot decode the ZIP blob as UTF-8, and the web fetch layer cannot retrieve the binary archive. This is an access/tooling limitation, not evidence that the artifact is missing or changed. The production manifest therefore remains untouched at `reference-pinned-not-acquired`; no substitute byte source is accepted.
+
+
+### T3-B CI checkpoint — 2026-10-06
+
+The current branch HEAD `842f94c7ea679c37f3f5e89126551f132add10ba` has a verified GitHub Actions **CI run 3304 — SUCCESS**. The run completed the full `validate` job; all 79 validation/build/test steps reported `success`.
+
+The checkpoint explicitly includes successful execution of the 1326 source-intake contract, historical GIS runtime assets and identity tests, historical political map tests, Phase 2 province topology and authoritative province generation contracts, spatial seed/P3/P6.x contracts, physical/cartography/rendering contracts, GPU province pack integrity/build, game startup/runtime/build checks, historical GIS/map script verification, and the 15K+ province scalability/diagnostics tests.
+
+This CI result confirms the **technical repository gate** for the current T3-B branch state. It does **not** convert evidence-layer artifacts into historical authority. The current state remains:
+
+```
+technical provenance / repository gate = PASS
+historical geometry review             = WAITING
+canonical political geography          = BLOCKED
+```
+
+The production acquisition manifest remains `reference-pinned-not-acquired` for Cliopatria v0.2.0. The v0.2.0 raw archive bytes are still not available through the current acquisition path, so no real candidate-specific review IDs or production edge bindings are fabricated. The verified v0.2.1 snapshot remains comparison/research-only and is not substituted for v0.2.0.
+
+The next legitimate transition is therefore **historical evidence acquisition/reconciliation**, not another synthetic validator layer and not canonical promotion. Once the pinned v0.2.0 bytes are genuinely acquired and verified, the existing deterministic chain may proceed:
+
+```
+acquisition → extraction → candidate validation
+→ entity reconciliation → candidate screening
+→ geometry review queue → research-backed geometry review
+→ topology / provenance / confidence review → canonical gate
+```
+
+CI success is recorded here as a repository/gate checkpoint only; it is not treated as evidence that the historical province boundaries are correct.
