@@ -72,3 +72,20 @@ jobs:
             data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.acquisition.json
           retention-days: 7
           compression-level: 0
+
+
+      - name: Prepare verified 1326 extraction input
+        run: |
+          npm run prepare:1326-cliopatria-extraction-input -- --archive data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip
+          npm run validate:1326-cliopatria-extraction-input -- --input data/build/gis/1326/cliopatria-extraction-input.json
+
+      - name: Publish verified extraction input
+        uses: actions/upload-artifact@v4
+        with:
+          name: cliopatria-v0.2.0-extraction-input
+          path: |
+            data/build/gis/1326/cliopatria-extraction-input.json
+            data/build/gis/1326/source-snapshots/cliopatria-v0.2.0/**/cliopatria*.geojson
+          retention-days: 7
+          compression-level: 0
+
