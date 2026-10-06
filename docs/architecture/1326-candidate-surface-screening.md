@@ -685,3 +685,49 @@ Therefore:
 - no main-branch data is substituted for the historical acquisition target.
 
 This is a source-identity clarification, not an authority promotion. The next transition is still genuine acquisition/verification of the exact v0.2.0 bytes, after which the existing extraction → candidate → review chain can operate against the correct immutable source.
+
+
+### T3-B acquisition checkpoint — 2026-10-06 / Cliopatria v0.2.0 byte verification complete
+
+The pinned Cliopatria v0.2.0 source has now crossed the real acquisition gate in GitHub Actions run **37482859089 / acquisition verification run #2** on branch HEAD `aeb7e49e378bf6b432c1d63d23db2930b79d2617`.
+
+The official Zenodo v0.2.0 distribution was verified at the archive level, and the embedded `cliopatria.geojson.zip` was verified against the immutable Git blob contract:
+
+- immutable commit: `ad28a69`
+- source blob SHA-1: `cefab0f4b622e2e7fb3daf68d4f461f83991204c`
+- retained source byte length: `44231317`
+- retained source SHA-256: `d01ae3a20d358cc5d54f69d9d725d390767d9c8759ac89ad6f90c58d106f3370`
+- acquisition record: `data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.acquisition.json`
+- retained artifact: `data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip`
+
+The acquisition script itself then executed `--download` and `--verify` in the clean CI workspace, and the direct retained ZIP was independently checked with `git hash-object`. Both acquisition verification and the normal Historia AI CI **run 3311** completed successfully.
+
+The tracked acquisition manifest has consequently transitioned only its **source provenance state** from `reference-pinned-not-acquired` to `acquired`. `authorityStatus` remains `evidence-only`; promotion remains blocked. The acquisition record explicitly reports `temporalExtraction.status = not-yet-extracted` and `promotion = BLOCKED_UNTIL_EXTRACTION_RECONCILIATION_REVIEW`.
+
+This is the first real byte-level acquisition of the pinned v0.2.0 source in the production chain. The previously supplied `cliopatria-main.zip` remains comparison/research-only because its source blob was the upstream `main` blob `a1e7093b64990bf97cd3c31bda96de1cafed822c`, not the pinned v0.2.0 blob.
+
+The next legitimate transition is now:
+
+```text
+VERIFIED acquisition
+  -> extraction-input preparation
+  -> extraction validation
+  -> temporal candidate extraction
+  -> entity reconciliation
+  -> candidate surface screening
+  -> T3-B review queue
+```
+
+No canonical geometry is created or promoted by acquisition, and no synthetic/fallback geometry is permitted.
+
+### Current T3-B authority state
+
+```text
+repository / CI gate          = PASS (run 3311)
+pinned v0.2.0 acquisition     = ACQUIRED + VERIFIED
+source byte provenance        = PASS
+1326 temporal extraction      = NOT YET RUN
+candidate surface             = WAITING FOR REAL EXTRACTION
+historical geometry review    = WAITING
+canonical political geography = BLOCKED
+```
