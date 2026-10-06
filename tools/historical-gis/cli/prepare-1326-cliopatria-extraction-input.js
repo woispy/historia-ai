@@ -92,11 +92,20 @@ try {
   }
   await collectFiles(expandedDir);
 
-  const geojsonFiles = files.filter(item => item.relative.toLowerCase().endsWith(".geojson"));
+  const geojsonFiles = files.filter(item => {
+    const normalized = item.relative.replaceAll("\\", "/");
+    const lower = normalized.toLowerCase();
+    if (!lower.endsWith(".geojson")) return false;
+    // macOS Finder metadata is not source data. Exclude AppleDouble files and
+    // the __MACOSX metadata tree so the production GeoJSON member is selected
+    // deterministically without content-based guessing.
+    if (lower.startsWith("__macosx/") || lower.includes("/__macosx/")) return false;
+    if (path.posix.basename(normalized).startsWith("._")) return false;
+    return true;
+  });
   if (geojsonFiles.length !== 1) {
-    throw new Error(`Expected exactly one GeoJSON member in Cliopatria archive; found ${geojsonFiles.length}: ${geojsonFiles.map(item => item.relative).join(", ")}`);
+    throw new Error(`Expected exactly one production GeoJSON member after excluding macOS metadata; found ${geojsonFiles.length}: ${geojsonFiles.map(item => item.relative).join(", ")}`);
   }
-
   const member = geojsonFiles[0].relative.replaceAll("\\", "/");
   if (path.posix.isAbsolute(member) || member.split("/").includes("..")) {
     throw new Error(`Unsafe archive member path: ${member}`);
@@ -133,7 +142,7 @@ try {
       featureCollectionValidated: true
     },
     immutableReference: acquisition.immutableReference,
-    extractionPolicy: "Exactly one .geojson archive member; cross-platform extraction; no inferred member selection.",
+    extractionPolicy: "Exactly one production .geojson archive member after excluding macOS metadata (__MACOSX and AppleDouble ._ files); cross-platform extraction; no content-based member guessing.",
     promotion: "BLOCKED_UNTIL_TEMPORAL_EXTRACTION_RECONCILIATION_REVIEW"
   };
 
