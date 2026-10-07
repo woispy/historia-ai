@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "research-candidate-registry",
+  "policy": {
+    "sourcePolicy": "historical-evidence-plus-independent-coordinate",
+    "geometryGeneration": false,
+    "controllerInference": false,
+    "canonicalPromotion": false
+  },
+  "anchors": [
+    {
+      "anchorId": "1326-bursa",
+      "historicalName": "Bursa / Prusa",
+      "modernName": "Bursa",
+      "geometry": { "type": "Point", "coordinates": [29.06013, 40.195593] },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_WINDOW",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-orhan",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/orhan",
+          "temporalClass": "SCENARIO_WINDOW",
+          "claim": "Bursa surrendered to Orhan in the spring of 1326; the entry dates the surrender to 6 April 1326."
+        },
+        {
+          "sourceId": "tdv-bursa",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/bursa",
+          "temporalClass": "SCENARIO_WINDOW",
+          "claim": "Bursa was surrendered to the Ottomans on 6 April 1326."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-16155",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/750737/bursa.html",
+          "coordinates": [29.06013, 40.195593],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q40738",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q40738",
+          "coordinates": [29.06013, 40.195593],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "HIGH",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-bilecik",
+      "historicalName": "Bilecik",
+      "modernName": "Bilecik",
+      "geometry": { "type": "Point", "coordinates": [29.979319, 40.141924] },
+      "anchorType": "SETTLEMENT",
+      "historicalApplicability": "PRE_SCENARIO",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-bilecik",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/bilecik",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Bilecik became an important centre of the Ottoman polity after its capture; Osman Gazi assigned the Bilecik revenues to his family and appointed Şeyh Edebali."
+        },
+        {
+          "sourceId": "tdv-dursun-fakih",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/dursun-fakih",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "The source records Bilecik under Osman Gazi and identifies Edebali's administration there."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-bilecik",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/search.html?country=TR",
+          "coordinates": [29.979319, 40.141924],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q208006",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q208006",
+          "coordinates": [29.979167, 40.143056],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "MEDIUM",
+        "controller": "MEDIUM",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-kutahya",
+      "historicalName": "Kütahya / Cotiaeum",
+      "modernName": "Kütahya",
+      "geometry": { "type": "Point", "coordinates": [29.983333, 39.424167] },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-kutahya",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/kutahya",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Kütahya became the centre of the Germiyan polity by 1300."
+        },
+        {
+          "sourceId": "tdv-germiyanogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/germiyanogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "The Germiyan polity was established around Kütahya and the city functioned as its political centre."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-kutahya",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/305267/kuetahya.html",
+          "coordinates": [29.983333, 39.424167],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q188894",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q188894",
+          "coordinates": [29.983333, 39.424167],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "MEDIUM",
+        "controller": "MEDIUM",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-sinop",
+      "historicalName": "Sinop / Sinope",
+      "modernName": "Sinop",
+      "geometry": { "type": "Point", "coordinates": [35.162525, 42.026829] },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-sinop",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/sinop",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Sinop passed from the Pervaneoğulları context to Candaroğlu Süleyman Paşa after the 1324 Hatunili episode; the entry later records Candaroğlu administration."
+        },
+        {
+          "sourceId": "tdv-candarogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/candarogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Süleyman Bey's major achievement included the annexation of Sinop."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-sinop",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=Sinop%2C+Türkiye",
+          "coordinates": [35.162525, 42.026829],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q28219932",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q28219932",
+          "coordinates": [35.151944, 42.028056],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "MEDIUM",
+        "controller": "MEDIUM",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    }
+  ]
+}
