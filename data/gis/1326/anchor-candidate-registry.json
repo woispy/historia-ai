@@ -917,5 +917,188 @@
       },
       "authorityStatus": "candidate-evidence-only"
     },
+    {
+      "anchorId": "1326-birgi",
+      "historicalName": "Birgi",
+      "modernName": "Birgi",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          28.059167,
+          38.250278
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-aydinogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/aydinogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Mehmed Bey established control in Aydın-ili in 1308, captured Ayasuluk and Tire, and settled in Birgi with his youngest son; Birgi became the first centre of the Aydınoğulları beylik."
+        },
+        {
+          "sourceId": "tdv-birgi",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/birgi",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Birgi is identified as the first centre of the Aydınoğulları Beyliği."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-birgi",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=Birgi%2C+Türkiye",
+          "coordinates": [
+            28.059167,
+            38.250278
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q2220449",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q2220449",
+          "coordinates": [
+            28.065,
+            38.255
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-ayasuluk",
+      "historicalName": "Ayasuluk / Selçuk",
+      "modernName": "Selçuk",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.3684883117676,
+          37.951371965992
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-aydinogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/aydinogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "After establishing control in Aydın-ili in 1308, Mehmed Bey captured Ayasuluk and later established a naval base there."
+        },
+        {
+          "sourceId": "tdv-ayasuluk",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/ayasuluk",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Ayasuluk is the historical settlement corresponding to the later Selçuk locality and is directly associated with the Aydınoğulları historical geography."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-selcuk",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/301256/sel-uk.html",
+          "coordinates": [
+            27.3684883117676,
+            37.951371965992
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q876176",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q876176",
+          "coordinates": [
+            27.37348888888889,
+            37.94698888888889
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-tire",
+      "historicalName": "Tire / Thyra",
+      "modernName": "Tire",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.73508,
+          38.088769
+        ]
+      },
+      "anchorType": "SETTLEMENT",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-aydinogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/aydinogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Mehmed Bey captured Tire after establishing control in Aydın-ili in 1308 and incorporated it into the Aydınoğulları sphere."
+        },
+        {
+          "sourceId": "tdv-tire",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/tire",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Tire passed from Sasa Bey's control to Aydınoğlu Mehmed Bey during the beyliks period; it was subsequently developed under the Aydınoğulları."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-tire",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=Tire%2C+Türkiye",
+          "coordinates": [
+            27.73508,
+            38.088769
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q630533",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q630533",
+          "coordinates": [
+            27.7319,
+            38.08956944444445
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
   ]
 }
