@@ -465,3 +465,20 @@ Jerusalem is intentionally classified as SETTLEMENT, not as an asserted politica
 | Required record fields | 32/32 |
 
 No new anchor is added in this wave. The registry is being treated as an evidence surface only. Alias reconciliation, exact-date controller binding, theatre coverage and confidence/precision review remain open before any canonical geometry work.
+
+
+## Wave 23 — Exact-date controller confidence audit
+
+| Audit | Result |
+|---|---|
+| Registry candidates reviewed | 32 |
+| Exact-date HIGH retained | 1 (1326-bursa) |
+| MEDIUM controller confidence retained | 0 |
+| MEDIUM to NOT_ASSERTED corrections | 6 |
+| Candidate deletions | 0 |
+| Geometry confidence | 32/32 NOT_ASSERTED |
+| Canonical promotion | BLOCKED |
+
+The six corrected records are Alâiye, Bilecik, Kütahya, Sinop, Söğüt and Uluborlu. Their historical candidate status is unchanged; only controller confidence was corrected because their stored evidence does not directly bind political control to the exact 7 April 1326 scenario instant. Bursa remains the sole HIGH controller-confidence record because its stored evidence dates the surrender to 6 April 1326.
+
+This wave closes the current exact-date controller-confidence audit without converting historical continuity into controller authority and without opening any geometry promotion path.
