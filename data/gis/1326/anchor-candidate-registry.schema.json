@@ -83,7 +83,7 @@
               "required": ["sourceId", "sourceType", "uri", "coordinates", "referencePoint"],
               "properties": {
                 "sourceId": { "type": "string", "minLength": 1 },
-                "sourceType": { "type": "string", "enum": ["GEONAMES", "WIKIDATA", "PROJECT_RESEARCH"] },
+                "sourceType": { "type": "string", "enum": ["GEONAMES", "WIKIDATA", "WIKIPEDIA", "PROJECT_RESEARCH"] },
                 "uri": { "type": "string", "format": "uri" },
                 "coordinates": {
                   "type": "array",
