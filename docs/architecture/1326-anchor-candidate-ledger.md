@@ -65,6 +65,10 @@ Production states:
 | 1326-settlement-balikesir | Balıkesir | Karasi / Mysia | SCENARIO_RELEVANT | GeoNames + Wikipedia city points | Karasi control predates 1326; exact 7 Apr controller not sealed | CONTROLLER_BINDING_PENDING | Exact April 1326 local controller; 1328 two-centre evidence cannot be projected backward |
 | 1326-settlement-bergama | Bergama | Karasi / Mysia | SCENARIO_RELEVANT | GeoNames + Wikipedia city points | Karasi centre evidence strong; exact 7 Apr controller not sealed | CONTROLLER_BINDING_PENDING | Exact April 1326 local controller; 1328 Yahşi-centre evidence is post-scenario |
 | 1326-settlement-manisa | Manisa | Saruhan / Lydia | SCENARIO_RELEVANT — Manisa-centred Saruhan polity established before scenario | GeoNames + Wikidata city points converge exactly | Saruhan centre evidence strong; exact 7 Apr 1326 controller not asserted | CONTROLLER_BINDING_PENDING | Exact 7 Apr 1326 controller binding; no controller inference from institutional continuity |
+
+| 1326-settlement-birgi | Birgi | Aydın / Lydia-Ionia | SCENARIO_RELEVANT — first Aydınoğulları centre | GeoNames + Wikidata city points | Aydınoğulları control established before scenario; exact 7 Apr controller not asserted | CONTROLLER_BINDING_PENDING | Exact 7 Apr 1326 controller binding; no boundary inference |
+| 1326-settlement-ayasuluk | Ayasuluk / Selçuk | Aydın / Lydia-Ionia | SCENARIO_RELEVANT — captured by Mehmed Bey before scenario | GeoNames + Wikidata city points | Aydınoğulları control established before scenario; exact 7 Apr controller not asserted | CONTROLLER_BINDING_PENDING | Exact 7 Apr 1326 controller binding; historical site vs modern city-point semantics |
+| 1326-settlement-tire | Tire | Aydın / Lydia-Ionia | SCENARIO_RELEVANT — captured by Mehmed Bey before scenario | GeoNames + Wikidata city points | Aydınoğulları control established before scenario; exact 7 Apr controller not asserted | CONTROLLER_BINDING_PENDING | Exact 7 Apr 1326 controller binding; no boundary inference |
 | 1326-settlement-birgi | Birgi | Aydın / Lydia-Ionia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | Aydınid centre evidence strong; exact date binding needed | CONTROLLER_BINDING_PENDING | Stable 1326 source binding |
 | 1326-settlement-ayasuluk | Ayasuluk | Aydın / Lydia-Ionia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | Aydınid evidence strong; later İzmir events excluded | CONTROLLER_BINDING_PENDING | Stable 1326 source binding |
 | 1326-settlement-tire | Tire | Aydın / Lydia-Ionia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | Aydınid evidence strong; exact date binding needed | CONTROLLER_BINDING_PENDING | Stable 1326 source binding |
@@ -252,3 +256,25 @@ Decision:
 - do not infer any province polygon or frontier from the Manisa anchor.
 
 This closes the **existence + independent-coordinate** gate for Manisa. The **exact scenario-date controller** gate remains open.
+
+
+## Wave 11 — Aydın / Birgi–Ayasuluk–Tire
+
+The Aydın pass closes the independent-coordinate gate for three existing high-value candidates without promoting controller or geometry authority.
+
+- TDV Aydınoğulları states that Mehmed Bey took control of Aydın-ili in 1308, then captured Ayasuluk and Tire, and settled in Birgi with his youngest son. It also records the establishment of a naval presence at Ayasuluk. citeturn1search0
+- TDV Birgi explicitly identifies Birgi as the first centre of the Aydınoğulları Beyliği. citeturn0search6
+- TDV Tire records the transition from Sasa Bey to Aydınoğlu Mehmed Bey during the beyliks period and subsequent Aydınoğulları development of the city. citeturn1search1
+- GeoNames reports Birgi [28.059167, 38.250278], Selçuk [27.3684883117676, 37.951371965992], and Tire [27.73508, 38.088769]. citeturn2search13turn2search0turn2search6
+- Wikidata provides independent city-point coordinates for Birgi (Q2220449), Selçuk (Q876176), and Tire (Q630533). citeturn1search7turn1search3turn2search2
+
+Decisions:
+
+- register `1326-birgi`, `1326-ayasuluk`, and `1326-tire` as research-candidate anchors;
+- retain `controller = NOT_ASSERTED` for all three;
+- retain `geometry = NOT_ASSERTED`;
+- use city-point semantics only;
+- do not project the later 1328/29 İzmir harbour event backward into the scenario date;
+- do not infer political boundaries from these anchors.
+
+This closes the **existence + independent-coordinate** gate for the three Aydın candidates. Their exact 7 April 1326 controller binding remains a separate open gate.
