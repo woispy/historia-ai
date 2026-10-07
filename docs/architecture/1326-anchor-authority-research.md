@@ -1241,3 +1241,47 @@ Decision:
 ### Wave 21 gate result
 
 The historical and independent-coordinate gates are closed for Jerusalem as a settlement/reference anchor. Canonical political geometry remains BLOCKED.
+
+
+## Wave 22 — Registry integrity / Tier-1 audit checkpoint
+
+No new anchor is promoted in this wave. The purpose is to reconcile the current machine-readable registry against the T3-A/T3-B authority rules recorded in the 1326 transition inventory and the current validator contract.
+
+### Registry audit result
+
+Current registry size: **32 anchors**.
+
+- anchor IDs: 32 unique / 32 records
+- duplicate coordinates: none detected
+- authorityStatus: all records = `candidate-evidence-only`
+- geometry confidence: all records = `NOT_ASSERTED`
+- anchor types: 25 `POLITICAL_CENTRE`, 7 `SETTLEMENT`
+- historical applicability: 28 `SCENARIO_RELEVANT`, 3 `PRE_SCENARIO`, 1 `SCENARIO_WINDOW`
+- required record fields: present for all 32 records
+
+The root registry remains `scenarioDate = 1326-04-07`, with geometry generation, controller inference, and canonical promotion all disabled. The validator additionally requires each selected point to match a declared source coordinate and requires at least two coordinate source types.
+
+### Authority interpretation
+
+This audit does **not** convert the 32 points into province centres, centroids, political polygons, or controller surfaces. The transition-inventory rule remains active: historical nodes are inputs to an evidence/constraint graph, not direct province geometry.
+
+The T3-B contract therefore remains:
+
+`Historical evidence → Anchor Graph → constraints → candidate surface → review → canonical`
+
+and not:
+
+`anchor → polygon → runtime`.
+
+### Remaining Tier-1 work
+
+The next production-gate tasks are now reconciliation rather than indiscriminate anchor expansion:
+
+1. alias/identity audit across historical and modern names;
+2. exact-date controller binding audit, distinguishing direct evidence from continuity inference;
+3. intended 1326 theatre coverage matrix;
+4. confidence/precision consistency audit;
+5. deterministic registry gate as the machine-readable evidence contract;
+6. only after those gates, research-backed geometry reconciliation.
+
+Canonical political geometry remains **BLOCKED**.
