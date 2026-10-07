@@ -64,7 +64,7 @@ Production states:
 | 1326-settlement-larende | Lârende / Karaman | Karaman / Lycaonia | SCENARIO_RELEVANT as regional centre | GeoNames + Wikipedia city points | Karamanid institutional continuity is strong, exact 7 Apr controller not sealed | CONTROLLER_BINDING_PENDING | Exact 7 Apr 1326 controller binding; do not use 1328–29 expansion backward |
 | 1326-settlement-balikesir | Balıkesir | Karasi / Mysia | SCENARIO_RELEVANT | GeoNames + Wikipedia city points | Karasi control predates 1326; exact 7 Apr controller not sealed | CONTROLLER_BINDING_PENDING | Exact April 1326 local controller; 1328 two-centre evidence cannot be projected backward |
 | 1326-settlement-bergama | Bergama | Karasi / Mysia | SCENARIO_RELEVANT | GeoNames + Wikipedia city points | Karasi centre evidence strong; exact 7 Apr controller not sealed | CONTROLLER_BINDING_PENDING | Exact April 1326 local controller; 1328 Yahşi-centre evidence is post-scenario |
-| 1326-settlement-manisa | Manisa | Saruhan / Lydia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | Saruhan centre evidence strong; exact date binding needed | CONTROLLER_BINDING_PENDING | Stable 1326 source binding |
+| 1326-settlement-manisa | Manisa | Saruhan / Lydia | SCENARIO_RELEVANT — Manisa-centred Saruhan polity established before scenario | GeoNames + Wikidata city points converge exactly | Saruhan centre evidence strong; exact 7 Apr 1326 controller not asserted | CONTROLLER_BINDING_PENDING | Exact 7 Apr 1326 controller binding; no controller inference from institutional continuity |
 | 1326-settlement-birgi | Birgi | Aydın / Lydia-Ionia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | Aydınid centre evidence strong; exact date binding needed | CONTROLLER_BINDING_PENDING | Stable 1326 source binding |
 | 1326-settlement-ayasuluk | Ayasuluk | Aydın / Lydia-Ionia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | Aydınid evidence strong; later İzmir events excluded | CONTROLLER_BINDING_PENDING | Stable 1326 source binding |
 | 1326-settlement-tire | Tire | Aydın / Lydia-Ionia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | Aydınid evidence strong; exact date binding needed | CONTROLLER_BINDING_PENDING | Stable 1326 source binding |
@@ -229,3 +229,26 @@ The targeted Karasi pass closes the coordinate/reference-point side for both can
 - Bergama coordinate evidence: GeoNames + city-level Wikipedia.
 - Both remain CONTROLLER_BINDING_PENDING and geometry NOT_ASSERTED.
 - No anchor point is converted into a political polygon.
+
+
+## Wave 10 — Saruhan / Manisa coordinate and temporal checkpoint
+
+### Manisa
+
+The Manisa pass closes the **independent coordinate** gate for the existing Saruhan candidate and strengthens its pre-scenario historical applicability, but deliberately leaves the exact scenario-date controller unasserted.
+
+- TDV Saruhanoğulları identifies the polity as a Türkmen beylik ruling from Manisa and its surrounding area from the late 13th to early 15th centuries. The entry states that Saruhan Bey established the polity with Manisa as its centre and that Manisa became the beylik's centre after its capture, after which Saruhan Bey expanded his regional power. citeturn0search6
+- TDV Saruhan Bey identifies him as the founder of the Manisa-centred Saruhanoğulları beylik. citeturn0search10
+- GeoNames reports the Manisa city point as [27.426465, 38.612018]. citeturn0search0
+- Wikidata Q147089 reports the same city coordinate, 38°36′43″N, 27°25′35″E, and identifies Manisa in relation to the Beylik of Saruhan. citeturn1search0
+
+Decision:
+
+- register `1326-manisa` as a research-candidate anchor;
+- selected coordinate is the exact coordinate reported by both independent coordinate source types;
+- `controller = NOT_ASSERTED`;
+- `geometry = NOT_ASSERTED`;
+- do not infer the 7 April 1326 controller solely from the beylik's pre-scenario institutional continuity;
+- do not infer any province polygon or frontier from the Manisa anchor.
+
+This closes the **existence + independent-coordinate** gate for Manisa. The **exact scenario-date controller** gate remains open.
