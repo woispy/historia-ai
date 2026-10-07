@@ -335,3 +335,28 @@ Giresun closes the historical-existence and independent-coordinate gates while a
 - No province polygon or frontier is derived from the anchor.
 
 This closes the existence + independent-coordinate gate for Giresun; exact scenario-date controller binding remains separate.
+
+
+## Wave 15 — Menteşe / Caria
+
+### 1326-milas
+- Status: research candidate / candidate-evidence-only.
+- Role: former and initial Menteşe centre; settlement anchor for the 1326 theatre.
+- Temporal basis: PRE_SCENARIO evidence; TDV places the initial centre at Milas and records the 1320-1321 transfer toward Muğla.
+- Coordinate: [27.783889, 37.316389] from GeoNames; independent Wikidata city point is approximately [27.783333, 37.316667].
+- Controller: NOT_ASSERTED.
+- Geometry: NOT_ASSERTED.
+- Boundary generation: prohibited.
+
+### 1326-mugla
+- Status: research candidate / candidate-evidence-only.
+- Role: Menteşe political-centre anchor for the 1320s.
+- Temporal basis: PRE_SCENARIO evidence; TDV dates the capital transfer from Milas to Muğla to the 1320-1321 Rhodes campaign aftermath.
+- Coordinate: [28.366497, 37.218066] from GeoNames; independent German Wikipedia city point is approximately [28.364444, 37.214722].
+- Controller: NOT_ASSERTED.
+- Geometry: NOT_ASSERTED.
+- Boundary generation: prohibited.
+
+### Peçin
+- Not added to machine-readable registry in Wave 15.
+- Reason: current source chain does not satisfy the strict pre-1326 temporal-binding gate despite strong later Menteşe-centre evidence.
