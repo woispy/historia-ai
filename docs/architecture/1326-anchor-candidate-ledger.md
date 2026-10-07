@@ -182,3 +182,25 @@ Registry decision:
 - `controller = NOT_ASSERTED`.
 - `geometry = NOT_ASSERTED`.
 - Keep the 1326 transition as unresolved chronology rather than inferring a controller from a broad regional statement.
+
+## Wave 6 intake — Burdur + Beyşehir
+
+### Burdur
+
+- `1326-settlement-burdur` is now closed on the coordinate/existence side for registry intake.
+- TDV places Burdur inside the Hamîdoğulları Isparta–Burdur regional sphere and identifies Dündar Bey as ruler of the Isparta–Burdur region in 1301–1326. citeturn0search1turn0search10
+- GeoNames and an independent city-coordinate reference converge on [30.2908333, 37.7202778]. citeturn2search1turn2search15
+- Production state remains **CONTROLLER_BINDING_PENDING**; no province geometry or exact 7 April controller is asserted.
+
+### Beyşehir
+
+- `1326-settlement-beysehir` is now closed on the coordinate/existence side for registry intake.
+- TDV identifies Beyşehir as an Eşrefoğlu political centre before the scenario date. citeturn1search5turn1search7
+- TDV explicitly dates the Demirtaş capture of Beyşehir and killing of II. Süleyman Bey to **9 October 1326**. The subsequent Hamîdoğulları takeover is therefore POST_SCENARIO and is not projected backward to 7 April. citeturn1search0
+- GeoNames and Wikidata provide independent city-point references near [31.724577, 37.677348] and [31.726111, 37.676389]. citeturn0search6turn1search2
+- Production state remains **CONTROLLER_BINDING_PENDING**; the April controller still requires a pre-9-October source binding.
+
+### Hygiene correction
+
+- Isparta's historical evidence temporal class was normalized from the invalid `SCENARIO_RELEVANT` value to `PRE_SCENARIO`.
+- `SCENARIO_RELEVANT` remains valid only at the registry record's top-level `historicalApplicability` field.
