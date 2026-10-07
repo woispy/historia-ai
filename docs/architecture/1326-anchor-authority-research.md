@@ -304,3 +304,133 @@ The research pass now supports a larger candidate pool than the initial Bithynia
 
 These remain **research candidates**, not production anchors, until independent coordinate references and machine-readable historical evidence bindings are attached.
 
+
+
+## Wave 2 historical-temporal findings
+
+### Karaman / Lycaonia
+
+TDV Karamanoğulları records that after Demirtaş left Anatolia, the Karamanids took Konya, Gevele Castle and Beyşehir in 1328-1329. It also identifies Lârende as the Karamanid capital from Bedreddin İbrahim Bey onward.
+
+Implication for 1326-04-07:
+
+- Lârende/Karaman is a valid high-value regional anchor candidate.
+- Konya must not be labelled Karamanid on 7 April 1326 solely from the later 1328-1329 conquest.
+- Beyşehir must remain tied to the Eşrefid/Hamid transition chronology rather than being assigned to Karaman from the later event.
+- The anchor registry must separate settlement existence from controller-at-scenario-date.
+
+### Germiyan / Kütahya
+
+TDV Germiyanoğulları and TDV Yâkub Bey both identify Kütahya as the Germiyan political centre. TDV Germiyanoğulları also records Timurtaş's 1325 campaign against Eşref and Hamid and the subsequent pressure on Germiyan, Denizli, Alaşehir and Menteşe.
+
+Implication:
+
+- Kütahya is a strong 1326 regional anchor.
+- The surrounding Germiyan political extent remains a separate boundary question.
+- The 1325-1327 Timurtaş campaign is scenario-relevant evidence, but must not be converted into a polygon or controller inference without local evidence.
+
+### Hamid / Pisidia
+
+TDV Hamîdoğulları states that Hamîd Bey made Uluborlu the government centre around 1297 and established the beylik around Isparta, Burdur, Eğridir and nearby districts. TDV related material identifies Feleküddin Dündar Bey as ruler in 1301-1326.
+
+Implication:
+
+- Uluborlu, Isparta, Burdur and Eğridir are strong regional anchor candidates.
+- Dündar Bey's death in 1326 requires exact-date care: evidence after his death cannot be used as if it described the 7 April start frame.
+- Eğridir's political chronology must remain distinct from the settlement anchor itself.
+
+### Eşref / Beyşehir
+
+TDV Eşrefoğulları records II. Süleyman's death at Beyşehir on 9 October 1326, after which Beyşehir, Seydişehir, Akşehir and surrounding territory were taken by Hamîdoğulları.
+
+Implication:
+
+- Beyşehir is a high-value settlement anchor.
+- The 9 October 1326 event is POST_SCENARIO for the 7 April start date.
+- Later Hamid control must not be projected backward to April.
+
+### Karasi / Mysia
+
+TDV Karesioğulları records that Karesi Bey's polity controlled much of Mysia, including Balıkesir and Bergama, from the late thirteenth/early fourteenth century. It records Karesi Bey's death before 1328 and Yahşi Bey's succession, with Demirhan governing Balıkesir. The 1328 Biga agreement provides later evidence of the two-centre structure.
+
+Implication:
+
+- Balıkesir and Bergama are strong settlement/regional anchor candidates.
+- The 1328 two-centre arrangement is POST_SCENARIO and cannot by itself define the April 1326 political configuration.
+- Balıkesir remains an anchor candidate; exact 1326 controller/boundary requires separate reconciliation.
+
+### Saruhan / Lydia
+
+TDV Saruhanoğulları places the beylik in the Manisa region from the 1290s, centred on Manisa.
+
+Implication:
+
+- Manisa is a strong regional anchor candidate.
+- Saruhan political extent requires local temporal evidence before geometry review.
+- Later Aegean expansion must not be projected backward.
+
+### Aydın / Lydia-Ionia
+
+TDV Aydınoğulları records Mehmed Bey's conquest of Aydın-ili in 1308 and his control of İzmir's Muslim quarter, Ayasuluk, Tire, Sultanhisarı and Bodemya, with Birgi as his residence. The İzmir harbour conquest is dated to 1328 or 1329.
+
+Implication:
+
+- Birgi, Ayasuluk and Tire are strong settlement anchor candidates.
+- İzmir harbour conquest is POST_SCENARIO and cannot establish April 1326 control.
+- The anchor can identify the settlement; it cannot define the surrounding Aydınid polygon.
+
+### Candar / Paphlagonia
+
+TDV Candaroğulları states that Süleyman Bey succeeded Candar around 1308 and later annexed Sinop when the Pervâneoğulları line ended in 1322. TDV Pervâneoğulları independently records the end of the Sinop polity in 1322.
+
+Implication:
+
+- Sinop is a strong 1326 settlement anchor.
+- Sinop must not retain the 1300 Pervâneoğulları controller.
+- Kastamonu is a regional anchor candidate, but the precise 1326 political configuration requires further local evidence.
+
+### Pontus / eastern Black Sea
+
+The current Wave 2 source pass confirms that the eastern Black Sea remained a distinct historical theatre, but the present source set does not yet provide a sufficiently explicit 7 April 1326 anchor/controller binding for all intended Pontus settlements.
+
+Implication:
+
+- Trebizond remains a high-value geographic anchor candidate.
+- Giresun/Kerasus is a candidate requiring caution: TDV Giresun documents continued Trabzon imperial context but also early fourteenth-century Turkmen pressure.
+- No Pontus political polygon should be inferred until the local temporal source chain is completed.
+
+## Wave 2 temporal classification summary
+
+**Strong candidate anchors:**
+
+- Lârende / Karaman
+- Kütahya
+- Uluborlu
+- Isparta
+- Burdur
+- Eğridir
+- Beyşehir
+- Balıkesir
+- Bergama
+- Manisa
+- Birgi
+- Ayasuluk
+- Tire
+- Sinop
+- Kastamonu
+- Trebizond
+
+**Requires additional 1326 temporal binding before production:**
+
+- Konya
+- Giresun/Kerasus
+- other eastern Black Sea settlements
+
+**Explicit post-scenario evidence that must not be projected backward:**
+
+- Karamanid conquest of Konya/Beyşehir in 1328-1329
+- Eşrefid collapse on 9 October 1326
+- Karesi two-centre evidence from 1328
+- Aydınid İzmir harbour conquest in 1328/1329
+
+This wave reinforces the central rule: **anchor existence, controller-at-date, and political boundary are three different evidence claims.**
