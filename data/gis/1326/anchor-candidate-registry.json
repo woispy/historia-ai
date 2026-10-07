@@ -672,6 +672,67 @@
         "geometry": "NOT_ASSERTED"
       },
       "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-larende",
+      "historicalName": "Lârende / Laranda",
+      "modernName": "Karaman",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          33.215,
+          37.1811111
+        ]
+      },
+      "anchorType": "SETTLEMENT",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-karamanogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/Karamanogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Lârende became Karamanlı territory during Güneri Bey's period; Bedreddin İbrâhim is recorded as ruler from 1318, and TDV later identifies Lârende as the Karamanlı capital after Demirtaş's departure."
+        },
+        {
+          "sourceId": "tdv-karaman",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/karaman",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "The modern city of Karaman is the historical Lârende and developed under Karamanoğulları rule."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-karaman",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?country=TR&q=T%C3%BCrkei",
+          "coordinates": [
+            33.215,
+            37.1811111
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikipedia-karaman",
+          "sourceType": "WIKIPEDIA",
+          "uri": "https://en.wikipedia.org/wiki/Karaman",
+          "coordinates": [
+            33.21806,
+            37.18194
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "MEDIUM",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
     }
   ]
 }
