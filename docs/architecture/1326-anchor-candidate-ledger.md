@@ -503,3 +503,21 @@ This wave closes the current exact-date controller-confidence audit without conv
 - Canonical promotion remains BLOCKED.
 
 Wave 24 closes the coverage classification. The next ledger step is confidence/coordinate-precision consistency across the 32 records.
+
+
+## Wave 25 — Confidence / coordinate-precision consistency audit
+
+| Check | Result |
+|---|---|
+| Existence confidence | 32/32 HIGH |
+| Coordinate confidence | 32/32 HIGH |
+| Temporal applicability confidence | 21 HIGH / 11 MEDIUM |
+| Controller confidence | 1 HIGH / 31 NOT_ASSERTED |
+| Geometry confidence | 32/32 NOT_ASSERTED |
+| Coordinate precision | 32/32 SOURCE_REPORTED |
+| Independent coordinate source-type pairs | 32/32 |
+| Selected point matches declared source | 32/32 |
+
+The live registry requires no record-level correction from this audit. The deterministic validator was hardened so invalid confidence and coordinate-precision values fail the gate instead of relying only on the JSON schema. Contract tests now include negative cases for those two classes.
+
+Canonical promotion remains BLOCKED until the hardened gate is proven green in CI.
