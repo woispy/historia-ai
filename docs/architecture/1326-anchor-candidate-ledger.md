@@ -451,3 +451,17 @@ All three records remain candidate-evidence-only. Their coordinates are source-r
 | 1326-kudus | ADD | GeoNames + Wikidata | Mamluk continuity; Jerusalem listed among six Damascus-attached Palestinian areas | NOT_ASSERTED | NOT_ASSERTED |
 
 Jerusalem is intentionally classified as SETTLEMENT, not as an asserted political centre. Its point is a city reference coordinate only; no administrative polygon or exact boundary is inferred.
+
+
+## Wave 22 — Registry integrity / Tier-1 audit
+
+| Audit | Result |
+|---|---|
+| Registry records | 32 |
+| Unique anchor IDs | 32/32 |
+| Duplicate coordinates | 0 |
+| Candidate authority status | 32/32 |
+| Geometry confidence NOT_ASSERTED | 32/32 |
+| Required record fields | 32/32 |
+
+No new anchor is added in this wave. The registry is being treated as an evidence surface only. Alias reconciliation, exact-date controller binding, theatre coverage and confidence/precision review remain open before any canonical geometry work.
