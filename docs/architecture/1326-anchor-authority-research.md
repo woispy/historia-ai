@@ -1219,3 +1219,25 @@ Decision:
 ### Wave 20 gate result
 
 All three records satisfy the current registry's historical-evidence and independent-coordinate gates. Their points remain city reference coordinates only. No averaging, centroid generation, proximity matching, polygon generation, or controller inference is performed. Canonical promotion remains BLOCKED pending the later full-theatre reconciliation and geometry authority stages.
+
+
+## Wave 21 — Levant interior / Jerusalem settlement gate
+
+### 1326-kudus
+
+This pass deliberately classifies Jerusalem as a **SETTLEMENT** anchor rather than a political-centre assertion. TDV records a more stable Mamluk period after the 1260 Aynicâlût victory and notes that Jerusalem's political importance had declined relative to the principal commercial routes. TDV Filistin independently places Jerusalem among the six Mamluk-administered areas attached to Damascus during the Mamluk period. citeturn0search2turn0search6
+
+Coordinate evidence:
+- GeoNames city point: [35.216331481933594, 31.76904009837115].
+- Wikidata Q1218 city point: [35.23415611111111, 31.77667888888889].
+
+Decision:
+- add `1326-kudus` as SCENARIO_RELEVANT SETTLEMENT;
+- retain controller = NOT_ASSERTED;
+- retain geometry = NOT_ASSERTED;
+- do not interpret the six-area administrative statement as a polygon or exact boundary;
+- do not promote Jerusalem to a provincial-capital geometry without a separate exact-date authority pass.
+
+### Wave 21 gate result
+
+The historical and independent-coordinate gates are closed for Jerusalem as a settlement/reference anchor. Canonical political geometry remains BLOCKED.
