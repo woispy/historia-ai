@@ -149,6 +149,30 @@ The initial set is deliberately heterogeneous:
 
 A source proving that a settlement existed or mattered in 1326 does not prove its surrounding political extent.
 
+## Wave 4 — Hamid/Pisidia targeted closure
+
+This wave intentionally narrows the work to the next unresolved Hamid/Pisidia candidate rather than reopening already-closed research.
+
+### Eğridir / Eğirdir
+
+The evidence chain is now sufficient to register Eğridir as a **research candidate anchor**, but not to assert its 1326-04-07 controller.
+
+- TDV Eğridir identifies the city as the second centre of the Hamîdoğulları beylik and states that Timurtaş occupied it in 1324; Hızır Bey returned to Eğridir in 1328. citeturn0search13
+- TDV Hamîdoğulları states that Dündar Bey moved the government centre to Eğridir around 1307 and that the city was named Felekâbâd in this period. citeturn0search4
+- GeoNames provides a populated-place coordinate of approximately [30.850425, 37.874616]. citeturn1search1
+- Wikidata Q586434 provides the city coordinate 37°52'30"N, 30°51'2"E, approximately [30.850556, 37.875000]. citeturn1search0
+
+Decision:
+
+- add `1326-egirdir` to the machine-readable research-candidate registry;
+- retain `controller = NOT_ASSERTED`;
+- retain `geometry = NOT_ASSERTED`;
+- use only city-point coordinate semantics;
+- do not use the 1324 occupation or 1328 restoration as a shortcut to infer the exact April 1326 political controller;
+- do not derive any political polygon from the anchor.
+
+This closes the **existence + independent-coordinate** gate for Eğridir. It does **not** close the controller-at-scenario-date gate.
+
 ## Current verdict
 
 The project now has enough material to establish a research ledger, but not enough to seal the complete production registry.
