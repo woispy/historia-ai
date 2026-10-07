@@ -1101,22 +1101,125 @@
       "authorityStatus": "candidate-evidence-only"
     },
     {
-      "anchorId": "1326-kastamonu",
-      "historicalName": "Kastamonu / Castamena",
-      "modernName": "Kastamonu",
-      "geometry": { "type": "Point", "coordinates": [33.775275, 41.378052] },
+      "anchorId": "1326-trabzon",
+      "historicalName": "Trabzon / Trebizond",
+      "modernName": "Trabzon",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          39.726944,
+          41.005
+        ]
+      },
       "anchorType": "POLITICAL_CENTRE",
       "historicalApplicability": "SCENARIO_RELEVANT",
       "historicalEvidenceRefs": [
-        { "sourceId": "tdv-candarogullari", "sourceType": "TDV_IA", "uri": "https://islamansiklopedisi.org.tr/candarogullari", "temporalClass": "PRE_SCENARIO", "claim": "Suleyman Bey took Kastamonu and moved the beylik centre there; the same chronology places his independence after 1327." },
-        { "sourceId": "tdv-kastamonu", "sourceType": "TDV_IA", "uri": "https://islamansiklopedisi.org.tr/kastamonu", "temporalClass": "PRE_SCENARIO", "claim": "Kastamonu passed to the Candarogullari in the early 14th century and became the beylik centre." }
+        {
+          "sourceId": "tdv-trabzon",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/trabzon",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV identifies Trabzon as the centre of the state founded by Alexios Komnenos in 1204 and states that the Komnenian capital retained its centre status from 1204 to 1461; the article also notes Ilkhanid influence and increasing Turkmen pressure from the 1320s."
+        },
+        {
+          "sourceId": "wikidata-Q45301",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q45301",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Wikidata identifies Trabzon as the city corresponding to Trebizond and records the Empire of Trebizond as the historical polity associated with the city from 1204 to 1461."
+        }
       ],
       "coordinateEvidenceRefs": [
-        { "sourceId": "geonames-kastamonu-city", "sourceType": "GEONAMES", "uri": "https://www.geonames.org/search.html?country=TR&q=Kastamonu", "coordinates": [33.775275, 41.378052], "referencePoint": "CITY_POINT" },
-        { "sourceId": "wikipedia-kastamonu", "sourceType": "WIKIPEDIA", "uri": "https://en.wikipedia.org/wiki/Kastamonu", "coordinates": [33.77639, 41.37639], "referencePoint": "CITY_POINT" }
+        {
+          "sourceId": "geonames-738648",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/738648/trabzon.html",
+          "coordinates": [
+            39.726944,
+            41.005
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q45301",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q45301",
+          "coordinates": [
+            39.7225,
+            41.005
+          ],
+          "referencePoint": "CITY_POINT"
+        }
       ],
       "coordinatePrecision": "SOURCE_REPORTED",
-      "confidence": { "existence": "HIGH", "coordinate": "HIGH", "temporalApplicability": "HIGH", "controller": "NOT_ASSERTED", "geometry": "NOT_ASSERTED" },
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-kastamonu",
+      "historicalName": "Kastamonu / Castamena",
+      "modernName": "Kastamonu",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          33.775275,
+          41.378052
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-candarogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/candarogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Suleyman Bey took Kastamonu and moved the beylik centre there; the same chronology places his independence after 1327."
+        },
+        {
+          "sourceId": "tdv-kastamonu",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/kastamonu",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Kastamonu passed to the Candarogullari in the early 14th century and became the beylik centre."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-kastamonu-city",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/search.html?country=TR&q=Kastamonu",
+          "coordinates": [
+            33.775275,
+            41.378052
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikipedia-kastamonu",
+          "sourceType": "WIKIPEDIA",
+          "uri": "https://en.wikipedia.org/wiki/Kastamonu",
+          "coordinates": [
+            33.77639,
+            41.37639
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
       "authorityStatus": "candidate-evidence-only"
     }
   ]
