@@ -434,3 +434,126 @@ Implication:
 - Aydınid İzmir harbour conquest in 1328/1329
 
 This wave reinforces the central rule: **anchor existence, controller-at-date, and political boundary are three different evidence claims.**
+
+
+## Wave 3 historical-temporal findings
+
+Wave 3 expands the research ledger into Caria/Menteşe, Pontus/Trabzon, Byzantine Marmara–Thrace context, and the southern Cilicia/Levant corridor. The pass also records where a theatre should remain an evidence-only geographic reference rather than being forced into a 1326 political anchor.
+
+### Menteşe / Caria
+
+TDV Menteşeoğulları places the beylik in southwestern Anatolia, extending across Muğla, Peçin, Milas and Balat toward the Aegean coast, and identifies Milas as the capital with Peçin as a nearby seasonal residence. TDV Muğla adds an important temporal detail: after Orhan Bey's unsuccessful 720-721/1320-1321 Rhodes expedition, the capital was moved for a period from Milas to the more inland Muğla for security.
+
+Implication for 1326-04-07:
+
+- Milas/Peçin is a strong historical centre anchor candidate for the Menteşe theatre.
+- Muğla is a separate high-value administrative anchor candidate because the documented relocation occurred before the scenario date.
+- The wording indicates a temporary relocation; therefore the registry must not silently replace Milas/Peçin with Muğla as the permanent Menteşe capital.
+- Balat remains a high-value coastal/trade reference anchor.
+- None of these centres establish the Menteşe political boundary by themselves.
+
+Temporal classification:
+
+- Menteşe territorial-centre evidence: PRE_SCENARIO / SCENARIO_RELEVANT.
+- Muğla relocation evidence: PRE_SCENARIO.
+- 1330 Hacı İlyas Mosque evidence is POST_SCENARIO and must not be used as direct April 1326 controller evidence.
+
+### Pontus / Trabzon / Giresun
+
+TDV Trabzon identifies Trabzon as the capital of the Empire of Trebizond throughout 1204-1461. TDV Giresun identifies Kerasus/Giresun as a fortified settlement within the wider Trabzon imperial context after 1204, while also documenting early-fourteenth-century Çepni/Türkmen pressure. It records that in 1301 Emperor Alexios II defeated the Türkmen leader Koustougans and strengthened the fortress.
+
+Implication:
+
+- Trebizond/Trabzon is a strong high-value 1326 geographic and political-centre anchor candidate.
+- Giresun/Kerasus is a strong geographic anchor candidate, but the present source does not provide a sufficiently explicit 7 April 1326 controller statement to seal a production controller binding.
+- The 1301 Kerasus fortification episode is PRE_SCENARIO evidence; it demonstrates historical relevance but does not by itself prove the exact April 1326 local political status.
+- The project must preserve the distinction between Trabzon imperial context, local fortress status, Türkmen pressure, and a province boundary.
+- No Pontus polygon may be inferred from the Trabzon/Giresun anchor pair.
+
+### Byzantine Marmara / Thrace transition
+
+The current source pass confirms that the 1326 scenario remains overwhelmingly an Anatolian/Byzantine Marmara frame rather than an Ottoman Rumelian frame. TDV Bizans and TDV Osmanlılar place Bursa's capture on 6 April 1326 and date the later European expansion to the mid-fourteenth century. TDV Gelibolu records the much later Ottoman capture of Gelibolu, while the broader Byzantine chronology places Ottoman Rumeli expansion after 1353-1354.
+
+Implication:
+
+- Istanbul/Constantinople, Adrianople/Edirne, and Gallipoli/Gelibolu may be retained as geographic reference anchors for the full 1326-1800 theatre, but they must not be treated as Ottoman 1326 control anchors.
+- Gelibolu is explicitly a POST_SCENARIO Ottoman theatre; its later strategic importance cannot be projected back to 1326.
+- For the 1326 start frame, Byzantine Thrace should be represented through separate Byzantine geographic anchors and historical evidence, not through Ottoman ownership assumptions.
+- A dedicated Byzantine 1326 anchor pass remains required before adding production records for Thrace/Balkan centres.
+
+### Cilicia / Çukurova
+
+TDV Ramazanoğulları dates the emergence of the Ramazanoğulları beylik to the mid-fourteenth century, with Ramazan Bey becoming prominent around 1352-1354. Therefore Adana/Ceyhan/Misis cannot be assigned to a Ramazanoğlu political anchor in the 1326 scenario.
+
+TDV Antakya records Baybars's 1268 destruction of Antioch and the subsequent decline of the city; it also records Antioch within the later Mamluk administrative structure. This makes Antakya a useful geographic reference but a poor candidate for a strong urban-political anchor at the 1326 start without additional local evidence.
+
+Implication:
+
+- Do not create a 1326 Ramazanoğlu anchor for Adana, Ceyhan, or Misis.
+- Çukurova must be researched as a Mamluk/Anatolian frontier theatre for 1326, with separate local source bindings.
+- Antakya may be retained as a southern geographic reference anchor, but its post-1268 reduced status must be reflected in confidence and anchor type.
+- The absence of a 1326 Ramazanoğlu polity is itself a source-backed exclusion and should be preserved in the research ledger.
+
+### Levant / North Syria
+
+TDV Halep records Halep as the major northern Syrian crossroads and states that after the 1260 Mongol episode the city was left to the Mamluks; the Mamluk period continued until the Ottoman conquest in 1516.
+
+TDV Trablusşam records Sultan Kalavun's conquest of Tripoli in 1289 and explicitly identifies Trablusşam as the centre of one of the six major Mamluk nāibliks. This makes Tripoli a strong 1326 Levant anchor candidate.
+
+Implication:
+
+- Halep is a strong 1326 settlement/administrative-centre anchor candidate under the Mamluk theatre.
+- Trablusşam/Tripoli is a strong 1326 settlement/administrative-centre anchor candidate under the Mamluk theatre.
+- These anchors are useful for the intended Levant coverage, but their coordinates still require independent cartographic evidence before production sealing.
+- Antakya should remain lower-confidence than Halep/Tripoli because of its severe post-1268 destruction and later reduced status.
+- No Mamluk province boundary should be generated from anchor proximity.
+
+### Wave 3 temporal classification summary
+
+**New strong historical anchor candidates:**
+
+- Milas / Mylasa
+- Peçin / Beçin
+- Muğla
+- Balat
+- Trebizond / Trabzon
+- Halep / Aleppo
+- Trablusşam / Tripoli
+
+**Strong geographic candidates requiring explicit 1326 local binding:**
+
+- Giresun / Kerasus
+- Antakya / Antioch
+- Adana
+- Ceyhan
+- Misis
+
+**Explicit exclusions / chronology guards:**
+
+- Ramazanoğulları cannot be used as a 1326 controller: the dynasty's documented emergence is mid-fourteenth century.
+- Gelibolu cannot be used as an Ottoman 1326 anchor: Ottoman Rumeli expansion belongs to the later 1350s.
+- Later Aegean/Marmara Ottoman expansion must not be projected backward from post-1326 events.
+- The 1330 Milas Hacı İlyas Mosque is post-scenario evidence and is not a substitute for April 1326 political evidence.
+
+### Wave 3 verdict
+
+The research ledger now covers the previously missing Menteşe and Levant-facing theatres with source-backed chronology. It also produces two important negative findings:
+
+1. **Cilicia cannot be shortcut through Ramazanoğlu history**; the 1326 theatre must be reconstructed from the Mamluk/frontier evidence.
+2. **Rumelia cannot be shortcut through later Ottoman conquest history**; Byzantine Thrace requires its own 1326 anchor/evidence pass.
+
+The next production-facing research task is therefore no longer broad discovery. It is **targeted temporal binding + independent coordinate collection** for the accumulated anchor pool, while filling the remaining gaps in Menteşe, Pontus, Cilicia and Byzantine Thrace.
+
+### Wave 3 sources
+
+- TDV İslâm Ansiklopedisi — Menteşeoğulları.
+- TDV İslâm Ansiklopedisi — Muğla.
+- TDV İslâm Ansiklopedisi — Trabzon.
+- TDV İslâm Ansiklopedisi — Giresun.
+- TDV İslâm Ansiklopedisi — Bizans.
+- TDV İslâm Ansiklopedisi — Osmanlılar.
+- TDV İslâm Ansiklopedisi — Gelibolu.
+- TDV İslâm Ansiklopedisi — Ramazanoğulları.
+- TDV İslâm Ansiklopedisi — Antakya.
+- TDV İslâm Ansiklopedisi — Halep.
+- TDV İslâm Ansiklopedisi — Trablusşam.
