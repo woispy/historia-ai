@@ -1310,3 +1310,35 @@ This is a confidence correction, not a candidate deletion. The six anchors remai
 - NOT_ASSERTED: 31
 
 Canonical political geometry remains BLOCKED. No controller confidence change authorizes polygon generation or promotion.
+
+
+## Wave 24 — Tier-1 theatre coverage matrix
+
+This wave measures the **research-candidate registry coverage**, not province or political-boundary completeness. An anchor point is not a province centre, polygon seed, controller surface, or canonical geometry.
+
+| Intended theatre | Registry anchors | Coverage state | Open gate |
+|---|---:|---|---|
+| Anatolia | 22 | PARTIAL / anchor-covered | Large central/eastern and frontier areas still require targeted temporal binding; no indiscriminate anchor expansion |
+| Byzantine geography | 3 | PARTIAL / anchor-covered | Marmara/Pontus references exist, but Byzantine Thrace requires its dedicated 1326 evidence pass |
+| Balkans | 0 | RESEARCH GAP | No production candidate is added; later Ottoman Rumelia chronology cannot be projected backward into 1326 |
+| Levant | 7 | PARTIAL / anchor-covered | Levant core is represented, while Cilicia/Çukurova remains a separate Mamluk/frontier research gate |
+
+### Coverage interpretation
+
+**Anatolia:** The registry currently contains Bursa, Bilecik, Söğüt, Nicaea-adjacent Bithynian context, western/central beylik centres, Pontic/Southern Anatolian candidates and Menteşe references. This is meaningful candidate coverage but is not a claim that all Anatolian historical political units are represented.
+
+**Byzantine geography:** Nicaea and the Pontus pair Trabzon/Giresun provide machine-readable candidates. The research ledger explicitly keeps Constantinople/Istanbul, Adrianople/Edirne and Gallipoli/Gelibolu as possible geographic references rather than Ottoman 1326 control anchors. A dedicated Byzantine Thrace pass remains required before production records are created for that theatre.
+
+**Balkans:** Zero registry anchors is intentional at this stage. The source policy forbids using later Ottoman Rumelia expansion as 1326 controller evidence. The gap is therefore an evidence/research gap, not permission to fabricate or project geometry.
+
+**Levant:** Aleppo, Tripoli, Damascus, Beirut, Sidon, Safed and Jerusalem provide the current machine-readable Levant candidate surface. Their points remain city/reference coordinates. Çukurova/Cilicia is deliberately held outside the registry until a local Mamluk/frontier temporal-binding pass is complete.
+
+### Wave 24 decision
+
+- No new anchor is added in this wave.
+- The registry is considered **coverage-aware but not theatre-complete**.
+- Byzantine Thrace/Balkan research and Cilicia/Çukurova research remain explicit open gates.
+- No theatre-level coverage statement authorizes controller inference or geometry generation.
+- Canonical political geometry remains **BLOCKED**.
+
+The next Tier-1 audit is the confidence/precision consistency pass across all 32 records, followed by the deterministic registry evidence gate.
