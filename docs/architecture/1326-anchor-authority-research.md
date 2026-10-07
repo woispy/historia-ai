@@ -557,3 +557,80 @@ The next production-facing research task is therefore no longer broad discovery.
 - TDV İslâm Ansiklopedisi — Antakya.
 - TDV İslâm Ansiklopedisi — Halep.
 - TDV İslâm Ansiklopedisi — Trablusşam.
+
+
+## Wave 3 coordinate-evidence intake
+
+This is a cartographic evidence checkpoint only. No coordinate below is promoted to production authority until the final registry has stable source references, precision policy, duplicate/alias review, and CI validation.
+
+### Candidate coordinate records
+
+**Milas / Mylasa**
+- GeoNames: approximately [27.783889, 37.316389].
+- Wikidata Mylasa: approximately [27.78333, 37.31667].
+- The two records converge closely enough to establish a stable research coordinate candidate.
+- Historical applicability remains sourced separately through the Menteşe/Milas evidence; coordinate evidence does not establish political extent.
+
+**Beçin / Peçin**
+- GeoNames: approximately [27.795992, 37.273648].
+- Wikidata Beçin: approximately [27.789056, 37.274925].
+- The small difference is compatible with different settlement/reference-point definitions; production precision policy must decide whether the anchor represents the settlement centroid, fortress/site, or another named reference.
+- Do not silently collapse the two coordinate meanings into one canonical point.
+
+**Muğla**
+- GeoNames: approximately [28.366497, 37.218066].
+- Wikidata province-level records also place Muğla near [28.5064, 37.0308], but that result is a province reference rather than a safe city-point authority.
+- For the 1326 anchor registry, the city-level GeoNames point is the better research candidate; it still requires a second city-specific coordinate source before sealing.
+
+**Balat / Miletus-area**
+- The modern Balat/Didim Wikidata record gives approximately [27.276875, 37.512092].
+- This is a useful coordinate candidate for the Menteşe/Aegean coastal theatre, but historical identity must be explicitly bound to medieval Balat before production use.
+
+**Trabzon / Trebizond**
+- Wikidata gives approximately [39.7225, 41.005], with the entity explicitly linked to the Empire of Trebizond (1204-1461).
+- This is a strong coordinate candidate for the historical centre anchor, but the production record still needs a second stable coordinate source and explicit source-reference persistence.
+
+**Halep / Aleppo**
+- GeoNames gives approximately [37.161173, 36.201241].
+- Wikidata gives approximately [37.16, 36.20].
+- The close convergence makes this a strong coordinate candidate for the 1326 Levant anchor.
+
+**Trablusşam / Tripoli**
+- GeoNames gives approximately [35.84415, 34.43352].
+- Wikidata gives approximately [35.83444, 34.43667].
+- The difference is small but should be retained as source-level evidence rather than silently averaged.
+
+### Coordinate-evidence policy reaffirmed
+
+The current intake establishes a useful pattern for the production registry:
+
+1. historical evidence answers **"was this place relevant at 1326-04-07?"**;
+2. coordinate evidence answers **"where is the named place/reference point?"**;
+3. controller evidence answers **"who controlled it at the scenario date?"**;
+4. geometry evidence answers **"what was the political boundary?"**.
+
+These four claims remain independent.
+
+Therefore:
+
+- no coordinate average is generated automatically;
+- no coordinate is derived from a 1300 polygon or centroid;
+- no coordinate is used to infer controller;
+- no coordinate is used to generate a political polygon;
+- coordinate precision must be recorded explicitly;
+- when two sources identify different physical reference points for the same historical name, the registry must preserve the distinction until alias/reference-point reconciliation is complete.
+
+### Wave 3 coordinate verdict
+
+The coordinate gap is now partially reduced for the newly researched Menteşe and Levant anchors, but it is **not closed**.
+
+Still required before production sealing:
+
+- stable source URLs/IDs persisted in machine-readable records;
+- a second city/site-specific coordinate source for each production anchor;
+- explicit precision semantics;
+- alias and historical-site reconciliation;
+- deterministic validator checks;
+- CI validation.
+
+The research phase should now move toward a **candidate anchor ledger**, not yet a canonical registry.
