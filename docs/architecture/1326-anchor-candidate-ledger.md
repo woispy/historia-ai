@@ -61,7 +61,7 @@ Production states:
 | 1326-settlement-isparta | Isparta | Hamid / Pisidia | SCENARIO_RELEVANT; 1326 internal transition requires care | GeoNames + independent city-point reference | Controller deliberately not asserted | CONTROLLER_BINDING_PENDING | Exact 7 Apr 1326 status within the 1326 Demirtaş/Dündar transition |
 | 1326-settlement-burdur | Burdur | Hamid / Pisidia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | Regional Hamid evidence | COORDINATE_PENDING | Independent coordinate source |
 | 1326-settlement-beysehir | Beyşehir | Eşref / Pisidia | SCENARIO_RELEVANT; 9 Oct 1326 collapse is POST_SCENARIO | Existing research coordinate | April controller must remain pre-collapse | CONTROLLER_BINDING_PENDING | Pre-9 Oct 1326 controller source |
-| 1326-settlement-larende | Lârende / Karaman | Karaman / Lycaonia | SCENARIO_RELEVANT as regional centre | Coordinate evidence pending final source pair | Karamanid 1326 controller requires explicit binding | CONTROLLER_BINDING_PENDING | Do not use 1328–29 conquest evidence backward |
+| 1326-settlement-larende | Lârende / Karaman | Karaman / Lycaonia | SCENARIO_RELEVANT as regional centre | GeoNames + Wikipedia city points | Karamanid institutional continuity is strong, exact 7 Apr controller not sealed | CONTROLLER_BINDING_PENDING | Exact 7 Apr 1326 controller binding; do not use 1328–29 expansion backward |
 | 1326-settlement-balikesir | Balıkesir | Karasi / Mysia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | 1328 two-centre evidence is POST_SCENARIO | CONTROLLER_BINDING_PENDING | April 1326 local controller |
 | 1326-settlement-bergama | Bergama | Karasi / Mysia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | Controller extent not sealed | CONTROLLER_BINDING_PENDING | April 1326 local controller |
 | 1326-settlement-manisa | Manisa | Saruhan / Lydia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | Saruhan centre evidence strong; exact date binding needed | CONTROLLER_BINDING_PENDING | Stable 1326 source binding |
@@ -204,3 +204,16 @@ Registry decision:
 
 - Isparta's historical evidence temporal class was normalized from the invalid `SCENARIO_RELEVANT` value to `PRE_SCENARIO`.
 - `SCENARIO_RELEVANT` remains valid only at the registry record's top-level `historicalApplicability` field.
+
+
+## Wave 8 intake — Lârende / Karaman
+
+The targeted Lârende pass closes the coordinate side for research-registry intake while deliberately leaving exact scenario-date controller authority open.
+
+- TDV Karamanoğulları records Lârende as Karamanlı territory from the Güneri Bey period and later states that, after Demirtaş's departure, Lârende was the Karamanlı capital under Bedreddin İbrâhim. The same chronology dates the Karamanlı capture of Konya, Gevele and Beyşehir to 1328–29; those later events are not projected backward to 7 April 1326.
+- GeoNames and the English Wikipedia city record provide independent city-point references near [33.215000, 37.1811111] and [33.21806, 37.18194].
+- The coordinate points remain source-level evidence and are not averaged.
+- Candidate remains CONTROLLER_BINDING_PENDING.
+- No geometry or controller extent is inferred from the anchor.
+
+The machine-readable registry may retain Lârende as candidate-evidence-only; canonical political geography remains blocked.
