@@ -422,3 +422,12 @@ No new machine-readable candidate is promoted from this wave. The ledger records
 | 1326-trablussam | ADD | GeoNames + Wikidata | Mamluk conquest in 1289; major niyaba centre thereafter | NOT_ASSERTED | NOT_ASSERTED |
 
 Both records remain candidate-evidence-only. Their points are city reference coordinates, not political centroids or boundary seeds. No province polygon, frontier, Voronoi surface, or fallback geometry may be generated from these anchors.
+
+
+## Wave 19 — Levant core / Damascus intake
+
+| Target | Registry decision | Coordinate gate | Historical gate | Controller | Geometry |
+|---|---|---|---|---|---|
+| 1326-dimask | ADD | GeoNames + Wikidata | Mamluk continuity plus direct 1312–1340 scenario-era institutional context | NOT_ASSERTED | NOT_ASSERTED |
+
+The Damascus point remains a city reference coordinate only. No provincial boundary or control surface is inferred from it. Canonical promotion remains BLOCKED.
