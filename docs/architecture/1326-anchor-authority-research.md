@@ -679,7 +679,7 @@ The selected point is therefore never an average, interpolation, polygon centroi
 
 **Kütahya** has strong historical centre evidence through TDV Kütahya and TDV Germiyanoğulları, with matching GeoNames/Wikidata city coordinates. The registry intentionally leaves scenario-date controller confidence below the Bursa level because centre existence does not by itself define the 7 April 1326 frontier.
 
-**Sinop** has strong historical relevance and independent coordinate evidence, but the exact April 1326 controller chronology remains deliberately below sealed/high confidence. The registry therefore preserves it as a candidate rather than projecting later Candaroğlu administration backward without a date-specific binding.
+**Sinop** has strong historical relevance and independent city-point coordinate evidence from GeoNames and the direct Sinop city page, but the exact April 1326 controller chronology remains deliberately below sealed/high confidence. The registry therefore preserves it as a candidate rather than projecting later Candaroğlu administration backward without a date-specific binding.
 
 ### Validation
 
