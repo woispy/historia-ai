@@ -482,3 +482,24 @@ No new anchor is added in this wave. The registry is being treated as an evidenc
 The six corrected records are Alâiye, Bilecik, Kütahya, Sinop, Söğüt and Uluborlu. Their historical candidate status is unchanged; only controller confidence was corrected because their stored evidence does not directly bind political control to the exact 7 April 1326 scenario instant. Bursa remains the sole HIGH controller-confidence record because its stored evidence dates the surrender to 6 April 1326.
 
 This wave closes the current exact-date controller-confidence audit without converting historical continuity into controller authority and without opening any geometry promotion path.
+
+
+## Wave 24 — Tier-1 theatre coverage matrix
+
+| Intended theatre | Registry anchors | Coverage state | Production interpretation |
+|---|---:|---|---|
+| Anatolia | 22 | PARTIAL / anchor-covered | Candidate surface exists; not a complete historical province inventory |
+| Byzantine geography | 3 | PARTIAL / anchor-covered | Nicaea + Trabzon/Giresun represented; Byzantine Thrace remains open |
+| Balkans | 0 | RESEARCH GAP | No 1326 production candidate; later Ottoman Rumelia evidence is not projected backward |
+| Levant | 7 | PARTIAL / anchor-covered | Levant core represented; Cilicia/Çukurova remains open |
+
+### Guardrails
+
+- Registry coverage is not political-boundary coverage.
+- Zero Balkan anchors is an explicit research state, not a missing geometry placeholder.
+- Byzantine Thrace requires its own 1326 evidence/temporal-binding pass.
+- Cilicia/Çukurova requires a local Mamluk/frontier evidence pass.
+- No new anchor is added from this matrix alone.
+- Canonical promotion remains BLOCKED.
+
+Wave 24 closes the coverage classification. The next ledger step is confidence/coordinate-precision consistency across the 32 records.
