@@ -1124,3 +1124,31 @@ TDV Tâceddinoğulları dates that dynasty's establishment to the second half of
 - Sivas, Kayseri, Tokat and Amasya remain open historical-reference targets pending a source chain explicitly binding the settlement/political authority to 1326-04-07.
 - Eretna and Tâceddinoğulları are recorded as explicit temporal guards, preventing accidental backward projection.
 - This is a deliberate research closure, not a missing-data workaround: no coordinate-only or later-dynasty evidence is allowed to create a 1326 controller claim.
+
+
+## Wave 18 — Levant / Aleppo–Tripoli closure
+
+This wave closes two previously identified Levant-facing candidates after completing both historical and coordinate evidence gates.
+
+### 1326-halep
+
+- TDV Halep records that after the Mongol defeat at Aynicâlût in 1260, Aleppo was left to the Mamluks. It records a brief Mongol reoccupation in the early 14th century, followed by the continuing Mamluk period until 1516. This establishes scenario relevance without requiring a later political label to be projected backward.
+- Independent coordinate evidence: GeoNames [37.161173, 36.201241] and Wikidata Q41183 [37.16, 36.2]. The registry retains the GeoNames source-reported point; no averaging is performed.
+- Decision: register `1326-halep` as `candidate-evidence-only` with `historicalApplicability = SCENARIO_RELEVANT`.
+- `controller = NOT_ASSERTED`; `geometry = NOT_ASSERTED`.
+- The anchor establishes a historical city/reference point only; no Mamluk provincial boundary is inferred.
+
+### 1326-trablussam
+
+- TDV Trablusşam records Sultan Kalavun's conquest in 1289 and states that the rebuilt city became the centre of one of the six major Mamluk niyabas. It also describes the city as an important administrative and commercial centre during the Mamluk period.
+- Independent coordinate evidence: GeoNames [35.84415, 34.43352] and Wikidata Q168954 [35.83444444444444, 34.43666666666667]. The registry retains the GeoNames source-reported point; no averaging is performed.
+- Decision: register `1326-trablussam` as `candidate-evidence-only` with `historicalApplicability = SCENARIO_RELEVANT`.
+- `controller = NOT_ASSERTED`; `geometry = NOT_ASSERTED`.
+- No Mamluk niyaba boundary is derived from the anchor.
+
+### Wave 18 gate result
+
+- Both Levant candidates satisfy the registry's two-source coordinate requirement.
+- Historical chronology is pre-scenario and does not depend on post-1326 conquest evidence.
+- No later Ottoman or unrelated modern administrative boundary is imported into the 1326 authority layer.
+- Canonical political geometry remains BLOCKED.
