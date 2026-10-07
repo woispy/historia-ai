@@ -731,3 +731,21 @@ The next work should expand this registry only where the evidence chain is genui
 - CI execution of the new registry validator and test.
 
 No candidate registry record may be converted directly into a political polygon.
+
+
+## Wave 5 — Isparta targeted closure
+
+Isparta now has a research-grade candidate coordinate pair and historical relevance, but the scenario-date controller remains deliberately unresolved.
+
+- TDV Isparta places the city within the Hamîdoğulları sphere and describes the Feleküddin Dündar Bey period (1301–1326), while also recording a regional political change in 1326 after Demirtaş's withdrawal. citeturn0search1
+- TDV Feleküddin Dündar Bey identifies Dündar as ruler of the Isparta–Burdur region in 1301–1326. citeturn1search6
+- GeoNames supplies the Isparta city point [30.5522222, 37.7644444]. citeturn3search5
+- An independent city-coordinate reference reports the same point. citeturn3search19
+
+Decision:
+
+- add `1326-isparta` to the candidate registry;
+- retain `controller = NOT_ASSERTED`;
+- retain `geometry = NOT_ASSERTED`;
+- treat the 1326 political transition as unresolved for the exact 7 April frame;
+- do not turn regional historical evidence into a province boundary.
