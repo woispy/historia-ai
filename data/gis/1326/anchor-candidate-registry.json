@@ -13,7 +13,13 @@
       "anchorId": "1326-bursa",
       "historicalName": "Bursa / Prusa",
       "modernName": "Bursa",
-      "geometry": { "type": "Point", "coordinates": [29.06013, 40.195593] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          29.06013,
+          40.195593
+        ]
+      },
       "anchorType": "POLITICAL_CENTRE",
       "historicalApplicability": "SCENARIO_WINDOW",
       "historicalEvidenceRefs": [
@@ -37,14 +43,20 @@
           "sourceId": "geonames-16155",
           "sourceType": "GEONAMES",
           "uri": "https://www.geonames.org/advanced-search.html?q=Bursa%2C+Türkiye",
-          "coordinates": [29.06013, 40.195593],
+          "coordinates": [
+            29.06013,
+            40.195593
+          ],
           "referencePoint": "CITY_POINT"
         },
         {
           "sourceId": "wikidata-Q40738",
           "sourceType": "WIKIDATA",
           "uri": "https://www.wikidata.org/wiki/Q40738",
-          "coordinates": [29.06013, 40.195593],
+          "coordinates": [
+            29.06013,
+            40.195593
+          ],
           "referencePoint": "CITY_POINT"
         }
       ],
@@ -62,7 +74,13 @@
       "anchorId": "1326-bilecik",
       "historicalName": "Bilecik",
       "modernName": "Bilecik",
-      "geometry": { "type": "Point", "coordinates": [29.979319, 40.141924] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          29.979319,
+          40.141924
+        ]
+      },
       "anchorType": "SETTLEMENT",
       "historicalApplicability": "PRE_SCENARIO",
       "historicalEvidenceRefs": [
@@ -86,14 +104,20 @@
           "sourceId": "geonames-bilecik",
           "sourceType": "GEONAMES",
           "uri": "https://www.geonames.org/search.html?country=TR",
-          "coordinates": [29.979319, 40.141924],
+          "coordinates": [
+            29.979319,
+            40.141924
+          ],
           "referencePoint": "CITY_POINT"
         },
         {
           "sourceId": "wikidata-Q208006",
           "sourceType": "WIKIDATA",
           "uri": "https://www.wikidata.org/wiki/Q208006",
-          "coordinates": [29.979167, 40.143056],
+          "coordinates": [
+            29.979167,
+            40.143056
+          ],
           "referencePoint": "CITY_POINT"
         }
       ],
@@ -111,7 +135,13 @@
       "anchorId": "1326-kutahya",
       "historicalName": "Kütahya / Cotiaeum",
       "modernName": "Kütahya",
-      "geometry": { "type": "Point", "coordinates": [29.983333, 39.424167] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          29.983333,
+          39.424167
+        ]
+      },
       "anchorType": "POLITICAL_CENTRE",
       "historicalApplicability": "SCENARIO_RELEVANT",
       "historicalEvidenceRefs": [
@@ -135,14 +165,20 @@
           "sourceId": "geonames-kutahya",
           "sourceType": "GEONAMES",
           "uri": "https://www.geonames.org/305267/kuetahya.html",
-          "coordinates": [29.983333, 39.424167],
+          "coordinates": [
+            29.983333,
+            39.424167
+          ],
           "referencePoint": "CITY_POINT"
         },
         {
           "sourceId": "wikidata-Q188894",
           "sourceType": "WIKIDATA",
           "uri": "https://www.wikidata.org/wiki/Q188894",
-          "coordinates": [29.983333, 39.424167],
+          "coordinates": [
+            29.983333,
+            39.424167
+          ],
           "referencePoint": "CITY_POINT"
         }
       ],
@@ -160,7 +196,13 @@
       "anchorId": "1326-sinop",
       "historicalName": "Sinop / Sinope",
       "modernName": "Sinop",
-      "geometry": { "type": "Point", "coordinates": [35.162525, 42.026829] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.162525,
+          42.026829
+        ]
+      },
       "anchorType": "POLITICAL_CENTRE",
       "historicalApplicability": "SCENARIO_RELEVANT",
       "historicalEvidenceRefs": [
@@ -184,14 +226,20 @@
           "sourceId": "geonames-sinop",
           "sourceType": "GEONAMES",
           "uri": "https://www.geonames.org/advanced-search.html?q=Sinop%2C+Türkiye",
-          "coordinates": [35.162525, 42.026829],
+          "coordinates": [
+            35.162525,
+            42.026829
+          ],
           "referencePoint": "CITY_POINT"
         },
         {
           "sourceId": "wikipedia-sinop-turkey",
           "sourceType": "WIKIPEDIA",
           "uri": "https://en.wikipedia.org/wiki/Sinop,_Turkey",
-          "coordinates": [35.151111, 42.026667],
+          "coordinates": [
+            35.151111,
+            42.026667
+          ],
           "referencePoint": "CITY_POINT"
         }
       ],
@@ -200,6 +248,182 @@
         "existence": "HIGH",
         "coordinate": "HIGH",
         "temporalApplicability": "MEDIUM",
+        "controller": "MEDIUM",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-nicaea",
+      "historicalName": "Nicaea / İznik",
+      "modernName": "İznik",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          29.721111,
+          40.428611
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-orhan",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/orhan",
+          "temporalClass": "SCENARIO_WINDOW",
+          "claim": "Orhan tightened the siege of both Bursa and İznik after becoming bey; the 1326 campaign against Bursa is described in the same temporal sequence."
+        },
+        {
+          "sourceId": "tdv-iznik",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/iznik",
+          "temporalClass": "SCENARIO_WINDOW",
+          "claim": "The article identifies İznik/Nicaea as the historical fortified settlement and records its place in the Orhan-period chronology."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-nicaea",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=Nicaea",
+          "coordinates": [
+            29.721111,
+            40.428611
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q217125",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q217125",
+          "coordinates": [
+            29.719444,
+            40.428889
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "MEDIUM",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-sogut",
+      "historicalName": "Söğüt",
+      "modernName": "Söğüt",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          30.184865,
+          40.0143
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "PRE_SCENARIO",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-sogut",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/sogut",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Söğüt is described as an early Ottoman frontier settlement and then Osman Gazi's first administrative centre; the 1326 Bursa conquest marks its subsequent decline in administrative importance."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-sogut",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=S%C3%B6%C4%9F%C3%BCt%2C+Bilecik",
+          "coordinates": [
+            30.184865,
+            40.0143
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q768506",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q768506",
+          "coordinates": [
+            30.181389,
+            40.018611
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "MEDIUM",
+        "controller": "MEDIUM",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-uluborlu",
+      "historicalName": "Uluborlu",
+      "modernName": "Uluborlu",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          30.450194,
+          38.078253
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "PRE_SCENARIO",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-hamidogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/hamidogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Hamîd Bey made fortified Uluborlu the government centre around 1297; the article also records Uluborlu as the seat of the beylik and Dündar Bey's rule in the region before 1326."
+        },
+        {
+          "sourceId": "tdv-felekuddin-dundar-bey",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/felekuddin-dundar-bey",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Feleküddin Dündar Bey is identified as the Hamîdoğulları ruler of the Isparta-Burdur region in 1301-1326."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-uluborlu",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=Uluborlu",
+          "coordinates": [
+            30.450194,
+            38.078253
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q1012840",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q1012840",
+          "coordinates": [
+            30.448333,
+            38.078889
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
         "controller": "MEDIUM",
         "geometry": "NOT_ASSERTED"
       },
