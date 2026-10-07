@@ -1221,6 +1221,67 @@
         "geometry": "NOT_ASSERTED"
       },
       "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-giresun",
+      "historicalName": "Giresun / Kerasus",
+      "modernName": "Giresun",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          38.387406,
+          40.91698
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-giresun",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/giresun",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV describes Giresun as the second important centre in the Trebizond Empire's regional geography and a fortified western outpost against surrounding Türkmen groups."
+        },
+        {
+          "sourceId": "tdv-tirebolu",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/tirebolu",
+          "temporalClass": "POST_SCENARIO",
+          "claim": "TDV states that Türkmen groups first reached Tirebolu in 1380 and that Hacı Emîr Bey's son Süleyman Bey captured Giresun in 1396-97; these later events must not be projected backward into 1326."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-giresun-746881",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/746881/giresun.html",
+          "coordinates": [
+            38.387406,
+            40.91698
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikipedia-giresun",
+          "sourceType": "WIKIPEDIA",
+          "uri": "https://en.wikipedia.org/wiki/Giresun",
+          "coordinates": [
+            38.38944,
+            40.91528
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
     }
   ]
 }
