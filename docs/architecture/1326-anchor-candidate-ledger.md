@@ -58,7 +58,7 @@ Production states:
 | 1326-settlement-kutahya | Kütahya | Germiyan | SCENARIO_RELEVANT — Germiyan centre | Existing independent coordinate | Strong centre evidence; frontier/controller extent separate | CONTROLLER_BINDING_PENDING | Scenario-date controller/boundary evidence |
 | 1326-settlement-uluborlu | Uluborlu | Hamid / Pisidia | PRE_SCENARIO / SCENARIO_RELEVANT | Existing research coordinate | Strong Hamid centre evidence | CONTROLLER_BINDING_PENDING | Stable refs + coordinate confirmation |
 | 1326-settlement-egirdir | Eğridir | Hamid / Pisidia | SCENARIO_RELEVANT with 1324–1328 disruption | GeoNames + Wikidata city points | Controller deliberately not asserted | CONTROLLER_BINDING_PENDING | 7 Apr 1326 local status; 1324 occupation and 1328 restoration must not be collapsed |
-| 1326-settlement-isparta | Isparta | Hamid / Pisidia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | Regional Hamid evidence | COORDINATE_PENDING | Independent coordinate source |
+| 1326-settlement-isparta | Isparta | Hamid / Pisidia | SCENARIO_RELEVANT; 1326 internal transition requires care | GeoNames + independent city-point reference | Controller deliberately not asserted | CONTROLLER_BINDING_PENDING | Exact 7 Apr 1326 status within the 1326 Demirtaş/Dündar transition |
 | 1326-settlement-burdur | Burdur | Hamid / Pisidia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | Regional Hamid evidence | COORDINATE_PENDING | Independent coordinate source |
 | 1326-settlement-beysehir | Beyşehir | Eşref / Pisidia | SCENARIO_RELEVANT; 9 Oct 1326 collapse is POST_SCENARIO | Existing research coordinate | April controller must remain pre-collapse | CONTROLLER_BINDING_PENDING | Pre-9 Oct 1326 controller source |
 | 1326-settlement-larende | Lârende / Karaman | Karaman / Lycaonia | SCENARIO_RELEVANT as regional centre | Coordinate evidence pending final source pair | Karamanid 1326 controller requires explicit binding | CONTROLLER_BINDING_PENDING | Do not use 1328–29 conquest evidence backward |
@@ -165,3 +165,20 @@ Registry decision:
 - The candidate remains blocked from canonical promotion.
 
 This is a deliberate closure of the coordinate/existence gate, not a closure of the political-control question.
+
+
+## Wave 5 intake — Isparta closure
+
+The targeted pass closes the coordinate/existence side for Isparta without collapsing the 1326 internal political transition into a single controller label.
+
+- TDV Isparta places Isparta within the Hamîdoğulları sphere from the late 13th century and describes the city during Feleküddin Dündar Bey's 1301–1326 period. It also records a 1326 change in the region after Demirtaş's withdrawal. citeturn0search1
+- TDV Feleküddin Dündar Bey identifies him as ruler of the Isparta–Burdur region from 1301 to 1326. citeturn1search6
+- GeoNames gives the Isparta city point as approximately [30.5522222, 37.7644444]. citeturn3search5
+- An independent city-coordinate reference reproduces the same city point. citeturn3search19
+
+Registry decision:
+
+- **ADD** `1326-isparta` as a research candidate.
+- `controller = NOT_ASSERTED`.
+- `geometry = NOT_ASSERTED`.
+- Keep the 1326 transition as unresolved chronology rather than inferring a controller from a broad regional statement.
