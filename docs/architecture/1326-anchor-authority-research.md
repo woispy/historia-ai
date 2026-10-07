@@ -1096,3 +1096,31 @@ The targeted southern-corridor pass closes two high-value settlement-anchor cand
 - Both records satisfy the registry's independent-coordinate evidence requirement through two source types.
 - Historical evidence is preserved as source-level claims with explicit temporal classes.
 - Canonical promotion remains blocked pending the full theatre review, temporal/controller reconciliation, alias checks, and geometry review.
+
+
+## Wave 17 — Central/Eastern Anatolia temporal-gate review
+
+This pass was intentionally run as a **negative-gate review** to avoid repeating closed western theatres or projecting later beylik formations backward into 1326.
+
+### Sivas / Kayseri / Eretna guard
+
+TDV Eretnaoğulları dates the Eretna polity to **1335–1381** and describes Alâeddin Eretna's later administration of Sivas, Kayseri and other central-Anatolian cities. Therefore Eretna authority is **POST_SCENARIO** for 1326-04-07 and cannot be used to assign Sivas, Kayseri, Amasya or Tokat to Eretna in the start frame. citeturn0search0
+
+### Tokat
+
+TDV Tokat states that the region entered Eretna rule only after Timurtaş's 1327 departure and Ebû Saîd's 1335 death, placing Eretna control after the scenario date. The present source chain therefore does not establish a sufficiently precise 7 April 1326 controller for a production political anchor. citeturn0search4
+
+### Amasya
+
+TDV Amasya confirms Amasya's strategic geographic role and continuous settlement importance, but the current retrieved passage does not provide a sufficiently explicit 7 April 1326 controller binding. A 1326-built monument demonstrates activity in the city but is not, by itself, political-control evidence. Therefore Amasya remains a **research/reference candidate**, not a machine-registry promotion in this wave. citeturn1search1
+
+### Tâceddinoğulları guard
+
+TDV Tâceddinoğulları dates that dynasty's establishment to the second half of the fourteenth century and places its early political activity after the Ilkhanid collapse. It must not be projected backward into the April 1326 scenario. citeturn0search6
+
+### Wave 17 decision
+
+- **No new machine-readable anchor was promoted in this wave.**
+- Sivas, Kayseri, Tokat and Amasya remain open historical-reference targets pending a source chain explicitly binding the settlement/political authority to 1326-04-07.
+- Eretna and Tâceddinoğulları are recorded as explicit temporal guards, preventing accidental backward projection.
+- This is a deliberate research closure, not a missing-data workaround: no coordinate-only or later-dynasty evidence is allowed to create a 1326 controller claim.
