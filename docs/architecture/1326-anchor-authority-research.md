@@ -1285,3 +1285,28 @@ The next production-gate tasks are now reconciliation rather than indiscriminate
 6. only after those gates, research-backed geometry reconciliation.
 
 Canonical political geometry remains **BLOCKED**.
+
+
+## Wave 23 — Exact-date controller confidence audit
+
+The Tier-1 exact-date audit reviewed the registry's non-NOT_ASSERTED controller confidence values against the evidence actually stored on each record.
+
+### Decision
+
+- 1326-bursa remains HIGH because both stored historical evidence records explicitly place the surrender on 6 April 1326, immediately before the scenario date of 7 April 1326.
+- 1326-alaiye → NOT_ASSERTED. The stored evidence establishes pre-scenario Karaman-linked continuity and later 1333 chronology, but does not directly bind a controller to 7 April 1326.
+- 1326-bilecik → NOT_ASSERTED. The stored evidence establishes an early Ottoman administrative association, but the record does not contain a scenario-date controller binding.
+- 1326-kutahya → NOT_ASSERTED. The stored evidence establishes Germiyan political-centre status before the scenario, but not an exact 7 April 1326 controller binding.
+- 1326-sinop → NOT_ASSERTED. The stored chronology supports the Candaroğlu transition before the scenario, but the record does not assert an exact-date controller observation.
+- 1326-sogut → NOT_ASSERTED. The stored evidence establishes its early Ottoman role and its decline after the Bursa conquest, but does not provide an exact 7 April 1326 controller statement.
+- 1326-uluborlu → NOT_ASSERTED. The stored evidence establishes Hamîd administrative-centre chronology and Dündar Bey's regional rule through 1326, but does not itself bind the controller to the exact scenario instant.
+
+This is a confidence correction, not a candidate deletion. The six anchors remain valid research candidates because their historical existence/applicability evidence is retained. The correction enforces the project rule that broad continuity must not be converted into exact-date controller authority.
+
+### Resulting controller-confidence distribution
+
+- HIGH: 1 (1326-bursa)
+- MEDIUM: 0
+- NOT_ASSERTED: 31
+
+Canonical political geometry remains BLOCKED. No controller confidence change authorizes polygon generation or promotion.
