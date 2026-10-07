@@ -1009,3 +1009,60 @@ This closes the existence + independent-coordinate gate for Giresun while preser
 - TDV İslâm Ansiklopedisi — Tirebolu: https://islamansiklopedisi.org.tr/tirebolu
 - GeoNames — Giresun city record: https://www.geonames.org/746881/giresun.html
 - Wikipedia — Giresun: https://en.wikipedia.org/wiki/Giresun
+
+
+## Wave 15 — Menteşe / Caria closure
+
+This wave closes the next unresolved Menteşe settlement-centre pair without collapsing historical centre chronology into a single 1326 controller claim.
+
+### Milas
+
+TDV Menteşeoğulları places Milas inside the Menteşe sphere and states that the beylik centre was initially Milas. TDV Menteşe likewise states that the centre was first Milas and that, after Orhan Bey's unsuccessful Rhodes campaign in 1320-1321, the capital was moved for a period from Milas to inland Muğla.
+
+Decision:
+
+- add `1326-milas` as a research-candidate settlement anchor;
+- treat Milas as a historically important former Menteşe centre, not as an automatically current 1326 capital;
+- keep `controller = NOT_ASSERTED`;
+- keep `geometry = NOT_ASSERTED`;
+- use only independent city-point coordinates;
+- do not infer a province boundary from the former-capital status.
+
+Coordinate evidence:
+
+- GeoNames city point: approximately [27.783889, 37.316389].
+- Wikidata Q924252 city point: approximately [27.783333, 37.316667].
+
+The 1320-1321 capital transfer is PRE_SCENARIO evidence and therefore establishes scenario relevance, but it does not by itself establish the exact political controller or territorial boundary on 1326-04-07.
+
+### Muğla
+
+TDV Muğla provides the strongest temporal binding in this wave: Orhan Bey moved the Menteşe capital from Milas to Muğla after the unsuccessful Rhodes campaign of 1320-1321 for security reasons. The same source records Ibn Battûta's 1333 visit and identifies Orhan Bey's son İbrahim Bey as the administrator in Muğla. TDV Menteşe separately describes Muğla as a temporary centre before Peçin later became the beylik centre.
+
+Decision:
+
+- add `1326-mugla` as a research-candidate political-centre anchor;
+- classify temporal applicability as SCENARIO_RELEVANT;
+- keep `controller = NOT_ASSERTED`;
+- keep `geometry = NOT_ASSERTED`;
+- do not use the later Peçin-centre chronology to erase Muğla's earlier 1320s central role;
+- do not infer a Menteşe political polygon from the city point.
+
+Coordinate evidence:
+
+- GeoNames city point: approximately [28.366497, 37.218066].
+- German Wikipedia city point: approximately [28.364444, 37.214722].
+
+### Peçin guard
+
+Peçin remains deliberately **out of the machine-readable 1326 registry in this wave**. TDV describes Peçin as the later Menteşe centre and records its major rebuilding by the 1330s, but the currently attached source chain does not provide a sufficiently clean pre-1326 temporal binding for the registry's strict evidence gate. Its geographic relevance is retained in research notes only.
+
+### Wave 15 verdict
+
+Menteşe now has two distinct machine-readable candidates:
+
+- `1326-milas` — former/initial Menteşe centre, scenario-relevant settlement anchor;
+- `1326-mugla` — 1320s Menteşe centre, scenario-relevant political-centre anchor.
+
+This wave does **not** promote either to canonical political geometry. The controller and boundary axes remain independently reviewable.
+
