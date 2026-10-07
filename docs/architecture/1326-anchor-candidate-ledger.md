@@ -442,3 +442,12 @@ The Damascus point remains a city reference coordinate only. No provincial bound
 | 1326-safed | ADD | GeoNames + Wikidata | Mamluk capture in 1266; one of six Mamluk niyaba centres | NOT_ASSERTED | NOT_ASSERTED |
 
 All three records remain candidate-evidence-only. Their coordinates are source-reported city points and are not political centroids, boundary seeds, or geometry inputs. No later Ottoman administrative structure is projected backward to 1326.
+
+
+## Wave 21 — Levant interior / Jerusalem settlement
+
+| Target | Registry decision | Coordinate gate | Historical gate | Controller | Geometry |
+|---|---|---|---|---|---|
+| 1326-kudus | ADD | GeoNames + Wikidata | Mamluk continuity; Jerusalem listed among six Damascus-attached Palestinian areas | NOT_ASSERTED | NOT_ASSERTED |
+
+Jerusalem is intentionally classified as SETTLEMENT, not as an asserted political centre. Its point is a city reference coordinate only; no administrative polygon or exact boundary is inferred.
