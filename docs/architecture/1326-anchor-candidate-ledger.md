@@ -412,3 +412,13 @@ TDV Alâiye Beyliği and TDV Alanya establish the pre-scenario Karaman-linked hi
 | Tâceddinoğulları | EXCLUDE | Dynasty/polity belongs to the later 14th-century sequence |
 
 No new machine-readable candidate is promoted from this wave. The ledger records these as explicit research targets and temporal guards rather than filling the gap with coordinate-only or later-dynasty inference.
+
+
+## Wave 18 — Levant / Aleppo–Tripoli intake
+
+| Target | Registry decision | Coordinate gate | Historical gate | Controller | Geometry |
+|---|---|---|---|---|---|
+| 1326-halep | ADD | GeoNames + Wikidata | Mamluk chronology established before scenario; no post-scenario projection | NOT_ASSERTED | NOT_ASSERTED |
+| 1326-trablussam | ADD | GeoNames + Wikidata | Mamluk conquest in 1289; major niyaba centre thereafter | NOT_ASSERTED | NOT_ASSERTED |
+
+Both records remain candidate-evidence-only. Their points are city reference coordinates, not political centroids or boundary seeds. No province polygon, frontier, Voronoi surface, or fallback geometry may be generated from these anchors.
