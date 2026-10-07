@@ -431,3 +431,14 @@ Both records remain candidate-evidence-only. Their points are city reference coo
 | 1326-dimask | ADD | GeoNames + Wikidata | Mamluk continuity plus direct 1312–1340 scenario-era institutional context | NOT_ASSERTED | NOT_ASSERTED |
 
 The Damascus point remains a city reference coordinate only. No provincial boundary or control surface is inferred from it. Canonical promotion remains BLOCKED.
+
+
+## Wave 20 — Levant coastal corridor / Beirut–Sayda–Safed
+
+| Target | Registry decision | Coordinate gate | Historical gate | Controller | Geometry |
+|---|---|---|---|---|---|
+| 1326-beyrut | ADD | GeoNames + Wikidata | Mamluk conquest in 1291; Mamluk trade/administrative relevance | NOT_ASSERTED | NOT_ASSERTED |
+| 1326-sayda | ADD | GeoNames + Wikidata | Mamluk conquest in 1291; direct Damascus-niyaba relationship | NOT_ASSERTED | NOT_ASSERTED |
+| 1326-safed | ADD | GeoNames + Wikidata | Mamluk capture in 1266; one of six Mamluk niyaba centres | NOT_ASSERTED | NOT_ASSERTED |
+
+All three records remain candidate-evidence-only. Their coordinates are source-reported city points and are not political centroids, boundary seeds, or geometry inputs. No later Ottoman administrative structure is projected backward to 1326.
