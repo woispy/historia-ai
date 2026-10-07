@@ -317,3 +317,21 @@ Trabzon closes the historical-existence and independent-coordinate gates for the
 - No province polygon or frontier is derived from the anchor.
 
 This closes the existence + independent-coordinate gate for Trabzon; canonical controller binding and geometry reconciliation remain separate production gates.
+
+
+## Wave 14 — Pontus / Giresun checkpoint
+
+Giresun closes the historical-existence and independent-coordinate gates while adding a strong post-scenario chronology guard.
+
+- TDV Giresun identifies Giresun as the second important centre in the Trebizond Empire's regional geography and a fortified western outpost against surrounding Türkmen groups.
+- TDV Tirebolu states that Türkmen groups first reached Tirebolu in 1380 and that Hacı Emîr Bey's son Süleyman Bey captured Giresun in 1396–97. These are POST_SCENARIO events and are not projected backward to 7 April 1326.
+- GeoNames city point: [38.387406, 40.91698].
+- Wikipedia city point: [38.38944, 40.91528].
+- Selected registry coordinate: GeoNames source-reported point; no averaging.
+- register 1326-giresun with historicalApplicability = SCENARIO_RELEVANT.
+- controller remains NOT_ASSERTED.
+- geometry remains NOT_ASSERTED.
+- No later Hacıemîroğulları conquest is used as 1326 controller evidence.
+- No province polygon or frontier is derived from the anchor.
+
+This closes the existence + independent-coordinate gate for Giresun; exact scenario-date controller binding remains separate.
