@@ -1374,3 +1374,31 @@ No live registry record required correction in this wave. Canonical political ge
 3. Theatre coverage matrix — CLOSED AS COVERAGE CLASSIFICATION
 4. Confidence/precision consistency — PASS
 5. Deterministic registry evidence gate — HARDENED; CI proof pending on the new validator/test commits
+
+
+## Wave 26 — Deterministic registry gate closure and T3-B transition review
+
+The hardened registry evidence gate is now CI-proven on commit 7e164e91b04f138e693866b64db3110f0dbb5f75:
+
+- Historia AI CI #3413 — SUCCESS
+- Cliopatria v0.2.0 acquisition verification #104 — SUCCESS
+
+The gate now rejects invalid confidence values and invalid coordinate-precision values in addition to its existing policy, source-point identity, independent-coordinate-source and geometry-confidence protections.
+
+### T3-B to review / physical-authority transition review
+
+The existing review/reconciliation contracts were inspected without promoting any candidate. The current contracts preserve the required separation:
+
+- source Cliopatria geometry remains immutable evidence;
+- candidate packet and candidate-record SHA lineage remains bound to review IDs;
+- reviewed geometry remains null until explicit research-backed review;
+- review status remains pending and promotion remains BLOCKED;
+- controller evidence does not imply geometry;
+- synthetic geometry and geometry mutation remain forbidden;
+- topology is a required downstream gate rather than an authority substitute.
+
+The pilot-readiness validator also requires explicit review bindings and keeps the state WAITING_FOR_EXPLICIT_REVIEW_BINDINGS when none exist. Therefore the next production step is not automatic geometry generation. It is explicit physical-authority evidence binding for the selected pilot review set.
+
+### Wave 26 decision
+
+Tier-1 registry evidence governance is closed for the current 32-anchor registry. The project may enter the controlled T3-B review/physical-authority transition, but canonical political geometry remains BLOCKED until physical constraints, boundary evidence, review decisions and topology gates are separately satisfied.
