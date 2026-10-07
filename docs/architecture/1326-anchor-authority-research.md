@@ -1168,3 +1168,54 @@ This wave closes two previously identified Levant-facing candidates after comple
 ### Wave 19 gate result
 
 The major Levant-core candidate passes the historical and independent-coordinate gates. Canonical political geometry remains BLOCKED.
+
+
+## Wave 20 — Levant coastal corridor / Beirut–Sayda–Safed closure
+
+This wave extends the Levant candidate surface south-westward using the same strict two-axis gate: historical evidence first, independent coordinates second. No controller or geometry is promoted by anchor existence.
+
+### 1326-beyrut
+
+TDV Beirut records that the city remained under Crusader control until 1291, when it was conquered for Sultan al-Malik al-Ashraf Khalil. It then describes Beirut under Mamluk rule as an important city in East-West trade and records early-14th-century al-Fidâ evidence for two castles and gardens. TDV Lebanon independently describes strong Mamluk rule over the Lebanese coastal region from the 14th century.
+
+Coordinate evidence:
+- GeoNames city point: [35.50157, 33.89332].
+- Wikidata Q3820 city point: [35.51305555555556, 33.88694444444444].
+
+Decision:
+- add `1326-beyrut` as SCENARIO_RELEVANT;
+- retain controller = NOT_ASSERTED;
+- retain geometry = NOT_ASSERTED;
+- no Mamluk provincial boundary is inferred from the city point.
+
+### 1326-sayda
+
+TDV Sayda gives a direct chronology: after Acre fell in 1291, the Templar garrison abandoned Sidon's sea castle and the city came under Mamluk control in July 1291. The same source states that during the Mamluk period Sidon was subordinate to the Damascus niyaba and governed by governors appointed from Damascus. This is sufficient historical evidence for scenario relevance without projecting a later administrative boundary backward.
+
+Coordinate evidence:
+- GeoNames city point: [35.37148, 33.55751].
+- Wikidata Q163490 city point: [35.37583333333333, 33.56055555555556].
+
+Decision:
+- add `1326-sayda` as SCENARIO_RELEVANT;
+- retain controller = NOT_ASSERTED;
+- retain geometry = NOT_ASSERTED;
+- preserve the Damascus-niyaba relationship as historical evidence, not as a generated province boundary.
+
+### 1326-safed
+
+TDV Safed records Baybars's capture of the city in 1266 and explicitly states that Safed became one of the six niyaba centres of Mamluk Syria. It also describes Safed as a rich and important city in the first half of the 14th century. This gives a particularly strong pre-scenario institutional chain.
+
+Coordinate evidence:
+- GeoNames populated-place point: [35.495997, 32.964648].
+- Wikidata Q188336 city point: [35.49833333333333, 32.96583333333333].
+
+Decision:
+- add `1326-safed` as SCENARIO_RELEVANT;
+- retain controller = NOT_ASSERTED;
+- retain geometry = NOT_ASSERTED;
+- do not infer the historical niyaba extent from the city point.
+
+### Wave 20 gate result
+
+All three records satisfy the current registry's historical-evidence and independent-coordinate gates. Their points remain city reference coordinates only. No averaging, centroid generation, proximity matching, polygon generation, or controller inference is performed. Canonical promotion remains BLOCKED pending the later full-theatre reconciliation and geometry authority stages.
