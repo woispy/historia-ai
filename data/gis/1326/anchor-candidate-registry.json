@@ -1100,5 +1100,24 @@
       },
       "authorityStatus": "candidate-evidence-only"
     }
+    {
+      "anchorId": "1326-kastamonu",
+      "historicalName": "Kastamonu / Castamena",
+      "modernName": "Kastamonu",
+      "geometry": { "type": "Point", "coordinates": [33.775275, 41.378052] },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        { "sourceId": "tdv-candarogullari", "sourceType": "TDV_IA", "uri": "https://islamansiklopedisi.org.tr/candarogullari", "temporalClass": "PRE_SCENARIO", "claim": "Suleyman Bey took Kastamonu and moved the beylik centre there; the same chronology places his independence after 1327." },
+        { "sourceId": "tdv-kastamonu", "sourceType": "TDV_IA", "uri": "https://islamansiklopedisi.org.tr/kastamonu", "temporalClass": "PRE_SCENARIO", "claim": "Kastamonu passed to the Candarogullari in the early 14th century and became the beylik centre." }
+      ],
+      "coordinateEvidenceRefs": [
+        { "sourceId": "geonames-kastamonu-city", "sourceType": "GEONAMES", "uri": "https://www.geonames.org/search.html?country=TR&q=Kastamonu", "coordinates": [33.775275, 41.378052], "referencePoint": "CITY_POINT" },
+        { "sourceId": "wikipedia-kastamonu", "sourceType": "WIKIPEDIA", "uri": "https://en.wikipedia.org/wiki/Kastamonu", "coordinates": [33.77639, 41.37639], "referencePoint": "CITY_POINT" }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": { "existence": "HIGH", "coordinate": "HIGH", "temporalApplicability": "HIGH", "controller": "NOT_ASSERTED", "geometry": "NOT_ASSERTED" },
+      "authorityStatus": "candidate-evidence-only"
+    }
   ]
 }
