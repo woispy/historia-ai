@@ -856,5 +856,66 @@
       },
       "authorityStatus": "candidate-evidence-only"
     }
+    {
+      "anchorId": "1326-manisa",
+      "historicalName": "Manisa / Magnesia ad Sipylum",
+      "modernName": "Manisa",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.426465,
+          38.612018
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-saruhanogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/saruhanogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Saruhan Bey established the Manisa-centred Saruhanoğulları polity; after Manisa became the beylik's centre, Saruhan Bey's regional power expanded."
+        },
+        {
+          "sourceId": "tdv-saruhan-bey",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/saruhan-bey",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Saruhan Bey is identified as the founder of the Manisa-centred Saruhanoğulları beylik."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-manisa",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?country=TR&featureClass=P",
+          "coordinates": [
+            27.426465,
+            38.612018
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q147089",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q147089",
+          "coordinates": [
+            27.426465,
+            38.612018
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
   ]
 }
