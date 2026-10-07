@@ -826,3 +826,43 @@ The first real temporal candidate extraction execution reached the new extractio
 The extractor now compares these artifact identities after `path.resolve(process.cwd(), ...)` normalization rather than raw string equality. This changes no source identity, archive hash, extracted GeoJSON hash, candidate geometry, temporal rule, or promotion state. A regression assertion was added to `tools/tests/1326-cliopatria-candidate-validator.test.js` for the normalization contract.
 
 The corrected gate must still prove, in CI, the real candidate count, exclusion accounting, candidate-packet SHA-256, and validator PASS. No candidate count is inferred from the failed execution.
+
+
+### Real Cliopatria v0.2.0 candidate packet sealed in CI
+
+The first real immutable Cliopatria v0.2.0 acquisition has now completed the complete temporal candidate extraction and independent candidate-packet validation gate in GitHub Actions.
+
+Verified acquisition checkpoint:
+
+- immutable commit: `ad28a69`
+- source blob SHA-1: `cefab0f4b622e2e7fb3daf68d4f461f83991204c`
+- retained raw SHA-256: `d01ae3a20d358cc5d54f69d9d725d390767d9c8759ac89ad6f90c58d106f3370`
+- extracted GeoJSON SHA-256: `5df3b5868cfab8f76030853fa2346ed3cd71171ad807b6f72d783ee2dce6839e`
+- input features: `13765`
+- temporal candidates: `150`
+- excluded outside temporal range: `13608`
+- excluded non-POLITY: `7`
+- excluded missing geometry: `0`
+- accounting: `150 + 13608 + 7 + 0 = 13765`
+- candidate packet SHA-256: `c03d8d1e2cb4b280f6549a48b0602f8f44d6c856e7fa49b543fbb2f748779c24`
+- candidate authority: `candidate-evidence-only`
+- promotion: `BLOCKED`
+
+The acquisition verification workflow completed successfully on run `37584530503` (run #25), and the repository CI for commit `93ab25076ac9546f8050edb93ed1d957ac4582e4` completed successfully on run `37584530498` (Historia AI CI #3334).
+
+This closes the **real source → extraction → candidate packet** gate. It does not establish 1326 political geometry authority, reviewed geometry, or canonical promotion. The 150 candidates are now repository-backed evidence and may be consumed by the next reconciliation/review stage.
+
+### T3-B next blocker: explicit 1326 anchor authority
+
+The real candidate packet is now available, but the candidate-surface screening/review chain must not fabricate or derive a production 1326 anchor registry from the legacy 1300 map or test fixtures. The next required input is therefore a research-backed, explicit 1326 anchor registry with stable IDs and WGS84 coordinates.
+
+Until that registry exists:
+
+- candidate surface screening remains blocked from production use;
+- no candidate is treated as spatially relevant to a named 1326 anchor by proximity alone;
+- no review ID is fabricated for the pilot binding layer;
+- no source polygon is altered, clipped, synthesized, or promoted;
+- `reviewedGeometry` remains `null`;
+- `promotion` remains `BLOCKED`.
+
+The next work item is therefore **not another Cliopatria acquisition pass**. It is the controlled creation/verification of the genuine 1326 anchor authority needed to feed the already-validated candidate packet into T3-B candidate surface screening and then into the pending geometry review queue.
