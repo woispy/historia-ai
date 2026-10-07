@@ -1152,3 +1152,19 @@ This wave closes two previously identified Levant-facing candidates after comple
 - Historical chronology is pre-scenario and does not depend on post-1326 conquest evidence.
 - No later Ottoman or unrelated modern administrative boundary is imported into the 1326 authority layer.
 - Canonical political geometry remains BLOCKED.
+
+
+## Wave 19 — Levant core / Damascus closure
+
+### 1326-dimask
+
+- TDV Şam identifies Dımaşk as a principal centre of Bilâdüşşam and records Mamluk control in the relevant period, including the brief Ilkhanid occupation of 1300 and the subsequent return to Mamluk control.
+- TDV also records major development under al-Nâsır Muhammad and governor Tengiz during 1312–1340, providing direct scenario-era institutional context.
+- Coordinate evidence: GeoNames [36.29127502441406, 33.51019814679501] and Wikidata Q3766 [36.292, 33.513]. No averaging.
+- Decision: register `1326-dimask` as `candidate-evidence-only` with `historicalApplicability = SCENARIO_RELEVANT`.
+- `controller = NOT_ASSERTED`; `geometry = NOT_ASSERTED`.
+- No political boundary is inferred from the city anchor.
+
+### Wave 19 gate result
+
+The major Levant-core candidate passes the historical and independent-coordinate gates. Canonical political geometry remains BLOCKED.
