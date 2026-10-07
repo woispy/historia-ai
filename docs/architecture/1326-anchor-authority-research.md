@@ -749,3 +749,40 @@ Decision:
 - retain `geometry = NOT_ASSERTED`;
 - treat the 1326 political transition as unresolved for the exact 7 April frame;
 - do not turn regional historical evidence into a province boundary.
+
+## Wave 6 — Burdur + Beyşehir controlled intake
+
+### Burdur
+
+The targeted Burdur pass closes the coordinate/existence side while keeping the exact 7 April 1326 controller assignment unasserted.
+
+- TDV places Hamîdoğulları in the Isparta–Burdur–Eğridir region and identifies Feleküddin Dündar Bey as ruler of the Isparta–Burdur region from 1301 to 1326. This supports Burdur as a historically relevant regional anchor, but does not by itself define a province boundary or an exact April-7 controller snapshot. citeturn0search1turn0search10
+- GeoNames reports the Burdur city point at [30.2908333, 37.7202778]; an independent city-coordinate reference reports the same point. citeturn2search1turn2search15
+
+Registry decision:
+
+- **ADD** `1326-burdur` as a research candidate.
+- `controller = NOT_ASSERTED`.
+- `geometry = NOT_ASSERTED`.
+- Coordinate evidence is stored as two source-level city points; no averaging or generated point is introduced.
+- Regional Hamîd evidence is not converted into a political polygon.
+
+### Beyşehir
+
+The Beyşehir pass is deliberately asymmetric: settlement/political-centre relevance is strong, but the exact controller on 1326-04-07 remains open.
+
+- TDV identifies Beyşehir as the centre associated with Eşrefoğlu Süleyman Bey and describes its Eşrefoğlu development before the scenario date. citeturn1search5turn1search7
+- TDV's Eşrefoğulları chronology dates Demirtaş's capture of Beyşehir and the killing of II. Süleyman Bey to **9 October 1326**. The subsequent Hamîdoğulları seizure of Beyşehir is therefore **POST_SCENARIO** and cannot be projected backward to 7 April 1326. citeturn1search0
+- GeoNames gives the Beyşehir city point as approximately [31.724577, 37.677348], while Wikidata Q127389 gives approximately [31.726111, 37.676389]. citeturn0search6turn1search2
+
+Registry decision:
+
+- **ADD** `1326-beysehir` as a research candidate.
+- `controller = NOT_ASSERTED`.
+- `geometry = NOT_ASSERTED`.
+- Preserve the 9 October event as POST_SCENARIO evidence only.
+- Do not infer April control from the later Hamîdoğulları occupation.
+
+### Registry hygiene correction
+
+The Isparta record had used `SCENARIO_RELEVANT` inside `historicalEvidenceRefs.temporalClass`, although the schema reserves that field for `PRE_SCENARIO`, `SCENARIO_WINDOW`, `POST_SCENARIO`, or `UNDATED`. The record is now normalized to `PRE_SCENARIO`; its top-level `historicalApplicability` remains `SCENARIO_RELEVANT` because that field has a separate schema meaning.
