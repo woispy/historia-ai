@@ -65,7 +65,7 @@
         "existence": "HIGH",
         "coordinate": "HIGH",
         "temporalApplicability": "HIGH",
-        "controller": "MEDIUM",
+        "controller": "NOT_ASSERTED",
         "geometry": "NOT_ASSERTED"
       },
       "authorityStatus": "candidate-evidence-only"
@@ -431,7 +431,7 @@
         "existence": "HIGH",
         "coordinate": "HIGH",
         "temporalApplicability": "MEDIUM",
-        "controller": "MEDIUM",
+        "controller": "NOT_ASSERTED",
         "geometry": "NOT_ASSERTED"
       },
       "authorityStatus": "candidate-evidence-only"
@@ -1041,7 +1041,7 @@
         "existence": "HIGH",
         "coordinate": "HIGH",
         "temporalApplicability": "MEDIUM",
-        "controller": "MEDIUM",
+        "controller": "NOT_ASSERTED",
         "geometry": "NOT_ASSERTED"
       },
       "authorityStatus": "candidate-evidence-only"
@@ -1407,7 +1407,7 @@
         "existence": "HIGH",
         "coordinate": "HIGH",
         "temporalApplicability": "MEDIUM",
-        "controller": "MEDIUM",
+        "controller": "NOT_ASSERTED",
         "geometry": "NOT_ASSERTED"
       },
       "authorityStatus": "candidate-evidence-only"
@@ -1461,7 +1461,7 @@
         "existence": "HIGH",
         "coordinate": "HIGH",
         "temporalApplicability": "MEDIUM",
-        "controller": "MEDIUM",
+        "controller": "NOT_ASSERTED",
         "geometry": "NOT_ASSERTED"
       },
       "authorityStatus": "candidate-evidence-only"
@@ -1705,7 +1705,7 @@
         "existence": "HIGH",
         "coordinate": "HIGH",
         "temporalApplicability": "HIGH",
-        "controller": "MEDIUM",
+        "controller": "NOT_ASSERTED",
         "geometry": "NOT_ASSERTED"
       },
       "authorityStatus": "candidate-evidence-only"
