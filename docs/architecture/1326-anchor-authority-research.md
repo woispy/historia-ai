@@ -211,3 +211,96 @@ Each theatre must be completed from historical evidence first; coordinate assign
 - GeoNames — Geyve İlçesi: coordinate reference.
 - GeoNames — Eskişehir: coordinate reference.
 - independent historical-site/cartographic coordinate records for Nicomedia, Söğüt, Bilecik and Kütahya.
+
+
+## Wave 1 historical-temporal findings
+
+The regional source pass strengthens several anchors and also exposes where a 1326 date must be treated carefully.
+
+### Hamid / Pisidia
+
+TDV Hamîdoğulları states that Hamîd Bey made Uluborlu the government centre around 1297 and that the Hamidid political sphere included Isparta, Burdur, Eğirdir and surrounding settlements. It also records Dündar Bey's rule and his death in 1326. TDV Eğridir states that Eğridir became the second centre of the Hamidid beylik and that the city was occupied by Timurtaş in 1324, with Hızır Bey restoring control only in 1328.
+
+Implication:
+
+- Uluborlu is a strong historical anchor candidate for the 1326 theatre.
+- Eğridir is a strong historical/geographic anchor candidate, but its 1326 controller state must not be simplified from later 1328 evidence.
+- Isparta and Burdur remain useful regional anchors.
+- No Hamidid polygon should be inferred from these points.
+
+### Eşref / Beyşehir
+
+TDV Eşrefoğulları records that II. Süleyman was killed by Timurtaş at Beyşehir on 9 October 1326 and that the beylik then broke apart, with Beyşehir, Seydişehir, Akşehir and surrounding territory subsequently taken by Hamîdoğulları.
+
+Implication:
+
+- Beyşehir is a high-value 1326 anchor candidate.
+- The date is especially important: evidence after 9 October 1326 cannot be silently treated as evidence for the scenario date 7 April 1326.
+- The registry must therefore distinguish pre-event and post-event evidence.
+
+### Germiyan / Kütahya
+
+TDV Germiyanoğulları identifies Kütahya as the centre of Germiyan and Yakub Bey as its ruler from 1300 to 1340. It also describes Timurtaş's 1325-1327 campaign against the western Anatolian beyliks.
+
+Implication:
+
+- Kütahya is a strong regional anchor candidate.
+- The anchor establishes historical relevance of the settlement/centre, not the exact 1326 Germiyan frontier.
+- A separate 1326 controller/boundary review remains mandatory.
+
+### Sinop / Candar transition
+
+TDV Pervâneoğulları records the end of the Pervâneoğulları polity in 1322 and the incorporation of Sinop into Süleyman Bey's Candaroğlu sphere. TDV Sinop independently records the same transition.
+
+Implication:
+
+- Sinop is a strong 1326 settlement anchor.
+- The project must not carry the 1300 Pervâneoğulları controller into the 1326 scenario.
+- This is a useful example of why temporal anchor evidence and controller evidence must be separated.
+
+### Aydın / Birgi / Ayasuluk
+
+TDV Aydınoğulları places the formation of the beylik in the Büyük Menderes–Tire–Ayasuluk–Birgi region and records Mehmed Bey's control of Ayasuluk, Tire, Sultanhisarı and Birgi-area territory beginning in 1308.
+
+Implication:
+
+- Birgi and Ayasuluk are valid historical anchor candidates for the 1326 theatre.
+- Their exact political extent requires separate source reconciliation.
+- Later events such as the İzmir conquest of 1328/1329 must not be projected backward to 7 April 1326.
+
+## Temporal rule added to the authority model
+
+For scenario date 1326-04-07, an anchor evidence reference must be classified as one of:
+
+- PRE_SCENARIO — evidence ending before 1326-04-07;
+- SCENARIO_WINDOW — evidence directly covering or immediately surrounding the scenario date;
+- POST_SCENARIO — evidence occurring after 1326-04-07;
+- UNDATED — historical evidence without a usable temporal bound.
+
+POST_SCENARIO evidence may support historical existence or later change history, but it cannot by itself establish the scenario-date controller or boundary.
+
+This is especially important for the 1326 Eşref/Hamid transition and for events occurring later in the same year.
+
+## Wave 1 verdict
+
+The research pass now supports a larger candidate pool than the initial Bithynia-only set:
+
+- Bursa
+- Nicaea
+- Nicomedia
+- Söğüt
+- Bilecik
+- Geyve / Sangarios corridor
+- Dorylaion / Eskişehir
+- Kütahya
+- Uluborlu
+- Eğridir
+- Isparta
+- Burdur
+- Beyşehir
+- Sinop
+- Birgi
+- Ayasuluk
+
+These remain **research candidates**, not production anchors, until independent coordinate references and machine-readable historical evidence bindings are attached.
+
