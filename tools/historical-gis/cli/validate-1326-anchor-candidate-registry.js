@@ -42,6 +42,23 @@ for (const anchor of report.anchors) {
     fail(`Invalid historicalApplicability: ${anchor.anchorId}`);
   }
 
+  const confidence = anchor.confidence ?? {};
+  const confidenceFields = ["existence", "coordinate", "temporalApplicability"];
+  for (const field of confidenceFields) {
+    if (!["HIGH", "MEDIUM", "LOW", "UNKNOWN"].includes(confidence[field])) {
+      fail(`Invalid confidence.${field}: ${anchor.anchorId}`);
+    }
+  }
+  if (!["HIGH", "MEDIUM", "LOW", "UNKNOWN", "NOT_ASSERTED"].includes(confidence.controller)) {
+    fail(`Invalid confidence.controller: ${anchor.anchorId}`);
+  }
+  if (confidence.geometry !== "NOT_ASSERTED") {
+    fail(`Candidate anchor geometry confidence must remain NOT_ASSERTED: ${anchor.anchorId}`);
+  }
+  if (!["SOURCE_REPORTED", "APPROXIMATE", "REFERENCE_POINT_ONLY"].includes(anchor.coordinatePrecision)) {
+    fail(`Invalid coordinatePrecision: ${anchor.anchorId}`);
+  }
+
   const coords = anchor.geometry?.coordinates;
   if (anchor.geometry?.type !== "Point" || !Array.isArray(coords) || coords.length !== 2 ||
       !finiteNumber(coords[0]) || !finiteNumber(coords[1]) ||
