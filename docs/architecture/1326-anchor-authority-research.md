@@ -634,3 +634,76 @@ Still required before production sealing:
 - CI validation.
 
 The research phase should now move toward a **candidate anchor ledger**, not yet a canonical registry.
+
+
+## Machine-readable anchor candidate registry — 2026-10-07
+
+The first machine-readable research candidate registry is now stored at:
+
+    data/gis/1326/anchor-candidate-registry.json
+
+Its contract is:
+
+    data/gis/1326/anchor-candidate-registry.schema.json
+
+The registry currently contains four evidence-layer candidates:
+
+- `1326-bursa`
+- `1326-bilecik`
+- `1326-kutahya`
+- `1326-sinop`
+
+These records are deliberately **not** canonical authority. The registry root is `research-candidate-registry`, every record is `candidate-evidence-only`, and geometry confidence is `NOT_ASSERTED`.
+
+### Registry gates
+
+Every candidate record now requires:
+
+1. scenario date `1326-04-07`;
+2. at least one historical evidence reference with `PRE_SCENARIO` or `SCENARIO_WINDOW` temporal applicability;
+3. at least two coordinate evidence references from distinct source types;
+4. explicit WGS84 `[longitude, latitude]` coordinates;
+5. explicit physical reference-point semantics;
+6. selected anchor coordinates that exactly match one declared source coordinate;
+7. `geometryGeneration = false`;
+8. `controllerInference = false`;
+9. `canonicalPromotion = false`.
+
+The selected point is therefore never an average, interpolation, polygon centroid, or proximity-derived coordinate.
+
+### Current evidence posture
+
+**Bursa** is the strongest current candidate. TDV Orhan and TDV Bursa independently place the surrender on 6 April 1326, immediately before the scenario date. GeoNames and Wikidata provide the coordinate evidence pair. This supports a high-confidence settlement/centre anchor, but does not provide a political province polygon.
+
+**Bilecik** has strong pre-scenario Ottoman administrative evidence and a convergent GeoNames/Wikidata city-point pair. Its exact scenario-date political extent remains a separate review question.
+
+**Kütahya** has strong historical centre evidence through TDV Kütahya and TDV Germiyanoğulları, with matching GeoNames/Wikidata city coordinates. The registry intentionally leaves scenario-date controller confidence below the Bursa level because centre existence does not by itself define the 7 April 1326 frontier.
+
+**Sinop** has strong historical relevance and independent coordinate evidence, but the exact April 1326 controller chronology remains deliberately below sealed/high confidence. The registry therefore preserves it as a candidate rather than projecting later Candaroğlu administration backward without a date-specific binding.
+
+### Validation
+
+The registry is fail-closed through:
+
+    npm run validate:1326-anchor-candidate-registry -- --input data/gis/1326/anchor-candidate-registry.json
+
+and its contract test:
+
+    npm run test:1326-anchor-candidate-registry
+
+The validator rejects duplicate anchor IDs, single-source coordinate pairs, generated/averaged points, invalid WGS84 coordinates, missing temporal evidence, and any attempt to mark candidate geometry as asserted.
+
+This is the first machine-readable bridge from the research ledger toward T3-B screening. It is intentionally still below production authority.
+
+### Next controlled research gate
+
+The next work should expand this registry only where the evidence chain is genuinely closable:
+
+- exact 1326-04-07 temporal/controller binding for the remaining high-value anchors;
+- second independent coordinate sources for anchors still marked coordinate-pending;
+- historical-name/modern-name alias reconciliation;
+- source-reference stability review;
+- dedicated Byzantine Thrace and Cilicia/Mamluk temporal passes;
+- CI execution of the new registry validator and test.
+
+No candidate registry record may be converted directly into a political polygon.
