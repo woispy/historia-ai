@@ -786,3 +786,20 @@ Registry decision:
 ### Registry hygiene correction
 
 The Isparta record had used `SCENARIO_RELEVANT` inside `historicalEvidenceRefs.temporalClass`, although the schema reserves that field for `PRE_SCENARIO`, `SCENARIO_WINDOW`, `POST_SCENARIO`, or `UNDATED`. The record is now normalized to `PRE_SCENARIO`; its top-level `historicalApplicability` remains `SCENARIO_RELEVANT` because that field has a separate schema meaning.
+
+## Wave 7 — Beyşehir temporal-controller refinement
+
+The dedicated temporal pass strengthens the April-1326 interpretation without silently promoting it to canonical controller authority.
+
+- TDV's Eşrefoğulları entry states that II. Süleyman succeeded Mehmed Bey in 1320 and that Demirtaş entered Beyşehir and killed II. Süleyman on **9 October 1326**. The same entry states that Beyşehir and the surrounding Eşrefoğlu territory were seized by Hamîdoğulları **after this event**. citeturn0search0
+- TDV's Beyşehir entry identifies the city as the centre of the Eşrefoğlu polity and associates the city's name and development with the Eşrefoğlu rulers. citeturn0search3
+- An academic review by Sait Kofoğlu likewise identifies II. Süleyman as successor in 1320 and places his assassination by Demirtaş in 1326. citeturn1search2
+
+Interpretation for the 1326-04-07 scenario:
+
+- The evidence is materially stronger than a generic historical association: a named ruler is documented from 1320 until a dated death event on 9 October 1326, with the territorial takeover described as subsequent.
+- This supports **Eşrefoğlu control as the leading historical interpretation for Beyşehir on 1326-04-07**.
+- Nevertheless, the registry remains `controller = NOT_ASSERTED` until the project accepts the continuity inference as an explicit controller-binding rule or obtains a source that directly binds the controller to the April scenario date.
+- The 9 October event remains `POST_SCENARIO`; no later Hamîdoğulları control is projected backward.
+
+Decision: **retain the candidate, do not promote controller authority yet**.
