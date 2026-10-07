@@ -1892,6 +1892,67 @@
         "geometry": "NOT_ASSERTED"
       },
       "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-kudus",
+      "historicalName": "Kudüs / al-Quds / Jerusalem",
+      "modernName": "Jerusalem",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.216331481933594,
+          31.76904009837115
+        ]
+      },
+      "anchorType": "SETTLEMENT",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-kudus",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/kudus",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV records that Jerusalem entered a more stable period after the Mamluk victory at Aynicâlût in 1260 and remained under Mamluk rule; its political importance was reduced relative to major commercial centres, so the city is treated here as a settlement/reference anchor rather than an asserted provincial capital."
+        },
+        {
+          "sourceId": "tdv-filistin",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/filistin",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV states that during the Mamluk period Palestine was reorganized into six areas attached to Damascus: Gaza, Ludd, Kakun, Jerusalem, Hebron and Nablus. This directly establishes Jerusalem as a relevant Mamluk administrative locality in the scenario-era regional system."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-281184",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/search.html?country=IL&q=Jerusalem",
+          "coordinates": [
+            35.216331481933594,
+            31.76904009837115
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q1218",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q1218",
+          "coordinates": [
+            35.23415611111111,
+            31.77667888888889
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
     }
   ]
 }
