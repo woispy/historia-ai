@@ -742,6 +742,67 @@
       "authorityStatus": "candidate-evidence-only"
     },
     {
+      "anchorId": "1326-halep",
+      "historicalName": "Halep / Aleppo",
+      "modernName": "Aleppo",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.161173,
+          36.201241
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-halep",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/halep",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV Halep records that the city was left to the Mamluks after the Mongol defeat at Aynicâlût in 1260; it notes a brief Mongol occupation in the early 14th century and that the city then remained in the Mamluk period until 1516."
+        },
+        {
+          "sourceId": "tdv-memlukler",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/memlukler",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV identifies the Mamluk state as the polity ruling Egypt, Syria and the Hijaz from 1250 to 1517, providing the broader institutional chronology for Aleppo's Mamluk period."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-170063",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/170063/aleppo.html",
+          "coordinates": [
+            37.161173,
+            36.201241
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q41183",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q41183",
+          "coordinates": [
+            37.16,
+            36.2
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
       "anchorId": "1326-isparta",
       "historicalName": "Isparta / Baris",
       "modernName": "Isparta",
@@ -1391,6 +1452,67 @@
           "coordinates": [
             27.7319,
             38.08956944444445
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-trablussam",
+      "historicalName": "Trablusşam / Tripoli",
+      "modernName": "Tripoli",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.84415,
+          34.43352
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-trablussam",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/trablussam",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV records Sultan Kalavun's conquest of Tripoli in 1289 and states that the rebuilt city became the centre of one of the six major Mamluk niyabas; it also describes the city as an important Mamluk administrative and commercial centre."
+        },
+        {
+          "sourceId": "tdv-memlukler",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/memlukler",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV identifies the Mamluk state as the polity ruling Syria during the period relevant to the Tripoli niyaba chronology."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-266826",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/266826/tripoli.html",
+          "coordinates": [
+            35.84415,
+            34.43352
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q168954",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q168954",
+          "coordinates": [
+            35.83444444444444,
+            34.43666666666667
           ],
           "referencePoint": "CITY_POINT"
         }
