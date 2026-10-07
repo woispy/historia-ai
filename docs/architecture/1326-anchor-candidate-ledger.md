@@ -521,3 +521,20 @@ Wave 24 closes the coverage classification. The next ledger step is confidence/c
 The live registry requires no record-level correction from this audit. The deterministic validator was hardened so invalid confidence and coordinate-precision values fail the gate instead of relying only on the JSON schema. Contract tests now include negative cases for those two classes.
 
 Canonical promotion remains BLOCKED until the hardened gate is proven green in CI.
+
+
+## Wave 26 — Deterministic registry gate closure / transition review
+
+| Gate | State |
+|---|---|
+| 32-anchor registry integrity | PASS |
+| Exact-date controller confidence | PASS |
+| Theatre coverage classification | CLOSED |
+| Confidence / precision consistency | PASS |
+| Runtime deterministic registry validator | PASS |
+| Negative confidence / precision tests | PASS |
+| Historia AI CI #3413 | SUCCESS |
+| Cliopatria acquisition #104 | SUCCESS |
+| Canonical political geometry | BLOCKED |
+
+The hardened registry gate is now CI-proven. The next controlled layer is explicit physical-authority evidence binding for the selected T3-B pilot review set. No automatic candidate-to-polygon transition is authorized.
