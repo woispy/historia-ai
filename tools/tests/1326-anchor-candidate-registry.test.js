@@ -23,36 +23,36 @@ async function expectFailure(file) {
   await assert.rejects(run(["--input", file]));
 }
 
-await run(["--input", input]);
-
-const original = JSON.parse(await fs.readFile(input, "utf8"));
-
-const duplicate = path.join(dir, "test-anchor-registry-duplicate.json");
-await fs.writeFile(duplicate, JSON.stringify({
-  ...original,
-  anchors: [...original.anchors, original.anchors[0]]
-}, null, 2));
-await expectFailure(duplicate);
-
-const sameSourceTypes = path.join(dir, "test-anchor-registry-same-source-types.json");
-const mutated = structuredClone(original);
-mutated.anchors[0].coordinateEvidenceRefs[1].sourceType = "GEONAMES";
-await fs.writeFile(sameSourceTypes, JSON.stringify(mutated, null, 2));
-await expectFailure(sameSourceTypes);
-
-const generated = path.join(dir, "test-anchor-registry-generated.json");
-const generatedMutation = structuredClone(original);
-generatedMutation.policy.geometryGeneration = true;
-await fs.writeFile(generated, JSON.stringify(generatedMutation, null, 2));
-await expectFailure(generated);
-
-const averaged = path.join(dir, "test-anchor-registry-averaged-point.json");
-const averagedMutation = structuredClone(original);
-averagedMutation.anchors[0].geometry.coordinates = [29.060125, 40.19559];
-await fs.writeFile(averaged, JSON.stringify(averagedMutation, null, 2));
-await expectFailure(averaged);
-
 try {
+  await run(["--input", input]);
+
+  const original = JSON.parse(await fs.readFile(input, "utf8"));
+
+  const duplicate = path.join(dir, "test-anchor-registry-duplicate.json");
+  await fs.writeFile(duplicate, JSON.stringify({
+    ...original,
+    anchors: [...original.anchors, original.anchors[0]]
+  }, null, 2));
+  await expectFailure(duplicate);
+
+  const sameSourceTypes = path.join(dir, "test-anchor-registry-same-source-types.json");
+  const mutated = structuredClone(original);
+  mutated.anchors[0].coordinateEvidenceRefs[1].sourceType = "GEONAMES";
+  await fs.writeFile(sameSourceTypes, JSON.stringify(mutated, null, 2));
+  await expectFailure(sameSourceTypes);
+
+  const generated = path.join(dir, "test-anchor-registry-generated.json");
+  const generatedMutation = structuredClone(original);
+  generatedMutation.policy.geometryGeneration = true;
+  await fs.writeFile(generated, JSON.stringify(generatedMutation, null, 2));
+  await expectFailure(generated);
+
+  const averaged = path.join(dir, "test-anchor-registry-averaged-point.json");
+  const averagedMutation = structuredClone(original);
+  averagedMutation.anchors[0].geometry.coordinates = [29.060125, 40.19559];
+  await fs.writeFile(averaged, JSON.stringify(averagedMutation, null, 2));
+  await expectFailure(averaged);
+
   console.log("1326 anchor candidate registry contract passed: independent coordinate-source guard, no-generation policy, and source-point identity guard.");
 } finally {
   await fs.rm(dir, { recursive: true, force: true });
