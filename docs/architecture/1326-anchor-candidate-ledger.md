@@ -360,3 +360,42 @@ This closes the existence + independent-coordinate gate for Giresun; exact scena
 ### Peçin
 - Not added to machine-readable registry in Wave 15.
 - Reason: current source chain does not satisfy the strict pre-1326 temporal-binding gate despite strong later Menteşe-centre evidence.
+
+
+## Wave 16 — Southern Anatolia / Antalya–Alâiye intake
+
+### 1326-antalya
+| Field | Value |
+|---|---|
+| historicalName | Antalya / Attaleia |
+| theatre | Southern Anatolia / Hamîd |
+| applicability | SCENARIO_RELEVANT |
+| coordinate | GeoNames [30.695565, 36.908118] |
+| independent coordinate | Wikidata Q6487 [30.666666666666668, 36.96666666666667] |
+| controller | NOT_ASSERTED |
+| geometry | NOT_ASSERTED |
+| state | CANDIDATE_EVIDENCE_ONLY |
+
+TDV Antalya and TDV Hamîdoğulları provide the historical chain connecting Antalya with the Hamîd political sphere and the 1326 chronology. Later 1327 events are retained only as chronology guards and are not projected backward.
+
+### 1326-alaiye
+| Field | Value |
+|---|---|
+| historicalName | Alâiye / Alanya |
+| theatre | Southern Anatolia / Karaman–Mamluk frontier |
+| applicability | SCENARIO_RELEVANT |
+| coordinate | GeoNames [31.999817, 36.543747] |
+| independent coordinate | Wikidata Q207341 [31.99972222222222, 36.54388888888889] |
+| controller confidence | MEDIUM; not asserted |
+| geometry | NOT_ASSERTED |
+| state | CANDIDATE_EVIDENCE_ONLY |
+
+TDV Alâiye Beyliği and TDV Alanya establish the pre-scenario Karaman-linked historical chain. Later 1333 evidence is retained as chronology only and does not become an April 1326 controller assertion.
+
+### Wave 16 decision
+
+- Add both candidates to the machine-readable registry and retain candidate-evidence-only status.
+- Preserve source-reported coordinates; do not average or derive coordinates.
+- Keep controller and political geometry as separate unresolved authority axes.
+- No province polygon, frontier, Voronoi surface, or fallback geometry may be generated from either anchor.
+- Canonical promotion remains BLOCKED.
