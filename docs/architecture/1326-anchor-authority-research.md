@@ -1066,3 +1066,33 @@ Menteşe now has two distinct machine-readable candidates:
 
 This wave does **not** promote either to canonical political geometry. The controller and boundary axes remain independently reviewable.
 
+
+
+## Wave 16 — Southern Anatolia / Antalya–Alâiye checkpoint
+
+The targeted southern-corridor pass closes two high-value settlement-anchor candidates for registry intake while keeping controller and geometry authority explicitly separate.
+
+### 1326-antalya
+
+- TDV Antalya records that Dündar Bey captured Antalya, entrusted it to his brother Yunus Bey, and that Yunus's son Mahmud Bey held Antalya. It also records Mahmud's surrender of Dündar to Demirtaş and the later chronology around Demirtaş's departure in 1327.
+- TDV Hamîdoğulları independently records Mahmud Bey's possession of Antalya and Dündar Bey's death in 1326.
+- Coordinate evidence: GeoNames [30.695565, 36.908118] and Wikidata Q6487 [30.666666666666668, 36.96666666666667]. The registry retains the selected source-reported GeoNames point; coordinates are not averaged.
+- Decision: register `1326-antalya` as `candidate-evidence-only` with `historicalApplicability = SCENARIO_RELEVANT`.
+- `controller = NOT_ASSERTED`; `geometry = NOT_ASSERTED`.
+- The anchor does not imply a Hamîd polygon or an exact political frontier.
+
+### 1326-alaiye
+
+- TDV Alâiye Beyliği records the transfer of Alâiye to Karamanoğlu Mecdüddin Mahmud Bey in 1293 and its subsequent governance by Karaman-linked beys under Mamluk overlordship.
+- TDV Alanya independently records the 1293 Karaman capture and identifies Alâiye as a Türkmen centre; later 1333 evidence names Yusuf b. Karaman as ruler. The later evidence is retained as chronology only and is not projected backward as an exact April 1326 controller assertion.
+- Coordinate evidence: GeoNames [31.999817, 36.543747] and Wikidata Q207341 [31.99972222222222, 36.54388888888889]. The registry retains the selected source-reported GeoNames point; coordinates are not averaged.
+- Decision: register `1326-alaiye` as `candidate-evidence-only` with `historicalApplicability = SCENARIO_RELEVANT`.
+- `controller = MEDIUM` in the confidence field, but this is not a canonical controller assertion; `geometry = NOT_ASSERTED`.
+- No Karamanid/Mamluk frontier polygon is inferred from the anchor.
+
+### Wave 16 gate result
+
+- The southern Anatolian anchor coverage is expanded without importing 1300 geometry or controller state.
+- Both records satisfy the registry's independent-coordinate evidence requirement through two source types.
+- Historical evidence is preserved as source-level claims with explicit temporal classes.
+- Canonical promotion remains blocked pending the full theatre review, temporal/controller reconciliation, alias checks, and geometry review.
