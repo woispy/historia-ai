@@ -1709,6 +1709,189 @@
         "geometry": "NOT_ASSERTED"
       },
       "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-beyrut",
+      "historicalName": "Beyrut / Beirut",
+      "modernName": "Beirut",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.50157,
+          33.89332
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-beyrut",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/beyrut",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV records that Beirut remained under Crusader control until 1291, when it was conquered for the Mamluk Sultan al-Malik al-Ashraf Khalil; under Mamluk rule Beirut became an important province/city in East-West trade, and early-14th-century al-Idrisi evidence describes its fortifications and gardens."
+        },
+        {
+          "sourceId": "tdv-lubnan",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/lubnan",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV Lebanon states that from the 14th century Lebanon experienced a stable period under strong Mamluk rule and that coastal cities were fortified and active in regional trade."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-beirut",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/search.html?q=Beirut",
+          "coordinates": [
+            35.50157,
+            33.89332
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q3820",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q3820",
+          "coordinates": [
+            35.51305555555556,
+            33.88694444444444
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-sayda",
+      "historicalName": "Sayda / Sidon",
+      "modernName": "Sidon",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.37148,
+          33.55751
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-sayda",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/sayda",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV records that after Acre fell in 1291, the Mamluk army approached Sidon; the Templar knights abandoned the sea castle and fled, and the city came under Mamluk control in July 1291. During the Mamluk period Sidon was subordinate to the Damascus niyaba and governed by governors appointed from Damascus."
+        },
+        {
+          "sourceId": "tdv-lubnan",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/lubnan",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV Lebanon records strong Mamluk rule over Lebanon from the 14th century and continued activity and fortification of coastal cities."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-269261",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/search.html?country=LB&q=Sidon",
+          "coordinates": [
+            35.37148,
+            33.55751
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q163490",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q163490",
+          "coordinates": [
+            35.37583333333333,
+            33.56055555555556
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-safed",
+      "historicalName": "Safed / Safad",
+      "modernName": "Safed",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.495997,
+          32.964648
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-safed",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/safed",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV records Sultan Baybars's capture of Safed in 1266 and states that the city then became one of the six niyaba centres of Mamluk Syria; it records Safed as an important city in the first half of the 14th century and describes its administrative and economic role."
+        },
+        {
+          "sourceId": "tdv-sam-suriye",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/sam--suriye",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV's Syria/Şam chronology places the region within Mamluk administration during the relevant period and provides the broader institutional context for Safed's Mamluk niyaba."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-safed",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?country=IL&q=Safed",
+          "coordinates": [
+            35.495997,
+            32.964648
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q188336",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q188336",
+          "coordinates": [
+            35.49833333333333,
+            32.96583333333333
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
     }
   ]
 }
