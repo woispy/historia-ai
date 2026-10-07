@@ -122,3 +122,26 @@ Production blockers remain:
 - no 1328+ events projected backward into April 1326;
 - no anchor point converted directly into a province polygon;
 - no canonical promotion from this ledger alone.
+
+
+## Registry intake checkpoint — 2026-10-07
+
+The evidence-layer registry now contains the following seven machine-readable candidates:
+
+- Bursa
+- Bilecik
+- Kütahya
+- Sinop
+- Nicaea / İznik
+- Söğüt
+- Uluborlu
+
+This intake does **not** change the ledger's non-canonical status. In particular:
+
+- Nicaea remains a historical anchor candidate; its scenario-date controller is not asserted.
+- Söğüt remains a strong early Ottoman administrative-centre candidate, but its post-1326 administrative decline means the exact 7 April 1326 role is not silently promoted.
+- Uluborlu has the strongest regional temporal chain among the newly added candidates: TDV places it as the Hamîd government centre from around 1297 and identifies Dündar Bey's rule through 1326.
+
+Coordinate evidence is stored as source-level points rather than averaged coordinates. No anchor point is converted into a political boundary.
+
+The registry validator remains the gate before any candidate can enter later reconciliation work. Canonical political geography remains blocked.
