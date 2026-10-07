@@ -428,6 +428,67 @@
         "geometry": "NOT_ASSERTED"
       },
       "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-egirdir",
+      "historicalName": "Eğridir / Felekâbâd",
+      "modernName": "Eğirdir",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          30.850424766540527,
+          37.874616265473385
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-egridir",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/egridir",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Eğridir became the second centre of the Hamîdoğulları beylik; the article records its occupation by Timurtaş in 1324 and Hızır Bey's return only in 1328."
+        },
+        {
+          "sourceId": "tdv-hamidogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/hamidogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Dündar Bey moved the Hamîdoğulları government centre to Eğridir around 1307 and used the name Felekâbâd for the city."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-egirdir",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=Isparta",
+          "coordinates": [
+            30.850424766540527,
+            37.874616265473385
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q586434",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q586434",
+          "coordinates": [
+            30.850555555555555,
+            37.875
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
     }
   ]
 }
