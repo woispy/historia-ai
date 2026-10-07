@@ -399,3 +399,16 @@ TDV Alâiye Beyliği and TDV Alanya establish the pre-scenario Karaman-linked hi
 - Keep controller and political geometry as separate unresolved authority axes.
 - No province polygon, frontier, Voronoi surface, or fallback geometry may be generated from either anchor.
 - Canonical promotion remains BLOCKED.
+
+
+## Wave 17 — Central/Eastern Anatolia temporal-gate review
+
+| Target | 1326 registry decision | Reason |
+|---|---|---|
+| Sivas | HOLD | Eretna political-centre evidence is post-1335; no exact 7 Apr 1326 binding sealed |
+| Kayseri | HOLD | Eretna administration is post-scenario in the current source chain |
+| Tokat | HOLD | TDV places Eretna control after 1327/1335 chronology; April 1326 controller unresolved |
+| Amasya | HOLD | Strong settlement/geographic importance, but current retrieved evidence does not bind political authority to 7 Apr 1326 |
+| Tâceddinoğulları | EXCLUDE | Dynasty/polity belongs to the later 14th-century sequence |
+
+No new machine-readable candidate is promoted from this wave. The ledger records these as explicit research targets and temporal guards rather than filling the gap with coordinate-only or later-dynasty inference.
