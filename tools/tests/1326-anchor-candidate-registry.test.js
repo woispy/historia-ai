@@ -5,8 +5,7 @@ import { spawn } from "node:child_process";
 
 const root = process.cwd();
 const input = path.join(root, "data/gis/1326/anchor-candidate-registry.json");
-const dir = path.join(root, "data/build/gis/1326");
-await fs.mkdir(dir, { recursive: true });
+const dir = await fs.mkdtemp(path.join(root, ".tmp-1326-anchor-registry-"));
 
 function run(args) {
   return new Promise((resolve, reject) => {
@@ -53,4 +52,8 @@ averagedMutation.anchors[0].geometry.coordinates = [29.060125, 40.19559];
 await fs.writeFile(averaged, JSON.stringify(averagedMutation, null, 2));
 await expectFailure(averaged);
 
-console.log("1326 anchor candidate registry contract passed: independent coordinate-source guard, no-generation policy, and source-point identity guard.");
+try {
+  console.log("1326 anchor candidate registry contract passed: independent coordinate-source guard, no-generation policy, and source-point identity guard.");
+} finally {
+  await fs.rm(dir, { recursive: true, force: true });
+}
