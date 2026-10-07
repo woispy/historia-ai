@@ -299,3 +299,21 @@ Decision:
 - do not derive political geometry from the city point.
 
 This closes the **existence + independent-coordinate** gate for Kastamonu while leaving exact scenario-date controller binding open.
+
+
+## Wave 13 — Pontus / Trabzon checkpoint
+
+Trabzon closes the historical-existence and independent-coordinate gates for the Pontus capital candidate.
+
+- TDV Trabzon states that Trabzon became the centre of the state founded by Alexios Komnenos in 1204 and that the Komnenian capital retained its centre status through 1461. It also records Ilkhanid influence and increasing Türkmen pressure in the surrounding region from the 1320s. The pressure is treated as regional chronology, not as evidence of a controller transfer at Trabzon.
+- Wikidata Q45301 independently identifies Trabzon/Trebizond and records the Empire of Trebizond association for 1204–1461.
+- GeoNames city point: [39.726944, 41.005].
+- Wikidata city point: [39.7225, 41.005].
+- Selected registry coordinate: the GeoNames source-reported point; no averaging.
+- register 1326-trabzon with historicalApplicability = SCENARIO_RELEVANT.
+- controller remains NOT_ASSERTED.
+- geometry remains NOT_ASSERTED.
+- No Ottoman/post-1461 control is projected backward into the 1326 scenario.
+- No province polygon or frontier is derived from the anchor.
+
+This closes the existence + independent-coordinate gate for Trabzon; canonical controller binding and geometry reconciliation remain separate production gates.
