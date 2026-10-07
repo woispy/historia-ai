@@ -188,10 +188,10 @@
           "referencePoint": "CITY_POINT"
         },
         {
-          "sourceId": "wikidata-Q28219932",
-          "sourceType": "WIKIDATA",
-          "uri": "https://www.wikidata.org/wiki/Q28219932",
-          "coordinates": [35.151944, 42.028056],
+          "sourceId": "wikipedia-sinop-turkey",
+          "sourceType": "WIKIPEDIA",
+          "uri": "https://en.wikipedia.org/wiki/Sinop,_Turkey",
+          "coordinates": [35.151111, 42.026667],
           "referencePoint": "CITY_POINT"
         }
       ],
