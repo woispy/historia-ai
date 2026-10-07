@@ -901,3 +901,32 @@ This closes the coordinate/reference-point gap for the Karasi pair while preserv
 - TDV İslâm Ansiklopedisi — Bergama.
 - GeoNames — Balıkesir and Bergama populated-place records.
 - Wikipedia — Balıkesir and Bergama city records.
+
+
+## Wave 10 — Saruhan / Manisa
+
+This wave closes the independent-coordinate gate for the existing Manisa/Saruhan research candidate while keeping the exact scenario-date controller explicitly unresolved.
+
+### Manisa
+
+TDV Saruhanoğulları describes the polity as a Türkmen beylik ruling from Manisa and its surrounding area from the late 13th to early 15th centuries. It states that Saruhan Bey established the polity with Manisa as its centre and that, after Manisa became the beylik's centre, Saruhan Bey expanded his regional power. citeturn0search6
+
+TDV Saruhan Bey independently identifies Saruhan Bey as the founder of the Manisa-centred Saruhanoğulları beylik. citeturn0search10
+
+Coordinate cross-check:
+
+- GeoNames city point: [27.426465, 38.612018]. citeturn0search0
+- Wikidata Q147089 city point: [27.426465, 38.612018]. citeturn1search0
+
+Decision:
+
+- register `1326-manisa` as a research-candidate anchor;
+- retain `historicalApplicability = SCENARIO_RELEVANT`;
+- selected coordinate is the exact point independently reported by both GeoNames and Wikidata;
+- retain `controller = NOT_ASSERTED`;
+- retain `geometry = NOT_ASSERTED`;
+- do not infer the 7 April 1326 controller merely from pre-scenario Saruhan institutional continuity;
+- do not infer political boundaries or province geometry from the anchor.
+
+The **existence + independent-coordinate** gate is now closed for Manisa. The **exact scenario-date controller** gate remains open.
+
