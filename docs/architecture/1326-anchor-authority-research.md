@@ -853,3 +853,51 @@ This closes a useful evidence gap for the Lârende candidate but does not justif
 - TDV İslâm Ansiklopedisi — Karaman: https://islamansiklopedisi.org.tr/karaman
 - GeoNames — Karaman city record.
 - Wikipedia — Karaman city record.
+
+
+## Wave 9 — Karasi / Balıkesir–Bergama temporal refinement
+
+The targeted Karasi pass closes the settlement/reference-point side for Balıkesir and Bergama and sharpens the chronology, but it does not close the exact 1326-04-07 controller binding.
+
+### Historical evidence
+
+TDV Karesioğulları states that Kalem Bey and Karesi Bey had taken control of much of the Mysia region, including Balıkesir and Bergama, from the late 13th century. It identifies Balıkesir as the beylik centre and states that Karesi Bey died before 1328, after which Yahşi Bey succeeded him. The same entry records a 1328 agreement between Byzantine emperor III Andronikos and Demirhan Bey at Biga/Pegae and interprets the evidence as showing a later two-centre structure: Balıkesir under Demirhan and Bergama under Yahşi. [TDV Karesioğulları]
+
+This produces an important temporal guard:
+
+- Karesi political control of the Balıkesir–Bergama theatre clearly predates 1326.
+- The specific Balıkesir/Demirhan + Bergama/Yahşi two-centre arrangement is explicitly evidenced in 1328, not directly on 7 April 1326.
+- Therefore the 1328 division must not be projected backward into the scenario start.
+- The research ledger should preserve both cities as separate high-value Karasi candidates while leaving exact April-1326 controller assignment open.
+
+TDV Bergama independently identifies Bergama as a medieval strategic position and as a centre of the Karesioğulları.
+
+### Coordinate evidence
+
+Balıkesir:
+- GeoNames city point: approximately [27.886111, 39.649167].
+- German Wikipedia city point: approximately [27.884167, 39.651111].
+
+Bergama:
+- GeoNames populated-place point: approximately [27.18052, 39.12074].
+- German Wikipedia city point: approximately [27.178333, 39.122778].
+
+The points are retained as source-level city references. No averaging or site substitution is performed.
+
+### Decision
+
+- Balıkesir: retain/add as SCENARIO_RELEVANT, controller NOT_ASSERTED, geometry NOT_ASSERTED.
+- Bergama: retain/add as SCENARIO_RELEVANT, controller NOT_ASSERTED, geometry NOT_ASSERTED.
+- The 1328 two-centre evidence is retained as a post-scenario chronology guard.
+- No 1328 controller split is projected backward to 7 April 1326.
+- No city anchor is converted into a political polygon.
+
+This closes the coordinate/reference-point gap for the Karasi pair while preserving the exact-date controller question as an explicit unresolved gate.
+
+### Sources
+
+- TDV İslâm Ansiklopedisi — Karesioğulları.
+- TDV İslâm Ansiklopedisi — Karesi Bey.
+- TDV İslâm Ansiklopedisi — Bergama.
+- GeoNames — Balıkesir and Bergama populated-place records.
+- Wikipedia — Balıkesir and Bergama city records.
