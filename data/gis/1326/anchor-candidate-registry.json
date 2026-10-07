@@ -489,6 +489,67 @@
         "geometry": "NOT_ASSERTED"
       },
       "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-isparta",
+      "historicalName": "Isparta / Baris",
+      "modernName": "Isparta",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          30.5522222,
+          37.7644444
+        ]
+      },
+      "anchorType": "SETTLEMENT",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-isparta",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/isparta",
+          "temporalClass": "SCENARIO_RELEVANT",
+          "claim": "Isparta was within the Hamîdoğulları sphere from the late 13th century; TDV describes its situation during Feleküddin Dündar Bey's 1301-1326 period and records a 1326 change after Demirtaş's withdrawal."
+        },
+        {
+          "sourceId": "tdv-felekuddin-dundar-bey",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/felekuddin-dundar-bey",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Feleküddin Dündar Bey is identified as the Hamîdoğulları ruler of the Isparta-Burdur region from 1301 to 1326."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-311073",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=Isparta",
+          "coordinates": [
+            30.5522222,
+            37.7644444
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "travelmath-isparta",
+          "sourceType": "PROJECT_RESEARCH",
+          "uri": "https://www.travelmath.com/cities/Isparta%2C%2BTurkey",
+          "coordinates": [
+            30.5522222,
+            37.7644444
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "MEDIUM",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
     }
   ]
 }
