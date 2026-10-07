@@ -620,6 +620,67 @@
       "authorityStatus": "candidate-evidence-only"
     },
     {
+      "anchorId": "1326-dimask",
+      "historicalName": "Dımaşk / Damascus",
+      "modernName": "Damascus",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.29127502441406,
+          33.51019814679501
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-sam",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/sam--suriye",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV Şam records Dımaşk as a major centre of Bilâdüşşam and states that after the Mamluk polity was established, Dımaşk remained under Mamluk authority; a 1300 Ilkhanid occupation was brief and the city soon returned to Mamluk control. It further records major Mamluk development under al-Nasir Muhammad and governor Tengiz in 1312-1340."
+        },
+        {
+          "sourceId": "wikidata-Q3766",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q3766",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Wikidata records the Mamluk Sultanate of Egypt as associated with Damascus from 1260 to 1516."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-170654",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/170654/damascus.html",
+          "coordinates": [
+            36.29127502441406,
+            33.51019814679501
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q3766",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q3766",
+          "coordinates": [
+            36.292,
+            33.513
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
       "anchorId": "1326-egirdir",
       "historicalName": "Eğridir / Felekâbâd",
       "modernName": "Eğirdir",
