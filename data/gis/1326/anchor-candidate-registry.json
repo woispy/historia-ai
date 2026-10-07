@@ -733,6 +733,128 @@
         "geometry": "NOT_ASSERTED"
       },
       "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-balikesir",
+      "historicalName": "Balıkesir / Karesi",
+      "modernName": "Balıkesir",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.886111,
+          39.649167
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-karesiogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/karesiogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Karesi Bey's polity controlled the Balıkesir-Bergama-Mysia theatre from the late 13th century; Balıkesir is identified as the beylik centre. Karesi Bey died before 1328 and Yahşi Bey succeeded him."
+        },
+        {
+          "sourceId": "tdv-karesi-bey",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/karesi-bey",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Karesi Bey is recorded as the founder of the polity and is known to have died before the 1328 Demirhan agreement."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-balikesir",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/search.html?country=TR",
+          "coordinates": [
+            27.886111,
+            39.649167
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikipedia-balikesir",
+          "sourceType": "WIKIPEDIA",
+          "uri": "https://en.wikipedia.org/wiki/Bal%C4%B1kesir",
+          "coordinates": [
+            27.884167,
+            39.651111
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "MEDIUM",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-bergama",
+      "historicalName": "Bergama / Pergamon",
+      "modernName": "Bergama",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.18052,
+          39.12074
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-karesiogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/karesiogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Karesi Bey's polity controlled Bergama within the wider Mysia theatre from the late 13th century; later evidence places Bergama as a Karesi centre."
+        },
+        {
+          "sourceId": "tdv-bergama",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/bergama",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Bergama is identified as a medieval strategic position and as a centre of the Karesioğulları."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-321426",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/321426/bergama.html",
+          "coordinates": [
+            27.18052,
+            39.12074
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikipedia-bergama",
+          "sourceType": "WIKIPEDIA",
+          "uri": "https://en.wikipedia.org/wiki/Bergama",
+          "coordinates": [
+            27.178333,
+            39.122778
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "MEDIUM",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
     }
   ]
 }
