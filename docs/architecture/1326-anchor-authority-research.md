@@ -1342,3 +1342,35 @@ This wave measures the **research-candidate registry coverage**, not province or
 - Canonical political geometry remains **BLOCKED**.
 
 The next Tier-1 audit is the confidence/precision consistency pass across all 32 records, followed by the deterministic registry evidence gate.
+
+
+## Wave 25 — Confidence / coordinate-precision consistency audit
+
+The 32-record Tier-1 consistency pass found no invalid live registry values:
+
+- existence confidence: **32/32 HIGH**;
+- coordinate confidence: **32/32 HIGH**;
+- temporal applicability confidence: **21 HIGH / 11 MEDIUM**;
+- controller confidence: **1 HIGH / 31 NOT_ASSERTED**;
+- geometry confidence: **32/32 NOT_ASSERTED**;
+- coordinate precision: **32/32 SOURCE_REPORTED**;
+- coordinate evidence: **32/32 have at least two source types**;
+- selected point identity: every registry coordinate exactly matches at least one declared source coordinate.
+
+The audit deliberately does not equate temporal applicability HIGH with exact-date controller authority. Exact-date political control remains represented by the separate controller confidence axis, whose prior Wave 23 correction is preserved.
+
+### Deterministic gate hardening
+
+The runtime registry validator previously checked geometry/source identity and policy constraints but did not explicitly enforce the declared confidence and coordinate-precision enums. The validator was hardened to reject invalid confidence values and invalid precision values, while continuing to require geometry = NOT_ASSERTED.
+
+The registry contract test now includes negative cases for invalid temporal-applicability confidence and invalid derived coordinate precision.
+
+No live registry record required correction in this wave. Canonical political geometry remains **BLOCKED**.
+
+### Current Tier-1 state
+
+1. Alias/identity audit — PASS
+2. Exact-date controller confidence audit — PASS
+3. Theatre coverage matrix — CLOSED AS COVERAGE CLASSIFICATION
+4. Confidence/precision consistency — PASS
+5. Deterministic registry evidence gate — HARDENED; CI proof pending on the new validator/test commits
