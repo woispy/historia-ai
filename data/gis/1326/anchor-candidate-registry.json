@@ -508,7 +508,7 @@
           "sourceId": "tdv-isparta",
           "sourceType": "TDV_IA",
           "uri": "https://islamansiklopedisi.org.tr/isparta",
-          "temporalClass": "SCENARIO_RELEVANT",
+          "temporalClass": "PRE_SCENARIO",
           "claim": "Isparta was within the Hamîdoğulları sphere from the late 13th century; TDV describes its situation during Feleküddin Dündar Bey's 1301-1326 period and records a 1326 change after Demirtaş's withdrawal."
         },
         {
@@ -546,6 +546,128 @@
         "existence": "HIGH",
         "coordinate": "HIGH",
         "temporalApplicability": "MEDIUM",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-burdur",
+      "historicalName": "Burdur / Polydorion",
+      "modernName": "Burdur",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          30.2908333,
+          37.7202778
+        ]
+      },
+      "anchorType": "SETTLEMENT",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-hamidogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/hamidogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Hamîdoğulları was established in the Isparta, Burdur and Eğridir region; TDV identifies Burdur within the beylik sphere and records Dündar Bey's rule in the Isparta-Burdur region from 1301 to 1326."
+        },
+        {
+          "sourceId": "tdv-felekuddin-dundar-bey",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/felekuddin-dundar-bey",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Feleküddin Dündar Bey is identified as the Hamîdoğulları ruler of the Isparta-Burdur region from 1301 to 1326."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-burdur",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=Burdur",
+          "coordinates": [
+            30.2908333,
+            37.7202778
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "travelmath-burdur",
+          "sourceType": "PROJECT_RESEARCH",
+          "uri": "https://www.travelmath.com/cities/Burdur%2C%2BTurkey",
+          "coordinates": [
+            30.2908333,
+            37.7202778
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "MEDIUM",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-beysehir",
+      "historicalName": "Beyşehir / Süleymanşehir",
+      "modernName": "Beyşehir",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.724577,
+          37.677348
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-beysehir",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/beysehir",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Beyşehir became the centre associated with Eşrefoğlu Süleyman Bey in the late 13th century; the city and its fortifications were developed under the Eşrefoğulları and the settlement remained their political centre before the 1326 collapse."
+        },
+        {
+          "sourceId": "tdv-esrefogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/esrefogullari",
+          "temporalClass": "POST_SCENARIO",
+          "claim": "TDV dates Demirtaş's capture of Beyşehir and the killing of II. Süleyman Bey to 9 October 1326; the subsequent seizure of Beyşehir and surrounding Eşrefoğlu territory by Hamîdoğulları is therefore post-scenario and must not be projected back to 7 April 1326."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-beysehir",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=Konia",
+          "coordinates": [
+            31.724577,
+            37.677348
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q127389",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q127389",
+          "coordinates": [
+            31.72611111111111,
+            37.67638888888889
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
         "controller": "NOT_ASSERTED",
         "geometry": "NOT_ASSERTED"
       },
