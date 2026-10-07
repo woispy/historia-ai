@@ -10,6 +10,128 @@
   },
   "anchors": [
     {
+      "anchorId": "1326-alaiye",
+      "historicalName": "Alâiye / Alanya",
+      "modernName": "Alanya",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.999817,
+          36.543747
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-alaiye-beyligi",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/alaiye-beyligi",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV Alâiye Beyliği states that Alâiye passed to Karamanoğlu Mecdüddin Mahmud Bey in 1293 and that the city and surrounding area were subsequently governed by beys affiliated with the Karamanids and under Mamluk overlordship."
+        },
+        {
+          "sourceId": "tdv-alanya",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/alanya",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV Alanya records the 1293 Karamanoğlu capture and identifies the city as a Karaman-linked Türkmen centre; later 1333 evidence names Yusuf b. Karaman as ruler."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-alanya",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?country=TR&q=antalya",
+          "coordinates": [
+            31.999817,
+            36.543747
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-alanya",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q207341",
+          "coordinates": [
+            31.99972222222222,
+            36.54388888888889
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "MEDIUM",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-antalya",
+      "historicalName": "Antalya / Attaleia",
+      "modernName": "Antalya",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          30.695565,
+          36.908118
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-antalya",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/antalya",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV Antalya records that Hamidid Dündar Bey captured Antalya, entrusted it to his brother Yunus Bey, and that Yunus's son Mahmud Bey ruled Antalya; Mahmud surrendered his uncle Dündar to Demirtaş in 1324, and later Mahmud was forced to seek refuge only after Demirtaş's departure in 1327."
+        },
+        {
+          "sourceId": "tdv-hamidogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/hamidogullari",
+          "temporalClass": "SCENARIO_WINDOW",
+          "claim": "TDV Hamîdoğulları states that Dündar Bey's nephew Mahmud Bey, who held Antalya, surrendered Dündar to Demirtaş and that Dündar was killed in 1326."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-323777",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/323777/antalya.html",
+          "coordinates": [
+            30.695565,
+            36.908118
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q6487",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q6487",
+          "coordinates": [
+            30.666666666666668,
+            36.96666666666667
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
       "anchorId": "1326-ayasuluk",
       "historicalName": "Ayasuluk / Selçuk",
       "modernName": "Selçuk",
