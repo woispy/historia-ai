@@ -73,7 +73,7 @@ Production states:
 | 1326-settlement-ayasuluk | Ayasuluk | Aydın / Lydia-Ionia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | Aydınid evidence strong; later İzmir events excluded | CONTROLLER_BINDING_PENDING | Stable 1326 source binding |
 | 1326-settlement-tire | Tire | Aydın / Lydia-Ionia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | Aydınid evidence strong; exact date binding needed | CONTROLLER_BINDING_PENDING | Stable 1326 source binding |
 | 1326-settlement-sinop | Sinop | Candar / Paphlagonia | PRE_SCENARIO — Pervâneoğulları ended 1322 | Existing independent coordinate | Candar transition strongly evidenced | CANDIDATE | Stable machine-readable refs + precision policy |
-| 1326-settlement-kastamonu | Kastamonu | Candar / Paphlagonia | SCENARIO_RELEVANT regional candidate | Coordinate evidence pending second-source seal | Controller not sealed | CONTROLLER_BINDING_PENDING | Explicit April 1326 local binding |
+| 1326-settlement-kastamonu | Kastamonu | Candar / Paphlagonia | SCENARIO_RELEVANT — Candar centre before scenario | GeoNames + Wikipedia city points | Candar centre evidence strong; exact 7 Apr 1326 controller not asserted | CONTROLLER_BINDING_PENDING | Exact 7 Apr 1326 controller binding; 1327 independence must not be projected backward |
 | 1326-settlement-milas | Milas / Mylasa | Menteşe / Caria | PRE_SCENARIO / SCENARIO_RELEVANT | GeoNames + Wikidata converge closely | Menteşe centre evidence; boundary separate | COORDINATE_PENDING | Site/reference-point semantics + stable refs |
 | 1326-settlement-pecin | Peçin / Beçin | Menteşe / Caria | PRE_SCENARIO / SCENARIO_RELEVANT | GeoNames + Wikidata; points differ slightly | Menteşe centre evidence | COORDINATE_PENDING | Resolve settlement vs fortress reference point |
 | 1326-settlement-mugla | Muğla | Menteşe / Caria | PRE_SCENARIO — documented temporary relocation | GeoNames city point; second city-specific source needed | Administrative-centre relevance, not permanent-capital inference | COORDINATE_PENDING | Second coordinate source + role semantics |
@@ -278,3 +278,24 @@ Decisions:
 - do not infer political boundaries from these anchors.
 
 This closes the **existence + independent-coordinate** gate for the three Aydın candidates. Their exact 7 April 1326 controller binding remains a separate open gate.
+
+
+## Wave 12 — Candar / Kastamonu
+
+Kastamonu now has a stronger research checkpoint.
+
+- TDV Candaroğulları states that Süleyman Bey took Kastamonu and Safranbolu and moved the beylik centre to Kastamonu. It separately places the end of Demirtaş's Anatolian governorship in 1327 and the Candar ruler's independence after that disruption. This prevents the later independence status from being projected backward into 7 April 1326. citeturn1search0
+- TDV Kastamonu likewise states that the Candaroğulları replaced the Çobanoğulları in the early 14th century and that Kastamonu subsequently became the beylik centre. citeturn1search2
+- GeoNames city record reports approximately [33.775275, 41.378052]. citeturn0search0
+- Wikipedia reports approximately [33.77639, 41.37639]. citeturn3search24
+
+Decision:
+
+- register `1326-kastamonu`;
+- retain `historicalApplicability = SCENARIO_RELEVANT`;
+- retain `controller = NOT_ASSERTED`;
+- retain `geometry = NOT_ASSERTED`;
+- do not use the 1327 independence event as April 1326 evidence;
+- do not derive political geometry from the city point.
+
+This closes the **existence + independent-coordinate** gate for Kastamonu while leaving exact scenario-date controller binding open.
