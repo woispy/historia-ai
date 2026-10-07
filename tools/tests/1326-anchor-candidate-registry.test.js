@@ -47,6 +47,18 @@ try {
   await fs.writeFile(generated, JSON.stringify(generatedMutation, null, 2));
   await expectFailure(generated);
 
+  const invalidConfidence = path.join(dir, "test-anchor-registry-invalid-confidence.json");
+  const confidenceMutation = structuredClone(original);
+  confidenceMutation.anchors[0].confidence.temporalApplicability = "INVALID";
+  await fs.writeFile(invalidConfidence, JSON.stringify(confidenceMutation, null, 2));
+  await expectFailure(invalidConfidence);
+
+  const invalidPrecision = path.join(dir, "test-anchor-registry-invalid-precision.json");
+  const precisionMutation = structuredClone(original);
+  precisionMutation.anchors[0].coordinatePrecision = "DERIVED_AVERAGE";
+  await fs.writeFile(invalidPrecision, JSON.stringify(precisionMutation, null, 2));
+  await expectFailure(invalidPrecision);
+
   const averaged = path.join(dir, "test-anchor-registry-averaged-point.json");
   const averagedMutation = structuredClone(original);
   averagedMutation.anchors[0].geometry.coordinates = [29.060125, 40.19559];
