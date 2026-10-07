@@ -930,3 +930,45 @@ Decision:
 
 The **existence + independent-coordinate** gate is now closed for Manisa. The **exact scenario-date controller** gate remains open.
 
+
+
+## Wave 13 — Pontus / Trabzon
+
+The Trabzon pass closes the historical-existence and independent-coordinate gates for the Pontus capital candidate, while deliberately keeping canonical controller and geometry authority unasserted.
+
+### Trabzon
+
+TDV Trabzon states that after Alexios Komnenos established the new state in 1204, Trabzon became its centre, and that the Komnenian capital retained its centre status from 1204 to 1461. The same entry describes the city's Ilkhanid-vassal context and notes that Türkmen pressure around Trabzon increased from the 1320s; this is regional pressure evidence and is not treated as a controller transfer. [TDV Trabzon]
+
+Wikidata independently identifies Trabzon/Trebizond and records the Empire of Trebizond association for the 1204–1461 period. [Wikidata Q45301]
+
+### Temporal interpretation
+
+- Trabzon is a high-value political-centre candidate for the 1326 theatre because the city is documented as the capital/centre of the Trebizond state throughout 1204–1461.
+- The 1320s Türkmen-pressure statement is retained as a regional chronology guard only; it does not imply that Trabzon itself changed controller in 1326.
+- The registry nevertheless keeps controller = NOT_ASSERTED because the current production policy does not promote controller authority from continuity inference alone.
+- No later Ottoman control is projected backward into the 1326 scenario.
+
+### Coordinate evidence
+
+- GeoNames city point: approximately [39.726944, 41.005] WGS84.
+- Wikidata Q45301 city coordinate: approximately [39.7225, 41.005] WGS84.
+
+The selected registry coordinate is the GeoNames source-reported city point. The two source points remain separate evidence; no averaging is performed.
+
+### Decision
+
+- register 1326-trabzon as a research-candidate anchor;
+- retain historicalApplicability = SCENARIO_RELEVANT;
+- retain controller = NOT_ASSERTED;
+- retain geometry = NOT_ASSERTED;
+- treat the 1320s Türkmen-pressure evidence as regional context, not a controller transfer;
+- do not derive a political polygon, frontier, or province extent from the city anchor.
+
+This closes the existence + independent-coordinate gate for Trabzon while leaving canonical controller binding and geometry reconciliation as separate production gates.
+
+### Sources
+
+- TDV İslâm Ansiklopedisi — Trabzon: https://islamansiklopedisi.org.tr/trabzon
+- Wikidata — Trabzon Q45301: https://www.wikidata.org/wiki/Q45301
+- GeoNames — Trabzon city record: https://www.geonames.org/738648/trabzon.html
