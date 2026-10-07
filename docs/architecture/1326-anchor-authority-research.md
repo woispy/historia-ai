@@ -972,3 +972,40 @@ This closes the existence + independent-coordinate gate for Trabzon while leavin
 - TDV İslâm Ansiklopedisi — Trabzon: https://islamansiklopedisi.org.tr/trabzon
 - Wikidata — Trabzon Q45301: https://www.wikidata.org/wiki/Q45301
 - GeoNames — Trabzon city record: https://www.geonames.org/738648/trabzon.html
+
+
+## Wave 14 — Pontus / Giresun temporal guard
+
+The Giresun pass strengthens the Pontus coastal candidate set but deliberately preserves the exact 1326 controller question as unresolved.
+
+### Giresun
+
+TDV Giresun describes the city as the second important regional centre in the Trebizond Empire's geography and as a fortified western outpost against surrounding Türkmen groups. [TDV Giresun]
+
+A separate TDV Tirebolu chronology provides the key negative temporal guard: Türkmen groups first reached Tirebolu in 1380, while Hacı Emîr Bey's son Süleyman Bey captured Giresun in 1396–97. Those events are substantially post-scenario and must not be projected backward into 7 April 1326. [TDV Tirebolu]
+
+### Coordinate evidence
+
+- GeoNames city point: approximately [38.387406, 40.91698] WGS84.
+- Wikipedia city point: approximately [38.38944, 40.91528] WGS84.
+
+The selected registry coordinate is the GeoNames source-reported city point. The source points remain separate; no averaging or derived site substitution is performed.
+
+### Decision
+
+- register 1326-giresun as a research-candidate anchor;
+- retain historicalApplicability = SCENARIO_RELEVANT;
+- retain controller = NOT_ASSERTED;
+- retain geometry = NOT_ASSERTED;
+- explicitly retain 1380 and 1396–97 as POST_SCENARIO temporal guards;
+- do not infer a 1326 controller from the later Hacıemîroğulları conquest;
+- do not derive political geometry from the city anchor.
+
+This closes the existence + independent-coordinate gate for Giresun while preserving the exact-date controller binding as unresolved.
+
+### Sources
+
+- TDV İslâm Ansiklopedisi — Giresun: https://islamansiklopedisi.org.tr/giresun
+- TDV İslâm Ansiklopedisi — Tirebolu: https://islamansiklopedisi.org.tr/tirebolu
+- GeoNames — Giresun city record: https://www.geonames.org/746881/giresun.html
+- Wikipedia — Giresun: https://en.wikipedia.org/wiki/Giresun
