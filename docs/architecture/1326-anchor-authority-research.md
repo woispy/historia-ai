@@ -803,3 +803,53 @@ Interpretation for the 1326-04-07 scenario:
 - The 9 October event remains `POST_SCENARIO`; no later Hamîdoğulları control is projected backward.
 
 Decision: **retain the candidate, do not promote controller authority yet**.
+
+
+## Wave 8 — Lârende / Karaman temporal-controller and coordinate refinement
+
+The targeted Lârende pass strengthens the historical existence / centre side and the independent coordinate side, but it does not close the exact 1326-04-07 controller binding.
+
+### Historical evidence
+
+- TDV Karamanoğulları states that Güneri Bey captured Lârende in 1286 and that Lârende and Ereğli became Karamanlı territory during his period. [TDV Karamanoğulları]
+- The same source states that after Yahşi Bey, Bedreddin İbrâhim became ruler in 1318 and that, after Demirtaş left Anatolia, Lârende became the capital of the Karamanlı beylik and İbrâhim Bey built a palace there. [TDV Karamanoğulları]
+- Crucially, the source then dates the Karamanlı capture of Konya, Gevele and Beyşehir to 1328–29, after Demirtaş's departure. That later expansion is not projected backward into the 7 April 1326 scenario.
+- TDV Karaman identifies the modern city as the historical Lârende and describes its development under Karamanoğulları rule.
+
+### Temporal interpretation
+
+The evidence supports the following restrained interpretation:
+
+- Lârende/Karaman is unquestionably a high-value Karamanlı historical anchor for the surrounding period.
+- The 1318 succession of Bedreddin İbrâhim and the later statement that Lârende was the beylik capital establish a strong pre-/near-scenario institutional continuity chain.
+- However, the source excerpt does not provide a clean, independently dated statement of who controlled Lârende specifically on 1326-04-07.
+- Therefore the project must not convert the later 1328–29 Karamanlı territorial expansion into an April-1326 controller assignment.
+- Controller remains NOT_ASSERTED until the exact-date binding rule is satisfied.
+
+### Coordinate evidence
+
+Two independent city-point references provide a stable research coordinate pair:
+
+- GeoNames city record: approximately [33.215000, 37.1811111] WGS84, with Lârende listed among alternate names.
+- English Wikipedia city record: approximately [33.21806, 37.18194] WGS84.
+
+The points differ because they represent different modern city reference points. They must remain source-level evidence; no averaged coordinate is introduced.
+
+### Decision
+
+- ADD/retain Lârende as a research candidate.
+- Historical applicability: SCENARIO_RELEVANT, with exact 7 April controller binding still open.
+- Coordinate evidence: research-grade pair available.
+- controller = NOT_ASSERTED.
+- geometry = NOT_ASSERTED.
+- No province polygon, controller extent, or boundary is inferred from the city anchor.
+- 1328–29 territorial expansion remains explicitly POST_SCENARIO.
+
+This closes a useful evidence gap for the Lârende candidate but does not justify canonical promotion.
+
+### Sources
+
+- TDV İslâm Ansiklopedisi — Karamanoğulları: https://islamansiklopedisi.org.tr/Karamanogullari
+- TDV İslâm Ansiklopedisi — Karaman: https://islamansiklopedisi.org.tr/karaman
+- GeoNames — Karaman city record.
+- Wikipedia — Karaman city record.
