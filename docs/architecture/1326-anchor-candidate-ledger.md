@@ -57,7 +57,7 @@ Production states:
 | 1326-settlement-dorylaion | Dorylaion / Eskişehir | Western Phrygia | TEMPORAL BINDING PENDING | GeoNames / existing coordinate | Not sealed | TEMPORAL_BINDING_PENDING | Explicit 1326 historical binding |
 | 1326-settlement-kutahya | Kütahya | Germiyan | SCENARIO_RELEVANT — Germiyan centre | Existing independent coordinate | Strong centre evidence; frontier/controller extent separate | CONTROLLER_BINDING_PENDING | Scenario-date controller/boundary evidence |
 | 1326-settlement-uluborlu | Uluborlu | Hamid / Pisidia | PRE_SCENARIO / SCENARIO_RELEVANT | Existing research coordinate | Strong Hamid centre evidence | CONTROLLER_BINDING_PENDING | Stable refs + coordinate confirmation |
-| 1326-settlement-egirdir | Eğridir | Hamid / Pisidia | SCENARIO_RELEVANT with 1324–1328 disruption | Existing research coordinate | Controller chronology requires exact-date treatment | CONTROLLER_BINDING_PENDING | 7 Apr 1326 local status |
+| 1326-settlement-egirdir | Eğridir | Hamid / Pisidia | SCENARIO_RELEVANT with 1324–1328 disruption | GeoNames + Wikidata city points | Controller deliberately not asserted | CONTROLLER_BINDING_PENDING | 7 Apr 1326 local status; 1324 occupation and 1328 restoration must not be collapsed |
 | 1326-settlement-isparta | Isparta | Hamid / Pisidia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | Regional Hamid evidence | COORDINATE_PENDING | Independent coordinate source |
 | 1326-settlement-burdur | Burdur | Hamid / Pisidia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | Regional Hamid evidence | COORDINATE_PENDING | Independent coordinate source |
 | 1326-settlement-beysehir | Beyşehir | Eşref / Pisidia | SCENARIO_RELEVANT; 9 Oct 1326 collapse is POST_SCENARIO | Existing research coordinate | April controller must remain pre-collapse | CONTROLLER_BINDING_PENDING | Pre-9 Oct 1326 controller source |
@@ -145,3 +145,23 @@ This intake does **not** change the ledger's non-canonical status. In particular
 Coordinate evidence is stored as source-level points rather than averaged coordinates. No anchor point is converted into a political boundary.
 
 The registry validator remains the gate before any candidate can enter later reconciliation work. Canonical political geography remains blocked.
+
+## Wave 4 intake — Eğridir closure
+
+The targeted Hamid/Pisidia pass now closes the **anchor existence + coordinate** side for Eğridir, while intentionally leaving controller authority open.
+
+- TDV Eğridir identifies Eğridir as the second centre of the Hamîdoğulları beylik and records a Timurtaş occupation in 1324, followed by Hızır Bey's return in 1328. This makes the settlement historically relevant to the 1326 theatre, but it also makes a simplistic April-1326 controller label unsafe. citeturn0search13
+- TDV Hamîdoğulları records Dündar Bey's transfer of the government centre to Eğridir around 1307 and the use of the name Felekâbâd. citeturn0search4
+- GeoNames reports the populated-place point at approximately [30.850425, 37.874616]. citeturn1search1
+- Wikidata Q586434 reports the city coordinate at 37°52'30"N, 30°51'2"E, approximately [30.850556, 37.875000]. citeturn1search0
+
+Registry decision:
+
+- **ADD to research-candidate registry** as `1326-egirdir`.
+- `controller = NOT_ASSERTED`.
+- `geometry = NOT_ASSERTED`.
+- No monument/site coordinate is substituted for the city point.
+- No controller or political boundary is inferred from the anchor.
+- The candidate remains blocked from canonical promotion.
+
+This is a deliberate closure of the coordinate/existence gate, not a closure of the political-control question.
