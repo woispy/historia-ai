@@ -62,8 +62,8 @@ Production states:
 | 1326-settlement-burdur | Burdur | Hamid / Pisidia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | Regional Hamid evidence | COORDINATE_PENDING | Independent coordinate source |
 | 1326-settlement-beysehir | Beyşehir | Eşref / Pisidia | SCENARIO_RELEVANT; 9 Oct 1326 collapse is POST_SCENARIO | Existing research coordinate | April controller must remain pre-collapse | CONTROLLER_BINDING_PENDING | Pre-9 Oct 1326 controller source |
 | 1326-settlement-larende | Lârende / Karaman | Karaman / Lycaonia | SCENARIO_RELEVANT as regional centre | GeoNames + Wikipedia city points | Karamanid institutional continuity is strong, exact 7 Apr controller not sealed | CONTROLLER_BINDING_PENDING | Exact 7 Apr 1326 controller binding; do not use 1328–29 expansion backward |
-| 1326-settlement-balikesir | Balıkesir | Karasi / Mysia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | 1328 two-centre evidence is POST_SCENARIO | CONTROLLER_BINDING_PENDING | April 1326 local controller |
-| 1326-settlement-bergama | Bergama | Karasi / Mysia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | Controller extent not sealed | CONTROLLER_BINDING_PENDING | April 1326 local controller |
+| 1326-settlement-balikesir | Balıkesir | Karasi / Mysia | SCENARIO_RELEVANT | GeoNames + Wikipedia city points | Karasi control predates 1326; exact 7 Apr controller not sealed | CONTROLLER_BINDING_PENDING | Exact April 1326 local controller; 1328 two-centre evidence cannot be projected backward |
+| 1326-settlement-bergama | Bergama | Karasi / Mysia | SCENARIO_RELEVANT | GeoNames + Wikipedia city points | Karasi centre evidence strong; exact 7 Apr controller not sealed | CONTROLLER_BINDING_PENDING | Exact April 1326 local controller; 1328 Yahşi-centre evidence is post-scenario |
 | 1326-settlement-manisa | Manisa | Saruhan / Lydia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | Saruhan centre evidence strong; exact date binding needed | CONTROLLER_BINDING_PENDING | Stable 1326 source binding |
 | 1326-settlement-birgi | Birgi | Aydın / Lydia-Ionia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | Aydınid centre evidence strong; exact date binding needed | CONTROLLER_BINDING_PENDING | Stable 1326 source binding |
 | 1326-settlement-ayasuluk | Ayasuluk | Aydın / Lydia-Ionia | PRE_SCENARIO / SCENARIO_RELEVANT | Coordinate evidence pending second-source seal | Aydınid evidence strong; later İzmir events excluded | CONTROLLER_BINDING_PENDING | Stable 1326 source binding |
@@ -217,3 +217,15 @@ The targeted Lârende pass closes the coordinate side for research-registry inta
 - No geometry or controller extent is inferred from the anchor.
 
 The machine-readable registry may retain Lârende as candidate-evidence-only; canonical political geography remains blocked.
+
+
+## Wave 9 intake — Karasi / Balıkesir–Bergama
+
+The targeted Karasi pass closes the coordinate/reference-point side for both candidates.
+
+- TDV Karesioğulları places Balıkesir and Bergama inside the Karasi theatre from the late 13th century and identifies Balıkesir as the beylik centre. Karesi Bey died before 1328 and Yahşi Bey succeeded him.
+- TDV records the Balıkesir/Demirhan and Bergama/Yahşi two-centre structure from evidence surrounding the 1328 Byzantine agreement. This is post-scenario chronology and is not projected backward to 7 April 1326.
+- Balıkesir coordinate evidence: GeoNames + city-level Wikipedia.
+- Bergama coordinate evidence: GeoNames + city-level Wikipedia.
+- Both remain CONTROLLER_BINDING_PENDING and geometry NOT_ASSERTED.
+- No anchor point is converted into a political polygon.
