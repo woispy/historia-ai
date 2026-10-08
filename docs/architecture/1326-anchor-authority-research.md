@@ -1402,3 +1402,33 @@ The pilot-readiness validator also requires explicit review bindings and keeps t
 ### Wave 26 decision
 
 Tier-1 registry evidence governance is closed for the current 32-anchor registry. The project may enter the controlled T3-B review/physical-authority transition, but canonical political geometry remains BLOCKED until physical constraints, boundary evidence, review decisions and topology gates are separately satisfied.
+
+
+## Wave 26 — T3-B deterministic gate closure and reconciliation handoff audit
+
+The hardened Tier-1 registry gate is now CI-proven on commit 7e164e91b04f138e693866b64db3110f0dbb5f75:
+
+- Historia AI CI **#3413 — SUCCESS**;
+- Cliopatria v0.2.0 acquisition verification **#104 — SUCCESS**.
+
+The acquisition workflow also published non-authoritative artifacts for the pinned v0.2.0 source, including the verified source snapshot and extraction input. These artifacts confirm source reproducibility; they do not promote source geometry into historical political authority.
+
+### Handoff audit
+
+The T3-B reconciliation implementation was reviewed at the contract level:
+
+screening → entity reconciliation → geometry reconciliation queue → geometry review ledger → explicit evidence/edge bindings → reviewed geometry → topology → canonical
+
+The queue builder enforces immutable source geometry, candidate-record provenance, packet provenance, no synthetic geometry, no controller-implies-geometry rule, and BLOCKED promotion. The review-ledger builder initializes reviewedGeometry = null, zeroed confidence fields, empty edge assessments, and BLOCKED promotion.
+
+The pilot-readiness gate additionally requires explicit review bindings before reporting a bound-review state. This is an important boundary: a green validator does not itself create historical geometry authority.
+
+### Current handoff verdict
+
+**T3-B deterministic registry gate: CLOSED / CI-PROVEN.**
+
+**T3-B → geometry reconciliation handoff: NOT YET CLOSED.** The repository contains the queue/ledger contracts and validators, but the current CI run does not publish a persisted geometry-review queue/ledger artifact. Therefore no claim is made that the complete 1326 candidate queue has been generated and reviewed.
+
+The next step is to execute/validate the actual candidate-surface-to-review-queue pipeline against the pinned Cliopatria extraction artifact, preserve the resulting provenance hashes, and then establish the pilot review bindings. Only after that evidence chain is CI-proven can research-backed geometry reconciliation begin.
+
+Canonical political geometry remains **BLOCKED**.
