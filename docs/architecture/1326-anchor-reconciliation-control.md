@@ -196,3 +196,12 @@ Provenance
 ```
 
 Canonical production remains protected until that chain is complete.
+## 2026-10-08 T3-B screening normalization fix
+
+- Corrected commit: `b6fc796ef7bd25d89fdcc34d1fab2fcae03f0643`.
+- The first CI attempt after the anchor-schema correction reached the real candidate pipeline, but failed because `normalizeAnchorReport()` correctly returned a normalized array while the caller still referenced `anchors.anchors`.
+- This was a local implementation contract bug, not a historical-geography finding and not a source-data problem.
+- The fix changes only the caller to consume the normalized anchor array directly. It does not alter anchor coordinates, candidate geometry, screening radius, authority status, or promotion policy.
+- Corrected head `b6fc796ef7bd25d89fdcc34d1fab2fcae03f0643` is now running through both `Cliopatria v0.2.0 acquisition verification` and the main `Historia AI CI` chain.
+- T3-B remains **OPEN / unverified** until the real candidate → reconciliation → review-ledger → pilot-readiness chain completes successfully and its persisted artifacts are inspected.
+
