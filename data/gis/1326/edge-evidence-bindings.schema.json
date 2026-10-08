@@ -3,10 +3,11 @@
   "title": "Historia AI 1326 Explicit Edge Evidence Bindings",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "scenarioDate", "authorityStatus", "promotion", "policy", "reviewBindings"],
+  "required": ["schemaVersion", "scenarioDate", "candidatePacketSha256", "authorityStatus", "promotion", "policy", "reviewBindings"],
   "properties": {
     "schemaVersion": { "const": 1 },
     "scenarioDate": { "const": "1326-04-07" },
+    "candidatePacketSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
     "authorityStatus": { "const": "bridge-reference-only" },
     "promotion": { "const": "BLOCKED" },
     "policy": {
