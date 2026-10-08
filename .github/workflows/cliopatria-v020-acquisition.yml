@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - integration/**
+      - work/**
     paths:
       - ".github/workflows/cliopatria-v020-acquisition.yml"
       - "data/anchors/1326-western-anatolia-anchor-matrix-v44_9.json"
