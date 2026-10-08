@@ -61,6 +61,14 @@ No production fix is authorized from that run.
 - The first post-acquisition failure was not GIS/T3-B logic: the workflow attempted to publish `cliopatria-v0.2.0-production-snapshot` twice and GitHub Actions rejected the second upload with HTTP 409 artifact-name conflict.
 - That duplicate upload was removed in commit `80d3f3ab6e0573c3ca8063e7917cbbd5c70b005d` on the existing T3-B branch. No new branch or PR was created.
 - The T3-B candidate/review pipeline has therefore **not yet been declared GREEN** from this latest corrected workflow execution. Canonical promotion remains BLOCKED.
+## 2026-10-08 T3-B pipeline contract correction
+
+- Corrected the real CI failure in candidate screening: `screen-1326-political-candidate-surface.js` expected the legacy `{id, coordinates}` anchor shape, while the validated production research registry uses `{anchorId, geometry: Point}`.
+- The screening tool now normalizes both explicitly supported shapes without modifying candidate geometry or synthesizing coordinates.
+- The workflow now consumes `data/gis/1326/anchor-candidate-registry.json`, which is already protected by the anchor-candidate-registry validation contract.
+- No historical boundary was inferred or promoted by this correction; the registry remains `research-candidate-registry`, anchor geometry confidence remains `NOT_ASSERTED`, and canonical promotion remains blocked.
+- Corrected commit: `19066da39e0063ca6231df7b2451d04122f44141`; workflow binding update: `7d9ab702e5b87181096c8efbfd16e83246533160`.
+- A new CI result for the corrected head is not yet queryable; therefore T3-B remains **OPEN / unverified**, not GREEN.
 ## Anchor / candidate handoff
 
 ### Evidence layer
