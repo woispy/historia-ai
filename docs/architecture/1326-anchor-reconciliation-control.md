@@ -200,6 +200,13 @@ Provenance
 ```
 
 Canonical production remains protected until that chain is complete.
+## 2026-10-08 main CI integration checkpoint
+
+- Main `Historia AI CI` run **#3451 / 37819819056** completed **SUCCESS** on the T3-B branch after the source-register/reference update.
+- The full validation chain remained green across physical geometry, historical GIS, topology, cartography/rendering, GPU province pack, runtime/game entry, build, repository cleanliness, and **15K+ province scalability/diagnostics**.
+- This confirms the T3-B documentation/reference additions did not regress the wider production contract surface.
+- The current branch remains a research/reconciliation workstream; canonical political geometry is still BLOCKED.
+
 ## 2026-10-08 T3-B persisted review-package checkpoint — GREEN
 
 - Corrected production head: `ba3d21824dcd4af443da5f6ea569771cc1d9b502` on the existing `work/phase-a-1326-t3b-candidate-surface` branch / PR #109.
