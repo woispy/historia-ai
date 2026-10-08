@@ -251,3 +251,19 @@ Canonical production remains protected until that chain is complete.
 - The new analysis is recorded in `docs/architecture/EU5DB-REFERENCE-MAP-ANALYSIS.md`.
 - No EU5DB geometry, ownership, or 1337 political state is imported or promoted.
 - The next production-facing work remains the existing T3-B explicit review-binding/adjudication gate; this reference work does not replace it.
+
+
+## 2026-10-08 T3-B pilot selection checkpoint
+
+- The retained review package was re-inspected from artifact **11568193231**.
+- The real ledger contains **21** pending review records; **0** explicit bindings are currently present.
+- A bounded pilot-selection document was added at `docs/architecture/1326-T3B-PILOT-REVIEW-SELECTION.md`.
+- Initial pilot candidates are:
+  - Ottoman Empire — reviewId `cliopatria-1326-feature-6204-760f7a0da05d42da`
+  - Byzantine Empire — reviewId `cliopatria-1326-feature-6241-eb6b78911fe2e881`
+  - Beylik of Menteshe — reviewId `cliopatria-1326-feature-6092-af809c314ff27761`
+  - Beylik of Karasi — reviewId `cliopatria-1326-feature-6227-d74baf119f1e7fa5`
+- Selection is research prioritization only. It does not create explicit review bindings, alter source geometry, or promote any candidate.
+- Ottoman + Byzantine are intentionally paired first because the existing Bithynia evidence surface can test temporal boundary discipline around Bursa/Nicaea/Pelekanon/Nicomedia without projecting later events backward into 1326.
+- Menteşe and Karasi provide non-Bithynian comparative beylik cases.
+- Canonical political geometry remains **BLOCKED**.
