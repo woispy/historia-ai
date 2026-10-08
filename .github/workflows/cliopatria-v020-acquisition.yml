@@ -6,7 +6,7 @@ on:
       - integration/**
     paths:
       - ".github/workflows/cliopatria-v020-acquisition.yml"
-      - "data/anchors/1326-western-anatolia-anchor-matrix-v44_9.json"
+      - "data/gis/1326/anchor-candidate-registry.json"
       - "data/gis/1326/acquisition-manifest.json"
       - "data/gis/1326/edge-evidence-bindings.schema.json"
       - "data/gis/1326/geometry-review-ledger.schema.json"
@@ -70,7 +70,7 @@ jobs:
 
       - name: Run real 1326 T3-B candidate-to-review pipeline
         run: |
-          npm run run:1326-cliopatria-candidate-pipeline --             --extraction-input data/build/gis/1326/cliopatria-extraction-input.json             --anchors data/anchors/1326-western-anatolia-anchor-matrix-v44_9.json             --acquisition data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.acquisition.json             --output-dir data/build/gis/1326
+          npm run run:1326-cliopatria-candidate-pipeline --             --extraction-input data/build/gis/1326/cliopatria-extraction-input.json             --anchors data/gis/1326/anchor-candidate-registry.json             --acquisition data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.acquisition.json             --output-dir data/build/gis/1326
 
       - name: Prepare and validate persisted geometry review ledger
         run: |
