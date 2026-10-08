@@ -45,14 +45,20 @@ function assertReconciliation(report) {
   if (!/^[0-9a-f]{64}$/.test(report?.sourceProvenance?.extractedGeojsonSha256 ?? "")) throw new Error("Entity reconciliation must carry extracted GeoJSON SHA-256.");
 }
 
+const candidatesPath = required("--candidates");
 const screeningPath = required("--screening");
 const reconciliationPath = required("--reconciliation");
 const outputPath = path.resolve(process.cwd(), arg("--output", "data/build/gis/1326/cliopatria-geometry-reconciliation.json"));
 
+const candidates = JSON.parse(await fs.readFile(candidatesPath, "utf8"));
 const screening = JSON.parse(await fs.readFile(screeningPath, "utf8"));
 const reconciliation = JSON.parse(await fs.readFile(reconciliationPath, "utf8"));
 assertScreening(screening);
 assertReconciliation(reconciliation);
+if (candidates?.scenarioDate !== SCENARIO_DATE) throw new Error("Candidate report scenario date mismatch.");
+if (candidates?.source?.sourceId !== SOURCE_ID) throw new Error("Candidate report source identity mismatch.");
+if (candidates?.candidatePacketSha256 !== screening.candidatePacketSha256) throw new Error("Candidate/screening packet mismatch.");
+const sourceCandidateIndex = new Map((candidates.candidates ?? []).map(candidate => [candidate.sourceFeatureIndex, candidate]));
 if (reconciliation.sourceProvenance.extractedGeojsonSha256 !== screening.source.extractedGeojsonSha256) throw new Error("Reconciliation/extraction provenance mismatch.");
 if (reconciliation.candidatePacketSha256 !== screening.candidatePacketSha256) throw new Error("Reconciliation/screening candidate packet mismatch.");
 
@@ -63,7 +69,9 @@ for (const entity of reconciliation.results ?? []) {
     const screened = candidateIndex.get(candidate.sourceFeatureIndex);
     if (!screened) throw new Error(`Reconciliation references unknown screened sourceFeatureIndex: ${candidate.sourceFeatureIndex}`);
     if (candidate.sourceFeatureId !== screened.sourceFeatureId) throw new Error(`Reconciliation sourceFeatureId mismatch: ${candidate.sourceFeatureIndex}`);
-    const expectedCandidateRecordSha256 = sha256(screened);
+    const sourceCandidate = sourceCandidateIndex.get(candidate.sourceFeatureIndex);
+    if (!sourceCandidate) throw new Error(`Reconciliation references unknown source candidate: ${candidate.sourceFeatureIndex}`);
+    const expectedCandidateRecordSha256 = sha256(sourceCandidate);
     if (candidate.candidateRecordSha256 !== expectedCandidateRecordSha256) {
       throw new Error(`Reconciliation candidate record SHA-256 mismatch: ${candidate.sourceFeatureIndex}`);
     }
@@ -153,6 +161,7 @@ const report = {
     reviewedGeometryRequiredBeforeCanonical: true
   },
   inputs: {
+    candidates: candidatesPath.replace(/\\/g, "/"),
     screening: screeningPath.replace(/\\/g, "/"),
     reconciliation: reconciliationPath.replace(/\\/g, "/")
   },
