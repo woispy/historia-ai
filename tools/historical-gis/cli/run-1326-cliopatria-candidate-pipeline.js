@@ -84,6 +84,7 @@ await run("tools/historical-gis/cli/validate-1326-candidate-reconciliation.js", 
 ]);
 
 await run("tools/historical-gis/cli/prepare-1326-geometry-reconciliation.js", [
+  "--candidates", candidateOutput,
   "--screening", screeningOutput,
   "--reconciliation", reconciliationOutput,
   "--output", geometryQueueOutput,
