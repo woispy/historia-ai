@@ -29,6 +29,7 @@ function bbox(geometry) {
   return [Math.min(...values.filter((_, i) => i % 2 === 0)), Math.min(...values.filter((_, i) => i % 2 === 1)), Math.max(...values.filter((_, i) => i % 2 === 0)), Math.max(...values.filter((_, i) => i % 2 === 1))];
 }
 const candidatePacketSha256 = crypto.createHash("sha256").update(JSON.stringify(candidates.candidates)).digest("hex");
+candidates.candidatePacketSha256 = candidatePacketSha256;
 const near = candidates.candidates[0];
 const b = bbox(near.geometry);
 const anchor = anchors.anchors[0];
