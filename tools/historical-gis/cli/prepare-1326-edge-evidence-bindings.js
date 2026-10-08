@@ -74,6 +74,7 @@ for (const binding of mapping.reviewBindings) {
 const report = {
   schemaVersion: 1,
   scenarioDate: SCENARIO_DATE,
+  candidatePacketSha256: ledger.candidatePacketSha256 ?? ledger.records?.[0]?.provenance?.candidatePacketSha256 ?? null,
   authorityStatus: "bridge-reference-only",
   promotion: "BLOCKED",
   policy: {
