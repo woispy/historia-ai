@@ -241,3 +241,13 @@ Canonical production remains protected until that chain is complete.
 - Corrected head `b6fc796ef7bd25d89fdcc34d1fab2fcae03f0643` is now running through both `Cliopatria v0.2.0 acquisition verification` and the main `Historia AI CI` chain.
 - T3-B remains **OPEN / unverified** until the real candidate → reconciliation → review-ledger → pilot-readiness chain completes successfully and its persisted artifacts are inspected.
 
+
+
+## 2026-10-08 EU5DB cartographic reference checkpoint
+
+- EU5DB was reviewed as a **comparative map-architecture reference**, not as 1326 historical authority.
+- The review confirms a distinct spatial hierarchy of **İl / Location → Vilayet / Province → Alan / Area → Bölge / Region → Alt Kıta → Kıta** and separate map modes for these levels. citeturn0search0turn0search1
+- This distinction is useful for Historia AI's future cartographic/LOD design because local geography and province-scale aggregation can be rendered as different semantic levels.
+- The new analysis is recorded in `docs/architecture/EU5DB-REFERENCE-MAP-ANALYSIS.md`.
+- No EU5DB geometry, ownership, or 1337 political state is imported or promoted.
+- The next production-facing work remains the existing T3-B explicit review-binding/adjudication gate; this reference work does not replace it.
