@@ -13,13 +13,14 @@ const geometry = { type: "Polygon", coordinates: [[[29,40],[29.1,40],[29.1,40.1]
 const candidate = { sourceFeatureIndex: 7, sourceFeatureId: "feature-7", name: "Candidate", fromYear: 1200, toYear: 1400, type: "POLITY", wikidataId: null, seshatId: null, geometry, reconciliationStatus: "pending", geometryAuthorityStatus: "candidate-evidence-only" };
 const packet = [candidate];
 const packetSha = crypto.createHash("sha256").update(JSON.stringify(packet)).digest("hex");
+const sourceRecordSha = crypto.createHash("sha256").update(JSON.stringify(candidate)).digest("hex");
 const geometrySha = crypto.createHash("sha256").update(JSON.stringify(geometry)).digest("hex");
 const record = { ...candidate, geometryBbox: [29,40,29.1,40.1], geometryBboxCenter: [29.05,40.05], anchorHits: [{ anchorId: "bursa-core", role: "anchor" }], sourceGeometrySha256: geometrySha, screeningOnly: true, promotion: "BLOCKED" };
 const recordSha = crypto.createHash("sha256").update(JSON.stringify(record)).digest("hex");
 const base = {
   candidates: { scenarioDate: "1326-04-07", source: { sourceId: "cliopatria-v0.2.0", extractedGeojsonSha256: sha }, candidates: packet, candidatePacketSha256: packetSha },
   screening: { scenarioDate: "1326-04-07", source: { sourceId: "cliopatria-v0.2.0", extractedGeojsonSha256: sha }, candidatePacketSha256: packetSha, candidates: [record], promotion: "BLOCKED" },
-  reconciliation: { scenarioDate: "1326-04-07", sourceId: "cliopatria-v0.2.0", candidatePacketSha256: packetSha, sourceProvenance: { extractedGeojsonSha256: sha }, results: [{ entityId: "candidate", candidates: [{ sourceFeatureIndex: 7, sourceFeatureId: "feature-7", candidateRecordSha256: recordSha, autoPromotion: false }] }], promotion: "BLOCKED" },
+  reconciliation: { scenarioDate: "1326-04-07", sourceId: "cliopatria-v0.2.0", candidatePacketSha256: packetSha, sourceProvenance: { extractedGeojsonSha256: sha }, results: [{ entityId: "candidate", candidates: [{ sourceFeatureIndex: 7, sourceFeatureId: "feature-7", candidateRecordSha256: sourceRecordSha, autoPromotion: false }] }], promotion: "BLOCKED" },
   review: { scenarioDate: "1326-04-07", source: { sourceId: "cliopatria-v0.2.0" }, candidatePacketSha256: packetSha, sourceProvenance: { extractedGeojsonSha256: sha }, reviewQueue: [{ sourceFeatureIndex: 7, sourceFeatureId: "feature-7", reviewId: "cliopatria-1326-feature-7-"+recordSha.slice(0,16), sourceGeometry: { geometry, sha256: geometrySha, screeningSourceGeometrySha256: geometrySha }, sourceEvidence: { candidateRecordSha256: recordSha } }], promotion: "BLOCKED" }
 };
 async function run(name, payload, ok) {
