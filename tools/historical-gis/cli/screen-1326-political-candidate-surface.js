@@ -147,7 +147,7 @@ for (const candidate of candidates.candidates) {
 
   const center = bboxCenter(bbox);
   const anchorHits = [];
-  for (const anchor of anchors.anchors) {
+  for (const anchor of anchors) {
     const influence = expandBboxAroundPoint(anchor.coordinates, radiusKm);
     if (!bboxIntersects(bbox, influence)) continue;
     anchorHits.push({
@@ -204,7 +204,7 @@ const report = {
   },
   anchorSource: {
     path: anchorPath.replace(/\\/g, "/"),
-    anchorCount: anchors.anchors.length,
+    anchorCount: anchors.length,
   },
   screening: {
     method: "candidate-geometry-bbox intersects anchor influence bbox",
