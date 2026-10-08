@@ -115,7 +115,7 @@ if (screening.scenarioDate !== SCENARIO_DATE) throw new Error("Screening report 
 if (screening.promotion !== "BLOCKED") throw new Error("Candidate surface must remain blocked from promotion.");
 if (geometryQueue.promotion !== "BLOCKED") throw new Error("Geometry reconciliation must remain blocked from promotion.");
 if (geometryQueue.candidatePacketSha256 !== candidates.candidatePacketSha256) throw new Error("Candidate/geometry queue packet provenance mismatch.");
-if (geometryQueue.reviewQueue?.length !== screening.screening?.screenedCandidates) throw new Error("Geometry queue count does not match screened candidate count.");
+if (geometryQueue.reviewQueue?.length !== screening.counts?.screenedCandidates) throw new Error("Geometry queue count does not match screened candidate count.");
 if (candidates.candidatePacketSha256 !== reconciliation.candidatePacketSha256) throw new Error("Candidate/reconciliation packet provenance mismatch.");
 if (candidates.candidatePacketSha256 !== screening.candidatePacketSha256) throw new Error("Candidate/screening packet provenance mismatch.");
 if (candidates.source.extractedGeojsonSha256 !== reconciliation.sourceProvenance?.extractedGeojsonSha256) throw new Error("Candidate/reconciliation extraction provenance mismatch.");
