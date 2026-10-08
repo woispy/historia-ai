@@ -106,10 +106,10 @@ assert.equal(
   report.reviewQueue[0].reviewId,
   `cliopatria-1326-feature-${near.sourceFeatureIndex}-${report.reviewQueue[0].sourceEvidence.candidateRecordSha256.slice(0, 16)}`
 );
-assert.equal(report.reviewQueue[0].sourceEvidence.candidateRecordSha256, report.reviewQueue[0].sourceEvidence.candidatePacketSha256);
+assert.match(report.reviewQueue[0].sourceEvidence.candidateRecordSha256, /^[0-9a-f]{64}$/);
 assert.equal(
   report.reviewQueue[0].sourceEvidence.reviewIdDerivation,
-  "cliopatria-1326-feature-${sourceFeatureIndex}-${candidatePacketSha256.slice(0,16)}"
+  "cliopatria-1326-feature-${sourceFeatureIndex}-${candidateRecordSha256.slice(0,16)}"
 );
 assert.equal(report.reviewQueue[0].reviewedGeometry, null);
 assert.equal(report.reviewQueue[0].sourceGeometry.immutable, true);
