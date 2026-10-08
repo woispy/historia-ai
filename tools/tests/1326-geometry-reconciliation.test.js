@@ -62,7 +62,7 @@ const reconciliation = {
   results: [{
     entityId: "ottoman-beylik",
     status: "single-candidate",
-    candidates: [{ sourceFeatureIndex: near.sourceFeatureIndex, sourceFeatureId: near.sourceFeatureId, name: near.name, wikidataId: null, seshatId: null, fromYear: 1200, toYear: 1400, geometryAuthorityStatus: "candidate-evidence-only" }]
+    candidates: [{ sourceFeatureIndex: near.sourceFeatureIndex, sourceFeatureId: near.sourceFeatureId, name: near.name, wikidataId: null, seshatId: null, fromYear: 1200, toYear: 1400, geometryAuthorityStatus: "candidate-evidence-only", candidateRecordSha256: crypto.createHash("sha256").update(JSON.stringify(near)).digest("hex"), autoPromotion: false }]
   }]
 };
 await fs.writeFile(screening, JSON.stringify(screen));
