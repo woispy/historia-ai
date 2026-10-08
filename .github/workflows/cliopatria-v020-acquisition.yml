@@ -47,39 +47,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download official Zenodo v0.2.0 archive
+      - name: Acquire pinned immutable GitHub raw snapshot
         run: |
-          curl --fail --location --retry 3 --retry-all-errors             "https://zenodo.org/records/20274630/files/Seshat-Global-History-Databank/cliopatria-v0.2.0.zip?download=1"             --output /tmp/cliopatria-v0.2.0.zip
+          node tools/historical-gis/cli/acquire-1326-cliopatria.js --download
+          node tools/historical-gis/cli/acquire-1326-cliopatria.js --verify
+          test "$(git hash-object data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip)" = "cefab0f4b622e2e7fb3daf68d4f461f83991204c"
 
-      - name: Verify Zenodo archive MD5
-        run: |
-          test "$(stat -c '%s' /tmp/cliopatria-v0.2.0.zip)" -eq 297058350
-          test "$(md5sum /tmp/cliopatria-v0.2.0.zip | cut -d ' ' -f1)" = "6d573d5a07dfcd5a2c6c9933d6401d48"
-
-      - name: Locate and verify pinned GeoJSON ZIP blob
-        run: |
-          rm -rf /tmp/cliopatria-v020
-          mkdir -p /tmp/cliopatria-v020
-          unzip -q /tmp/cliopatria-v0.2.0.zip -d /tmp/cliopatria-v020
-
-          mapfile -t members < <(find /tmp/cliopatria-v020 -type f -name 'cliopatria.geojson.zip' -print)
-          test "${#members[@]}" -eq 1
-          source_zip="${members[0]}"
-
-          actual_size="$(stat -c '%s' "$source_zip")"
-          actual_blob="$(git hash-object "$source_zip")"
-
-          echo "source_zip=$source_zip"
-          echo "source_size=$actual_size"
-          echo "source_git_blob=$actual_blob"
-
-          test "$actual_blob" = "cefab0f4b622e2e7fb3daf68d4f461f83991204c"
-
-      - name: Publish verified acquisition artifact
+      - name: Publish directly acquired production snapshot
         uses: actions/upload-artifact@v4
         with:
-          name: cliopatria-v0.2.0-verified
-          path: /tmp/cliopatria-v0.2.0.zip
+          name: cliopatria-v0.2.0-production-snapshot
+          path: |
+            data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip
+            data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.acquisition.json
           retention-days: 7
           compression-level: 0
 
