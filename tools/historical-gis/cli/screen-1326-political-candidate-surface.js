@@ -28,14 +28,30 @@ function assertCandidateReport(report) {
   if (report.candidatePacketSha256 !== expectedPacketSha) throw new Error("Candidate packet SHA-256 mismatch.");
 }
 
-function assertAnchorReport(report) {
-  if (report?.scenarioDate !== SCENARIO_DATE) throw new Error("Anchor scenario date mismatch.");
+function normalizeAnchorReport(report) {
+  if (report?.scenarioDate !== SCENARIO_DATE) throw new Error("Anchor report scenario date mismatch.");
   if (!Array.isArray(report?.anchors) || report.anchors.length === 0) {
     throw new Error("Anchor report must contain a non-empty anchors[] array.");
   }
-  for (const anchor of report.anchors) {
-    if (!anchor?.id || !Array.isArray(anchor.coordinates) || anchor.coordinates.length !== 2) {
-      throw new Error("Each anchor requires id and [longitude, latitude] coordinates.");
+
+  const anchors = report.anchors.map(anchor => {
+    if (anchor?.id && Array.isArray(anchor.coordinates)) return {
+      id: anchor.id,
+      role: anchor.role ?? null,
+      coordinates: anchor.coordinates,
+    };
+    const coordinates = anchor?.geometry?.coordinates;
+    if (anchor?.anchorId && anchor?.geometry?.type === "Point" && Array.isArray(coordinates)) return {
+      id: anchor.anchorId,
+      role: anchor.anchorType ?? null,
+      coordinates,
+    };
+    throw new Error("Each anchor requires either id/coordinates or anchorId/Point geometry.");
+  });
+
+  for (const anchor of anchors) {
+    if (!Array.isArray(anchor.coordinates) || anchor.coordinates.length !== 2) {
+      throw new Error("Each anchor requires [longitude, latitude] coordinates.");
     }
     const [longitude, latitude] = anchor.coordinates;
     if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) {
@@ -45,6 +61,7 @@ function assertAnchorReport(report) {
       throw new Error(`Anchor ${anchor.id} has out-of-range coordinates.`);
     }
   }
+  return anchors;
 }
 
 function walkCoordinates(value, visit) {
@@ -116,9 +133,8 @@ const radiusKm = Number(readArg("--radius-km", "120"));
 if (!Number.isFinite(radiusKm) || radiusKm <= 0) throw new Error("--radius-km must be a positive number.");
 
 const candidates = JSON.parse(await fs.readFile(candidatePath, "utf8"));
-const anchors = JSON.parse(await fs.readFile(anchorPath, "utf8"));
+const anchors = normalizeAnchorReport(JSON.parse(await fs.readFile(anchorPath, "utf8")));
 assertCandidateReport(candidates);
-assertAnchorReport(anchors);
 
 const screened = [];
 const rejected = [];
