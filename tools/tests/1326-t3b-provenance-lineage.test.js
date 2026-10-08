@@ -19,7 +19,7 @@ const recordSha = crypto.createHash("sha256").update(JSON.stringify(record)).dig
 const base = {
   candidates: { scenarioDate: "1326-04-07", source: { sourceId: "cliopatria-v0.2.0", extractedGeojsonSha256: sha }, candidates: packet, candidatePacketSha256: packetSha },
   screening: { scenarioDate: "1326-04-07", source: { sourceId: "cliopatria-v0.2.0", extractedGeojsonSha256: sha }, candidatePacketSha256: packetSha, candidates: [record], promotion: "BLOCKED" },
-  reconciliation: { scenarioDate: "1326-04-07", sourceId: "cliopatria-v0.2.0", candidatePacketSha256: packetSha, sourceProvenance: { extractedGeojsonSha256: sha }, results: [{ entityId: "candidate", candidates: [{ sourceFeatureIndex: 7, sourceFeatureId: "feature-7" }] }], promotion: "BLOCKED" },
+  reconciliation: { scenarioDate: "1326-04-07", sourceId: "cliopatria-v0.2.0", candidatePacketSha256: packetSha, sourceProvenance: { extractedGeojsonSha256: sha }, results: [{ entityId: "candidate", candidates: [{ sourceFeatureIndex: 7, sourceFeatureId: "feature-7", candidateRecordSha256: recordSha, autoPromotion: false }] }], promotion: "BLOCKED" },
   review: { scenarioDate: "1326-04-07", source: { sourceId: "cliopatria-v0.2.0" }, candidatePacketSha256: packetSha, sourceProvenance: { extractedGeojsonSha256: sha }, reviewQueue: [{ sourceFeatureIndex: 7, sourceFeatureId: "feature-7", reviewId: "cliopatria-1326-feature-7-"+recordSha.slice(0,16), sourceGeometry: { geometry, sha256: geometrySha, screeningSourceGeometrySha256: geometrySha }, sourceEvidence: { candidateRecordSha256: recordSha } }], promotion: "BLOCKED" }
 };
 async function run(name, payload, ok) {
