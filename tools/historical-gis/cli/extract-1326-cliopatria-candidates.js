@@ -152,7 +152,7 @@ const report = {
 };
 
 await fs.mkdir(path.dirname(outputPath), { recursive: true });
-await fs.writeFile(outputPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+await fs.writeFile(outputPath, JSON.stringify(report, null, 2), "utf8");
 console.log(JSON.stringify({
   scenarioDate: SCENARIO_DATE,
   inputFeatures: geojson.features.length,
