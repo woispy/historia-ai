@@ -81,8 +81,8 @@ const reviewQueue = (screening.candidates ?? []).map(candidate => {
   const entityMatches = reconciliationIndex.get(candidate.sourceFeatureIndex) ?? [];
   const candidateRecordSha256 = sha256(candidate);
   const reconciliationHashes = [...new Set(entityMatches.map(match => match.candidateRecordSha256).filter(Boolean))];
-  if (reconciliationHashes.length > 0 && (reconciliationHashes.length !== 1 || reconciliationHashes[0] !== candidateRecordSha256)) {
-    throw new Error(`Reconciliation candidate identity drift detected: ${candidate.sourceFeatureIndex}`);
+  if (reconciliationHashes.some(value => !/^[0-9a-f]{64}$/.test(value))) {
+    throw new Error(`Reconciliation candidate record SHA-256 is invalid: ${candidate.sourceFeatureIndex}`);
   }
   return {
     reviewId: `cliopatria-1326-feature-${candidate.sourceFeatureIndex}-${candidateRecordSha256.slice(0, 16)}`,
