@@ -93,6 +93,10 @@ EU5DB's 1337 state is eleven years after Historia AI's `1326-04-07` target. Ther
 
 The EU5DB map-mode inventory is particularly valuable for future layer planning: it includes political, terrain, vegetation, climate, topography, culture, religion, language, population, market, wealth/tax-base, roads, military, maritime and other derived views. These should be treated as **design references**, not as a requirement to reproduce EU5 mechanics one-for-one.
 
+### EU5DB spatial hierarchy analysis
+
+The repository also retains `docs/architecture/EU5DB-REFERENCE-MAP-ANALYSIS.md` as the detailed cartographic interpretation of the EU5DB hierarchy. It records the **İl → Vilayet → Alan → Bölge → Alt Kıta → Kıta** concept as a comparative design reference only. It does not promote EU5DB geometry or 1337 ownership into the 1326 authority pipeline.
+
 ### World Historical Gazetteer
 
 **Role:** historical place identity, reconciliation, and provenance evidence.
