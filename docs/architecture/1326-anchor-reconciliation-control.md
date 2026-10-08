@@ -1,9 +1,9 @@
 # Historia AI — 1326 Anchor Reconciliation Control
 
 Status: **ACTIVE / forensic-to-production handoff**
-Last reviewed: **2026-10-08 17:07 TRT**
+Last reviewed: **2026-10-08 20:50 TRT**
 
-Follow-up gate: **T3-B persisted review package / CI handoff**
+Follow-up gate: **T3-B explicit review bindings / geometry adjudication handoff**
 
 ## Scope
 
@@ -154,8 +154,11 @@ The review ledger must distinguish at minimum:
 | Historical evidence registry | GREEN |
 | T3-A anchor model | GREEN / research contract |
 | T3-B deterministic evidence registry | GREEN / CI-proven |
-| Candidate political surface | CANDIDATE ONLY |
-| Geometry reconciliation review ledger | **OPEN** |
+| Candidate political surface | CANDIDATE ONLY — 150 source candidates / 21 screened |
+| Geometry reconciliation review queue | GREEN / CI-proven — 21 immutable pending items |
+| Persisted geometry review ledger | GREEN / CI-proven — 21 pending records |
+| T3-B pilot readiness | GREEN / CI-proven — waiting for explicit review bindings |
+| Geometry reconciliation review/adjudication | **OPEN** |
 | Physical authority | PRESERVE / migration debt |
 | Canonical political geometry | **BLOCKED** |
 | 1586/1586 authoritative GIS gate | **NOT GREEN** |
@@ -166,20 +169,21 @@ The review ledger must distinguish at minimum:
 
 The next production-facing task is not another global branch migration.
 
-It is:
+The T3-B machine pipeline is now sealed. The next task is the **research-backed explicit review binding phase**:
 
 ```
-pinned source extraction
-  -> candidate surfaces
-  -> deterministic reconciliation queue
-  -> persisted review ledger
-  -> pilot review bindings
-  -> topology validation
+21 pending review records
+  -> select high-confidence pilot records
+  -> bind each reviewId to explicit historical/edge evidence
+  -> adjudicate reviewedGeometry externally/research-backed
+  -> validate reviewed geometry + topology
+  -> persist confidence/decision
+  -> re-run canonical acceptance gates
 ```
 
-The first pilot should use a small, high-confidence 1326 anchor set and retain the complete provenance chain before scaling to the wider Tier-1 geography.
+The current real package contains 21 pending review records, but 0 explicit review bindings. Do not infer or synthesize bindings merely to make the gate green.
 
-Only after the pilot ledger is persisted and independently validated may candidate geometry begin the reviewed-geometry transition.
+Only after reviewed geometry and topology/provenance acceptance are independently proven may canonical political geometry be promoted.
 
 ## Migration rule
 
@@ -196,6 +200,31 @@ Provenance
 ```
 
 Canonical production remains protected until that chain is complete.
+## 2026-10-08 T3-B persisted review-package checkpoint — GREEN
+
+- Corrected production head: `ba3d21824dcd4af443da5f6ea569771cc1d9b502` on the existing `work/phase-a-1326-t3b-candidate-surface` branch / PR #109.
+- Cliopatria v0.2.0 acquisition verification run **#141 / 37819558760** completed **SUCCESS**.
+- Immutable source remains commit `ad28a69`, source blob SHA `cefab0f4b622e2e7fb3daf68d4f461f83991204c`; archive SHA-256 remains `d01ae3a20d358cc5d54f69d9d725d390767d9c8759ac89ad6f90c58d106f3370`.
+- Real extraction: **13,765** input features → **150** temporal candidates; exclusions **13,608** outside range, **7** non-polity, **0** missing geometry. Candidate packet SHA-256 remains `c03d8d1e2cb4b280f6549a48b0602f8f44d6c856e7fa49b543fbb2f748779c24`.
+- Entity reconciliation: **8** required entities, **2 matched**, **6 unmatched**, **0 ambiguous**. Matching remains candidate-only; no controller/geometry authority is inferred from names.
+- Candidate screening: **21 screened**, **129 rejected**; source geometry remains immutable and promotion-blocked.
+- Geometry reconciliation queue: **21 items**, **21 immutable source geometries**, **21 pending**, **2 entity-linked / 19 unmatched**. No reviewed geometry was generated.
+- Persisted geometry review ledger: **21 records**, schema v2, review-ledger-only, promotion BLOCKED.
+- Pilot edge-evidence preparation/validation passed; current real package has **0 explicit review bindings** and therefore remains waiting for human/research adjudication.
+- T3-B pilot-readiness validator passed with status **WAITING_FOR_EXPLICIT_REVIEW_BINDINGS**; this is a successful safety state, not canonical promotion.
+- All five T3-B contract tests passed: geometry reconciliation, review ledger, edge-evidence bindings, provenance lineage, and pilot readiness.
+- Published artifact `historia-1326-t3b-review-package` is retained for 7 days (artifact ID **11568193231**, digest `sha256:50f2939b98f69c0ca776fa19a1fddaba9bfa32c3cb5fb3b897b9f9cd75a955d5`).
+- **Interpretation:** T3-B pipeline integrity is now GREEN/CI-proven. This does **not** promote any Cliopatria polygon to canonical political geography. Canonical political geometry remains BLOCKED until explicit research-backed review bindings, reviewed geometry, topology validation, provenance/confidence adjudication, and the authoritative GIS acceptance gate are complete.
+
+### Contract fixes sealed in this checkpoint
+
+1. Candidate report now explicitly carries `promotion: BLOCKED`.
+2. Reconciliation candidate records explicitly carry `autoPromotion: false`.
+3. Geometry queue now binds to the immutable extraction candidate packet and keeps source-candidate hash separate from screened review-record hash.
+4. Pilot readiness accepts intentionally unmatched screened candidates; only present reconciliation matches are identity-checked.
+5. Geometry/provenance test fixtures now distinguish packet SHA, immutable source-candidate SHA, and screened review-record SHA.
+
+
 ## 2026-10-08 T3-B screening normalization fix
 
 - Corrected commit: `b6fc796ef7bd25d89fdcc34d1fab2fcae03f0643`.
