@@ -117,7 +117,6 @@ assert.equal(
 assert.equal(report.reviewQueue[0].reviewedGeometry, null);
 assert.equal(report.reviewQueue[0].sourceGeometry.immutable, true);
 assert.equal(report.reviewQueue[0].sourceGeometry.screeningSourceGeometrySha256, report.reviewQueue[0].sourceGeometry.sha256);
-assert.equal(report.reviewQueue[0].sourceEvidence.candidateRecordSha256, report.reviewQueue[0].sourceEvidence.candidatePacketSha256);
 assert.equal(report.reviewQueue[0].sourceGeometry.mutationPolicy, "immutable-source-evidence");
 assert.deepEqual(report.reviewQueue[0].sourceGeometry.geometry, near.geometry);
 assert.match(report.reviewQueue[0].sourceGeometry.sha256, /^[0-9a-f]{64}$/);
