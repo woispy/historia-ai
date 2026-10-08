@@ -538,3 +538,20 @@ Canonical promotion remains BLOCKED until the hardened gate is proven green in C
 | Canonical political geometry | BLOCKED |
 
 The hardened registry gate is now CI-proven. The next controlled layer is explicit physical-authority evidence binding for the selected T3-B pilot review set. No automatic candidate-to-polygon transition is authorized.
+
+
+## Wave 26 — T3-B deterministic gate closure and handoff audit
+
+| Gate | State |
+|---|---|
+| Anchor registry confidence/precision gate | CLOSED / CI-PROVEN |
+| Historia AI CI | #3413 SUCCESS |
+| Cliopatria acquisition verification | #104 SUCCESS |
+| Candidate geometry mutation | FORBIDDEN |
+| Controller implies geometry | FORBIDDEN |
+| Review ledger promotion | BLOCKED |
+| Explicit review bindings | REQUIRED before bound-review state |
+| Geometry reconciliation handoff | NOT YET CLOSED |
+| Canonical political geometry | BLOCKED |
+
+The queue and review-ledger contracts are implemented and validated, but the current CI run does not publish a persisted full geometry-review queue/ledger artifact. The next production-facing action is therefore to run the actual candidate-surface-to-review-queue chain against the pinned extraction artifact, retain its provenance hashes, and establish the pilot review bindings before any reviewed geometry can exist.
