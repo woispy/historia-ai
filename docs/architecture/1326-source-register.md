@@ -75,6 +75,24 @@ OpenHistoricalMap provides historical geospatial data through downloads/APIs. It
 Export: https://www.openhistoricalmap.org/export
 Copyright/licensing: https://www.openhistoricalmap.org/copyright
 
+### EU5DB — Europa Universalis V reference database
+
+**Role:** comparative game-data / map-architecture reference, not historical authority.
+
+EU5DB exposes an interactive EU5 map at the 1337 start and provides per-location information including owner, culture, religion, population, topography, vegetation, climate, and raw materials. Its map hierarchy exposes **Location → Province → Area → Region → Subcontinent → Continent**, while its map-mode catalogue exposes 162 game map modes spanning geography, demography, economy, diplomacy, military, and geopolitics.
+
+For Historia AI this is useful as a **benchmark/reference layer** for:
+
+- comparing province/location granularity around Anatolia, Balkans, Byzantium, Levant and Black Sea;
+- validating our separation of immutable geography from dynamic political state;
+- designing map-layer contracts for terrain/topography, vegetation, climate, culture, religion, population, economy and geopolitics;
+- comparing hierarchical geography (`location/province/area/region`) with our own province/region architecture;
+- checking whether our future map UI exposes the same conceptual layer families without copying EU5 implementation or data.
+
+EU5DB's 1337 state is eleven years after Historia AI's `1326-04-07` target. Therefore it is **not** evidence for a 1326 political boundary and must never be promoted into the canonical 1326 geography pipeline. It is a comparative reference for structure, granularity and post-1326 plausibility checks only.
+
+The EU5DB map-mode inventory is particularly valuable for future layer planning: it includes political, terrain, vegetation, climate, topography, culture, religion, language, population, market, wealth/tax-base, roads, military, maritime and other derived views. These should be treated as **design references**, not as a requirement to reproduce EU5 mechanics one-for-one.
+
 ### World Historical Gazetteer
 
 **Role:** historical place identity, reconciliation, and provenance evidence.
