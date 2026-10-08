@@ -149,6 +149,7 @@ const report = {
   },
   candidates,
   candidatePacketSha256: sha256Text(JSON.stringify(candidates)),
+  promotion: "BLOCKED",
 };
 
 await fs.mkdir(path.dirname(outputPath), { recursive: true });
