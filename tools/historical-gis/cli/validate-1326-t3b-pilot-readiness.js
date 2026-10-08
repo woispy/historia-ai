@@ -64,7 +64,7 @@ for (const [index, screened] of screenedByIndex) {
   if (!source || !item) fail(`Broken candidate -> review identity at ${index}.`);
   if (screened.sourceFeatureId !== source.sourceFeatureId || item.sourceFeatureId !== screened.sourceFeatureId) fail(`Source identity drift at ${index}.`);
   const reconciled = reconciliationByIndex.get(index);
-  if (!reconciled || reconciled.sourceFeatureId !== source.sourceFeatureId) fail(`Candidate -> reconciliation identity drift at ${index}.`);
+  if (!reconciled || reconciled.sourceFeatureId !== source.sourceFeatureId) fail(`Candidate -> reconciliation identity drift at ${index}: source=${JSON.stringify({sourceFeatureId: source.sourceFeatureId, sourceFeatureIndex: source.sourceFeatureIndex})} reconciled=${JSON.stringify(reconciled)} screened=${JSON.stringify({sourceFeatureId: screened.sourceFeatureId, sourceFeatureIndex: screened.sourceFeatureIndex})}`);
   if (screened.sourceGeometrySha256 !== sha(source.geometry)) fail(`Screening geometry provenance drift at ${index}.`);
   if (item.sourceGeometry?.sha256 !== sha(source.geometry)) fail(`Review geometry provenance drift at ${index}.`);
   if (item.reviewedGeometry !== null || item.reviewStatus !== "pending" || item.promotion !== "BLOCKED") fail(`Review item is not pending/blocked at ${index}.`);
