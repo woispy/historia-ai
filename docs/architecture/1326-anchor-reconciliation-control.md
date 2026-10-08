@@ -1,7 +1,7 @@
 # Historia AI — 1326 Anchor Reconciliation Control
 
 Status: **ACTIVE / forensic-to-production handoff**
-Last reviewed: **2026-10-08**
+Last reviewed: **2026-10-08 17:07 TRT**
 
 Follow-up gate: **T3-B persisted review package / CI handoff**
 
@@ -52,6 +52,15 @@ The dedicated clip-lineage workflow also completed successfully at head `d4b4427
 
 No production fix is authorized from that run.
 
+## 2026-10-08 CI checkpoint
+
+- Pinned Cliopatria acquisition is now independently verified in GitHub Actions at run `37787235151` before the workflow failed later.
+- Immutable source reference: commit `ad28a69`.
+- Expected source blob SHA: `cefab0f4b622e2e7fb3daf68d4f461f83991204c`; CI hash check passed.
+- Acquired archive: 44,231,317 bytes; retained snapshot SHA-256: `d01ae3a20d358cc5d54f69d9d725d390767d9c8759ac89ad6f90c58d106f3370`.
+- The first post-acquisition failure was not GIS/T3-B logic: the workflow attempted to publish `cliopatria-v0.2.0-production-snapshot` twice and GitHub Actions rejected the second upload with HTTP 409 artifact-name conflict.
+- That duplicate upload was removed in commit `80d3f3ab6e0573c3ca8063e7917cbbd5c70b005d` on the existing T3-B branch. No new branch or PR was created.
+- The T3-B candidate/review pipeline has therefore **not yet been declared GREEN** from this latest corrected workflow execution. Canonical promotion remains BLOCKED.
 ## Anchor / candidate handoff
 
 ### Evidence layer
