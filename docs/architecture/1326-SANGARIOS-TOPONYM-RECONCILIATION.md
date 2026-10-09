@@ -443,3 +443,29 @@ A coordinate appears in general secondary web summaries for the Malagina/Paşala
 - **1326-04-07 political frontier**: no new evidence.
 
 No anchor, coordinate, polygon, candidate geometry, or review binding was added. SAFE TO DELETE = 0; canonical promotion remains blocked; the frontier remains INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED.
+
+
+## 2026-10-09 eighth pass — institutional thesis resolves the scholarly dispute more precisely
+
+### Newly inspected institutional source
+
+The Sakarya University repository PDF on northwestern Anatolian historical road networks was inspected through its indexed text, including printed page 30 and the following discussion (institutional PDF: https://acikerisim.sakarya.edu.tr/bitstream/handle/20.500.12619/101577/T10915.pdf?isAllowed=y&sequence=1). It records two different claims that must not be collapsed:
+
+- It attributes to Şahin the proposal that the **broader Malagina region** should be placed at Mekece, reasoning from the Mekece–İznik road and a nearby small lake, alongside route and pasture criteria.
+- It then argues that **Paşalar Castle is the more suitable identification for the Malagina/Metabole fortress**, based on the Sangarios, the horse-grazing plain, the Nikaia–Dorylaion road, and the cited topographical setting. It explicitly notes the debate between Mekece and Paşalar and says Foss identified Paşalar, not Mekece Castle, as Metabole.
+
+The same source cites Foss (1990), including pp. 163–164 and 170–171, and local castle research. This is an institutional secondary synthesis, not the full Foss article; it clarifies the structure of the argument but does not replace direct inspection of Foss's original pages or a georeferenced site plan.
+
+### Adjudication
+
+1. **Malagina as a wider region/plain** and **Metabole as a specific fortress** remain separate entities.
+2. **Mekece as a proposed location for the broader Malagina region** and **Mekece Castle as a proposed fortress identity** are related but not equivalent claims.
+3. **Paşalar Castle ↔ Metabole** is the best-supported fortress hypothesis in the institutional source inspected, but still remains a research hypothesis rather than a canonical entity reconciliation.
+4. The official Culture Inventory establishes the physical monument at Kale Tepe, but supplies no coordinate pair or coordinate derivation.
+5. None of these historical-site identifications establishes the exact 1326-04-07 political frontier.
+
+No anchor registry entry, coordinate, candidate polygon, evidence binding, or review binding was added. Canonical promotion remains blocked; frontier status remains **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**; **SAFE TO DELETE = 0**.
+
+### Next operation
+
+Locate a legitimate full-text copy of Foss (1990), inspect the cited topographical pages and any site plan, and record a coordinate only if the source map can be georeferenced with documented method and uncertainty. Do not use a generic search-result coordinate as a surveyed fortress point.
