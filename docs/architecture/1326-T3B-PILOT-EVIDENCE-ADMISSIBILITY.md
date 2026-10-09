@@ -198,3 +198,20 @@ The full-volume endpoint is discoverable and search-indexed, but the current web
 **Adjudication:** retain Bursa/Prusa as a date-specific city-control anchor subject to the project's existing source/entity reconciliation; retain Nikaia and Nikomedeia chronology as later-event constraints; do not convert siege reach, governor residence, road corridors, fortress locations, or a regional map into borders. The Bithynia frontier remains REVIEW_REQUIRED / INSUFFICIENT_EVIDENCE for exact-line geometry. No review binding is created and no candidate polygon is modified.
 
 **Source navigation:** [TIB 13 open-access contents and part links](https://ancientworldonline.blogspot.com/2020/04/tabulae-imperii-byzantini-13-bithynien.html); [publisher-hosted historical/administrative chapter PDF](https://austriaca.at/0xc1aa5576%200x003b6739.pdf). The book record states CC BY 4.0; preserve attribution and check the asset-specific license record before redistribution.
+
+
+
+### TIB 13 early Sangarios-corridor claims — source-critical context
+
+A second useful passage occurs at TIB 13 printed pp. 215–216 (publisher PDF part 0x003b6739.pdf, PDF pages 104–105). Belke distinguishes the Byzantine narrative from Ottoman chronicle traditions and warns that the Ottoman account differs in detail and is embellished by legendary material. In that Ottoman-chronicle account, a campaign dated 1304/05 reports the taking/submission of places in the Sangarios valley, including Lefke/Leukai, Mekece/Makaǧā, Akhisar/Malagina and Geyve/Kabeia; further places are then described on both sides of the Sangarios, including the area of Nikomedeia west of the river. The same discussion says some place identifications are uncertain and notes disagreement over dates for certain fortifications.
+
+**Classification:** source-critical, retrospective conquest narrative; candidate historical-anchor lead only. This is useful for prioritizing a Lefke–Sangarios corridor evidence review, but not as a coordinate boundary or unqualified proof that every named place remained under continuous Ottoman control on 1326-04-07. The river is a physical corridor/barrier whose role varies by section; the text does not authorize tracing it as a political border.
+
+**Required reconciliation before any anchor promotion:**
+1. Keep the Byzantine narrative and Ottoman chronicle claims as distinct evidence records, not one blended claim.
+2. Preserve the reported date range (1304/05), source tradition, the author's source-critical caveat, and the uncertainty of individual place identifications.
+3. Reconcile each toponym independently (Lefke/Leukai, Mekece/Makaǧā, Akhisar/Malagina, Geyve/Kabeia) before linking it to a canonical anchor.
+4. Do not convert the list of reported conquests into a polygon or continuous frontier.
+5. If the project cannot represent contested event claims without implying certainty, keep them in this research register rather than adding them to the evidence matrix.
+
+This passage adds a better-defined research path, not a boundary solution. The exact 1326 Bithynia frontier remains REVIEW_REQUIRED / INSUFFICIENT_EVIDENCE.
