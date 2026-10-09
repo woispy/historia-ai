@@ -309,3 +309,15 @@ Canonical production remains protected until that chain is complete.
 - Keep the Ottoman/Byzantine review records pending, `reviewBindings: []`, immutable candidate geometry, and canonical promotion **BLOCKED**. Do not infer borders from settlements, fortifications, routes, metropolitan status, or regional cartography.
 - Next: obtain the segmented/open-access volume and extract the exact scope/history sections and gazetteer entries with printed page/map, date, evidence class, scale and limitation. If no 1326-specific frontier evidence is present, close TIB 13 as contextual corroboration and continue the source search without synthetic geometry.
 - No CI result is claimed for this documentation-only checkpoint.
+
+
+
+## 2026-10-09 TIB 13 exact-page extraction
+
+- Corrected the previous access note: the direct full-volume endpoint did not open, but the publisher-hosted segmented open-access edition is accessible. The historical/administrative chapter PDF was inspected at printed pp. 217–219 (PDF pages 106–108 of part 0x003b6739.pdf).
+- TIB 13 p. 218 states Prusa was under a prolonged encirclement and food shortage and surrendered to Orhan on **6 April 1326**; it became the emerging Ottoman state's first capital. This is a date-specific **city-control event**, not proof of the full surrounding political polygon.
+- The same page describes the 1321–1328 Byzantine civil war and a probable 1325 campaign in Bithynia and/or northern Hellespont, while noting that campaign details are not preserved. This is military context with spatial uncertainty.
+- TIB 13 p. 219 records Nikaia under Ottoman siege in 1329 and its surrender on 2 March 1331; it also describes likely Byzantine administrative presence at Nikomedeia in 1329 and its land-side encirclement in 1331. These are later chronology constraints, not facts to back-project into the 1326 ownership state.
+- The chapter explicitly notes a thin/uncertain record for Ottoman conquests before about 1320; no precise frontier is described for 1326-04-07.
+- Updated disposition: TIB 13 now contributes **dated city-control and military/administrative context**, but still does not provide an exact coordinate-level frontier. Keep Bithynia exact-line status REVIEW_REQUIRED / INSUFFICIENT_EVIDENCE, keep reviewBindings: [], preserve immutable candidates, and leave canonical promotion **BLOCKED**.
+- Next: add the Prusa/Bursa date-specific event to the evidence matrix only if its current schema supports an event/anchor without implying polygon ownership; inspect existing Bursa record first to avoid duplication. Then continue source search for a dated frontier or sufficiently constrained boundary anchors. No CI result is claimed for this documentation update.
