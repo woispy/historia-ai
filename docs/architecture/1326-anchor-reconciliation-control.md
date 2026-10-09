@@ -321,3 +321,12 @@ Canonical production remains protected until that chain is complete.
 - The chapter explicitly notes a thin/uncertain record for Ottoman conquests before about 1320; no precise frontier is described for 1326-04-07.
 - Updated disposition: TIB 13 now contributes **dated city-control and military/administrative context**, but still does not provide an exact coordinate-level frontier. Keep Bithynia exact-line status REVIEW_REQUIRED / INSUFFICIENT_EVIDENCE, keep reviewBindings: [], preserve immutable candidates, and leave canonical promotion **BLOCKED**.
 - Next: add the Prusa/Bursa date-specific event to the evidence matrix only if its current schema supports an event/anchor without implying polygon ownership; inspect existing Bursa record first to avoid duplication. Then continue source search for a dated frontier or sufficiently constrained boundary anchors. No CI result is claimed for this documentation update.
+
+
+
+## 2026-10-09 TIB 13 evidence matrix update
+
+- Added TIB 13 printed p. 218 as a second source for the existing Ottoman Beylik/Bursa city-control event in data/gis/1326/evidence-matrix.json; matrix commit: aaba343392aebbdcac3f0b0b10b72b1ef8689324.
+- Kept the evidence record in the existing source/claim/dateScope/role shape. The claim explicitly limits its scope to city control and does not imply the surrounding polygon or Bursa–Nicaea frontier.
+- No new polity, boundary edge, review binding, candidate geometry, or canonical authority was created. The evidence matrix remains evidence-only.
+- CI is pending/running for the newest head and must be checked before claiming verification.
