@@ -289,3 +289,12 @@ Canonical production remains protected until that chain is complete.
 - Next operation: inspect the TIB 13 introductory sections and map/gazetteer references for Nikaia, Nikomedeia, Prusa, Sangarios/Sakarya and Lefke; record exact pages/maps, temporal scope, spatial scale and evidence role. Only source statements explicitly supporting a relevant dated frontier may be classified as boundary evidence.
 - No review binding was added. `reviewBindings: []`, immutable candidate geometries, `SAFE TO DELETE = 0`, and canonical promotion **BLOCKED** remain unchanged.
 - No CI result is claimed for these documentation commits.
+
+
+## 2026-10-09 TIB 13 targeted page-map checkpoint
+
+- Expanded `docs/architecture/1326-T3B-PILOT-EVIDENCE-ADMISSIBILITY.md` with a page-level reading plan from the published review of Klaus Belke's TIB 13 (commit `f3045151abc0a8e08236436637cc3c400e632e50`).
+- Priority sections are: geographic scope/terminology pp. 97–102; geography pp. 103–110; historical and administrative development pp. 111–224; transport connections pp. 263–304; Nikaia pp. 802–830; Nikomedeia pp. 833–856; Prusa pp. 949–957; and the regional/detail maps in the end matter.
+- The secondary review is used only as a navigation aid. The next evidence records must cite Belke's exact page/map, claim, date scope, scale and limitations; the review itself is not a substitute for the underlying source.
+- A regional or period-coded settlement map is not automatically a political border map. No digitization, polygon reconstruction or review binding is authorized from this page map alone.
+- Canonical promotion remains **BLOCKED**; immutable candidate geometries and the empty binding list remain unchanged. No CI claim is made for documentation-only commits.
