@@ -159,3 +159,17 @@ Physical geography remains a separate authority layer from political geography.
 ## Current state
 
 The 1326 source registry is established, but no authoritative 1326 political runtime asset has been promoted yet. The next production task is source acquisition and reconciliation, beginning with Tier 1 evidence and the highest-confidence entities rather than generating a synthetic global polygon set.
+
+
+
+### TIB 13 — exact-page findings (2026-10-09)
+
+The segmented publisher-hosted open-access edition was inspected in the historical/administrative chapter, section C.IV, printed pp. 217–219 (PDF pages 106–108 of part 0x003b6739.pdf). Findings for the 1326 pilot:
+
+- **Prusa/Bursa:** p. 218 reports prolonged encirclement, food shortage, and surrender to Orhan on 6 April 1326; it became the emerging Ottoman state's first capital. Classify as a date-specific city-control event, not an exact polygon or countryside frontier.
+- **Regional defence context:** p. 218 describes the Byzantine civil war (1321–1328) as undermining Asian defence and a probable 1325 campaign in Bithynia and/or northern Hellespont, with details not preserved. Use only as broad military context.
+- **Nikaia:** p. 219 describes siege pressure in 1329 and surrender on 2 March 1331. This is a later chronology lock; do not back-project Ottoman ownership to 1326.
+- **Nikomedeia:** p. 219 says the Mesothēnia governor probably still resided there in 1329 and describes a land-side encirclement in 1331. This supports later administrative/military context, not a coordinate boundary or certain 1326 territorial extent.
+- **Boundary result:** no coordinate-level frontier for 1326-04-07 was found in these passages. TIB 13 is accepted as dated historical context and city-event evidence, but not as exact political-boundary authority.
+
+The chapter itself emphasizes gaps/uncertainty in the conquest narrative. Keep provenance and claim type distinct; never translate siege zones, road routes, fortress/settlement points, or administrative presence into an invented border. Source links: [open-access chapter PDF](https://austriaca.at/0xc1aa5576%200x003b6739.pdf), [open-access contents and all part links](https://ancientworldonline.blogspot.com/2020/04/tabulae-imperii-byzantini-13-bithynien.html). The book listing states CC BY 4.0; preserve attribution and verify the specific asset's license metadata before redistribution.
