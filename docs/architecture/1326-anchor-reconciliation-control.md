@@ -411,3 +411,12 @@ No anchor was added because a project-acceptable coordinate source is still miss
 - Coordinate provenance remains below the project bar: no coordinates copied from community/web-index entries, and no project-grade coordinate pair has been verified from the official cultural inventory or the full scholarly site argument.
 - No anchor registry, candidate geometry, evidence matrix, or review binding changed. reviewBindings remains empty, immutable candidates, SAFE TO DELETE = 0, local convergence locked, and canonical promotion **BLOCKED** remain unchanged.
 - Next: inspect Foss (1990), pp. 163–164 and 170–171, against the TIB full-text entries for p. 215 and pp. 748–750; then seek institutional coordinate provenance. If evidence remains insufficient, retain the candidate-only status. No CI result is claimed by this documentation update.
+
+
+## 2026-10-09 sixth-pass — Foss / TIB index source limits
+
+- Re-inspected Cambridge Core's accessible Foss (1990) article record. The abstract says fieldwork enabled a more precise Malagina site identification and fortress description; its references explicitly state Foss's conclusions differ from S. Şahin's 1986 study. The full topographical argument remains inaccessible in the directly inspected record, so the abstract cannot validate the precise coordinate or all details attributed to Foss by later summaries.
+- Cross-checked the official TIB 13 index. Separate entries exist for Akhisar (Malagina), Makaǧā, Mekece, Malagina (region/place/theme), Metabolē, and Leukai (2). Mekece and Makaǧā share some page references, including printed p. 215, but an index is not an identity assertion. TIB pp. 747–750 require full-text inspection before any equivalence is accepted.
+- Current disposition: Paşalar remains a leading research hypothesis for the Metabole fortress; no project-grade coordinate provenance or directly verified full scholarly argument is in hand. Do not collapse Malagina region, Metabole fortress, Mekece Castle and the campaign form Makaǧā.
+- No anchor registry, evidence matrix, candidate geometry or review binding changed. reviewBindings remains empty; immutable candidate geometry, SAFE TO DELETE = 0, convergence lock, and canonical promotion BLOCKED remain unchanged.
+- Next: directly inspect Foss's full article (or a legitimate institutional copy), TIB pp. 215 and 747–750, and an official coordinate-bearing archaeological record. No CI result is claimed by this documentation update.
