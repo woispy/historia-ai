@@ -194,3 +194,14 @@ The focused research note `docs/architecture/1326-SANGARIOS-TOPONYM-RECONCILIATI
 - **Sangarios/Sakarya:** physical geography/corridor only, not a political boundary.
 
 **Admissibility:** these findings improve place-name reconciliation but do not prove the 1304/05 chronicle account as continuous control on 1326-04-07. No anchor registry, candidate polygon, or review binding was changed. The exact frontier remains `REVIEW_REQUIRED / INSUFFICIENT_EVIDENCE`.
+
+
+### 2026-10-09 — second-pass source verification
+
+The full Öztürk (2021) article is now available at https://www.libridergi.org/wp-content/uploads/2021/03/lbr.202101.pdf. Printed pp. 2–3 explicitly identify Leukai/Lefke with modern Osmaneli and cite TIB 13's Leukai entry. The paper also documents Roman/Hajj-road routes, milestones, bridges and settlement evidence. Classify this as **place identity and route context**, not 1326 political-control or frontier evidence.
+
+A Ministry-hosted copy of Sencer Şahin's 1983 epigraphic/historical-geography survey was found at https://ukaas.ktb.gov.tr/Eklenti/130204%2C02arastirmapdf.pdf?0=. Its indexed text reports ancient Kabaia at modern Geyve and relates the name to an inscription. Preserve the source-specific forms Kabeia/Kabia/Kabaia until the original publications are compared; the indexed excerpt was not treated as a complete source transcription.
+
+Sakarya Metropolitan Municipality's historical-castles PDF (https://sakarya.bel.tr/uploads/files/sakaryakaleleri.pdf) summarizes Foss's identification of Malagina's fortress with Paşalar Kalesi and records Mekece Kalesi as an earlier proposal. This cautions against conflating Malagina and Mekece. The detailed dispositions and limits are recorded in `docs/architecture/1326-SANGARIOS-TOPONYM-RECONCILIATION.md`.
+
+**Result:** stronger place-identity evidence, but no 1326 frontier evidence. No anchor registry entries, candidate polygons, or review bindings were added.
