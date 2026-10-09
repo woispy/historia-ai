@@ -255,3 +255,16 @@ The Cambridge Core abstract for Foss, “Byzantine Malagina and the Lower Sangar
 - OpenBibArt: https://openbibart.fr/vibad/index.php?action=getRecordDetail&idt=oba_0065074
 
 **Authority and admissibility remain unchanged:** Malagina region/plain is not identical by default to a fortress point; Mekece settlement/tekfur and Mekece Castle remain distinct; Paşalar–Metabole/Akhisar is still a modern-site hypothesis requiring full topographical verification; TIB campaign Makaǧā–Mekece remains unresolved. No anchor, coordinate, polygon, or review binding was promoted. The 1326-04-07 frontier remains INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED.
+
+
+### 2026-10-09 — DeLuigi thesis cross-check for Malagina / Metabole
+
+Humberto Cesar Hugo DeLuigi's 2015 Bilkent University M.A. thesis, *Winter in the Land of Rûm: Komnenian Defenses Against the Turks in Western Anatolia*, discusses “Melangeia-Malagina (Paşalar, Sakarya)” on printed pp. 78–79 and includes a plan and views of Metabole (figures 52–54). The searchable text reports that Foss identifies Metabole with the fortress above Paşalar and Melangeia/Malagina with the plain between the fortress and the Sangarios; it records Mekece as a competing earlier proposal attributed to Şahin and gives topographical/travel-distance reasons for preferring Paşalar.
+
+- Thesis catalog: https://tezara.org/theses/385927
+- Searchable text consulted: https://www.scribd.com/document/475011130/Winter-in-the-Land-of-Rum-Komnenian-Defe-pdf
+- Foss (1990) publisher record: https://www.cambridge.org/core/journals/anatolian-studies/article/abs/byzantine-malagina-and-the-lower-sangarius/C764A7C79EB54493BA6061F3402DEF3C
+
+This upgrades the **Paşalar ↔ Metabole** hypothesis to a strongly supported scholarly site identification, while the project still requires direct inspection of a legitimate full-text source and its figure/map before coordinate ingestion. Keep Melangeia/Malagina as the broader plain/region; keep Mekece Castle as a recorded competing hypothesis; and do not infer TIB campaign Makaǧā = Mekece from the fortress debate. OUP's official chapter abstract independently associates the Byzantine fortress Malagina with APZ's Akhisar: https://academic.oup.com/book/38839/chapter-abstract/337747727.
+
+No anchor, coordinate, candidate polygon, or review binding was promoted. This evidence is historical site identification, not 1326 political-control or boundary evidence. The exact 1326-04-07 frontier remains INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED.
