@@ -267,3 +267,14 @@ Canonical production remains protected until that chain is complete.
 - Ottoman + Byzantine are intentionally paired first because the existing Bithynia evidence surface can test temporal boundary discipline around Bursa/Nicaea/Pelekanon/Nicomedia without projecting later events backward into 1326.
 - Menteşe and Karasi provide non-Bithynian comparative beylik cases.
 - Canonical political geometry remains **BLOCKED**.
+
+
+## 2026-10-09 T3-B pilot evidence admissibility checkpoint
+
+- Added `docs/architecture/1326-T3B-PILOT-EVIDENCE-ADMISSIBILITY.md` at commit `124aa541dfea4942a2f6aeb5980dc6c022355809`.
+- The P1 Ottoman and Byzantine records were checked against the existing evidence matrix and Bithynia edge registry.
+- The sources support date-specific context: Bursa surrendered on 1326-04-06; İznik was captured in 1331; İzmit was captured in 1337. These dates constrain scenario interpretation but do not define full political polygons.
+- The Bursa–Nicaea frontier edge remains explicitly uncertain (confidence 0.25). River/road corridor and regional-proximity evidence are not political-boundary proof.
+- Decision: do not create geometry-supporting review bindings from the current edge set alone. Keep `reviewBindings: []`, candidate geometry immutable, and promotion BLOCKED until the binding contract can preserve evidence roles or boundary-specific evidence is acquired.
+- This is a research/evidence-quality checkpoint, not a geometry adjudication and not a new CI claim.
+- Immediate next task: acquire/reconcile boundary-specific historical geography evidence for the Bithynia frontier; if the exact line remains unsupported, record `INSUFFICIENT_EVIDENCE` or `REVIEW_REQUIRED` rather than synthesizing geometry.
