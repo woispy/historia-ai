@@ -367,3 +367,28 @@ The independent publisher abstract strengthens **Malagina fortress ↔ APZ Akhis
 ### Next evidence operation
 
 Obtain and inspect the full Foss (1990) article or a legitimate library copy of the OUP chapter, prioritizing the field/topographical description and map/figure references. Extract a site location only when the cited publication provides a traceable map, coordinate, or unambiguous site description; record source page/figure and coordinate derivation separately. Do not substitute a modern castle's approximate map pin for historical evidence.
+
+
+## 2026-10-09 fifth-pass: academic thesis resolves the main site hypothesis more clearly
+
+A searchable copy of Humberto Cesar Hugo DeLuigi's 2015 Bilkent University M.A. thesis, *Winter in the Land of Rûm: Komnenian Defenses Against the Turks in Western Anatolia*, was inspected at the section “Melangeia-Malagina (Paşalar, Sakarya) and Pithekas” (printed pp. 78–79; figures 52–54 show the plan, fortress, and view). The thesis explicitly reports Foss's identification of **Metabole with the fortress above Paşalar** and **Melangeia/Malagina with the plain between that fortress and the Sangarios**. It contrasts this with Şahin's earlier Mekece-fortress proposal and argues that Mekece lies about 9 km southwest of Paşalar and does not fit the cited Nikomedeia travel-distance evidence as well. The thesis cites Foss (1990, especially pp. 170–172) and Şahin (1986, p. 166).
+
+Source records:
+- Thesis catalog record (Tezara): https://tezara.org/theses/385927
+- Searchable thesis copy consulted for the text and figure captions: https://www.scribd.com/document/475011130/Winter-in-the-Land-of-Rum-Komnenian-Defe-pdf
+- Thesis author profile / abstract: https://bilkent.academia.edu/HumbertoDeLuigi
+- Foss (1990): https://www.cambridge.org/core/journals/anatolian-studies/article/abs/byzantine-malagina-and-the-lower-sangarius/C764A7C79EB54493BA6061F3402DEF3C
+
+### Revised source-critical disposition
+
+- **Metabole fortress ↔ Paşalar fortress site:** STRONGLY SUPPORTED as a scholarly site identification by the thesis's account of Foss's fieldwork and by its figure/map discussion; still require the original Foss article or thesis figure/map to be inspected in a traceable, legitimate full-text copy before extracting a project coordinate.
+- **Melangeia/Malagina region/plain:** treat as a wider landscape/corridor, not a point identical to the fortress.
+- **Mekece Castle ↔ Metabole:** documented as a competing earlier hypothesis, but the thesis gives topographical and route-distance reasons to prefer Paşalar. Keep the competing claim in provenance rather than silently deleting it.
+- **Mekece settlement/tekfur ↔ TIB Makaǧā:** remains a separate unresolved toponym question. The fortress identification does not prove that TIB's campaign form Makaǧā is Mekece.
+- **APZ Akhisar ↔ Malagina fortress:** the OUP chapter abstract supports this scholarly association, but the crosswalk between APZ's narrative label, Metabole, and the exact modern site should retain separate evidence links rather than collapsing all names into a single unqualified alias.
+
+This is a stronger research result, but it still does not establish a 1326 political border. No anchor, coordinate, polygon, evidence-matrix binding, or review binding was created. The exact 1326-04-07 frontier remains INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED; SAFE TO DELETE = 0.
+
+### Next operation
+
+Inspect the thesis figures 52–54 and Foss (1990) pp. 170–172 from a legitimate library/institutional copy. If a map is used for a point anchor, preserve its page/figure, source CRS or georeferencing method, and estimated positional uncertainty. Keep the coordinate research-only until that provenance is independently checkable.
