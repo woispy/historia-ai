@@ -155,3 +155,23 @@ These page ranges come from Peter Riedlberger's 2021 review of Klaus Belke's TIB
 - Repository evidence: `data/gis/1326/evidence-matrix.json`, `data/gis/1326/pilot-edge-evidence/bithynia-core-01.json`, and `data/gis/1326/pilot-edge-evidence/bithynia-core-01.review-bindings.json`.
 
 These sources establish chronology and context, not a canonical 1326 political boundary.
+
+
+### 2026-10-09 — TIB 13 first-pass source check
+
+**Result: CONTEXT-ONLY / INSUFFICIENT_EVIDENCE for the exact 1326-04-07 Ottoman–Byzantine frontier.**
+
+The official Austrian Academy of Sciences summary supports these source-level observations: Bithynia is described as the hinterland of Constantinople; Nikomedeia, Nikaia and Kyzikos are identified as traditional metropolitan centres; Nikomedeia, Nikaia, Prusa and Kyzikos are noted among fortified cities; and the region's road and sea connections are part of the volume's scope. These statements support regional/place/fortification/route context, but the public summary does not state the exact political boundary on 1326-04-07.
+
+The full-volume endpoint is discoverable and search-indexed, but the current web retrieval attempt could not open the PDF for reliable page-by-page inspection. One indexed excerpt from p. 150 concerns earlier Byzantine administrative history and is not date-specific evidence for the 1326 frontier. It is therefore not promoted as boundary evidence. The bibliographic page map remains a navigation aid, not extracted primary evidence.
+
+| Candidate evidence | Current classification | Permitted use | Not permitted |
+|---|---|---|---|
+| TIB 13 official volume summary | Regional/place context | Explain Bithynian regional importance and identify target gazetteer/map entries | Derive a political line or assign territorial ownership in 1326 |
+| TIB 13 place/fortification references to Nikomedeia, Nikaia, Prusa and Kyzikos | Place/fortification context | Support settlement identity and regional significance | Treat a fortified city or metropolitan status as proof of surrounding jurisdiction |
+| TIB 13 road/sea-route coverage | Route/connectivity context | Corroborate route hypotheses after exact passages are extracted | Convert route corridors into borders |
+| Indexed p. 150 administrative-history excerpt | Earlier-period historical context; date mismatch | Navigation clue only | Apply it to 1326 without date-specific corroboration |
+
+**Disposition:** no exact frontier passage/map has yet been verified. The Ottoman–Byzantine Bithynia edge remains `REVIEW_REQUIRED` / `INSUFFICIENT_EVIDENCE`; no review binding is created. The Bursa chronology (surrender dated 1326-04-06 in the existing project evidence) constrains the scenario but does not define the surrounding polygon. İznik's 1331 and İzmit's 1337 capture dates must not be projected backward.
+
+**Next evidence pass:** retrieve the volume in accessible parts or through the publisher's segmented open-access edition, then inspect pp. 97–110 and 111–224 plus the Nikaia/Nikomedeia/Prusa entries and map legend. Capture exact printed page/map, verbatim claim in a short note, claim date, evidence class, scale and limitation. If those passages do not explicitly constrain the 1326 frontier, close this source pass as context-only and seek a separate date-specific frontier source. Do not infer a line from the regional map.
