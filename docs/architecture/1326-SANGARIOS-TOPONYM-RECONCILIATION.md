@@ -417,3 +417,29 @@ The scholarly case for **Metabole ↔ Paşalar fortress** is now strong enough t
 - APZ Akhisar: narrative name linked to the Malagina fortress by Foss (2022) chapter abstract; preserve this as a source-specific equivalence rather than an unrestricted alias.
 
 No anchor registry entry, coordinate, candidate polygon, evidence binding, or review binding was added. Canonical promotion remains blocked; exact 1326-04-07 frontier remains INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED; SAFE TO DELETE = 0.
+
+
+## 2026-10-09 seventh-pass: institutional corroboration and coordinate admissibility
+
+### Institutional records newly cross-checked
+
+1. **Sakarya University repository thesis, indexed page 31 / printed page shown in the PDF text.** The accessible institutional PDF text describes Paşalar Castle at Kale Tepe in Paşalar, Pamukova; documents its circular wall plan and masonry; and cites Foss, “Byzantine Malagina and the Lower Sangarius,” p. 170, alongside Şahin and local architectural literature. This independently confirms that the thesis's physical-site discussion is grounded in a traceable scholarly citation chain. Institutional PDF: https://acikerisim.sakarya.edu.tr/bitstream/handle/20.500.12619/101577/T10915.pdf?isAllowed=y&sequence=1
+2. **Türkiye Ministry of Culture and Tourism, Culture Inventory — Paşalar Kalesi.** The inventory identifies the site as Kale Tepe, north of Paşalar village, Pamukova/Sakarya; describes surviving sections of the circular fortification and gives a broad 5th–6th-century construction estimate. It does not publish coordinates or equate the site explicitly with Metabole. https://www.kulturportali.gov.tr/turkiye/sakarya/kulturenvanteri/pasalar-kalesi
+3. **Sakarya Governorship and Pamukova District Governorship.** Both identify the physical monument as Paşalar (Karaceyş) Castle and describe its position overlooking the Pamukova/Geyve plain. Their local-history claim that it was conquered in 1314 is not independently adjudicated here and is not treated as proof of the 1326 political frontier. https://www.sakarya.gov.tr/pasalar-kalesi ; https://www.pamukova.gov.tr/pasalar-kalesi/
+4. **Oxford Academic publisher abstract for Foss (2022).** The abstract explicitly links Byzantine fortress Malagina with APZ's Akhisar; it does not expose the full argument or a coordinate. https://academic.oup.com/book/38839/chapter-abstract/337747727
+5. **Cambridge Core abstract and OpenBibArt bibliographic record for Foss (1990).** These describe the field identification of Malagina and the surviving fortress of Metabole. Full topographical argument remains unverified in the accessible publisher extract. https://www.cambridge.org/core/journals/anatolian-studies/article/abs/byzantine-malagina-and-the-lower-sangarius/C764A7C79EB54493BA6061F3402DEF3C ; https://openbibart.fr/vibad/index.php?action=getRecordDetail&idt=oba_0065074
+
+### Coordinate decision
+
+A coordinate appears in general secondary web summaries for the Malagina/Paşalar identification, but no inspected institutional inventory or publisher abstract supplies that coordinate or a reproducible derivation. It is therefore **not admissible** for anchor-candidate-registry.json at this stage. Do not copy a generic web-map point or geocoded village centre into the registry and present it as a surveyed fortress coordinate.
+
+### Updated evidence grade
+
+- Physical monument identity **Paşalar Castle at Kale Tepe, Paşalar/Pamukova**: institutionally documented.
+- Historical site hypothesis **Paşalar fortress = Metabole**: strongly supported by scholarly argument cited through the thesis and Foss bibliographic/publisher records, but original Foss topographical pages/figures have not been fully inspected in this pass.
+- **Malagina plain/region**: wider geographic unit, not interchangeable with the fortress point.
+- **Mekece Castle**: competing hypothesis remains in the history of scholarship.
+- **TIB Makaǧā = modern Mekece**: unresolved.
+- **1326-04-07 political frontier**: no new evidence.
+
+No anchor, coordinate, polygon, candidate geometry, or review binding was added. SAFE TO DELETE = 0; canonical promotion remains blocked; the frontier remains INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED.
