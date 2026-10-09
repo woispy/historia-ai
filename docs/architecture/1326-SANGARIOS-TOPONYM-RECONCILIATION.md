@@ -343,3 +343,27 @@ The 2022 extract is a valuable lead, but due to access provenance it should be v
 2. Compare the official Sakarya tourism master-plan's Mekece-or-Paşalar statement with Foss's field-site description and the 1990 article.
 3. Obtain a coordinate-bearing institutional archaeological record or map for the physical Paşalar fortress and document datum/precision/provenance.
 4. Keep Mekece, Akhisar, Malagina, Metabole, and campaign Makaǧā separate until the exact identity links are directly supported.
+
+
+## 2026-10-09 fourth-pass: publisher abstracts cross-check
+
+### Newly verified from publisher/bibliographic records
+
+- **Foss (2022), Oxford University Press / Oxford Academic, chapter 3 “Reconciling the Accounts,” pp. 135–140.** The official chapter abstract explicitly states that the Byzantine fortress Malagina can be identified with APZ's Akhisar and that this identification helps establish chronology for Osman's conquest of the Sangarius valley. This is direct confirmation of the scholarly *Malagina ↔ APZ Akhisar* association at abstract level, not merely a third-party mirror. Official chapter page: https://academic.oup.com/book/38839/chapter-abstract/337747727
+- **Foss (1990), “Byzantine Malagina and the Lower Sangarius,” *Anatolian Studies* 40, pp. 161–183.** Cambridge Core's visible abstract says the article uses field investigation to give Malagina a precise location and identify/describe its fortress. The OpenBibArt bibliographic record summarizes the paper as identifying Malagina and describing the surviving fortress of Metabole. These records support the research linkage **Malagina site / Metabole fortress**, but neither abstract exposes the complete topographical argument or a coordinate suitable for direct project ingestion.
+  - Cambridge Core: https://www.cambridge.org/core/journals/anatolian-studies/article/abs/byzantine-malagina-and-the-lower-sangarius/C764A7C79EB54493BA6061F3402DEF3C
+  - OpenBibArt record: https://openbibart.fr/vibad/index.php?action=getRecordDetail&idt=oba_0065074
+
+### Adjudication update
+
+The independent publisher abstract strengthens **Malagina fortress ↔ APZ Akhisar** beyond a third-party-transcription-only lead. The combined bibliographic evidence also supports examining **Malagina ↔ Metabole fortress** as a scholarly site identification. It does **not** close the modern-site question to a project coordinate, prove Paşalar Castle as the location, or establish a political frontier on 1326-04-07. The OUP chapter's full text is access-restricted in this pass; no claim is made that its detailed argument was directly read.
+
+- Keep **Mekece settlement/tekfur**, **Mekece Castle**, **Malagina region/plain**, and **Metabole fortress / APZ Akhisar** as separate entities/roles until full topographical evidence adjudicates their spatial relation.
+- Keep **Paşalar Castle ↔ Metabole/Akhisar** as a plausible but not closed modern-site identification.
+- Keep TIB campaign **Makaǧā ↔ Mekece** unresolved.
+- No anchor, coordinate, polygon, evidence-matrix binding, or review binding added.
+- SAFE TO DELETE = 0; canonical promotion remains blocked; the exact 1326-04-07 frontier remains INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED.
+
+### Next evidence operation
+
+Obtain and inspect the full Foss (1990) article or a legitimate library copy of the OUP chapter, prioritizing the field/topographical description and map/figure references. Extract a site location only when the cited publication provides a traceable map, coordinate, or unambiguous site description; record source page/figure and coordinate derivation separately. Do not substitute a modern castle's approximate map pin for historical evidence.
