@@ -221,3 +221,25 @@ Sources: Foss (1990), https://www.cambridge.org/core/journals/anatolian-studies/
 The Sakarya Governorship's page reports that Paşalar Castle (Karaceyş Castle) was conquered in 1314 and overlooks the Pamukova/Geyve plains. The Ministry of Culture and Tourism Culture Inventory locates the remains at Kale Tepe, north of Paşalar village in Pamukova/Sakarya, gives a broad 5th–6th century construction date, and describes fortification remains. Neither page explicitly equates Paşalar Castle with Malagina/Metabole, and the inventory's location section provides no coordinates.
 
 Treat the physical site as established, the Paşalar–Metabole identity as a scholarly hypothesis, and 1314 as a source-specific local-history claim requiring independent historical adjudication. These records do not establish 1326 political control or a frontier. No anchor or geometry was promoted.
+
+
+### 2026-10-09 — Foss 2022 / official Malagina location fork
+
+The accessible indexed extract attributed to Clive Foss, *The Beginnings of the Ottoman Empire* (OUP, 2022), pp. 67–69, distinguishes the Mekece tekfur from the Akhisar fortress in the Ottoman narrative and associates the fortified Metabole site with Akhisar overlooking the Malagina plain. The extract was read on a third-party document platform and is recorded as a research lead only; confirm against a legitimate OUP/library copy before anchor promotion. Official OUP chapter metadata establishes the book's source-critical approach but does not itself verify every detail of the extract.
+
+The official Sakarya provincial tourism master-plan PDF retains two candidate locations for Malagina: Mekece or Paşalar/Paşalar Castle. The Pamukova District Governorate and Ministry Culture Inventory describe the physical Paşalar Castle site but do not explicitly equate it with Metabole/Akhisar and do not provide coordinates.
+
+Current source-critical disposition:
+- Mekece settlement/tekfur and Akhisar fortress are distinct in Foss's narrative.
+- Metabole ↔ Akhisar is a stronger scholarly association, pending direct verification from an official book copy.
+- Malagina plain/region is broader than the fortress.
+- Paşalar = Metabole/Akhisar remains a hypothesis, not a closed identity.
+- TIB campaign Makaǧā remains unresolved and must not be inferred to equal Mekece.
+
+References:
+- OUP chapter metadata: https://academic.oup.com/book/38839/chapter-abstract/337747727
+- Sakarya provincial tourism master plan: https://bolge1.tarimorman.gov.tr/Documents/menu-dosyalar/Do%C4%9Fa%20Turizmi%20Master%20Planlar%C4%B1/SAKARYA%20TTMP.pdf
+- Pamukova District Governorate: https://www.pamukova.gov.tr/pasalar-kalesi/
+- Ministry Culture Inventory: https://www.kulturportali.gov.tr/turkiye/sakarya/kulturenvanteri/pasalar-kalesi
+
+No anchor or geometry was promoted; coordinate provenance remains insufficient.
