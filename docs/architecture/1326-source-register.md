@@ -268,3 +268,14 @@ Humberto Cesar Hugo DeLuigi's 2015 Bilkent University M.A. thesis, *Winter in th
 This upgrades the **Paşalar ↔ Metabole** hypothesis to a strongly supported scholarly site identification, while the project still requires direct inspection of a legitimate full-text source and its figure/map before coordinate ingestion. Keep Melangeia/Malagina as the broader plain/region; keep Mekece Castle as a recorded competing hypothesis; and do not infer TIB campaign Makaǧā = Mekece from the fortress debate. OUP's official chapter abstract independently associates the Byzantine fortress Malagina with APZ's Akhisar: https://academic.oup.com/book/38839/chapter-abstract/337747727.
 
 No anchor, coordinate, candidate polygon, or review binding was promoted. This evidence is historical site identification, not 1326 political-control or boundary evidence. The exact 1326-04-07 frontier remains INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED.
+
+
+### 2026-10-09 — DeLuigi thesis page-level cross-check
+
+A searchable extract of Humberto DeLuigi's 2015 Bilkent M.A. thesis, printed pp. 78–79, section “Melangeia-Malagina (Paşalar, Sakarya) and Pithekas,” identifies Metabole with the fortress above Paşalar and Melangeia with the plain between the fortress and the Sangarios. It records Mekece Castle, about nine kilometres southwest of Paşalar, as Şahin's competing proposal and discusses travel distance from Nikomedeia and surface pottery as comparative evidence. Figures 52–54 are labelled as a plan, the fortress, and its view.
+
+- Thesis catalog: https://tezara.org/theses/385927
+- Searchable text mirror (not an institutional full-text endpoint): https://www.scribd.com/document/475011130/Winter-in-the-Land-of-Rum-Komnenian-Defe-pdf
+- Foss (1990) publisher-hosted extract: https://www.cambridge.org/core/journals/anatolian-studies/article/abs/byzantine-malagina-and-the-lower-sangarius/C764A7C79EB54493BA6061F3402DEF3C
+
+This raises confidence in **Metabole ↔ Paşalar fortress** as a scholarly site hypothesis, but the thesis figures and Foss's cited topographical pages still need verification against a legitimate, traceable full text before coordinate extraction. Malagina/Melangeia remains the wider plain/region; Mekece Castle remains a competing earlier hypothesis; TIB campaign Makaǧā ↔ modern Mekece remains unresolved; APZ Akhisar ↔ Malagina fortress remains a source-specific scholarly equivalence, not an unrestricted alias. No anchor, coordinate, candidate polygon, or review binding was promoted. No evidence here establishes the 1326-04-07 political frontier.
