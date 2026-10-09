@@ -420,3 +420,13 @@ No anchor was added because a project-acceptable coordinate source is still miss
 - Current disposition: Paşalar remains a leading research hypothesis for the Metabole fortress; no project-grade coordinate provenance or directly verified full scholarly argument is in hand. Do not collapse Malagina region, Metabole fortress, Mekece Castle and the campaign form Makaǧā.
 - No anchor registry, evidence matrix, candidate geometry or review binding changed. reviewBindings remains empty; immutable candidate geometry, SAFE TO DELETE = 0, convergence lock, and canonical promotion BLOCKED remain unchanged.
 - Next: directly inspect Foss's full article (or a legitimate institutional copy), TIB pp. 215 and 747–750, and an official coordinate-bearing archaeological record. No CI result is claimed by this documentation update.
+
+
+## 2026-10-09 seventh pass — live register verification
+
+- Queried the live TIB 13 register entries directly. Akhisar (Malagina), Makaǧā, Mekece, Malagina (region/place/theme), and Metabolē are distinct index entries; Makaǧā and Mekece share some page references, including pp. 214–215 and 747–750. This is an index-level observation, not proof of identity.
+- Clicked the TIB reader links for p. 215 and pp. 747–750; the browser extraction exposed no readable page text in this pass. Record this as an access/extraction limitation; do not claim that the page prose was verified.
+- Cambridge Core's Foss (1990) extract confirms field investigation and a scholarly conclusion differing from Şahin (1986), but the article body remains gated. The bibliographic record describes the surviving Metabole fortress remains, but does not substitute for direct inspection of the topographical argument.
+- A secondary indexed page exposes a Paşalar coordinate pair, but it is rejected as project-grade coordinate provenance because the official Culture Inventory lacks coordinates and the original survey/map basis was not directly checked. No coordinate copied to project data.
+- No anchor registry, candidate geometry, evidence matrix or review binding changed. reviewBindings remains empty; immutable candidates, SAFE TO DELETE = 0, convergence lock and canonical promotion BLOCKED remain unchanged.
+- Next: obtain readable TIB pp. 215 and 747–750, inspect Foss (1990) and its map directly, and find institutional coordinate metadata. No CI result is claimed by this documentation update.
