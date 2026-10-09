@@ -77,3 +77,15 @@ A Ministry-hosted PDF of Sencer Şahin's 1983 epigraphic/historical-geography su
 Sakarya Metropolitan Municipality's historical-castles PDF summarizes Foss's identification of the Malagina fortress with Paşalar Kalesi and notes that Mekece Kalesi had been an earlier proposal: https://sakarya.bel.tr/uploads/files/sakaryakaleleri.pdf. This is useful because it exposes a real historical identification conflict: do not collapse Mekece and Malagina into one place or assume the names are interchangeable. Foss's full 1990 article remains the scholarly authority to inspect before coordinate/anchor acceptance. The TIB campaign narrative's Mekece/Makaǧā remains unresolved as an independent place match.
 
 **Net result:** place-identity evidence improved for Leukai/Lefke and Geyve/Kabia, while Malagina/Mekece is now explicitly treated as a potentially conflicting identification problem. No anchor registry entry, candidate polygon, or review binding was created. The exact 1326 frontier remains **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**.
+
+
+## 2026-10-09 source-critical spelling and site distinction
+
+The accessible Cambridge Core record for Clive Foss's 1990 article confirms that the paper argues Malagina's site can be located more precisely through fieldwork, but the freely visible extract does not expose the full topographical argument. Its footnotes cite Sencer Şahin's work on Malagina/Melagina and Pachymeres for **Kabaia**; the article also explicitly warns that another proposed identification of **Hisn al-Ghabra with Geyve** is appealing but uncertain because the name's actual form cannot be determined. These are different historical name problems and must not be merged into one equivalence.
+
+- Foss article record and visible extract: https://www.cambridge.org/core/journals/anatolian-studies/article/abs/byzantine-malagina-and-the-lower-sangarius/C764A7C79EB54493BA6061F3402DEF3C
+- Foss's note references Kabaia to Pachymeres, *ed. Bekker* I.419; that confirms a historical source trail for the form but is not by itself a coordinate-level identification of the Ottoman-chronicle form TIB spells Kabeia.
+- The TIB 1304/05 narrative's **Geyve/Kabeia** should therefore remain a provisional cross-period toponym reconciliation, distinct from the better-supported modern Geyve ↔ ancient Kabaia epigraphic identification.
+- Foss's site argument and the Sakarya Metropolitan Municipality summary make **Malagina ↔ Paşalar Kalesi** a promising research lead; Mekece Kalesi is recorded as an earlier competing proposal. Do not use generic “Akhisar” name matching to resolve this conflict.
+
+**Adjudication unchanged:** no anchor or review binding added. This pass clarifies the identity graph and unresolved aliases; it does not create a 1326 political boundary.
