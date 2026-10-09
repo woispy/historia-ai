@@ -89,3 +89,23 @@ The accessible Cambridge Core record for Clive Foss's 1990 article confirms that
 - Foss's site argument and the Sakarya Metropolitan Municipality summary make **Malagina ↔ Paşalar Kalesi** a promising research lead; Mekece Kalesi is recorded as an earlier competing proposal. Do not use generic “Akhisar” name matching to resolve this conflict.
 
 **Adjudication unchanged:** no anchor or review binding added. This pass clarifies the identity graph and unresolved aliases; it does not create a 1326 political boundary.
+
+
+## 2026-10-09 third-pass: Malagina, Metabole, Akhisar and Mekece
+
+### New evidence inspected
+
+1. **Foss (1990), “Byzantine Malagina and the Lower Sangarius.”** The Cambridge Core abstract says field investigation allowed Foss to locate Malagina more precisely and identify its fortress. The full article remains behind access restrictions in the current pass, so this abstract alone does not provide coordinates or the detailed site argument. Bibliographic record: https://www.cambridge.org/core/journals/anatolian-studies/article/abs/byzantine-malagina-and-the-lower-sangarius/C764A7C79EB54493BA6061F3402DEF3C
+2. **Sakarya Metropolitan Municipality, *Sakarya Kaleleri*, section 2.2.1 (Mekece Kalesi), printed p. 43 and nearby discussion.** It says Mekece Castle has often been considered as a possible Malagina Castle, but describes the modern research as inconclusive; it reports that Şahin discussed Mekece in his Malagina/Melagina study and that Foss repeated earlier information without visiting Mekece itself. It separately discusses the Paşalar Castle identification. https://sakarya.bel.tr/uploads/files/sakaryakaleleri.pdf
+3. **Sakarya University thesis, historical road networks in northwestern Anatolia, PDF p. 30 (search-indexed text).** It distinguishes the broad Malagina region from its fortress and argues that Paşalar Castle is the more suitable identification for Malagina/Metabole Castle, based on topography and route relationships; it also acknowledges that both Paşalar and Mekece have been proposed. https://acikerisim.sakarya.edu.tr/bitstream/handle/20.500.12619/101577/T10915.pdf?sequence=1
+4. **Foss (2022), *The Beginnings of the Ottoman Empire*, chapter “The Homeland of the Ottomans,” pp. 65–68 (accessible indexed extract).** The account distinguishes the Mekece fort from the broader Malagina plain, describes the plain as extending roughly between Mekece and Lefke, and identifies the strategically placed fortress of Metabole with the Akhisar of the Ottoman campaign narrative. It also treats the Sangarios route as held by Orhan by 1324. Accessible excerpt: https://www.scribd.com/document/595994910/The-Beginnings-of-the-Ottoman-Empire-Clive-Foss-2022. Because this is an indexed/hosted excerpt rather than the publisher's full text, the bibliographic book should be checked before any exact quotation or coordinate use.
+
+### Reconciliation ruling
+
+- **Malagina (region)** is not interchangeable with **Metabole (fortress)**. The broad regional name refers to the Sangarios plain/corridor; the fortress is a specific site.
+- **Mekece Kalesi** is a separate physical fort near Mekece. It has appeared in earlier proposals for Metabole, but the consulted secondary discussion favours Paşalar as the more suitable fortress identification while preserving the debate.
+- **Akhisar** in the 1304/05 Ottoman narrative must not be matched to any modern town simply by name. Foss's 2022 account associates the campaign's Akhisar with the Malagina/Metabole fortress context; this is a historical-site hypothesis, not a 1326 province boundary.
+- **Mekece/Makaǧā** as a toponym in TIB's chronicle summary remains a separate question from the location of Mekece Castle and from the broader Malagina region.
+- The statement that the Sangarios route was held by Orhan by 1324 is a dated regional-control claim in Foss (2022), useful for historical chronology but not a coordinate-level frontier or proof that every adjacent locality had the same status on 1326-04-07.
+
+**Disposition:** the best-supported working distinction is *Malagina plain/region ≠ Metabole fortress ≠ Mekece Castle*. Paşalar is a stronger candidate for the fortress identification in the consulted secondary literature, but it is not yet promoted to the anchor registry. No coordinate, geometry, evidence-matrix item, or review binding was added. The exact political frontier remains **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**.
