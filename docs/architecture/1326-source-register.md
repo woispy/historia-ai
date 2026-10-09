@@ -299,3 +299,12 @@ The Sakarya University repository thesis on northwestern Anatolian historical ro
 Keep these as separate propositions: (a) Malagina region/plain ↔ Mekece proposal, (b) Metabole fortress ↔ Paşalar hypothesis, and (c) TIB campaign Makaǧā ↔ modern Mekece, still unresolved. The thesis is a traceable institutional secondary synthesis, not a substitute for direct review of Foss's full topographical argument or a georeferenced site plan. It provides no coordinate provenance adequate for the anchor registry and no exact 1326 political boundary.
 
 No anchor, coordinate, polygon, or review binding was promoted. Canonical promotion remains blocked; SAFE TO DELETE = 0.
+
+
+### 2026-10-10 — direct page-level institutional verification: Paşalar / Metabole
+
+The full Sakarya University repository thesis by Sena Nur Akbaş (2023), *Sakarya İli Hudutlarında Bizans Mimari Plastiğinin Belgelenmesi (Geyve-Pamukova ve Akyazı İlçeleri)*, was checked at PDF pages 45–47 (printed pp. 30–32). It explicitly distinguishes Şahin's **broader Malagina-region/Mekece** proposal from the **specific fortress** identification: it argues Paşalar Castle is the more suitable Malagina/Metabole fortress and states that Foss identified Paşalar, not Mekece Castle, as Metabole, citing Foss (1990), p. 170. Institutional source: https://acikerisim.sakarya.edu.tr/bitstream/handle/20.500.12619/101577/T10915.pdf?isAllowed=y&sequence=1.
+
+This supports a strong scholarly site-identification hypothesis, but not a project-ready coordinate or a 1326 political boundary. The PDF gives a physical place description (Kaletepe, Paşalar Mahallesi, Pamukova), not a traceable coordinate pair, georeferencing procedure, or positional uncertainty. Keep the regional Malagina/Mekece proposal distinct from the fortress-level Paşalar/Metabole identification and keep TIB Makaǧā ↔ modern Mekece unresolved.
+
+No anchor, coordinate, polygon, evidence binding, review binding, or canonical geometry was promoted. Frontier remains INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED; SAFE TO DELETE = 0.
