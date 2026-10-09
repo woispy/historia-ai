@@ -279,3 +279,14 @@ A searchable extract of Humberto DeLuigi's 2015 Bilkent M.A. thesis, printed pp.
 - Foss (1990) publisher-hosted extract: https://www.cambridge.org/core/journals/anatolian-studies/article/abs/byzantine-malagina-and-the-lower-sangarius/C764A7C79EB54493BA6061F3402DEF3C
 
 This raises confidence in **Metabole ↔ Paşalar fortress** as a scholarly site hypothesis, but the thesis figures and Foss's cited topographical pages still need verification against a legitimate, traceable full text before coordinate extraction. Malagina/Melangeia remains the wider plain/region; Mekece Castle remains a competing earlier hypothesis; TIB campaign Makaǧā ↔ modern Mekece remains unresolved; APZ Akhisar ↔ Malagina fortress remains a source-specific scholarly equivalence, not an unrestricted alias. No anchor, coordinate, candidate polygon, or review binding was promoted. No evidence here establishes the 1326-04-07 political frontier.
+
+
+### 2026-10-09 — institutional cross-check of Paşalar Castle
+
+The Türkiye Ministry of Culture and Tourism Culture Inventory records Paşalar Kalesi at Kale Tepe, north of Paşalar village, Pamukova/Sakarya, describes surviving sections of the circular fortification, and gives a broad 5th–6th-century construction estimate. It does not provide coordinates or explicitly equate the site with Metabole: https://www.kulturportali.gov.tr/turkiye/sakarya/kulturenvanteri/pasalar-kalesi
+
+The Sakarya University repository thesis on northwestern Anatolian historical road networks describes the physical castle and cites Foss (1990, p. 170), Şahin, and local architectural literature: https://acikerisim.sakarya.edu.tr/bitstream/handle/20.500.12619/101577/T10915.pdf?isAllowed=y&sequence=1. The Sakarya Governorship and Pamukova District Governorship also document the monument and its setting over the Pamukova/Geyve plain: https://www.sakarya.gov.tr/pasalar-kalesi and https://www.pamukova.gov.tr/pasalar-kalesi/.
+
+These records support the physical identity and location description of Paşalar Castle, while the Foss/DeLuigi evidence supports Paşalar–Metabole as a strong scholarly site hypothesis. A generic coordinate found in secondary web summaries is not admissible as a surveyed fortress coordinate because the inspected institutional inventory and publisher abstracts do not supply it or document its derivation. Do not add it to the anchor registry without traceable coordinate provenance.
+
+No anchor, coordinate, candidate polygon, or review binding was promoted. The broader Malagina/Melangeia plain remains distinct from the fortress; Mekece Castle remains a competing hypothesis; TIB campaign Makaǧā ↔ modern Mekece remains unresolved; no source reviewed here establishes the exact 1326-04-07 political frontier.
