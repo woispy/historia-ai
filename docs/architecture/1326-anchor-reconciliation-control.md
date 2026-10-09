@@ -401,3 +401,13 @@ Checked the Sakarya Governorship's Paşalar Castle page and the Ministry of Cult
 - Neither official page explicitly identifies Paşalar as Malagina/Metabole. That link remains a scholarly site-identification hypothesis; the 1314 local-history statement is not sufficient to assign control to the whole region or to draw a political polygon for 1326.
 
 No anchor was added because a project-acceptable coordinate source is still missing and the identity/control roles must remain separate. No candidate geometry or review binding changed. See the source-specific analysis in `docs/architecture/1326-SANGARIOS-TOPONYM-RECONCILIATION.md`.
+
+
+## 2026-10-09 fifth-pass — TIB register / Malagina entity reconciliation
+
+- Inspected the official Austrian Academy of Sciences TIB 13 online toponym register. It has separate entries for **Akhisar (Malagina)** (including printed p. 215), **Makaǧā** (also p. 215), **Malagina (region/place/theme)**, **Metabolē**, and **Leukai (2)**. These related entries do not independently establish that Makaǧā is modern Mekece or that a corridor is a political border.
+- Checked the Sakarya University historical-roads thesis (T10915, printed p. 30 as indexed). It records Şahin's Mekece-based identification argument for the wider Malagina region, while judging Paşalar Castle more suitable as the specific Malagina/Metabole fortress based on historical topography and routes; it cites Foss and Şahin. This is a stronger comparative secondary source, but not a replacement for direct inspection of Foss (1990).
+- Current source-critical distinction: **Malagina region ≠ Metabole fortress ≠ Mekece Castle ≠ TIB campaign Makaǧā (unresolved)**. Paşalar is the leading research hypothesis for the fortress, not yet a coordinate-verified anchor.
+- Coordinate provenance remains below the project bar: no coordinates copied from community/web-index entries, and no project-grade coordinate pair has been verified from the official cultural inventory or the full scholarly site argument.
+- No anchor registry, candidate geometry, evidence matrix, or review binding changed. reviewBindings remains empty, immutable candidates, SAFE TO DELETE = 0, local convergence locked, and canonical promotion **BLOCKED** remain unchanged.
+- Next: inspect Foss (1990), pp. 163–164 and 170–171, against the TIB full-text entries for p. 215 and pp. 748–750; then seek institutional coordinate provenance. If evidence remains insufficient, retain the candidate-only status. No CI result is claimed by this documentation update.
