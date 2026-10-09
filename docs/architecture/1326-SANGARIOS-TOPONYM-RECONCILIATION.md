@@ -131,3 +131,47 @@ The current evidence supports the following split:
 - **Political boundary:** not established.
 
 No anchor registry entry, candidate geometry, evidence-matrix record, or review binding was created. Keep the exact 1326 frontier **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**.
+
+
+## 2026-10-09 fifth pass — official TIB register and thesis cross-check
+
+### Official TIB 13 toponym register
+
+The Austrian Academy of Sciences' online TIB 13 register was inspected directly:
+https://tib.oeaw.ac.at/tib-register/tib13
+
+Its entries preserve distinct forms and page references:
+- **Akhisar (Malagina)** points to printed p. 215 and further gazetteer/map references.
+- **Makaǧā** is a separate entry and also points to printed p. 215.
+- **Malagina (Gegend und Ort, auch Thema)** explicitly classifies Malagina as a region/place/theme and lists several historical-geography pages.
+- **Metabolē** is a separate entry with its own set of gazetteer references, including pp. 748–750.
+- **Leukai (2)** has its own entry, including p. 177 and the p. 215 campaign reference.
+
+This register structure reinforces that TIB is tracking related but not automatically identical entities. In particular, the p. 215 juxtaposition of Akhisar (Malagina) and Makaǧā does not itself prove that modern Mekece Castle equals Makaǧā, nor does it convert the corridor into a political boundary. The page references are navigation aids into TIB's full text, not standalone coordinate evidence.
+
+### Sakarya University thesis: explicit competing identifications
+
+The accessible indexed text of the Sakarya University thesis on northwestern Anatolian historical roads (T10915, PDF printed p. 30 and references 39–41) makes the dispute more explicit:
+https://acikerisim.sakarya.edu.tr/bitstream/handle/20.500.12619/101577/T10915.pdf?sequence=1
+
+The thesis reports that Şahin argued for identifying the broader Malagina region with Mekece, based on the road from Mekece toward İznik and a nearby small lake. It then says the historical descriptions make **Paşalar Castle the more suitable candidate for Malagina/Metabole Castle**, citing Foss and the castle's position relative to the Sangarios, pasture, and the Nikaia–Dorylaion route. It also states that Foss called Paşalar—not Mekece—the Metabole Castle. The thesis cites Foss, “Byzantine Malagina and the Lower Sangarius,” pp. 163–164 and 171, and Şahin, “Malagina/Melagina am Sangarios,” pp. 153–166.
+
+This is a meaningful scholarly cross-check, but it is still a secondary thesis summarizing prior scholarship; the repository currently redirects direct PDF access through a verification page. The evidence is sufficient to rank **Paşalar as the stronger working fortress-site hypothesis**, while retaining Şahin's Mekece regional-identification argument as a competing hypothesis. It is not sufficient to equate the separate TIB campaign toponym Makaǧā with Mekece Castle.
+
+### Coordinate provenance ruling
+
+A web index and a community-maintained archaeological gazetteer expose coordinates for the Paşalar/Metabole site, but neither was accepted as project-grade coordinate authority in this pass. The official Ministry Culture Inventory entry still does not supply a coordinate pair, and the full Foss (1990) topographical argument was not directly inspected. Accordingly:
+- no coordinates were copied into project data;
+- no anchor-candidate registry entry was created;
+- no geometry, evidence-matrix record, or review binding was changed;
+- no 1326 control or political boundary was inferred.
+
+**Current disposition:** identity graph refined; Paşalar is the leading *research hypothesis* for the Metabole fortress, not yet a registry-ready anchor. Keep **Malagina region ≠ Metabole fortress ≠ Mekece Castle ≠ TIB campaign Makaǧā (unresolved)** until the source-level entity chain and coordinate provenance are independently documented.
+
+## Updated next operation
+
+1. Obtain a directly inspectable copy of Foss (1990), especially pp. 163–164 and 170–171, and compare its site argument with the thesis's cited passages.
+2. Use TIB's linked full-text page references for printed pp. 215, 748–750, and the separate Makaǧā/Leukai entries; record exact statements and their evidence roles.
+3. Seek a coordinate-bearing archaeological/institutional source for the Paşalar fortress and record datum/precision/source identity before any research-only anchor is considered.
+4. Keep Makaǧā unresolved unless a source explicitly reconciles that campaign toponym with modern Mekece independently of the castle debate.
+5. Do not create review bindings to satisfy the gate. The 1326-04-07 frontier remains **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**.
