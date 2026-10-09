@@ -297,3 +297,49 @@ No anchor registry entry, coordinate, evidence-matrix item, candidate geometry, 
 2. Obtain a legitimate accessible copy of Foss (1990) and directly inspect its map/topographical argument.
 3. Continue looking for institutional coordinate provenance for Paşalar, but do not promote secondary coordinates into the registry.
 4. Check CI for the new documentation HEAD after these commits; do not reuse the pre-commit green result as proof for the new HEAD.
+
+
+## 2026-10-09 ninth pass — Foss 2022 route narrative and institutional counter-check
+
+### New source-level distinction: Akhisar, Malagina and Mekece
+
+The accessible indexed extract of Clive Foss, *The Beginnings of the Ottoman Empire* (OUP, 2022), chapter 1, printed pp. 67–69, provides a more explicit distinction than the index-only evidence:
+- the narrative describes the tekfur of Mekece submitting and then joining Osman in the attack on Akhisar;
+- the discussion identifies the strongly fortified Metabole castle with the Akhisar of that narrative and describes it as overlooking the Malagina plain;
+- the account then treats the Akhisar tekfur's refuge at Kara Çebiş Hisar separately.
+
+The official OUP chapter metadata confirms the book and its separate discussion of reconciling Greek and Turkish accounts; it cautions that the narrative traditions often disagree and that place-name matching must be source-critical:
+https://academic.oup.com/book/38839/chapter-abstract/337747727
+
+The readable extract used for the pp. 67–69 cross-check was hosted on a third-party document platform, not an official publisher reader:
+https://www.scribd.com/document/595994910/The-Beginnings-of-the-Ottoman-Empire-Clive-Foss-2022
+It is therefore logged as a **secondary access lead**, not as a substitute for a legitimate publisher/library copy. No long passage is reproduced here. The claims above are paraphrased for entity-reconciliation purposes only.
+
+### Institutional local sources still leave a location fork
+
+The official Sakarya provincial tourism master-plan PDF states that Malagina's location is proposed as either Mekece or Paşalar village/Paşalar Castle, based on Byzantine and Ottoman sources:
+https://bolge1.tarimorman.gov.tr/Documents/menu-dosyalar/Do%C4%9Fa%20Turizmi%20Master%20Planlar%C4%B1/SAKARYA%20TTMP.pdf
+
+The official Pamukova District Governorate page describes Paşalar Castle as a Byzantine fort, notes a local claim that it was captured in 1314, and places it about 5 km northwest of Pamukova; it does not identify it as Metabole and supplies no coordinate pair:
+https://www.pamukova.gov.tr/pasalar-kalesi/
+
+The Ministry of Culture and Tourism inventory independently describes the physical Paşalar Castle remains at Kale Tepe north of Paşalar village, but gives no coordinate pair:
+https://www.kulturportali.gov.tr/turkiye/sakarya/kulturenvanteri/pasalar-kalesi
+
+### Adjudication update
+
+This pass improves the entity graph but **does not close the site identity**:
+- **Mekece (settlement / tekfur in the Ottoman narrative)** and **Akhisar (fortress attacked in the narrative)** are distinct in Foss's account; this is evidence against casually equating the two.
+- **Metabole fortress ↔ Akhisar of Foss's reconstruction** is a stronger scholarly association in the 2022 book extract.
+- **Malagina plain/region** is the wider geographic context, not the fortress itself.
+- **Paşalar Castle as the physical Metabole/Akhisar site** remains plausible but is not established by the official local pages, which explicitly preserve a Mekece-or-Paşalar fork.
+- The campaign form **Makaǧā** remains unresolved separately; shared TIB page references do not prove it equals modern Mekece.
+
+The 2022 extract is a valuable lead, but due to access provenance it should be verified against an official OUP/library copy before promotion. No coordinate, anchor, geometry, evidence-matrix item, or review binding was added. The 1326-04-07 frontier remains **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**.
+
+### Next operation
+
+1. Obtain legitimate publisher/library access to Foss 2022, pp. 67–69, and inspect the map/figure context for Malagina/Akhisar and the fortress location.
+2. Compare the official Sakarya tourism master-plan's Mekece-or-Paşalar statement with Foss's field-site description and the 1990 article.
+3. Obtain a coordinate-bearing institutional archaeological record or map for the physical Paşalar fortress and document datum/precision/provenance.
+4. Keep Mekece, Akhisar, Malagina, Metabole, and campaign Makaǧā separate until the exact identity links are directly supported.
