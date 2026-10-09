@@ -214,3 +214,10 @@ A third source pass separates the **Malagina region/plain**, the **Metabole fort
 Sources: Foss (1990), https://www.cambridge.org/core/journals/anatolian-studies/article/abs/byzantine-malagina-and-the-lower-sangarius/C764A7C79EB54493BA6061F3402DEF3C; Foss (2022) accessible excerpt, https://www.scribd.com/document/595994910/The-Beginnings-of-the-Ottoman-Empire-Clive-Foss-2022; Sakarya Metropolitan Municipality, https://sakarya.bel.tr/uploads/files/sakaryakaleleri.pdf; Sakarya University thesis, https://acikerisim.sakarya.edu.tr/bitstream/handle/20.500.12619/101577/T10915.pdf?sequence=1.
 
 **Admissibility:** this improves site identity and chronology research, not the 1326 boundary. The report that the Sangarios route was held by Orhan by 1324 remains a regional-control claim, not a closed political polygon. No anchor, geometry, or review binding was added.
+
+
+### 2026-10-09 — official Paşalar Castle record check
+
+The Sakarya Governorship's page reports that Paşalar Castle (Karaceyş Castle) was conquered in 1314 and overlooks the Pamukova/Geyve plains. The Ministry of Culture and Tourism Culture Inventory locates the remains at Kale Tepe, north of Paşalar village in Pamukova/Sakarya, gives a broad 5th–6th century construction date, and describes fortification remains. Neither page explicitly equates Paşalar Castle with Malagina/Metabole, and the inventory's location section provides no coordinates.
+
+Treat the physical site as established, the Paşalar–Metabole identity as a scholarly hypothesis, and 1314 as a source-specific local-history claim requiring independent historical adjudication. These records do not establish 1326 political control or a frontier. No anchor or geometry was promoted.
