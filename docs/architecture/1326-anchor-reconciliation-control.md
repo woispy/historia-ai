@@ -278,3 +278,14 @@ Canonical production remains protected until that chain is complete.
 - Decision: do not create geometry-supporting review bindings from the current edge set alone. Keep `reviewBindings: []`, candidate geometry immutable, and promotion BLOCKED until the binding contract can preserve evidence roles or boundary-specific evidence is acquired.
 - This is a research/evidence-quality checkpoint, not a geometry adjudication and not a new CI claim.
 - Immediate next task: acquire/reconcile boundary-specific historical geography evidence for the Bithynia frontier; if the exact line remains unsupported, record `INSUFFICIENT_EVIDENCE` or `REVIEW_REQUIRED` rather than synthesizing geometry.
+
+
+## 2026-10-09 TIB 13 source-acquisition checkpoint
+
+- Added the Austrian Academy of Sciences' **Tabula Imperii Byzantini 13 — Bithynia and Hellespont** as a high-priority scholarly source lead in `docs/architecture/1326-source-register.md` (commit `fd80cbe0d1216e47a011c608f0f27270f0279bae`).
+- Added the source-specific admissibility and extraction checklist to `docs/architecture/1326-T3B-PILOT-EVIDENCE-ADMISSIBILITY.md` (commit `dd862083ad97f3ed88a09c380a2145dbbb45bc4d`).
+- Official TIB documentation describes regional coverage, settlements/toponyms, fortifications, roads/sea routes, and cartographic material for Bithynia/Hellespont. The FWF e-book record identifies the map resource as CC BY 4.0; attribution and asset-specific rights must be retained.
+- Ruling: TIB 13 is **ACCEPTED as a source-acquisition lead**, not yet accepted as exact boundary evidence for 1326-04-07. It is a historical-geography synthesis across the Byzantine period, not a ready-made 1326 political polygon layer.
+- Next operation: inspect the TIB 13 introductory sections and map/gazetteer references for Nikaia, Nikomedeia, Prusa, Sangarios/Sakarya and Lefke; record exact pages/maps, temporal scope, spatial scale and evidence role. Only source statements explicitly supporting a relevant dated frontier may be classified as boundary evidence.
+- No review binding was added. `reviewBindings: []`, immutable candidate geometries, `SAFE TO DELETE = 0`, and canonical promotion **BLOCKED** remain unchanged.
+- No CI result is claimed for these documentation commits.
