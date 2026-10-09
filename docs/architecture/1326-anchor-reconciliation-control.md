@@ -349,3 +349,18 @@ Canonical production remains protected until that chain is complete.
 - This is a **coverage gap**, not permission to create coordinates from an unreviewed place-name match. No new anchor was inserted because this pass has not independently reconciled modern/historical toponym identity, coordinate provenance, and scenario-date relevance for each place.
 - Keep these names as source-research leads. The next safe step is entity/toponym reconciliation from existing project evidence and a second independent gazetteer/source; only then consider an anchor-candidate record with explicit confidence and provenance. Any anchor would remain non-boundary evidence.
 - Geometry, review bindings, and canonical authority remain unchanged. No CI claim is made for this documentation checkpoint.
+
+
+## 2026-10-09 Sangarios toponym reconciliation checkpoint
+
+A focused reconciliation pass was recorded in `docs/architecture/1326-SANGARIOS-TOPONYM-RECONCILIATION.md`.
+
+- **Lefke/Leukai → Osmaneli:** provisional place match supported by the Bilecik Provincial Directorate of Culture and Tourism; a separate 2021 epigraphic paper is identified for follow-up. Exact coordinate/site provenance has not been extracted, so no anchor was added.
+- **Geyve/Kabia-Kabeia:** local municipal history is a useful lead, but the underlying epigraphic publication/critical edition must be checked before treating the identification as independently verified.
+- **Akhisar/Malagina:** Clive Foss's scholarly work provides a promising identification lead; exact site equivalence and coordinate provenance remain to be reconciled.
+- **Mekece/Makaǧā:** unresolved; no independent place identification sufficient for registry inclusion was verified.
+- **Sangarios/Sakarya:** physical/corridor constraint only, never a presumed political border.
+
+**Disposition:** no changes to `data/gis/1326/anchor-candidate-registry.json`, immutable candidate geometry, or review bindings. The TIB 1304/05 campaign account remains source-critical retrospective evidence, not proof of continuous control on `1326-04-07`. Canonical political geometry remains BLOCKED and `SAFE TO DELETE = 0`.
+
+**Next step:** inspect the full Öztürk (2021) Leukai/Lefke epigraphic study, verify the underlying Kabia inscription reference, reconcile Malagina against Foss/TIB's gazetteer, and find an independent Mekece identification. Add research-only anchors only after coordinate provenance is explicit; no frontier binding unless boundary-specific evidence is found.
