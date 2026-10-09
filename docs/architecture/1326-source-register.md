@@ -243,3 +243,15 @@ References:
 - Ministry Culture Inventory: https://www.kulturportali.gov.tr/turkiye/sakarya/kulturenvanteri/pasalar-kalesi
 
 No anchor or geometry was promoted; coordinate provenance remains insufficient.
+
+
+### 2026-10-09 — publisher-record cross-check for Malagina / Metabole
+
+Oxford Academic's official abstract for Clive Foss, *The Beginnings of the Ottoman Empire*, chapter 3 “Reconciling the Accounts” (2022, pp. 135–140), explicitly says the Byzantine fortress Malagina can be identified with APZ's Akhisar. This supports the scholarly Malagina–Akhisar association at abstract level; the full chapter is access-restricted in this research pass. https://academic.oup.com/book/38839/chapter-abstract/337747727
+
+The Cambridge Core abstract for Foss, “Byzantine Malagina and the Lower Sangarius” (1990, pp. 161–183), states that field investigation enabled a more precise location for Malagina and identification/description of its fortress. OpenBibArt's bibliographic record summarizes the article as identifying Malagina and describing the remains of the fortress of Metabole. These records strengthen the scholarly **Malagina / Metabole fortress / APZ Akhisar** research relationship, but do not independently provide a project-ready coordinate or settle Paşalar Castle as the modern site.
+
+- Cambridge Core: https://www.cambridge.org/core/journals/anatolian-studies/article/abs/byzantine-malagina-and-the-lower-sangarius/C764A7C79EB54493BA6061F3402DEF3C
+- OpenBibArt: https://openbibart.fr/vibad/index.php?action=getRecordDetail&idt=oba_0065074
+
+**Authority and admissibility remain unchanged:** Malagina region/plain is not identical by default to a fortress point; Mekece settlement/tekfur and Mekece Castle remain distinct; Paşalar–Metabole/Akhisar is still a modern-site hypothesis requiring full topographical verification; TIB campaign Makaǧā–Mekece remains unresolved. No anchor, coordinate, polygon, or review binding was promoted. The 1326-04-07 frontier remains INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED.
