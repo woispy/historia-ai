@@ -298,3 +298,14 @@ Canonical production remains protected until that chain is complete.
 - The secondary review is used only as a navigation aid. The next evidence records must cite Belke's exact page/map, claim, date scope, scale and limitations; the review itself is not a substitute for the underlying source.
 - A regional or period-coded settlement map is not automatically a political border map. No digitization, polygon reconstruction or review binding is authorized from this page map alone.
 - Canonical promotion remains **BLOCKED**; immutable candidate geometries and the empty binding list remain unchanged. No CI claim is made for documentation-only commits.
+
+
+## 2026-10-09 TIB 13 first-pass evidence ruling
+
+- Checked the official TIB 13 overview and available indexed full-text excerpts against the current P1 Bithynia question.
+- Official summary supports Bithynian regional context, key centres (Nikomedeia, Nikaia, Kyzikos), fortified-city references (including Prusa), and route/sea connectivity.
+- The exact full-volume PDF could not be reliably opened for page-by-page extraction in this pass. The one indexed p. 150 excerpt concerns earlier Byzantine administrative history and does not establish a frontier on 1326-04-07.
+- Classification: **CONTEXT-ONLY / INSUFFICIENT EVIDENCE** for the exact Ottoman–Byzantine boundary. No explicit dated frontier statement or map was verified.
+- Keep the Ottoman/Byzantine review records pending, `reviewBindings: []`, immutable candidate geometry, and canonical promotion **BLOCKED**. Do not infer borders from settlements, fortifications, routes, metropolitan status, or regional cartography.
+- Next: obtain the segmented/open-access volume and extract the exact scope/history sections and gazetteer entries with printed page/map, date, evidence class, scale and limitation. If no 1326-specific frontier evidence is present, close TIB 13 as contextual corroboration and continue the source search without synthetic geometry.
+- No CI result is claimed for this documentation-only checkpoint.
