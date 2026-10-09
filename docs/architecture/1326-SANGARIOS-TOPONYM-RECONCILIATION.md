@@ -175,3 +175,48 @@ A web index and a community-maintained archaeological gazetteer expose coordinat
 3. Seek a coordinate-bearing archaeological/institutional source for the Paşalar fortress and record datum/precision/source identity before any research-only anchor is considered.
 4. Keep Makaǧā unresolved unless a source explicitly reconciles that campaign toponym with modern Mekece independently of the castle debate.
 5. Do not create review bindings to satisfy the gate. The 1326-04-07 frontier remains **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**.
+
+
+## 2026-10-09 sixth pass — Foss article metadata and TIB register cross-reference
+
+### What the accessible Foss (1990) record actually establishes
+
+Cambridge Core exposes the article's abstract, bibliographic metadata and references, but not the complete site argument. The abstract says the general Malagina location on the Sangarios was known while the exact site had not been convincingly identified; Foss reports that his field investigations enabled a precise location and identification of the fortress. The reference list states that Foss's conclusions differ from S. Şahin's 1986 “Malagina/Melagina am Sangarios” study, while acknowledging Şahin's careful work. Foss also records discovering the fort in 1982 and refers to a prior brief description in *Byzantine Fortifications* (1986), pp. 140, 147–148.
+
+Sources:
+- Cambridge Core article record and extract: https://www.cambridge.org/core/journals/anatolian-studies/article/abs/byzantine-malagina-and-the-lower-sangarius/C764A7C79EB54493BA6061F3402DEF3C
+- Open bibliographic record: https://openbibart.fr/vibad/index.php?action=getRecordDetail&idt=oba_0065074
+
+This strengthens the methodological point that the site identification rests on fieldwork and a scholarly argument that explicitly differs from an earlier identification—not merely on a modern place-name match. However, because the article body and its topographical description remain unavailable in the directly inspected Cambridge record, this pass cannot independently verify the exact site coordinates or reproduce the argument from pp. 163–164 and 170–171.
+
+### TIB register cross-check: Mekece is present, but equivalence is not encoded
+
+The official TIB 13 register lists all of the following as distinct entries:
+- **Akhisar (Malagina)** — includes printed p. 215.
+- **Makaǧā** — includes printed p. 215 and pp. 748–750 among its references.
+- **Mekece** — includes printed p. 215 and pp. 747–750 among its references.
+- **Malagina (Gegend und Ort, auch Thema)** — explicitly spans region/place/theme uses.
+- **Metabolē** — a separate entry with its own page references.
+- **Leukai (2)** — a separate entry including printed pp. 177–178 and 215.
+
+Register: https://tib.oeaw.ac.at/tib-register/tib13
+
+The co-occurrence of Mekece and Makaǧā in the register's page references is a useful source-navigation clue, but the register is an index, not a claim of identity. The distinct entries do not establish that the campaign form Makaǧā equals modern Mekece, nor that Mekece Castle equals the Metabole fortress. The page references at 747–750 should be read in the full TIB text before they can be used as evidence of any specific identity relation.
+
+### Coordinate and promotion ruling
+
+- Paşalar remains the leading research hypothesis for the specific Metabole fortress in the secondary literature inspected, but the decisive Foss topographical argument is not directly available in this pass.
+- The official Ministry Culture Inventory record identifies the physical Paşalar Castle site but gives no coordinate pair.
+- No coordinate was copied from a web map, community gazetteer or search result.
+- No anchor candidate, evidence-matrix record, candidate geometry or review binding was created.
+- No political control or boundary was inferred from a castle location, route corridor, or regional conquest narrative.
+
+**Disposition:** retain the distinctions **Malagina region / place**, **Metabole fortress**, **Mekece Castle / modern Mekece**, and **Makaǧā in the campaign tradition**. The relationship between the last two remains unresolved. Exact frontier on 1326-04-07 remains **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**.
+
+## Next operation
+
+1. Obtain a directly inspectable full copy of Foss (1990), or a legitimate institutional/library copy, and verify the site argument against the cited pp. 163–164 and 170–171.
+2. Open TIB 13 printed pp. 215 and 747–750 from the linked reader and record the exact wording for Akhisar (Malagina), Makaǧā, Mekece and Metabolē as separate claims.
+3. Find an official coordinate-bearing archaeological record for Paşalar Castle; record the source, coordinate reference system, precision and access date before considering a research-only point anchor.
+4. Keep the campaign toponym Makaǧā unresolved unless an explicit independent source closes that entity match.
+5. Leave geometry, bindings and canonical promotion unchanged until the evidence contract is satisfied.
