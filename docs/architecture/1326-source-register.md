@@ -97,6 +97,25 @@ The EU5DB map-mode inventory is particularly valuable for future layer planning:
 
 The repository also retains `docs/architecture/EU5DB-REFERENCE-MAP-ANALYSIS.md` as the detailed cartographic interpretation of the EU5DB hierarchy. It records the **İl → Vilayet → Alan → Bölge → Alt Kıta → Kıta** concept as a comparative design reference only. It does not promote EU5DB geometry or 1337 ownership into the 1326 authority pipeline.
 
+
+
+### Tabula Imperii Byzantini 13 — Bithynia and Hellespont
+
+**Role:** high-value scholarly historical-geography reference for the P1 Byzantine/Bithynia review; corroboration and place/route context, not an automatic 1326 political boundary.
+
+The Austrian Academy of Sciences identifies TIB 13 as *Bithynia and Hellespont* by Klaus Belke (2020). The volume covers northwestern Asia Minor and discusses regional geography, history, administrative history, transport connections, settlements, fortifications, and other historical-geography evidence. It includes regional cartography at 1:800,000 and supplementary detail maps. The freely accessible FWF e-book record identifies the resource as CC BY 4.0.
+
+- Official TIB 13 overview: https://www.oeaw.ac.at/en/imafo/research/byzantine-research/communities-and-landscapes/historical-geography/tib-13
+- Official publication list: https://tib.oeaw.ac.at/publications
+- FWF e-book and rights record: https://e-book.fwf.ac.at/detail/o%3A1438
+- Full volume: https://e-book.fwf.ac.at/api/object/o%3A1436/get
+
+**Use in Historia AI:** inspect the relevant introductory sections, maps, and gazetteer entries for Nikaia/Nicaea, Nikomedeia/Nicomedia, Prusa/Bursa, Sangarios/Sakarya, Lefke, and the surrounding region. Extract page/map references and record the exact historical period to which each claim applies. Use this to improve place identity, physical/route context, and Byzantine regional interpretation.
+
+**Limitations:** TIB is a scholarly historical-geography synthesis across the Byzantine period, not a ready-made political polygon layer for 1326-04-07. A regional/provincial map or toponym entry must not be assumed to prove the Ottoman–Byzantine frontier on the scenario date. TIB 13's map scale is regional rather than province-level geometry precision. Any reuse of source-derived content must retain attribution and comply with CC BY 4.0; map digitization/derivative geometry still requires explicit source and interpretation notes.
+
+**Current disposition:** ACCEPTED as a source-acquisition/research lead; not yet adjudicated as boundary-specific evidence. No candidate geometry or review binding is changed by adding this reference.
+
 ### World Historical Gazetteer
 
 **Role:** historical place identity, reconciliation, and provenance evidence.
