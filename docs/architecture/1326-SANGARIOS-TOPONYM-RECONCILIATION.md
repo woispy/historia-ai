@@ -220,3 +220,42 @@ The co-occurrence of Mekece and Makaǧā in the register's page references is a 
 3. Find an official coordinate-bearing archaeological record for Paşalar Castle; record the source, coordinate reference system, precision and access date before considering a research-only point anchor.
 4. Keep the campaign toponym Makaǧā unresolved unless an explicit independent source closes that entity match.
 5. Leave geometry, bindings and canonical promotion unchanged until the evidence contract is satisfied.
+
+
+## 2026-10-09 seventh pass — live TIB index and Foss extract re-check
+
+### Directly inspected source details
+
+The live TIB 13 register was searched by exact entries rather than relying on earlier paraphrases:
+https://tib.oeaw.ac.at/tib-register/tib13
+
+The register lists:
+- **Akhisar (Malagina)** with references including printed p. 215.
+- **Makaǧā** with references including pp. 214–215 and 747–750.
+- **Mekece** as a separate entry, also with references including pp. 214–215 and 747–750.
+- **Malagina (Gegend und Ort, auch Thema)** as a separate, broad region/place/theme entry.
+- **Metabolē** as a separate entry, including pp. 748–750.
+
+The clickable page references lead to the TIB static reader, but the browser extraction returned no readable page text for those links in this pass. Therefore, this is a verified index-level result only; the content of printed pp. 215 and 747–750 has **not** been independently transcribed here. Do not describe the indexed page references as if they proved an entity equivalence.
+
+Cambridge Core's accessible Foss (1990) page provides a little more than a generic abstract: its extract states that Malagina's general location on the Sangarios was known but the site had not been convincingly identified before Foss's field investigations; its reference note says his conclusions differ from Şahin (1986), and another note says Foss discovered the fort in 1982. The page still gates the article body behind access options, so this pass did not directly inspect Foss's topographical argument or validate a coordinate. https://www.cambridge.org/core/journals/anatolian-studies/article/abs/byzantine-malagina-and-the-lower-sangarius/C764A7C79EB54493BA6061F3402DEF3C
+
+The open bibliographic record characterizes the article as identifying Malagina and describing surviving remains of the fortress of Metabole, first mentioned in 1144/45 and an important eastern Byzantine frontier defense until around 1300: https://openbibart.fr/vibad/index.php?action=getRecordDetail&idt=oba_0065074. This confirms the bibliographic subject of the article, not an independently inspected coordinate or a 1326 ownership claim.
+
+### Coordinate lead — rejected for project promotion
+
+Search-indexed secondary pages expose a coordinate pair for the Paşalar/Metabole hypothesis (40.5253 N, 30.1014 E). This is recorded only as a **lead requiring verification**, not as an accepted project coordinate: the accessible official Ministry Culture Inventory page does not provide coordinates, and the coordinate surfaced through a non-institutional secondary page. No coordinate was copied into the anchor registry.
+
+### Ruling
+
+- The live index confirms separate entries and shared page references; it does **not** establish that Mekece equals Makaǧā, that Mekece Castle equals Metabole, or that the Malagina region is identical to its fortress.
+- Paşalar remains the leading research hypothesis for the fortress identification based on secondary scholarship, but coordinate provenance and the full Foss argument remain unverified in this pass.
+- No anchor, geometry, evidence-matrix record, or review binding was added.
+- Exact 1326-04-07 political frontier remains **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**.
+
+### Next operation
+
+1. Access the TIB reader through a readable/accessible edition and transcribe the actual prose of printed p. 215 and pp. 747–750, including the exact context of Makaǧā, Mekece, Malagina and Metabolē.
+2. Obtain Foss (1990) through a legitimate library/institutional route and verify the site argument, map/figure, and coordinate basis directly.
+3. Seek an official archaeological survey or institutional gazetteer with coordinate metadata for Paşalar; independently compare it to Foss's published map.
+4. Until those checks are complete, retain the coordinate as an unaccepted research lead and do not create a registry anchor or boundary binding.
