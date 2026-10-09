@@ -469,3 +469,29 @@ No anchor registry entry, coordinate, candidate polygon, evidence binding, or re
 ### Next operation
 
 Locate a legitimate full-text copy of Foss (1990), inspect the cited topographical pages and any site plan, and record a coordinate only if the source map can be georeferenced with documented method and uncertainty. Do not use a generic search-result coordinate as a surveyed fortress point.
+
+
+## 2026-10-10 ninth pass — direct page-level verification from Sakarya University repository
+
+### Source checked
+
+The full institutional PDF of Sena Nur Akbaş, *Sakarya İli Hudutlarında Bizans Mimari Plastiğinin Belgelenmesi (Geyve-Pamukova ve Akyazı İlçeleri)*, Sakarya University, 2023, was opened and the relevant passage was inspected at PDF pages 45–47 (printed pp. 30–32). The repository text explicitly preserves both sides of the historical identification debate:
+
+- It attributes the **broader Malagina region ↔ Mekece** proposal to Sencer Şahin (1986), based on route, lake, and military-pasture criteria.
+- It separately says that, for the **specific Malagina/Metabole fortress**, Paşalar Castle is the more suitable identification, based on the historic descriptions of its position near the Sangarios, pasture land, and the Nikaia–Dorylaion route.
+- It states that Foss visited/identified the Paşalar site in 1982 and named Paşalar—not Mekece Castle—as Metabole; it cites Foss (1990), especially p. 170, and the Sakarya castle study.
+- It locates the physical Paşalar Castle at Kaletepe in Paşalar Mahallesi, Pamukova, and describes its surviving circular wall plan.
+
+Institutional source: https://acikerisim.sakarya.edu.tr/bitstream/handle/20.500.12619/101577/T10915.pdf?isAllowed=y&sequence=1. The relevant passage is in the repository's searchable text around lines 931–975 of the extracted PDF text; the original article by Foss remains a separate source.
+
+### Evidence grade update
+
+This direct page-level check raises the **Paşalar Castle ↔ Metabole fortress** proposition from a general secondary lead to **STRONGLY_SUPPORTED BY AN INSTITUTIONAL SECONDARY SOURCE**, because the thesis explicitly attributes the site identification to Foss and cites the relevant pages. It does **not** make the coordinate registry-ready: the thesis passage supplies a place description, not a coordinate pair, georeferencing method, or positional uncertainty. Nor does it establish the exact 1326-04-07 political frontier.
+
+Keep the entities and claims separate:
+- Malagina region/plain ↔ Mekece: Şahin's regional-location proposal, source-specific.
+- Metabole fortress ↔ Paşalar Castle: stronger site-specific identification attributed to Foss.
+- Mekece Castle ↔ Metabole: earlier competing fortress proposal, not preferred by this source.
+- TIB campaign Makaǧā ↔ modern Mekece: still unresolved as a separate toponym reconciliation.
+
+No anchor, coordinate, candidate polygon, evidence binding, review binding, or canonical geometry was added. Frontier remains **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**; **SAFE TO DELETE = 0**.
