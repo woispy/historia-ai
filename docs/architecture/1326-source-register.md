@@ -205,3 +205,12 @@ A Ministry-hosted copy of Sencer Şahin's 1983 epigraphic/historical-geography s
 Sakarya Metropolitan Municipality's historical-castles PDF (https://sakarya.bel.tr/uploads/files/sakaryakaleleri.pdf) summarizes Foss's identification of Malagina's fortress with Paşalar Kalesi and records Mekece Kalesi as an earlier proposal. This cautions against conflating Malagina and Mekece. The detailed dispositions and limits are recorded in `docs/architecture/1326-SANGARIOS-TOPONYM-RECONCILIATION.md`.
 
 **Result:** stronger place-identity evidence, but no 1326 frontier evidence. No anchor registry entries, candidate polygons, or review bindings were added.
+
+
+### 2026-10-09 — Malagina/Metabole/Mekece distinction
+
+A third source pass separates the **Malagina region/plain**, the **Metabole fortress**, and **Mekece Castle** rather than treating them as one place. Foss (2022)'s accessible indexed extract describes the Malagina plain as a broad Sangarios corridor between Mekece and Lefke and associates the campaign's Akhisar with the fortress in the Malagina/Metabole context. A Sakarya University thesis on northwestern Anatolian road networks argues that Paşalar Castle is a more suitable identification for Malagina/Metabole Castle than Mekece Castle, while documenting the competing hypotheses. Sakarya Metropolitan Municipality's *Sakarya Kaleleri* also records the history of the Mekece proposal. Foss (1990)'s abstract confirms that fieldwork was used to locate the fortress, but the full argument and coordinate-level source were not extracted in this pass.
+
+Sources: Foss (1990), https://www.cambridge.org/core/journals/anatolian-studies/article/abs/byzantine-malagina-and-the-lower-sangarius/C764A7C79EB54493BA6061F3402DEF3C; Foss (2022) accessible excerpt, https://www.scribd.com/document/595994910/The-Beginnings-of-the-Ottoman-Empire-Clive-Foss-2022; Sakarya Metropolitan Municipality, https://sakarya.bel.tr/uploads/files/sakaryakaleleri.pdf; Sakarya University thesis, https://acikerisim.sakarya.edu.tr/bitstream/handle/20.500.12619/101577/T10915.pdf?sequence=1.
+
+**Admissibility:** this improves site identity and chronology research, not the 1326 boundary. The report that the Sangarios route was held by Orhan by 1324 remains a regional-control claim, not a closed political polygon. No anchor, geometry, or review binding was added.
