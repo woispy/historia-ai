@@ -109,3 +109,25 @@ The accessible Cambridge Core record for Clive Foss's 1990 article confirms that
 - The statement that the Sangarios route was held by Orhan by 1324 is a dated regional-control claim in Foss (2022), useful for historical chronology but not a coordinate-level frontier or proof that every adjacent locality had the same status on 1326-04-07.
 
 **Disposition:** the best-supported working distinction is *Malagina plain/region ≠ Metabole fortress ≠ Mekece Castle*. Paşalar is a stronger candidate for the fortress identification in the consulted secondary literature, but it is not yet promoted to the anchor registry. No coordinate, geometry, evidence-matrix item, or review binding was added. The exact political frontier remains **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**.
+
+
+## 2026-10-09 fourth pass — official Paşalar Castle records
+
+Two official Turkish records were checked against the scholarly Malagina/Metabole identification:
+
+- **Sakarya Governorship, “Paşalar Kalesi”** states that Paşalar Castle (also called Karaceyş Castle) is Byzantine and was conquered in 1314 during Osman Gazi's period; it describes the castle as overlooking the Pamukova and Geyve plains from Geyve to Mekece. https://www.sakarya.gov.tr/pasalar-kalesi
+- **Ministry of Culture and Tourism, Culture Inventory, “Paşalar Kalesi”** places the remains at Kale Tepe, north of Paşalar village, Pamukova/Sakarya and gives a broad 5th–6th century construction date. It describes surviving fortification remains and reused late Roman funerary stelae, but the page provides no coordinates in its location section. https://www.kulturportali.gov.tr/turkiye/sakarya/kulturenvanteri/pasalar-kalesi
+
+### Source reconciliation
+
+These official records independently establish a physical castle at Paşalar and its strategic overlook; they do **not** themselves name it as Malagina or Metabole. The 1314 capture statement is a local-government historical claim and must not be silently merged with the Byzantine fortress chronology or treated as proof of an exact political boundary. The Culture Inventory's broad architectural dating also does not date the castle's control in 1326.
+
+The current evidence supports the following split:
+
+- **Paşalar Castle as a physical site:** established in the official cultural inventory.
+- **Paşalar Castle = Foss's Metabole fortress:** strong scholarly hypothesis in the reviewed secondary literature, but not independently established by the official inventory page itself.
+- **Paşalar Castle control in 1326:** not independently adjudicated by this pass.
+- **Coordinate anchor:** not eligible yet; the official inventory page does not provide a coordinate pair, and no coordinate was copied from a generic map/search result.
+- **Political boundary:** not established.
+
+No anchor registry entry, candidate geometry, evidence-matrix record, or review binding was created. Keep the exact 1326 frontier **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**.
