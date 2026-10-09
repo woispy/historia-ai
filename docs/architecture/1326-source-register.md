@@ -290,3 +290,12 @@ The Sakarya University repository thesis on northwestern Anatolian historical ro
 These records support the physical identity and location description of Paşalar Castle, while the Foss/DeLuigi evidence supports Paşalar–Metabole as a strong scholarly site hypothesis. A generic coordinate found in secondary web summaries is not admissible as a surveyed fortress coordinate because the inspected institutional inventory and publisher abstracts do not supply it or document its derivation. Do not add it to the anchor registry without traceable coordinate provenance.
 
 No anchor, coordinate, candidate polygon, or review binding was promoted. The broader Malagina/Melangeia plain remains distinct from the fortress; Mekece Castle remains a competing hypothesis; TIB campaign Makaǧā ↔ modern Mekece remains unresolved; no source reviewed here establishes the exact 1326-04-07 political frontier.
+
+
+### 2026-10-09 — institutional thesis clarifies the Malagina / Metabole fork
+
+The Sakarya University repository thesis on northwestern Anatolian historical road networks explicitly distinguishes the competing claims: it reports Şahin's placement of the broader Malagina region at Mekece based on route/lake/pasture criteria, while arguing that Paşalar Castle is the more suitable identification for the specific Malagina/Metabole fortress. It cites Foss (1990, pp. 163–164 and 170–171) and acknowledges the Paşalar/Mekece debate. Institutional PDF: https://acikerisim.sakarya.edu.tr/bitstream/handle/20.500.12619/101577/T10915.pdf?isAllowed=y&sequence=1.
+
+Keep these as separate propositions: (a) Malagina region/plain ↔ Mekece proposal, (b) Metabole fortress ↔ Paşalar hypothesis, and (c) TIB campaign Makaǧā ↔ modern Mekece, still unresolved. The thesis is a traceable institutional secondary synthesis, not a substitute for direct review of Foss's full topographical argument or a georeferenced site plan. It provides no coordinate provenance adequate for the anchor registry and no exact 1326 political boundary.
+
+No anchor, coordinate, polygon, or review binding was promoted. Canonical promotion remains blocked; SAFE TO DELETE = 0.
