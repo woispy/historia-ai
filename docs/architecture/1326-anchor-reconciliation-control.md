@@ -340,3 +340,12 @@ Canonical production remains protected until that chain is complete.
 - Disposition: source-critical historical-anchor lead only. Do not merge divergent traditions, assert continuous control through 1326, or turn the Sangarios corridor into a political border.
 - Next: reconcile each toponym independently against the existing anchor candidate ledger and evidence schema; if the schema cannot represent source-critical claims without implying certainty, leave them in the research register.
 - Exact 1326 frontier remains REVIEW_REQUIRED / INSUFFICIENT_EVIDENCE. No geometry, binding, or authority change. No CI result is claimed for this documentation-only update.
+
+
+
+## 2026-10-09 anchor-registry cross-check for TIB 13
+
+- Cross-checked data/gis/1326/anchor-candidate-registry.json against the TIB 13 early Sangarios-corridor names: Lefke/Leukai, Mekece/Makaǧā, Geyve/Kabeia and Sangarios. No matching candidate is currently present in that registry.
+- This is a **coverage gap**, not permission to create coordinates from an unreviewed place-name match. No new anchor was inserted because this pass has not independently reconciled modern/historical toponym identity, coordinate provenance, and scenario-date relevance for each place.
+- Keep these names as source-research leads. The next safe step is entity/toponym reconciliation from existing project evidence and a second independent gazetteer/source; only then consider an anchor-candidate record with explicit confidence and provenance. Any anchor would remain non-boundary evidence.
+- Geometry, review bindings, and canonical authority remain unchanged. No CI claim is made for this documentation checkpoint.
