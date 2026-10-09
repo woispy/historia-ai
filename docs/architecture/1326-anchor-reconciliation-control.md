@@ -375,3 +375,18 @@ A second source pass inspected the full Öztürk (2021) article and located Senc
 - Sakarya Metropolitan Municipality's historical-castles PDF summarizes Foss's identification of Malagina's fortress with Paşalar Kalesi and notes Mekece Kalesi as an earlier proposal. This is a genuine place-identification conflict to preserve, not a reason to merge Mekece and Malagina.
 
 References and claim limits are documented in `docs/architecture/1326-SANGARIOS-TOPONYM-RECONCILIATION.md`. No anchors, polygons, evidence-matrix records, or review bindings were added. **Next:** inspect the full Foss article and exact TIB gazetteer entries; keep Mekece/Makaǧā unresolved unless independent identification evidence closes the ambiguity.
+
+
+## 2026-10-09 third-pass — Malagina/Metabole site distinction
+
+A source comparison now separates three entities that earlier shorthand could blur:
+
+- **Malagina:** the wider Sangarios plain/region, described by Foss (2022) as stretching broadly between Mekece and Lefke.
+- **Metabole / the fortress in the Malagina region:** a specific fortified site; the consulted Sakarya University thesis favours Paşalar Castle over Mekece Castle as the more suitable identification, while documenting the history of competing proposals.
+- **Mekece Castle:** a separate fort near the modern village; do not treat the castle as identical to the wider Malagina region or as proof that TIB's Mekece/Makaǧā toponym has been reconciled.
+
+Foss's accessible 2022 excerpt associates the Ottoman-chronicle Akhisar with the Malagina/Metabole fortress context and says the Sangarios route was held by Orhan by 1324. This is useful dated regional chronology, but neither the campaign narrative nor a road corridor provides a coordinate-level political frontier for 1326-04-07. Foss (1990)'s full argument was not accessible in this pass; the abstract alone does not establish a registry-ready coordinate.
+
+Reference note: `docs/architecture/1326-SANGARIOS-TOPONYM-RECONCILIATION.md`; sources include Foss (1990), Foss (2022 indexed extract), Sakarya Metropolitan Municipality's *Sakarya Kaleleri*, and the Sakarya University thesis on northwestern Anatolian road networks.
+
+**Disposition:** no anchor registry change, no geometry mutation, no review binding. Keep the frontier **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**. Next step: inspect the thesis bibliography and primary references, then acquire the complete Foss/TIB gazetteer passages and any coordinate-bearing archaeological record before considering a research-only point anchor.
