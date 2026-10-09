@@ -392,3 +392,28 @@ This is a stronger research result, but it still does not establish a 1326 polit
 ### Next operation
 
 Inspect the thesis figures 52–54 and Foss (1990) pp. 170–172 from a legitimate library/institutional copy. If a map is used for a point anchor, preserve its page/figure, source CRS or georeferencing method, and estimated positional uncertainty. Keep the coordinate research-only until that provenance is independently checkable.
+
+
+## 2026-10-09 sixth-pass: full thesis excerpt and Foss article metadata cross-check
+
+### DeLuigi thesis, printed pp. 78–79
+
+A searchable extract of Humberto DeLuigi's 2015 Bilkent M.A. thesis, section “Melangeia-Malagina (Paşalar, Sakarya) and Pithekas,” was inspected. It says that Foss identifies Metabole with the fortress above Paşalar and Melangeia with the plain between the fortress and the Sangarios. It records Mekece, roughly nine kilometres southwest of Paşalar, as Şahin's competing identification; it then contrasts the route-distance argument (Metabole described as a night ride from Nikomedeia) and the reported surface pottery chronology at Paşalar and Mekece. Figures 52–54 are labelled as a plan of Metabole, the fortress, and its view.
+
+Source record: https://tezara.org/theses/385927. The searchable text is mirrored on a third-party document platform, not an institutional full-text endpoint: https://www.scribd.com/document/475011130/Winter-in-the-Land-of-Rum-Komnenian-Defe-pdf. Therefore the specific passage and figure labels are useful for research triage, but the thesis figures and the cited Foss pages still require verification against a legitimate, traceable copy before extracting a project coordinate.
+
+### Foss (1990), publisher-hosted extract
+
+Cambridge Core's visible article extract confirms that Foss's field investigations allowed a more precise location for Malagina and identification of its fortress. Its visible references also say Foss discovered the fort in 1982, note that his conclusions differ from Şahin's 1986 study, and refer to the wider plain and a castle site explored because it appeared on Şahin's map. The article's full topographical narrative is not visible in the accessible extract. https://www.cambridge.org/core/journals/anatolian-studies/article/abs/byzantine-malagina-and-the-lower-sangarius/C764A7C79EB54493BA6061F3402DEF3C
+
+### Disposition
+
+The scholarly case for **Metabole ↔ Paşalar fortress** is now strong enough to label as STRONGLY_SUPPORTED_SITE_HYPOTHESIS, while retaining the evidence-access limitation. It is **not** enough to create a canonical coordinate or a 1326 political boundary. Keep these roles distinct:
+
+- Paşalar fortress: leading modern-site candidate for Metabole.
+- Malagina/Melangeia: broader plain/region.
+- Mekece Castle: competing historical identification, with the thesis favouring Paşalar.
+- TIB campaign Makaǧā: still unresolved against modern Mekece.
+- APZ Akhisar: narrative name linked to the Malagina fortress by Foss (2022) chapter abstract; preserve this as a source-specific equivalence rather than an unrestricted alias.
+
+No anchor registry entry, coordinate, candidate polygon, evidence binding, or review binding was added. Canonical promotion remains blocked; exact 1326-04-07 frontier remains INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED; SAFE TO DELETE = 0.
