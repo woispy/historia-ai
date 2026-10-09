@@ -259,3 +259,41 @@ Search-indexed secondary pages expose a coordinate pair for the Paşalar/Metabol
 2. Obtain Foss (1990) through a legitimate library/institutional route and verify the site argument, map/figure, and coordinate basis directly.
 3. Seek an official archaeological survey or institutional gazetteer with coordinate metadata for Paşalar; independently compare it to Foss's published map.
 4. Until those checks are complete, retain the coordinate as an unaccepted research lead and do not create a registry anchor or boundary binding.
+
+
+## 2026-10-09 eighth pass — exact TIB index targets and repository gate refresh
+
+### Exact index entries and linked page access
+
+The live TIB 13 index was queried by exact labels, with these observed entries:
+- **Akhisar (Malagina):** printed p. 215, plus later gazetteer/map references.
+- **Makaǧā:** printed pp. 214–215 and 747–750 among its references.
+- **Mekece:** printed pp. 214–215 and 747–750 among its references.
+- **Malagina (Gegend und Ort, auch Thema):** a separate region/place/theme entry.
+- **Metabolē:** a separate entry with its own references, including pp. 748–750.
+
+Direct clicks on the index's links for printed p. 215 and the pp. 747–750 references resolved to the TIB static reader URL, but the browser extraction returned **zero readable lines**. This is an observed access/extraction limitation, not evidence that the book lacks the information. The page prose has still not been independently transcribed in this workflow. The TIB index is an authoritative navigation aid, not a substitute for the cited entries' full text.
+
+- Official index: https://tib.oeaw.ac.at/tib-register/tib13
+- TIB digital publication explanation: https://tib.oeaw.ac.at/subprojects/digtib
+
+### Repository gate refresh (pre-documentation commit)
+
+Before recording this checkpoint, the current PR #109 head was checked:
+- GitHub PR API reported **mergeable=true** (the earlier false result was not persistent).
+- Base comparison: **523 commits ahead, 0 behind**.
+- Both Historia AI CI and Cliopatria v0.2.0 acquisition verification were reported completed with **success** for the then-current HEAD 35cffac6a0e905cff231d5ef4019f9edd7c1081d.
+- This result applies to that HEAD only. The documentation commits that add this checkpoint will create a newer HEAD and must receive their own CI verification before they can be called green.
+
+### Evidence ruling
+
+The shared page references are useful navigation clues but do not establish identity. Keep **Akhisar (Malagina)**, **Makaǧā**, **Mekece**, the broader **Malagina region**, and **Metabolē** distinct until the actual prose resolves their relations. Do not infer that the campaign Makaǧā equals modern Mekece or that Mekece Castle equals the Metabole fortress.
+
+No anchor registry entry, coordinate, evidence-matrix item, candidate geometry, or review binding was added. Exact 1326-04-07 political frontier remains **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**.
+
+### Next operation
+
+1. Obtain readable full-text access to TIB 13 printed p. 215 and pp. 747–750, and transcribe each relevant lemma/claim with exact page context.
+2. Obtain a legitimate accessible copy of Foss (1990) and directly inspect its map/topographical argument.
+3. Continue looking for institutional coordinate provenance for Paşalar, but do not promote secondary coordinates into the registry.
+4. Check CI for the new documentation HEAD after these commits; do not reuse the pre-commit green result as proof for the new HEAD.
