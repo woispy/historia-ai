@@ -390,3 +390,14 @@ Foss's accessible 2022 excerpt associates the Ottoman-chronicle Akhisar with the
 Reference note: `docs/architecture/1326-SANGARIOS-TOPONYM-RECONCILIATION.md`; sources include Foss (1990), Foss (2022 indexed extract), Sakarya Metropolitan Municipality's *Sakarya Kaleleri*, and the Sakarya University thesis on northwestern Anatolian road networks.
 
 **Disposition:** no anchor registry change, no geometry mutation, no review binding. Keep the frontier **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**. Next step: inspect the thesis bibliography and primary references, then acquire the complete Foss/TIB gazetteer passages and any coordinate-bearing archaeological record before considering a research-only point anchor.
+
+
+## 2026-10-09 fourth pass — official Paşalar Castle record check
+
+Checked the Sakarya Governorship's Paşalar Castle page and the Ministry of Culture and Tourism Culture Inventory entry.
+
+- The Governorship says Paşalar Castle (Karaceyş Castle) is Byzantine and reports a 1314 conquest; it describes the castle as overlooking the Pamukova and Geyve plains.
+- The Culture Inventory places the castle at Kale Tepe, north of Paşalar village in Pamukova/Sakarya, gives a broad 5th–6th century construction date and describes extant fortification remains. Its location section does not provide coordinates.
+- Neither official page explicitly identifies Paşalar as Malagina/Metabole. That link remains a scholarly site-identification hypothesis; the 1314 local-history statement is not sufficient to assign control to the whole region or to draw a political polygon for 1326.
+
+No anchor was added because a project-acceptable coordinate source is still missing and the identity/control roles must remain separate. No candidate geometry or review binding changed. See the source-specific analysis in `docs/architecture/1326-SANGARIOS-TOPONYM-RECONCILIATION.md`.
