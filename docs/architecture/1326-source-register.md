@@ -181,3 +181,16 @@ The chapter itself emphasizes gaps/uncertainty in the conquest narrative. Keep p
 TIB 13 printed pp. 215–216 (publisher-hosted historical/administrative chapter PDF, part 0x003b6739.pdf, PDF pages 104–105) summarizes the 1304/05 conquest sequence as reported by Ottoman chronicle tradition. The author explicitly distinguishes that account from the Byzantine narrative and cautions that details differ and the Ottoman chronicle is legend-enriched. The list includes Lefke/Leukai, Mekece/Makaǧā, Akhisar/Malagina and Geyve/Kabeia, with further claims about places on both sides of the Sangarios.
 
 Use this only as a **source-critical anchor-research lead**. Keep traditions distinct, preserve the 1304/05 date range and uncertainty of toponym identification, and do not treat the list as proof of uninterrupted control on 1326-04-07 or as a continuous political frontier. Reconcile each toponym separately before adding any evidence-matrix entry. Exact boundary authority is not established by this passage.
+
+
+### 2026-10-09 — Sangarios toponym reconciliation pass
+
+The focused research note `docs/architecture/1326-SANGARIOS-TOPONYM-RECONCILIATION.md` records provisional identity matches and unresolved items for the TIB 13 printed pp. 215–216 place list.
+
+- **Lefke/Leukai → Osmaneli:** provisionally supported by the Bilecik Provincial Directorate of Culture and Tourism's history page; a 2021 epigraphic study is catalogued for further extraction. No project anchor was added because exact coordinate/site provenance has not yet been verified.
+- **Geyve/Kabia-Kabeia:** municipal history reports the Kabia identification and cites an inscription, but the primary epigraphic publication must be checked before acceptance.
+- **Akhisar/Malagina:** scholarly work by Clive Foss is a promising place-identification lead; exact equivalence and coordinates remain pending.
+- **Mekece/Makaǧā:** unresolved pending independent gazetteer or scholarly identification.
+- **Sangarios/Sakarya:** physical geography/corridor only, not a political boundary.
+
+**Admissibility:** these findings improve place-name reconciliation but do not prove the 1304/05 chronicle account as continuous control on 1326-04-07. No anchor registry, candidate polygon, or review binding was changed. The exact frontier remains `REVIEW_REQUIRED / INSUFFICIENT_EVIDENCE`.
