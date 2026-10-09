@@ -30,10 +30,9 @@
         },
         {
           "source": "Klaus Belke, TIB 13, Bithynien und Hellespont, printed p. 218 (publisher PDF part 0x003b6739.pdf, PDF p. 107)",
-          "claim": "Prusa was under prolonged encirclement and food shortage and surrendered to Orhan on 6 April 1326; the source describes it as becoming the emerging Ottoman state's first capital.",
+          "claim": "Prusa was under prolonged encirclement and food shortage and surrendered to Orhan on 6 April 1326; the source describes it as becoming the emerging Ottoman state's first capital. This is a city-control event only and does not establish the surrounding political polygon or the Bursa–Nicaea frontier.",
           "dateScope": "1326-04-06",
-          "role": "historical-control-event",
-          "limitation": "City-control event only; does not establish the extent of the surrounding political polygon or the Bursa–Nicaea frontier."
+          "role": "historical-control-event"
         }
       ],
       "notes": "Bursa control is a scenario-state fact and must not be encoded by mutating province geometry."
