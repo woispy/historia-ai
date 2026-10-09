@@ -430,3 +430,13 @@ No anchor was added because a project-acceptable coordinate source is still miss
 - A secondary indexed page exposes a Paşalar coordinate pair, but it is rejected as project-grade coordinate provenance because the official Culture Inventory lacks coordinates and the original survey/map basis was not directly checked. No coordinate copied to project data.
 - No anchor registry, candidate geometry, evidence matrix or review binding changed. reviewBindings remains empty; immutable candidates, SAFE TO DELETE = 0, convergence lock and canonical promotion BLOCKED remain unchanged.
 - Next: obtain readable TIB pp. 215 and 747–750, inspect Foss (1990) and its map directly, and find institutional coordinate metadata. No CI result is claimed by this documentation update.
+
+
+## 2026-10-09 eighth-pass — TIB reader access and current PR gate
+
+- Exact TIB 13 index entries were rechecked: Akhisar (Malagina), Makaǧā, Mekece, Malagina (region/place/theme), and Metabolē remain separate index entries. Makaǧā and Mekece share printed-page references, but shared references do not prove identity.
+- Clicked the index links for printed p. 215 and pp. 747–750. They resolve to the TIB static reader, but browser extraction returned zero readable lines. Record this as a source-access limitation; do not claim the prose of those pages has been transcribed.
+- The TIB project page explains that the index links into the digital volume; next task is to secure a readable full-text route and transcribe the relevant lemmas directly.
+- Pre-documentation commit gate refresh: GitHub reported PR #109 mergeable=true, 523 commits ahead / 0 behind, and both Historia AI CI and Cliopatria v0.2.0 acquisition verification completed successfully for HEAD 35cffac6a0e905cff231d5ef4019f9edd7c1081d. This is not a CI claim for the new documentation commits that follow.
+- No anchor, coordinate, evidence-matrix record, candidate geometry, or review binding changed. reviewBindings remains empty; immutable candidates, SAFE TO DELETE = 0, convergence lock and canonical promotion BLOCKED remain unchanged.
+- Next: directly inspect TIB pp. 215 and 747–750, Foss (1990), and institutional coordinate provenance; then verify CI on the new HEAD. No new CI result is claimed in this document update.
