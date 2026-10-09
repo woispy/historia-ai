@@ -87,6 +87,35 @@ A binding may be added only when all of the following are recorded:
 
 The current binding file therefore remains empty until the data contract can preserve this evidence-role distinction without ambiguity, or until genuinely boundary-specific evidence is acquired and reviewed.
 
+
+
+## New source lead — Tabula Imperii Byzantini 13
+
+The source search identified a materially stronger scholarly reference for the Byzantine side of the Bithynia pilot:
+
+- **Work:** Klaus Belke, *Tabula Imperii Byzantini 13: Bithynien und Hellespont* (2020).
+- **Institution:** Austrian Academy of Sciences, Tabula Imperii Byzantini.
+- **Coverage:** historical geography of Bithynia and Hellespont in northwestern Asia Minor; includes regional context, settlements/toponyms, fortifications, routes, introductory geography and administrative history, a regional map and supplementary detail maps.
+- **Access/rights:** FWF-hosted e-book record identifies the map resource as **CC BY 4.0**. Preserve attribution and verify the exact rights attached to any specific volume/map asset before redistribution.
+- **Primary links:** [official TIB 13 overview](https://www.oeaw.ac.at/en/imafo/research/byzantine-research/communities-and-landscapes/historical-geography/tib-13), [official publication record](https://tib.oeaw.ac.at/publications), [FWF e-book and rights record](https://e-book.fwf.ac.at/detail/o%3A1438), [full-volume PDF](https://e-book.fwf.ac.at/api/object/o%3A1436/get).
+
+### Admissibility ruling
+
+**ACCEPT as a high-priority source-acquisition lead; NOT YET ACCEPTED as exact 1326 boundary evidence.**
+
+TIB 13 is more directly relevant to Bithynia than general chronology sources, but it is a historical-geography synthesis spanning the Byzantine period, not a ready-made political polygon layer for 1326-04-07. A regional map or place entry cannot by itself prove the exact Ottoman–Byzantine frontier on that date.
+
+### Extraction checklist
+
+1. Inspect the introductory sections on territorial designations, historical/administrative geography, and transport routes.
+2. Locate the gazetteer/map references for Nikaia, Nikomedeia, Prusa, Sangarios/Sakarya and Lefke.
+3. For every extracted claim, record volume/page or map number, exact claim, temporal scope, spatial scale, and whether it concerns a place, administrative region, route, fortification, control event, or frontier.
+4. Compare the TIB evidence with the 1326 date constraint and existing project evidence without treating later Byzantine-period geography as automatically valid in 1326.
+5. Only classify an item as boundary evidence if the cited passage/map explicitly supports a boundary claim at a relevant date and scale. Otherwise classify it as place/region/route context.
+6. Preserve attribution and license metadata; do not raster-trace or convert the regional map into a canonical polygon without a separately reviewed method and provenance record.
+
+This source lead does not change `reviewBindings: []`, immutable candidate geometry, or the promotion gate.
+
 ## Next operation
 
 1. Acquire or locate boundary-specific historical geography evidence for the Bithynia frontier at or near 1326.
