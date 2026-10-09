@@ -364,3 +364,14 @@ A focused reconciliation pass was recorded in `docs/architecture/1326-SANGARIOS-
 **Disposition:** no changes to `data/gis/1326/anchor-candidate-registry.json`, immutable candidate geometry, or review bindings. The TIB 1304/05 campaign account remains source-critical retrospective evidence, not proof of continuous control on `1326-04-07`. Canonical political geometry remains BLOCKED and `SAFE TO DELETE = 0`.
 
 **Next step:** inspect the full Öztürk (2021) Leukai/Lefke epigraphic study, verify the underlying Kabia inscription reference, reconcile Malagina against Foss/TIB's gazetteer, and find an independent Mekece identification. Add research-only anchors only after coordinate provenance is explicit; no frontier binding unless boundary-specific evidence is found.
+
+
+## 2026-10-09 source verification addendum — Leukai and Kabia
+
+A second source pass inspected the full Öztürk (2021) article and located Sencer Şahin's Ministry-hosted 1983 epigraphic/historical-geography survey.
+
+- Öztürk (2021), printed pp. 2–3, explicitly equates Leukai/Lefke with modern Osmaneli and cites TIB 13's Leukai entry. This supports place identity and route context, not 1326 political ownership.
+- Şahin's 1983 survey's indexed text reports Kabaia at the site of modern Geyve and connects the name with an inscription. Keep TIB's Kabeia and the forms Kabia/Kabaia source-specific until normalized through the original publications.
+- Sakarya Metropolitan Municipality's historical-castles PDF summarizes Foss's identification of Malagina's fortress with Paşalar Kalesi and notes Mekece Kalesi as an earlier proposal. This is a genuine place-identification conflict to preserve, not a reason to merge Mekece and Malagina.
+
+References and claim limits are documented in `docs/architecture/1326-SANGARIOS-TOPONYM-RECONCILIATION.md`. No anchors, polygons, evidence-matrix records, or review bindings were added. **Next:** inspect the full Foss article and exact TIB gazetteer entries; keep Mekece/Makaǧā unresolved unless independent identification evidence closes the ambiguity.
