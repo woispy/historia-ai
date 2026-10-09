@@ -173,3 +173,11 @@ The segmented publisher-hosted open-access edition was inspected in the historic
 - **Boundary result:** no coordinate-level frontier for 1326-04-07 was found in these passages. TIB 13 is accepted as dated historical context and city-event evidence, but not as exact political-boundary authority.
 
 The chapter itself emphasizes gaps/uncertainty in the conquest narrative. Keep provenance and claim type distinct; never translate siege zones, road routes, fortress/settlement points, or administrative presence into an invented border. Source links: [open-access chapter PDF](https://austriaca.at/0xc1aa5576%200x003b6739.pdf), [open-access contents and all part links](https://ancientworldonline.blogspot.com/2020/04/tabulae-imperii-byzantini-13-bithynien.html). The book listing states CC BY 4.0; preserve attribution and verify the specific asset's license metadata before redistribution.
+
+
+
+### TIB 13 — early Sangarios-corridor claims
+
+TIB 13 printed pp. 215–216 (publisher-hosted historical/administrative chapter PDF, part 0x003b6739.pdf, PDF pages 104–105) summarizes the 1304/05 conquest sequence as reported by Ottoman chronicle tradition. The author explicitly distinguishes that account from the Byzantine narrative and cautions that details differ and the Ottoman chronicle is legend-enriched. The list includes Lefke/Leukai, Mekece/Makaǧā, Akhisar/Malagina and Geyve/Kabeia, with further claims about places on both sides of the Sangarios.
+
+Use this only as a **source-critical anchor-research lead**. Keep traditions distinct, preserve the 1304/05 date range and uncertainty of toponym identification, and do not treat the list as proof of uninterrupted control on 1326-04-07 or as a continuous political frontier. Reconcile each toponym separately before adding any evidence-matrix entry. Exact boundary authority is not established by this passage.
