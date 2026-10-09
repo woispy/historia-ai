@@ -116,6 +116,27 @@ TIB 13 is more directly relevant to Bithynia than general chronology sources, bu
 
 This source lead does not change `reviewBindings: []`, immutable candidate geometry, or the promotion gate.
 
+
+
+### Targeted TIB 13 reading plan (bibliographic page map)
+
+A published review of the volume provides a useful navigation map for the next extraction pass:
+
+| TIB 13 section | Printed pages | Intended use in this project | Boundary admissibility |
+|---|---:|---|---|
+| Definition and delimitation (`Definition und Abgrenzung`) | 97–102 | Understand the volume's geographic scope and terminology | Context only until claims are dated and explicitly boundary-related |
+| Geographic overview (`Geographischer Überblick`) | 103–110 | Rivers, terrain, climate and regional geography | Physical geography, not political ownership |
+| Historical and administrative development | 111–224 | Identify time-specific territorial/administrative statements | Potentially relevant; each claim must be dated and checked for scale |
+| Transport connections | 263–304 | Roads, shipping and connectivity around Bithynia | Route/access evidence, not a political frontier by itself |
+| Nikaia gazetteer entry | 802–830 | Locate cited history, place references and bibliography for Nicaea/İznik | Not a polygon or ownership proof without a specific dated claim |
+| Nikomedeia gazetteer entry | 833–856 | Same for Nicomedia/İzmit | Not a polygon or ownership proof without a specific dated claim |
+| Prusa gazetteer entry | 949–957 | Same for Prusa/Bursa | Not a polygon or ownership proof without a specific dated claim |
+| Regional map and supplementary maps | End matter; map legends must be read with the introduction | Inspect settlement and period symbols, map scope and regional relationships | Regional cartography only; do not trace as 1326 political geometry |
+
+These page ranges come from Peter Riedlberger's 2021 review of Klaus Belke's TIB 13, which also notes that the maps use period-coded settlement symbols and must be interpreted together with the introduction. The review is a navigation aid, not a substitute for citing Belke's underlying passages.
+
+**Extraction rule:** do not record a page range as evidence on its own. Each eventual evidence item must cite the exact page/map and state the relevant passage's date scope, claim type and limitation. If a source describes Byzantine administrative geography from another century, it remains historical context unless corroboration supports its relevance to 1326-04-07.
+
 ## Next operation
 
 1. Acquire or locate boundary-specific historical geography evidence for the Bithynia frontier at or near 1326.
