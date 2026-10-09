@@ -330,3 +330,13 @@ Canonical production remains protected until that chain is complete.
 - Kept the evidence record in the existing source/claim/dateScope/role shape. The claim explicitly limits its scope to city control and does not imply the surrounding polygon or Bursa–Nicaea frontier.
 - No new polity, boundary edge, review binding, candidate geometry, or canonical authority was created. The evidence matrix remains evidence-only.
 - CI is pending/running for the newest head and must be checked before claiming verification.
+
+
+
+## 2026-10-09 TIB 13 Sangarios-corridor lead
+
+- Inspected TIB 13 printed pp. 215–216 (PDF pages 104–105 in the publisher-hosted chapter part).
+- The chapter attributes the 1304/05 Sangarios-valley conquest sequence to Ottoman chronicle tradition, distinguishes it from the Byzantine narrative, and cautions that the Ottoman account differs in details and includes legendary embellishment. Named places include Lefke/Leukai, Mekece/Makaǧā, Akhisar/Malagina and Geyve/Kabeia; place-identification and fortification chronology caveats remain.
+- Disposition: source-critical historical-anchor lead only. Do not merge divergent traditions, assert continuous control through 1326, or turn the Sangarios corridor into a political border.
+- Next: reconcile each toponym independently against the existing anchor candidate ledger and evidence schema; if the schema cannot represent source-critical claims without implying certainty, leave them in the research register.
+- Exact 1326 frontier remains REVIEW_REQUIRED / INSUFFICIENT_EVIDENCE. No geometry, binding, or authority change. No CI result is claimed for this documentation-only update.
