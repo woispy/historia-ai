@@ -509,3 +509,20 @@ Important audit limitation: artifact metadata and workflow steps were inspected 
 Gate ruling unchanged: workflow PASS validates the pipeline, not the historical truth of candidate geometry. Do not create aliases for Eşrefoğulları or Alâiye, infer control from bbox intersections, or promote any reviewed geometry without independent evidence and explicit review. No anchor, coordinate, polygon, controller, or review binding was changed by this checkpoint. `reviewBindings = []` remains the last content-verified state; `SAFE TO DELETE = 0`; convergence locked; canonical political geography **BLOCKED**; frontier **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**.
 
 Next operation: inspect the #200 review-package contents, compare its manifests/ledger with the prior #199 package, and only then choose a candidate for evidence-backed adjudication. Do not merge PR #109.
+
+### #200 review-package content audit — 2026-10-10
+
+The newly published #200 package was downloaded and inspected. Artifact SHA-256 from GitHub metadata: `940b03809dde1d40161bc0f0a1d94e69cc791a135c0b908c0aba9928c65a137c`. The extracted manifests/ledger agree with the prior #199 content checkpoint:
+
+- Input features **13,765**; temporal candidate packet **150**; excluded **13,608** outside the temporal range, **7** non-polity, **0** missing geometry.
+- Spatial screen **21/150** retained for review and **129** rejected by the documented 120 km anchor-influence bounding-box screen. This is a research triage screen only.
+- Required canonical entities **8**; single-candidate matches **6** (Ottoman Empire, Byzantine Empire, Ilkhanate, Beylik of Karasi, Beylik of Saruhan, Beylik of Aydin); unmatched **2** (Eşrefoğulları, Alâiye); ambiguous **0**.
+- Review queue **21**; linked candidates **6**; unmatched candidates **15**; review ledger **21 records / 21 pending**.
+- Each ledger decision remains `pending`; `reviewedGeometry = null`; topology gate `not-run`; explicit `reviewBindings = []`.
+- Automatic review matching, geometry generation, controller inference, and canonical promotion remain disabled. Every matched candidate has `autoPromotion = false`.
+
+The queue audit also confirms why the 21 candidates cannot be accepted based on the screening alone: some source polygons have very broad extents and produce many anchor hits (for example, the Mamluk Sultanate candidate hits anchors across Anatolia and the Levant). These hits derive from bbox screening, not exact polygon containment or evidence of political control. The screen must never be used as an implicit candidate-to-anchor binding.
+
+This exact-HEAD artifact audit confirms the alias-fix behavior and the intended safety posture; it does **not** adjudicate a single polygon or edge. Eşrefoğulları and Alâiye remain unmatched, and no candidate should be force-bound to them. Next research unit should be a tightly scoped pilot with a source-backed historical entity plus a specific, independently supported edge claim; if no source supports an exact edge, record the gap and leave the review pending rather than manufacture a binding.
+
+The previous subsection's note that #200 package internals had not yet been re-extracted is superseded by this audit. All geometry/promotion gates remain unchanged: `SAFE TO DELETE = 0`; convergence locked; canonical political geography **BLOCKED**.
