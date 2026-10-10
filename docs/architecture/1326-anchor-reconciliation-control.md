@@ -449,3 +449,12 @@ No anchor was added because a project-acceptable coordinate source is still miss
 - Entity ruling: Mekece settlement/tekfur and Akhisar fortress are distinct in Foss's account; Metabole↔Akhisar is a stronger scholarly association; Malagina plain/region remains a broader context; Paşalar=Metabole/Akhisar is still plausible but unproven; campaign Makaǧā remains unresolved.
 - No anchor, coordinate, candidate geometry, evidence-matrix record or review binding changed. Immutable source geometry preserved; SAFE TO DELETE = 0; convergence locked; canonical promotion BLOCKED; frontier remains INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED.
 - Next: inspect legitimate OUP/library copy and map context, compare it with the official tourism plan and Foss 1990, then obtain institutional coordinate metadata. No CI claim is made for the documentation update.
+
+
+## 2026-10-10 T3-B entity alias reconciliation correction
+
+The latest persisted real-source review package (Cliopatria v0.2.0, candidate packet SHA-256 `c03d8d1e2cb4b280f6549a48b0602f8f44d6c856e7fa49b543fbb2f748779c24`) exposed a deterministic naming gap in `reconcile-1326-cliopatria-entities.js`: the required canonical IDs `ottoman-beylik`, `karasi`, `saruhan`, and `aydin` did not include the exact upstream candidate labels `Ottoman Empire`, `Beylik of Karasi`, `Beylik of Saruhan`, and `Beylik of Aydin`. The normalization also discarded Turkish dotless `ı` rather than treating it as `i`.
+
+The reconciliation alias list now includes those exact source labels, and normalization explicitly maps dotless `ı` to `i`. This is an identity-reconciliation correction only: matching remains candidate-only, auto-promotion remains false, and a name match still does not establish controller or geometry authority. No polygon, coordinate, review binding, or canonical record was changed. Eşrefoğulları and Alâiye remain unmatched until a source candidate with an admissible identity is found; they are not force-mapped to unrelated polities.
+
+**Required verification:** fresh PR CI and Cliopatria acquisition workflow must confirm the new reconciliation output and downstream queue/ledger integrity. Until then the previous artifact counts are historical and must not be represented as post-fix counts. Canonical political geography remains **BLOCKED**; `SAFE TO DELETE = 0`; local convergence remains locked.
