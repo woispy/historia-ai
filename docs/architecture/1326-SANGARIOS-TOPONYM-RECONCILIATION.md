@@ -495,3 +495,37 @@ Keep the entities and claims separate:
 - TIB campaign Makaǧā ↔ modern Mekece: still unresolved as a separate toponym reconciliation.
 
 No anchor, coordinate, candidate polygon, evidence binding, review binding, or canonical geometry was added. Frontier remains **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**; **SAFE TO DELETE = 0**.
+
+
+## 2026-10-10 — T3-B CI checkpoint and review-package audit
+
+### Current branch verification
+
+For HEAD `764e024a173c3f968441c0489bab9e1b63938571`, both PR-triggered workflows completed successfully:
+
+- **Historia AI CI #3500** — success; validate job completed all listed checks, including 1326 source-intake/anchor-registry contracts, historical GIS identity tests, political runtime tests, topology contracts, map/rendering tests, and the production build.
+- **Cliopatria v0.2.0 acquisition verification #191** — success; its verify job completed source acquisition, the real 1326 T3-B candidate-to-review pipeline, persisted geometry-review-ledger validation, explicit pilot edge-binding validation, T3-B provenance/pilot-readiness validation, contract tests, and review-package publication.
+
+Workflow runs:
+- https://github.com/woispy/historia-ai/actions/runs/37995453054
+- https://github.com/woispy/historia-ai/actions/runs/37995453072
+
+The acquisition workflow published `historia-1326-t3b-review-package` (262,027 bytes; SHA-256 digest reported by GitHub: `917c3992bfd7f7a2f6ac68f13268d6712306fe10a66ac4ab43f5acac2ff63fec`) and the pinned source snapshot artifact (44,232,585 bytes; digest `8c2e8c5505ca8241ae3429e613d52b8ebedac7880675a746e7e4f95f5bbc52ae`). Both artifacts are retained with a seven-day expiry; the review package is reproducible evidence, not a canonical promotion.
+
+### Review-package audit
+
+The downloaded package confirms these gates remain intentionally open:
+
+- Source extraction: **13,765** input features; **150** temporal candidates; exclusions are **13,608** outside the date range, **7** non-polity features, **0** missing geometries.
+- Spatial screen: **21** of the 150 candidates retained for manual review; **129** screened out by the documented 120 km anchor-influence bounding-box screen. This screen narrows research only; it does not validate historical ownership or boundaries.
+- Entity reconciliation: **2** of 8 required entities have a single candidate; **6** remain unmatched; no candidate auto-promotes.
+- Geometry review ledger: **21 records, 21 pending**; all `reviewedGeometry` decisions remain null, confidence fields are zero until evidence is recorded, and topology checks have not run for pending records.
+- Edge-evidence bridge: `reviewBindings: []`; automatic review matching, geometry generation, controller inference, and canonical promotion remain disabled.
+
+The artifact's immutable source provenance remains pinned to Cliopatria v0.2.0 commit `ad28a69`, raw archive SHA-256 `d01ae3a20d358cc5d54f69d9d725d390767d9c8759ac89ad6f90c58d106f3370`, and extracted GeoJSON SHA-256 `5df3b5868cfab8f76030853fa2346ed3cd71171ad807b6f72d783ee2dce6839e`. Candidate packet SHA-256 remains `c03d8d1e2cb4b280f6549a48b0602f8f44d6c856e7fa49b543fbb2f748779c24`.
+
+### Gate ruling and next operation
+
+CI is **GREEN for the tested code and reproducible review-pipeline contracts**, but **canonical political geometry remains BLOCKED**. The next task is not to force-bind the 21 pending records: it is to resolve the six unmatched canonical entities and the candidate-to-entity identities using independent dated historical evidence, then record explicit reviewed edge bindings only where the source supports that exact edge. The Malagina/Metabole research remains identity evidence only and cannot close a political boundary.
+
+No anchor, coordinate, polygon, geometry, or review binding was added in this CI audit. The exact 1326-04-07 frontier remains **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**; **SAFE TO DELETE = 0**.
