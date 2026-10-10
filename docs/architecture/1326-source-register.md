@@ -353,3 +353,20 @@ The persisted T3-B review package was also checked against the two relevant anch
 These are **bbox-screening observations only**: they do not establish exact polygon containment, political control, or an entity match. The broad year-level intervals are especially inadequate for Eşrefoğulları, because TDV dates the transfer of core Eşref territory to Hamîdoğulları after Süleyman Şah's death on 9 October 1326. They are also inadequate to collapse Alâiye into Karaman or Teke, because the historical source describes a distinct Alâiye locality and Karaman-affiliated rulers, while the precise 1326-04-07 arrangement remains unresolved.
 
 **Decision:** do not create alias mappings from `esrefogullari` to `Beylik of Hamid`, or from `alaye` to `Beylik of Karaman` / `Beylik of Teke`. Keep both unmatched and use these candidate geometries only as contextual review evidence. No polygon, anchor coordinate, controller, or review binding was promoted.
+
+## Bithynia pilot citation traceability gap — 2026-10-10
+
+The pilot edge packet `data/gis/1326/pilot-edge-evidence/bithynia-core-01.json` cites internal references such as `inventory:1326-gecis-envanteri#17`, `#15`, `#18`, and `#1`. These identifiers are not themselves source citations and cannot be used to adjudicate an exact political edge without a resolvable inventory record and its underlying source.
+
+The available conversation attachment titled `1326 Geçiş Envanteri.txt` was checked during this audit. It is a Tier 3 historical-geography design/methodology note (historical geography graph, anchor/constraint distinction, and frontier uncertainty); it does **not** contain a numbered evidence inventory with records `#1`, `#15`, `#17`, or `#18`. Therefore the attachment cannot be treated as the source record referenced by those IDs. The corresponding repository inventory path/record has not yet been identified from the current branch files.
+
+### Edge-specific disposition
+
+- `bursa-nicaea-frontier-1326`: keep **uncertain**, confidence 0.25; no exact political boundary is established by the currently traceable source material.
+- `bursa-nicaea-regional-proximity-1326`: retain as a distinct graph relation; it must not be converted into a boundary.
+- Nicaea–Sangarius and Nicaea–Lefke records: preserve as river/road corridor or physical-access claims, not ownership/frontier claims.
+- Nicomedia–Nicaea crossing: retain as a hypothesis only; no exact crossing point is established.
+
+The #202 package independently confirms that the generated review ledger has 21 pending records, zero edge assessments, zero explicit `reviewBindings`, and `reviewedGeometry = null` throughout. The pilot binding input also remains `WAITING_FOR_REAL_CANDIDATE_ACQUISITION` with an empty binding list. CI's pilot-readiness pass is a schema/workflow result, not a historical adjudication.
+
+**Required next action:** locate and verify the exact repository inventory record(s) and follow each reference to its primary or inspectable secondary source. Record source title, author/editor, page/section, URL or stable identifier, relevant claim, date scope, and what the source does not prove. Until that trace is complete, do not add review bindings or raise frontier confidence. No geometry, anchor, coordinate, controller, or canonical state is changed by this note.
