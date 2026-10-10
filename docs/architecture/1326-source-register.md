@@ -370,3 +370,24 @@ The available conversation attachment titled `1326 Geçiş Envanteri.txt` was ch
 The #202 package independently confirms that the generated review ledger has 21 pending records, zero edge assessments, zero explicit `reviewBindings`, and `reviewedGeometry = null` throughout. The pilot binding input also remains `WAITING_FOR_REAL_CANDIDATE_ACQUISITION` with an empty binding list. CI's pilot-readiness pass is a schema/workflow result, not a historical adjudication.
 
 **Required next action:** locate and verify the exact repository inventory record(s) and follow each reference to its primary or inspectable secondary source. Record source title, author/editor, page/section, URL or stable identifier, relevant claim, date scope, and what the source does not prove. Until that trace is complete, do not add review bindings or raise frontier confidence. No geometry, anchor, coordinate, controller, or canonical state is changed by this note.
+
+### 2026-10-10 — EU5toGIS georeferenced map dataset intake
+
+**Disposition: ACCEPT as a comparative cartography / GIS workflow reference only. NOT accepted as 1326 political-boundary authority.**
+
+The user-supplied `EU5toGIS.zip` was inspected in place; archive SHA-256: `c8a92838f7ab3a37f72bc875da0f52fbfe22084fd07ab7e71f16128a6d0b7c0c`. Its README describes a georeferenced Europa Universalis V map and map-object layers. Inspected vector contents:
+
+- `datasets/locations.gpkg`: 28,573 MultiPolygon location features; attributes include in-game `id`, `tag`, `hex_color`, `topography`, `vegetation`, `climate`, `raw_material`, and `natural_harbor_suitability`.
+- `datasets/generated_map_object_locators_city.gpkg`: 21,046 city point features, with tag, rotation and game-map coordinates.
+- `datasets/ports.gpkg`: port points (4,421), sea-zone points (5,662), and connection lines (4,421).
+- Raster files include georeferenced `locations.tif`, `rivers.tif` and alternate-central-longitude `*_L.tif` variants.
+- Vector layers use a custom Gall Stereographic projected CRS described in the README as WGS 84-based. Raster/vector central-longitude handling differs; overlays must be checked in GIS rather than assumed pixel-identical.
+
+**Useful for Historia AI:** a high-detail visual comparison layer for modern/global coastline and river alignment, location granularity, province/region hierarchy research, GIS overlay workflow, and reviewing how small settlements and coast-adjacent shapes are represented. The vector polygons can support visual QA and comparative cartography; point/port layers can support a separate locator cross-check after real-world positions are independently verified.
+
+**Limits / exclusions:** this is EU5's game map and game data, not an independently surveyed historical dataset. Its own README warns that city and port object positions can differ from real-world positions and notes some regional map inaccuracies. Its game location geometry, game tags, resource/climate/topography values, and implicit political partitions must not be copied into Historia AI's canonical 1326 polygons, treated as historical ownership/controller evidence, or used to auto-fill missing geometry. Do not infer 1326 boundaries from a 1337/current game setup or from modern rivers/administrative lines. Physical geography, political geometry, and scenario ownership remain separate authorities.
+
+**License/provenance gate:** the supplied README credits DavidRMilos and includes a GPL notice for the bundled QGIS plugin (whose copyright is attributed to Jorge Almerio), but does not clearly state a redistribution license for the GIS datasets/game-derived layers themselves. Keep the ZIP outside the repository for now; do not commit or redistribute its binary data. Before any derivative data is published, establish the dataset's own license/permission and the applicable Paradox game-asset terms, retain attribution, pin source/version and checksums, and document any transformation.
+
+**Workflow recommendation:** use this as an optional QGIS reference layer for visual QA only. Any extracted real-world comparison geometry must have its own source, license, date applicability and provenance. This intake changes no anchor, evidence-matrix entry, candidate geometry, review binding, or canonical asset. Current political geometry gate remains blocked; `SAFE TO DELETE = 0`.
+
