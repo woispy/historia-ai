@@ -308,3 +308,35 @@ The full Sakarya University repository thesis by Sena Nur Akbaş (2023), *Sakary
 This supports a strong scholarly site-identification hypothesis, but not a project-ready coordinate or a 1326 political boundary. The PDF gives a physical place description (Kaletepe, Paşalar Mahallesi, Pamukova), not a traceable coordinate pair, georeferencing procedure, or positional uncertainty. Keep the regional Malagina/Mekece proposal distinct from the fortress-level Paşalar/Metabole identification and keep TIB Makaǧā ↔ modern Mekece unresolved.
 
 No anchor, coordinate, polygon, evidence binding, review binding, or canonical geometry was promoted. Frontier remains INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED; SAFE TO DELETE = 0.
+
+
+## T3-B unmatched required entities — 2026-10-10 research checkpoint
+
+The pinned Cliopatria v0.2.0 scenario extraction (150 temporal candidates) has no accepted exact-name/alias candidate for either `esrefogullari` or `alaye`. This is currently a **source coverage / entity-reconciliation gap**, not permission to substitute a neighboring polity. Both entities remain required and unmatched; candidate promotion, controller inference, and geometry generation stay disabled.
+
+### Eşrefoğulları — existence supported; candidate geometry absent
+
+The TDV İslâm Ansiklopedisi entry by Sait Kofoğlu states that Eşref II Süleyman was killed by Demirtaş on 9 October 1326 and that, after this event, Beyşehir, Seydişehir, Akşehir and nearby lands were seized by Hamîdoğulları while other territories were divided between Sâhib Ataoğulları and Karamanoğulları. This is strong temporal evidence that Eşrefoğulları had not yet ended on 1326-04-07, and identifies a core regional context around Beyşehir/Seydişehir. It does **not** provide a machine-readable political boundary or prove a match to the Cliopatria candidate geometry.
+
+Source: https://islamansiklopedisi.org.tr/esrefogullari
+
+**Disposition:** keep `esrefogullari` unmatched and `geometryStatus = pending-source-acquisition`. Do not use the post-9 October territorial transfers as April borders, and do not bind the later Hamid geometry as a substitute.
+
+### Alâiye — polity period supported; exact 1326 ruler/control unresolved
+
+The TDV İslâm Ansiklopedisi entry by Erdoğan Merçil dates Alâiye's polity period from the late 13th century to 1471, but also states that after Mecdüddin Mahmud Bey took Alâiye in 1293, the city and surrounding area were governed by beys affiliated with the Karamanoğulları and under Mamluk suzerainty. Ibn Battuta's report of Yusuf b. Karaman is circa 1333, later than the scenario date. Therefore a broad polity interval does not settle the local authority on 1326-04-07, and the record must not be silently equated with the Karamanoğulları, Teke, or another adjacent polity.
+
+Source: https://islamansiklopedisi.org.tr/alaiye-beyligi
+Related city entry: https://islamansiklopedisi.org.tr/alanya
+
+**Disposition:** keep `alaye` unmatched pending scenario-date ruler/authority reconciliation and source geometry. Do not infer the political boundary from the place's existence interval.
+
+### Post-alias-fix pipeline checkpoint
+
+- Cliopatria acquisition verification #196: **PASS**.
+- Historia AI CI #3505: **PASS**.
+- Entity reconciliation: 6/8 matched, 2 unmatched, 0 ambiguous.
+- Review queue: 21 records (6 entity-linked, 15 unmatched); geometry ledger 21/21 pending.
+- Explicit `reviewBindings`: 0; promotion remains **BLOCKED**.
+
+This checkpoint improves evidence and records the reason for non-matching; it does not promote anchors, coordinates, review bindings, or canonical geometry. `SAFE TO DELETE = 0`.
