@@ -423,3 +423,36 @@ Before changing either disposition, obtain and record:
 
 **Safe interim use:** use only as a local, non-redistributed visual inspection reference while assessing rights; do not commit the package or create a public derived layer from EU5 polygons. For production province geometry, prefer independently licensed public-domain/open-license real-world geography and independently sourced historical evidence. The EU5toGIS package remains a comparative workflow reference, not 1326 historical boundary authority. No anchor, evidence-matrix entry, candidate geometry, review binding, or canonical asset was changed; SAFE TO DELETE = 0.
 
+
+
+### 2026-10-10 — inventory-reference trace audit (PR #109, HEAD `7b97437cf409479a46bd3902c544296ae28ad663`)
+
+**Result: the numbered source inventory is still unresolved.** This pass checked the complete Git tree at the exact PR HEAD (1,028 entries), searched repository paths/text for `1326-gecis-envanteri` / `Geçiş Envanteri`, and inspected the available conversation attachment `1326 Geçiş Envanteri.txt`. No repository file or numbered evidence ledger for inventory records `#1`, `#15`, `#17`, or `#18` was found. The attachment is a Tier 3 methodology/design note and contains no such numbered evidence records. Related files that do exist — `data/historical/evidence/1326/source-register.json`, `docs/architecture/1326-HISTORICAL-GEOGRAPHY-EVIDENCE-REGISTER.md`, and `docs/architecture/1326-SANGARIOS-TOPONYM-RECONCILIATION.md` — are source/evidence registers and research notes, not the missing numbered inventory. GitHub code/commit searches for the exact inventory identifier returned no matches.
+
+This does **not** prove that the inventory never existed in another branch, external note, deleted file, or earlier conversation; it means the underlying numbered records cannot be resolved from the current PR tree and the available attachment.
+
+#### Claim-level cross-check (not a substitution for the missing numbered records)
+
+| Pilot reference | Claim currently attached in `bithynia-core-01.json` | Independent source-level result | Ruling |
+|---|---|---|---|
+| `#1` | Sangarios valley is both an access corridor and a barrier in some gorge sections | Oxford Classical Dictionary, “Sangarius” (Eric William Gray, 2015), identifies the river valley as access from coast to plateau and says parts of the gorge impede east–west movement: https://academic.oup.com/edited-volume/61673/chapter-abstract/550496284. Oxford, “Bithynia” describes the region’s forested/mountainous terrain, Sangarius tributaries/valleys and communications: https://academic.oup.com/edited-volume/61673/chapter-abstract/548511258. | **Physical geography claim corroborated at general scale only.** The exact inventory record #1 and any segment-specific geometry remain unverified. This is not a political boundary. |
+| `#15` | Nicaea–Sangarius / Lefke road-corridor context | TIB 13, printed pp. 215–216, reports a retrospective 1304/05 Ottoman-chronicle campaign narrative naming Lefke/Leukai and other Sangarius-valley places, while warning of differences from Byzantine accounts, legendary embellishment, and uncertain identifications. Öztürk (2021), printed pp. 2–3, supports the place identity Leukai/Lefke → modern Osmaneli and discusses historical route evidence: https://www.libridergi.org/wp-content/uploads/2021/03/lbr.202101.pdf. | **Corridor/place/route context only.** The 1304/05 narrative is not proof of continuous control on 1326-04-07, nor a boundary. The exact inventory record #15 remains unavailable. |
+| `#17` | Bursa–Nicaea frontier and regional proximity | TDV “Bursa” dates the city’s surrender to 6 April 1326: https://islamansiklopedisi.org.tr/bursa. TDV “Orhan” describes the Bursa and Nicaea sieges in the same regional campaign and the Bursa event, but does not draw a precise continuous political frontier: https://islamansiklopedisi.org.tr/orhan. TIB 13, printed p. 218, likewise supports the dated Prusa/Bursa city-control event, not the surrounding polygon. | **City/event chronology and regional context only. Exact frontier claim NOT VERIFIED.** Preserve the pilot’s frontier status as uncertain and do not raise its 0.25 confidence. The original inventory record #17 remains unavailable. |
+| `#18` | Nicomedia–Nicaea regional network and a strategic-crossing hypothesis | TIB 13, printed pp. 218–219, and TDV “Orhan” provide regional chronology and later events; neither source, as inspected here, identifies the exact crossing point asserted by the pilot or an exact 1326 border. | **Regional chronology only; specific crossing hypothesis NOT VERIFIED.** The original inventory record #18 and its alleged crossing source remain unavailable. |
+
+#### Source-level references and temporal limits
+
+- TIB 13, Klaus Belke, *Bithynien und Hellespont* (2020), printed pp. 215–216: retrospective 1304/05 Sangarios-valley narrative, explicitly source-critical; use for toponym/route research only. Chapter PDF: https://austriaca.at/0xc1aa5576%200x003b6739.pdf.
+- TIB 13, printed pp. 217–219: p. 218 supports Prusa/Bursa surrender to Orhan on 6 April 1326 (city control); p. 219 discusses the 1329 siege context and Nicaea’s 1331 surrender / later Nicomedia events. These later events are chronology constraints, not facts to project backward as exact 1326 boundary geometry.
+- TDV İslâm Ansiklopedisi, “Bursa”: https://islamansiklopedisi.org.tr/bursa.
+- TDV İslâm Ansiklopedisi, “Orhan”: https://islamansiklopedisi.org.tr/orhan.
+- Oxford Classical Dictionary, “Bithynia” and “Sangarius”: URLs in the table above. These are regional physical/historical-geography context, not 1326 political-boundary evidence.
+
+#### Decision / required next step
+
+1. Keep `data/gis/1326/pilot-edge-evidence/bithynia-core-01.json` unchanged in this audit; its `inventory:1326-gecis-envanteri#*` strings still point to unresolved internal identifiers, not source citations.
+2. Keep `data/gis/1326/pilot-edge-evidence/bithynia-core-01.review-bindings.json` at `reviewBindings: []`; no explicit review binding is created by this pass.
+3. Keep geometry generation, controller inference and canonical promotion disabled. The Bursa–Nicaea frontier remains **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**; corridor/proximity evidence must not be promoted to a political border.
+4. To resolve the references, retrieve the original inventory file/revision or the original authoring message that defines the numbered records and capture each record verbatim with its source title, author/editor, page/section, stable URL, date scope, spatial scale, claim type and limitations. Until then, do not silently remap the numbers to the corroborating sources above.
+
+No anchor, coordinate, candidate polygon, geometry, controller, source-matrix entry, or review binding was promoted. `MIN_AREA = 0.00005` remains unchanged; `SAFE TO DELETE = 0`; canonical promotion and Local convergence remain blocked.
