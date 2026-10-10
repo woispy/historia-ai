@@ -606,3 +606,20 @@ The workflow results verify pipeline execution and publication only; they do not
 Unchanged gates: Bursa–Nicaea exact frontier **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED** (confidence 0.25); `reviewBindings = []`; `reviewedGeometry = null`; canonical promotion **BLOCKED**; `SAFE TO DELETE = 0`; convergence locked. PR #109 remains open/draft/unmerged.
 
 **Next:** continue the source trace through repository branches, historical commits, and the original authoring context for the inventory. If the original ledger cannot be recovered, replace the internal-only references only through a documented, source-by-source evidence review—not by silently relabeling secondary research leads as the missing records.
+
+## 2026-10-10 — exact-HEAD CI #3518 / Cliopatria #209 sealed
+
+Commit `89b4ca672c6d47abbe1b7cc43758967da7de4b94` completed both required workflows successfully:
+
+- Historia AI CI **#3518 — PASS**: validation job completed all 84 steps; no failed steps.
+- Cliopatria v0.2.0 acquisition verification **#209 — PASS**: verification job completed all 13 steps; no failed steps.
+- Published review package artifact: ID `11679533732`, 262,629 bytes, SHA-256 `d066a3d328c13f6e9e195210fd503197fffe4bb364fa9247d270bd5247d0bf50`.
+- Published source snapshot artifact: ID `11679369158`, 44,232,585 bytes, SHA-256 `b3d3b8f849863731915f1e8988e093c19f3a27ada45092f1b8245320ee42eaa2`.
+
+The published review package was inspected directly. Its `edge-evidence-bindings.json` has `reviewBindings: []`, `promotion: BLOCKED`, and all automatic matching, geometry generation, controller inference, and canonical promotion policies disabled. The review ledger has 21 records and 21 pending; every decision remains pending, every `reviewedGeometry` remains null, and the reference bridge reports `boundReviewRecords: 0` and `boundEdges: 0`. The reconciliation queue reports 21 pending review items, including 15 unmatched candidates. This is consistent with the no-inference/no-promotion contract.
+
+The source-inventory trace was also extended to prior independent-source-review branches. The tracked source register, independent-source-review JSON, and Anatolia geometry-source matrix in those branches do not contain the missing numbered inventory references. This narrows the repository trace but does not prove the original ledger never existed elsewhere.
+
+Historical gate remains unchanged: Bursa–Nicaea frontier **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED** (confidence 0.25); `reviewBindings = []`; `reviewedGeometry = null`; canonical promotion **BLOCKED**; `SAFE TO DELETE = 0`; convergence locked. PR #109 remains open, draft, unmerged, and mergeable; base remains `integration/phase-a-h-production`.
+
+**Next:** recover the original numbered inventory from its authoring context or a retained external copy. If unavailable, continue a separately labeled source-by-source evidence review; do not silently map the missing inventory IDs to secondary sources or promote any political geometry.
