@@ -391,3 +391,35 @@ The user-supplied `EU5toGIS.zip` was inspected in place; archive SHA-256: `c8a92
 
 **Workflow recommendation:** use this as an optional QGIS reference layer for visual QA only. Any extracted real-world comparison geometry must have its own source, license, date applicability and provenance. This intake changes no anchor, evidence-matrix entry, candidate geometry, review binding, or canonical asset. Current political geometry gate remains blocked; `SAFE TO DELETE = 0`.
 
+### 2026-10-10 — EU5toGIS license/provenance audit (second pass)
+
+**Verdict: NOT CLEARED for repository redistribution, committed binary assets, or publication of derivative game-map geometry.** This is a provenance/risk decision, not a legal opinion.
+
+#### A. Dataset files (datasets/*.gpkg, *.tif)
+
+The supplied EU5toGIS/README.md asks users to credit DavidRMilos but states no SPDX identifier, Creative Commons license, explicit grant, or redistribution terms for the GIS datasets. A request for attribution is not, by itself, a license grant. The source thread was not readable by the automated browser due to a forum client challenge; the linked Reddit announcement confirms that the author distributes the package and describes it as a georeferenced EU5 map with embedded in-game location data, but the accessible announcement does not add a dataset license: https://www.reddit.com/r/EU5/comments/1rcf6z1/complete_version_of_georeferenced_eu5_dataset_is/.
+
+The data is expressly derived from EU5 map/game content (location map, location tags/IDs, game-object locators, port/sea-zone data and in-game attributes). Paradox's current User Agreement, updated 2026-01-21, says Paradox or its licensors reserve intellectual-property rights in the Services; its UGC clause says users' rights extend only to their original new content and do not grant rights to Paradox or third-party content. It also cautions that Paradox does not own IP in every published game and therefore cannot unconditionally permit UGC for all games. Source: https://legal.paradoxplaza.com/eula (see §§1 and 5). This does not, on its own, adjudicate the exact rights status of this specific dataset; it means the dataset author cannot be assumed to grant rights that they do not hold.
+
+**Dataset disposition:** LICENSE_UNCONFIRMED / REDISTRIBUTION_BLOCKED. Do not add the ZIP, GeoPackages, TIFFs, extracted EU5 polygons, or derivatives of EU5 map geometry to this repository or a public release unless (1) the dataset author supplies explicit written permission/license covering the intended use and redistribution, and (2) any necessary Paradox rights/terms are confirmed. Private inspection of the supplied copy is not treated as clearance for publishing or incorporating its geometry. The archive remains outside the repository; SHA-256: c8a92838f7ab3a37f72bc875da0f52fbfe22084fd07ab7e71f16128a6d0b7c0c.
+
+#### B. Bundled QGIS plugin (plugins/valuetool_for_eu5/)
+
+The plugin is a separately licensed third-party component and must not be conflated with the GIS dataset:
+
+- metadata.txt identifies the upstream project as https://github.com/jorgealmerio/valuetool, names Jorge Almerio as maintainer, and lists multiple original contributors.
+- The ZIP includes a GNU GPL v3 license text, while source-file headers state GPL version 2 or later. Treat the exact licensing/modified-distribution state as requiring upstream verification rather than assuming the bundle is internally consistent.
+- Crucially, the dataset README says the author has **not yet received the copyright holder's consent for uploading this modified plugin to the QGIS plugin site**.
+
+**Plugin disposition:** do not commit, mirror, or redistribute the bundled plugin. If a GIS workflow needs this functionality, obtain the plugin directly from its upstream source/QGIS distribution under the license and terms supplied there, or implement an independent minimal tool without copying its code. This restriction is independent of the dataset-license question.
+
+#### C. Required clearance record
+
+Before changing either disposition, obtain and record:
+1. Dataset author's explicit license/permission for the specific data layers and any derivatives, including whether public GitHub distribution is allowed.
+2. Confirmation whether the author's work includes EU5/Paradox-owned game assets or data and, if it does, the applicable permission/terms for redistribution outside the game-mod context.
+3. For the plugin, an upstream source/version and license confirmation, plus resolution of the README's stated missing consent before any redistribution of the bundled copy.
+4. The exact version/date, source URL, author/rights-holder, permission evidence, checksum, and allowed-use scope in the project provenance record.
+
+**Safe interim use:** use only as a local, non-redistributed visual inspection reference while assessing rights; do not commit the package or create a public derived layer from EU5 polygons. For production province geometry, prefer independently licensed public-domain/open-license real-world geography and independently sourced historical evidence. The EU5toGIS package remains a comparative workflow reference, not 1326 historical boundary authority. No anchor, evidence-matrix entry, candidate geometry, review binding, or canonical asset was changed; SAFE TO DELETE = 0.
+
