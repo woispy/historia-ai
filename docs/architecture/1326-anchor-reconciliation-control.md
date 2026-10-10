@@ -591,3 +591,18 @@ Exact inventory identifier / record text remains unresolved in the current PR tr
 - `MIN_AREA = 0.00005`; `SAFE TO DELETE = 0`; convergence remains locked; PR #109 remains open/draft/unmerged.
 
 **Next:** obtain the original inventory artifact or the authoring message that defines the four numbered records, then transcribe each source record with exact source title, author/editor, page/section, stable URL, temporal scope, spatial scale, claim type, and limitations. Until that exists, keep the edge assessments unbound and the frontier uncertain.
+
+## 2026-10-10 — exact-HEAD verification after inventory trace audit
+
+Branch HEAD `c5518aac2437b77d8c6b8fef5a2b48e611addb6e` (PR #109) has now completed both required workflows successfully:
+
+- Historia AI CI **#3517 — PASS**: all 81 validation/build/scalability steps completed, including historical GIS and political-map contracts, topology, production build, repository-cleanliness checks, and 15K+ province scalability.
+- Cliopatria v0.2.0 acquisition verification **#208 — PASS**: immutable source acquisition, T3-B candidate-to-review pipeline, persisted geometry-review ledger, explicit pilot-edge binding validation, provenance/readiness checks, contract tests, and review-package publication.
+- Exact-HEAD review package artifact: ID `11669725515`, 262,628 bytes, SHA-256 `ce61d66d59cba5ffe0b52e6256fa8c1e253a9badbaed7f79451d9efef28e10a6`.
+- Exact-HEAD source snapshot artifact: ID `11669368200`, 44,232,585 bytes, SHA-256 `0e92a102e4f08de7554f5897fecc0027e8f9459ae4a75cda25564dc8e96055a0`.
+
+The workflow results verify pipeline execution and publication only; they do not establish the historical truth of a boundary. The inventory trace search across repository issues/PRs did not locate an inspectable source record for `inventory:1326-gecis-envanteri#1/#15/#17/#18`. The available attachment remains a methodology note rather than a numbered evidence ledger. Therefore no substitute citation has been assigned and no source-backed edge assessment can be completed from those internal IDs alone.
+
+Unchanged gates: Bursa–Nicaea exact frontier **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED** (confidence 0.25); `reviewBindings = []`; `reviewedGeometry = null`; canonical promotion **BLOCKED**; `SAFE TO DELETE = 0`; convergence locked. PR #109 remains open/draft/unmerged.
+
+**Next:** continue the source trace through repository branches, historical commits, and the original authoring context for the inventory. If the original ledger cannot be recovered, replace the internal-only references only through a documented, source-by-source evidence review—not by silently relabeling secondary research leads as the missing records.
