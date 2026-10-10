@@ -526,3 +526,31 @@ The queue audit also confirms why the 21 candidates cannot be accepted based on 
 This exact-HEAD artifact audit confirms the alias-fix behavior and the intended safety posture; it does **not** adjudicate a single polygon or edge. Eşrefoğulları and Alâiye remain unmatched, and no candidate should be force-bound to them. Next research unit should be a tightly scoped pilot with a source-backed historical entity plus a specific, independently supported edge claim; if no source supports an exact edge, record the gap and leave the review pending rather than manufacture a binding.
 
 The previous subsection's note that #200 package internals had not yet been re-extracted is superseded by this audit. All geometry/promotion gates remain unchanged: `SAFE TO DELETE = 0`; convergence locked; canonical political geography **BLOCKED**.
+
+## 2026-10-10 — exact-HEAD CI #3511 and T3-B #202 audit
+
+Latest PR #109 head before this documentation checkpoint was `3eb200aed9e5c44d9cb7e5fa2ed8cd1f783c4ed7`. Both required workflows have now completed successfully on that exact SHA:
+
+- Historia AI CI **#3511 — PASS**: full validate job passed, including lint, historical GIS, map/rendering, build, repository-cleanliness, and 15K+ province scalability gates.
+- Cliopatria v0.2.0 acquisition verification **#202 — PASS**: real source acquisition, candidate/review pipeline, ledger validation, pilot edge-binding validation, provenance/readiness, contract tests and artifact publication passed.
+
+Exact-HEAD artifact `historia-1326-t3b-review-package`: ID `11666780759`, 262,628 bytes, GitHub SHA-256 `832a90cf49d5019ae3956218c4c3986231710aa96425acf34f514f371dd5b70e`. The source snapshot artifact is ID `11666995441`, 44,232,585 bytes, digest `99b65830e3c139a62dcebd16ba2f96c5d0e2c1df04af00a6b5064944d94c66b4`.
+
+### Package-level audit
+
+The #202 package was downloaded and inspected, not inferred from workflow success:
+
+- 13,765 source features; 150 temporal candidates; 21 candidates retained for review and 129 rejected by the documented 120 km bounding-box screen.
+- Entity reconciliation: 8 required entities, 6 single-candidate matches, 2 unmatched (`esrefogullari`, `alaye`), 0 ambiguous.
+- Queue: 21 review items, 6 entity-linked and 15 unmatched; ledger: 21/21 pending; `reviewedGeometry=null`; 0 edge assessments; topology `not-run`; `reviewBindings=[]`.
+- All candidate records remain evidence-only; `autoPromotion=false`. The queue's anchor-hit counts range from 1 to 24, but these are bbox-screen hits, not exact polygon containment or political control. For example, Republic of Genoa has 23 hits and Byzantine Empire 20, demonstrating that spatial screening is intentionally broad.
+
+### Pilot evidence audit — no binding authorized
+
+`data/gis/1326/pilot-edge-evidence/bithynia-core-01.json` records the Bursa–Nicaea exact frontier as uncertain (confidence 0.25), regional proximity as supported (0.75), Nicaea–Sangarius corridor as supported (0.9), and other route/physical relationships separately. Its cited evidence keys point to internal inventory items (for example `inventory:1326-gecis-envanteri#17`), not to a direct source citation within the binding packet. The paired `bithynia-core-01.review-bindings.json` correctly remains `WAITING_FOR_REAL_CANDIDATE_ACQUISITION` with an empty binding list. The CI package's generated `edge-evidence-bindings.json` likewise contains zero bindings.
+
+Therefore the pipeline's “pilot readiness” status is only a contract/readiness result, **not evidence that the Bursa–Nicaea edge has been historically adjudicated**. Before binding any review ID to an edge, the internal inventory references must be traced to inspectable underlying sources and the edge type must be kept precise: regional proximity, river/road corridor, and exact political frontier are distinct claims. Current evidence does not justify accepting the Bursa–Nicaea exact boundary.
+
+No candidate polygon, anchor, coordinate, controller, or review binding changed. Eşrefoğulları and Alâiye remain unmatched; no forced alias. `SAFE TO DELETE = 0`; convergence locked; canonical political geography **BLOCKED**; frontier **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**.
+
+Next operation: trace and audit the source records behind the Bithynia pilot's internal inventory references; replace internal-only citations with source-level provenance where possible. If the source only supports proximity/corridor rather than an exact frontier, preserve that limitation and keep the geometry review pending. Do not merge PR #109.
