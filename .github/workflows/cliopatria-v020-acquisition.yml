@@ -1,0 +1,113 @@
+name: Cliopatria v0.2.0 acquisition verification
+
+on:
+  pull_request:
+    branches:
+      - integration/**
+    paths:
+      - ".github/workflows/cliopatria-v020-acquisition.yml"
+      - "data/gis/1326/anchor-candidate-registry.json"
+      - "data/gis/1326/acquisition-manifest.json"
+      - "data/gis/1326/edge-evidence-bindings.schema.json"
+      - "data/gis/1326/geometry-review-ledger.schema.json"
+      - "data/gis/1326/pilot-edge-evidence/**"
+      - "tools/historical-gis/cli/acquire-1326-cliopatria.js"
+      - "tools/historical-gis/cli/prepare-1326-cliopatria-extraction-input.js"
+      - "tools/historical-gis/cli/validate-1326-cliopatria-extraction-input.js"
+      - "tools/historical-gis/cli/extract-1326-cliopatria-candidates.js"
+      - "tools/historical-gis/cli/validate-1326-cliopatria-candidates.js"
+      - "tools/historical-gis/cli/reconcile-1326-cliopatria-entities.js"
+      - "tools/historical-gis/cli/validate-1326-candidate-reconciliation.js"
+      - "tools/historical-gis/cli/screen-1326-political-candidate-surface.js"
+      - "tools/historical-gis/cli/prepare-1326-geometry-reconciliation.js"
+      - "tools/historical-gis/cli/validate-1326-geometry-reconciliation.js"
+      - "tools/historical-gis/cli/prepare-1326-geometry-review-ledger.js"
+      - "tools/historical-gis/cli/validate-1326-geometry-review-ledger.js"
+      - "tools/historical-gis/cli/prepare-1326-edge-evidence-bindings.js"
+      - "tools/historical-gis/cli/validate-1326-edge-evidence-bindings.js"
+      - "tools/historical-gis/cli/bridge-1326-edge-evidence.js"
+      - "tools/historical-gis/cli/validate-1326-t3b-pilot-readiness.js"
+      - "tools/tests/1326-cliopatria-extraction-input.test.js"
+      - "tools/tests/1326-cliopatria-candidate-validator.test.js"
+      - "tools/tests/1326-geometry-reconciliation.test.js"
+      - "tools/tests/1326-geometry-review-ledger.test.js"
+      - "tools/tests/1326-edge-evidence-bindings.test.js"
+      - "tools/tests/1326-t3b-provenance-lineage.test.js"
+      - "tools/tests/1326-t3b-pilot-readiness.test.js"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Acquire pinned immutable GitHub raw snapshot
+        run: |
+          node tools/historical-gis/cli/acquire-1326-cliopatria.js --download
+          node tools/historical-gis/cli/acquire-1326-cliopatria.js --verify
+          test "$(git hash-object data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip)" = "cefab0f4b622e2e7fb3daf68d4f461f83991204c"
+
+      - name: Publish directly acquired production snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: cliopatria-v0.2.0-production-snapshot
+          path: |
+            data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip
+            data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.acquisition.json
+          retention-days: 7
+          compression-level: 0
+
+      - name: Prepare verified 1326 extraction input
+        run: |
+          npm run prepare:1326-cliopatria-extraction-input --             --archive data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.geojson.zip
+          npm run validate:1326-cliopatria-extraction-input --             --input data/build/gis/1326/cliopatria-extraction-input.json
+
+      - name: Run real 1326 T3-B candidate-to-review pipeline
+        run: |
+          npm run run:1326-cliopatria-candidate-pipeline --             --extraction-input data/build/gis/1326/cliopatria-extraction-input.json             --anchors data/gis/1326/anchor-candidate-registry.json             --acquisition data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.acquisition.json             --output-dir data/build/gis/1326
+
+      - name: Prepare and validate persisted geometry review ledger
+        run: |
+          npm run prepare:1326-geometry-review-ledger --             --input data/build/gis/1326/1326-geometry-reconciliation-queue.json             --output data/build/gis/1326/1326-geometry-review-ledger.json
+          npm run validate:1326-geometry-review-ledger --             --input data/build/gis/1326/1326-geometry-review-ledger.json             --queue data/build/gis/1326/1326-geometry-reconciliation-queue.json
+
+      - name: Prepare and validate explicit pilot edge bindings
+        run: |
+          npm run prepare:1326-edge-evidence-bindings --             --ledger data/build/gis/1326/1326-geometry-review-ledger.json             --mapping data/gis/1326/pilot-edge-evidence/bithynia-core-01.review-bindings.json             --evidence data/gis/1326/pilot-edge-evidence/bithynia-core-01.json             --output data/build/gis/1326/edge-evidence-bindings.json
+          npm run validate:1326-edge-evidence-bindings --             --input data/build/gis/1326/edge-evidence-bindings.json
+          npm run bridge:1326-edge-evidence --             --ledger data/build/gis/1326/1326-geometry-review-ledger.json             --evidence data/gis/1326/pilot-edge-evidence/bithynia-core-01.json             --bindings data/build/gis/1326/edge-evidence-bindings.json             --output data/build/gis/1326/1326-geometry-review-ledger-edge-bridged.json
+
+      - name: Validate T3-B provenance lineage and pilot readiness
+        run: |
+          npm run validate:1326-t3b-pilot-readiness --             --candidates data/build/gis/1326/cliopatria-1326-candidates.json             --screening data/build/gis/1326/cliopatria-candidate-surface-screening.json             --reconciliation data/build/gis/1326/cliopatria-entity-reconciliation.json             --review data/build/gis/1326/1326-geometry-reconciliation-queue.json             --ledger data/build/gis/1326/1326-geometry-review-ledger.json             --bindings data/build/gis/1326/edge-evidence-bindings.json             --evidence data/gis/1326/pilot-edge-evidence/bithynia-core-01.json
+
+      - name: Run T3-B contract tests
+        run: |
+          npm run test:1326-geometry-reconciliation
+          npm run test:1326-geometry-review-ledger
+          npm run test:1326-edge-evidence-bindings
+          npm run test:1326-t3b-provenance-lineage
+          npm run test:1326-t3b-pilot-readiness
+
+      - name: Publish persisted T3-B review package
+        uses: actions/upload-artifact@v4
+        with:
+          name: historia-1326-t3b-review-package
+          path: |
+            data/build/gis/1326/cliopatria-extraction-input.json
+            data/build/gis/1326/source-snapshots/cliopatria-v0.2.0.acquisition.json
+            data/build/gis/1326/cliopatria-1326-candidates.json
+            data/build/gis/1326/cliopatria-entity-reconciliation.json
+            data/build/gis/1326/cliopatria-candidate-surface-screening.json
+            data/build/gis/1326/1326-geometry-reconciliation-queue.json
+            data/build/gis/1326/1326-geometry-review-ledger.json
+            data/build/gis/1326/edge-evidence-bindings.json
+            data/build/gis/1326/1326-geometry-review-ledger-edge-bridged.json
+          retention-days: 7
+          compression-level: 6
