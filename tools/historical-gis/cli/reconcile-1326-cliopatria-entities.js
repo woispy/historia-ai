@@ -5,13 +5,13 @@ import crypto from "node:crypto";
 const SCENARIO_DATE = "1326-04-07";
 const SOURCE_ID = "cliopatria-v0.2.0";
 const REQUIRED_ENTITIES = [
-  { entityId: "ottoman-beylik", aliases: ["ottoman", "ottoman beylik", "osmanli", "osmanlı"] },
+  { entityId: "ottoman-beylik", aliases: ["ottoman", "ottoman empire", "ottoman beylik", "osmanli", "osmanlı"] },
   { entityId: "byzantine-empire", aliases: ["byzantine", "byzantine empire", "bizans", "bizans imparatorluğu"] },
   { entityId: "esrefogullari", aliases: ["esrefogullari", "eşrefoğulları", "eşref"] },
   { entityId: "ilkhanate", aliases: ["ilkhanate", "il-khanate", "ilhanate", "ilhanlı", "ilhanlilar", "ilhanlılar"] },
-  { entityId: "karasi", aliases: ["karasi", "karasi beylik", "karesi", "karesi beyligi", "karesi beyliği"] },
-  { entityId: "saruhan", aliases: ["saruhan", "saruhan beylik", "saruhan beyliği"] },
-  { entityId: "aydin", aliases: ["aydin", "aydın", "aydinoğulları", "aydinoğullari"] },
+  { entityId: "karasi", aliases: ["karasi", "karasi beylik", "beylik of karasi", "karesi", "karesi beyligi", "karesi beyliği"] },
+  { entityId: "saruhan", aliases: ["saruhan", "saruhan beylik", "beylik of saruhan", "saruhan beyliği"] },
+  { entityId: "aydin", aliases: ["aydin", "aydın", "beylik of aydin", "aydinoğulları", "aydinoğullari"] },
   { entityId: "alaye", aliases: ["alaye", "alâiye", "alâiye beyliği", "ala iye"] },
 ];
 
@@ -53,8 +53,9 @@ if (matrix.scenarioDate !== SCENARIO_DATE || matrix.authorityStatus !== "evidenc
 
 function normalize(value) {
   return String(value ?? "")
+    .toLowerCase().replace(/ı/g, "i")
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    .replace(/[^a-z0-9]+/g, " ").trim();
 }
 const byName = new Map();
 for (const candidate of candidates.candidates ?? []) {
