@@ -478,3 +478,18 @@ Verified reconciliation output:
 This is a verified reduction of a name-alias reconciliation gap, not a geometry or controller verdict. Eşrefoğulları and Alâiye do not have a matching record in this pinned 150-candidate packet under the accepted aliases; they remain unmatched rather than being attached to a geographically nearby or historically adjacent polity. The six candidate matches are identity links for review only and do not validate their polygons or political borders.
 
 The main Historia AI CI #3503 was still running when this result was recorded. A behavior-level regression test has since been added for the six exact source labels and the two intentionally unmatched entities; the final HEAD must receive a fresh green CI and acquisition workflow before this checkpoint can be treated as fully verified on the branch.
+
+
+## 2026-10-10 unmatched-entity research / latest artifact checkpoint
+
+The current pinned-source run **Cliopatria acquisition verification #199** completed successfully for documentation/reconciliation HEAD `e7c6c63bae75833678c6f3bd46173a3c4c4d7b99`. Persisted review package artifact ID `11665088147`, SHA-256 `b741892cd9616bd2355e20dcb6db7c3c6cf6065cd5a48f74f13dd7cfbd61094a`, was downloaded and inspected.
+
+Its output confirms the alias correction remains stable after the evidence-matrix/source-register updates: **8 required entities; 6 matched; 2 unmatched; 0 ambiguous; 21 review records; 21/21 pending; 0 explicit review bindings; promotion BLOCKED**. The two unmatched entities are Eşrefoğulları and Alâiye.
+
+The source review distinguishes (a) Eşrefoğulları's supported existence on 1326-04-07 from its later territorial transfer after 9 October 1326, and (b) Alâiye's distinct locality/polity history from Karaman-affiliated local rulers and the unresolved exact scenario-date authority. Spatial screening shows bbox intersections with Cliopatria candidate features Karaman (6219), Teke (6221), and Hamid (6229), but bbox intersection plus year-level temporal intervals does not prove entity identity, exact containment, or April controller. No alias substitution is authorized.
+
+- Cliopatria acquisition verification #199: **PASS**.
+- Historia AI CI #3508 for this exact HEAD: **in progress at checkpoint time**; final green status is still required.
+- Latest PR head remains open/draft, no merge performed.
+- No anchor, coordinate, reviewed geometry, controller, or edge binding was promoted.
+- `SAFE TO DELETE = 0`; local convergence remains locked; canonical political geography remains **BLOCKED**.
