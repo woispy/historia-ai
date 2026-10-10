@@ -458,3 +458,23 @@ The latest persisted real-source review package (Cliopatria v0.2.0, candidate pa
 The reconciliation alias list now includes those exact source labels, and normalization explicitly maps dotless `ı` to `i`. This is an identity-reconciliation correction only: matching remains candidate-only, auto-promotion remains false, and a name match still does not establish controller or geometry authority. No polygon, coordinate, review binding, or canonical record was changed. Eşrefoğulları and Alâiye remain unmatched until a source candidate with an admissible identity is found; they are not force-mapped to unrelated polities.
 
 **Required verification:** fresh PR CI and Cliopatria acquisition workflow must confirm the new reconciliation output and downstream queue/ledger integrity. Until then the previous artifact counts are historical and must not be represented as post-fix counts. Canonical political geography remains **BLOCKED**; `SAFE TO DELETE = 0`; local convergence remains locked.
+
+
+### T3-B alias-fix execution result — 2026-10-10 / acquisition workflow #194
+
+The Cliopatria v0.2.0 acquisition workflow **#194** completed successfully on HEAD `2f0c74e8ee42ff60035cae67f24437423d88a54e`. Its persisted review-package artifact (`historia-1326-t3b-review-package`, artifact ID `11663983164`, SHA-256 `16cf06b02f38bc5c87c9527591b33485be9cf389d1081181c7766749dfd4d459`) was downloaded and inspected after the alias correction.
+
+Verified reconciliation output:
+
+- required entities: **8**;
+- single-candidate matches: **6** — Ottoman Empire, Byzantine Empire, Ilkhanate, Beylik of Karasi, Beylik of Saruhan, Beylik of Aydin;
+- unmatched: **2** — Eşrefoğulları and Alâiye;
+- ambiguous: **0**;
+- review queue: **21** records, **6** entity-linked and **15** unmatched;
+- review ledger: **21/21 pending**, `reviewedGeometry = null` for every record;
+- explicit `reviewBindings`: **0**;
+- promotion: **BLOCKED**.
+
+This is a verified reduction of a name-alias reconciliation gap, not a geometry or controller verdict. Eşrefoğulları and Alâiye do not have a matching record in this pinned 150-candidate packet under the accepted aliases; they remain unmatched rather than being attached to a geographically nearby or historically adjacent polity. The six candidate matches are identity links for review only and do not validate their polygons or political borders.
+
+The main Historia AI CI #3503 was still running when this result was recorded. A behavior-level regression test has since been added for the six exact source labels and the two intentionally unmatched entities; the final HEAD must receive a fresh green CI and acquisition workflow before this checkpoint can be treated as fully verified on the branch.
