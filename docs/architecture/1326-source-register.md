@@ -340,3 +340,16 @@ Related city entry: https://islamansiklopedisi.org.tr/alanya
 - Explicit `reviewBindings`: 0; promotion remains **BLOCKED**.
 
 This checkpoint improves evidence and records the reason for non-matching; it does not promote anchors, coordinates, review bindings, or canonical geometry. `SAFE TO DELETE = 0`.
+
+
+### Spatial-screen cross-check — candidate presence is not entity identity
+
+The persisted T3-B review package was also checked against the two relevant anchors. The screening output includes the following source candidates:
+
+- Cliopatria feature index **6219**, `Beylik of Karaman`, temporal interval `1326–1332`; its bounding box contains the Alâiye and Beyşehir anchor coordinates.
+- Feature index **6221**, `Beylik of Teke`, temporal interval `1326–1332`; its bounding box also contains the Alâiye anchor coordinate.
+- Feature index **6229**, `Beylik of Hamid`, temporal interval `1326–1332`; its bounding box contains the Beyşehir anchor coordinate.
+
+These are **bbox-screening observations only**: they do not establish exact polygon containment, political control, or an entity match. The broad year-level intervals are especially inadequate for Eşrefoğulları, because TDV dates the transfer of core Eşref territory to Hamîdoğulları after Süleyman Şah's death on 9 October 1326. They are also inadequate to collapse Alâiye into Karaman or Teke, because the historical source describes a distinct Alâiye locality and Karaman-affiliated rulers, while the precise 1326-04-07 arrangement remains unresolved.
+
+**Decision:** do not create alias mappings from `esrefogullari` to `Beylik of Hamid`, or from `alaye` to `Beylik of Karaman` / `Beylik of Teke`. Keep both unmatched and use these candidate geometries only as contextual review evidence. No polygon, anchor coordinate, controller, or review binding was promoted.
