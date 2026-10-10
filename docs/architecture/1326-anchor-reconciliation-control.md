@@ -493,3 +493,19 @@ The source review distinguishes (a) Eşrefoğulları's supported existence on 13
 - Latest PR head remains open/draft, no merge performed.
 - No anchor, coordinate, reviewed geometry, controller, or edge binding was promoted.
 - `SAFE TO DELETE = 0`; local convergence remains locked; canonical political geography remains **BLOCKED**.
+
+## 2026-10-10 — exact-HEAD T3-B verification checkpoint
+
+PR #109 HEAD `554ac0bba1d9a44b68dcafcccc8fa0ba79cc0006` has now received both required workflow results:
+
+- Historia AI CI **#3509 — PASS**: all 81 listed validation/build/scalability steps completed successfully.
+- Cliopatria v0.2.0 acquisition verification **#200 — PASS**: immutable source acquisition, real T3-B candidate-to-review pipeline, persisted geometry-review ledger, explicit pilot edge-binding validation, provenance/pilot-readiness validation, contract tests, and artifact publication all completed successfully.
+- PR #109 remains **OPEN / DRAFT / mergeable**; no merge was performed.
+
+The exact-HEAD review-package artifact is published as `historia-1326-t3b-review-package`, artifact ID `11665278111`, size 262,628 bytes, GitHub SHA-256 digest `940b03809dde1d40161bc0f0a1d94e69cc791a135c0b908c0aba9928c65a137c`, created 2026-10-10 08:56:57 UTC and expiring 2026-10-17 08:56:56 UTC. The pinned production source snapshot is artifact ID `11665258199`, 44,232,585 bytes, digest `6d303e9854f8474641557f5654d4a9ca53c2624eb2d8facc932d8998cf0b2f00`.
+
+Important audit limitation: artifact metadata and workflow steps were inspected in this checkpoint, but the newly published ZIP's internal JSON files were not re-extracted here. Therefore the prior 6/8 entity reconciliation and 21/21 pending-ledger figures remain the last content-inspected package figures, not a newly asserted #200 content audit. Use the exact-HEAD package as the next read-only evidence source before making any candidate/identity ruling.
+
+Gate ruling unchanged: workflow PASS validates the pipeline, not the historical truth of candidate geometry. Do not create aliases for Eşrefoğulları or Alâiye, infer control from bbox intersections, or promote any reviewed geometry without independent evidence and explicit review. No anchor, coordinate, polygon, controller, or review binding was changed by this checkpoint. `reviewBindings = []` remains the last content-verified state; `SAFE TO DELETE = 0`; convergence locked; canonical political geography **BLOCKED**; frontier **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**.
+
+Next operation: inspect the #200 review-package contents, compare its manifests/ledger with the prior #199 package, and only then choose a candidate for evidence-backed adjudication. Do not merge PR #109.
