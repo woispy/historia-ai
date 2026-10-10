@@ -554,3 +554,40 @@ Therefore the pipeline's “pilot readiness” status is only a contract/readine
 No candidate polygon, anchor, coordinate, controller, or review binding changed. Eşrefoğulları and Alâiye remain unmatched; no forced alias. `SAFE TO DELETE = 0`; convergence locked; canonical political geography **BLOCKED**; frontier **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**.
 
 Next operation: trace and audit the source records behind the Bithynia pilot's internal inventory references; replace internal-only citations with source-level provenance where possible. If the source only supports proximity/corridor rather than an exact frontier, preserve that limitation and keep the geometry review pending. Do not merge PR #109.
+
+
+## 2026-10-10 — inventory trace audit follow-up / exact-HEAD CI seal
+
+Latest documentation HEAD before this control-ledger update: `37471f368bc12c0d9cbd42f96e2f184e84b6d650` (PR #109, branch `work/phase-a-1326-t3b-candidate-surface`).
+
+### Workflow status on the exact source HEAD
+
+- Historia AI CI **#3516 — PASS**: all 81 validation/build/scalability steps completed successfully, including physical geometry generation, historical GIS runtime generation and cleanliness checks, historical political/map contracts, province topology, river/physical geography checks, production build, and 15K+ province scalability diagnostics.
+- Cliopatria v0.2.0 acquisition verification **#207 — PASS**: pinned immutable source acquisition, real T3-B candidate-to-review pipeline, persisted geometry review ledger, explicit pilot-edge binding contract, provenance/readiness, contract tests and artifact publication completed successfully.
+- Exact-HEAD review package artifact: `historia-1326-t3b-review-package`, artifact ID `11669725515`, size 262,628 bytes, SHA-256 `ce61d66d59cba5ffe0b52e6256fa8c1e253a9badbaed7f79451d9efef28e10a6`.
+- Exact-HEAD source snapshot artifact: `cliopatria-v0.2.0-production-snapshot`, artifact ID `11669368200`, size 44,232,585 bytes, SHA-256 `0e92a102e4f08de7554f5897fecc0027e8f9459ae4a75cda25564dc8e96055a0`.
+
+These workflow passes validate the repository pipeline and artifact publication, **not** the historical truth of a pilot edge or candidate polygon.
+
+### Additional numbered-reference check
+
+The repository PRs whose numeric IDs happen to match `#1`, `#15`, `#17`, and `#18` were checked to rule out a misleading auto-link interpretation. They are unrelated implementation PRs:
+- PR #1 — Living Game Foundation.
+- PR #15 — Fix 1300 map water, labels, and visual hierarchy.
+- PR #17 — Build global 1300 map physical and historical foundation.
+- PR #18 — Phase 2: Build Anatolia historical GIS core.
+
+They are not the missing `1326-gecis-envanteri` numbered source records. Their descriptions do, however, reaffirm an existing constraint: 1300 political reconstruction is approximate/source-dependent and must not be copied into the 1326 authority layer.
+
+Exact inventory identifier / record text remains unresolved in the current PR tree and the supplied `1326 Geçiş Envanteri.txt` attachment. Keep internal references as unresolved identifiers; do not silently map them to unrelated PR numbers or substitute source leads.
+
+### Current adjudication and next operation
+
+- Bursa–Nicaea exact frontier: **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED**, confidence remains **0.25**.
+- Regional proximity and physical/road corridors remain distinct evidence types.
+- Pilot `reviewBindings = []`; `reviewedGeometry = null`; canonical promotion **BLOCKED**.
+- Eşrefoğulları and Alâiye remain unmatched in the pinned T3-B candidate packet; no forced alias.
+- No anchor, coordinate, controller, candidate polygon, geometry, or review binding was promoted in this checkpoint.
+- `MIN_AREA = 0.00005`; `SAFE TO DELETE = 0`; convergence remains locked; PR #109 remains open/draft/unmerged.
+
+**Next:** obtain the original inventory artifact or the authoring message that defines the four numbered records, then transcribe each source record with exact source title, author/editor, page/section, stable URL, temporal scope, spatial scale, claim type, and limitations. Until that exists, keep the edge assessments unbound and the frontier uncertain.
