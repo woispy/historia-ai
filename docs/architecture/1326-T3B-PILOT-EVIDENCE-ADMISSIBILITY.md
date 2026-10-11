@@ -232,3 +232,21 @@ This passage adds a better-defined research path, not a boundary solution. The e
 **Decision:** this source strengthens the model rule that a captured city and a fortress/supply-route network must not be conflated with a sharp surrounding territorial polygon. Its Sangarios frontier statement concerns the 1250s and is not time-valid as a direct assertion for 1326-04-07. It therefore does not raise the Bursa–Nicaea exact-frontier confidence, does not resolve inventory:1326-gecis-envanteri#1/#15/#17/#18, and does not authorize any explicit review binding.
 
 Keep reviewBindings empty, reviewedGeometry null, candidate geometry immutable, and canonical promotion BLOCKED. Bursa–Nicaea remains INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED (confidence 0.25). No production geometry was changed.
+
+
+### 2026-10-11 — Encyclopedia of the Ottoman Empire chronology cross-check
+
+**Source:** Gábor Ágoston and Bruce Masters (eds.), *Encyclopedia of the Ottoman Empire* (Facts On File, 2009), “Byzantine Empire,” pp. 107–109. Digitized scan: https://repository.bilkent.edu.tr/server/api/core/bitstreams/afc8c48a-c7ba-41e7-9ed8-6f977ca55f9e/content.
+
+The entry provides a secondary narrative of the early Ottoman–Byzantine conflict: Ottoman activity in eastern Bithynia and around the Bursa–Nicaea corridor; Bursa's conquest in 1326; Nicaea's surrender in 1331; and Nicomedia's capture in 1337. It also describes the countryside and strategic positions between major cities as part of the conquest process.
+
+| Claim | Admissible interpretation | Boundary ruling |
+|---|---|---|
+| Sangarios/eastern Bithynia framing | Broad regional and historical context | Not a verified 1326 polygon edge |
+| Campaign activity between Bursa and Nicaea | Strategic/campaign corridor context | Does not establish continuous control of every settlement or an exact frontier |
+| Bursa conquered in 1326 | City-control chronology | Does not define the surrounding countryside boundary |
+| Nicaea captured in 1331; Nicomedia in 1337 | Later-event chronology; prevents backward projection | Does not itself delineate the complete Byzantine area in 1326 |
+
+**Ruling:** CONTEXT-ONLY / INSUFFICIENT_EVIDENCE for the exact 1326-04-07 Bursa–Nicaea frontier. This is a secondary synthesis and supplies no coordinate-level boundary or exact line. Treat it as a corroborating chronology check, not a replacement for the missing inventory records or a basis for explicit edge binding.
+
+The result is consistent with the existing source-admissibility rule: city capture, a strategic corridor, and regional control narrative are different claim types. No candidate polygon, anchor, controller, edge assessment, or review binding changes. Keep reviewBindings empty, reviewedGeometry null, and canonical promotion BLOCKED; frontier remains INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED (confidence 0.25).

@@ -467,3 +467,16 @@ No anchor, coordinate, candidate polygon, geometry, controller, source-matrix en
 - Printed pp. 237–238 discuss the 6 April 1326 surrender of Bursa and argue that city capitulation cannot be read as a sharp ethnic or territorial change across the surrounding countryside. The author describes control through networks of fortresses, towns, strategic positions, and supply routes; the Bursa blockade was not complete.
 
 **Admissibility:** accepted as a scholarly source lead for frontier historiography, source criticism, and the distinction between city control and hinterland control. The Sangarios-border passage is explicitly about the 1250s, not a verified 1326-04-07 political boundary. The chapter supplies no coordinate-level line for the Bursa–Nicaea edge. It must not be used to bind a candidate polygon or silently replace the missing numbered inventory records.
+
+
+### Encyclopedia of the Ottoman Empire (2009) — Bithynia chronology cross-check (2026-10-11)
+
+**Bibliographic record:** Gábor Ágoston and Bruce Masters (eds.), *Encyclopedia of the Ottoman Empire* (Facts On File, 2009), entry “Byzantine Empire,” pp. 107–109. Digitized scan hosted by Bilkent University Repository: https://repository.bilkent.edu.tr/server/api/core/bitstreams/afc8c48a-c7ba-41e7-9ed8-6f977ca55f9e/content.
+
+The entry supplies a useful secondary chronology and regional narrative: it places the early Ottoman polity in northwestern Asia Minor, associates the eastern Bithynian frontier with the Sangarios, discusses raids and strategic positions between Bursa and Nicaea, records Bursa's conquest in 1326, and dates Nicaea's surrender to 1331 and Nicomedia's capture to 1337 (pp. 107–109).
+
+**Evidence class:** secondary historical synthesis; chronology and broad regional context only.
+
+**Admissibility ruling:** the narrative does not provide a coordinate-level or consistently delimited political frontier for 1326-04-07. The broad Sangarios framing and the Bursa-to-Nicaea campaign narrative cannot be converted into a closed polygon or a claim that every intervening settlement was under continuous Ottoman control. The later Nicaea/Nicomedia dates are chronology locks, not proof of a complete Byzantine boundary.
+
+**Disposition:** accepted as corroborating context only. It does not resolve the missing numbered inventory records, alter the Bursa–Nicaea confidence (0.25), create review bindings, or authorize candidate/canonical geometry changes.
