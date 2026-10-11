@@ -623,3 +623,19 @@ The source-inventory trace was also extended to prior independent-source-review 
 Historical gate remains unchanged: Bursa–Nicaea frontier **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED** (confidence 0.25); `reviewBindings = []`; `reviewedGeometry = null`; canonical promotion **BLOCKED**; `SAFE TO DELETE = 0`; convergence locked. PR #109 remains open, draft, unmerged, and mergeable; base remains `integration/phase-a-h-production`.
 
 **Next:** recover the original numbered inventory from its authoring context or a retained external copy. If unavailable, continue a separately labeled source-by-source evidence review; do not silently map the missing inventory IDs to secondary sources or promote any political geometry.
+
+
+## 2026-10-11 — exact-HEAD CI #3519 / Cliopatria #210 sealed
+
+Commit `44703edd6da5257cd7a0ddf08295f7910873bb4d` completed both required workflows successfully:
+
+- Historia AI CI **#3519 — PASS**: all 81 validation/build/scalability steps completed, including historical GIS, topology, production build, repository-cleanliness, and 15K+ province scalability gates.
+- Cliopatria v0.2.0 acquisition verification **#210 — PASS**: all 13 verification steps completed, including pinned immutable acquisition, T3-B candidate-to-review pipeline, review-ledger validation, pilot-edge binding validation, provenance/readiness checks, contract tests, and package publication.
+- Review-package artifact ID `11681205705`, 262,629 bytes; GitHub artifact archive digest `sha256:cd3ce70a1a71bb43a16c9de2f10182d60e6373b93f4d238a4dcab299a4d6b52c`.
+- Source-snapshot artifact ID `11681130764`, 44,232,585 bytes; GitHub artifact archive digest `sha256:972a8d0308a5747599689ec08b701a223f665ecc14d1eabaaf9a8552650a2313`. The pinned raw source remains commit `ad28a69`, blob `cefab0f4b622e2e7fb3daf68d4f461f83991204c`, raw SHA-256 `d01ae3a20d358cc5d54f69d9d725d390767d9c8759ac89ad6f90c58d106f3370`.
+
+The newly published review package was downloaded and independently re-inspected. The reconciliation queue remains `screenedCandidates: 21`, `entityLinkedCandidates: 6`, `unmatchedCandidates: 15`, `pendingReview: 21`. The persisted ledger and edge-bridged ledger each retain 21 pending decisions; all `reviewedGeometry` values are null. The bridge still reports `boundReviewRecords: 0`, `boundEdges: 0`, `reviewBindings: []`, and `promotion: BLOCKED`. The fresh artifact therefore confirms that a green pipeline has not promoted any unreviewed historical geometry.
+
+No source-inventory record was recovered in this run. Historical gate remains unchanged: Bursa–Nicaea exact frontier **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED** (confidence 0.25); canonical promotion **BLOCKED**; `MIN_AREA = 0.00005`; `SAFE TO DELETE = 0`; convergence locked. PR #109 remains open/draft/unmerged on `integration/phase-a-h-production`.
+
+**Next:** continue recovering the original numbered inventory from authoring context or retained external copies. In parallel, source-by-source research may proceed only as separately labeled evidence; it must not be relabeled as the missing inventory or bound to an edge without explicit review.
