@@ -456,3 +456,14 @@ This does **not** prove that the inventory never existed in another branch, exte
 4. To resolve the references, retrieve the original inventory file/revision or the original authoring message that defines the numbered records and capture each record verbatim with its source title, author/editor, page/section, stable URL, date scope, spatial scale, claim type and limitations. Until then, do not silently remap the numbers to the corroborating sources above.
 
 No anchor, coordinate, candidate polygon, geometry, controller, source-matrix entry, or review binding was promoted. `MIN_AREA = 0.00005` remains unchanged; `SAFE TO DELETE = 0`; canonical promotion and Local convergence remain blocked.
+
+
+## 2026-10-11 — Korobeinikov Bithynia frontier historiography lead
+
+**D.A. Korobeinikov**, “How ‘Byzantine’ were the early Ottomans? Bithynia in ca. 1290–1450,” in *Osmanskii mir i osmanistika*, ed. I.V. Zaitsev and S.F. Oreshkova (Moscow, 2010), pp. 215–239. Accessible PDF: https://anticabibliotecacoriglianorossano.it/wp-content/uploads/2019/12/Korobeinikov-D.A.-How-Byzantine-were-the-early-Ottomans-Bithynia-in-ca.-1290-1450.pdf.
+
+- Printed pp. 216–217 discuss the Byzantine–Seljuk frontier in the 1250s and describe the Sangarios as a border in that earlier context; the same passage says the southern part of the Nicaean frontier is especially obscure.
+- Printed p. 225 cautions that reconstructions of the earlier frontier rely heavily on Ottoman narratives compiled much later than the events.
+- Printed pp. 237–238 discuss the 6 April 1326 surrender of Bursa and argue that city capitulation cannot be read as a sharp ethnic or territorial change across the surrounding countryside. The author describes control through networks of fortresses, towns, strategic positions, and supply routes; the Bursa blockade was not complete.
+
+**Admissibility:** accepted as a scholarly source lead for frontier historiography, source criticism, and the distinction between city control and hinterland control. The Sangarios-border passage is explicitly about the 1250s, not a verified 1326-04-07 political boundary. The chapter supplies no coordinate-level line for the Bursa–Nicaea edge. It must not be used to bind a candidate polygon or silently replace the missing numbered inventory records.

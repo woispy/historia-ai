@@ -215,3 +215,20 @@ A second useful passage occurs at TIB 13 printed pp. 215–216 (publisher PDF pa
 5. If the project cannot represent contested event claims without implying certainty, keep them in this research register rather than adding them to the evidence matrix.
 
 This passage adds a better-defined research path, not a boundary solution. The exact 1326 Bithynia frontier remains REVIEW_REQUIRED / INSUFFICIENT_EVIDENCE.
+
+
+### Korobeinikov (2010) — source-specific frontier admissibility review
+
+**Bibliographic record:** D.A. Korobeinikov, “How ‘Byzantine’ were the early Ottomans? Bithynia in ca. 1290–1450,” in *Osmanskii mir i osmanistika*, ed. I.V. Zaitsev and S.F. Oreshkova (Moscow, 2010), pp. 215–239. Full-text PDF: https://anticabibliotecacoriglianorossano.it/wp-content/uploads/2019/12/Korobeinikov-D.A.-How-Byzantine-were-the-early-Ottomans-Bithynia-in-ca.-1290-1450.pdf.
+
+| Passage | What it supports | What it does not support |
+|---|---|---|
+| Printed pp. 216–217 | A discussion of the Byzantine–Seljuk border in the 1250s, including a Sangarios alignment in that earlier period; the author explicitly says the southern Nicaean frontier is especially obscure | A direct 1326 Ottoman–Byzantine boundary; the 1250s line cannot be projected forward without intermediate evidence |
+| Printed p. 225 | Source-critical warning that reconstructions of earlier frontier zones lean heavily on Ottoman narratives compiled much later than the events | A deterministic line or high-confidence polygon |
+| Printed pp. 237–238 | Bursa surrendered on 1326-04-06; the chapter distinguishes city capitulation from control of the surrounding countryside and discusses control via fortresses, towns, strategic positions and supply routes; the blockade was not complete | Continuous Ottoman control of every surrounding settlement, exact Bursa–Nicaea frontier, or an edge geometry |
+
+**Classification:** useful scholarly historical-geography and source-criticism evidence; not exact-line boundary evidence.
+
+**Decision:** this source strengthens the model rule that a captured city and a fortress/supply-route network must not be conflated with a sharp surrounding territorial polygon. Its Sangarios frontier statement concerns the 1250s and is not time-valid as a direct assertion for 1326-04-07. It therefore does not raise the Bursa–Nicaea exact-frontier confidence, does not resolve inventory:1326-gecis-envanteri#1/#15/#17/#18, and does not authorize any explicit review binding.
+
+Keep reviewBindings empty, reviewedGeometry null, candidate geometry immutable, and canonical promotion BLOCKED. Bursa–Nicaea remains INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED (confidence 0.25). No production geometry was changed.
