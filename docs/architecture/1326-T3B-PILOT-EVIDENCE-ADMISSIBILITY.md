@@ -250,3 +250,21 @@ The entry provides a secondary narrative of the early Ottoman–Byzantine confli
 **Ruling:** CONTEXT-ONLY / INSUFFICIENT_EVIDENCE for the exact 1326-04-07 Bursa–Nicaea frontier. This is a secondary synthesis and supplies no coordinate-level boundary or exact line. Treat it as a corroborating chronology check, not a replacement for the missing inventory records or a basis for explicit edge binding.
 
 The result is consistent with the existing source-admissibility rule: city capture, a strategic corridor, and regional control narrative are different claim types. No candidate polygon, anchor, controller, edge assessment, or review binding changes. Keep reviewBindings empty, reviewedGeometry null, and canonical promotion BLOCKED; frontier remains INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED (confidence 0.25).
+
+
+### 2026-10-11 — Inventory section-numbering correction and reference lock
+
+A comparison of same-title attachment revisions shows that section numbers are **revision-dependent**:
+
+| Pilot ref | Matching T3-B / Pilot 01 section in the available attachment | Why a bare `#N` is still unsafe |
+|---|---|---|
+| `#1` | Oxford-based Bithynia/Sangarius physical geography; corridor and gorge-barrier distinction | Another revision numbers different material at #1; bibliographic source must still be independently verified |
+| `#15` | “Nicaea'nın doğusu için özel durum” — Nicaea → Lefke → Sangarius corridor | In the T3-A revision, #15 is the Aleppo city/region distinction |
+| `#17` | “Bursa–Nicaea frontier'i nasıl modellenmeli?” | In the T3-A revision, #17 is the Anchor Graph edge model |
+| `#18` | “Nicomedia–Nicaea arasında başka bir constraint” | In the T3-A revision, #18 is the canonical edge-type list |
+
+This corrects the earlier claim that the available attachment had no matching numbered sections. The section topics can be matched in the T3-B/Pilot 01 revision, but the repo's bare `inventory:1326-gecis-envanteri#N` identifier does not encode that revision and is therefore ambiguous across same-name source revisions.
+
+**Admissibility:** this is a provenance/identifier issue, not new independent historical evidence. The heading and prose in a design note do not independently validate the cited Oxford/TIB/TDV material or its confidence. Until the exact source revision is pinned, do not reinterpret the existing refs as globally stable IDs or promote their claim status.
+
+**Required action:** create a revision-pinned inventory manifest/source-record mapping (including checksum, revision identity, section title, and bibliographic citations) before altering the pilot evidence refs. Keep reviewBindings empty, reviewedGeometry null, candidate geometry immutable, and canonical promotion BLOCKED. Bursa–Nicaea remains INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED (confidence 0.25).

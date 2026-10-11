@@ -480,3 +480,16 @@ The entry supplies a useful secondary chronology and regional narrative: it plac
 **Admissibility ruling:** the narrative does not provide a coordinate-level or consistently delimited political frontier for 1326-04-07. The broad Sangarios framing and the Bursa-to-Nicaea campaign narrative cannot be converted into a closed polygon or a claim that every intervening settlement was under continuous Ottoman control. The later Nicaea/Nicomedia dates are chronology locks, not proof of a complete Byzantine boundary.
 
 **Disposition:** accepted as corroborating context only. It does not resolve the missing numbered inventory records, alter the Bursa–Nicaea confidence (0.25), create review bindings, or authorize candidate/canonical geometry changes.
+
+
+## 2026-10-11 — Correction: numbered inventory references are revision-ambiguous, not simply absent
+
+A renewed comparison of the available same-title conversation attachments found at least two incompatible section-numbering schemes for `1326 Geçiş Envanteri.txt`. This corrects the earlier statement that the available attachment contains no relevant numbered sections.
+
+- In the **T3-B / Pilot 01** revision, section **#1** is the Oxford-based Bithynia/Sangarius physical-geography review; **#15** is “Nicaea'nın doğusu için özel durum” (Nicaea → Lefke → Sangarius corridor); **#17** is “Bursa–Nicaea frontier'i nasıl modellenmeli?”; **#18** is “Nicomedia–Nicaea arasında başka bir constraint”. These section topics correspond to the *claim categories* currently attached to the pilot's four numbered refs.
+- In a separate **T3-A Historical Anchor Graph** revision with the same filename, **#15** discusses Aleppo's city-vs-region distinction, **#17** defines the anchor-graph edge model, and **#18** lists canonical edge types. Therefore a bare identifier such as `inventory:1326-gecis-envanteri#17` is not globally stable across these revisions.
+- The currently mounted same-title attachment has yet another numbering layout. Filename alone is not a sufficient source identity.
+
+**Corrected finding:** the topic-level mapping is recoverable from the T3-B/Pilot 01 revision available in conversation context, but the Git repository does not yet pin the exact source revision/bytes as the authority for these IDs. The underlying cited scholarly records still require source-by-source verification; the presence of a section heading is not independent historical evidence and does not validate its confidence score.
+
+**Required resolution:** add a versioned inventory source record with a stable revision identifier and checksum, or replace the abstract `inventory:...#N` refs with explicit immutable source-record IDs that preserve the claim text and bibliographic provenance. Until then, treat the existing refs as **revision-ambiguous** rather than asserting that the relevant sections never existed. Do not edit pilot confidence, candidate geometry, review bindings, or promotion status on this finding alone.
