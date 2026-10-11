@@ -639,3 +639,27 @@ The newly published review package was downloaded and independently re-inspected
 No source-inventory record was recovered in this run. Historical gate remains unchanged: Bursa–Nicaea exact frontier **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED** (confidence 0.25); canonical promotion **BLOCKED**; `MIN_AREA = 0.00005`; `SAFE TO DELETE = 0`; convergence locked. PR #109 remains open/draft/unmerged on `integration/phase-a-h-production`.
 
 **Next:** continue recovering the original numbered inventory from authoring context or retained external copies. In parallel, source-by-source research may proceed only as separately labeled evidence; it must not be relabeled as the missing inventory or bound to an edge without explicit review.
+
+
+## 2026-10-11 — exact-HEAD CI #3520 / Cliopatria #211 and package audit
+
+Commit `defd671e9db700dc86f27e084d54e67a2d61ad21` has now completed both required workflows successfully:
+
+- Historia AI CI **#3520 — PASS**: all 84 validation/build/scalability steps completed successfully; no failed steps.
+- Cliopatria v0.2.0 acquisition verification **#211 — PASS**: all 13 verification steps completed successfully; no failed steps.
+- Exact-HEAD review package artifact ID `11697697256`, 262,627 bytes, archive SHA-256 `339902db6c8d80795b23b3a6c3da5c65bcc25ad3dccc9bdce32ef2a82ffb21f5`.
+- Exact-HEAD source snapshot artifact ID `11697357730`, 44,232,585 bytes, archive SHA-256 `2a6693ffb843aa1637e2bfc8677053fdb3b73638bddbf430da29dc622d99ecb4`.
+
+The review-package ZIP was downloaded and inspected. Its archive SHA-256 matches the GitHub artifact digest. The acquisition manifest retains immutable Cliopatria source commit `ad28a69`, source blob `cefab0f4b622e2e7fb3daf68d4f461f83991204c`, and raw-source SHA-256 `d01ae3a20d358cc5d54f69d9d725d390767d9c8759ac89ad6f90c58d106f3370`. The package content audit confirms:
+
+- Entity reconciliation: 8 required entities, 6 matched, 2 unmatched, 0 ambiguous.
+- Candidate review queue: 21 screened, 6 entity-linked, 15 unmatched, 21 pending; all queue statuses are pending and no reviewed geometry is present.
+- Persisted geometry review ledger: 21 records, 21 pending; every decision remains pending and every `reviewedGeometry` is null.
+- Edge-evidence bridge: `reviewBindings: []`, `boundReviewRecords: 0`, `boundEdges: 0`; automatic matching, geometry generation, controller inference, and canonical promotion remain disabled.
+- Promotion remains `BLOCKED`; topology for pending reviewed geometries has not been run because no geometry has been adjudicated.
+
+A fresh GitHub repository code-search pass for each literal internal identifier `inventory:1326-gecis-envanteri#1`, `#15`, `#17`, and `#18` returned no indexed results. This is a bounded code-search result, not proof that the original inventory never existed; the source records remain unresolved. No substitute citation or binding was introduced.
+
+The green workflows establish pipeline/contract execution and immutable artifact publication, not historical political truth. Bursa–Nicaea exact frontier remains **INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED** (confidence 0.25). `MIN_AREA = 0.00005`; `SAFE TO DELETE = 0`; convergence remains locked; canonical promotion remains **BLOCKED**. PR #109 remains open/draft/unmerged, based on `integration/phase-a-h-production`.
+
+**Next:** keep the source inventory recovery as an explicit blocker. If its original authoring context or ledger cannot be recovered, continue a separately labeled source-by-source review with exact citations and claim limits; only create an edge binding after the evidence is inspected and explicitly adjudicated. Do not infer a boundary from a city-control event, route, river corridor, regional proximity, or bbox hit.
