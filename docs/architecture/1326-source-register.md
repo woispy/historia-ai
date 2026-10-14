@@ -495,11 +495,11 @@ A renewed comparison of the available same-title conversation attachments found 
 **Required resolution:** add a versioned inventory source record with a stable revision identifier and checksum, or replace the abstract `inventory:...#N` refs with explicit immutable source-record IDs that preserve the claim text and bibliographic provenance. Until then, treat the existing refs as **revision-ambiguous** rather than asserting that the relevant sections never existed. Do not edit pilot confidence, candidate geometry, review bindings, or promotion status on this finding alone.
 
 
-## 2026-10-14 — Inventory reference manifest (revision pinning in progress)
+## 2026-10-14 — Initial inventory reference manifest (superseded by the recovery entry below)
 
-Added `data/historical/evidence/1326/inventory-reference-resolution.json` to record the exact bytes of the currently mounted same-name attachment and keep the four legacy pilot references in an explicit `REVISION_AMBIGUOUS` state. The pinned comparison attachment is SHA-256 `9b100d1a84ee0e398d66926598daa32e0aa5289dbad13364138ba29a1791b04d` (22,580 bytes; 972 lines). Its own sections #15/#17/#18 have different headings, so it is **not** asserted to be the T3-B/Pilot 01 source revision.
+The first manifest pass recorded the currently mounted same-name attachment as a comparison-only object: SHA-256 `9b100d1a84ee0e398d66926598daa32e0aa5289dbad13364138ba29a1791b04d` (22,580 bytes; 973 lines). Its own sections #15/#17/#18 have different headings, so it was correctly not treated as the T3-B/Pilot 01 source revision.
 
-The T3-B/Pilot 01 section titles are recorded as topic-level matches only; their exact source revision/bytes remain unpinned. The pilot evidence JSON is intentionally unchanged. No review binding, geometry, controller, confidence, or promotion state was changed.
+At that point the four legacy pilot references were marked `REVISION_AMBIGUOUS` because the exact T3-B bytes had not yet been recovered. The subsequent entry records the recovered T3-B revision and supersedes that interim status. The pilot evidence JSON was intentionally left unchanged; no review binding, geometry, controller, confidence, or promotion state changed.
 
 ## 2026-10-14 — T3-B / Pilot 01 source revision recovered and pinned
 
