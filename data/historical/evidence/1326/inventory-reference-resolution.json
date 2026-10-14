@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "purpose": "Resolve and pin the provenance of legacy inventory:1326-gecis-envanteri#N references without treating a same-name attachment as the authoritative revision.",
-  "status": "REVISION_AMBIGUOUS",
+  "status": "T3B_SOURCE_REVISION_PINNED_LEGACY_REFS_PENDING_MIGRATION",
   "scenarioDate": "1326-04-07",
   "pilot": "bithynia-core-01",
   "pilotEvidencePath": "data/gis/1326/pilot-edge-evidence/bithynia-core-01.json",
@@ -16,7 +16,7 @@
     "fileName": "1326 Geçiş Envanteri.txt",
     "sha256": "9b100d1a84ee0e398d66926598daa32e0aa5289dbad13364138ba29a1791b04d",
     "byteLength": 22580,
-    "lineCount": 972,
+    "lineCount": 973,
     "identity": "exact bytes of the currently mounted attachment inspected on 2026-10-14",
     "role": "comparison-only; not established as the T3-B/Pilot 01 source revision",
     "sectionHeadings": {
@@ -29,37 +29,39 @@
     {
       "ref": "inventory:1326-gecis-envanteri#1",
       "candidateSectionTitle": "T3-B / Pilot 01 — initial Bithynia and Sangarius physical-geography/source review",
-      "sourceRevisionStatus": "UNPINNED",
-      "resolution": "TOPIC_MATCH_ONLY",
-      "admissibility": "physical geography context only; not a political boundary"
+      "sourceRevisionStatus": "PINNED",
+      "resolution": "SECTION_HEADING_VERIFIED",
+      "admissibility": "physical geography context only; not a political boundary",
+      "sourceRecordId": "project-file:file_000000004b4081f7b09426f5f25c1f46"
     },
     {
       "ref": "inventory:1326-gecis-envanteri#15",
       "candidateSectionTitle": "T3-B / Pilot 01 — Nicaea's east: Nicaea → Lefke → Sangarius corridor",
-      "sourceRevisionStatus": "UNPINNED",
-      "resolution": "TOPIC_MATCH_ONLY",
-      "admissibility": "route/accessibility context; does not establish controller or boundary"
+      "sourceRevisionStatus": "PINNED",
+      "resolution": "SECTION_HEADING_VERIFIED",
+      "admissibility": "route/accessibility context; does not establish controller or boundary",
+      "sourceRecordId": "project-file:file_000000004b4081f7b09426f5f25c1f46"
     },
     {
       "ref": "inventory:1326-gecis-envanteri#17",
       "candidateSectionTitle": "T3-B / Pilot 01 — Bursa–Nicaea frontier modelling",
-      "sourceRevisionStatus": "UNPINNED",
-      "resolution": "TOPIC_MATCH_ONLY",
-      "admissibility": "frontier hypothesis only; exact line remains unverified"
+      "sourceRevisionStatus": "PINNED",
+      "resolution": "SECTION_HEADING_VERIFIED",
+      "admissibility": "frontier hypothesis only; exact line remains unverified",
+      "sourceRecordId": "project-file:file_000000004b4081f7b09426f5f25c1f46"
     },
     {
       "ref": "inventory:1326-gecis-envanteri#18",
       "candidateSectionTitle": "T3-B / Pilot 01 — Nicomedia–Nicaea geographic constraints",
-      "sourceRevisionStatus": "UNPINNED",
-      "resolution": "TOPIC_MATCH_ONLY",
-      "admissibility": "network/terrain context; no exact crossing point established"
+      "sourceRevisionStatus": "PINNED",
+      "resolution": "SECTION_HEADING_VERIFIED",
+      "admissibility": "network/terrain context; no exact crossing point established",
+      "sourceRecordId": "project-file:file_000000004b4081f7b09426f5f25c1f46"
     }
   ],
   "requiredToResolve": [
-    "Recover the exact T3-B/Pilot 01 attachment bytes or an immutable source revision from its original authoring location.",
-    "Record its SHA-256, byte length, line count, stable revision identity, and acquisition date.",
-    "Verify each section heading against that exact revision and preserve its cited bibliography and claim limitations.",
-    "Only then replace the legacy aliases with immutable source-record IDs in a separately reviewed change."
+    "Review the exact text and cited bibliography for each of the four recovered sections; source identity/heading verification is not independent historical claim validation.",
+    "Replace the legacy inventory:...#N aliases with explicit immutable source-record IDs in a separately reviewed change, preserving the original claim text and admissibility limits."
   ],
   "decision": {
     "frontierStatus": "INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED",
@@ -69,5 +71,28 @@
     "canonicalPromotion": "BLOCKED",
     "minArea": 0.00005,
     "safeToDelete": 0
-  }
+  },
+  "recoveredT3BPilot01SourceRevision": {
+    "fileName": "1326 Geçiş Envanteri.txt",
+    "sourceRecordId": "project-file:file_000000004b4081f7b09426f5f25c1f46",
+    "projectFileId": "file_000000004b4081f7b09426f5f25c1f46",
+    "sourceVersionId": "1",
+    "sourceCreatedAt": "2026-09-16T14:56:02Z",
+    "identity": "exact raw bytes recovered from the T3-B/Pilot 01 project attachment",
+    "sha256": "1fcefb023a328951e6219cc18093356f6f2230e176eb9c57096d64b410e0819c",
+    "byteLength": 23410,
+    "lineCount": 1119,
+    "sectionHeadings": {
+      "1": "Önce kaynaklarla coğrafi modeli yeniden doğruladım",
+      "15": "Nicaea'nın doğusu için özel durum",
+      "17": "Bursa–Nicaea frontier'i nasıl modellenmeli?",
+      "18": "Nicomedia–Nicaea arasında başka bir constraint"
+    },
+    "disposition": "source revision pinned; section headings verified; historical claims and bibliography are not thereby independently validated"
+  },
+  "requiredForLegacyRefMigration": [
+    "Verify the cited bibliography and claim limitations section by section against their cited sources.",
+    "Migrate the four aliases to stable source-record IDs in a separately reviewed change.",
+    "Do not alter pilot evidence, review bindings, geometry, controller inference, confidence, or canonical promotion solely because the source revision was recovered."
+  ]
 }

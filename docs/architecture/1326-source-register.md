@@ -500,3 +500,18 @@ A renewed comparison of the available same-title conversation attachments found 
 Added `data/historical/evidence/1326/inventory-reference-resolution.json` to record the exact bytes of the currently mounted same-name attachment and keep the four legacy pilot references in an explicit `REVISION_AMBIGUOUS` state. The pinned comparison attachment is SHA-256 `9b100d1a84ee0e398d66926598daa32e0aa5289dbad13364138ba29a1791b04d` (22,580 bytes; 972 lines). Its own sections #15/#17/#18 have different headings, so it is **not** asserted to be the T3-B/Pilot 01 source revision.
 
 The T3-B/Pilot 01 section titles are recorded as topic-level matches only; their exact source revision/bytes remain unpinned. The pilot evidence JSON is intentionally unchanged. No review binding, geometry, controller, confidence, or promotion state was changed.
+
+## 2026-10-14 — T3-B / Pilot 01 source revision recovered and pinned
+
+The exact raw project attachment for the T3-B/Pilot 01 revision was recovered from project file record `file_000000004b4081f7b09426f5f25c1f46` (source version `1`; created 2026-09-16T14:56:02Z). The file is 23,410 bytes and 1,119 lines; SHA-256 is `1fcefb023a328951e6219cc18093356f6f2230e176eb9c57096d64b410e0819c`.
+
+The expected section headings are verified in those exact bytes:
+
+- #1 — “Önce kaynaklarla coğrafi modeli yeniden doğruladım”
+- #15 — “Nicaea'nın doğusu için özel durum”
+- #17 — “Bursa–Nicaea frontier'i nasıl modellenmeli?”
+- #18 — “Nicomedia–Nicaea arasında başka bir constraint”
+
+The earlier `REVISION_AMBIGUOUS` finding is superseded for **source-revision identity**: the T3-B source revision is now pinned, and the four references map to headings in that revision. The separate T3-A attachment and the currently mounted same-name attachment remain comparison-only and must not be substituted.
+
+**Important scope limit:** this resolves which document revision the aliases refer to; it does not independently validate the claims or bibliography inside those sections. The pilot evidence file and review bindings remain unchanged. Bursa–Nicaea remains `INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED`, confidence 0.25; `reviewBindings: []`, `reviewedGeometry: null`, canonical promotion `BLOCKED`, `MIN_AREA=0.00005`, and `SAFE TO DELETE=0`. Next is a section-by-section citation/admissibility audit, then a separately reviewed migration from numbered aliases to immutable source-record IDs.
