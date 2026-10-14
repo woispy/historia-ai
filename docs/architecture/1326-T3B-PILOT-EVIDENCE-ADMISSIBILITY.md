@@ -270,8 +270,27 @@ This corrects the earlier claim that the available attachment had no matching nu
 **Required action:** create a revision-pinned inventory manifest/source-record mapping (including checksum, revision identity, section title, and bibliographic citations) before altering the pilot evidence refs. Keep reviewBindings empty, reviewedGeometry null, candidate geometry immutable, and canonical promotion BLOCKED. Bursa–Nicaea remains INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED (confidence 0.25).
 
 
-### 2026-10-14 — Manifest added; reference lock remains partial
+### 2026-10-14 — Initial manifest pass (superseded by the recovered-source and citation-audit entries below)
 
-Created `data/historical/evidence/1326/inventory-reference-resolution.json`. It pins the exact bytes of the currently mounted attachment for comparison and documents why that attachment cannot safely resolve the pilot's `#1/#15/#17/#18` aliases. The manifest records the expected T3-B/Pilot 01 section topics but labels them `TOPIC_MATCH_ONLY` and their source revision `UNPINNED`.
+The initial manifest pinned the currently mounted same-name attachment as comparison-only and left the T3-B/Pilot 01 source revision unpinned. That was the correct interim decision before the exact historical attachment bytes were recovered. The source-register entry below records the recovered revision identity and checksum; this earlier interim status is superseded.
 
-This is a provenance hardening step, not new historical evidence. The next valid resolution requires recovering the exact T3-B/Pilot 01 source bytes or immutable revision and recording its checksum before rewriting the legacy aliases. `bithynia-core-01.json` and `.review-bindings.json` remain unchanged; `reviewBindings` stays empty and canonical promotion remains BLOCKED.
+### 2026-10-14 — Recovered T3-B source revision and citation/admissibility audit
+
+The exact T3-B/Pilot 01 attachment is now pinned in `data/historical/evidence/1326/inventory-reference-resolution.json`: project source record `file_000000004b4081f7b09426f5f25c1f46`, version `1`, SHA-256 `1fcefb023a328951e6219cc18093356f6f2230e176eb9c57096d64b410e0819c`, 23,410 bytes, 1,119 lines. The four section headings match the recovered bytes. This resolves source-revision identity only; it does not independently prove the historical claims.
+
+**External-source check:**
+
+- Oxford, “Bithynia” (Stephen Mitchell; Oxford Research Encyclopedia / Oxford Classical Dictionary entry): https://academic.oup.com/edited-volume/61673/chapter-abstract/548511258 — supports the broad physical-geography description of a mountainous/forested region, Sangarius tributaries and valleys, relatively easy communication along valleys, and roads to the plateau/Pontus. It is regional/classical geography, not a 1326 political-boundary source.
+- Oxford, “Sangarius” (E. W. Gray): https://academic.oup.com/edited-volume/61673/chapter-abstract/550496284 — explicitly distinguishes the river valley as an access line from the gorge's barrier effect on east–west movement. This supports treating the river system as both corridor and local movement constraint, not as a political frontier.
+- John France, “The first enemy: the Turks of Asia Minor,” in *Victory in the East*, pp. 143–196 (1994; online chapter page): https://www.cambridge.org/core/books/abs/victory-in-the-east/first-enemy-the-turks-of-asia-minor/259B6EC17320DA7F644157882E794FF4 — describes Nicaea's physical setting during the First Crusade in 1097: Lake Iznik to the west, Avdan Mountains to the south, Naldökan uplands to the north, and the eastern Lefke-gate valley leading toward the Sangarius and roads to Ankara/the plateau. This is a useful terrain/accessibility reference, but its historical setting is not 1326 and it cannot establish Ottoman–Byzantine control.
+
+**Claim-level rulings:**
+
+| Inventory section | Supported use | Not supported / additional requirement |
+|---|---|---|
+| #1 — Bithynia/Sangarius physical geography | Broad physical geography; corridor-versus-gorge-barrier distinction | Political boundary, controller, or a boundary line inferred from the river |
+| #15 — Nicaea → Lefke → Sangarius | Geographic accessibility / route-corridor hypothesis | The phrase `LOWER COST` is a solver hypothesis, not a measured source value; validate it with terrain-cost/DEM routing before assigning a numeric weight |
+| #17 — Bursa–Nicaea frontier | Candidate transition-zone concept and explicit low confidence | No centerline, coordinates, or exact boundary; the sketch is conceptual only |
+| #18 — Nicomedia–Nicaea network constraint | Qualitative coastal/terrain/route-network context | No confirmed crossing, straight boundary, or political ownership inference |
+
+**Decision:** mark the four source revisions `PINNED` and headings `SECTION_HEADING_VERIFIED`, but keep alias migration as a separately reviewed task. `bithynia-core-01.json` and `.review-bindings.json` remain unchanged. Bursa–Nicaea remains `INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED` (confidence 0.25); `reviewBindings: []`, `reviewedGeometry: null`, canonical promotion `BLOCKED`, `MIN_AREA=0.00005`, `SAFE TO DELETE=0`. No geometry, anchor, controller, or review binding was created.
