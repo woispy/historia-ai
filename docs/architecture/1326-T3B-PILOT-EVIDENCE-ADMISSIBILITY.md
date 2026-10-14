@@ -268,3 +268,10 @@ This corrects the earlier claim that the available attachment had no matching nu
 **Admissibility:** this is a provenance/identifier issue, not new independent historical evidence. The heading and prose in a design note do not independently validate the cited Oxford/TIB/TDV material or its confidence. Until the exact source revision is pinned, do not reinterpret the existing refs as globally stable IDs or promote their claim status.
 
 **Required action:** create a revision-pinned inventory manifest/source-record mapping (including checksum, revision identity, section title, and bibliographic citations) before altering the pilot evidence refs. Keep reviewBindings empty, reviewedGeometry null, candidate geometry immutable, and canonical promotion BLOCKED. Bursa–Nicaea remains INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED (confidence 0.25).
+
+
+### 2026-10-14 — Manifest added; reference lock remains partial
+
+Created `data/historical/evidence/1326/inventory-reference-resolution.json`. It pins the exact bytes of the currently mounted attachment for comparison and documents why that attachment cannot safely resolve the pilot's `#1/#15/#17/#18` aliases. The manifest records the expected T3-B/Pilot 01 section topics but labels them `TOPIC_MATCH_ONLY` and their source revision `UNPINNED`.
+
+This is a provenance hardening step, not new historical evidence. The next valid resolution requires recovering the exact T3-B/Pilot 01 source bytes or immutable revision and recording its checksum before rewriting the legacy aliases. `bithynia-core-01.json` and `.review-bindings.json` remain unchanged; `reviewBindings` stays empty and canonical promotion remains BLOCKED.

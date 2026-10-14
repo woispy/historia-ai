@@ -493,3 +493,10 @@ A renewed comparison of the available same-title conversation attachments found 
 **Corrected finding:** the topic-level mapping is recoverable from the T3-B/Pilot 01 revision available in conversation context, but the Git repository does not yet pin the exact source revision/bytes as the authority for these IDs. The underlying cited scholarly records still require source-by-source verification; the presence of a section heading is not independent historical evidence and does not validate its confidence score.
 
 **Required resolution:** add a versioned inventory source record with a stable revision identifier and checksum, or replace the abstract `inventory:...#N` refs with explicit immutable source-record IDs that preserve the claim text and bibliographic provenance. Until then, treat the existing refs as **revision-ambiguous** rather than asserting that the relevant sections never existed. Do not edit pilot confidence, candidate geometry, review bindings, or promotion status on this finding alone.
+
+
+## 2026-10-14 — Inventory reference manifest (revision pinning in progress)
+
+Added `data/historical/evidence/1326/inventory-reference-resolution.json` to record the exact bytes of the currently mounted same-name attachment and keep the four legacy pilot references in an explicit `REVISION_AMBIGUOUS` state. The pinned comparison attachment is SHA-256 `9b100d1a84ee0e398d66926598daa32e0aa5289dbad13364138ba29a1791b04d` (22,580 bytes; 972 lines). Its own sections #15/#17/#18 have different headings, so it is **not** asserted to be the T3-B/Pilot 01 source revision.
+
+The T3-B/Pilot 01 section titles are recorded as topic-level matches only; their exact source revision/bytes remain unpinned. The pilot evidence JSON is intentionally unchanged. No review binding, geometry, controller, confidence, or promotion state was changed.

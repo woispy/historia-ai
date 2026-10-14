@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Resolve and pin the provenance of legacy inventory:1326-gecis-envanteri#N references without treating a same-name attachment as the authoritative revision.",
+  "status": "REVISION_AMBIGUOUS",
+  "scenarioDate": "1326-04-07",
+  "pilot": "bithynia-core-01",
+  "pilotEvidencePath": "data/gis/1326/pilot-edge-evidence/bithynia-core-01.json",
+  "policy": {
+    "mutatePilotEvidenceRefs": false,
+    "createReviewBindings": false,
+    "generateGeometry": false,
+    "inferController": false,
+    "promoteCanonicalGeometry": false
+  },
+  "observedAvailableAttachment": {
+    "fileName": "1326 Geçiş Envanteri.txt",
+    "sha256": "9b100d1a84ee0e398d66926598daa32e0aa5289dbad13364138ba29a1791b04d",
+    "byteLength": 22580,
+    "lineCount": 972,
+    "identity": "exact bytes of the currently mounted attachment inspected on 2026-10-14",
+    "role": "comparison-only; not established as the T3-B/Pilot 01 source revision",
+    "sectionHeadings": {
+      "15": "Bu aynı zamanda Open Historia yaklaşımından da bizi koruyor",
+      "17": "İlk anchor confidence matrisi",
+      "18": "Tier 3'ün gerçek veri modeli"
+    }
+  },
+  "legacyPilotRefs": [
+    {
+      "ref": "inventory:1326-gecis-envanteri#1",
+      "candidateSectionTitle": "T3-B / Pilot 01 — initial Bithynia and Sangarius physical-geography/source review",
+      "sourceRevisionStatus": "UNPINNED",
+      "resolution": "TOPIC_MATCH_ONLY",
+      "admissibility": "physical geography context only; not a political boundary"
+    },
+    {
+      "ref": "inventory:1326-gecis-envanteri#15",
+      "candidateSectionTitle": "T3-B / Pilot 01 — Nicaea's east: Nicaea → Lefke → Sangarius corridor",
+      "sourceRevisionStatus": "UNPINNED",
+      "resolution": "TOPIC_MATCH_ONLY",
+      "admissibility": "route/accessibility context; does not establish controller or boundary"
+    },
+    {
+      "ref": "inventory:1326-gecis-envanteri#17",
+      "candidateSectionTitle": "T3-B / Pilot 01 — Bursa–Nicaea frontier modelling",
+      "sourceRevisionStatus": "UNPINNED",
+      "resolution": "TOPIC_MATCH_ONLY",
+      "admissibility": "frontier hypothesis only; exact line remains unverified"
+    },
+    {
+      "ref": "inventory:1326-gecis-envanteri#18",
+      "candidateSectionTitle": "T3-B / Pilot 01 — Nicomedia–Nicaea geographic constraints",
+      "sourceRevisionStatus": "UNPINNED",
+      "resolution": "TOPIC_MATCH_ONLY",
+      "admissibility": "network/terrain context; no exact crossing point established"
+    }
+  ],
+  "requiredToResolve": [
+    "Recover the exact T3-B/Pilot 01 attachment bytes or an immutable source revision from its original authoring location.",
+    "Record its SHA-256, byte length, line count, stable revision identity, and acquisition date.",
+    "Verify each section heading against that exact revision and preserve its cited bibliography and claim limitations.",
+    "Only then replace the legacy aliases with immutable source-record IDs in a separately reviewed change."
+  ],
+  "decision": {
+    "frontierStatus": "INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED",
+    "frontierConfidence": 0.25,
+    "reviewBindings": [],
+    "reviewedGeometry": null,
+    "canonicalPromotion": "BLOCKED",
+    "minArea": 0.00005,
+    "safeToDelete": 0
+  }
+}
