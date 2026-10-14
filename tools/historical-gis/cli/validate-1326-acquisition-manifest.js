@@ -30,18 +30,31 @@ for (const source of manifest.sources) {
     assert(typeof source[field] === "string" && source[field].length > 0, `1326 source ${source.id ?? "<unknown>"} is missing ${field}.`);
   }
   assert(
-    source.status === "acquisition-required" || source.status === "reference-acquisition-or-citation-required",
+    source.status === "acquisition-required" ||
+    source.status === "acquired" ||
+    source.status === "reference-acquisition-or-citation-required",
     `1326 source ${source.id} has unexpected intake status: ${source.status}.`,
   );
   assert(!source.url.startsWith("file:"), `1326 source ${source.id} must retain an external source URL.`);
   if (source.snapshot) {
-    assert(source.snapshot.status === "reference-pinned-not-acquired", `1326 source ${source.id} snapshot must remain reference-pinned-not-acquired until raw acquisition is verified.`);
+    assert(
+      source.snapshot.status === "reference-pinned-not-acquired" || source.snapshot.status === "acquired",
+      `1326 source ${source.id} snapshot has invalid acquisition state.`,
+    );
     assert(typeof source.snapshot.sourceTag === "string" && source.snapshot.sourceTag.length > 0, `1326 source ${source.id} snapshot must record its source tag.`);
     assert(source.snapshot.immutableReference?.type === "git-commit", `1326 source ${source.id} snapshot must use an immutable git-commit reference.`);
     assert(/^[0-9a-f]{7,40}$/.test(source.snapshot.immutableReference?.sha ?? ""), `1326 source ${source.id} snapshot commit must be a hexadecimal git SHA.`);
-    assert(source.snapshot.rawSha256 === null, `1326 source ${source.id} raw SHA-256 must remain null before byte acquisition.`);
     assert(/^[0-9a-f]{40}$/.test(source.snapshot.immutableReference.sourceBlobSha ?? ""), `1326 source ${source.id} snapshot must record the exact Git blob SHA when source bytes are addressable.`);
-    assert(source.snapshot.retainedArtifact === null, `1326 source ${source.id} retained artifact must remain null before acquisition.`);
+    if (source.snapshot.status === "reference-pinned-not-acquired") {
+      assert(source.snapshot.rawSha256 === null, `1326 source ${source.id} raw SHA-256 must remain null before byte acquisition.`);
+      assert(source.snapshot.retainedArtifact === null, `1326 source ${source.id} retained artifact must remain null before acquisition.`);
+      assert(source.status === "acquisition-required" || source.status === "reference-acquisition-or-citation-required", `1326 source ${source.id} cannot remain unacquired with status ${source.status}.`);
+    } else {
+      assert(source.status === "acquired", `1326 source ${source.id} acquired snapshot requires acquired source status.`);
+      assert(/^[0-9a-f]{64}$/.test(source.snapshot.rawSha256 ?? ""), `1326 source ${source.id} acquired snapshot must record a raw SHA-256.`);
+      assert(typeof source.snapshot.retainedArtifact === "string" && source.snapshot.retainedArtifact.length > 0, `1326 source ${source.id} acquired snapshot must retain an artifact path.`);
+      assert(typeof source.snapshot.acquiredAt === "string" && source.snapshot.acquiredAt.length > 0, `1326 source ${source.id} acquired snapshot must record acquisition time.`);
+    }
   }
 }
 
@@ -56,5 +69,7 @@ console.log(JSON.stringify({
   authorityStatus: manifest.authorityStatus,
   canonicalGeometryStatus: registry.canonicalGeometry.status,
   intakeGate: "PASS",
+  acquiredSources: manifest.sources.filter(source => source.status === "acquired").length,
+  pendingSources: manifest.sources.filter(source => source.status !== "acquired").length,
   promotion: "BLOCKED_UNTIL_SOURCE_SNAPSHOTS_AND_RECONCILIATION"
 }, null, 2));

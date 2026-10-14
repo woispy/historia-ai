@@ -63,6 +63,10 @@ jobs:
         run: npm run test:production-scenario-contract
       - name: Validate 1326 source intake contract
         run: npm run validate:1326-source-intake
+      - name: Validate 1326 anchor candidate registry
+        run: npm run validate:1326-anchor-candidate-registry -- --input data/gis/1326/anchor-candidate-registry.json
+      - name: Run 1326 anchor candidate registry contract test
+        run: npm run test:1326-anchor-candidate-registry
       - name: Generate world physical geometry assets
         run: npm run build:assets
       - name: Verify repository cleanliness after physical assets

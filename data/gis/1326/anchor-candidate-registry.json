@@ -1,0 +1,1958 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "research-candidate-registry",
+  "policy": {
+    "sourcePolicy": "historical-evidence-plus-independent-coordinate",
+    "geometryGeneration": false,
+    "controllerInference": false,
+    "canonicalPromotion": false
+  },
+  "anchors": [
+    {
+      "anchorId": "1326-alaiye",
+      "historicalName": "Alâiye / Alanya",
+      "modernName": "Alanya",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.999817,
+          36.543747
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-alaiye-beyligi",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/alaiye-beyligi",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV Alâiye Beyliği states that Alâiye passed to Karamanoğlu Mecdüddin Mahmud Bey in 1293 and that the city and surrounding area were subsequently governed by beys affiliated with the Karamanids and under Mamluk overlordship."
+        },
+        {
+          "sourceId": "tdv-alanya",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/alanya",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV Alanya records the 1293 Karamanoğlu capture and identifies the city as a Karaman-linked Türkmen centre; later 1333 evidence names Yusuf b. Karaman as ruler."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-alanya",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?country=TR&q=antalya",
+          "coordinates": [
+            31.999817,
+            36.543747
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-alanya",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q207341",
+          "coordinates": [
+            31.99972222222222,
+            36.54388888888889
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-antalya",
+      "historicalName": "Antalya / Attaleia",
+      "modernName": "Antalya",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          30.695565,
+          36.908118
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-antalya",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/antalya",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV Antalya records that Hamidid Dündar Bey captured Antalya, entrusted it to his brother Yunus Bey, and that Yunus's son Mahmud Bey ruled Antalya; Mahmud surrendered his uncle Dündar to Demirtaş in 1324, and later Mahmud was forced to seek refuge only after Demirtaş's departure in 1327."
+        },
+        {
+          "sourceId": "tdv-hamidogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/hamidogullari",
+          "temporalClass": "SCENARIO_WINDOW",
+          "claim": "TDV Hamîdoğulları states that Dündar Bey's nephew Mahmud Bey, who held Antalya, surrendered Dündar to Demirtaş and that Dündar was killed in 1326."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-323777",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/323777/antalya.html",
+          "coordinates": [
+            30.695565,
+            36.908118
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q6487",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q6487",
+          "coordinates": [
+            30.666666666666668,
+            36.96666666666667
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-ayasuluk",
+      "historicalName": "Ayasuluk / Selçuk",
+      "modernName": "Selçuk",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.3684883117676,
+          37.951371965992
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-aydinogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/aydinogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "After establishing control in Aydın-ili in 1308, Mehmed Bey captured Ayasuluk and later established a naval base there."
+        },
+        {
+          "sourceId": "tdv-ayasuluk",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/ayasuluk",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Ayasuluk is the historical settlement corresponding to the later Selçuk locality and is directly associated with the Aydınoğulları historical geography."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-selcuk",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/301256/sel-uk.html",
+          "coordinates": [
+            27.3684883117676,
+            37.951371965992
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q876176",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q876176",
+          "coordinates": [
+            27.37348888888889,
+            37.94698888888889
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-balikesir",
+      "historicalName": "Balıkesir / Karesi",
+      "modernName": "Balıkesir",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.886111,
+          39.649167
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-karesiogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/karesiogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Karesi Bey's polity controlled the Balıkesir-Bergama-Mysia theatre from the late 13th century; Balıkesir is identified as the beylik centre. Karesi Bey died before 1328 and Yahşi Bey succeeded him."
+        },
+        {
+          "sourceId": "tdv-karesi-bey",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/karesi-bey",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Karesi Bey is recorded as the founder of the polity and is known to have died before the 1328 Demirhan agreement."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-balikesir",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/search.html?country=TR",
+          "coordinates": [
+            27.886111,
+            39.649167
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikipedia-balikesir",
+          "sourceType": "WIKIPEDIA",
+          "uri": "https://en.wikipedia.org/wiki/Bal%C4%B1kesir",
+          "coordinates": [
+            27.884167,
+            39.651111
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "MEDIUM",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-bergama",
+      "historicalName": "Bergama / Pergamon",
+      "modernName": "Bergama",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.18052,
+          39.12074
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-karesiogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/karesiogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Karesi Bey's polity controlled Bergama within the wider Mysia theatre from the late 13th century; later evidence places Bergama as a Karesi centre."
+        },
+        {
+          "sourceId": "tdv-bergama",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/bergama",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Bergama is identified as a medieval strategic position and as a centre of the Karesioğulları."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-321426",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/321426/bergama.html",
+          "coordinates": [
+            27.18052,
+            39.12074
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikipedia-bergama",
+          "sourceType": "WIKIPEDIA",
+          "uri": "https://en.wikipedia.org/wiki/Bergama",
+          "coordinates": [
+            27.178333,
+            39.122778
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "MEDIUM",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-beysehir",
+      "historicalName": "Beyşehir / Süleymanşehir",
+      "modernName": "Beyşehir",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.724577,
+          37.677348
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-beysehir",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/beysehir",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Beyşehir became the centre associated with Eşrefoğlu Süleyman Bey in the late 13th century; the city and its fortifications were developed under the Eşrefoğulları and the settlement remained their political centre before the 1326 collapse."
+        },
+        {
+          "sourceId": "tdv-esrefogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/esrefogullari",
+          "temporalClass": "POST_SCENARIO",
+          "claim": "TDV dates Demirtaş's capture of Beyşehir and the killing of II. Süleyman Bey to 9 October 1326; the subsequent seizure of Beyşehir and surrounding Eşrefoğlu territory by Hamîdoğulları is therefore post-scenario and must not be projected back to 7 April 1326."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-beysehir",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=Konia",
+          "coordinates": [
+            31.724577,
+            37.677348
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q127389",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q127389",
+          "coordinates": [
+            31.72611111111111,
+            37.67638888888889
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-bilecik",
+      "historicalName": "Bilecik",
+      "modernName": "Bilecik",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          29.979319,
+          40.141924
+        ]
+      },
+      "anchorType": "SETTLEMENT",
+      "historicalApplicability": "PRE_SCENARIO",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-bilecik",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/bilecik",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Bilecik became an important centre of the Ottoman polity after its capture; Osman Gazi assigned the Bilecik revenues to his family and appointed Şeyh Edebali."
+        },
+        {
+          "sourceId": "tdv-dursun-fakih",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/dursun-fakih",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "The source records Bilecik under Osman Gazi and identifies Edebali's administration there."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-bilecik",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/search.html?country=TR",
+          "coordinates": [
+            29.979319,
+            40.141924
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q208006",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q208006",
+          "coordinates": [
+            29.979167,
+            40.143056
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "MEDIUM",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-birgi",
+      "historicalName": "Birgi",
+      "modernName": "Birgi",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          28.059167,
+          38.250278
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-aydinogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/aydinogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Mehmed Bey established control in Aydın-ili in 1308, captured Ayasuluk and Tire, and settled in Birgi with his youngest son; Birgi became the first centre of the Aydınoğulları beylik."
+        },
+        {
+          "sourceId": "tdv-birgi",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/birgi",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Birgi is identified as the first centre of the Aydınoğulları Beyliği."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-birgi",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=Birgi%2C+Türkiye",
+          "coordinates": [
+            28.059167,
+            38.250278
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q2220449",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q2220449",
+          "coordinates": [
+            28.065,
+            38.255
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-burdur",
+      "historicalName": "Burdur / Polydorion",
+      "modernName": "Burdur",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          30.2908333,
+          37.7202778
+        ]
+      },
+      "anchorType": "SETTLEMENT",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-hamidogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/hamidogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Hamîdoğulları was established in the Isparta, Burdur and Eğridir region; TDV identifies Burdur within the beylik sphere and records Dündar Bey's rule in the Isparta-Burdur region from 1301 to 1326."
+        },
+        {
+          "sourceId": "tdv-felekuddin-dundar-bey",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/felekuddin-dundar-bey",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Feleküddin Dündar Bey is identified as the Hamîdoğulları ruler of the Isparta-Burdur region from 1301 to 1326."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-burdur",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=Burdur",
+          "coordinates": [
+            30.2908333,
+            37.7202778
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "travelmath-burdur",
+          "sourceType": "PROJECT_RESEARCH",
+          "uri": "https://www.travelmath.com/cities/Burdur%2C%2BTurkey",
+          "coordinates": [
+            30.2908333,
+            37.7202778
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "MEDIUM",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-bursa",
+      "historicalName": "Bursa / Prusa",
+      "modernName": "Bursa",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          29.06013,
+          40.195593
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_WINDOW",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-orhan",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/orhan",
+          "temporalClass": "SCENARIO_WINDOW",
+          "claim": "Bursa surrendered to Orhan in the spring of 1326; the entry dates the surrender to 6 April 1326."
+        },
+        {
+          "sourceId": "tdv-bursa",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/bursa",
+          "temporalClass": "SCENARIO_WINDOW",
+          "claim": "Bursa was surrendered to the Ottomans on 6 April 1326."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-16155",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=Bursa%2C+Türkiye",
+          "coordinates": [
+            29.06013,
+            40.195593
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q40738",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q40738",
+          "coordinates": [
+            29.06013,
+            40.195593
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "HIGH",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-dimask",
+      "historicalName": "Dımaşk / Damascus",
+      "modernName": "Damascus",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          36.29127502441406,
+          33.51019814679501
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-sam",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/sam--suriye",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV Şam records Dımaşk as a major centre of Bilâdüşşam and states that after the Mamluk polity was established, Dımaşk remained under Mamluk authority; a 1300 Ilkhanid occupation was brief and the city soon returned to Mamluk control. It further records major Mamluk development under al-Nasir Muhammad and governor Tengiz in 1312-1340."
+        },
+        {
+          "sourceId": "wikidata-Q3766",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q3766",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Wikidata records the Mamluk Sultanate of Egypt as associated with Damascus from 1260 to 1516."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-170654",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/170654/damascus.html",
+          "coordinates": [
+            36.29127502441406,
+            33.51019814679501
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q3766",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q3766",
+          "coordinates": [
+            36.292,
+            33.513
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-egirdir",
+      "historicalName": "Eğridir / Felekâbâd",
+      "modernName": "Eğirdir",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          30.850424766540527,
+          37.874616265473385
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-egridir",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/egridir",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Eğridir became the second centre of the Hamîdoğulları beylik; the article records its occupation by Timurtaş in 1324 and Hızır Bey's return only in 1328."
+        },
+        {
+          "sourceId": "tdv-hamidogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/hamidogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Dündar Bey moved the Hamîdoğulları government centre to Eğridir around 1307 and used the name Felekâbâd for the city."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-egirdir",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=Isparta",
+          "coordinates": [
+            30.850424766540527,
+            37.874616265473385
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q586434",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q586434",
+          "coordinates": [
+            30.850555555555555,
+            37.875
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-giresun",
+      "historicalName": "Giresun / Kerasus",
+      "modernName": "Giresun",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          38.387406,
+          40.91698
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-giresun",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/giresun",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV describes Giresun as the second important centre in the Trebizond Empire's regional geography and a fortified western outpost against surrounding Türkmen groups."
+        },
+        {
+          "sourceId": "tdv-tirebolu",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/tirebolu",
+          "temporalClass": "POST_SCENARIO",
+          "claim": "TDV states that Türkmen groups first reached Tirebolu in 1380 and that Hacı Emîr Bey's son Süleyman Bey captured Giresun in 1396-97; these later events must not be projected backward into 1326."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-giresun-746881",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/746881/giresun.html",
+          "coordinates": [
+            38.387406,
+            40.91698
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikipedia-giresun",
+          "sourceType": "WIKIPEDIA",
+          "uri": "https://en.wikipedia.org/wiki/Giresun",
+          "coordinates": [
+            38.38944,
+            40.91528
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-halep",
+      "historicalName": "Halep / Aleppo",
+      "modernName": "Aleppo",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37.161173,
+          36.201241
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-halep",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/halep",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV Halep records that the city was left to the Mamluks after the Mongol defeat at Aynicâlût in 1260; it notes a brief Mongol occupation in the early 14th century and that the city then remained in the Mamluk period until 1516."
+        },
+        {
+          "sourceId": "tdv-memlukler",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/memlukler",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV identifies the Mamluk state as the polity ruling Egypt, Syria and the Hijaz from 1250 to 1517, providing the broader institutional chronology for Aleppo's Mamluk period."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-170063",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/170063/aleppo.html",
+          "coordinates": [
+            37.161173,
+            36.201241
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q41183",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q41183",
+          "coordinates": [
+            37.16,
+            36.2
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-isparta",
+      "historicalName": "Isparta / Baris",
+      "modernName": "Isparta",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          30.5522222,
+          37.7644444
+        ]
+      },
+      "anchorType": "SETTLEMENT",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-isparta",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/isparta",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Isparta was within the Hamîdoğulları sphere from the late 13th century; TDV describes its situation during Feleküddin Dündar Bey's 1301-1326 period and records a 1326 change after Demirtaş's withdrawal."
+        },
+        {
+          "sourceId": "tdv-felekuddin-dundar-bey",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/felekuddin-dundar-bey",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Feleküddin Dündar Bey is identified as the Hamîdoğulları ruler of the Isparta-Burdur region from 1301 to 1326."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-311073",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=Isparta",
+          "coordinates": [
+            30.5522222,
+            37.7644444
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "travelmath-isparta",
+          "sourceType": "PROJECT_RESEARCH",
+          "uri": "https://www.travelmath.com/cities/Isparta%2C%2BTurkey",
+          "coordinates": [
+            30.5522222,
+            37.7644444
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "MEDIUM",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-kastamonu",
+      "historicalName": "Kastamonu / Castamena",
+      "modernName": "Kastamonu",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          33.775275,
+          41.378052
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-candarogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/candarogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Suleyman Bey took Kastamonu and moved the beylik centre there; the same chronology places his independence after 1327."
+        },
+        {
+          "sourceId": "tdv-kastamonu",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/kastamonu",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Kastamonu passed to the Candarogullari in the early 14th century and became the beylik centre."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-kastamonu-city",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/search.html?country=TR&q=Kastamonu",
+          "coordinates": [
+            33.775275,
+            41.378052
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikipedia-kastamonu",
+          "sourceType": "WIKIPEDIA",
+          "uri": "https://en.wikipedia.org/wiki/Kastamonu",
+          "coordinates": [
+            33.77639,
+            41.37639
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-kutahya",
+      "historicalName": "Kütahya / Cotiaeum",
+      "modernName": "Kütahya",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          29.983333,
+          39.424167
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-kutahya",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/kutahya",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Kütahya became the centre of the Germiyan polity by 1300."
+        },
+        {
+          "sourceId": "tdv-germiyanogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/germiyanogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "The Germiyan polity was established around Kütahya and the city functioned as its political centre."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-kutahya",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/305267/kuetahya.html",
+          "coordinates": [
+            29.983333,
+            39.424167
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q188894",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q188894",
+          "coordinates": [
+            29.983333,
+            39.424167
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "MEDIUM",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-larende",
+      "historicalName": "Lârende / Laranda",
+      "modernName": "Karaman",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          33.215,
+          37.1811111
+        ]
+      },
+      "anchorType": "SETTLEMENT",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-karamanogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/Karamanogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Lârende became Karamanlı territory during Güneri Bey's period; Bedreddin İbrâhim is recorded as ruler from 1318, and TDV later identifies Lârende as the Karamanlı capital after Demirtaş's departure."
+        },
+        {
+          "sourceId": "tdv-karaman",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/karaman",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "The modern city of Karaman is the historical Lârende and developed under Karamanoğulları rule."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-karaman",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?country=TR&q=T%C3%BCrkei",
+          "coordinates": [
+            33.215,
+            37.1811111
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikipedia-karaman",
+          "sourceType": "WIKIPEDIA",
+          "uri": "https://en.wikipedia.org/wiki/Karaman",
+          "coordinates": [
+            33.21806,
+            37.18194
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "MEDIUM",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-manisa",
+      "historicalName": "Manisa / Magnesia ad Sipylum",
+      "modernName": "Manisa",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.426465,
+          38.612018
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-saruhanogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/saruhanogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Saruhan Bey established the Manisa-centred Saruhanoğulları polity; after Manisa became the beylik's centre, Saruhan Bey's regional power expanded."
+        },
+        {
+          "sourceId": "tdv-saruhan-bey",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/saruhan-bey",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Saruhan Bey is identified as the founder of the Manisa-centred Saruhanoğulları beylik."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-manisa",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?country=TR&featureClass=P",
+          "coordinates": [
+            27.426465,
+            38.612018
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q147089",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q147089",
+          "coordinates": [
+            27.426465,
+            38.612018
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-milas",
+      "historicalName": "Milas / Mylasa",
+      "modernName": "Milas",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.783889,
+          37.316389
+        ]
+      },
+      "anchorType": "SETTLEMENT",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-menteseogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/mente%C5%9Feo%C4%9Fullar%C4%B1",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV Menteşeoğulları identifies Milas within the Menteşe sphere and states that the beylik centre was initially Milas; after the unsuccessful 1320-1321 Rhodes campaign, the capital was moved for a time from Milas to Muğla."
+        },
+        {
+          "sourceId": "tdv-mentese",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/mentese",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV Menteşe states that the beylik centre was first Milas and later moved to Muğla during the Rhodes conflict."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-milas",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/search.html?country=TR&q=Milas",
+          "coordinates": [
+            27.783889,
+            37.316389
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q924252",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q924252",
+          "coordinates": [
+            27.78333333333333,
+            37.31666666666667
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "MEDIUM",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-mugla",
+      "historicalName": "Muğla / Mobolla",
+      "modernName": "Muğla",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          28.366497,
+          37.218066
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-mugla",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/mugla",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV Muğla states that Menteşe Beyi Orhan Bey moved the beylik capital from Milas to inland Muğla for security after the unsuccessful Rhodes campaign of 1320-1321; Ibn Battuta found Orhan Bey's son İbrahim Bey administering Muğla in 1333."
+        },
+        {
+          "sourceId": "tdv-mentese",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/mentese",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV Menteşe states that Muğla served as the centre for a period during the Rhodes conflict before Peçin later became the beylik centre."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-mugla",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=Mu%C4%9Fla",
+          "coordinates": [
+            28.366497,
+            37.218066
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikipedia-mugla",
+          "sourceType": "WIKIPEDIA",
+          "uri": "https://de.wikipedia.org/wiki/Mu%C4%9Fla",
+          "coordinates": [
+            28.364444444444445,
+            37.21472222222222
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-nicaea",
+      "historicalName": "Nicaea / İznik",
+      "modernName": "İznik",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          29.721111,
+          40.428611
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-orhan",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/orhan",
+          "temporalClass": "SCENARIO_WINDOW",
+          "claim": "Orhan tightened the siege of both Bursa and İznik after becoming bey; the 1326 campaign against Bursa is described in the same temporal sequence."
+        },
+        {
+          "sourceId": "tdv-iznik",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/iznik",
+          "temporalClass": "SCENARIO_WINDOW",
+          "claim": "The article identifies İznik/Nicaea as the historical fortified settlement and records its place in the Orhan-period chronology."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-nicaea",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=Nicaea",
+          "coordinates": [
+            29.721111,
+            40.428611
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q217125",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q217125",
+          "coordinates": [
+            29.719444,
+            40.428889
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "MEDIUM",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-sinop",
+      "historicalName": "Sinop / Sinope",
+      "modernName": "Sinop",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.162525,
+          42.026829
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-sinop",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/sinop",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Sinop passed from the Pervaneoğulları context to Candaroğlu Süleyman Paşa after the 1324 Hatunili episode; the entry later records Candaroğlu administration."
+        },
+        {
+          "sourceId": "tdv-candarogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/candarogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Süleyman Bey's major achievement included the annexation of Sinop."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-sinop",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=Sinop%2C+Türkiye",
+          "coordinates": [
+            35.162525,
+            42.026829
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikipedia-sinop-turkey",
+          "sourceType": "WIKIPEDIA",
+          "uri": "https://en.wikipedia.org/wiki/Sinop,_Turkey",
+          "coordinates": [
+            35.151111,
+            42.026667
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "MEDIUM",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-sogut",
+      "historicalName": "Söğüt",
+      "modernName": "Söğüt",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          30.184865,
+          40.0143
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "PRE_SCENARIO",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-sogut",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/sogut",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Söğüt is described as an early Ottoman frontier settlement and then Osman Gazi's first administrative centre; the 1326 Bursa conquest marks its subsequent decline in administrative importance."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-sogut",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=S%C3%B6%C4%9F%C3%BCt%2C+Bilecik",
+          "coordinates": [
+            30.184865,
+            40.0143
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q768506",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q768506",
+          "coordinates": [
+            30.181389,
+            40.018611
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "MEDIUM",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-tire",
+      "historicalName": "Tire / Thyra",
+      "modernName": "Tire",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.73508,
+          38.088769
+        ]
+      },
+      "anchorType": "SETTLEMENT",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-aydinogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/aydinogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Mehmed Bey captured Tire after establishing control in Aydın-ili in 1308 and incorporated it into the Aydınoğulları sphere."
+        },
+        {
+          "sourceId": "tdv-tire",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/tire",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Tire passed from Sasa Bey's control to Aydınoğlu Mehmed Bey during the beyliks period; it was subsequently developed under the Aydınoğulları."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-tire",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=Tire%2C+Türkiye",
+          "coordinates": [
+            27.73508,
+            38.088769
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q630533",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q630533",
+          "coordinates": [
+            27.7319,
+            38.08956944444445
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-trablussam",
+      "historicalName": "Trablusşam / Tripoli",
+      "modernName": "Tripoli",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.84415,
+          34.43352
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-trablussam",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/trablussam",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV records Sultan Kalavun's conquest of Tripoli in 1289 and states that the rebuilt city became the centre of one of the six major Mamluk niyabas; it also describes the city as an important Mamluk administrative and commercial centre."
+        },
+        {
+          "sourceId": "tdv-memlukler",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/memlukler",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV identifies the Mamluk state as the polity ruling Syria during the period relevant to the Tripoli niyaba chronology."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-266826",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/266826/tripoli.html",
+          "coordinates": [
+            35.84415,
+            34.43352
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q168954",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q168954",
+          "coordinates": [
+            35.83444444444444,
+            34.43666666666667
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-trabzon",
+      "historicalName": "Trabzon / Trebizond",
+      "modernName": "Trabzon",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          39.726944,
+          41.005
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-trabzon",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/trabzon",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV identifies Trabzon as the centre of the state founded by Alexios Komnenos in 1204 and states that the Komnenian capital retained its centre status from 1204 to 1461; the article also notes Ilkhanid influence and increasing Turkmen pressure from the 1320s."
+        },
+        {
+          "sourceId": "wikidata-Q45301",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q45301",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Wikidata identifies Trabzon as the city corresponding to Trebizond and records the Empire of Trebizond as the historical polity associated with the city from 1204 to 1461."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-738648",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/738648/trabzon.html",
+          "coordinates": [
+            39.726944,
+            41.005
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q45301",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q45301",
+          "coordinates": [
+            39.7225,
+            41.005
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-uluborlu",
+      "historicalName": "Uluborlu",
+      "modernName": "Uluborlu",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          30.450194,
+          38.078253
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "PRE_SCENARIO",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-hamidogullari",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/hamidogullari",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Hamîd Bey made fortified Uluborlu the government centre around 1297; the article also records Uluborlu as the seat of the beylik and Dündar Bey's rule in the region before 1326."
+        },
+        {
+          "sourceId": "tdv-felekuddin-dundar-bey",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/felekuddin-dundar-bey",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "Feleküddin Dündar Bey is identified as the Hamîdoğulları ruler of the Isparta-Burdur region in 1301-1326."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-uluborlu",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?q=Uluborlu",
+          "coordinates": [
+            30.450194,
+            38.078253
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q1012840",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q1012840",
+          "coordinates": [
+            30.448333,
+            38.078889
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-beyrut",
+      "historicalName": "Beyrut / Beirut",
+      "modernName": "Beirut",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.50157,
+          33.89332
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-beyrut",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/beyrut",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV records that Beirut remained under Crusader control until 1291, when it was conquered for the Mamluk Sultan al-Malik al-Ashraf Khalil; under Mamluk rule Beirut became an important province/city in East-West trade, and early-14th-century al-Idrisi evidence describes its fortifications and gardens."
+        },
+        {
+          "sourceId": "tdv-lubnan",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/lubnan",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV Lebanon states that from the 14th century Lebanon experienced a stable period under strong Mamluk rule and that coastal cities were fortified and active in regional trade."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-beirut",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/search.html?q=Beirut",
+          "coordinates": [
+            35.50157,
+            33.89332
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q3820",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q3820",
+          "coordinates": [
+            35.51305555555556,
+            33.88694444444444
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-sayda",
+      "historicalName": "Sayda / Sidon",
+      "modernName": "Sidon",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.37148,
+          33.55751
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-sayda",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/sayda",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV records that after Acre fell in 1291, the Mamluk army approached Sidon; the Templar knights abandoned the sea castle and fled, and the city came under Mamluk control in July 1291. During the Mamluk period Sidon was subordinate to the Damascus niyaba and governed by governors appointed from Damascus."
+        },
+        {
+          "sourceId": "tdv-lubnan",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/lubnan",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV Lebanon records strong Mamluk rule over Lebanon from the 14th century and continued activity and fortification of coastal cities."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-269261",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/search.html?country=LB&q=Sidon",
+          "coordinates": [
+            35.37148,
+            33.55751
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q163490",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q163490",
+          "coordinates": [
+            35.37583333333333,
+            33.56055555555556
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-safed",
+      "historicalName": "Safed / Safad",
+      "modernName": "Safed",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.495997,
+          32.964648
+        ]
+      },
+      "anchorType": "POLITICAL_CENTRE",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-safed",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/safed",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV records Sultan Baybars's capture of Safed in 1266 and states that the city then became one of the six niyaba centres of Mamluk Syria; it records Safed as an important city in the first half of the 14th century and describes its administrative and economic role."
+        },
+        {
+          "sourceId": "tdv-sam-suriye",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/sam--suriye",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV's Syria/Şam chronology places the region within Mamluk administration during the relevant period and provides the broader institutional context for Safed's Mamluk niyaba."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-safed",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/advanced-search.html?country=IL&q=Safed",
+          "coordinates": [
+            35.495997,
+            32.964648
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q188336",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q188336",
+          "coordinates": [
+            35.49833333333333,
+            32.96583333333333
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
+      "anchorId": "1326-kudus",
+      "historicalName": "Kudüs / al-Quds / Jerusalem",
+      "modernName": "Jerusalem",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          35.216331481933594,
+          31.76904009837115
+        ]
+      },
+      "anchorType": "SETTLEMENT",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-kudus",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/kudus",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV records that Jerusalem entered a more stable period after the Mamluk victory at Aynicâlût in 1260 and remained under Mamluk rule; its political importance was reduced relative to major commercial centres, so the city is treated here as a settlement/reference anchor rather than an asserted provincial capital."
+        },
+        {
+          "sourceId": "tdv-filistin",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/filistin",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV states that during the Mamluk period Palestine was reorganized into six areas attached to Damascus: Gaza, Ludd, Kakun, Jerusalem, Hebron and Nablus. This directly establishes Jerusalem as a relevant Mamluk administrative locality in the scenario-era regional system."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-281184",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/search.html?country=IL&q=Jerusalem",
+          "coordinates": [
+            35.216331481933594,
+            31.76904009837115
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q1218",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q1218",
+          "coordinates": [
+            35.23415611111111,
+            31.77667888888889
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "HIGH",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    }
+  ]
+}
