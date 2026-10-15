@@ -1,0 +1,93 @@
+name: Phase 2D B-C4 Clean Forensic Replay
+
+on:
+  push:
+    branches:
+      - codex/phase2.8-c-b-c4-clean
+  pull_request:
+    branches:
+      - integration/phase-a-h-production
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  b-c4-clean-replay:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout canonical baseline
+        uses: actions/checkout@v4
+        with:
+          ref: 6b7424125eee4a1c72925b7a1780c68e695e9ba3
+          path: canonical
+
+      - name: Checkout historical V15 source
+        uses: actions/checkout@v4
+        with:
+          ref: codex/phase2.8-c-b-c4-replay-canonical
+          path: v15-source
+
+      - name: Checkout forensic probe
+        uses: actions/checkout@v4
+        with:
+          path: forensic
+
+      - name: Prepare canonical environment
+        working-directory: canonical
+        run: npm ci
+
+      - name: Generate authoritative hydrography fixture
+        working-directory: canonical
+        run: npm run build:assets
+
+      - name: Prepare historical V15 dependencies
+        working-directory: v15-source
+        run: npm ci
+
+      - name: Provision generated hydrography fixture into historical V15 source
+        run: |
+          mkdir -p v15-source/src/map/data/generated
+          cp canonical/src/map/data/generated/anatolia-hydrography-10m.json v15-source/src/map/data/generated/anatolia-hydrography-10m.json
+
+      - name: Run B-C4 observational replay
+        working-directory: forensic
+        env:
+          CANONICAL_ROOT: ${{ github.workspace }}/canonical
+          V15_ROOT: ${{ github.workspace }}/v15-source
+        run: |
+          node tools/tests/phase2d-v15-b-c4-nicomedia-nicaea-replay.mjs \
+            > tools/tests/b-c4-nicomedia-nicaea-replay.json \
+            2> tools/tests/b-c4-nicomedia-nicaea-replay.stderr.log
+
+      - name: Run B-C6 transition geometry probe
+        working-directory: forensic
+        env:
+          V15_ROOT: ${{ github.workspace }}/v15-source
+        run: |
+          node tools/tests/phase2d-v15-b-c6-transition-geometry.mjs \
+            > tools/tests/b-c6-transition-geometry.json \
+            2> tools/tests/b-c6-transition-geometry.stderr.log
+
+      - name: Run B-C8 repair boundary segment trace
+        working-directory: forensic
+        env:
+          V15_ROOT: ${{ github.workspace }}/v15-source
+        run: |
+          node tools/tests/phase2d-v15-b-c8-repair-segment-trace.mjs \
+            > tools/tests/b-c8-repair-segment-trace.json \
+            2> tools/tests/b-c8-repair-segment-trace.stderr.log
+
+      - name: Upload B-C4/B-C6/B-C8 results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2d-b-c4-clean-replay
+          path: |
+            forensic/tools/tests/b-c4-nicomedia-nicaea-replay.json
+            forensic/tools/tests/b-c4-nicomedia-nicaea-replay.stderr.log
+            forensic/tools/tests/b-c6-transition-geometry.json
+            forensic/tools/tests/b-c6-transition-geometry.stderr.log
+            forensic/tools/tests/b-c8-repair-segment-trace.json
+            forensic/tools/tests/b-c8-repair-segment-trace.stderr.log
+            forensic/tools/tests/phase2d-v15-b-c4-nicomedia-nicaea-replay.mjs
+            forensic/tools/tests/phase2d-v15-b-c6-transition-geometry.mjs
+            forensic/tools/tests/phase2d-v15-b-c8-repair-segment-trace.mjs
