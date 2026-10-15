@@ -17,6 +17,13 @@
       "provider": "Seshat Global History Databank",
       "dataset": "Cliopatria",
       "version": "v0.2.0",
+      "releaseDate": "2026-05-16",
+      "zenodoRecord": "10.5281/zenodo.20274630",
+      "archive": {
+        "filename": "cliopatria-v0.2.0.zip",
+        "sizeBytesApprox": 297100000,
+        "md5": "6d573d5a07dfcd5a2c6c9933d6401d48"
+      },
       "role": "global-political-entity-candidate-evidence",
       "url": "https://github.com/Seshat-Global-History-Databank/cliopatria/releases/tag/v0.2.0",
       "repository": "https://github.com/Seshat-Global-History-Databank/cliopatria",
@@ -123,7 +130,7 @@
     }
   ],
   "acquisitionOrder": [
-    "1. Acquire Cliopatria snapshot and isolate 1326 candidate political records.",
+    "1. Acquire the pinned Cliopatria v0.2.0 snapshot and isolate 1326 candidate political records.",
     "2. Reconcile candidate entities against the 1326 evidence matrix and historical place identities.",
     "3. Acquire European Digital Atlas evidence for European corroboration only.",
     "4. Acquire OpenHistoricalMap historical features and preserve feature-level licensing/provenance.",

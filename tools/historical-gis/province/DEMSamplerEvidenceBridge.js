@@ -1,0 +1,142 @@
+/**
+ * Bridge between the P6.2 Copernicus DEM cost sampler and the candidate-only
+ * DEM relief evidence layer used by T3/P6.1.
+ *
+ * P6.2 sampler -> physical terrain evidence -> candidate graph evidence.
+ * This module never creates political ownership, canonical borders, or runtime geometry.
+ */
+import { extractDEMReliefEvidence } from "./DEMReliefEvidence.js";
+
+const METERS_PER_DEGREE = 111000;
+const DEFAULT_RADIUS_SAMPLES = 1;
+const DEFAULT_SAMPLE_STEP_DEGREES = 1 / 3600;
+
+function finite(value, name) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) throw new TypeError(`${name} must be finite`);
+  return number;
+}
+
+function clamp01(value) {
+  return Math.max(0, Math.min(1, finite(value, "value")));
+}
+
+function buildElevationGrid(sampler, lon, lat, radiusSamples, stepDegrees) {
+  const size = radiusSamples * 2 + 1;
+  const elevations = [];
+  for (let y = 0; y < size; y += 1) {
+    const dy = y - radiusSamples;
+    for (let x = 0; x < size; x += 1) {
+      const dx = x - radiusSamples;
+      elevations.push(sampler.elevation(lon + dx * stepDegrees, lat + dy * stepDegrees));
+    }
+  }
+  const cellSizeMeters = stepDegrees * METERS_PER_DEGREE;
+  return { elevations, width: size, height: size, cellSizeMeters };
+}
+
+export function createDEMSamplerEvidenceProvider(sampler, {
+  radiusSamples = DEFAULT_RADIUS_SAMPLES,
+  sampleStepDegrees = DEFAULT_SAMPLE_STEP_DEGREES,
+  reliefScaleMeters = 500,
+  ridgeScaleMeters = 400,
+  cache = true,
+} = {}) {
+  if (!sampler || typeof sampler.elevation !== "function") throw new TypeError("sampler.elevation must be a function");
+  if (!Number.isInteger(radiusSamples) || radiusSamples < 1) throw new RangeError("radiusSamples must be a positive integer");
+  if (!(sampleStepDegrees > 0)) throw new RangeError("sampleStepDegrees must be positive");
+  if (typeof cache !== "boolean") throw new TypeError("cache must be boolean");
+
+  const evidenceCache = cache ? new Map() : null;
+  let cacheHits = 0;
+  let sampleCount = 0;
+  let elevationRequestCount = 0;
+  let validSampleCount = 0;
+  let invalidSampleCount = 0;
+
+  const sample = (node) => {
+    const lon = finite(node?.lon, "node.lon");
+    const lat = finite(node?.lat, "node.lat");
+    const cacheKey = `${lon},${lat}`;
+    if (evidenceCache?.has(cacheKey)) {
+      cacheHits += 1;
+      return evidenceCache.get(cacheKey);
+    }
+
+    sampleCount += 1;
+    const grid = buildElevationGrid(sampler, lon, lat, radiusSamples, sampleStepDegrees);
+    elevationRequestCount += grid.elevations.length;
+    const evidence = extractDEMReliefEvidence(grid, { reliefScaleMeters, ridgeScaleMeters });
+    const centerIndex = radiusSamples * (radiusSamples * 2 + 1) + radiusSamples;
+    const center = evidence.samples[centerIndex];
+    const validCount = evidence.samples.filter((sampleValue) => sampleValue.valid).length;
+    const coverage = evidence.samples.length ? validCount / evidence.samples.length : 0;
+
+    const result = !center?.valid
+      ? Object.freeze({
+        valid: false,
+        authoritative: false,
+        source: "Copernicus DEM GLO-30",
+        coverage: Number(coverage.toFixed(6)),
+        slopeNormalized: 0,
+        ridgeAffinity: 0,
+        mountainResistance: 0,
+        reliefMeters: null,
+        ridgeProminenceMeters: null,
+      })
+      : Object.freeze({
+        valid: true,
+        authoritative: false,
+        source: "Copernicus DEM GLO-30",
+        coverage: Number(coverage.toFixed(6)),
+        elevationMeters: center.elevationMeters,
+        slopeNormalized: clamp01(center.slopeNormalized),
+        ridgeAffinity: clamp01(center.ridgeAffinity),
+        mountainResistance: clamp01(center.mountainResistance),
+        reliefMeters: center.reliefMeters,
+        ridgeProminenceMeters: center.ridgeProminenceMeters,
+      });
+
+    if (result.valid) validSampleCount += 1;
+    else invalidSampleCount += 1;
+    evidenceCache?.set(cacheKey, result);
+    return result;
+  };
+
+  return Object.freeze({
+    sample,
+    getCacheStats() {
+      return Object.freeze({
+        enabled: Boolean(evidenceCache),
+        entries: evidenceCache?.size ?? 0,
+        sampleCount,
+        cacheHits,
+        cacheMisses: sampleCount,
+        elevationRequestCount,
+        validSampleCount,
+        invalidSampleCount,
+      });
+    },
+  });
+}
+
+export const DEM_SAMPLER_EVIDENCE_BRIDGE_CONTRACT = Object.freeze({
+  schemaVersion: 2,
+  authoritative: false,
+  source: "Copernicus DEM GLO-30",
+  input: "initialized P6.2 CopernicusDemCostSampler",
+  output: "candidate physical terrain evidence",
+  neighbourhood: "3x3 elevation post by default",
+  caching: "coordinate-keyed evidence cache by default",
+  telemetry: "cache and elevation request counters",
+  politicalAuthority: false,
+});
+
+export const demSamplerEvidenceBridgeDefaults = Object.freeze({
+  radiusSamples: DEFAULT_RADIUS_SAMPLES,
+  sampleStepDegrees: DEFAULT_SAMPLE_STEP_DEGREES,
+  reliefScaleMeters: 500,
+  ridgeScaleMeters: 400,
+  cache: true,
+  defaultCellSizeMeters: DEFAULT_SAMPLE_STEP_DEGREES * METERS_PER_DEGREE,
+});
