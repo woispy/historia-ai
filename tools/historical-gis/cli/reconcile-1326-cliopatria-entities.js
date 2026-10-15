@@ -8,9 +8,9 @@ const REQUIRED_ENTITIES = [
   { entityId: "byzantine-empire", aliases: ["byzantine", "byzantine empire", "bizans", "bizans imparatorluğu"] },
   { entityId: "esrefogullari", aliases: ["esrefogullari", "eşrefoğulları", "eşref"] },
   { entityId: "ilkhanate", aliases: ["ilkhanate", "il-khanate", "ilhanate", "ilhanlı", "ilhanlilar", "ilhanlılar"] },
-  { entityId: "karasi", aliases: ["karasi", "karasi beylik", "karesi", "karesi beyligi", "karesi beyliği"] },
-  { entityId: "saruhan", aliases: ["saruhan", "saruhan beylik", "saruhan beyliği"] },
-  { entityId: "aydin", aliases: ["aydin", "aydın", "aydinoğulları", "aydinoğullari"] },
+  { entityId: "karasi", aliases: ["karasi", "karasi beylik", "karesi", "karesi beyligi", "karesi beyliği", "beylik of karasi"] },
+  { entityId: "saruhan", aliases: ["saruhan", "saruhan beylik", "saruhan beyliği", "beylik of saruhan"] },
+  { entityId: "aydin", aliases: ["aydin", "aydın", "aydinoğulları", "aydinoğullari", "beylik of aydin"] },
   { entityId: "alaye", aliases: ["alaye", "alâiye", "alâiye beyliği", "ala iye"] },
 ];
 
@@ -35,6 +35,10 @@ function normalize(value) {
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
+
+const MANUAL_REVIEW_IDENTIFIERS = {
+  "ottoman-beylik": { wikidataId: "Q12560", reason: "cross-polity-label" },
+};
 const byName = new Map();
 for (const candidate of candidates.candidates ?? []) {
   const key = normalize(candidate.name);
@@ -46,15 +50,21 @@ for (const candidate of candidates.candidates ?? []) {
 
 const results = REQUIRED_ENTITIES.map((entity) => {
   const matches = [];
+  const matchedAliases = [];
   for (const alias of entity.aliases) {
     const bucket = byName.get(normalize(alias)) ?? [];
-    for (const candidate of bucket) if (!matches.some(x => x.sourceFeatureIndex === candidate.sourceFeatureIndex)) matches.push(candidate);
+    for (const candidate of bucket) {
+      if (!matches.some(x => x.sourceFeatureIndex === candidate.sourceFeatureIndex)) {
+        matches.push(candidate);
+        matchedAliases.push(alias);
+      }
+    }
   }
-  const exact = matches.filter(candidate => normalize(candidate.name) === normalize(entity.aliases[0]));
   return {
     entityId: entity.entityId,
     status: matches.length === 0 ? "unmatched" : matches.length === 1 ? "single-candidate" : "ambiguous",
     candidateCount: matches.length,
+    matchedAliases,
     candidates: matches.map(candidate => ({
       sourceFeatureIndex: candidate.sourceFeatureIndex,
       sourceFeatureId: candidate.sourceFeatureId,
@@ -69,8 +79,23 @@ const results = REQUIRED_ENTITIES.map((entity) => {
   };
 });
 
+const manualReview = Object.entries(MANUAL_REVIEW_IDENTIFIERS).flatMap(([entityId, rule]) => {
+  const matches = (candidates.candidates ?? []).filter(candidate => candidate.wikidataId === rule.wikidataId);
+  return matches.map(candidate => ({
+    entityId,
+    reason: rule.reason,
+    sourceFeatureIndex: candidate.sourceFeatureIndex,
+    sourceFeatureId: candidate.sourceFeatureId,
+    name: candidate.name,
+    wikidataId: candidate.wikidataId,
+    fromYear: candidate.fromYear,
+    toYear: candidate.toYear,
+    geometryAuthorityStatus: candidate.geometryAuthorityStatus,
+  }));
+});
+
 const report = {
-  schemaVersion: 1,
+  schemaVersion: 3,
   scenarioDate: SCENARIO_DATE,
   sourceId: SOURCE_ID,
   reconciliationPolicy: {
@@ -79,7 +104,10 @@ const report = {
     aliasMatch: "candidate-only",
     ambiguity: "manual-review-required",
     geometryAuthority: "never-derived-from-name-match-alone",
+    "cross-polity-label": "manual-review-required",
+    "missing-source-record": "explicit-gap",
   },
+  manualReview,
   counts: {
     requiredEntities: results.length,
     matched: results.filter(x => x.candidateCount > 0).length,
@@ -91,5 +119,5 @@ const report = {
 };
 const output = path.resolve(process.cwd(), readArg("--output") ?? "data/build/gis/1326/cliopatria-entity-reconciliation.json");
 await fs.mkdir(path.dirname(output), { recursive: true });
-await fs.writeFile(output, `${JSON.stringify(report, null, 2)}\\n`);
+await fs.writeFile(output, JSON.stringify(report, null, 2) + "\n");
 console.log(JSON.stringify({ scenarioDate: SCENARIO_DATE, ...report.counts, output, promotion: "BLOCKED" }, null, 2));

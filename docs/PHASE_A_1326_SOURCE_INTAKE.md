@@ -1,6 +1,6 @@
 # Phase A — 1326 Source Intake Contract
 
-Status: **intake contract established; acquisition and promotion remain blocked**  
+Status: **byte acquisition, temporal extraction and mechanical entity reconciliation gates evidenced for Cliopatria; 5/8 Tier-1 entities have candidate matches, 1 cross-polity label requires manual review, 2 remain explicit source gaps; promotion remains BLOCKED**  
 Date: **2026-09-18**  
 Canonical branch: `integration/phase-a-h-production`
 
@@ -66,7 +66,9 @@ Until these fields exist, the source remains **acquisition-required** and cannot
 
 ## Acquisition decision
 
-The first acquisition target is **Cliopatria v0.2.0** because it is a versioned, downloadable GeoJSON source with explicit temporal intervals and Wikidata/Seshat identifiers. Its role remains candidate political evidence; it cannot directly become canonical province geometry. The repository command `npm run acquire:1326-cliopatria` now explicitly performs the byte acquisition path; `npm run verify:1326-cliopatria` verifies the retained artifact hash. Neither command promotes geometry.
+The first acquisition target is **Cliopatria v0.2.0** because it is a versioned, downloadable GeoJSON source with explicit temporal intervals and Wikidata/Seshat identifiers. Its role remains candidate political evidence; it cannot directly become canonical province geometry. The repository command `npm run acquire:1326-cliopatria` explicitly performs the byte acquisition path; `npm run verify:1326-cliopatria` verifies the retained artifact hash. Neither command promotes geometry.
+
+The acquisition workflow also performs deterministic archive extraction and selects the first valid GeoJSON FeatureCollection rather than assuming an archive filename.
 
 The second operational source is **OpenHistoricalMap**, but the repository should acquire a reproducible bulk snapshot rather than rely on an interactive area export. The current service documentation points to Planet OHM and Overpass for bulk acquisition.
 
@@ -92,9 +94,72 @@ The public v0.2.0 release resolves to commit **ad28a69**. The exact repository b
 
 The source documentation describes Cliopatria as a historical political-entity dataset with EPSG:4326 geometry and inclusive `FromYear/ToYear` intervals. For Historia AI, the extraction rule remains `FromYear <= 1326 <= ToYear`; the resulting records remain candidate evidence and require entity reconciliation and review before any geometry promotion.
 
+## Verified Cliopatria acquisition evidence
+
+The acquisition-only forensic workflow completed successfully on **2026-09-18** (workflow run **35374512708**, head **b97653c23688998ce44f5179f20a362cec306ec6**).
+
+Verified retained source bytes:
+
+- source: `cliopatria-v0.2.0`
+- immutable source commit: `ad28a69`
+- source Git blob: `cefab0f4b622e2e7fb3daf68d4f461f83991204c` (Git object identity, not raw SHA-256)
+- raw SHA-256: `d01ae3a20d358cc5d54f69d9d725d390767d9c8759ac89ad6f90c58d106f3370`
+- byte length: `44231317`
+- ZIP signature validation: PASS
+- independent retained-byte verification: PASS
+- acquisition timestamp: `2026-09-18T17:28:53.478Z`
+- retained outside canonical runtime as GitHub Actions artifact **10559198772**
+- artifact ZIP digest: `sha256:fc93ba2c4481344269ab3d731fd4899f8425eb8cc395aadf4da96e1625c88c11`
+
+This closes the **byte-acquisition gate only**. Temporal extraction, entity reconciliation, candidate geometry review, topology/physical validation and canonical promotion remain blocked until their respective gates pass.
+
+## Verified 1326 temporal extraction evidence
+
+The same forensic acquisition workflow was extended to perform the first deterministic temporal extraction without promoting any geometry. Successful workflow run **35381065057** executed from PR #108's merge ref and completed all extraction steps.
+
+The archive was unpacked and the selected input was validated as a GeoJSON **FeatureCollection** before invoking the repository extractor. The selected file was:
+
+`cliopatria_polities_only.geojson`
+
+Extractor result:
+
+- scenario date: **1326-04-07**
+- input features: **13,765**
+- temporal candidates: **150**
+- excluded outside temporal range: **13,608**
+- excluded non-polity: **7**
+- missing geometry: **0**
+- output: `data/build/gis/1326/cliopatria-1326-candidates.json`
+- authority status: **candidate-evidence-only**
+- retained source ZIP SHA-256: `d01ae3a20d358cc5d54f69d9d725d390767d9c8759ac89ad6f90c58d106f3370`
+- retained source ZIP byte length: `44,231,317`
+
+This closes the **Cliopatria temporal extraction gate**. It does not close entity identity, political-control, geometry-authority, topology, physical validation, or canonical promotion.
+
+The workflow artifact for this extraction is **10562680169** with uploaded-artifact ZIP digest `sha256:727b3c7bf53b53f411439aaf5565c800519dddf49f4c6c42f79e0296f8b322c0`. The raw source ZIP remains outside canonical runtime.
+
+## Verified 1326 entity reconciliation evidence
+
+The fail-closed reconciliation stage was re-executed after temporal extraction in successful workflow run **35383554275** (head **3b7abc8593d6b623e3d68b303dabec372622e15b**).
+
+The stage consumes the extracted candidate report plus the canonical 1326 evidence matrix and evaluates only the eight established Tier-1 entities. Result:
+
+- required Tier-1 entities: **8**
+- entities with at least one name/alias candidate: **5**
+- unmatched: **3**
+- ambiguous: **0**
+- automatic promotion: **false**
+- overall promotion state: **BLOCKED**
+
+The three unmatched entities are not treated as absent from history; they are explicit **reconciliation gaps in this source's 1326 candidate set under the current name/alias matching policy**. The five matched entities are only candidate identity matches and are not geometry authority. The current matched set is Byzantine Empire, Ilkhanate, Karesi, Saruhan and Aydın. Ottoman Beylik, Eşrefoğulları and Alâiye remain unmatched in this source.
+
+The subsequent successful forensic workflow **35396664319** (run #34, head **b7b21117ca32f7a1c71e76958b9247e3b325defb**) re-ran acquisition, temporal extraction, reconciliation, independent checksum and artifact retention. Reconciliation again produced **8 required / 5 matched / 3 unmatched / 0 ambiguous / promotion BLOCKED**. The report now records schemaVersion **3** and explicitly separates cross-polity labels into `manualReview` rather than treating them as automatic entity matches. The Cliopatria candidate `Ottoman Empire` (Wikidata **Q12560**, 1326–1332) is recorded for `ottoman-beylik` with reason `cross-polity-label`; this is a manual-review candidate, not a sixth matched entity. Eşrefoğulları and Alâiye remain unmatched source gaps. The workflow retained the combined acquisition/intake evidence as artifact **10566919811** with uploaded-artifact ZIP digest `sha256:c08bedf1c18a31d05d18d88ece6a62453ab4e9b6e9566e8ab40cd462a1459cdc`. The independently hashed retained source remains SHA-256 `d01ae3a20d358cc5d54f69d9d725d390767d9c8759ac89ad6f90c58d106f3370` and `44,231,317` bytes.
+
+This establishes that the source can now be mechanically evaluated against the Tier-1 matrix, while the unresolved three-entity gap remains the active forensic work item.
+
 ## Entity reconciliation gate
 
-A dedicated fail-closed reconciliation stage now exists at:
+A dedicated fail-closed reconciliation stage exists at:
 
 `tools/historical-gis/cli/reconcile-1326-cliopatria-entities.js`
 
@@ -112,10 +177,11 @@ temporal match
     ≠ canonical authority
 ```
 
+The next executable gate is therefore **manual-review closure of the Ottoman cross-polity label plus evidence-backed closure of the two remaining Cliopatria source gaps** (Eşrefoğulları, Alâiye), using source identifiers and/or additional historical sources plus the evidence matrix, without relaxing the promotion locks.
 
 ## Reproducible Cliopatria byte-acquisition path
 
-A dedicated local acquisition helper now exists at:
+A dedicated local acquisition helper exists at:
 
 `tools/historical-gis/cli/acquire-1326-cliopatria.js`
 
@@ -128,8 +194,52 @@ npm run verify:1326-cliopatria
 
 The helper downloads the pinned v0.2.0 payload, requires a ZIP signature, retains the exact bytes outside the canonical runtime, records acquisition time, byte length and raw SHA-256, and provides an independent re-hash verification path. It does not perform temporal extraction or canonical promotion.
 
-This command is intentionally a local acquisition operation. The repository tooling in this environment cannot materialize the binary GitHub blob because binary repository content is not returned as UTF-8; therefore no raw SHA-256 is claimed until the command is actually executed against the external source and the resulting bytes are retained.
+This command is intentionally a local acquisition operation. The repository tooling in this environment cannot materialize the binary GitHub blob because binary repository content is not returned as UTF-8; therefore no raw SHA-256 is claimed until the command is actually executed against the external source and the resulting bytes are retained. The successful GitHub Actions run now provides that independent execution evidence.
 
+
+## Tier-1 historical evidence closure
+
+A dedicated evidence note now records the historical closure of the three reconciliation gaps:
+
+`docs/PHASE_A_1326_TIER1_GAP_CLOSURE.md`
+
+At scenario date **1326-04-07**:
+
+- **Ottoman Beylik:** Cliopatria's `Ottoman Empire` / Q12560 record remains a **cross-polity manual-review candidate**. Independent Bursa/Orhan chronology places Ottoman control immediately before the scenario date.
+- **Eşrefoğulları:** the source remains a genuine Cliopatria candidate gap, but independent historical evidence places the polity in existence until **9 October 1326**, after the scenario date.
+- **Alâiye:** the source remains a genuine Cliopatria candidate gap, while independent historical references document Alâiye Beyliği as **1293–1471** and its rule in the Alanya region across the scenario date.
+
+This closes the **historical existence/control evidence gap**, not the geometry gap. No polygon is promoted by this evidence and all production promotion locks remain active.
+
+The next gate is therefore candidate/cross-source **geometry acquisition and review**, followed by topology and physical validation.
+
+The geometry-stage working record is now maintained in `docs/PHASE_A_1326_GEOMETRY_ACQUISITION_REVIEW.md`. It classifies Eşrefoğulları/Alâiye cartographic references as research candidates only and explicitly prevents 1300 material, late maps, or local GIS layers from becoming 1326 canonical geometry.
+
+
+
+## AtlasPI geometry-path closure — 2026-09-19
+
+The AtlasPI forensic probe is now recorded in:
+
+`docs/PHASE_A_1326_ATLASPI_ACQUISITION_PROBE.md`
+
+and the geometry-stage implications are recorded in:
+
+`docs/PHASE_A_1326_GEOMETRY_ACQUISITION_REVIEW.md`
+
+The inspected AtlasPI repository does **not** contain a tracked `world_1326.geojson` snapshot. Its `data/processed/` tree is empty apart from `.gitkeep`; the pre-1800 boundary path resolves to `aourednik/historical-basemaps`.
+
+The upstream snapshot index contains relevant target labels at 1300 and 1400 but no 1326 snapshot:
+
+- 1300: Byzantine Empire, Ilkhanate;
+- 1400: Beylik of Aydin, Byzantine Empire, Ottoman Empire;
+- no 1326 snapshot.
+
+Direct inspection of `world_1300.geojson` found only Byzantine Empire and Ilkhanate among the target-family entities. AtlasPI's separate `approximate_generated` capital-radius boundary path is explicitly computational approximation and remains excluded from Historia AI authority.
+
+Therefore AtlasPI is closed for the current **direct 1326 geometry acquisition** attempt and retained as a provenance/reference layer. This is a negative acquisition result, not a failure of the source: the source lineage simply does not expose a date-appropriate 1326 polygon snapshot for the missing Tier-1 entities.
+
+The active geometry gate is now narrowed to **independent date-appropriate machine-readable evidence for Eşrefoğulları and Alâiye plus review of the Cliopatria Ottoman candidate**.
 
 ## Promotion locks
 
@@ -156,4 +266,4 @@ This verifies the manifest/registry/evidence contracts. It intentionally does **
 
 Source intake is complete only when each production-relevant source has a pinned snapshot identity, raw hash, license/provenance record, reproducible extraction parameters, and a retained artifact that can be independently revalidated.
 
-After that, the next stage is temporal/entity reconciliation — not automatic geometry promotion.
+For Cliopatria, byte acquisition, temporal extraction and mechanical reconciliation are now evidenced. The next stage is **manual review of the Ottoman cross-polity label plus closure of the two genuine source gaps with additional historical evidence**, followed by candidate geometry review and topology/physical validation — not automatic geometry promotion.
