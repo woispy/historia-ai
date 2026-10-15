@@ -1,0 +1,74 @@
+name: Phase 2.8-C A2 Amisos Telemetry
+
+on:
+  pull_request:
+    branches:
+      - integration/phase-a-h-production
+  workflow_dispatch:
+
+env:
+  A2_V15_SOURCE_SHA: 3575c1bccf94a322fed175958ce786531b142497
+
+jobs:
+  a2-amisos-telemetry:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm install --include=dev --no-audit --no-fund --package-lock=false
+      - name: Generate required GIS runtime assets
+        run: npm run build:assets
+      - name: Fetch retained V15 forensic source tree
+        shell: bash
+        run: |
+          git fetch --no-tags --depth=1 origin "$A2_V15_SOURCE_SHA"
+          mkdir -p "$RUNNER_TEMP/v15"
+          git archive "$A2_V15_SOURCE_SHA" \
+            tools/historical-gis/AnatoliaPhase2DGeometryBuilderV15.js \
+            tools/historical-gis/recovery/physical-land-authority.mjs \
+            src/map/data/Anatolia1300ProvinceGeometryManifest.js \
+            src/map/data/AnatoliaPhysicalAtlasRuntime.js \
+            src/map/data/AnatoliaPhysicalAtlas.js \
+            src/map/data/AnatoliaPhysicalCoastCorrections.js \
+            src/map/data/AnatoliaProvinceMetadata.js \
+            src/map/data/AnatoliaProvinceRefinement.js \
+            | tar -x -C "$RUNNER_TEMP/v15"
+          V15_SOURCE_PATH="$RUNNER_TEMP/v15/tools/historical-gis/AnatoliaPhase2DGeometryBuilderV15.js"
+          test -f "$V15_SOURCE_PATH"
+          test -f "$RUNNER_TEMP/v15/src/map/data/Anatolia1300ProvinceGeometryManifest.js"
+          test -f "$RUNNER_TEMP/v15/tools/historical-gis/recovery/physical-land-authority.mjs"
+          test -f "$RUNNER_TEMP/v15/src/map/data/AnatoliaPhysicalAtlasRuntime.js"
+          test -f "$RUNNER_TEMP/v15/src/map/data/AnatoliaPhysicalAtlas.js"
+          test -f "$RUNNER_TEMP/v15/src/map/data/AnatoliaPhysicalCoastCorrections.js"
+          mkdir -p "$RUNNER_TEMP/v15/src/map/data/generated"
+          cp src/map/data/generated/anatolia-hydrography-10m.json "$RUNNER_TEMP/v15/src/map/data/generated/anatolia-hydrography-10m.json"
+          test -f "$RUNNER_TEMP/v15/src/map/data/generated/anatolia-hydrography-10m.json"
+          echo "A2_V15_SOURCE_FILE=$V15_SOURCE_PATH" >> "$GITHUB_ENV"
+          echo "A2_V15_SOURCE_PATH=tools/historical-gis/AnatoliaPhase2DGeometryBuilderV15.js" >> "$GITHUB_ENV"
+          echo "Resolved V15 source tree at: $RUNNER_TEMP/v15"
+          echo "Generated hydrography runtime asset supplied from checked-out candidate workspace"
+      - name: Verify telemetry source isolation
+        shell: bash
+        run: |
+          test -n "$A2_V15_SOURCE_FILE"
+          case "$A2_V15_SOURCE_FILE" in
+            "$RUNNER_TEMP/v15/"*) ;;
+            *) echo "A2 telemetry source escaped pinned V15 tree: $A2_V15_SOURCE_FILE"; exit 1 ;;
+          esac
+          test -f "$A2_V15_SOURCE_FILE"
+          echo "Telemetry source isolated at: $A2_V15_SOURCE_FILE"
+      - name: Run isolated A2 Amisos edge telemetry
+        run: node tools/tests/phase2d-a2-amisos-edge-telemetry-v2.mjs
+      - name: Upload A2 edge telemetry
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2.8-c-a2-amisos-edge-telemetry
+          path: artifacts/phase2.8-c/a2-amisos-edge-telemetry.json
+          if-no-files-found: error
