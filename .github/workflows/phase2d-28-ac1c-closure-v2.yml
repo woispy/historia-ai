@@ -1,0 +1,31 @@
+name: Phase 2D 2.8-C A1 A2 C Closure Audit V2
+
+on:
+  push:
+    branches: [codex/phase2.8-b4-forensic-calibration]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  closure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build:assets
+      - name: Prepare canonical fixture
+        run: |
+          git fetch --no-tags origin 6b7424125eee4a1c72925b7a1780c68e695e9ba3
+          git worktree add --detach /tmp/historia-ai-canonical 6b7424125eee4a1c72925b7a1780c68e695e9ba3
+          mkdir -p /tmp/historia-ai-canonical/src/map/data/generated
+          cp src/map/data/generated/anatolia-hydrography-10m.json /tmp/historia-ai-canonical/src/map/data/generated/anatolia-hydrography-10m.json
+      - name: Run refined closure audit
+        env:
+          CANONICAL_ROOT: /tmp/historia-ai-canonical
+        run: node tools/tests/phase2d-28-ac1c-closure-audit-v2.mjs

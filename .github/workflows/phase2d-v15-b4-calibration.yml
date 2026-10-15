@@ -1,0 +1,44 @@
+name: Phase 2D V15 B4 Forensic Calibration
+
+on:
+  push:
+    branches:
+      - codex/phase2.8-b4-forensic-calibration
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  b4:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Generate required hydrography runtime fixture
+        run: npm run build:assets
+      - name: Fetch canonical production branch
+        run: git fetch --no-tags origin 6b7424125eee4a1c72925b7a1780c68e695e9ba3 && git worktree add --detach /tmp/historia-ai-canonical 6b7424125eee4a1c72925b7a1780c68e695e9ba3
+      - name: Provision canonical generated hydrography fixture
+        run: mkdir -p /tmp/historia-ai-canonical/src/map/data/generated && cp src/map/data/generated/anatolia-hydrography-10m.json /tmp/historia-ai-canonical/src/map/data/generated/anatolia-hydrography-10m.json
+      - name: Run B4 calibrated forensic probe
+        env:
+          CANONICAL_ROOT: /tmp/historia-ai-canonical
+        run: |
+          mkdir -p forensic-output
+          node tools/tests/phase2d-v15-b4-forensic-calibration.mjs > forensic-output/b4-calibration.json
+          cat forensic-output/b4-calibration.json
+      - name: Upload B4 machine-readable artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2d-v15-b4-calibration
+          path: forensic-output/b4-calibration.json
+          retention-days: 7
