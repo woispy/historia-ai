@@ -15,7 +15,6 @@ export function useWorldMap(gameSession) {
     if (!gameSession) return { provinces: [], cities: [] };
 
     const provinceRepository = gameSession.world.repositories.provinces;
-    const cityRepository = gameSession.world.repositories.cities;
     const countryRepository = gameSession.world.repositories.countries;
     const geometryRepository = gameSession.world.map.geometry;
     const sourceProvinces = getProvinces(provinceRepository);
@@ -41,10 +40,10 @@ export function useWorldMap(gameSession) {
         : {
           province,
           country: province.owner
-            ? gameSession.world.repositories.countries.byId?.[province.owner] ?? null
+            ? countryRepository.byId?.[province.owner] ?? null
             : null,
           sourceCountry: province.owner
-            ? gameSession.world.repositories.countries.byId?.[province.owner] ?? null
+            ? countryRepository.byId?.[province.owner] ?? null
             : null,
           historicalPolitical: null,
           geometry: province.geometryId
@@ -53,7 +52,10 @@ export function useWorldMap(gameSession) {
         };
     });
 
-    const cities = getCities(cityRepository);
+    const canonicalCities = gameSession.state?.cities;
+    const cities = canonicalCities
+      ? canonicalCities.allIds.map((id) => canonicalCities.byId[id]).filter(Boolean)
+      : getCities(gameSession.world.repositories.cities);
 
     return { provinces, cities };
   }, [gameSession]);
