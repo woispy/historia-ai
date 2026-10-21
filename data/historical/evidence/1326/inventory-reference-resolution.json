@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "purpose": "Resolve and pin the provenance of legacy inventory:1326-gecis-envanteri#N references without treating a same-name attachment as the authoritative revision.",
-  "status": "T3B_SOURCE_REVISION_PINNED_LEGACY_REFS_PENDING_MIGRATION",
+  "status": "T3B_SOURCE_PINNED_IMMUTABLE_RECORDS_MIGRATED",
   "scenarioDate": "1326-04-07",
   "pilot": "bithynia-core-01",
   "pilotEvidencePath": "data/gis/1326/pilot-edge-evidence/bithynia-core-01.json",
@@ -60,9 +60,8 @@
     }
   ],
   "requiredToResolve": [
-    "Verify the exact linked source passages and bibliographic metadata against each claim; the design inventory and heading match are provenance, not independent evidence.",
-    "After a reviewed migration, replace legacy evidenceRefs with the immutable recordId values above; preserve confidence and admissibility limits.",
-    "For the section-15 lower-cost claim, produce a reproducible DEM/terrain-cost analysis before assigning numeric solver weights."
+    "Verify exact linked source passages and bibliographic metadata against each claim; source identity and heading matches are provenance, not independent evidence.",
+    "For section-15 lower-cost claims, produce reproducible DEM/terrain-cost analysis before assigning numeric solver weights."
   ],
   "decision": {
     "frontierStatus": "INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED",
@@ -92,10 +91,8 @@
     "disposition": "source revision pinned; section headings verified; historical claims and bibliography are not thereby independently validated"
   },
   "requiredForLegacyRefMigration": [
-    "Review this immutable source-record mapping and claim summaries.",
-    "Change only the four evidenceRefs in data/gis/1326/pilot-edge-evidence/bithynia-core-01.json to the matching recordId values; preserve all edge statuses, confidence values, notes, and geometry gates.",
-    "Run the full CI and Cliopatria acquisition verification after migration.",
-    "Do not alter review bindings, geometry, controller inference, confidence, or canonical promotion."
+    "Migration completed in commit cd0958fbea9812c66cce5e2341f20e2fd0cd7d3f; old aliases remain preserved in immutableSourceRecords[].legacyRef for audit.",
+    "Do not alter pilot confidence, review bindings, geometry, controller inference, or canonical promotion based solely on source identifier migration."
   ],
   "immutableSourceRecords": [
     {

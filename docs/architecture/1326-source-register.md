@@ -515,3 +515,9 @@ The expected section headings are verified in those exact bytes:
 The earlier `REVISION_AMBIGUOUS` finding is superseded for **source-revision identity**: the T3-B source revision is now pinned, and the four references map to headings in that revision. The separate T3-A attachment and the currently mounted same-name attachment remain comparison-only and must not be substituted.
 
 **Important scope limit:** this resolves which document revision the aliases refer to; it does not independently validate the claims or bibliography inside those sections. The pilot evidence file and review bindings remain unchanged. Bursa–Nicaea remains `INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED`, confidence 0.25; `reviewBindings: []`, `reviewedGeometry: null`, canonical promotion `BLOCKED`, `MIN_AREA=0.00005`, and `SAFE TO DELETE=0`. Next is a section-by-section citation/admissibility audit, then a separately reviewed migration from numbered aliases to immutable source-record IDs.
+
+## 2026-10-14 — Immutable evidence reference migration completed
+
+The T3-B/Pilot 01 inventory revision is pinned by SHA-256 `1fcefb023a328951e6219cc18093356f6f2230e176eb9c57096d64b410e0819c`. Four immutable source-record IDs now exist in `data/historical/evidence/1326/inventory-reference-resolution.json`, with original aliases retained for audit. `data/gis/1326/pilot-edge-evidence/bithynia-core-01.json` now references those stable IDs; edge statuses, confidence, notes and geometry gates were preserved. The manifest status is `T3B_SOURCE_PINNED_IMMUTABLE_RECORDS_MIGRATED`.
+
+This closes the identifier/provenance migration only. It does not independently validate every linked scholarly passage, convert the corridor hypothesis into a measured terrain cost, or establish an exact 1326 frontier. Review bindings remain empty and canonical promotion remains blocked.
