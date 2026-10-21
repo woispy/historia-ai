@@ -60,8 +60,9 @@
     }
   ],
   "requiredToResolve": [
-    "Review the exact text and cited bibliography for each of the four recovered sections; source identity/heading verification is not independent historical claim validation.",
-    "Replace the legacy inventory:...#N aliases with explicit immutable source-record IDs in a separately reviewed change, preserving the original claim text and admissibility limits."
+    "Verify the exact linked source passages and bibliographic metadata against each claim; the design inventory and heading match are provenance, not independent evidence.",
+    "After a reviewed migration, replace legacy evidenceRefs with the immutable recordId values above; preserve confidence and admissibility limits.",
+    "For the section-15 lower-cost claim, produce a reproducible DEM/terrain-cost analysis before assigning numeric solver weights."
   ],
   "decision": {
     "frontierStatus": "INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED",
@@ -91,8 +92,84 @@
     "disposition": "source revision pinned; section headings verified; historical claims and bibliography are not thereby independently validated"
   },
   "requiredForLegacyRefMigration": [
-    "Verify the cited bibliography and claim limitations section by section against their cited sources.",
-    "Migrate the four aliases to stable source-record IDs in a separately reviewed change.",
-    "Do not alter pilot evidence, review bindings, geometry, controller inference, confidence, or canonical promotion solely because the source revision was recovered."
+    "Review this immutable source-record mapping and claim summaries.",
+    "Change only the four evidenceRefs in data/gis/1326/pilot-edge-evidence/bithynia-core-01.json to the matching recordId values; preserve all edge statuses, confidence values, notes, and geometry gates.",
+    "Run the full CI and Cliopatria acquisition verification after migration.",
+    "Do not alter review bindings, geometry, controller inference, confidence, or canonical promotion."
+  ],
+  "immutableSourceRecords": [
+    {
+      "recordId": "hist-evidence:1326:bithynia-t3b:section-01",
+      "legacyRef": "inventory:1326-gecis-envanteri#1",
+      "sourceRecordId": "project-file:file_000000004b4081f7b09426f5f25c1f46",
+      "sourceSha256": "1fcefb023a328951e6219cc18093356f6f2230e176eb9c57096d64b410e0819c",
+      "section": 1,
+      "heading": "Önce kaynaklarla coğrafi modeli yeniden doğruladım",
+      "lineRange": [
+        30,
+        45
+      ],
+      "claimType": "PHYSICAL_GEOGRAPHY",
+      "sourceUrls": [
+        "https://academic.oup.com/edited-volume/61673/chapter-abstract/548511258",
+        "https://academic.oup.com/edited-volume/61673/chapter-abstract/550496284"
+      ],
+      "claimSummary": "Bithynia terrain and valley communication; Sangarius valley as an access corridor while gorge sections may constrain east-west movement.",
+      "admissibility": "Physical-geography context only. Not a political boundary, controller claim, or dated 1326 frontier.",
+      "verification": "section bytes and heading verified; linked bibliography is identified in the source text; detailed source passage/page verification remains pending"
+    },
+    {
+      "recordId": "hist-evidence:1326:bithynia-t3b:section-15",
+      "legacyRef": "inventory:1326-gecis-envanteri#15",
+      "sourceRecordId": "project-file:file_000000004b4081f7b09426f5f25c1f46",
+      "sourceSha256": "1fcefb023a328951e6219cc18093356f6f2230e176eb9c57096d64b410e0819c",
+      "section": 15,
+      "heading": "Nicaea'nın doğusu için özel durum",
+      "lineRange": [
+        466,
+        474
+      ],
+      "claimType": "ROUTE_ACCESSIBILITY_HYPOTHESIS",
+      "sourceUrls": [
+        "https://www.cambridge.org/core/books/abs/victory-in-the-east/first-enemy-the-turks-of-asia-minor/259B6EC17320DA7F644157882E794FF4"
+      ],
+      "claimSummary": "Nicaea → Lefke → Sangarius corridor is proposed as a lower-cost/high-connectivity route based on a terrain description.",
+      "admissibility": "Geographic accessibility hypothesis only; route presence does not imply Byzantine control or political ownership.",
+      "verification": "section bytes and heading verified; numeric lower-cost weighting is an unvalidated solver hypothesis and needs DEM/terrain-cost analysis"
+    },
+    {
+      "recordId": "hist-evidence:1326:bithynia-t3b:section-17",
+      "legacyRef": "inventory:1326-gecis-envanteri#17",
+      "sourceRecordId": "project-file:file_000000004b4081f7b09426f5f25c1f46",
+      "sourceSha256": "1fcefb023a328951e6219cc18093356f6f2230e176eb9c57096d64b410e0819c",
+      "section": 17,
+      "heading": "Bursa–Nicaea frontier'i nasıl modellenmeli?",
+      "lineRange": [
+        519,
+        552
+      ],
+      "claimType": "POLITICAL_FRONTIER_HYPOTHESIS",
+      "sourceUrls": [],
+      "claimSummary": "Conceptual transition-zone sketch between Bursa and Nicaea; states that the frontier centerline is not canonical and confidence should remain low/medium.",
+      "admissibility": "Design hypothesis only. No coordinates, line geometry, or independently sourced exact frontier.",
+      "verification": "section bytes and heading verified; the section itself is not independent historical evidence; bibliography must be checked at claim level"
+    },
+    {
+      "recordId": "hist-evidence:1326:bithynia-t3b:section-18",
+      "legacyRef": "inventory:1326-gecis-envanteri#18",
+      "sourceRecordId": "project-file:file_000000004b4081f7b09426f5f25c1f46",
+      "sourceSha256": "1fcefb023a328951e6219cc18093356f6f2230e176eb9c57096d64b410e0819c",
+      "section": 18,
+      "heading": "Nicomedia–Nicaea arasında başka bir constraint",
+      "lineRange": [
+        556,
+        579
+      ],
+      "claimType": "REGIONAL_NETWORK_CONSTRAINT",
+      "sourceUrls": [],
+      "claimSummary": "Coast, gulf, mountain passages and roads mean the Nicomedia–Nicaea relationship should not be simplified to a straight political line.",
+      "admissibility": "Qualitative terrain/network design constraint only; no confirmed crossing, political ownership, or boundary geometry.",
+      "verification": "section bytes and heading verified; specific geographic claims and any implied crossing require independent source verification"
+    }
   ]
 }
