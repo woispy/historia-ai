@@ -198,3 +198,32 @@ Therefore:
 - No coordinate is added to the candidate registry in this pass. A physical-reference record still needs feature identity, at least two coordinate-source types, uncertainty, and explicit temporal/semantic limits.
 
 **Gate remains BLOCKED_ENDPOINT_PROVENANCE.** No solver run, raster selection, weight tuning, route result, review binding, political geometry, or canonical promotion is authorized by this source alone.
+
+
+## Source-critical correction: two Taşköprü references and competing road hypotheses — 2026-10-22
+
+A page-level check of Belke (2017), pp. 54–59 and 61–63, requires a qualification to the preceding road-network note.
+
+### Do not conflate the bridges
+
+Belke describes **two different bridges called Taşköprü / associated with Göksu names**:
+
+1. Near Kutluca, about 24 road-km northwest of Nikomēdeia/İzmit, a Roman or early Byzantine bridge crosses the upper Psillis/Göksu Deresi on the route toward Şile and Ağva. This is a Black Sea coast connector, not the Nicaea–Dorylaion corridor endpoint.
+2. On the Nicaea–Dorylaion route, a different tributary arriving from the İnegöl area—Gök(çe)su, probably ancient Rēbas—was crossed on a surviving ruined stone bridge also called Taşköprü. From there, the pilgrimage road crossed the Sangarios and separated from the Dorylaion road.
+
+The shared modern name “Taşköprü” is not a unique feature identifier. The experiment must not use the Kutluca/Psillis bridge as a proxy for the İnegöl/Gök(çe)su–Rēbas bridge.
+
+### Route alignment is not settled
+
+Belke describes the older route as following the Sangarios left bank at least to Osmaneli/Lefke and then the Karasu, but explicitly leaves the exact alignment uncertain. The same discussion reports Şahin's alternative: a shorter route east of the Yenişehir plain toward Gökçesu/Pazaryeri, then joining the upper Karasu corridor. Belke notes that the precise route cannot yet be reconstructed from the evidence reviewed there.
+
+Consequently, the previous entry's “Sangarios valley → Osmaneli/Lefke → Karasu” is retained only as **one source-backed candidate**, not the preferred or established route. A fair diagnostic must preserve competing hypotheses rather than select a path before comparison.
+
+### Experiment consequences
+
+- Endpoint feature IDs must distinguish the two Taşköprü bridges and the two Göksu/Psillis/Rēbas hydronym contexts.
+- Keep at least two historical route hypotheses in the research ledger: (A) Sangarios left-bank → Osmaneli/Lefke → Karasu; (B) eastern Yenişehir / Gökçesu candidate toward Pazaryeri and upper Karasu.
+- Do not run a terrain-cost comparison until the candidate paths/endpoints are independently georeferenced with source provenance and the raster source is pinned.
+- Ancient/Byzantine road reconstruction remains contextual evidence, not proof of route usage on 1326-04-07.
+
+**Gate remains BLOCKED_ENDPOINT_PROVENANCE.** This correction changes no registry anchor, geometry, controller claim, review binding, or canonical promotion.
