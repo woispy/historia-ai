@@ -163,6 +163,12 @@ These are useful physical-geography references, not dated 1326 political-boundar
 
 **Decision:** retain these citations only for the claims they actually support. No geometry, ownership, candidate provenance, edge confidence or canonical status is promoted by this source check. Next: acquire date-relevant evidence for 1326 and run a reproducible terrain-cost analysis before assigning any numeric route-cost weight.
 
+### 2026-10-21 — DEM experiment gate clarified
+
+The repository's generic DEM/cost tests and broad Anatolia stress run passed, but they are not a Nicaea–Lefke route-specific measurement. In addition, the current `CopernicusDemCostSampler` consumes the public COG cache source while the separate P6.2 contract pins the CDSE DGED `2024_1` release and its manifest currently has zero promoted tiles. These provenance tracks must not be silently conflated.
+
+The route-specific experiment is therefore **specified but not run**. See [Bithynia DEM / Terrain-Cost Experiment Contract](1326-BITHYNIA-DEM-COST-EXPERIMENT.md) for endpoint provenance, raster pinning, cost-model, checksum and sensitivity requirements. No numeric solver weight, review binding, candidate geometry or canonical promotion is authorized by the generic CI pass.
+
 ## Next operation
 
 1. Acquire or locate boundary-specific historical geography evidence for the Bithynia frontier at or near 1326.

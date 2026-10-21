@@ -124,6 +124,12 @@ WHG is useful for linking historical place identities and source-linked records.
 
 Website: https://whgazetteer.org/
 
+### 2026-10-21 — Bithynia route-cost experiment contract
+
+The Nicaea–Lefke–Sangarius accessibility hypothesis now has an explicit experiment contract at `docs/architecture/1326-BITHYNIA-DEM-COST-EXPERIMENT.md`. The contract separates a physical route-cost diagnostic from historical route-use claims and political-boundary authority. It also records that the current generic terrain sampler's public COG source is not automatically equivalent to the P6.2 CDSE DGED `2024_1` acquisition contract; exact raster provenance and per-tile hashes must be pinned before a route-specific run.
+
+Current state: **specified, not run**. No 1326 political geometry is promoted by this contract.
+
 ## Explicit exclusions
 
 ### 1300 historical-basemaps data
