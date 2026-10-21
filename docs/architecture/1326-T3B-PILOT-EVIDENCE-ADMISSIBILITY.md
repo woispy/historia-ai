@@ -294,3 +294,14 @@ The exact T3-B/Pilot 01 attachment is now pinned in `data/historical/evidence/13
 | #18 — Nicomedia–Nicaea network constraint | Qualitative coastal/terrain/route-network context | No confirmed crossing, straight boundary, or political ownership inference |
 
 **Decision:** mark the four source revisions `PINNED` and headings `SECTION_HEADING_VERIFIED`, but keep alias migration as a separately reviewed task. `bithynia-core-01.json` and `.review-bindings.json` remain unchanged. Bursa–Nicaea remains `INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED` (confidence 0.25); `reviewBindings: []`, `reviewedGeometry: null`, canonical promotion `BLOCKED`, `MIN_AREA=0.00005`, `SAFE TO DELETE=0`. No geometry, anchor, controller, or review binding was created.
+
+### 2026-10-14 — Pilot evidence refs migrated to immutable source-record IDs
+
+The four legacy section aliases in `data/gis/1326/pilot-edge-evidence/bithynia-core-01.json` were migrated using the source-record mapping in `data/historical/evidence/1326/inventory-reference-resolution.json`:
+
+- `inventory:1326-gecis-envanteri#1` → `hist-evidence:1326:bithynia-t3b:section-01`
+- `inventory:1326-gecis-envanteri#15` → `hist-evidence:1326:bithynia-t3b:section-15`
+- `inventory:1326-gecis-envanteri#17` → `hist-evidence:1326:bithynia-t3b:section-17`
+- `inventory:1326-gecis-envanteri#18` → `hist-evidence:1326:bithynia-t3b:section-18`
+
+Only evidence reference identifiers changed. Edge IDs, types, statuses, confidence values, notes and policy gates are preserved. The manifest retains the old aliases, source checksum, headings, line ranges, source URLs and admissibility limits. Review bindings remain empty and canonical promotion remains BLOCKED.
