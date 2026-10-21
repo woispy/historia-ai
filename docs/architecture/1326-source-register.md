@@ -560,3 +560,18 @@ The official Copernicus Data Space documentation states that COP-DEM GLO-30 DGED
 - OData API documentation: https://documentation.dataspace.copernicus.eu/APIs/OData.html
 
 The live OData catalogue endpoint could not be retrieved through the available research interface in this pass. No product IDs or tile bytes were obtained and no hashes can be claimed. N40_E029 and N40_E030 are only candidate grid IDs if the future approved experiment bounds cross those cells; they are not an acquired or approved tile manifest. The route endpoint choice remains unresolved, and the experiment remains blocked.
+
+
+## 2026-10-21 — Historical road-network source narrows the Bithynia corridor hypothesis
+
+A targeted search identified Klaus Belke, “Bithynien und Hellespont in der Tabula Peutingeriana,” in *Space, Landscapes and Settlements in Byzantium* (2017), especially the discussion reproduced around pp. 61–64. The paper distinguishes the Nikaia–Dorylaion road from the pilgrimage road and discusses their shared approach through the Sangarios valley.
+
+Belke describes an older road following the Sangarios' left bank at least to Osmaneli (formerly Lefke, Byzantine Leukai), then following the Karasu tributary. He also discusses an old crossing of the Göksu/Rēbas near Taşköprü and a Sangarios bridge associated with the pilgrimage road before that road separates from the Dorylaion route. References:
+- Full-text/article record: https://www.researchgate.net/publication/341043590_Klaus_Belke_Bithynien_und_Hellespont_in_der_Tabula_Peutingeriana_in_A_Kulzer_-_M_Popovic_eds_Space_Landscapes_and_Settlements_in_Byzantium_Studies_in_Historical_Geography_of_the_Eastern_Mediterranean_
+- Tabula Peutingeriana online entry summarizing the Bithynian road geography: https://tp-online.ku.de/trefferanzeige_druck.php?id=2651
+
+**Source-derived finding:** this is stronger support for a historical road-network candidate than the previously cited broad corridor narrative. It gives a sequence of named valleys/places and distinguishes at least two different crossings.
+
+**Limit:** it does not establish a coordinate-level trailhead or crossing used specifically on 1326-04-07. Ancient road reconstruction, pilgrimage-route history, and a retrospective corridor narrative are not interchangeable with exact-date route usage. Modern town coordinates are not a substitute for a surveyed historic road feature.
+
+**Disposition:** record the Sangarios valley → Osmaneli/Lefke → Karasu alignment as a research candidate only. Investigate the Göksu/Rēbas crossing separately from the Sangarios pilgrimage-road bridge. No candidate anchor, controller claim, political geometry, review binding, or canonical promotion is changed. The terrain-cost experiment remains BLOCKED_ENDPOINT_PROVENANCE; no DEM tile manifest or solver result is authorized yet.
