@@ -177,3 +177,24 @@ On 2026-10-21, the official OData documentation/query form was reviewed, but the
 - endpoint and raster gates: **BLOCKED**.
 
 This is a documented access limitation, not evidence that the products are absent from CDSE.
+
+
+## Historical road-network evidence follow-up — 2026-10-21
+
+A targeted literature search found a more specific road-network source than the previously recorded broad corridor references:
+
+- Klaus Belke, “Bithynien und Hellespont in der Tabula Peutingeriana,” in *Space, Landscapes and Settlements in Byzantium* (2017), pp. 61–64 in the available text. The discussion distinguishes the Nikaia–Dorylaion road from the pilgrimage road and places their shared approach in the Sangarios valley.
+- Belke describes the older road as following the Sangarios' left bank at least as far as Osmaneli (formerly Lefke, Byzantine Leukai), then following the Karasu tributary. He also discusses an old crossing of the Göksu/Rēbas near Taşköprü and a bridge used by the pilgrimage road over the Sangarios before the route separated from the road to Dorylaion.
+- The accessible paper record and text can be consulted at: https://www.researchgate.net/publication/341043590_Klaus_Belke_Bithynien_und_Hellespont_in_der_Tabula_Peutingeriana_in_A_Kulzer_-_M_Popovic_eds_Space_Landscapes_and_Settlements_in_Byzantium_Studies_in_Historical_Geography_of_the_Eastern_Mediterranean_ and the Tabula Peutingeriana online reference: https://tp-online.ku.de/trefferanzeige_druck.php?id=2651.
+
+### Admissibility and endpoint decision
+
+This source narrows the *route-network hypothesis* and identifies named physical features worth investigating; it does not supply a surveyed coordinate for a 1326 trailhead, does not prove that a specific crossing was used on 1326-04-07, and does not provide a DEM-derived cost comparison. Its discussion is historical road geography, including ancient route reconstruction, and must not be silently recast as exact 1326 route evidence.
+
+Therefore:
+- Treat the Sangarios valley → Osmaneli/Lefke → Karasu alignment as a **source-backed route candidate**, not a frozen solver path.
+- Keep the Nicaea city point separate from the route's departure point; keep modern Osmaneli coordinates separate from a historic road node.
+- Investigate the Göksu/Rēbas crossing and the Sangarios crossing as distinct features. Do not substitute one for the other or assume that the pilgrimage-road bridge is the required Nicaea–Lefke endpoint.
+- No coordinate is added to the candidate registry in this pass. A physical-reference record still needs feature identity, at least two coordinate-source types, uncertainty, and explicit temporal/semantic limits.
+
+**Gate remains BLOCKED_ENDPOINT_PROVENANCE.** No solver run, raster selection, weight tuning, route result, review binding, political geometry, or canonical promotion is authorized by this source alone.
