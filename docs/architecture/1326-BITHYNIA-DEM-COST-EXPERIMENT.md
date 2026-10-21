@@ -114,3 +114,33 @@ A terrain-cost result can support only physical accessibility analysis. It canno
 2. Resolve the DEM source provenance mismatch before sampling.
 3. Implement/run the experiment only after endpoint and raster input gates pass.
 4. Record results and sensitivity; if inputs or endpoints cannot be verified, preserve the block and seek better evidence.
+
+
+## Endpoint and raster provenance follow-up — 2026-10-21
+
+### Place identity is not a route endpoint
+
+External coordinate cross-checking did not justify unblocking the experiment:
+
+- Historical literature already cited in this repository (Öztürk 2021, printed pp. 2–3; TIB 13, printed pp. 215–216) supports the historical place-name relationship Leukai/Lefke → modern Osmaneli and a retrospective 1304/05 Sangarios-corridor narrative. It does not specify a surveyed 1326 trailhead, river crossing, or cost-sampling endpoint.
+- Modern locality references place Osmaneli around 40.3591 N, 30.0166 E (Mapcarta/OpenStreetMap-backed place record), while a general reference gives rounded coordinates 40.350 N, 30.017 E. These are modern town-location references, not independently verified medieval route points.
+- Geyve has a material point-type ambiguity: GeoNames' Geyve İlçesi administrative-division record reports 40.51701 N, 30.29645 E, whereas the Geyve town/locality record reports approximately 40.50906 N, 30.29025 E. The earlier approximate value [30.296, 40.517] therefore corresponds to a district-level reference, not a validated town point or gorge crossing.
+- The historical mention of Absu/Hypsu in Geyve Gorge remains a research lead. Neither a district centroid nor a modern town point can be silently substituted for that historical feature.
+
+No anchor was added to `anchor-candidate-registry.json`: the available evidence does not yet identify a single physical endpoint with an explicit point type and acceptable independent coordinate provenance. This is intentional fail-closed behavior, not a claim that these places are unknown.
+
+### Raster release clarified; tile inputs still unpinned
+
+Official Copernicus Data Space documentation identifies `COP-DEM_GLO-30-DGED/2024_1` as a distinct release and documents one-degree grid-cell IDs and OData discovery by dataset and grid ID. This clarifies how the pinned CDSE product should be acquired, but it does not supply this experiment's exact tile list or file checksums.
+
+The repository's separate public COG tile-list/cache path remains a different acquisition/provenance chain. No tile from that cache is accepted as a substitute for a CDSE 2024_1 tile until product identity, source URL, bytes and SHA-256 are reconciled.
+
+### Gate ruling
+
+**Still `BLOCKED_ENDPOINT_PROVENANCE`; raster gate also remains open.** The external coordinate checks narrow the ambiguity but do not resolve it. No route solver was run, no weights were tuned, and no political geometry/controller/review binding was changed.
+
+Required next evidence:
+1. Select the physical feature intended by the historical claim (town reference, gorge feature, or river crossing) and record why that feature is the experiment endpoint.
+2. Obtain two coordinate-source types for that exact feature, record coordinate disagreement/uncertainty and retain the historical source separately from coordinate sources.
+3. Query the official CDSE catalogue for the exact `2024_1` grid cells intersecting the approved experiment bounds; save product IDs, original download URLs, downloaded bytes and SHA-256 values.
+4. Only then perform a route-specific run and sensitivity comparison.

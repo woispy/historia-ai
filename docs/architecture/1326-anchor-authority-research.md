@@ -1432,3 +1432,21 @@ The pilot-readiness gate additionally requires explicit review bindings before r
 The next step is to execute/validate the actual candidate-surface-to-review-queue pipeline against the pinned Cliopatria extraction artifact, preserve the resulting provenance hashes, and then establish the pilot review bindings. Only after that evidence chain is CI-proven can research-backed geometry reconciliation begin.
 
 Canonical political geometry remains **BLOCKED**.
+
+
+## Wave 27 — Bithynia corridor endpoint semantics and coordinate-source audit (2026-10-21)
+
+The Nicaea–Lefke–Sangarius terrain-cost experiment prompted a targeted endpoint check. This is a provenance audit, not an anchor-expansion wave.
+
+### Findings
+
+- Historical literature already registered in the source notes supports the Leukai/Lefke → modern Osmaneli place-identity lead and retrospective 1304/05 corridor context. It does not locate a specific 1326 trailhead or crossing point.
+- Modern Osmaneli locality references cluster around 40.35–40.359 N, 30.017 E. These represent the present town, not a demonstrated medieval road node.
+- The earlier Geyve approximation [30.296, 40.517] matches a GeoNames record for **Geyve İlçesi** (administrative division). A separate Geyve town/locality record is approximately [30.29025, 40.50906]. These point types must not be conflated.
+- The historical Absu/Hypsu / Geyve Gorge lead remains a physical-geography research lead; current modern town/district coordinates do not identify the precise historical feature.
+
+### Decision
+
+No new anchor is added. Before creating a machine-readable physical-reference candidate, the work must identify whether the experiment needs a modern locality reference, a named historical feature, or a river/gorge crossing, then capture coordinate sources for that exact feature. Any future record must remain `candidate-evidence-only`, state its physical-reference semantics, and leave controller and geometry confidence `NOT_ASSERTED`.
+
+The registry remains at its previously audited 32 records. No coordinate, controller, candidate polygon, review binding, or canonical geometry is promoted. Canonical political geometry remains **BLOCKED**.

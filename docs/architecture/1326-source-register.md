@@ -531,3 +531,22 @@ The earlier `REVISION_AMBIGUOUS` finding is superseded for **source-revision ide
 The T3-B/Pilot 01 inventory revision is pinned by SHA-256 `1fcefb023a328951e6219cc18093356f6f2230e176eb9c57096d64b410e0819c`. Four immutable source-record IDs now exist in `data/historical/evidence/1326/inventory-reference-resolution.json`, with original aliases retained for audit. `data/gis/1326/pilot-edge-evidence/bithynia-core-01.json` now references those stable IDs; edge statuses, confidence, notes and geometry gates were preserved. The manifest status is `T3B_SOURCE_PINNED_IMMUTABLE_RECORDS_MIGRATED`.
 
 This closes the identifier/provenance migration only. It does not independently validate every linked scholarly passage, convert the corridor hypothesis into a measured terrain cost, or establish an exact 1326 frontier. Review bindings remain empty and canonical promotion remains blocked.
+
+
+## 2026-10-21 — Bithynia endpoint point-type audit and CDSE tile-provenance clarification
+
+A focused follow-up checked modern coordinate references against the Nicaea–Lefke–Sangarius terrain-cost experiment contract.
+
+- The historical source trail cited here supports the Leukai/Lefke → modern Osmaneli place identity and a retrospective 1304/05 Sangarios corridor narrative, not an exact 1326 route endpoint.
+- Modern Osmaneli locality references around 40.35–40.359 N, 30.017 E identify the modern town. They do not establish the location of a medieval trailhead or river crossing.
+- GeoNames' Geyve İlçesi record gives 40.51701 N, 30.29645 E for an administrative division; a separate Geyve town/locality record gives approximately 40.50906 N, 30.29025 E. Thus the existing approximate Geyve reference is district-level, not a verified gorge crossing.
+- Copernicus Data Space documentation distinguishes the `COP-DEM_GLO-30-DGED/2024_1` release and supports catalogue queries by dataset and one-degree grid ID. This establishes the acquisition method, not the exact tile inputs or their checksums for this experiment.
+
+**Disposition:** endpoint provenance remains blocked; the DEM tile gate remains open until exact CDSE product IDs, download URLs, bytes and SHA-256 hashes are captured. No anchor, route result, confidence, geometry, review binding, or canonical promotion was changed. The public COG/cache pipeline must not be conflated with the separately pinned CDSE release.
+
+External references reviewed:
+- Copernicus Data Space Ecosystem, “Copernicus DEM — Global and European Digital Elevation Model”: https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM
+- GeoNames, “Geyve İlçesi” (administrative division): https://www.geonames.org/8632523/geyve-ilcesi.html
+- Wikidata, “Geyve district” (town/district item; coordinates are not a historical feature locator): https://www.wikidata.org/wiki/Q2248743
+- Mapcarta, “Osmaneli” (modern locality reference; derived from OpenStreetMap and other gazetteers): https://mapcarta.com/Osmaneli
+- Mapcarta, “Geyve” (modern town/locality reference): https://mapcarta.com/13839474
