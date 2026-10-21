@@ -575,3 +575,28 @@ Belke describes an older road following the Sangarios' left bank at least to Osm
 **Limit:** it does not establish a coordinate-level trailhead or crossing used specifically on 1326-04-07. Ancient road reconstruction, pilgrimage-route history, and a retrospective corridor narrative are not interchangeable with exact-date route usage. Modern town coordinates are not a substitute for a surveyed historic road feature.
 
 **Disposition:** record the Sangarios valley → Osmaneli/Lefke → Karasu alignment as a research candidate only. Investigate the Göksu/Rēbas crossing separately from the Sangarios pilgrimage-road bridge. No candidate anchor, controller claim, political geometry, review binding, or canonical promotion is changed. The terrain-cost experiment remains BLOCKED_ENDPOINT_PROVENANCE; no DEM tile manifest or solver result is authorized yet.
+
+
+## 2026-10-22 — Belke road evidence: homonymous Taşköprü sites and competing alignments
+
+A page-level review of Klaus Belke, “Bithynien und Hellespont in der Tabula Peutingeriana” (2017), pp. 54–59 and 61–63, qualifies the route candidate recorded on 2026-10-21.
+
+### Feature identity correction
+
+Belke discusses two distinct bridges called Taşköprü / associated with Göksu hydronyms:
+- Near Kutluca, roughly 24 road-km northwest of Nikomēdeia, a Roman or early Byzantine bridge crosses the upper Psillis/Göksu Deresi on a route connecting Nikomēdeia with the Black Sea coast around Şile and Ağva.
+- On the Nikaia–Dorylaion route, a different stream from the İnegöl area, Gök(çe)su, probably ancient Rēbas, was crossed on a ruined stone bridge also called Taşköprü. The pilgrimage route then crossed the Sangarios and diverged from the Dorylaion road.
+
+These are not interchangeable features. Shared modern names do not establish identical coordinates or route function. The Kutluca/Psillis bridge is not evidence for the Nicaea–Dorylaion crossing.
+
+### Competing historical route hypotheses
+
+Belke describes an older route along the Sangarios left bank at least to Osmaneli/Lefke and then along the Karasu, while acknowledging uncertainty over whether it followed the valley floor or higher ground. The paper also reports Sencer Şahin's alternative alignment east of the Yenişehir plain toward Gökçesu/Pazaryeri and the upper Karasu. Belke notes that the precise line cannot yet be reconstructed from the evidence discussed.
+
+Accordingly, the Sangarios–Osmaneli–Karasu alignment is one supported research candidate, not a proven or uniquely preferred route. Retain the alternative alignment in the evidence ledger; do not choose a path by intuition or tune the model to prefer one.
+
+Source:
+- Belke 2017, pp. 54–59, 61–63: https://www.researchgate.net/publication/341043590_Klaus_Belke_Bithynien_und_Hellespont_in_der_Tabula_Peutingeriana_in_A_Kulzer_-_M_Popovic_eds_Space_Landscapes_and_Settlements_in_Byzantium_Studies_in_Historical_Geography_of_the_Eastern_Mediterranean_
+- Tabula Peutingeriana entry for the upper Psillis/Göksu/Taşköprü coast route: https://www1.ku.de/ggf/ag/tabula_peutingeriana/trefferanzeige.php?id=1187
+
+**Disposition:** preserve two route hypotheses and distinct feature IDs in future research. No anchor or coordinate is added because the exact physical features are not yet sufficiently georeferenced for the experiment. This source describes ancient/Byzantine road geography and does not establish route usage on 1326-04-07. Endpoint provenance and raster provenance remain blocked; no solver result or political geometry is promoted.
