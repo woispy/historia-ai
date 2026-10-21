@@ -144,3 +144,36 @@ Required next evidence:
 2. Obtain two coordinate-source types for that exact feature, record coordinate disagreement/uncertainty and retain the historical source separately from coordinate sources.
 3. Query the official CDSE catalogue for the exact `2024_1` grid cells intersecting the approved experiment bounds; save product IDs, original download URLs, downloaded bytes and SHA-256 values.
 4. Only then perform a route-specific run and sensitivity comparison.
+
+
+## CDSE catalogue query plan and DEM semantics — 2026-10-21
+
+### Official catalogue query contract
+
+CDSE's official CCM documentation defines the COP-DEM grid identifier as `N/S<latitude>_<E/W><longitude>` and documents OData filtering by both `gridId` and `dataset`. The official dataset documentation lists `COP-DEM_GLO-30-DGED/2024_1` as the July 2024 release and states that GLO-30 DGED cells are 1° × 1°.
+
+The route bounds are not approved yet, so the following are **candidate catalogue queries only**, not a sealed tile manifest. If the eventual endpoint set stays within N40 and spans longitude 29–31, check `N40_E029` and `N40_E030`; include other cells if the approved bounds intersect them. Do not infer tile coverage solely from the modern town coordinates.
+
+OData query template (replace `{GRID_ID}` with each grid cell actually intersecting the approved experiment bounds):
+
+```text
+https://catalogue.dataspace.copernicus.eu/odata/v1/Products?$filter=Collection/Name eq 'CCM' and Attributes/OData.CSC.StringAttribute/any(att:att/Name eq 'gridId' and att/OData.CSC.StringAttribute/Value eq '{GRID_ID}') and Attributes/OData.CSC.StringAttribute/any(att:att/Name eq 'dataset' and att/OData.CSC.StringAttribute/Value eq 'COP-DEM_GLO-30-DGED/2024_1')&$expand=Attributes
+```
+
+For each response, preserve the unmodified OData product `Id`, `Name`, `S3Path`/download metadata, `GeoFootprint`, grid ID and dataset attribute. Catalogue metadata is not a file checksum. The acquired file bytes must be hashed locally after download; record the original URL and download timestamp. If authentication or catalogue access is unavailable, record that operational blocker instead of substituting an unpinned public COG.
+
+### DEM interpretation constraint
+
+Copernicus describes GLO-30 as a **digital surface model (DSM)**, which may include buildings, infrastructure and vegetation, rather than a bare-earth terrain model. Its product description also notes edited water bodies and river consistency. A medieval travel-cost model using this raster therefore measures present-day surface morphology as a physical-geography proxy; it does not reconstruct 1326 land cover, roads, bridges, vegetation or settlement structures. The experiment output must state this limitation and must not present DSM slope as direct evidence of medieval travel cost.
+
+### Access attempt and disposition
+
+On 2026-10-21, the official OData documentation/query form was reviewed, but the live catalogue endpoint could not be retrieved through the available research interface. No authenticated product metadata or tile bytes were obtained in this pass. Consequently:
+
+- exact CDSE product IDs: **NOT YET VERIFIED**;
+- exact intersecting tile set: **PROVISIONAL / BOUNDS NOT APPROVED**;
+- downloaded tile hashes: **NONE**;
+- route-cost experiment: **NOT RUN**;
+- endpoint and raster gates: **BLOCKED**.
+
+This is a documented access limitation, not evidence that the products are absent from CDSE.

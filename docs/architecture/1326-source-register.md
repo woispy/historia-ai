@@ -550,3 +550,13 @@ External references reviewed:
 - Wikidata, “Geyve district” (town/district item; coordinates are not a historical feature locator): https://www.wikidata.org/wiki/Q2248743
 - Mapcarta, “Osmaneli” (modern locality reference; derived from OpenStreetMap and other gazetteers): https://mapcarta.com/Osmaneli
 - Mapcarta, “Geyve” (modern town/locality reference): https://mapcarta.com/13839474
+
+
+## 2026-10-21 — Official CDSE query path reviewed; no tile acquired
+
+The official Copernicus Data Space documentation states that COP-DEM GLO-30 DGED cells are 1° × 1° and documents OData filtering by the `gridId` and `dataset` attributes. The `2024_1` release is listed as July 2024. Official sources:
+- CCM collection documentation and grid-ID/query examples: https://documentation.dataspace.copernicus.eu/Data/Others/CCM.html
+- Copernicus DEM collection/release and DSM semantics: https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM
+- OData API documentation: https://documentation.dataspace.copernicus.eu/APIs/OData.html
+
+The live OData catalogue endpoint could not be retrieved through the available research interface in this pass. No product IDs or tile bytes were obtained and no hashes can be claimed. N40_E029 and N40_E030 are only candidate grid IDs if the future approved experiment bounds cross those cells; they are not an acquired or approved tile manifest. The route endpoint choice remains unresolved, and the experiment remains blocked.
