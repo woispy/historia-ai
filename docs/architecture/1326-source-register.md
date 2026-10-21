@@ -130,6 +130,10 @@ The Nicaea–Lefke–Sangarius accessibility hypothesis now has an explicit expe
 
 Current state: **specified, not run**. No 1326 political geometry is promoted by this contract.
 
+### 2026-10-21 — Route-cost endpoint registry check
+
+Inspection of `data/gis/1326/anchor-candidate-registry.json` confirms a Nicaea city-point candidate but no Lefke/Leukai/Osmaneli, Geyve/Kabeia or Sangarius/Sakarya endpoint record. Geyve appears in the research document as a geographic corridor candidate, not as a sealed machine-readable candidate-registry entry. Therefore the Bithynia DEM experiment is blocked at endpoint provenance before any cost calculation. Do not hardcode or promote a route endpoint from narrative text; reconcile a source-backed point record first.
+
 ## Explicit exclusions
 
 ### 1300 historical-basemaps data

@@ -25,6 +25,14 @@ A second provenance distinction must remain explicit:
 
 These are not interchangeable provenance records merely because both names contain “Copernicus GLO-30”. Before the experiment, choose and pin the actual raster authority, exact source release/URL, and per-tile checksum. Do not describe an unpinned COG cache as the pinned DGED 2024_1 release.
 
+## Endpoint registry audit (2026-10-21)
+
+The current `data/gis/1326/anchor-candidate-registry.json` contains a Nicaea/İznik candidate city point at `[29.721111, 40.428611]`, supported by GeoNames and Wikidata coordinate references. It is explicitly `candidate-evidence-only`; a city point is not a trailhead or route corridor endpoint.
+
+The current machine-readable candidate registry does **not** contain a Lefke/Leukai/Osmaneli, Geyve/Kabeia, or Sangarius/Sakarya endpoint record. The research document `docs/architecture/1326-anchor-authority-research.md` describes Geyve as a research candidate around `[30.296, 40.517]`, but that is not a sealed production registry record and remains corridor/reference context only. It cannot silently be copied into this experiment as an authoritative endpoint.
+
+**Result: `BLOCKED_ENDPOINT_PROVENANCE`.** No route-cost solver run should be started until the corridor endpoint(s) are reconciled into a machine-readable, source-backed record with explicit coordinate source, uncertainty, temporal applicability, and physical-reference-only semantics. This is an evidence/provenance block, not a request to promote a new political anchor.
+
 ## Required experiment design
 
 ### 1. Freeze endpoints from the project evidence
@@ -94,7 +102,7 @@ A terrain-cost result can support only physical accessibility analysis. It canno
 | T3-B source revision and immutable references | Pinned |
 | Cambridge claim's date scope | Audited: 1097 context, not 1326 proof |
 | DEM/cost pipeline general CI contracts | Passed on `8f278b5` |
-| Route-specific endpoint provenance | Not yet demonstrated in this experiment |
+| Route-specific endpoint provenance | **BLOCKED_ENDPOINT_PROVENANCE** — Nicaea city point exists; Lefke/Geyve/Sangarius endpoint is not in the candidate registry |
 | One exact raster authority/release + per-tile hashes | Not yet pinned for this experiment |
 | Nicaea–Lefke route-specific reproducible run | Not run |
 | Numeric solver weight from this hypothesis | Prohibited until the run is reviewed |
