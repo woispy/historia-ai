@@ -61,7 +61,9 @@
   ],
   "requiredToResolve": [
     "Verify exact linked source passages and bibliographic metadata against each claim; source identity and heading matches are provenance, not independent evidence.",
-    "For section-15 lower-cost claims, produce reproducible DEM/terrain-cost analysis before assigning numeric solver weights."
+    "For section-15 lower-cost claims, produce reproducible DEM/terrain-cost analysis before assigning numeric solver weights.",
+    "Treat the Cambridge Nicaea–Lefke–Sangarius passage as 1097 route/physical-geography context only; it does not independently establish route use in 1326.",
+    "Do not assign numeric route-cost weights to the Nicaea–Lefke–Sangarius hypothesis until a reproducible DEM/terrain-cost analysis records source/version, resolution, friction assumptions, endpoints, algorithm and output checksum."
   ],
   "decision": {
     "frontierStatus": "INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED",
@@ -132,7 +134,7 @@
       ],
       "claimSummary": "Nicaea → Lefke → Sangarius corridor is proposed as a lower-cost/high-connectivity route based on a terrain description.",
       "admissibility": "Geographic accessibility hypothesis only; route presence does not imply Byzantine control or political ownership.",
-      "verification": "section bytes and heading verified; numeric lower-cost weighting is an unvalidated solver hypothesis and needs DEM/terrain-cost analysis"
+      "verification": "section bytes and heading verified; Cambridge linked passage checked on 2026-10-21 and describes the 1097 First Crusade route to Nicaea, not a 1326-specific route or frontier; numeric lower-cost claim remains unmeasured pending reproducible DEM/terrain-cost analysis"
     },
     {
       "recordId": "hist-evidence:1326:bithynia-t3b:section-17",
@@ -168,5 +170,6 @@
       "admissibility": "Qualitative terrain/network design constraint only; no confirmed crossing, political ownership, or boundary geometry.",
       "verification": "section bytes and heading verified; specific geographic claims and any implied crossing require independent source verification"
     }
-  ]
+  ],
+  "claimAuditStatus": "CLAIM_DATE_AUDIT_UPDATED_2026-10-21"
 }

@@ -70,7 +70,7 @@
       "evidenceRefs": [
         "hist-evidence:1326:bithynia-t3b:section-15"
       ],
-      "notes": "Lower-cost/high-connectivity corridor evidence; route presence does not imply controller."
+      "notes": "Route/accessibility hypothesis only. Cambridge passage describes the First Crusade route in 1097, not route use specifically in 1326; lower-cost/high-connectivity remains unmeasured and must not be assigned numeric solver weight without reproducible DEM/terrain-cost analysis."
     },
     {
       "edgeId": "nicomedia-nicaea-network-1326",

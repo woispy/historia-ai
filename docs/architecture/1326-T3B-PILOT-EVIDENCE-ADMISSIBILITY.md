@@ -137,6 +137,32 @@ These page ranges come from Peter Riedlberger's 2021 review of Klaus Belke's TIB
 
 **Extraction rule:** do not record a page range as evidence on its own. Each eventual evidence item must cite the exact page/map and state the relevant passage's date scope, claim type and limitation. If a source describes Byzantine administrative geography from another century, it remains historical context unless corroboration supports its relevance to 1326-04-07.
 
+### 2026-10-21 — T3-B source claim/date audit: Nicaea–Lefke–Sangarius
+
+**Finding: the cited Cambridge passage is valid physical-route context, but it is not evidence specific to 1326.**
+
+John France, *Victory in the East*, chapter 6, “The first enemy: the Turks of Asia Minor” (print pp. 143–196; Cambridge University Press online chapter), describes the First Crusade's approach to Nicaea in **1097**. The extract states that east of Nicaea's Lefke Gate a gently sloping valley leads toward the Sangarius valley and roads to Ankara/the Anatolian plateau. It supports a historical-geography observation about terrain and a route in the 11th century. It does **not** establish that this exact route was in use in 1326, a lower numerical travel cost, a political controller, or a 1326 frontier.
+
+The two Oxford Classical Dictionary entries have a similarly bounded role:
+- **Bithynia**: broad regional geography and the communication role of valleys/tributaries; its historical overview ranges across ancient periods.
+- **Sangarius**: the river's course and the general distinction between access valley and gorge as a movement barrier.
+
+These are useful physical-geography references, not dated 1326 political-boundary evidence.
+
+| Existing pilot item | Audit disposition |
+|---|---|
+| `nicaea-lefke-route-1326` | Keep as a route/accessibility hypothesis only. Its Cambridge citation is dated to the 1097 campaign, so it cannot by itself support a 1326-specific route claim. |
+| “Lower-cost/high-connectivity” wording | **Unmeasured hypothesis.** Do not convert it to a numeric solver weight until a reproducible DEM/terrain-cost run defines DEM source/version, resolution, cost surface, friction assumptions, endpoints, algorithm and output checksum. |
+| Confidence `0.8` on the current edge | Treat as the pre-existing ledger value, not a calibrated probability that the route or its cost is established for 1326. Recalibration is a separate evidence-adjudication step; this audit does not silently rewrite it. |
+| Bursa–Nicaea frontier | No change: confidence `0.25`, `REVIEW_REQUIRED / INSUFFICIENT_EVIDENCE`, no reviewed geometry, no review bindings, canonical promotion blocked. |
+
+**Sources checked (21 October 2026):**
+- John France, [“The first enemy: the Turks of Asia Minor,” *Victory in the East*](https://www.cambridge.org/core/books/abs/victory-in-the-east/first-enemy-the-turks-of-asia-minor/259B6EC17320DA7F644157882E794FF4) — route description is in the context of the 1097 First Crusade.
+- Oxford Classical Dictionary, [“Bithynia”](https://academic.oup.com/edited-volume/61673/chapter-abstract/548511258) — broad regional geography.
+- Oxford Classical Dictionary, [“Sangarius”](https://academic.oup.com/edited-volume/61673/chapter-abstract/550496284) — river course, access valley and gorge barrier.
+
+**Decision:** retain these citations only for the claims they actually support. No geometry, ownership, candidate provenance, edge confidence or canonical status is promoted by this source check. Next: acquire date-relevant evidence for 1326 and run a reproducible terrain-cost analysis before assigning any numeric route-cost weight.
+
 ## Next operation
 
 1. Acquire or locate boundary-specific historical geography evidence for the Bithynia frontier at or near 1326.
