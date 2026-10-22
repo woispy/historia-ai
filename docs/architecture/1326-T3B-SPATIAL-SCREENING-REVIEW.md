@@ -124,3 +124,18 @@ Regression coverage now exercises:
 
 The test-only approved scope is synthetic fixture data used to validate control flow, not a historical or production scope decision. The production Bithynia scope remains blocked pending source-backed scope review.
 
+## Scope-gate verification artifact — 2026-10-22
+
+- Verified HEAD: `56521ace8bd3c3316b608bf1400546236859e12f`
+- Cliopatria acquisition verification #251: [SUCCESS](https://github.com/woispy/historia-ai/actions/runs/39775490687)
+- Historia AI CI #3560: pending at time of this update; full-repository result not yet confirmed.
+- Persisted review package artifact ID: `12423239605`
+- Artifact ZIP SHA-256: `5c184f928ddab7fe6de157765ceaf8797c54bc903ab4cfd11ed70af9886d85d6`
+- Screening JSON SHA-256: `963529138c3c53715217f9571e5c5b577da7b281759bd65b0799d7350c320593`
+- Reconciliation queue SHA-256: `3531b15cbb4458a0484c16baaf8a3014677db0ef86d797c6f541b5634ebee525`
+- Review ledger SHA-256: `81c9e211bb48fbf5e25f6d06c9fc90fdaa370960921fbaa5012dbea1850d0450`
+
+The artifact was downloaded and inspected after the scope-gate change. It still contains 150 source candidates, 18 screened candidates, 132 rejected candidates, 18 queue entries and 18 pending review-ledger records; 6 candidates are entity-linked, 12 remain unmatched, and explicit bound reviews remain zero. Rejections are 129 outside the global anchor screening windows and 3 bbox-only false positives. This is expected because the production Bithynia scope is deliberately blocked and the established acquisition workflow continues to run in global-screening mode.
+
+The acquisition verification's T3-B contract-test step passed on this HEAD, including the new explicit-scope regression coverage. The full Historia AI CI result remains pending, so this is not yet a complete repository-wide green gate.
+
