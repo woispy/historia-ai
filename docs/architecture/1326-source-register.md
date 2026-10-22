@@ -615,3 +615,18 @@ The latest completed workflow for commit d4054829c60d30c8ce3e2ce46b1d39e485b8938
 The readiness validator reported source cliopatria-v0.2.0, 150 candidate features, 21 screened candidates, 21 review queue entries, 21 ledger records, 7 pilot evidence edges, and **0 bound reviews**. Result: WAITING_FOR_EXPLICIT_REVIEW_BINDINGS; promotion remains BLOCKED.
 
 This closes the prior gap that CI did not publish a persisted candidate-to-review package for the run. It does not close geometry review or canonical promotion. The review ledger remains pending, and queue membership is not approval. Preserve and inspect the artifact's exact files/checksums, then perform explicit evidence-backed review/binding before any geometry can be accepted. No candidate, controller, anchor, or canonical geometry was promoted.
+
+
+## 2026-10-22 — Artifact-level screening precision audit
+
+The review artifact for current CI run #232 was downloaded and inspected. The artifact ZIP SHA-256 reported by GitHub is `635520f828d7cf15b158527cf51b9c8684168ec2fca5f0c1ad0e4db973553c1e`. Its pipeline counts are 150 input candidates, 21 screened/review records, 129 rejected, 6 entity-linked, 15 unmatched, 7 pilot evidence edges, and 0 explicit bound reviews.
+
+Inspection of the persisted queue shows that spatial-screening anchor hits can be driven by very broad geometry bounding boxes. Examples include:
+- Mamluk Sultanate, bbox about [18.81, 17.51, 44.53, 37.00], 17 anchor hits;
+- Republic of Genoa, bbox about [7.23, 38.16, 39.53, 47.47], 23 anchor hits;
+- Ilkhanate, bbox about [30.25, 24.07, 70.84, 43.08], 24 anchor hits;
+- Republic of Venice, bbox about [12.00, 35.00, 34.97, 45.82], 24 anchor hits.
+
+These counts are bbox intersections, not verified point-in-polygon hits or historical control evidence. Therefore the 21 queue entries must not be described as 21 plausible regional political boundaries. The unmatched rate is 15/21 and remains a material review risk.
+
+**Next corrective work:** inspect and tighten the candidate-screening contract to require true geometry intersection and a declared regional scope for the Bithynia pilot, then test broad-bbox false positives, true local overlap, temporal rejection, and unmatched entities. Keep all items pending and promotion-blocked until that audit passes. No existing review bindings or geometry decisions are added.
