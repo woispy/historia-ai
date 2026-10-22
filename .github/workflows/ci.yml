@@ -71,6 +71,30 @@ jobs:
         run: npm run build:assets
       - name: Verify repository cleanliness after physical assets
         run: npm run test:repository-cleanliness
+      - name: Extract pinned Sakarya physical-reference candidates
+        run: |
+          node tools/historical-gis/cli/extract-sakarya-physical-reference.js \
+            src/world/map/source/physical/ne_10m_rivers_lake_centerlines.geojson \
+            /tmp/sakarya-source-candidates.json
+          node --input-type=module -e '
+            import { readFile } from "node:fs/promises";
+            const record = JSON.parse(await readFile("/tmp/sakarya-source-candidates.json", "utf8"));
+            if (record.status !== "CANDIDATES_EXTRACTED_REVIEW_REQUIRED") throw new Error("Unexpected extraction status");
+            if (!Number.isInteger(record.candidateCount) || record.candidateCount < 1 || record.candidateCount !== record.candidates.length) throw new Error("No valid Sakarya candidates");
+            if (!/^[a-f0-9]{64}$/.test(record.source.sourceFileSha256)) throw new Error("Invalid source file SHA-256");
+            for (const candidate of record.candidates) {
+              if (!/^[a-f0-9]{64}$/.test(candidate.sourceGeometrySha256) || !/^[a-f0-9]{64}$/.test(candidate.sourceFeatureSha256)) throw new Error("Invalid candidate hash");
+              if (candidate.crs !== "EPSG:4326") throw new Error("Unexpected CRS");
+            }
+            console.log(JSON.stringify({status: record.status, candidateCount: record.candidateCount, sourceFileSha256: record.source.sourceFileSha256, candidates: record.candidates.map(({sourceLocator, matchedNames, geometryType, sourceGeometrySha256, sourceFeatureSha256}) => ({sourceLocator, matchedNames, geometryType, sourceGeometrySha256, sourceFeatureSha256}))}, null, 2));
+          '
+      - name: Publish Sakarya physical-reference intake candidates
+        uses: actions/upload-artifact@v4
+        with:
+          name: sakarya-physical-reference-intake
+          path: /tmp/sakarya-source-candidates.json
+          retention-days: 7
+          compression-level: 6
       - name: Generate historical GIS runtime assets
         run: npm run build:historical-gis:1300
       - name: Verify repository cleanliness after historical GIS
