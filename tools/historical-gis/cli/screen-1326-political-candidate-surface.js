@@ -161,10 +161,10 @@ function segmentsIntersect(a, b, c, d) {
     || pointOnSegment(a, c, d) || pointOnSegment(b, c, d);
 }
 
-function ringIntersectsRect(ring, rect) {
+function ringIntersectsRect(ring, rect, testCorners = true) {
   if (ring.some(point => pointInRect(point, rect))) return true;
   const corners = [[rect[0], rect[1]], [rect[2], rect[1]], [rect[2], rect[3]], [rect[0], rect[3]]];
-  if (corners.some(point => pointInRing(point, ring))) return true;
+  if (testCorners && corners.some(point => pointInRing(point, ring))) return true;
   const edges = [
     [[rect[0], rect[1]], [rect[2], rect[1]]],
     [[rect[2], rect[1]], [rect[2], rect[3]]],
@@ -182,7 +182,7 @@ function polygonIntersectsRect(rings, rect) {
   if (rings[0].some(point => pointInRect(point, rect))) return true;
   const corners = [[rect[0], rect[1]], [rect[2], rect[1]], [rect[2], rect[3]], [rect[0], rect[3]]];
   if (corners.some(point => pointInPolygon(point, rings))) return true;
-  return rings.some(ring => ringIntersectsRect(ring, rect));
+  if (ringIntersectsRect(rings[0], rect)) return true;\n  // Hole boundaries count only if the rectangle crosses/touches them; a rectangle\n  // entirely contained inside a hole is not an intersection with the polygon interior.\n  return rings.slice(1).some(ring => ringIntersectsRect(ring, rect, false));
 }
 
 function geometryIntersectsRect(geometry, rect) {
