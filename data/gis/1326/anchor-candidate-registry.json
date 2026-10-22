@@ -1366,6 +1366,13 @@
       "historicalApplicability": "SCENARIO_RELEVANT",
       "historicalEvidenceRefs": [
         {
+          "sourceId": "tdv-izmit-byzantine-period",
+          "sourceType": "TDV_IA",
+          "uri": "https://islamansiklopedisi.org.tr/izmit#1",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "TDV İzmit identifies the historical city as Nicomedia in the Byzantine period and dates the Ottoman capture to 1337. This supports the city's pre-scenario historical identity and excludes the later capture from 1326; it does not independently establish a fully adjudicated political-control record for 1326-04-07."
+        },
+        {
           "sourceId": "tdv-izmit",
           "sourceType": "TDV_IA",
           "uri": "https://islamansiklopedisi.org.tr/izmit#1",
