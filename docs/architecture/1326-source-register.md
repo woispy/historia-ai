@@ -658,3 +658,23 @@ The review package was downloaded and its ZIP digest was checked against GitHub'
 The acquisition metadata says the immutable source ZIP was retained in the CI workspace and records the raw SHA-256 above. The published review package includes the extraction input and acquisition metadata, but not the full 44 MB raw source archive; the separate production-snapshot artifact is also temporary and has its own digest.
 
 **Interpretation:** this manifest pins the current generated artifact, not the historical validity of the candidate polygons. The screening audit above still applies: 21 queue entries include very broad bbox hits, 15 are unmatched, and zero reviews are explicitly bound. All review and canonical promotion states remain blocked.
+
+
+## 2026-10-22 — Candidate screening contract tightened
+
+The candidate screening implementation now requires **actual Polygon/MultiPolygon intersection** with the anchor influence rectangle after using the geometry bounding box only as a fast prefilter. It also rejects candidate records whose declared `fromYear` / `toYear` interval excludes scenario year 1326, and fails closed for geometry types other than Polygon and MultiPolygon.
+
+Implementation:
+- `tools/historical-gis/cli/screen-1326-political-candidate-surface.js`
+- `tools/tests/1326-candidate-surface-screening.test.js`
+
+The deterministic test was expanded to cover:
+- an actual local polygon overlap;
+- a broad bounding box whose local area is entirely within a polygon hole (must not be accepted as an intersection);
+- an expired candidate whose `toYear` is 1325;
+- a candidate outside the anchor influence window;
+- a MultiPolygon with a remote component and a local component.
+
+The screening report now labels each accepted anchor relation as `polygon-intersects-anchor-influence-rectangle`. The algorithm remains a candidate-evidence filter only; it does not establish historical control, geometry authority, or canonical political boundaries. The source geometry is preserved and hashed; promotion remains `BLOCKED`.
+
+**Verification status at documentation time:** code and test changes are pushed on the existing PR branch; CI for the latest head SHA must be checked before treating this contract as validated. The prior successful CI run applies to the previous screening implementation and does not validate these new changes.
