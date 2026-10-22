@@ -139,3 +139,13 @@ The artifact was downloaded and inspected after the scope-gate change. It still 
 
 The acquisition verification's T3-B contract-test step passed on this HEAD, including the new explicit-scope regression coverage. The full Historia AI CI result remains pending, so this is not yet a complete repository-wide green gate.
 
+## Full repository gate confirmation — 2026-10-22
+
+- Verified HEAD: `5c91f50052c11ec8049566092b3b397fe99b8473`
+- Historia AI CI #3561: [SUCCESS](https://github.com/woispy/historia-ai/actions/runs/39775633191)
+- Cliopatria acquisition verification #252: [SUCCESS](https://github.com/woispy/historia-ai/actions/runs/39775633332)
+- Pull request #109 remains open and draft; latest GitHub metadata reports mergeable, but this is not an approval or a merge.
+
+The full CI validate job completed successfully, including lint, map/terrain contracts, historical GIS and political runtime checks, topology and boundary solver contracts, P6.1/P6.2 telemetry and DEM contracts, 15K+ province scalability diagnostics, build, and repository-cleanliness checks. The dedicated acquisition verification also passed its T3-B screening/review pipeline and artifact publishing steps.
+
+This closes the CI-verification gap for the current HEAD only. It does **not** approve the production Bithynia scope: `bithynia-core-01.scope.json` remains `BLOCKED_SCOPE_DEFINITION`, and `reviewBindings` remains empty. Next work must resolve the scope from source-backed anchor/physical-reference records or explicitly narrow the edge subset with documented justification; no candidate should be manually bound or promoted solely from spatial proximity.
