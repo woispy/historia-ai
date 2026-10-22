@@ -237,9 +237,11 @@ for (const candidate of candidates.candidates) {
 
   const center = bboxCenter(bbox);
   const anchorHits = [];
+  let bboxPrefilterHits = 0;
   for (const anchor of anchors) {
     const influence = expandBboxAroundPoint(anchor.coordinates, radiusKm);
     if (!bboxIntersects(bbox, influence)) continue;
+    bboxPrefilterHits += 1;
     if (!geometryIntersectsRect(candidate.geometry, influence)) continue;
     anchorHits.push({
       anchorId: anchor.id,
@@ -250,7 +252,13 @@ for (const candidate of candidates.candidates) {
   }
 
   if (anchorHits.length === 0) {
-    rejected.push({ sourceFeatureIndex: candidate.sourceFeatureIndex, reason: "outside-anchor-screening-window" });
+    rejected.push({
+      sourceFeatureIndex: candidate.sourceFeatureIndex,
+      reason: bboxPrefilterHits > 0
+        ? "bbox-only-false-positive-no-polygon-intersection"
+        : "outside-anchor-screening-window",
+      bboxPrefilterHits,
+    });
     continue;
   }
 
