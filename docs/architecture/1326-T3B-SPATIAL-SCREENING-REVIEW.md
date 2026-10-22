@@ -104,3 +104,23 @@ The registry contains 32 evidence-only anchors. The confirmed records for Bursa,
 
 **Decision:** scope definition remains a separate blocking task. The current implementation and artifact are valid for global candidate screening, not yet for a Bithynia-only review shortlist.
 
+## Explicit pilot-scope gate implementation — 2026-10-22
+
+The screening CLI now supports an opt-in `--scope <path>` contract. When supplied, the scope must:
+- use schema version 1 and scenario date `1326-04-07`;
+- declare `status: "APPROVED"`, a pilot ID, edge IDs, and a non-empty unique `allowedAnchorIds` list;
+- reference only anchor IDs present in the supplied anchor report.
+
+The CLI fails closed when the scope is blocked, malformed, empty, or references missing anchors. In scoped mode, only explicitly allowed anchor influence windows can admit candidates; geometry intersecting only other anchors is rejected as `outside-explicit-pilot-scope`. The global screening behavior remains available when `--scope` is omitted, so this unresolved pilot decision does not silently change the established global acquisition pipeline.
+
+A new machine-readable record is committed at `data/gis/1326/pilot-edge-evidence/bithynia-core-01.scope.json`. It deliberately has `status: "BLOCKED_SCOPE_DEFINITION"`, an empty allowlist, and unresolved references for Nicomedia, Sangarios, and the Lefke corridor. This is not an approved production scope and must not be passed as though it were one.
+
+Regression coverage now exercises:
+1. an approved test-only Bursa subset;
+2. exclusion of a polygon intersecting only the Nicaea anchor when the explicit scope allows only Bursa;
+3. the explicit `outside-explicit-pilot-scope` reason;
+4. fail-closed behavior for a blocked scope;
+5. the existing polygon-hole, year-range, and MultiPolygon cases.
+
+The test-only approved scope is synthetic fixture data used to validate control flow, not a historical or production scope decision. The production Bithynia scope remains blocked pending source-backed scope review.
+
