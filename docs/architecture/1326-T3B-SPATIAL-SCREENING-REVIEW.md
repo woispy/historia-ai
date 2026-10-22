@@ -180,3 +180,19 @@ The anchor registry also now includes `1326-lefke-osmaneli` as an **evidence-onl
 - Earlier full CI #3561 passed on `5c91f50052c11ec8049566092b3b397fe99b8473`; it predates these two registry additions.
 
 Next verification must run the registry contract and full gate chain against the latest branch head before these records are treated as validated inputs. Canonical promotion and review bindings remain blocked.
+
+
+## Latest full-gate confirmation — 2026-10-22
+
+- Verified branch HEAD: `22b7982a65e6f4f978dc3af5b9fdade57d7aa981`
+- Historia AI CI #3567: [SUCCESS](https://github.com/woispy/historia-ai/actions/runs/39816316976)
+- Cliopatria acquisition verification #258: [SUCCESS](https://github.com/woispy/historia-ai/actions/runs/39816316982)
+- Pull request [#109](https://github.com/woispy/historia-ai/pull/109) remains open, draft, unmerged, and reported mergeable by GitHub.
+
+The full validate job completed successfully across all 81 numbered steps, including lint, world physical-geometry generation and repository-cleanliness verification, historical GIS runtime generation/validation, river and physical-geography regressions, topology and boundary-solver contracts, P6.1/P6.2 telemetry and DEM checks, production build, and 15K+ province scalability diagnostics. The dedicated Cliopatria acquisition verification also completed successfully on this HEAD.
+
+This supersedes the older “Verification boundary after evidence-only registry additions” note above for the current HEAD. It closes the CI verification gap only; it does not change the historical evidence verdict. The registry has 34 records, but Nicomedia and Lefke/Osmaneli remain evidence-only candidates. The production scope file remains `BLOCKED_SCOPE_DEFINITION`, the review bindings remain empty, and canonical political geometry remains **BLOCKED**.
+
+### Next blocking work
+
+Create a versioned, source-backed physical-reference record for the Sangarios segment and the Lefke/Sangarios route endpoint. Record the geometry source/version, coordinate provenance, uncertainty, and what each source can—and cannot—support. Natural Earth 10m hydrography may provide generalized physical-geography evidence, but it is not a historical political-boundary authority. Do not guess endpoints or infer controller/ownership from settlement coordinates. Only after physical references are documented should the team propose a narrow edge/anchor subset for explicit human review; keep the production scope blocked until that review is recorded.
