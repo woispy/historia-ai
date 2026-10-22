@@ -117,6 +117,88 @@ function bboxIntersects(a, b) {
   return a[0] <= b[2] && a[2] >= b[0] && a[1] <= b[3] && a[3] >= b[1];
 }
 
+function pointOnSegment(point, a, b, epsilon = 1e-10) {
+  const cross = (point[1] - a[1]) * (b[0] - a[0]) - (point[0] - a[0]) * (b[1] - a[1]);
+  if (Math.abs(cross) > epsilon) return false;
+  return point[0] >= Math.min(a[0], b[0]) - epsilon
+    && point[0] <= Math.max(a[0], b[0]) + epsilon
+    && point[1] >= Math.min(a[1], b[1]) - epsilon
+    && point[1] <= Math.max(a[1], b[1]) + epsilon;
+}
+
+function pointInRing(point, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const a = ring[j], b = ring[i];
+    if (pointOnSegment(point, a, b)) return true;
+    const crosses = (a[1] > point[1]) !== (b[1] > point[1])
+      && point[0] < ((b[0] - a[0]) * (point[1] - a[1])) / (b[1] - a[1]) + a[0];
+    if (crosses) inside = !inside;
+  }
+  return inside;
+}
+
+function pointInPolygon(point, rings) {
+  if (!Array.isArray(rings) || rings.length === 0 || !pointInRing(point, rings[0])) return false;
+  for (let i = 1; i < rings.length; i += 1) {
+    if (pointInRing(point, rings[i])) return false;
+  }
+  return true;
+}
+
+function pointInRect(point, rect) {
+  return point[0] >= rect[0] && point[0] <= rect[2]
+    && point[1] >= rect[1] && point[1] <= rect[3];
+}
+
+function segmentsIntersect(a, b, c, d) {
+  const orient = (p, q, r) => (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]);
+  const o1 = orient(a, b, c), o2 = orient(a, b, d);
+  const o3 = orient(c, d, a), o4 = orient(c, d, b);
+  if (((o1 > 0 && o2 < 0) || (o1 < 0 && o2 > 0))
+      && ((o3 > 0 && o4 < 0) || (o3 < 0 && o4 > 0))) return true;
+  return pointOnSegment(c, a, b) || pointOnSegment(d, a, b)
+    || pointOnSegment(a, c, d) || pointOnSegment(b, c, d);
+}
+
+function ringIntersectsRect(ring, rect) {
+  if (ring.some(point => pointInRect(point, rect))) return true;
+  const corners = [[rect[0], rect[1]], [rect[2], rect[1]], [rect[2], rect[3]], [rect[0], rect[3]]];
+  if (corners.some(point => pointInRing(point, ring))) return true;
+  const edges = [
+    [[rect[0], rect[1]], [rect[2], rect[1]]],
+    [[rect[2], rect[1]], [rect[2], rect[3]]],
+    [[rect[2], rect[3]], [rect[0], rect[3]]],
+    [[rect[0], rect[3]], [rect[0], rect[1]]],
+  ];
+  for (let i = 0; i < ring.length - 1; i += 1) {
+    if (edges.some(([c, d]) => segmentsIntersect(ring[i], ring[i + 1], c, d))) return true;
+  }
+  return false;
+}
+
+function polygonIntersectsRect(rings, rect) {
+  if (!Array.isArray(rings) || rings.length === 0) return false;
+  if (rings[0].some(point => pointInRect(point, rect))) return true;
+  const corners = [[rect[0], rect[1]], [rect[2], rect[1]], [rect[2], rect[3]], [rect[0], rect[3]]];
+  if (corners.some(point => pointInPolygon(point, rings))) return true;
+  return rings.some(ring => ringIntersectsRect(ring, rect));
+}
+
+function geometryIntersectsRect(geometry, rect) {
+  if (geometry?.type === "Polygon") return polygonIntersectsRect(geometry.coordinates, rect);
+  if (geometry?.type === "MultiPolygon") return geometry.coordinates.some(polygon => polygonIntersectsRect(polygon, rect));
+  return false;
+}
+
+function validForScenario(candidate) {
+  const from = candidate.fromYear;
+  const to = candidate.toYear;
+  if (from != null && (!Number.isFinite(from) || from > SCENARIO_YEAR)) return false;
+  if (to != null && (!Number.isFinite(to) || to < SCENARIO_YEAR)) return false;
+  return true;
+}
+
 function distanceToBbox(point, bbox) {
   const longitude = Math.max(bbox[0], Math.min(point[0], bbox[2]));
   const latitude = Math.max(bbox[1], Math.min(point[1], bbox[3]));
@@ -139,9 +221,17 @@ assertCandidateReport(candidates);
 const screened = [];
 const rejected = [];
 for (const candidate of candidates.candidates) {
+  if (!validForScenario(candidate)) {
+    rejected.push({ sourceFeatureIndex: candidate.sourceFeatureIndex, reason: "outside-scenario-year-range" });
+    continue;
+  }
   const bbox = geometryBbox(candidate.geometry);
   if (!bbox) {
     rejected.push({ sourceFeatureIndex: candidate.sourceFeatureIndex, reason: "missing-coordinate-geometry" });
+    continue;
+  }
+  if (!["Polygon", "MultiPolygon"].includes(candidate.geometry?.type)) {
+    rejected.push({ sourceFeatureIndex: candidate.sourceFeatureIndex, reason: "unsupported-political-geometry-type" });
     continue;
   }
 
@@ -150,9 +240,11 @@ for (const candidate of candidates.candidates) {
   for (const anchor of anchors) {
     const influence = expandBboxAroundPoint(anchor.coordinates, radiusKm);
     if (!bboxIntersects(bbox, influence)) continue;
+    if (!geometryIntersectsRect(candidate.geometry, influence)) continue;
     anchorHits.push({
       anchorId: anchor.id,
       role: anchor.role ?? null,
+      geometryRelation: "polygon-intersects-anchor-influence-rectangle",
       bboxDistanceKm: Number(distanceToBbox(anchor.coordinates, bbox).toFixed(3)),
     });
   }
@@ -207,9 +299,9 @@ const report = {
     anchorCount: anchors.length,
   },
   screening: {
-    method: "candidate-geometry-bbox intersects anchor influence bbox",
+    method: "Polygon/MultiPolygon intersects anchor influence rectangle; bbox used only as a fast prefilter",
     radiusKm,
-    purpose: "narrow candidate evidence for manual geometry reconciliation",
+    purpose: "narrow candidate evidence for manual geometry reconciliation; temporal validity and actual polygon/rectangle intersection are required",
     notGeometryAuthority: true,
     noSyntheticGeometry: true,
   },
