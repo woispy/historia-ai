@@ -221,6 +221,37 @@ const candidates = JSON.parse(await fs.readFile(candidatePath, "utf8"));
 const anchors = normalizeAnchorReport(JSON.parse(await fs.readFile(anchorPath, "utf8")));
 assertCandidateReport(candidates);
 
+const scopePath = readArg("--scope");
+let scope = null;
+let allowedAnchorIds = null;
+if (scopePath) {
+  scope = JSON.parse(await fs.readFile(path.resolve(process.cwd(), scopePath), "utf8"));
+  if (scope?.schemaVersion !== 1 || scope?.scenarioDate !== SCENARIO_DATE) {
+    throw new Error("Pilot scope schema/scenario mismatch.");
+  }
+  if (scope?.status !== "APPROVED") {
+    throw new Error("Pilot scope is not APPROVED; refusing to produce a scoped shortlist.");
+  }
+  if (typeof scope.pilot !== "string" || !scope.pilot.trim()) {
+    throw new Error("Approved pilot scope must identify pilot.");
+  }
+  if (!Array.isArray(scope.allowedAnchorIds) || scope.allowedAnchorIds.length === 0
+      || scope.allowedAnchorIds.some(id => typeof id !== "string" || !id.trim())
+      || new Set(scope.allowedAnchorIds).size !== scope.allowedAnchorIds.length) {
+    throw new Error("Approved pilot scope must contain a non-empty unique allowedAnchorIds list.");
+  }
+  if (!Array.isArray(scope.edgeIds) || scope.edgeIds.length === 0
+      || scope.edgeIds.some(id => typeof id !== "string" || !id.trim())) {
+    throw new Error("Approved pilot scope must list the pilot edge IDs it serves.");
+  }
+  const anchorIds = new Set(anchors.map(anchor => anchor.id));
+  const missingAnchorIds = scope.allowedAnchorIds.filter(id => !anchorIds.has(id));
+  if (missingAnchorIds.length) {
+    throw new Error(`Pilot scope references missing anchors: ${missingAnchorIds.join(", ")}`);
+  }
+  allowedAnchorIds = new Set(scope.allowedAnchorIds);
+}
+
 const screened = [];
 const rejected = [];
 for (const candidate of candidates.candidates) {
@@ -241,11 +272,16 @@ for (const candidate of candidates.candidates) {
   const center = bboxCenter(bbox);
   const anchorHits = [];
   let bboxPrefilterHits = 0;
+  let outOfScopeGeometryHits = 0;
   for (const anchor of anchors) {
     const influence = expandBboxAroundPoint(anchor.coordinates, radiusKm);
     if (!bboxIntersects(bbox, influence)) continue;
     bboxPrefilterHits += 1;
     if (!geometryIntersectsRect(candidate.geometry, influence)) continue;
+    if (allowedAnchorIds && !allowedAnchorIds.has(anchor.id)) {
+      outOfScopeGeometryHits += 1;
+      continue;
+    }
     anchorHits.push({
       anchorId: anchor.id,
       role: anchor.role ?? null,
@@ -257,10 +293,13 @@ for (const candidate of candidates.candidates) {
   if (anchorHits.length === 0) {
     rejected.push({
       sourceFeatureIndex: candidate.sourceFeatureIndex,
-      reason: bboxPrefilterHits > 0
-        ? "bbox-only-false-positive-no-polygon-intersection"
-        : "outside-anchor-screening-window",
+      reason: allowedAnchorIds && outOfScopeGeometryHits > 0
+        ? "outside-explicit-pilot-scope"
+        : bboxPrefilterHits > 0 && outOfScopeGeometryHits === 0
+          ? "bbox-only-false-positive-no-polygon-intersection"
+          : "outside-anchor-screening-window",
       bboxPrefilterHits,
+      outOfScopeGeometryHits,
     });
     continue;
   }
@@ -309,8 +348,17 @@ const report = {
     path: anchorPath.replace(/\\/g, "/"),
     anchorCount: anchors.length,
   },
+  pilotScope: scope ? {
+    status: scope.status,
+    pilot: scope.pilot,
+    edgeIds: scope.edgeIds,
+    allowedAnchorIds: scope.allowedAnchorIds,
+    scopeSource: scope.source ?? null,
+  } : null,
   screening: {
-    method: "Polygon/MultiPolygon intersects anchor influence rectangle; bbox used only as a fast prefilter",
+    method: allowedAnchorIds
+      ? "Polygon/MultiPolygon intersects only explicitly allowed pilot anchor influence rectangles; bbox used only as a fast prefilter"
+      : "Polygon/MultiPolygon intersects anchor influence rectangle; bbox used only as a fast prefilter",
     radiusKm,
     purpose: "narrow candidate evidence for manual geometry reconciliation; temporal validity and actual polygon/rectangle intersection are required",
     notGeometryAuthority: true,
