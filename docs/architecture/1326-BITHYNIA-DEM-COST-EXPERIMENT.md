@@ -227,3 +227,15 @@ Consequently, the previous entry's “Sangarios valley → Osmaneli/Lefke → Ka
 - Ancient/Byzantine road reconstruction remains contextual evidence, not proof of route usage on 1326-04-07.
 
 **Gate remains BLOCKED_ENDPOINT_PROVENANCE.** This correction changes no registry anchor, geometry, controller claim, review binding, or canonical promotion.
+
+
+## T3-B pipeline status update — 2026-10-22
+
+The CI run for commit d4054829c60d30c8ce3e2ce46b1d39e485b89386 now confirms that the candidate-to-review pipeline executed and published its review package. The acquisition workflow reports 150 source candidates, 21 screened candidates, 21 queue entries, 21 ledger records, 7 pilot evidence edges, and zero bound reviews. Readiness is WAITING_FOR_EXPLICIT_REVIEW_BINDINGS; promotion remains BLOCKED.
+
+- CI #3539: https://github.com/woispy/historia-ai/actions/runs/39680631177
+- Acquisition verification #230: https://github.com/woispy/historia-ai/actions/runs/39680631194
+- Review package artifact: https://github.com/woispy/historia-ai/actions/runs/39680631194/artifacts/12383368333
+- Artifact ZIP SHA-256: f20614e32f094d833172d1eed16b5992eb799151016a797bf04e271201456816
+
+This pipeline result is separate from the Nicaea–Lefke terrain-cost experiment. Route endpoint provenance remains unresolved and the DEM source/tile hashes remain unpinned for that experiment. No route solver was run and no political boundary or controller inference was promoted.
