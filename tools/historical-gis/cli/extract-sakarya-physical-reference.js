@@ -80,7 +80,7 @@ if (source?.type !== "FeatureCollection" || !Array.isArray(source.features)) {
 const candidates = [];
 for (const [featureIndex, feature] of source.features.entries()) {
   const names = featureNameValues(feature?.properties);
-  const matchedNames = names.filter((name) => TARGET_ALIASES.has(normalizedName(name)));
+  const matchedNames = names.filter((name) => [...TARGET_ALIASES].some((alias) => normalizedName(name).includes(alias)));
   if (matchedNames.length === 0) continue;
   validateGeometry(feature.geometry, `source feature index ${featureIndex}`);
 
