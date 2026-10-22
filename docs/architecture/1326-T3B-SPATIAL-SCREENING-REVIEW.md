@@ -182,17 +182,21 @@ The anchor registry also now includes `1326-lefke-osmaneli` as an **evidence-onl
 Next verification must run the registry contract and full gate chain against the latest branch head before these records are treated as validated inputs. Canonical promotion and review bindings remain blocked.
 
 
-## Latest full-gate confirmation — 2026-10-22
+## Latest full-gate confirmation — 2026-10-22 (supersedes prior verification snapshot)
 
-- Verified branch HEAD: `22b7982a65e6f4f978dc3af5b9fdade57d7aa981`
-- Historia AI CI #3567: [SUCCESS](https://github.com/woispy/historia-ai/actions/runs/39816316976)
-- Cliopatria acquisition verification #258: [SUCCESS](https://github.com/woispy/historia-ai/actions/runs/39816316982)
-- Pull request [#109](https://github.com/woispy/historia-ai/pull/109) remains open, draft, unmerged, and reported mergeable by GitHub.
+- Verified branch HEAD: `01742889ef9f461ef70d28aa3eabf8a61ec4f64e`
+- Historia AI CI #3568: [SUCCESS](https://github.com/woispy/historia-ai/actions/runs/39833368380)
+- Cliopatria acquisition verification #259: [SUCCESS](https://github.com/woispy/historia-ai/actions/runs/39833368309)
+- Pull request [#109](https://github.com/woispy/historia-ai/pull/109) remains open, draft, and unmerged.
 
-The full validate job completed successfully across all 81 numbered steps, including lint, world physical-geometry generation and repository-cleanliness verification, historical GIS runtime generation/validation, river and physical-geography regressions, topology and boundary-solver contracts, P6.1/P6.2 telemetry and DEM checks, production build, and 15K+ province scalability diagnostics. The dedicated Cliopatria acquisition verification also completed successfully on this HEAD.
+The full validate job passed on this HEAD, including lint, world physical-geometry generation, generated-asset cleanliness checks, historical GIS generation/validation, river and physical-geography tests, topology and boundary-solver contracts, P6.1/P6.2 telemetry and DEM contracts, production build, and 15K+ province scalability diagnostics. The dedicated Cliopatria acquisition verification also passed its T3-B candidate-to-review pipeline, provenance checks, contract tests, and artifact publication.
 
-This supersedes the older “Verification boundary after evidence-only registry additions” note above for the current HEAD. It closes the CI verification gap only; it does not change the historical evidence verdict. The registry has 34 records, but Nicomedia and Lefke/Osmaneli remain evidence-only candidates. The production scope file remains `BLOCKED_SCOPE_DEFINITION`, the review bindings remain empty, and canonical political geometry remains **BLOCKED**.
+This supersedes the older verification snapshot above. The successful gates validate the repository and acquisition pipeline, not historical control or boundary claims. Nicomedia and Lefke/Osmaneli remain evidence-only candidates; the production scope is still `BLOCKED_SCOPE_DEFINITION`, review bindings remain empty, and canonical political geometry remains **BLOCKED**.
 
-### Next blocking work
+### Next blocking work: physical-reference intake
 
-Create a versioned, source-backed physical-reference record for the Sangarios segment and the Lefke/Sangarios route endpoint. Record the geometry source/version, coordinate provenance, uncertainty, and what each source can—and cannot—support. Natural Earth 10m hydrography may provide generalized physical-geography evidence, but it is not a historical political-boundary authority. Do not guess endpoints or infer controller/ownership from settlement coordinates. Only after physical references are documented should the team propose a narrow edge/anchor subset for explicit human review; keep the production scope blocked until that review is recorded.
+The repository pins Natural Earth Vector source revision `ca96624a56bd078437bca8184e78163e5039ad19`. The physical atlas builder derives canonical river identity `sakarya` from the pinned 10m river/lake centerline data and exports WGS84 coordinates. The checked-in source contract explicitly marks the river adapter as non-authoritative; therefore this source can identify a generalized physical river trace but cannot establish a 1326 political boundary or prove a specific medieval road.
+
+The next data task is to extract the Sakarya/Sangarios line geometry reproducibly from that pinned source into a versioned physical-reference record. Record source revision, source layer/feature identity, CRS, coordinate provenance, extraction method, geometry hash, and uncertainty. Do not invent a coordinate range or endpoint before extraction. Treat the Lefke route endpoint as unresolved unless a source explicitly supports it; a modern settlement point is not a route endpoint.
+
+Keep `bithynia-core-01.scope.json` blocked until the chosen edge subset, required anchor/physical references, and human approval are recorded. Do not populate review bindings or promote candidate geometry based only on spatial proximity.
