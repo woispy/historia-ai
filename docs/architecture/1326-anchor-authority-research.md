@@ -1494,3 +1494,40 @@ Next:
 4. Keep reviewedGeometry null and promotion blocked until actual geometry decisions and downstream topology checks are complete.
 
 No candidate geometry, controller claim, anchor coordinate, or canonical political geometry was promoted by this pipeline run.
+
+
+## Wave 29 — Persisted review-package spatial-screening audit (2026-10-22)
+
+The newly downloaded CI artifact was inspected directly. The ZIP digest matches the GitHub artifact metadata: `sha256:635520f828d7cf15b158527cf51b9c8684168ec2fca5f0c1ad0e4db973553c1e`. The nine extracted files have individual SHA-256 values recorded in the working audit notes; the artifact is a temporary CI product and should be retained separately before expiry.
+
+### Pipeline counts confirmed from artifact
+
+- Input candidates: 150
+- Screened/review-queue candidates: 21
+- Rejected candidates: 129
+- Entity-linked candidates: 6
+- Unmatched candidates: 15
+- Review ledger records: 21
+- Pilot evidence edges: 7
+- Explicit bound reviews: 0
+
+### Critical screening finding
+
+The review queue is correctly marked pending and promotion-blocked, but its spatial screening is **not sufficiently selective to be treated as a historical-geography shortlist**. For example:
+
+- Candidate 6047 “Mamluk Sultanate” has a bounding box of approximately [18.81, 17.51, 44.53, 37.00] and hits many anchors spread across Anatolia and the Levant.
+- Candidate 6133 “Republic of Genoa” has a bounding box of approximately [7.23, 38.16, 39.53, 47.47] and hits 23 anchors.
+- Candidate 6179 “Ilkhanate” has a bounding box of approximately [30.25, 24.07, 70.84, 43.08] and hits 24 anchors.
+- Candidate 6220 “Republic of Venice” has a bounding box of approximately [12.00, 35.00, 34.97, 45.82] and hits 24 anchors.
+
+These are **bbox/anchor intersections**, not proof that each anchor lies inside a valid source polygon, not proof of 1326 control, and not proof that the candidate geometry is suitable for Bithynia boundary review. Several very large historical polities are included, and the unmatched count (15/21) is material.
+
+### Required disposition
+
+- Do not bind any of these 21 records to pilot edges solely because the record appears in the queue or its bbox hits an anchor.
+- Do not use the 21 count as a proxy for “21 plausible 1326 Anatolian boundary candidates.”
+- The candidate screening contract should be audited next: use actual point-in-polygon / geometry intersection rather than bbox alone where appropriate; add an explicit regional scope gate for the Bithynia pilot; preserve source identity and immutable source geometry; retain the fail-closed pending state for ambiguous or broad polygons.
+- Validate the screening change against fixtures for a huge bbox with no local polygon overlap, an actual local polygon overlap, date-validity failure, and an unmatched source entity.
+- Re-run the pipeline only after the screening contract and test coverage are corrected. The current artifact remains a valid provenance package for the current algorithm, not a reviewed historical result.
+
+The zero-bound-review result remains correct. No review binding, geometry decision, controller claim, or canonical promotion was made in this audit.
