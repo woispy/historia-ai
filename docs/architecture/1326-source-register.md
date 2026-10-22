@@ -600,3 +600,18 @@ Source:
 - Tabula Peutingeriana entry for the upper Psillis/Göksu/Taşköprü coast route: https://www1.ku.de/ggf/ag/tabula_peutingeriana/trefferanzeige.php?id=1187
 
 **Disposition:** preserve two route hypotheses and distinct feature IDs in future research. No anchor or coordinate is added because the exact physical features are not yet sufficiently georeferenced for the experiment. This source describes ancient/Byzantine road geography and does not establish route usage on 1326-04-07. Endpoint provenance and raster provenance remain blocked; no solver result or political geometry is promoted.
+
+
+## 2026-10-22 — CI-proven T3-B review package and explicit-binding gate
+
+The latest completed workflow for commit d4054829c60d30c8ce3e2ce46b1d39e485b89386 changes the previous handoff status: the real candidate-to-review pipeline ran and its output package was persisted as a GitHub Actions artifact.
+
+- Historia AI CI #3539 — SUCCESS: https://github.com/woispy/historia-ai/actions/runs/39680631177
+- Cliopatria v0.2.0 acquisition verification #230 — SUCCESS: https://github.com/woispy/historia-ai/actions/runs/39680631194
+- Artifact historia-1326-t3b-review-package, ID 12383368333, ZIP SHA-256 f20614e32f094d833172d1eed16b5992eb799151016a797bf04e271201456816
+- Artifact URL: https://github.com/woispy/historia-ai/actions/runs/39680631194/artifacts/12383368333
+- GitHub reported seven-day retention from 2026-10-21 21:40 UTC. This artifact is a temporary CI record, not a durable repository asset unless preserved before expiry.
+
+The readiness validator reported source cliopatria-v0.2.0, 150 candidate features, 21 screened candidates, 21 review queue entries, 21 ledger records, 7 pilot evidence edges, and **0 bound reviews**. Result: WAITING_FOR_EXPLICIT_REVIEW_BINDINGS; promotion remains BLOCKED.
+
+This closes the prior gap that CI did not publish a persisted candidate-to-review package for the run. It does not close geometry review or canonical promotion. The review ledger remains pending, and queue membership is not approval. Preserve and inspect the artifact's exact files/checksums, then perform explicit evidence-backed review/binding before any geometry can be accepted. No candidate, controller, anchor, or canonical geometry was promoted.
