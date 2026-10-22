@@ -85,3 +85,22 @@ Do not choose the scope list from the current candidate output alone. First reco
 ## Next operation
 
 Inspect the existing machine-readable pilot edge definitions and their evidence bindings, establish the explicit Bithynia scope from those records, then implement the scope gate and regression fixtures. Re-run CI and inspect the new persisted artifact before any candidate is manually adjudicated.
+
+## Pilot edge contract inspected after this audit
+
+The machine-readable `data/gis/1326/pilot-edge-evidence/bithynia-core-01.json` defines seven evidence edges:
+
+- `bursa-nicaea-frontier-1326` — uncertain frontier hypothesis, confidence 0.25;
+- `bursa-nicaea-regional-proximity-1326` — regional relationship, confidence 0.75;
+- `nicaea-sangarius-corridor-1326` — river/access corridor, confidence 0.9;
+- `nicaea-sangarius-barrier-1326` — partial physical constraint, confidence 0.7;
+- `nicaea-lefke-route-1326` — route/accessibility hypothesis, confidence 0.8;
+- `nicomedia-nicaea-network-1326` — regional network, confidence 0.7;
+- `nicomedia-nicaea-crossing-1326` — uncertain strategic-crossing hypothesis, confidence 0.35.
+
+These edge records define research questions and evidence types; they do **not** define a closed regional polygon or a complete anchor allowlist. The companion `bithynia-core-01.review-bindings.json` currently has `reviewBindings: []` and status `WAITING_FOR_REAL_CANDIDATE_ACQUISITION`. The production artifact confirms that the pipeline has now acquired candidates, but it still has zero explicit review bindings.
+
+The registry contains 32 evidence-only anchors. The confirmed records for Bursa, Nicaea, Bilecik and Söğüt are useful references, but choosing those four as the complete spatial scope would be an unsupported inference: the pilot also includes Nicomedia, Sangarios and a Lefke route hypothesis, while the route endpoint note explicitly says no source-backed Lefke/Sangarios endpoint is sealed in the registry. Therefore the scope gate must be built from an explicit reviewed scope record—not an improvised list derived from these names or from current candidate hits.
+
+**Decision:** scope definition remains a separate blocking task. The current implementation and artifact are valid for global candidate screening, not yet for a Bithynia-only review shortlist.
+
