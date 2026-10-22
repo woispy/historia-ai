@@ -182,7 +182,8 @@ function polygonIntersectsRect(rings, rect) {
   if (rings[0].some(point => pointInRect(point, rect))) return true;
   const corners = [[rect[0], rect[1]], [rect[2], rect[1]], [rect[2], rect[3]], [rect[0], rect[3]]];
   if (corners.some(point => pointInPolygon(point, rings))) return true;
-  if (ringIntersectsRect(rings[0], rect, false)) return true;\n  // Hole boundaries count only if the rectangle crosses/touches them; a rectangle\n  // entirely contained inside a hole is not an intersection with the polygon interior.\n  return rings.slice(1).some(ring => ringIntersectsRect(ring, rect, false));
+  if (ringIntersectsRect(rings[0], rect, false)) return true;
+  // Hole boundaries count only if the rectangle crosses/touches them; a rectangle\n  // entirely contained inside a hole is not an intersection with the polygon interior.\n  return rings.slice(1).some(ring => ringIntersectsRect(ring, rect, false));
 }
 
 function geometryIntersectsRect(geometry, rect) {
