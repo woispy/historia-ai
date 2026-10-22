@@ -1450,3 +1450,47 @@ The Nicaea–Lefke–Sangarius terrain-cost experiment prompted a targeted endpo
 No new anchor is added. Before creating a machine-readable physical-reference candidate, the work must identify whether the experiment needs a modern locality reference, a named historical feature, or a river/gorge crossing, then capture coordinate sources for that exact feature. Any future record must remain `candidate-evidence-only`, state its physical-reference semantics, and leave controller and geometry confidence `NOT_ASSERTED`.
 
 The registry remains at its previously audited 32 records. No coordinate, controller, candidate polygon, review binding, or canonical geometry is promoted. Canonical political geometry remains **BLOCKED**.
+
+
+## Wave 28 — T3-B persisted candidate-to-review pipeline executed (2026-10-22)
+
+This entry supersedes the Wave 26 statement that CI did not publish a persisted candidate review package. The latest Cliopatria acquisition verification workflow executed the real pipeline against the pinned cliopatria-v0.2.0 source and successfully uploaded a nine-file review package.
+
+### CI execution record
+
+- Commit:  d4054829c60d30c8ce3e2ce46b1d39e485b89386
+- Historia AI CI #3539: SUCCESS — https://github.com/woispy/historia-ai/actions/runs/39680631177
+- Cliopatria v0.2.0 acquisition verification #230: SUCCESS — https://github.com/woispy/historia-ai/actions/runs/39680631194
+- Review artifact: historia-1326-t3b-review-package
+- Artifact ID: 12383368333
+- Artifact ZIP SHA-256: f20614e32f094d833172d1eed16b5992eb799151016a797bf04e271201456816
+- Artifact download: https://github.com/woispy/historia-ai/actions/runs/39680631194/artifacts/12383368333
+- Retention reported by GitHub: seven days from 2026-10-21 21:40 UTC; preserve the artifact or its exact contents/checksums before expiry if it must remain a durable review record.
+
+### Pipeline counts and readiness result
+
+The successful workflow reported:
+
+- source: cliopatria-v0.2.0;
+- candidate features: **150**;
+- screened candidates: **21**;
+- geometry review queue: **21**;
+- review ledger records: **21**;
+- pilot evidence edges: **7**;
+- bound review records: **0**;
+- readiness status: WAITING_FOR_EXPLICIT_REVIEW_BINDINGS;
+- promotion: BLOCKED.
+
+The artifact includes extraction input, source snapshot metadata, candidate records, entity reconciliation, screening output, geometry reconciliation queue, geometry review ledger, edge-evidence bindings, and the edge-bridged ledger. The pipeline is now demonstrably executed and persisted as a CI artifact; this closes the earlier artifact-generation gap for this run.
+
+### What remains open
+
+This is not a completed historical geometry review. The successful workflow explicitly reports zero bound reviews, so pilot readiness remains WAITING_FOR_EXPLICIT_REVIEW_BINDINGS. The ledger is a review package, not an approval: reviewed geometry has not been accepted, and canonical promotion remains blocked.
+
+Next:
+1. Preserve/inspect the exact artifact files and their per-file provenance before the seven-day artifact expiry.
+2. Review the 21 queue records against their immutable source geometry and source evidence; do not infer acceptance from queue membership.
+3. Bind only evidence-backed review IDs to the pilot edges after an explicit human/source review.
+4. Keep reviewedGeometry null and promotion blocked until actual geometry decisions and downstream topology checks are complete.
+
+No candidate geometry, controller claim, anchor coordinate, or canonical political geometry was promoted by this pipeline run.
