@@ -200,3 +200,33 @@ The repository pins Natural Earth Vector source revision `ca96624a56bd078437bca8
 The next data task is to extract the Sakarya/Sangarios line geometry reproducibly from that pinned source into a versioned physical-reference record. Record source revision, source layer/feature identity, CRS, coordinate provenance, extraction method, geometry hash, and uncertainty. Do not invent a coordinate range or endpoint before extraction. Treat the Lefke route endpoint as unresolved unless a source explicitly supports it; a modern settlement point is not a route endpoint.
 
 Keep `bithynia-core-01.scope.json` blocked until the chosen edge subset, required anchor/physical references, and human approval are recorded. Do not populate review bindings or promote candidate geometry based only on spatial proximity.
+
+## Latest CI + physical-source extraction audit — 2026-10-22 (supersedes prior verification snapshot)
+
+- Verified branch HEAD: `e8c1b473b6f90fd165bd150afa02bfc24c9e9e6f`
+- Historia AI CI #3569: [SUCCESS](https://github.com/woispy/historia-ai/actions/runs/39841574706)
+- Cliopatria acquisition verification #260: [SUCCESS](https://github.com/woispy/historia-ai/actions/runs/39841574931)
+- Pull request [#109](https://github.com/woispy/historia-ai/pull/109) remains open, draft, unmerged; GitHub currently reports mergeable.
+- Cliopatria review-package artifact ID: `12453546282`, SHA-256 `8692a97e3295ec47c4306ad3c648459f8b5ced3bd29ca7fc05bf2dca6ba2bb2a`.
+- Cliopatria production-snapshot artifact ID: `12454135236`, SHA-256 `c4e084e3a49a0b8883af21b6b361b2efe2033a4595ca0c5f157c875b6ea5ad81`.
+
+The complete 81-step Historia AI validate job passed, including physical-geometry generation and clean-tree checks, historical GIS generation/validation, river and physical-geography regressions, topology/boundary-solver contracts, P6.1/P6.2, build, and 15K+ province scalability diagnostics. The acquisition verification and both artifact-publishing steps also passed. These are pipeline gates only; they do not establish historical ownership, medieval route geometry, or political boundaries.
+
+### Extraction implementation findings
+
+The checked-in builder `tools/asset-builder/cli/build-anatolia-hydrography-10m.js` reads four pinned inputs under `src/world/map/source/physical`:
+- `ne_10m_lakes_europe.geojson`
+- `ne_10m_lakes.geojson`
+- `ne_10m_rivers_europe.geojson`
+- `ne_10m_rivers_lake_centerlines.geojson`
+
+It clips river linework to the Anatolia atlas bbox, removes exact duplicate clipped geometry, and assigns canonical identity `sakarya` by normalized name/alias matching. Output coordinates are `EPSG:4326`. The runtime segment IDs are generated from source-layer name plus feature-array index, segment index, and clipped-piece index; they are **not** stable source feature identifiers. Therefore a source intake record must not treat a generated runtime ID as a durable Natural Earth feature ID.
+
+For a reproducible physical-reference record, the extraction step must retain the pinned source revision (`ca96624a56bd078437bca8184e78163e5039ad19`), source layer and original feature properties, source feature geometry hash, extracted line geometry hash, clipping/selection method, CRS, and any segment selection rule. If the upstream feature has no durable feature identifier, explicitly record that limitation and use a source-revision-scoped feature locator plus content hash rather than inventing an ID. Preserve the full selected Sakarya linework or document a deterministic, evidence-based segment selection; do not select a segment by guessed endpoint proximity.
+
+The current CI artifacts do not publish the generated hydrography JSON as a standalone file, so this verification confirms the builder contract and successful generation but does **not** itself supply an independently inspected Sakarya coordinate list. No physical-reference geometry has been promoted by this update.
+
+### Decision and next gate
+
+The physical-reference intake remains open. Next, make a deterministic extraction path that operates on the pinned Natural Earth source and emits a small reviewable record plus provenance manifest; validate feature selection and both hashes in a regression test. Inspect the extracted coordinates and feature metadata before committing them. Until then, `sangarius` and `lefke_sangarius_corridor` remain unresolved, `bithynia-core-01.scope.json` remains `BLOCKED_SCOPE_DEFINITION`, review bindings remain empty, and canonical political geometry remains **BLOCKED**.
+
