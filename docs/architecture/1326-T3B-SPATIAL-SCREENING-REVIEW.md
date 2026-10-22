@@ -160,3 +160,23 @@ The anchor registry now includes `1326-nicomedia` as an **evidence-only candidat
 - Registry authority remains `candidate-evidence-only`; controller and geometry are explicitly `NOT_ASSERTED`.
 
 This narrows one missing reference but does not close the pilot scope gate. The unresolved edge contract still needs a human-approved anchor/edge subset, while Sangarios and the Lefke route corridor still require explicit physical-reference provenance. Do not infer historical ownership or route cost from this new city point.
+
+## Lefke / Osmaneli evidence update — 2026-10-22
+
+The anchor registry also now includes `1326-lefke-osmaneli` as an **evidence-only settlement candidate**.
+
+- The TDV İslâm Ansiklopedisi [Anadolu entry](https://cdn2.islamansiklopedisi.org.tr/dosya/3/C03015526.pdf) states that Lefke (Osmaneli), Akhisar, Geyve and Gölpazarı had been incorporated into Ottoman territory before Bursa's conquest in 1326. This supports the place's pre-scenario historical relevance.
+- Halim Demiryürek's [Lefke/Osmaneli study](https://dergipark.org.tr/tr/pub/sinopusd/article/1358434) corroborates the historical/modern toponym link and reports the official name change to Osmaneli in 1914.
+- GeoNames, Wikidata and Getty TGN provide modern city-point references. The coordinate records differ by about 1 km, so confidence remains `MEDIUM`; none identifies the exact endpoint of the hypothesized Nicaea–Lefke–Sangarios route.
+- The new record's authority is `candidate-evidence-only`; it does not assert controller, route geometry, or a political boundary.
+
+**Scope consequence:** the two missing settlement references (Nicomedia and Lefke/Osmaneli) now have evidence-only candidate records, but the production pilot remains blocked. The Sangarios river segment and the exact `lefke_sangarius_corridor` route endpoint still lack a versioned, source-backed physical-reference record, and no reviewer-approved edge subset has been recorded.
+
+## Verification boundary after evidence-only registry additions
+
+- Latest branch HEAD: `927147277a3004792de48e05cffccb95c67e6571`
+- Cliopatria acquisition verification #254: [SUCCESS](https://github.com/woispy/historia-ai/actions/runs/39785206807) on the preceding registry revision `22f71c9a0468590db7a0cb6834115ee473dbcc78`.
+- Historia AI CI #3563 was cancelled while a newer commit was pushed. The workflow lookup returned no CI run for the latest evidence-only registry revision, so full CI is **not claimed for current HEAD**.
+- Earlier full CI #3561 passed on `5c91f50052c11ec8049566092b3b397fe99b8473`; it predates these two registry additions.
+
+Next verification must run the registry contract and full gate chain against the latest branch head before these records are treated as validated inputs. Canonical promotion and review bindings remain blocked.
