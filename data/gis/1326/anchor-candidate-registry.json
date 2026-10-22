@@ -1413,6 +1413,77 @@
       "authorityStatus": "candidate-evidence-only"
     },
     {
+      "anchorId": "1326-lefke-osmaneli",
+      "historicalName": "Lefke / Osmaneli",
+      "modernName": "Osmaneli",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          30.014167,
+          40.357222
+        ]
+      },
+      "anchorType": "SETTLEMENT",
+      "historicalApplicability": "SCENARIO_RELEVANT",
+      "historicalEvidenceRefs": [
+        {
+          "sourceId": "tdv-anadolu-osmanli-transition",
+          "sourceType": "TDV_IA",
+          "uri": "https://cdn2.islamansiklopedisi.org.tr/dosya/3/C03015526.pdf",
+          "temporalClass": "PRE_SCENARIO",
+          "claim": "The TDV İslâm Ansiklopedisi 'Anadolu' entry states that before Bursa's conquest in 1326, Lefke (Osmaneli), Akhisar, Geyve and Gölpazarı towns/fortresses had been incorporated into Ottoman territory. This supports the historical place identity and broad pre-scenario relevance, but does not identify the exact route corridor endpoint."
+        },
+        {
+          "sourceId": "demiryurek-lefke-osmaneli-2023",
+          "sourceType": "ACADEMIC_JOURNAL",
+          "uri": "https://dergipark.org.tr/tr/pub/sinopusd/article/1358434",
+          "temporalClass": "MODERN_TOPONYM_CORROBORATION",
+          "claim": "Halim Demiryürek's study treats Lefke/Osmaneli as the same settlement and notes that the name was officially changed to Osmaneli in 1914; used here only to corroborate modern/historical toponym identity, not as evidence for 1326 political control."
+        }
+      ],
+      "coordinateEvidenceRefs": [
+        {
+          "sourceId": "geonames-740881",
+          "sourceType": "GEONAMES",
+          "uri": "https://www.geonames.org/740881/osmaneli.html",
+          "coordinates": [
+            30.014167,
+            40.357222
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "wikidata-Q736759",
+          "sourceType": "WIKIDATA",
+          "uri": "https://www.wikidata.org/wiki/Q736759",
+          "coordinates": [
+            30.014167,
+            40.357222
+          ],
+          "referencePoint": "CITY_POINT"
+        },
+        {
+          "sourceId": "getty-tgn-1086750",
+          "sourceType": "GETTY_TGN",
+          "uri": "https://www.getty.edu/vow/TGNFullDisplay?english=Y&find=&nation=Lithuania&place=&subjectid=1086750",
+          "coordinates": [
+            30.0167,
+            40.3667
+          ],
+          "referencePoint": "CITY_POINT"
+        }
+      ],
+      "coordinatePrecision": "SOURCE_REPORTED",
+      "confidence": {
+        "existence": "HIGH",
+        "coordinate": "MEDIUM",
+        "temporalApplicability": "HIGH",
+        "controller": "NOT_ASSERTED",
+        "geometry": "NOT_ASSERTED"
+      },
+      "authorityStatus": "candidate-evidence-only"
+    },
+    {
       "anchorId": "1326-sinop",
       "historicalName": "Sinop / Sinope",
       "modernName": "Sinop",
