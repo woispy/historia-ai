@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "anchors": [
+    {"id":"bursa-core","role":"historical-city-anchor","coordinates":[29.06,40.19]},
+    {"id":"nicaea-core","role":"historical-city-anchor","coordinates":[29.72,40.43]},
+    {"id":"nicomedia-core","role":"historical-city-anchor","coordinates":[29.92,40.77]},
+    {"id":"sangarius-corridor","role":"physical-corridor-anchor","coordinates":[30.25,40.75]}
+  ]
+}

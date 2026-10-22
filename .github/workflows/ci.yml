@@ -63,10 +63,54 @@ jobs:
         run: npm run test:production-scenario-contract
       - name: Validate 1326 source intake contract
         run: npm run validate:1326-source-intake
+      - name: Validate 1326 anchor candidate registry
+        run: npm run validate:1326-anchor-candidate-registry -- --input data/gis/1326/anchor-candidate-registry.json
+      - name: Run 1326 anchor candidate registry contract test
+        run: npm run test:1326-anchor-candidate-registry
       - name: Generate world physical geometry assets
         run: npm run build:assets
       - name: Verify repository cleanliness after physical assets
         run: npm run test:repository-cleanliness
+      - name: Extract pinned Sakarya physical-reference candidates
+        run: |
+          node tools/historical-gis/cli/extract-sakarya-physical-reference.js \
+            src/world/map/source/physical/ne_10m_rivers_lake_centerlines.geojson \
+            /tmp/sakarya-source-candidates.json
+          node --input-type=module -e '
+            import { readFile } from "node:fs/promises";
+            const record = JSON.parse(await readFile("/tmp/sakarya-source-candidates.json", "utf8"));
+            if (record.status !== "CANDIDATES_EXTRACTED_REVIEW_REQUIRED") throw new Error("Unexpected extraction status");
+            if (record.source.revision !== "ca96624a56bd078437bca8184e78163e5039ad19") throw new Error("Unexpected Natural Earth source revision");
+            if (record.source.layer !== "ne_10m_rivers_lake_centerlines" || record.source.crs !== "EPSG:4326") throw new Error("Unexpected source layer or CRS");
+            if (record.candidateCount !== 1 || record.candidates.length !== 1) throw new Error("Pinned source should yield exactly one reviewed Sakarya name candidate");
+            if (!/^[a-f0-9]{64}$/.test(record.source.sourceFileSha256)) throw new Error("Invalid source file SHA-256");
+            const candidate = record.candidates[0];
+            if (candidate.sourceLocator.featureIndex !== 1077 || candidate.sourceLocator.featureId !== null) throw new Error("Pinned Sakarya source locator changed; review required");
+            if (candidate.matchedNames.length !== 1 || candidate.matchedNames[0] !== "Sakarya") throw new Error("Source name labels are not exact/deduplicated");
+            if (candidate.sourceProperties.rivernum !== 741 || candidate.sourceProperties.featurecla !== "River") throw new Error("Unexpected Natural Earth Sakarya feature properties");
+            if (candidate.geometryType !== "MultiLineString" || candidate.crs !== "EPSG:4326") throw new Error("Unexpected source geometry type or CRS");
+            if (!/^[a-f0-9]{64}$/.test(candidate.sourceGeometrySha256) || !/^[a-f0-9]{64}$/.test(candidate.sourceFeatureSha256)) throw new Error("Invalid candidate hash");
+            let coordinateCount = 0;
+            const visit = (value) => {
+              if (!Array.isArray(value)) return;
+              if (value.length >= 2 && Number.isFinite(value[0]) && Number.isFinite(value[1])) {
+                if (value[0] < -180 || value[0] > 180 || value[1] < -90 || value[1] > 90) throw new Error("Coordinate outside WGS84 bounds");
+                coordinateCount += 1;
+                return;
+              }
+              for (const child of value) visit(child);
+            };
+            visit(candidate.geometry.coordinates);
+            if (coordinateCount < 2) throw new Error("Sakarya geometry has insufficient coordinates");
+            console.log(JSON.stringify({status: record.status, candidateCount: record.candidateCount, sourceFileSha256: record.source.sourceFileSha256, coordinateCount, candidate: {sourceLocator: candidate.sourceLocator, matchedNames: candidate.matchedNames, geometryType: candidate.geometryType, sourceGeometrySha256: candidate.sourceGeometrySha256, sourceFeatureSha256: candidate.sourceFeatureSha256}}, null, 2));
+          '
+      - name: Publish Sakarya physical-reference intake candidates
+        uses: actions/upload-artifact@v4
+        with:
+          name: sakarya-physical-reference-intake
+          path: /tmp/sakarya-source-candidates.json
+          retention-days: 7
+          compression-level: 6
       - name: Generate historical GIS runtime assets
         run: npm run build:historical-gis:1300
       - name: Verify repository cleanliness after historical GIS
