@@ -630,3 +630,31 @@ Inspection of the persisted queue shows that spatial-screening anchor hits can b
 These counts are bbox intersections, not verified point-in-polygon hits or historical control evidence. Therefore the 21 queue entries must not be described as 21 plausible regional political boundaries. The unmatched rate is 15/21 and remains a material review risk.
 
 **Next corrective work:** inspect and tighten the candidate-screening contract to require true geometry intersection and a declared regional scope for the Bithynia pilot, then test broad-bbox false positives, true local overlap, temporal rejection, and unmatched entities. Keep all items pending and promotion-blocked until that audit passes. No existing review bindings or geometry decisions are added.
+
+
+### Artifact manifest — T3-B review package, CI run #232 (2026-10-22)
+
+The review package was downloaded and its ZIP digest was checked against GitHub's artifact metadata. The following per-file SHA-256 values were computed from the exact ZIP entries. They preserve the contents' identity even after the temporary GitHub artifact expires.
+
+- Artifact ID: `12391972741`
+- Artifact ZIP SHA-256: `635520f828d7cf15b158527cf51b9c8684168ec2fca5f0c1ad0e4db973553c1e`
+- Artifact URL: https://github.com/woispy/historia-ai/actions/runs/39699427691/artifacts/12391972741
+- CI run: https://github.com/woispy/historia-ai/actions/runs/39699427691
+- Source raw archive SHA-256 (from acquisition metadata): `d01ae3a20d358cc5d54f69d9d725d390767d9c8759ac89ad6f90c58d106f3370`
+- Source immutable Git reference: `ad28a69`; source blob SHA: `cefab0f4b622e2e7fb3daf68d4f461f83991204c`
+
+| Artifact file | Byte length | SHA-256 |
+|---|---:|---|
+| `cliopatria-extraction-input.json` | 1,191 | `cc193c9e6c31e40b96fc73ad9d2c915c7b42e904fe1adae8a4607413d60f05ff` |
+| `source-snapshots/cliopatria-v0.2.0.acquisition.json` | 936 | `fdab09e6ee20f4b8457aa6d32548b8d3f32a71884b130d1de685e2dc449e4a28` |
+| `cliopatria-1326-candidates.json` | 1,265,034 | `35d16b9a000f397b1d95c6470a388c7cd1d8be68cc38d6c911578d9fe38c0fc3` |
+| `cliopatria-entity-reconciliation.json` | 4,983 | `63a2c6696a7a488e0020662e7fb0a98af539f7d34394ca15e35f87ca559387ff` |
+| `cliopatria-candidate-surface-screening.json` | 254,051 | `347223992841180bf72991f9bee1bec38d13877e732909fb8d204a8f52623456` |
+| `1326-geometry-reconciliation-queue.json` | 287,131 | `f166e0282b64e4772fa4a71b3c16b1ef7841663972303fdfe572983132468ba2` |
+| `1326-geometry-review-ledger.json` | 32,836 | `647e415cecec60c257efa2c047c073fced22c376f3f3f55e5fb589f5e5fe1e21` |
+| `edge-evidence-bindings.json` | 874 | `5d6643190d72ff508d509402acead38d97115982598849a26f8ac8d4158dab59` |
+| `1326-geometry-review-ledger-edge-bridged.json` | 33,353 | `1bd56a0e38d70ab019c19227db25fedd63e359f5c25c59c022bee8da0818bfc6` |
+
+The acquisition metadata says the immutable source ZIP was retained in the CI workspace and records the raw SHA-256 above. The published review package includes the extraction input and acquisition metadata, but not the full 44 MB raw source archive; the separate production-snapshot artifact is also temporary and has its own digest.
+
+**Interpretation:** this manifest pins the current generated artifact, not the historical validity of the candidate polygons. The screening audit above still applies: 21 queue entries include very broad bbox hits, 15 are unmatched, and zero reviews are explicitly bound. All review and canonical promotion states remain blocked.
