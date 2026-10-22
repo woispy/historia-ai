@@ -230,3 +230,18 @@ The current CI artifacts do not publish the generated hydrography JSON as a stan
 
 The physical-reference intake remains open. Next, make a deterministic extraction path that operates on the pinned Natural Earth source and emits a small reviewable record plus provenance manifest; validate feature selection and both hashes in a regression test. Inspect the extracted coordinates and feature metadata before committing them. Until then, `sangarius` and `lefke_sangarius_corridor` remain unresolved, `bithynia-core-01.scope.json` remains `BLOCKED_SCOPE_DEFINITION`, review bindings remain empty, and canonical political geometry remains **BLOCKED**.
 
+## Reproducible Sakarya intake extractor added — 2026-10-22
+
+- Extractor: `tools/historical-gis/cli/extract-sakarya-physical-reference.js`
+- Pinned Natural Earth revision: `ca96624a56bd078437bca8184e78163e5039ad19`
+- Source layer: `ne_10m_rivers_lake_centerlines`
+- Expected output: `data/gis/1326/physical-reference-intake/sakarya-source-candidates.json`
+- Default command after the repository's asset fetch step has populated the pinned source:
+  `node tools/historical-gis/cli/extract-sakarya-physical-reference.js`
+
+The extractor reads the pinned source GeoJSON, selects all features whose supported name properties normalize to a Sakarya match, retains each original geometry and source properties, and writes SHA-256 digests for the source file, each geometry, and each complete feature payload. It preserves source geometry without clipping and records source revision, layer, feature index, any source-provided ID, and the fact that a feature index is revision-scoped when no durable source ID exists. It intentionally does not choose a river segment by proximity to a guessed endpoint.
+
+This is an extraction mechanism, not a completed evidence intake: the output has **not** been generated or inspected in this environment because the pinned source file is not present in the available working checkout. No coordinates, candidate count, or geometry hash are claimed here. After the source is fetched in a repository checkout, run the extractor, inspect every candidate's names/geometry, and only then decide whether to retain a source-backed physical-reference record. If multiple Sakarya matches are present, keep them as candidates until the source structure and geographic coverage justify a reviewed selection.
+
+The extractor does not assert that Natural Earth reproduces the exact medieval Sangarios course. The production scope remains `BLOCKED_SCOPE_DEFINITION`; no review binding or canonical geometry promotion is authorized by this code addition.
+
