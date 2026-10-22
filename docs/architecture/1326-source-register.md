@@ -678,3 +678,6 @@ The deterministic test was expanded to cover:
 The screening report now labels each accepted anchor relation as `polygon-intersects-anchor-influence-rectangle`. The algorithm remains a candidate-evidence filter only; it does not establish historical control, geometry authority, or canonical political boundaries. The source geometry is preserved and hashed; promotion remains `BLOCKED`.
 
 **Verification status at documentation time:** code and test changes are pushed on the existing PR branch; CI for the latest head SHA must be checked before treating this contract as validated. The prior successful CI run applies to the previous screening implementation and does not validate these new changes.
+
+
+Follow-up hardening: the rejection ledger now distinguishes cases where only the bounding boxes intersect from cases where no anchor window is nearby. The former is recorded as a geometry-intersection false positive and includes the number of bounding-box prefilter hits; the latter keeps the outside-window reason. The screening test asserts this distinction.
