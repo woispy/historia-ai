@@ -112,4 +112,83 @@ assert.equal(
   crypto.createHash("sha256").update(JSON.stringify(local.geometry)).digest("hex")
 );
 
-console.log("1326 candidate surface screening contract passed (polygon intersection, holes, MultiPolygon, temporal gate).");
+
+const scopedCandidate = {
+  ...base,
+  sourceFeatureIndex: 6,
+  sourceFeatureId: "nicaea-only",
+  name: "Candidate intersecting Nicaea only",
+  fromYear: 1200,
+  toYear: 1400,
+  geometry: {
+    type: "Polygon",
+    coordinates: [[[29.65, 40.4], [29.8, 40.4], [29.8, 40.5], [29.65, 40.5], [29.65, 40.4]]],
+  },
+  reconciliationStatus: "pending",
+};
+candidateReport.candidates.push(scopedCandidate);
+candidateReport.candidatePacketSha256 = crypto.createHash("sha256").update(JSON.stringify(candidateReport.candidates)).digest("hex");
+await fs.writeFile(candidateInput, JSON.stringify(candidateReport));
+
+const approvedScope = path.join(temp, "approved-scope.json");
+await fs.writeFile(approvedScope, JSON.stringify({
+  schemaVersion: 1,
+  scenarioDate: "1326-04-07",
+  pilot: "test-bithynia-subset",
+  status: "APPROVED",
+  edgeIds: ["bursa-nicaea-frontier-1326"],
+  allowedAnchorIds: ["bursa-core"],
+  source: "test-only fixture scope",
+}));
+const scopedOutput = path.join(temp, "scoped-screening.json");
+await new Promise((resolve, reject) => {
+  const child = spawn(process.execPath, [
+    script,
+    "--input", candidateInput,
+    "--anchors", path.join(fixture, "anchors.json"),
+    "--scope", approvedScope,
+    "--output", scopedOutput,
+    "--radius-km", "30",
+  ], { cwd: root, stdio: ["ignore", "pipe", "pipe"] });
+  let stderr = "";
+  child.stderr.on("data", chunk => { stderr += chunk; });
+  child.on("error", reject);
+  child.on("close", code => code === 0
+    ? resolve()
+    : reject(new Error(stderr || `scoped screening exited ${code}`)));
+});
+const scopedReport = JSON.parse(await fs.readFile(scopedOutput, "utf8"));
+assert.equal(scopedReport.pilotScope.status, "APPROVED");
+assert.deepEqual(scopedReport.pilotScope.allowedAnchorIds, ["bursa-core"]);
+const scopedIds = new Set(scopedReport.candidates.map(candidate => candidate.sourceFeatureId));
+assert.equal(scopedIds.has("near-bursa"), true, "in-scope Bursa geometry should remain screened");
+assert.equal(scopedIds.has("nicaea-only"), false, "Nicaea-only geometry must not enter a Bursa-only scoped shortlist");
+const scopedRejected = new Map(scopedReport.rejected.map(item => [item.sourceFeatureIndex, item.reason]));
+assert.equal(scopedRejected.get(6), "outside-explicit-pilot-scope", "out-of-scope anchor hits need an explicit rejection reason");
+
+const blockedScope = path.join(temp, "blocked-scope.json");
+await fs.writeFile(blockedScope, JSON.stringify({
+  schemaVersion: 1,
+  scenarioDate: "1326-04-07",
+  pilot: "bithynia-core-01",
+  status: "BLOCKED_SCOPE_DEFINITION",
+  edgeIds: ["bursa-nicaea-frontier-1326"],
+  allowedAnchorIds: [],
+}));
+await new Promise(resolve => {
+  const child = spawn(process.execPath, [
+    script,
+    "--input", candidateInput,
+    "--anchors", path.join(fixture, "anchors.json"),
+    "--scope", blockedScope,
+    "--output", path.join(temp, "blocked-screening.json"),
+    "--radius-km", "30",
+  ], { cwd: root, stdio: ["ignore", "pipe", "pipe"] });
+  child.on("error", resolve);
+  child.on("close", code => {
+    assert.notEqual(code, 0, "blocked pilot scope must fail closed");
+    resolve();
+  });
+});
+
+console.log("1326 candidate surface screening contract passed (polygon intersection, holes, MultiPolygon, temporal gate, explicit scope gate).");
