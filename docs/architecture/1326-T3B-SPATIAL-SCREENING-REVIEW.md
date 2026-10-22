@@ -149,3 +149,14 @@ The acquisition verification's T3-B contract-test step passed on this HEAD, incl
 The full CI validate job completed successfully, including lint, map/terrain contracts, historical GIS and political runtime checks, topology and boundary solver contracts, P6.1/P6.2 telemetry and DEM contracts, 15K+ province scalability diagnostics, build, and repository-cleanliness checks. The dedicated acquisition verification also passed its T3-B screening/review pipeline and artifact publishing steps.
 
 This closes the CI-verification gap for the current HEAD only. It does **not** approve the production Bithynia scope: `bithynia-core-01.scope.json` remains `BLOCKED_SCOPE_DEFINITION`, and `reviewBindings` remains empty. Next work must resolve the scope from source-backed anchor/physical-reference records or explicitly narrow the edge subset with documented justification; no candidate should be manually bound or promoted solely from spatial proximity.
+
+## Nicomedia anchor research update — 2026-10-22
+
+The anchor registry now includes `1326-nicomedia` as an **evidence-only candidate**, not as a sealed historical anchor.
+
+- TDV İslâm Ansiklopedisi's [İzmit entry](https://islamansiklopedisi.org.tr/izmit#1) records the 1329 Pelekanon battle, an agreement in 1333, and the Ottoman capture of İzmit in 1337. This chronology supports excluding the later Ottoman capture from the 1326-04-07 scenario; it does not by itself establish a complete controller record for the scenario date.
+- The Turkish Historical Society-hosted [İzmit historical overview](https://dunyasavasi.ttk.gov.tr/tr/turk-ermeni-kulliyati/vi-cilt-merkez-ve-tasrada-ermeniler/izmit-kazasinda-ermeni-yerlesiminin-baslangici-ve-ermeni-yerlesim-yerleri-oguz-polatel-490.html) independently identifies the city as Nicomedia in the Byzantine period and also dates the transition to Turkish rule to 1337.
+- Modern city-point coordinates were recorded separately from GeoNames and Wikidata. Their reported points differ by roughly 2 km, so coordinate confidence is `MEDIUM`; this is a city anchor, not a historical boundary or a coastline/terrain geometry.
+- Registry authority remains `candidate-evidence-only`; controller and geometry are explicitly `NOT_ASSERTED`.
+
+This narrows one missing reference but does not close the pilot scope gate. The unresolved edge contract still needs a human-approved anchor/edge subset, while Sangarios and the Lefke route corridor still require explicit physical-reference provenance. Do not infer historical ownership or route cost from this new city point.
