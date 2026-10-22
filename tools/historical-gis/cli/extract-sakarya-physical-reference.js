@@ -80,7 +80,7 @@ if (source?.type !== "FeatureCollection" || !Array.isArray(source.features)) {
 const candidates = [];
 for (const [featureIndex, feature] of source.features.entries()) {
   const names = featureNameValues(feature?.properties);
-  const matchedNames = names.filter((name) => [...TARGET_ALIASES].some((alias) => normalizedName(name).includes(alias)));
+  const matchedNames = [...new Set(names.filter((name) => TARGET_ALIASES.has(normalizedName(name))))];
   if (matchedNames.length === 0) continue;
   validateGeometry(feature.geometry, `source feature index ${featureIndex}`);
 
@@ -113,7 +113,7 @@ for (const [featureIndex, feature] of source.features.entries()) {
 }
 
 if (candidates.length === 0) {
-  throw new Error("No exact Sakarya name match found in the pinned Natural Earth river centerline source; refusing to create an empty intake record.");
+  throw new Error("No exact normalized Sakarya name match found in the pinned Natural Earth river centerline source; refusing to create an empty intake record.");
 }
 
 const payload = {
@@ -128,7 +128,7 @@ const payload = {
     layer: SOURCE_LAYER,
     path: path.relative(process.cwd(), SOURCE_PATH).replaceAll(path.sep, "/"),
     crs: "EPSG:4326",
-    selection: "exact normalized match against name/name_en/nameascii/name_alt/namealt; no endpoint-distance selection",
+    selection: "exact normalized equality against name/name_en/nameascii/name_alt/namealt; matched labels are deduplicated; no substring or endpoint-distance selection",
     clipping: "none; original source feature geometry is retained",
     sourceFileSha256: sha256(raw),
   },
