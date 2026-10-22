@@ -245,3 +245,40 @@ This is an extraction mechanism, not a completed evidence intake: the output has
 
 The extractor does not assert that Natural Earth reproduces the exact medieval Sangarios course. The production scope remains `BLOCKED_SCOPE_DEFINITION`; no review binding or canonical geometry promotion is authorized by this code addition.
 
+## Sakarya source candidate extracted and persisted — 2026-10-23
+
+The CI run on commit `e4670c066848efe9cf13837b5f44e0b37590cb5b` completed successfully:
+- Historia AI CI #3574: [SUCCESS](https://github.com/woispy/historia-ai/actions/runs/39858239164)
+- Cliopatria acquisition verification #265: [SUCCESS](https://github.com/woispy/historia-ai/actions/runs/39858239241)
+- Sakarya intake artifact: [workflow artifact](https://github.com/woispy/historia-ai/actions/runs/39858239164), artifact ID `12459779293`, ZIP SHA-256 `1ee01f7e219300b6832e5eb99fe90af89cfc13a35639a080f1ae113698eceb02`.
+
+The intake artifact was downloaded and inspected. The pinned source yielded **one** Sakarya name candidate:
+- Layer: `ne_10m_rivers_lake_centerlines`
+- Revision: `ca96624a56bd078437bca8184e78163e5039ad19`
+- Source feature locator: array index `1077`; no durable source feature ID is present.
+- Source properties: `name=Sakarya`, `name_en=Sakarya`, `rivernum=741`, `featurecla=River`.
+- Geometry: `MultiLineString`, WGS84 / `EPSG:4326`, 112 coordinate pairs, one line component.
+- Observed WGS84 bbox: `[29.44752, 40.038275, 30.6456, 41.132921]`.
+- First coordinate: `[29.534597, 40.038275]`; last coordinate: `[30.6456, 41.132921]`.
+- Source file SHA-256: `9ae6e735f9d96cab4804339755ea1c694f7bddfc21bf391db64dafcc32edb17a`.
+- Geometry SHA-256: `b668b2b2ba510837cc6a33fa7eeadef90916977ba5bba05b089724eef7a1e4c3`.
+- Feature payload SHA-256: `9c746f05d4f4afe51a2c03fd6a3d32e0a81e443f8f4ad7e2b359215803e899bd`.
+
+A durable metadata record is now committed at `data/gis/1326/physical-reference-intake/sakarya-source-candidate.json`. It records the pinned source locator, source properties, hashes, geometry bounds, coordinate count, extraction method, artifact digest, and evidence limitations. The full candidate geometry remains reproducible from the pinned source using `tools/historical-gis/cli/extract-sakarya-physical-reference.js`; the CI artifact retains the complete extracted geometry for inspection.
+
+### Extraction precision correction
+
+Review of the first artifact exposed duplicate matched labels because both `name` and `name_en` contain “Sakarya”. The extractor now deduplicates matched labels and uses exact normalized equality rather than substring matching. The CI contract also checks the pinned revision/layer, expected feature index and source properties, the unique label, geometry type/CRS, hash formats, and every coordinate's WGS84 bounds. This prevents a changed upstream feature selection from silently passing as the same source candidate.
+
+The above geometry metrics and hashes are from the inspected artifact produced before this exact-match hardening; the geometry itself is unchanged by label deduplication. The newer exact-match contract and persisted manifest are awaiting their own CI result as of this documentation update.
+
+### Interpretation boundary
+
+This is a source-backed, generalized modern river trace—not proof of the exact 1326 Sangarios course, a medieval road endpoint, a political frontier, or ownership. The modern coordinate extent is recorded only to identify the extracted source geometry; it must not be used to invent a Lefke route endpoint. The candidate is evidence-only and still requires human review before edge binding.
+
+Production status remains:
+- `bithynia-core-01.scope.json`: `BLOCKED_SCOPE_DEFINITION`
+- Explicit review bindings: `0`
+- Canonical political geometry: **BLOCKED**
+- `lefke_sangarius_corridor`: unresolved pending independent endpoint provenance.
+
