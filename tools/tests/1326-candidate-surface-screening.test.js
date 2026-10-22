@@ -97,7 +97,7 @@ assert.equal(screenedIds.has("expired"), false, "candidate outside the scenario 
 assert.equal(screenedIds.has("far-away"), false, "candidate outside the anchor window must be rejected");
 
 const rejectedById = new Map(report.rejected.map(item => [item.sourceFeatureIndex, item.reason]));
-assert.equal(rejectedById.get(2), "outside-anchor-screening-window");
+assert.equal(rejectedById.get(2), "bbox-only-false-positive-no-polygon-intersection");
 assert.equal(rejectedById.get(3), "outside-scenario-year-range");
 assert.equal(rejectedById.get(4), "outside-anchor-screening-window");
 
