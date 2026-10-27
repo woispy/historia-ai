@@ -32,13 +32,31 @@
     "candidateCount": 1,
     "geometryType": "MultiLineString",
     "coordinateCount": 112,
-    "geometryBoundsWgs84": [29.44752, 40.038275, 30.6456, 41.132921],
-    "firstCoordinate": [29.534597, 40.038275],
-    "lastCoordinate": [30.6456, 41.132921],
+    "geometryBoundsWgs84": [
+      29.44752,
+      40.038275,
+      30.6456,
+      41.132921
+    ],
+    "firstCoordinate": [
+      29.534597,
+      40.038275
+    ],
+    "lastCoordinate": [
+      30.6456,
+      41.132921
+    ],
     "artifact": "sakarya-physical-reference-intake",
-    "artifactId": 12459779293,
-    "artifactZipSha256": "1ee01f7e219300b6832e5eb99fe90af89cfc13a35639a080f1ae113698eceb02",
-    "extractionCode": "tools/historical-gis/cli/extract-sakarya-physical-reference.js"
+    "artifactId": 12466233836,
+    "artifactZipSha256": "a90b57ccfc452e64dc3c02d551c1ac8f0c19253ee6ecd9dafb7f56a0412c09f9",
+    "extractionCode": "tools/historical-gis/cli/extract-sakarya-physical-reference.js",
+    "verification": {
+      "commit": "4f25d9546ac4dc239032ac4d3a615f921a4147d2",
+      "historiaAiCiRun": 39871061577,
+      "cliopatriaVerificationRun": 39871061559,
+      "status": "SUCCESS",
+      "note": "Exact-name matching and source locator/geometry contract passed on this revision."
+    }
   },
   "limitations": [
     "Natural Earth provides generalized modern hydrography, not an exact medieval Sangarios reconstruction.",
