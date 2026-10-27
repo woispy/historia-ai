@@ -282,3 +282,16 @@ Production status remains:
 - Canonical political geometry: **BLOCKED**
 - `lefke_sangarius_corridor`: unresolved pending independent endpoint provenance.
 
+## Hardened Sakarya extraction verification — 2026-10-23
+
+- Extraction contract verified on commit `4f25d9546ac4dc239032ac4d3a615f921a4147d2`.
+- Historia AI CI #3578: [SUCCESS](https://github.com/woispy/historia-ai/actions/runs/39871061577).
+- Cliopatria acquisition verification #269: [SUCCESS](https://github.com/woispy/historia-ai/actions/runs/39871061559).
+- Hardened extraction artifact ID: `12466233836`; ZIP SHA-256: `a90b57ccfc452e64dc3c02d551c1ac8f0c19253ee6ecd9dafb7f56a0412c09f9`.
+
+The exact normalized name match, expected source locator, source properties, geometry type/CRS, hash formats and WGS84 coordinate bounds passed. The durable metadata record has been updated to point to this hardened artifact instead of the earlier pre-hardening artifact. That metadata pointer update and this review-note update are newer than the cited successful CI run; the CI chain must be considered pending for the resulting new HEAD until it completes.
+
+The extracted candidate remains the pinned Natural Earth source feature at array index `1077`, with no durable upstream feature ID. The geometry is a generalized modern river trace, not an exact reconstruction of the 1326 Sangarios course. The recorded bounds and endpoints identify the source line only; they do not establish a medieval route endpoint or political boundary.
+
+**Next gate:** compare the trace with independent historical and physical-geography evidence, then document whether it is suitable as evidence for the Sangarios corridor and/or barrier hypotheses. No edge binding is automatic. The Lefke route endpoint remains unresolved, `bithynia-core-01.scope.json` remains `BLOCKED_SCOPE_DEFINITION`, review bindings remain empty, and canonical political geometry remains **BLOCKED**.
+
