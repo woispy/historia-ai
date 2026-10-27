@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Historia AI 1326 Anchor Authority Candidate Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "scenarioDate", "authorityStatus", "policy", "anchors"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "scenarioDate": { "const": "1326-04-07" },
+    "authorityStatus": { "const": "research-candidate-registry" },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourcePolicy", "geometryGeneration", "controllerInference", "canonicalPromotion"],
+      "properties": {
+        "sourcePolicy": { "const": "historical-evidence-plus-independent-coordinate" },
+        "geometryGeneration": { "const": false },
+        "controllerInference": { "const": false },
+        "canonicalPromotion": { "const": false }
+      }
+    },
+    "anchors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "anchorId", "historicalName", "modernName", "geometry",
+          "anchorType", "historicalApplicability", "historicalEvidenceRefs",
+          "coordinateEvidenceRefs", "coordinatePrecision", "confidence",
+          "authorityStatus"
+        ],
+        "properties": {
+          "anchorId": { "type": "string", "pattern": "^1326-[a-z0-9-]+$" },
+          "historicalName": { "type": "string", "minLength": 1 },
+          "modernName": { "type": "string", "minLength": 1 },
+          "geometry": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "coordinates"],
+            "properties": {
+              "type": { "const": "Point" },
+              "coordinates": {
+                "type": "array",
+                "prefixItems": [
+                  { "type": "number", "minimum": -180, "maximum": 180 },
+                  { "type": "number", "minimum": -90, "maximum": 90 }
+                ],
+                "items": false
+              }
+            }
+          },
+          "anchorType": {
+            "type": "string",
+            "enum": ["SETTLEMENT", "POLITICAL_CENTRE", "FORTRESS", "PORT", "CORRIDOR_REFERENCE", "GEOGRAPHIC_REFERENCE"]
+          },
+          "historicalApplicability": {
+            "type": "string",
+            "enum": ["PRE_SCENARIO", "SCENARIO_WINDOW", "SCENARIO_RELEVANT"]
+          },
+          "historicalEvidenceRefs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["sourceId", "sourceType", "uri", "temporalClass", "claim"],
+              "properties": {
+                "sourceId": { "type": "string", "minLength": 1 },
+                "sourceType": { "type": "string", "enum": ["TDV_IA", "WIKIDATA", "GEONAMES", "PROJECT_RESEARCH"] },
+                "uri": { "type": "string", "format": "uri" },
+                "temporalClass": { "type": "string", "enum": ["PRE_SCENARIO", "SCENARIO_WINDOW", "POST_SCENARIO", "UNDATED"] },
+                "claim": { "type": "string", "minLength": 1 }
+              }
+            }
+          },
+          "coordinateEvidenceRefs": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["sourceId", "sourceType", "uri", "coordinates", "referencePoint"],
+              "properties": {
+                "sourceId": { "type": "string", "minLength": 1 },
+                "sourceType": { "type": "string", "enum": ["GEONAMES", "WIKIDATA", "WIKIPEDIA", "PROJECT_RESEARCH"] },
+                "uri": { "type": "string", "format": "uri" },
+                "coordinates": {
+                  "type": "array",
+                  "prefixItems": [
+                    { "type": "number", "minimum": -180, "maximum": 180 },
+                    { "type": "number", "minimum": -90, "maximum": 90 }
+                  ],
+                  "items": false
+                },
+                "referencePoint": { "type": "string", "enum": ["CITY_POINT", "SETTLEMENT_POINT", "HISTORICAL_SITE", "ADMINISTRATIVE_POINT"] }
+              }
+            }
+          },
+          "coordinatePrecision": {
+            "type": "string",
+            "enum": ["SOURCE_REPORTED", "APPROXIMATE", "REFERENCE_POINT_ONLY"]
+          },
+          "confidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["existence", "coordinate", "temporalApplicability", "controller", "geometry"],
+            "properties": {
+              "existence": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW", "UNKNOWN"] },
+              "coordinate": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW", "UNKNOWN"] },
+              "temporalApplicability": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW", "UNKNOWN"] },
+              "controller": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW", "UNKNOWN", "NOT_ASSERTED"] },
+              "geometry": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW", "UNKNOWN", "NOT_ASSERTED"] }
+            }
+          },
+          "authorityStatus": { "const": "candidate-evidence-only" }
+        }
+      }
+    }
+  }
+}

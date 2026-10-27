@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "pilot": "bithynia-core-01",
+  "status": "BLOCKED_SCOPE_DEFINITION",
+  "source": {
+    "pilotEdgeContract": "data/gis/1326/pilot-edge-evidence/bithynia-core-01.json",
+    "anchorRegistry": "data/gis/1326/anchor-candidate-registry.json",
+    "reviewBindings": "data/gis/1326/pilot-edge-evidence/bithynia-core-01.review-bindings.json"
+  },
+  "edgeIds": [
+    "bursa-nicaea-frontier-1326",
+    "bursa-nicaea-regional-proximity-1326",
+    "nicaea-sangarius-corridor-1326",
+    "nicaea-sangarius-barrier-1326",
+    "nicaea-lefke-route-1326",
+    "nicomedia-nicaea-network-1326",
+    "nicomedia-nicaea-crossing-1326"
+  ],
+  "allowedAnchorIds": [],
+  "unresolvedAnchorRefs": [
+    "nicomedia_1326",
+    "sangarius",
+    "lefke_sangarius_corridor"
+  ],
+  "decision": {
+    "allowGlobalScreening": true,
+    "allowScopedPilotScreening": false,
+    "reason": "The pilot edge contract defines evidence questions but not a complete, source-backed regional boundary or anchor allowlist. The anchor registry lacks a sealed Nicomedia anchor and exact physical-reference records for Sangarius and Lefke. Do not infer an allowlist from current candidate hits."
+  },
+  "policy": {
+    "geometryGeneration": false,
+    "controllerInference": false,
+    "automaticReviewMatching": false,
+    "canonicalPromotion": false,
+    "humanReviewRequired": true
+  },
+  "approvalRequirements": [
+    "Resolve every unresolvedAnchorRef to a source-backed record or explicitly document why it is not required for the selected edge subset.",
+    "Declare the exact pilot edge subset this scope serves.",
+    "Declare a unique allowedAnchorIds list that exists in the canonical 1326 anchor registry or an explicitly versioned physical-reference registry.",
+    "Record scope rationale, source references, uncertainty, and reviewer approval before status may become APPROVED."
+  ]
+}
