@@ -295,3 +295,30 @@ The extracted candidate remains the pinned Natural Earth source feature at array
 
 **Next gate:** compare the trace with independent historical and physical-geography evidence, then document whether it is suitable as evidence for the Sangarios corridor and/or barrier hypotheses. No edge binding is automatic. The Lefke route endpoint remains unresolved, `bithynia-core-01.scope.json` remains `BLOCKED_SCOPE_DEFINITION`, review bindings remain empty, and canonical political geometry remains **BLOCKED**.
 
+## Independent physical-geography evidence review: Sangarios — 2026-10-27
+
+### Source-derived findings
+
+1. **River identity and broad geography.** The Oxford Classical Dictionary / Oxford Research Encyclopedias entry identifies Sangarius as the modern Sakarya and describes its course through Phrygia and Bithynia to the Black Sea. It says the Bithynian section was navigable and rich in fish. Source: [Oxford Research Encyclopedias, “Sangarius”](https://academic.oup.com/edited-volume/61673/chapter-abstract/550496284).
+2. **Corridor versus barrier are both plausible at different reaches.** The same Oxford entry says the valley provides access from the coast to the plateau, while parts of the gorge impede west-east movement. This supports retaining two distinct hypotheses—`nicaea-sangarius-corridor-1326` and `nicaea-sangarius-barrier-1326`—rather than assigning one uniform movement effect to the whole river.
+3. **Regional communications context.** The Oxford Classical Dictionary entry for Bithynia describes the Sangarius and its tributary valleys running back from the Propontis as fertile plains and relatively easy communications, and notes routes toward the Anatolian plateau and Pontus. Source: [Oxford Research Encyclopedias, “Bithynia”](https://academic.oup.com/edited-volume/61673/chapter-abstract/548511258).
+4. **Strategic significance is reach- and period-specific.** Clive Foss's study of Byzantine Malagina describes the lower Sangarius as strategically important and as a route/staging context for imperial armies, but also notes that Malagina's exact site had long been disputed before fieldwork clarified it. Source: [Foss, “Byzantine Malagina and the Lower Sangarius,” *Anatolian Studies*](https://www.cambridge.org/core/journals/anatolian-studies/article/abs/byzantine-malagina-and-the-lower-sangarius/C764A7C79EB54493BA6061F3402DEF3C).
+
+### What these sources do not establish
+
+- These are broad historical-geography and Byzantine-period references; they do not establish the exact river channel in 1326, a complete political boundary, or the exact Nicaea–Lefke route endpoint.
+- They do not justify selecting a particular subset of the Natural Earth polyline by nearest endpoint or by bounding-box overlap.
+- They do not authorize assigning the same corridor/barrier cost to every segment. The route and barrier hypotheses require reach-specific terrain/route evidence and explicit uncertainty.
+- Natural Earth feature index `1077` remains a generalized modern source trace; this literature review does not transform it into authoritative medieval geometry.
+
+### Evidence decision
+
+- `nicaea-sangarius-corridor-1326`: **contextual support only** for a broad river-valley access hypothesis; exact reach and route remain unverified.
+- `nicaea-sangarius-barrier-1326`: **contextual support only** for a gorge/barrier effect on some reaches; the relevant reach for the 1326 pilot is not yet selected.
+- `nicaea-lefke-route-1326`: **not resolved** by these sources; the Lefke/Sangarios endpoint remains unsupported.
+- Production scope: still `BLOCKED_SCOPE_DEFINITION`; no review binding or canonical promotion follows from this literature review.
+
+### Next operation
+
+Inspect the complete Sakarya source geometry against a terrain/relief reference and the documented Nicaea/Lefke anchor candidates, but treat any spatial overlay as a hypothesis screen only. Define and cite the relevant reach before proposing a pilot-edge binding; then request explicit human review. Keep the source geometry and hashes immutable.
+
