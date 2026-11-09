@@ -1,13 +1,18 @@
 import assert from "node:assert/strict";
+import aoi from "../../src/world/map/source/physical/copernicus-glo30.aoi.json" with { type: "json" };
+import selection from "../../data/gis/1326/physical-reference-intake/sakarya-glo30-tile-selection.json" with { type: "json" };
 import { expectedCopernicusGlo30TileIds, validateCopernicusGlo30TileSelection } from "../historical-gis/CopernicusGlo30TileSelection.js";
-const aoi = { west: 29, east: 32, south: 40, north: 42, tileSizeDegrees: 1, tileCount: 6 };
-assert.deepEqual(expectedCopernicusGlo30TileIds(aoi), ["N40_E029","N40_E030","N40_E031","N41_E029","N41_E030","N41_E031"]);
-const selected = ["N40_E029","N40_E030","N41_E030"];
-assert.deepEqual(validateCopernicusGlo30TileSelection(selected, aoi), selected);
-assert.deepEqual(validateCopernicusGlo30TileSelection({tileIds:selected}, aoi), selected);
-assert.throws(() => validateCopernicusGlo30TileSelection([], aoi), /non-empty/);
-assert.throws(() => validateCopernicusGlo30TileSelection(["N40_E029","N40_E029"], aoi), /duplicate/);
-assert.throws(() => validateCopernicusGlo30TileSelection(["N40_E999"], aoi), /outside the pinned AOI/);
-assert.throws(() => validateCopernicusGlo30TileSelection(["../N40_E029"], aoi), /invalid grid ID/);
-assert.throws(() => expectedCopernicusGlo30TileIds({...aoi,tileCount:5}), /tileCount mismatch/);
+
+assert.equal(expectedCopernicusGlo30TileIds(aoi).length, aoi.tileCount);
+assert.deepEqual(validateCopernicusGlo30TileSelection(selection, aoi), ["N40_E029", "N40_E030", "N41_E030"]);
+assert.equal(selection.status, "GEOMETRY_DERIVED_CATALOG_CHECK_REQUIRED");
+assert.match(selection.sourceGeometrySha256, /^[a-f0-9]{64}$/);
+
+const testAoi = { west: 29, east: 32, south: 40, north: 42, tileSizeDegrees: 1, tileCount: 6 };
+assert.deepEqual(expectedCopernicusGlo30TileIds(testAoi), ["N40_E029","N40_E030","N40_E031","N41_E029","N41_E030","N41_E031"]);
+assert.throws(() => validateCopernicusGlo30TileSelection([], testAoi), /non-empty/);
+assert.throws(() => validateCopernicusGlo30TileSelection(["N40_E029","N40_E029"], testAoi), /duplicate/);
+assert.throws(() => validateCopernicusGlo30TileSelection(["N40_E999"], testAoi), /outside the pinned AOI/);
+assert.throws(() => validateCopernicusGlo30TileSelection(["../N40_E029"], testAoi), /invalid grid ID/);
+assert.throws(() => expectedCopernicusGlo30TileIds({...testAoi,tileCount:5}), /tileCount mismatch/);
 console.log("P6.2-A Copernicus GLO-30 tile subset selection: PASS");

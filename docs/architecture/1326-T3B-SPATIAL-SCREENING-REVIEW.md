@@ -420,3 +420,5 @@ The post-#3582 implementation closes the acquisition blockers:
 The Sakarya diagnostic selection remains `N40_E029`, `N40_E030`, `N41_E030`. These are geometry-derived grid IDs, not proof of CDSE catalog presence or download availability. The repository manifest remains empty until catalog and authenticated acquisition gates pass.
 
 **Next gate:** run the three-ID catalog query, preserve its response artifact, and only then proceed to authenticated download and semantic GeoTIFF validation.
+
+The reviewed selection is persisted at `data/gis/1326/physical-reference-intake/sakarya-glo30-tile-selection.json`; its regression test validates both the source geometry digest format and membership of all three IDs in the pinned AOI. CI now runs this selection test alongside the existing P6.2 acquisition-contract checks.
