@@ -422,3 +422,5 @@ The Sakarya diagnostic selection remains `N40_E029`, `N40_E030`, `N41_E030`. The
 **Next gate:** run the three-ID catalog query, preserve its response artifact, and only then proceed to authenticated download and semantic GeoTIFF validation.
 
 The reviewed selection is persisted at `data/gis/1326/physical-reference-intake/sakarya-glo30-tile-selection.json`; its regression test validates both the source geometry digest format and membership of all three IDs in the pinned AOI. CI now runs this selection test alongside the existing P6.2 acquisition-contract checks.
+
+The CI workflow now includes the `work/**` branch family in its push filter so changes on this active work branch receive the same validation chain without depending solely on pull-request synchronization events. The Sakarya tile-selection test also checks that its geometry digest exactly matches the persisted physical-reference candidate record.
