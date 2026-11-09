@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import path from "node:path";
 
 import { validateCopernicusGlo30GeoTiff } from "./P62GeoTiffValidator.js";
 
@@ -141,6 +142,7 @@ function buildTileIndex(tiles) {
   for (const tile of tiles) {
     if (!tile || typeof tile !== "object") fail("manifest contains an invalid tile entry.");
     if (typeof tile.id !== "string" || typeof tile.path !== "string") fail(`manifest tile is missing id/path: ${JSON.stringify(tile)}.`);
+    if (tile.path.includes("\\") || tile.path.startsWith("/") || /^[A-Za-z]:/.test(tile.path) || tile.path.split("/").some((part) => part === ".." || part === "." || part === "")) fail(`manifest tile ${tile.id} path must be normalized and repository-relative without traversal.`);
     const semantic = tile.semantic;
     if (!semantic || semantic.width !== 3601 || semantic.height !== 3601
       || semantic.horizontalCrs !== "EPSG:4326" || semantic.verticalCrs !== "EPSG:3855"
@@ -225,9 +227,15 @@ export function createWgs84ElevationSampler({ manifest, tileLoader }) {
 }
 
 export async function createWgs84ElevationSamplerFromFiles({ manifest, baseDirectory = "." }) {
+  const root = path.resolve(baseDirectory);
   return createWgs84ElevationSampler({
     manifest,
-    tileLoader: async (tile) => fs.readFile(new URL(tile.path, `file://${baseDirectory.replace(/\\/g, "/")}/`)),
+    tileLoader: async (tile) => {
+      const resolved = path.resolve(root, tile.path);
+      const relative = path.relative(root, resolved);
+      if (relative.startsWith("..") || path.isAbsolute(relative)) fail(`manifest tile ${tile.id} resolves outside the sampler base directory.`);
+      return fs.readFile(resolved);
+    },
   });
 }
 

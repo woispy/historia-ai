@@ -406,3 +406,17 @@ The earlier bbox-only candidate `N41_E029` is **not** intersected by the line un
 ### Next operation
 
 Fix the acquisition/sampler manifest path contract, add validated tile-ID subset selection and tests, ignore local Copernicus build outputs, then query the three selected IDs against the pinned CDSE collection. Only after catalog results are recorded should authenticated tile acquisition and semantic validation proceed. Keep the historical route and political boundary gates unchanged.
+
+
+## P6.2 acquisition contract implementation — 2026-11-09
+
+The post-#3582 implementation closes the acquisition blockers:
+
+- `--tile-ids-file=<path>` accepts a JSON array or an object with a `tileIds` array. A supplied selection must be non-empty, use valid one-degree grid identifiers, contain no duplicates, and remain entirely inside the pinned AOI. Without this option, the original full-AOI behavior remains the default.
+- Catalog output records whether the run used an explicit subset or the full AOI and preserves the exact selected tile order.
+- Promoted manifest entries include a normalized repository-relative `path` to the local TIFF. The manifest contract and sampler reject absolute paths, backslashes, empty/dot/traversal path segments; the file sampler also verifies resolution stays inside its configured base directory.
+- `data/build/physical/copernicus-glo30/` is ignored so local catalog responses and raw DEM downloads cannot be accidentally committed.
+
+The Sakarya diagnostic selection remains `N40_E029`, `N40_E030`, `N41_E030`. These are geometry-derived grid IDs, not proof of CDSE catalog presence or download availability. The repository manifest remains empty until catalog and authenticated acquisition gates pass.
+
+**Next gate:** run the three-ID catalog query, preserve its response artifact, and only then proceed to authenticated download and semantic GeoTIFF validation.
