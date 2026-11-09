@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Resolve and pin the provenance of legacy inventory:1326-gecis-envanteri#N references without treating a same-name attachment as the authoritative revision.",
+  "status": "T3B_SOURCE_PINNED_IMMUTABLE_RECORDS_MIGRATED",
+  "scenarioDate": "1326-04-07",
+  "pilot": "bithynia-core-01",
+  "pilotEvidencePath": "data/gis/1326/pilot-edge-evidence/bithynia-core-01.json",
+  "policy": {
+    "mutatePilotEvidenceRefs": false,
+    "createReviewBindings": false,
+    "generateGeometry": false,
+    "inferController": false,
+    "promoteCanonicalGeometry": false
+  },
+  "observedAvailableAttachment": {
+    "fileName": "1326 Geçiş Envanteri.txt",
+    "sha256": "9b100d1a84ee0e398d66926598daa32e0aa5289dbad13364138ba29a1791b04d",
+    "byteLength": 22580,
+    "lineCount": 973,
+    "identity": "exact bytes of the currently mounted attachment inspected on 2026-10-14",
+    "role": "comparison-only; not established as the T3-B/Pilot 01 source revision",
+    "sectionHeadings": {
+      "15": "Bu aynı zamanda Open Historia yaklaşımından da bizi koruyor",
+      "17": "İlk anchor confidence matrisi",
+      "18": "Tier 3'ün gerçek veri modeli"
+    }
+  },
+  "legacyPilotRefs": [
+    {
+      "ref": "inventory:1326-gecis-envanteri#1",
+      "candidateSectionTitle": "T3-B / Pilot 01 — initial Bithynia and Sangarius physical-geography/source review",
+      "sourceRevisionStatus": "PINNED",
+      "resolution": "SECTION_HEADING_VERIFIED",
+      "admissibility": "physical geography context only; not a political boundary",
+      "sourceRecordId": "project-file:file_000000004b4081f7b09426f5f25c1f46"
+    },
+    {
+      "ref": "inventory:1326-gecis-envanteri#15",
+      "candidateSectionTitle": "T3-B / Pilot 01 — Nicaea's east: Nicaea → Lefke → Sangarius corridor",
+      "sourceRevisionStatus": "PINNED",
+      "resolution": "SECTION_HEADING_VERIFIED",
+      "admissibility": "route/accessibility context; does not establish controller or boundary",
+      "sourceRecordId": "project-file:file_000000004b4081f7b09426f5f25c1f46"
+    },
+    {
+      "ref": "inventory:1326-gecis-envanteri#17",
+      "candidateSectionTitle": "T3-B / Pilot 01 — Bursa–Nicaea frontier modelling",
+      "sourceRevisionStatus": "PINNED",
+      "resolution": "SECTION_HEADING_VERIFIED",
+      "admissibility": "frontier hypothesis only; exact line remains unverified",
+      "sourceRecordId": "project-file:file_000000004b4081f7b09426f5f25c1f46"
+    },
+    {
+      "ref": "inventory:1326-gecis-envanteri#18",
+      "candidateSectionTitle": "T3-B / Pilot 01 — Nicomedia–Nicaea geographic constraints",
+      "sourceRevisionStatus": "PINNED",
+      "resolution": "SECTION_HEADING_VERIFIED",
+      "admissibility": "network/terrain context; no exact crossing point established",
+      "sourceRecordId": "project-file:file_000000004b4081f7b09426f5f25c1f46"
+    }
+  ],
+  "requiredToResolve": [
+    "Verify exact linked source passages and bibliographic metadata against each claim; source identity and heading matches are provenance, not independent evidence.",
+    "For section-15 lower-cost claims, produce reproducible DEM/terrain-cost analysis before assigning numeric solver weights.",
+    "Treat the Cambridge Nicaea–Lefke–Sangarius passage as 1097 route/physical-geography context only; it does not independently establish route use in 1326.",
+    "Do not assign numeric route-cost weights to the Nicaea–Lefke–Sangarius hypothesis until a reproducible DEM/terrain-cost analysis records source/version, resolution, friction assumptions, endpoints, algorithm and output checksum."
+  ],
+  "decision": {
+    "frontierStatus": "INSUFFICIENT_EVIDENCE / REVIEW_REQUIRED",
+    "frontierConfidence": 0.25,
+    "reviewBindings": [],
+    "reviewedGeometry": null,
+    "canonicalPromotion": "BLOCKED",
+    "minArea": 0.00005,
+    "safeToDelete": 0
+  },
+  "recoveredT3BPilot01SourceRevision": {
+    "fileName": "1326 Geçiş Envanteri.txt",
+    "sourceRecordId": "project-file:file_000000004b4081f7b09426f5f25c1f46",
+    "projectFileId": "file_000000004b4081f7b09426f5f25c1f46",
+    "sourceVersionId": "1",
+    "sourceCreatedAt": "2026-09-16T14:56:02Z",
+    "identity": "exact raw bytes recovered from the T3-B/Pilot 01 project attachment",
+    "sha256": "1fcefb023a328951e6219cc18093356f6f2230e176eb9c57096d64b410e0819c",
+    "byteLength": 23410,
+    "lineCount": 1119,
+    "sectionHeadings": {
+      "1": "Önce kaynaklarla coğrafi modeli yeniden doğruladım",
+      "15": "Nicaea'nın doğusu için özel durum",
+      "17": "Bursa–Nicaea frontier'i nasıl modellenmeli?",
+      "18": "Nicomedia–Nicaea arasında başka bir constraint"
+    },
+    "disposition": "source revision pinned; section headings verified; historical claims and bibliography are not thereby independently validated"
+  },
+  "requiredForLegacyRefMigration": [
+    "Migration completed in commit cd0958fbea9812c66cce5e2341f20e2fd0cd7d3f; old aliases remain preserved in immutableSourceRecords[].legacyRef for audit.",
+    "Do not alter pilot confidence, review bindings, geometry, controller inference, or canonical promotion based solely on source identifier migration."
+  ],
+  "immutableSourceRecords": [
+    {
+      "recordId": "hist-evidence:1326:bithynia-t3b:section-01",
+      "legacyRef": "inventory:1326-gecis-envanteri#1",
+      "sourceRecordId": "project-file:file_000000004b4081f7b09426f5f25c1f46",
+      "sourceSha256": "1fcefb023a328951e6219cc18093356f6f2230e176eb9c57096d64b410e0819c",
+      "section": 1,
+      "heading": "Önce kaynaklarla coğrafi modeli yeniden doğruladım",
+      "lineRange": [
+        30,
+        45
+      ],
+      "claimType": "PHYSICAL_GEOGRAPHY",
+      "sourceUrls": [
+        "https://academic.oup.com/edited-volume/61673/chapter-abstract/548511258",
+        "https://academic.oup.com/edited-volume/61673/chapter-abstract/550496284"
+      ],
+      "claimSummary": "Bithynia terrain and valley communication; Sangarius valley as an access corridor while gorge sections may constrain east-west movement.",
+      "admissibility": "Physical-geography context only. Not a political boundary, controller claim, or dated 1326 frontier.",
+      "verification": "section bytes and heading verified; linked bibliography is identified in the source text; detailed source passage/page verification remains pending"
+    },
+    {
+      "recordId": "hist-evidence:1326:bithynia-t3b:section-15",
+      "legacyRef": "inventory:1326-gecis-envanteri#15",
+      "sourceRecordId": "project-file:file_000000004b4081f7b09426f5f25c1f46",
+      "sourceSha256": "1fcefb023a328951e6219cc18093356f6f2230e176eb9c57096d64b410e0819c",
+      "section": 15,
+      "heading": "Nicaea'nın doğusu için özel durum",
+      "lineRange": [
+        466,
+        474
+      ],
+      "claimType": "ROUTE_ACCESSIBILITY_HYPOTHESIS",
+      "sourceUrls": [
+        "https://www.cambridge.org/core/books/abs/victory-in-the-east/first-enemy-the-turks-of-asia-minor/259B6EC17320DA7F644157882E794FF4"
+      ],
+      "claimSummary": "Nicaea → Lefke → Sangarius corridor is proposed as a lower-cost/high-connectivity route based on a terrain description.",
+      "admissibility": "Geographic accessibility hypothesis only; route presence does not imply Byzantine control or political ownership.",
+      "verification": "section bytes and heading verified; Cambridge linked passage checked on 2026-10-21 and describes the 1097 First Crusade route to Nicaea, not a 1326-specific route or frontier; numeric lower-cost claim remains unmeasured pending reproducible DEM/terrain-cost analysis"
+    },
+    {
+      "recordId": "hist-evidence:1326:bithynia-t3b:section-17",
+      "legacyRef": "inventory:1326-gecis-envanteri#17",
+      "sourceRecordId": "project-file:file_000000004b4081f7b09426f5f25c1f46",
+      "sourceSha256": "1fcefb023a328951e6219cc18093356f6f2230e176eb9c57096d64b410e0819c",
+      "section": 17,
+      "heading": "Bursa–Nicaea frontier'i nasıl modellenmeli?",
+      "lineRange": [
+        519,
+        552
+      ],
+      "claimType": "POLITICAL_FRONTIER_HYPOTHESIS",
+      "sourceUrls": [],
+      "claimSummary": "Conceptual transition-zone sketch between Bursa and Nicaea; states that the frontier centerline is not canonical and confidence should remain low/medium.",
+      "admissibility": "Design hypothesis only. No coordinates, line geometry, or independently sourced exact frontier.",
+      "verification": "section bytes and heading verified; the section itself is not independent historical evidence; bibliography must be checked at claim level"
+    },
+    {
+      "recordId": "hist-evidence:1326:bithynia-t3b:section-18",
+      "legacyRef": "inventory:1326-gecis-envanteri#18",
+      "sourceRecordId": "project-file:file_000000004b4081f7b09426f5f25c1f46",
+      "sourceSha256": "1fcefb023a328951e6219cc18093356f6f2230e176eb9c57096d64b410e0819c",
+      "section": 18,
+      "heading": "Nicomedia–Nicaea arasında başka bir constraint",
+      "lineRange": [
+        556,
+        579
+      ],
+      "claimType": "REGIONAL_NETWORK_CONSTRAINT",
+      "sourceUrls": [],
+      "claimSummary": "Coast, gulf, mountain passages and roads mean the Nicomedia–Nicaea relationship should not be simplified to a straight political line.",
+      "admissibility": "Qualitative terrain/network design constraint only; no confirmed crossing, political ownership, or boundary geometry.",
+      "verification": "section bytes and heading verified; specific geographic claims and any implied crossing require independent source verification"
+    }
+  ],
+  "claimAuditStatus": "CLAIM_DATE_AUDIT_UPDATED_2026-10-21"
+}

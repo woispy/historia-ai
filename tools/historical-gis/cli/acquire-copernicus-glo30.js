@@ -6,6 +6,7 @@ import process from "node:process";
 import aoi from "../../../src/world/map/source/physical/copernicus-glo30.aoi.json" with { type: "json" };
 import manifest from "../../../src/world/map/source/physical/copernicus-glo30.manifest.json" with { type: "json" };
 import { validateCopernicusGlo30GeoTiff } from "../P62GeoTiffValidator.js";
+import { expectedCopernicusGlo30TileIds, validateCopernicusGlo30TileSelection } from "../CopernicusGlo30TileSelection.js";
 
 const CATALOG_URL = "https://catalogue.dataspace.copernicus.eu/odata/v1/Products";
 const DOWNLOAD_URL = "https://download.dataspace.copernicus.eu/odata/v1/Products";
@@ -17,11 +18,13 @@ const MANIFEST_PATH = path.resolve("src/world/map/source/physical/copernicus-glo
 
 function parseArgs(argv) {
   const args = new Set(argv.slice(2));
-  return {
-    catalogOnly: args.has("--catalog-only"),
-    download: args.has("--download"),
-    promote: args.has("--promote"),
-  };
+  let tileIdsFile = null;
+  for (let index = 2; index < argv.length; index += 1) {
+    if (argv[index].startsWith("--tile-ids-file=")) tileIdsFile = argv[index].slice("--tile-ids-file=".length);
+    else if (argv[index] === "--tile-ids-file") { tileIdsFile = argv[index + 1] ?? null; index += 1; }
+  }
+  if (tileIdsFile === "") throw new Error("P6.2-A --tile-ids-file requires a path.");
+  return { catalogOnly: args.has("--catalog-only"), download: args.has("--download"), promote: args.has("--promote"), tileIdsFile };
 }
 
 function assertAoi() {
@@ -34,18 +37,8 @@ function assertAoi() {
   }
 }
 
-function tileId(latitude, longitude) {
-  const latPrefix = latitude >= 0 ? "N" : "S";
-  const lonPrefix = longitude >= 0 ? "E" : "W";
-  return `${latPrefix}${String(Math.abs(latitude)).padStart(2, "0")}_${lonPrefix}${String(Math.abs(longitude)).padStart(3, "0")}`;
-}
-
 function expectedTileIds() {
-  const ids = [];
-  for (let lat = aoi.south; lat < aoi.north; lat += 1) {
-    for (let lon = aoi.west; lon < aoi.east; lon += 1) ids.push(tileId(lat, lon));
-  }
-  return ids;
+  return expectedCopernicusGlo30TileIds(aoi);
 }
 
 function getAttribute(product, name) {
@@ -184,9 +177,11 @@ async function acquireValidatedTile(item, token) {
 }
 
 async function main() {
-  const { catalogOnly, download, promote } = parseArgs(process.argv);
+  const { catalogOnly, download, promote, tileIdsFile } = parseArgs(process.argv);
   assertAoi();
-  const ids = expectedTileIds();
+  const fullAoiIds = expectedTileIds();
+  const selection = tileIdsFile ? JSON.parse(await fs.readFile(path.resolve(process.cwd(), tileIdsFile), "utf8")) : fullAoiIds;
+  const ids = tileIdsFile ? validateCopernicusGlo30TileSelection(selection, aoi) : fullAoiIds;
   const results = [];
 
   for (const gridId of ids) {
@@ -219,7 +214,7 @@ async function main() {
 
   const catalogPath = path.join(OUTPUT_DIR, "catalog-results.json");
   await fs.mkdir(OUTPUT_DIR, { recursive: true });
-  await fs.writeFile(catalogPath, `${JSON.stringify({ schemaVersion: 1, dataset: DATASET, aoi, tiles: results }, null, 2)}\n`);
+  await fs.writeFile(catalogPath, `${JSON.stringify({ schemaVersion: 1, dataset: DATASET, aoi, selection: { mode: tileIdsFile ? "explicit-subset" : "full-aoi", tileIds: ids }, tiles: results }, null, 2)}\n`);
   console.log(`P6.2-A catalog discovery: ${results.filter((item) => item.status === "catalogued").length}/${results.length} tiles catalogued`);
   console.log(`catalogResults=${catalogPath}`);
 
@@ -242,6 +237,7 @@ async function main() {
       productName: item.productName,
       downloadLocator: nodeDownloadUrl(item.productId, acquired.node.path),
       demNodePath: acquired.node.path,
+      path: path.relative(process.cwd(), acquired.destination).split(path.sep).join("/"),
       sha256,
       byteLength: acquired.bytes.length,
       semantic: acquired.semantic,

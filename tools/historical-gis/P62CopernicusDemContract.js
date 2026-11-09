@@ -52,6 +52,10 @@ export function validateCopernicusGlo30Manifest(value = manifest) {
     assertString(tile.id, "tile.id");
     assertString(tile.catalogDataset, "tile.catalogDataset");
     assertString(tile.downloadLocator, "tile.downloadLocator");
+    assertString(tile.path, "tile.path");
+    if (tile.path.includes("\\") || tile.path.startsWith("/") || /^[A-Za-z]:/.test(tile.path) || tile.path.split("/").some((part) => part === ".." || part === "." || part === "")) {
+      throw new Error(`P6.2-A tile ${tile.id} path must be a normalized, repository-relative path without traversal.`);
+    }
     assertString(tile.sha256, "tile.sha256");
     if (!/^[0-9a-f]{64}$/i.test(tile.sha256)) {
       throw new Error(`P6.2-A tile ${tile.id} has no valid SHA-256 checksum.`);

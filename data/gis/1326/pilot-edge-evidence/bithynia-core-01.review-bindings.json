@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "scenarioDate": "1326-04-07",
+  "authorityStatus": "explicit-binding-input",
+  "promotion": "BLOCKED",
+  "policy": {
+    "automaticReviewMatching": false,
+    "geometryGeneration": false,
+    "controllerInference": false,
+    "canonicalPromotion": false
+  },
+  "status": "WAITING_FOR_REAL_CANDIDATE_ACQUISITION",
+  "reviewBindings": [],
+  "provenance": {
+    "pilotEvidence": "data/gis/1326/pilot-edge-evidence/bithynia-core-01.json",
+    "generationMode": "explicit-review-id-and-edge-id-only",
+    "note": "No production reviewId is bound until the real 1326 candidate packet and geometry review queue exist."
+  }
+}

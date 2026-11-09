@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "status": "PHYSICAL_REFERENCE_CANDIDATE_REVIEW_REQUIRED",
+  "canonicalPhysicalFeature": "sakarya",
+  "historicalName": "Sangarios",
+  "authority": "non-authoritative physical-reference evidence",
+  "source": {
+    "provider": "Natural Earth Vector",
+    "repository": "nvkelso/natural-earth-vector",
+    "revision": "ca96624a56bd078437bca8184e78163e5039ad19",
+    "layer": "ne_10m_rivers_lake_centerlines",
+    "featureIndex": 1077,
+    "featureId": null,
+    "featureIdSemantics": "No durable feature ID in source payload; locator is revision-scoped and paired with content hashes",
+    "properties": {
+      "dissolve": "741River",
+      "scalerank": 8,
+      "featurecla": "River",
+      "name": "Sakarya",
+      "rivernum": 741,
+      "name_en": "Sakarya",
+      "min_zoom": 7,
+      "min_label": 8
+    },
+    "crs": "EPSG:4326",
+    "sourceFileSha256": "9ae6e735f9d96cab4804339755ea1c694f7bddfc21bf391db64dafcc32edb17a",
+    "sourceGeometrySha256": "b668b2b2ba510837cc6a33fa7eeadef90916977ba5bba05b089724eef7a1e4c3",
+    "sourceFeatureSha256": "9c746f05d4f4afe51a2c03fd6a3d32e0a81e443f8f4ad7e2b359215803e899bd"
+  },
+  "extraction": {
+    "method": "Exact normalized equality across supported source name properties; retain original source geometry without clipping; no endpoint-distance selection",
+    "candidateCount": 1,
+    "geometryType": "MultiLineString",
+    "coordinateCount": 112,
+    "geometryBoundsWgs84": [
+      29.44752,
+      40.038275,
+      30.6456,
+      41.132921
+    ],
+    "firstCoordinate": [
+      29.534597,
+      40.038275
+    ],
+    "lastCoordinate": [
+      30.6456,
+      41.132921
+    ],
+    "artifact": "sakarya-physical-reference-intake",
+    "artifactId": 12466233836,
+    "artifactZipSha256": "a90b57ccfc452e64dc3c02d551c1ac8f0c19253ee6ecd9dafb7f56a0412c09f9",
+    "extractionCode": "tools/historical-gis/cli/extract-sakarya-physical-reference.js",
+    "verification": {
+      "commit": "4f25d9546ac4dc239032ac4d3a615f921a4147d2",
+      "historiaAiCiRun": 39871061577,
+      "cliopatriaVerificationRun": 39871061559,
+      "status": "SUCCESS",
+      "note": "Exact-name matching and source locator/geometry contract passed on this revision."
+    }
+  },
+  "limitations": [
+    "Natural Earth provides generalized modern hydrography, not an exact medieval Sangarios reconstruction.",
+    "This feature does not define a political boundary or prove a specific 1326 route.",
+    "The source feature has no durable ID; use pinned revision, layer, feature index and content hashes together.",
+    "Human review is required before binding this candidate to a pilot edge.",
+    "Lefke route endpoint remains unresolved."
+  ]
+}

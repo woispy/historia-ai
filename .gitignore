@@ -49,3 +49,6 @@ public/assets/stress-15k.mapbin
 opencode.json
 local-tracked-migration.patch
 local-untracked-manifest.txt
+
+# Local Copernicus DEM acquisition products and catalog responses
+data/build/physical/copernicus-glo30/

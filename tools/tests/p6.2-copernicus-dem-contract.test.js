@@ -22,6 +22,7 @@ const validManifest = {
     id: "N40_E030",
     catalogDataset: "COP-DEM_GLO-30-DGED/2024_1",
     downloadLocator: "odata-product-id:example",
+    path: "data/build/physical/copernicus-glo30/2024_1/N40_E030.tif",
     sha256: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
   }],
 };
@@ -62,3 +63,8 @@ console.log(`dataset=${P62_COPERNICUS_GLO30_CONTRACT.dataset}`);
 console.log(`release=${P62_COPERNICUS_GLO30_CONTRACT.release}`);
 console.log(`runtimeRule=${P62_COPERNICUS_GLO30_CONTRACT.runtimeRule}`);
 console.log("repositoryManifestTiles=0 (authority acquisition not yet promoted)");
+
+for (const unsafePath of ["/tmp/N40_E030.tif", "../N40_E030.tif", "data\\\\N40_E030.tif", "C:/DEM/N40_E030.tif"]) {
+  assert.throws(() => validateCopernicusGlo30Manifest({...validManifest, tiles:[{...validManifest.tiles[0],path:unsafePath}]}), /normalized, repository-relative path without traversal/);
+}
+console.log("P6.2-A promoted tile paths: safe relative-path contract PASS");

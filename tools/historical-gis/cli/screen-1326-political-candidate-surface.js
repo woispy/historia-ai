@@ -1,0 +1,386 @@
+import fs from "node:fs/promises";
+import path from "node:path";
+import crypto from "node:crypto";
+
+const SCENARIO_DATE = "1326-04-07";
+const SCENARIO_YEAR = 1326;
+const SOURCE_ID = "cliopatria-v0.2.0";
+const EARTH_RADIUS_KM = 6371.0088;
+
+function readArg(name, fallback = null) {
+  const i = process.argv.indexOf(name);
+  return i < 0 ? fallback : process.argv[i + 1] ?? fallback;
+}
+
+function requireArg(name) {
+  const value = readArg(name);
+  if (!value) throw new Error(`${name} <path> is required.`);
+  return path.resolve(process.cwd(), value);
+}
+
+function assertCandidateReport(report) {
+  if (report?.scenarioDate !== SCENARIO_DATE) throw new Error("Candidate scenario date mismatch.");
+  if (report?.source?.sourceId !== SOURCE_ID) throw new Error("Candidate source identity mismatch.");
+  if (!/^[0-9a-f]{64}$/.test(report?.source?.extractedGeojsonSha256 ?? "")) throw new Error("Candidate report must carry extracted GeoJSON SHA-256.");
+  if (!Array.isArray(report?.candidates)) throw new Error("Candidate report must contain candidates[].");
+  if (!/^[0-9a-f]{64}$/.test(report?.candidatePacketSha256 ?? "")) throw new Error("Candidate report must carry candidate packet SHA-256.");
+  const expectedPacketSha = crypto.createHash("sha256").update(JSON.stringify(report.candidates)).digest("hex");
+  if (report.candidatePacketSha256 !== expectedPacketSha) throw new Error("Candidate packet SHA-256 mismatch.");
+}
+
+function normalizeAnchorReport(report) {
+  if (report?.scenarioDate !== SCENARIO_DATE) throw new Error("Anchor report scenario date mismatch.");
+  if (!Array.isArray(report?.anchors) || report.anchors.length === 0) {
+    throw new Error("Anchor report must contain a non-empty anchors[] array.");
+  }
+
+  const anchors = report.anchors.map(anchor => {
+    if (anchor?.id && Array.isArray(anchor.coordinates)) return {
+      id: anchor.id,
+      role: anchor.role ?? null,
+      coordinates: anchor.coordinates,
+    };
+    const coordinates = anchor?.geometry?.coordinates;
+    if (anchor?.anchorId && anchor?.geometry?.type === "Point" && Array.isArray(coordinates)) return {
+      id: anchor.anchorId,
+      role: anchor.anchorType ?? null,
+      coordinates,
+    };
+    throw new Error("Each anchor requires either id/coordinates or anchorId/Point geometry.");
+  });
+
+  for (const anchor of anchors) {
+    if (!Array.isArray(anchor.coordinates) || anchor.coordinates.length !== 2) {
+      throw new Error("Each anchor requires [longitude, latitude] coordinates.");
+    }
+    const [longitude, latitude] = anchor.coordinates;
+    if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) {
+      throw new Error(`Anchor ${anchor.id} has non-finite coordinates.`);
+    }
+    if (longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90) {
+      throw new Error(`Anchor ${anchor.id} has out-of-range coordinates.`);
+    }
+  }
+  return anchors;
+}
+
+function walkCoordinates(value, visit) {
+  if (!Array.isArray(value)) return;
+  if (value.length >= 2 && Number.isFinite(value[0]) && Number.isFinite(value[1])) {
+    visit(value[0], value[1]);
+    return;
+  }
+  for (const child of value) walkCoordinates(child, visit);
+}
+
+function geometryBbox(geometry) {
+  const bbox = [Infinity, Infinity, -Infinity, -Infinity];
+  let count = 0;
+  walkCoordinates(geometry?.coordinates, (longitude, latitude) => {
+    bbox[0] = Math.min(bbox[0], longitude);
+    bbox[1] = Math.min(bbox[1], latitude);
+    bbox[2] = Math.max(bbox[2], longitude);
+    bbox[3] = Math.max(bbox[3], latitude);
+    count += 1;
+  });
+  return count === 0 ? null : bbox;
+}
+
+function bboxCenter(bbox) {
+  return [(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2];
+}
+
+function haversineKm(a, b) {
+  const toRad = value => value * Math.PI / 180;
+  const [lon1, lat1] = a.map(toRad);
+  const [lon2, lat2] = b.map(toRad);
+  const dLon = lon2 - lon1;
+  const dLat = lat2 - lat1;
+  const h = Math.sin(dLat / 2) ** 2
+    + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+  return EARTH_RADIUS_KM * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+}
+
+function expandBboxAroundPoint([longitude, latitude], radiusKm) {
+  const latRadius = radiusKm / 111.32;
+  const cosLat = Math.max(Math.cos(latitude * Math.PI / 180), 0.2);
+  const lonRadius = radiusKm / (111.32 * cosLat);
+  return [
+    longitude - lonRadius,
+    latitude - latRadius,
+    longitude + lonRadius,
+    latitude + latRadius,
+  ];
+}
+
+function bboxIntersects(a, b) {
+  return a[0] <= b[2] && a[2] >= b[0] && a[1] <= b[3] && a[3] >= b[1];
+}
+
+function pointOnSegment(point, a, b, epsilon = 1e-10) {
+  const cross = (point[1] - a[1]) * (b[0] - a[0]) - (point[0] - a[0]) * (b[1] - a[1]);
+  if (Math.abs(cross) > epsilon) return false;
+  return point[0] >= Math.min(a[0], b[0]) - epsilon
+    && point[0] <= Math.max(a[0], b[0]) + epsilon
+    && point[1] >= Math.min(a[1], b[1]) - epsilon
+    && point[1] <= Math.max(a[1], b[1]) + epsilon;
+}
+
+function pointInRing(point, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const a = ring[j], b = ring[i];
+    if (pointOnSegment(point, a, b)) return true;
+    const crosses = (a[1] > point[1]) !== (b[1] > point[1])
+      && point[0] < ((b[0] - a[0]) * (point[1] - a[1])) / (b[1] - a[1]) + a[0];
+    if (crosses) inside = !inside;
+  }
+  return inside;
+}
+
+function pointInPolygon(point, rings) {
+  if (!Array.isArray(rings) || rings.length === 0 || !pointInRing(point, rings[0])) return false;
+  for (let i = 1; i < rings.length; i += 1) {
+    if (pointInRing(point, rings[i])) return false;
+  }
+  return true;
+}
+
+function pointInRect(point, rect) {
+  return point[0] >= rect[0] && point[0] <= rect[2]
+    && point[1] >= rect[1] && point[1] <= rect[3];
+}
+
+function segmentsIntersect(a, b, c, d) {
+  const orient = (p, q, r) => (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]);
+  const o1 = orient(a, b, c), o2 = orient(a, b, d);
+  const o3 = orient(c, d, a), o4 = orient(c, d, b);
+  if (((o1 > 0 && o2 < 0) || (o1 < 0 && o2 > 0))
+      && ((o3 > 0 && o4 < 0) || (o3 < 0 && o4 > 0))) return true;
+  return pointOnSegment(c, a, b) || pointOnSegment(d, a, b)
+    || pointOnSegment(a, c, d) || pointOnSegment(b, c, d);
+}
+
+function ringIntersectsRect(ring, rect, testCorners = true) {
+  if (ring.some(point => pointInRect(point, rect))) return true;
+  const corners = [[rect[0], rect[1]], [rect[2], rect[1]], [rect[2], rect[3]], [rect[0], rect[3]]];
+  if (testCorners && corners.some(point => pointInRing(point, ring))) return true;
+  const edges = [
+    [[rect[0], rect[1]], [rect[2], rect[1]]],
+    [[rect[2], rect[1]], [rect[2], rect[3]]],
+    [[rect[2], rect[3]], [rect[0], rect[3]]],
+    [[rect[0], rect[3]], [rect[0], rect[1]]],
+  ];
+  for (let i = 0; i < ring.length - 1; i += 1) {
+    if (edges.some(([c, d]) => segmentsIntersect(ring[i], ring[i + 1], c, d))) return true;
+  }
+  return false;
+}
+
+function polygonIntersectsRect(rings, rect) {
+  if (!Array.isArray(rings) || rings.length === 0) return false;
+  if (rings[0].some(point => pointInRect(point, rect))) return true;
+  const corners = [[rect[0], rect[1]], [rect[2], rect[1]], [rect[2], rect[3]], [rect[0], rect[3]]];
+  if (corners.some(point => pointInPolygon(point, rings))) return true;
+  if (ringIntersectsRect(rings[0], rect, false)) return true;
+  // Hole boundaries count only if the rectangle crosses/touches them; a rectangle
+  // entirely contained inside a hole is not an intersection with the polygon interior.
+  return rings.slice(1).some(ring => ringIntersectsRect(ring, rect, false));
+}
+
+function geometryIntersectsRect(geometry, rect) {
+  if (geometry?.type === "Polygon") return polygonIntersectsRect(geometry.coordinates, rect);
+  if (geometry?.type === "MultiPolygon") return geometry.coordinates.some(polygon => polygonIntersectsRect(polygon, rect));
+  return false;
+}
+
+function validForScenario(candidate) {
+  const from = candidate.fromYear;
+  const to = candidate.toYear;
+  if (from != null && (!Number.isFinite(from) || from > SCENARIO_YEAR)) return false;
+  if (to != null && (!Number.isFinite(to) || to < SCENARIO_YEAR)) return false;
+  return true;
+}
+
+function distanceToBbox(point, bbox) {
+  const longitude = Math.max(bbox[0], Math.min(point[0], bbox[2]));
+  const latitude = Math.max(bbox[1], Math.min(point[1], bbox[3]));
+  return haversineKm(point, [longitude, latitude]);
+}
+
+const candidatePath = requireArg("--input");
+const anchorPath = requireArg("--anchors");
+const outputPath = path.resolve(
+  process.cwd(),
+  readArg("--output", "data/build/gis/1326/cliopatria-candidate-surface-screening.json"),
+);
+const radiusKm = Number(readArg("--radius-km", "120"));
+if (!Number.isFinite(radiusKm) || radiusKm <= 0) throw new Error("--radius-km must be a positive number.");
+
+const candidates = JSON.parse(await fs.readFile(candidatePath, "utf8"));
+const anchors = normalizeAnchorReport(JSON.parse(await fs.readFile(anchorPath, "utf8")));
+assertCandidateReport(candidates);
+
+const scopePath = readArg("--scope");
+let scope = null;
+let allowedAnchorIds = null;
+if (scopePath) {
+  scope = JSON.parse(await fs.readFile(path.resolve(process.cwd(), scopePath), "utf8"));
+  if (scope?.schemaVersion !== 1 || scope?.scenarioDate !== SCENARIO_DATE) {
+    throw new Error("Pilot scope schema/scenario mismatch.");
+  }
+  if (scope?.status !== "APPROVED") {
+    throw new Error("Pilot scope is not APPROVED; refusing to produce a scoped shortlist.");
+  }
+  if (typeof scope.pilot !== "string" || !scope.pilot.trim()) {
+    throw new Error("Approved pilot scope must identify pilot.");
+  }
+  if (!Array.isArray(scope.allowedAnchorIds) || scope.allowedAnchorIds.length === 0
+      || scope.allowedAnchorIds.some(id => typeof id !== "string" || !id.trim())
+      || new Set(scope.allowedAnchorIds).size !== scope.allowedAnchorIds.length) {
+    throw new Error("Approved pilot scope must contain a non-empty unique allowedAnchorIds list.");
+  }
+  if (!Array.isArray(scope.edgeIds) || scope.edgeIds.length === 0
+      || scope.edgeIds.some(id => typeof id !== "string" || !id.trim())) {
+    throw new Error("Approved pilot scope must list the pilot edge IDs it serves.");
+  }
+  const anchorIds = new Set(anchors.map(anchor => anchor.id));
+  const missingAnchorIds = scope.allowedAnchorIds.filter(id => !anchorIds.has(id));
+  if (missingAnchorIds.length) {
+    throw new Error(`Pilot scope references missing anchors: ${missingAnchorIds.join(", ")}`);
+  }
+  allowedAnchorIds = new Set(scope.allowedAnchorIds);
+}
+
+const screened = [];
+const rejected = [];
+for (const candidate of candidates.candidates) {
+  if (!validForScenario(candidate)) {
+    rejected.push({ sourceFeatureIndex: candidate.sourceFeatureIndex, reason: "outside-scenario-year-range" });
+    continue;
+  }
+  const bbox = geometryBbox(candidate.geometry);
+  if (!bbox) {
+    rejected.push({ sourceFeatureIndex: candidate.sourceFeatureIndex, reason: "missing-coordinate-geometry" });
+    continue;
+  }
+  if (!["Polygon", "MultiPolygon"].includes(candidate.geometry?.type)) {
+    rejected.push({ sourceFeatureIndex: candidate.sourceFeatureIndex, reason: "unsupported-political-geometry-type" });
+    continue;
+  }
+
+  const center = bboxCenter(bbox);
+  const anchorHits = [];
+  let bboxPrefilterHits = 0;
+  let outOfScopeGeometryHits = 0;
+  for (const anchor of anchors) {
+    const influence = expandBboxAroundPoint(anchor.coordinates, radiusKm);
+    if (!bboxIntersects(bbox, influence)) continue;
+    bboxPrefilterHits += 1;
+    if (!geometryIntersectsRect(candidate.geometry, influence)) continue;
+    if (allowedAnchorIds && !allowedAnchorIds.has(anchor.id)) {
+      outOfScopeGeometryHits += 1;
+      continue;
+    }
+    anchorHits.push({
+      anchorId: anchor.id,
+      role: anchor.role ?? null,
+      geometryRelation: "polygon-intersects-anchor-influence-rectangle",
+      bboxDistanceKm: Number(distanceToBbox(anchor.coordinates, bbox).toFixed(3)),
+    });
+  }
+
+  if (anchorHits.length === 0) {
+    rejected.push({
+      sourceFeatureIndex: candidate.sourceFeatureIndex,
+      reason: allowedAnchorIds && outOfScopeGeometryHits > 0
+        ? "outside-explicit-pilot-scope"
+        : bboxPrefilterHits > 0 && outOfScopeGeometryHits === 0
+          ? "bbox-only-false-positive-no-polygon-intersection"
+          : "outside-anchor-screening-window",
+      bboxPrefilterHits,
+      outOfScopeGeometryHits,
+    });
+    continue;
+  }
+
+  screened.push({
+    sourceFeatureIndex: candidate.sourceFeatureIndex,
+    sourceFeatureId: candidate.sourceFeatureId,
+    name: candidate.name,
+    fromYear: candidate.fromYear,
+    toYear: candidate.toYear,
+    type: candidate.type,
+    wikidataId: candidate.wikidataId,
+    seshatId: candidate.seshatId,
+    geometryAuthorityStatus: candidate.geometryAuthorityStatus,
+    // Preserve the exact source geometry in the evidence packet. This is not a reviewed
+    // geometry and must never be mutated in-place; downstream reconciliation works on a
+    // separate reviewedGeometry field.
+    geometry: candidate.geometry,
+    sourceGeometrySha256: crypto.createHash("sha256").update(JSON.stringify(candidate.geometry)).digest("hex"),
+    geometryBbox: bbox,
+    geometryBboxCenter: center,
+    anchorHits,
+    screeningOnly: true,
+    promotion: "BLOCKED",
+  });
+}
+
+screened.sort((a, b) => {
+  const da = Math.min(...a.anchorHits.map(hit => hit.bboxDistanceKm));
+  const db = Math.min(...b.anchorHits.map(hit => hit.bboxDistanceKm));
+  return da - db || a.sourceFeatureIndex - b.sourceFeatureIndex;
+});
+
+const report = {
+  schemaVersion: 1,
+  kind: "historical-1326-political-candidate-surface-screening",
+  scenarioDate: SCENARIO_DATE,
+  scenarioYear: SCENARIO_YEAR,
+  source: candidates.source,
+  candidatePacketSha256: candidates.candidatePacketSha256,
+  provenance: {
+    extractedGeojsonSha256: candidates.source.extractedGeojsonSha256,
+    inputSha256: candidates.source.inputSha256
+  },
+  anchorSource: {
+    path: anchorPath.replace(/\\/g, "/"),
+    anchorCount: anchors.length,
+  },
+  pilotScope: scope ? {
+    status: scope.status,
+    pilot: scope.pilot,
+    edgeIds: scope.edgeIds,
+    allowedAnchorIds: scope.allowedAnchorIds,
+    scopeSource: scope.source ?? null,
+  } : null,
+  screening: {
+    method: allowedAnchorIds
+      ? "Polygon/MultiPolygon intersects only explicitly allowed pilot anchor influence rectangles; bbox used only as a fast prefilter"
+      : "Polygon/MultiPolygon intersects anchor influence rectangle; bbox used only as a fast prefilter",
+    radiusKm,
+    purpose: "narrow candidate evidence for manual geometry reconciliation; temporal validity and actual polygon/rectangle intersection are required",
+    notGeometryAuthority: true,
+    noSyntheticGeometry: true,
+  },
+  counts: {
+    inputCandidates: candidates.candidates.length,
+    screenedCandidates: screened.length,
+    rejectedCandidates: rejected.length,
+  },
+  candidates: screened,
+  rejected,
+  promotion: "BLOCKED",
+};
+
+await fs.mkdir(path.dirname(outputPath), { recursive: true });
+await fs.writeFile(outputPath, JSON.stringify(report, null, 2) + "\n", "utf8");
+console.log(JSON.stringify({
+  scenarioDate: SCENARIO_DATE,
+  inputCandidates: candidates.candidates.length,
+  screenedCandidates: screened.length,
+  rejectedCandidates: rejected.length,
+  outputPath,
+  promotion: "BLOCKED",
+}, null, 2));

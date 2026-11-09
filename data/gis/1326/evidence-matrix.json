@@ -27,6 +27,12 @@
           "claim": "Orhan captured Bursa after the siege.",
           "dateScope": "1326",
           "role": "historical-control-context"
+        },
+        {
+          "source": "Klaus Belke, TIB 13, Bithynien und Hellespont, printed p. 218 (publisher PDF part 0x003b6739.pdf, PDF p. 107)",
+          "claim": "Prusa was under prolonged encirclement and food shortage and surrendered to Orhan on 6 April 1326; the source describes it as becoming the emerging Ottoman state's first capital. This is a city-control event only and does not establish the surrounding political polygon or the Bursa–Nicaea frontier.",
+          "dateScope": "1326-04-06",
+          "role": "historical-control-event"
         }
       ],
       "notes": "Bursa control is a scenario-state fact and must not be encoded by mutating province geometry."
@@ -71,9 +77,15 @@
           "claim": "Eşref II Süleyman was killed on 9 October 1326; therefore the polity had not yet ended on 7 April 1326.",
           "dateScope": "1326-04-07",
           "role": "temporal-existence-bound"
+        },
+        {
+          "source": "TDV İslâm Ansiklopedisi — Eşrefoğulları (Sait Kofoğlu, 1995), https://islamansiklopedisi.org.tr/esrefogullari",
+          "claim": "The entry places the polity's centre and core in Beyşehir and Seydişehir, records Eşref II Süleyman's death on 9 October 1326, and says Beyşehir, Seydişehir, Akşehir and nearby territory were subsequently seized by Hamidoğulları while other lands were divided between Sahib Ataoğulları and Karamanoğulları. This supports temporal existence on 7 April 1326 but does not supply a boundary polygon or match to a Cliopatria candidate.",
+          "dateScope": "pre-1326 through 1326-10-09",
+          "role": "temporal-existence-and-territorial-context"
         }
       ],
-      "notes": "Later 1326 territorial changes must not be projected backward to the scenario start."
+      "notes": "Cliopatria v0.2.0's 150 temporally extracted candidates contain no accepted Eşrefoğulları-named record. Keep the entity unmatched: the post-9 October 1326 transfer to Hamidoğulları cannot be projected backward to 1326-04-07, and no other polity geometry may be substituted. Later 1326 territorial changes must not be projected backward to the scenario start."
     },
     {
       "entityId": "ilkhanate",
@@ -172,9 +184,15 @@
           "claim": "Alâiye is dated 1293-1471.",
           "dateScope": "1293-1471",
           "role": "polity-existence-bound"
+        },
+        {
+          "source": "TDV İslâm Ansiklopedisi — Alâiye Beyliği (Erdoğan Merçil, 1989), https://islamansiklopedisi.org.tr/alaiye-beyligi",
+          "claim": "The entry dates Alâiye's polity period from the late 13th century to 1471, but says after Karamanoğlu Mecdüddin Mahmud Bey took Alâiye in 1293, the city and surrounding area were ruled by beys affiliated with the Karamanoğulları and under Mamluk suzerainty; Ibn Battuta's report of Yusuf b. Karaman is circa 1333. This does not identify a ruler specifically on 1326-04-07.",
+          "dateScope": "1293-1471; specific ruler evidence circa 1333",
+          "role": "polity-existence-and-overlordship-context"
         }
       ],
-      "notes": "Existence interval does not by itself establish the 1326 border."
+      "notes": "Cliopatria v0.2.0's 150 temporally extracted candidates contain no accepted Alâiye-named record. Keep the required entity unmatched; do not automatically equate it with Karaman, Teke, or another nearby polity. The exact 1326 local ruler/controller and the relationship between local Alâiye authority, Karamanoğlu affiliation, and Mamluk suzerainty require separate reconciliation. The existence interval does not establish a 1326 border."
     }
   ],
   "globalRules": [
