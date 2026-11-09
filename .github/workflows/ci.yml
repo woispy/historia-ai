@@ -16,6 +16,7 @@ on:
       - main
       - master
       - integration/**
+      - work/**
       - feat/**
       - fix/**
       - agent/**
