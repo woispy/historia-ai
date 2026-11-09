@@ -161,7 +161,8 @@
     "test:1326-cliopatria-version-comparator": "node tools/tests/1326-cliopatria-version-comparator.test.js",
     "validate:1326-anchor-candidate-registry": "node tools/historical-gis/cli/validate-1326-anchor-candidate-registry.js",
     "test:1326-anchor-candidate-registry": "node tools/tests/1326-anchor-candidate-registry.test.js",
-    "test:p6.2-copernicus-tile-selection": "node tools/tests/p6.2-copernicus-tile-selection.test.js"
+    "test:p6.2-copernicus-tile-selection": "node tools/tests/p6.2-copernicus-tile-selection.test.js",
+    "catalog:sakarya-glo30": "node tools/historical-gis/cli/acquire-copernicus-glo30.js --catalog-only --tile-ids-file data/gis/1326/physical-reference-intake/sakarya-glo30-tile-selection.json"
   },
   "dependencies": {
     "react": "^19.2.7",
