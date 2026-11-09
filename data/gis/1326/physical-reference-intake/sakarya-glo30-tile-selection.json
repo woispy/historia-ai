@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Sakarya source-trace Copernicus GLO-30 terrain diagnostic",
+  "sourceGeometrySha256": "b668b2b2ba510837cc6a33fa7eeadef90916977ba5bba05b089724eef7a1e4c3",
+  "derivation": "Exact segment traversal across integer EPSG:4326 one-degree grid lines; cells are geographic coverage candidates only.",
+  "tileIds": [
+    "N40_E029",
+    "N40_E030",
+    "N41_E030"
+  ],
+  "status": "GEOMETRY_DERIVED_CATALOG_CHECK_REQUIRED"
+}

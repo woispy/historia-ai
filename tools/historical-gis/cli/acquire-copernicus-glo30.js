@@ -37,12 +37,6 @@ function assertAoi() {
   }
 }
 
-function tileId(latitude, longitude) {
-  const latPrefix = latitude >= 0 ? "N" : "S";
-  const lonPrefix = longitude >= 0 ? "E" : "W";
-  return `${latPrefix}${String(Math.abs(latitude)).padStart(2, "0")}_${lonPrefix}${String(Math.abs(longitude)).padStart(3, "0")}`;
-}
-
 function expectedTileIds() {
   return expectedCopernicusGlo30TileIds(aoi);
 }
