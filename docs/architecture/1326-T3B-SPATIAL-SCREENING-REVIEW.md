@@ -369,3 +369,40 @@ The Nicaea–Lefke route endpoint remains unresolved. No endpoint may be generat
 
 **Next operation:** prepare a deterministic, source-manifest-backed elevation profile for the Sakarya candidate as an evidence-only terrain diagnostic. Do not change pilot scope, edge bindings, historical ownership, route endpoints, or canonical geometry as a result of the profile alone.
 
+## P6.2 Sakarya geometry-derived GLO-30 tile coverage
+
+- CI run: [#3582](https://github.com/woispy/historia-ai/actions/runs/42603309441) — **SUCCESS**
+- Commit under test: `4a91dd97facce970f5736d52f69b7705063dcc95`
+- Intake artifact: `sakarya-physical-reference-intake`
+- Artifact ID: `13667068433`
+- Artifact ZIP SHA-256: `46ae66fabef0612c9aed97f133a8e8f91c5365e27d2ba68d9d5a3a9e636044f9`
+- Candidate JSON: `sakarya-source-candidates.json`
+- Candidate status: `CANDIDATES_EXTRACTED_REVIEW_REQUIRED`
+- Candidate count: 1
+- Geometry: one `MultiLineString` component, 112 source vertices, 111 consecutive segments.
+- Source geometry SHA-256: `b668b2b2ba510837cc6a33fa7eeadef90916977ba5bba05b089724eef7a1e4c3` (matches the previously recorded source geometry identity).
+- Source feature SHA-256: `9c746f05d4f4afe51a2c03fd6a3d32e0a81e443f8f4ad7e2b359215803e899bd`.
+
+### Exact one-degree tile traversal
+
+The Sakarya line was traversed segment-by-segment in EPSG:4326. For each consecutive source-coordinate pair, the algorithm inserts parametric split points at every crossed integer longitude and latitude grid line, sorts the split parameters, and assigns each open segment interval by its midpoint to the one-degree cell. Source vertices are also included as a boundary safety check. This is more precise than selecting every cell in the geometry bounding box.
+
+Result: **3 intersected one-degree tile cells**:
+
+- `N40_E029`
+- `N40_E030`
+- `N41_E030`
+
+The earlier bbox-only candidate `N41_E029` is **not** intersected by the line under this traversal and is excluded from the selected set. These IDs identify geographic grid cells only; they do not prove that the corresponding Copernicus products exist in the catalog or are downloadable.
+
+### Acquisition status and implementation blockers
+
+- The pinned Copernicus GLO-30 manifest still contains `tiles: []`; no DEM tile has been catalogued, downloaded, checksum-verified, or promoted.
+- The acquisition CLI currently scans the entire 152-cell AOI and has no validated selected-tile input. Add a fail-closed tile-ID subset option so this Sakarya intake can query only the three geometry-derived cells while preserving the full-AOI default.
+- The acquisition CLI's promoted tile record currently omits `path`, while `WGS84ElevationSampler` requires `id` and `path`. Promotion must record a safe repository-relative local path (with path traversal and absolute paths rejected by the manifest contract) before sampler integration can work.
+- Raw downloads and catalog output are written beneath `data/build/physical/copernicus-glo30/2024_1`; this controlled build-data directory must be ignored by Git. Keep the manifest, checksums, and provenance in tracked source control; do not commit raw DEM TIFFs.
+- Catalog availability, authenticated download, GeoTIFF semantic validation, and checksum verification remain separate gates. No availability or validation claim is made for the three selected cells yet.
+
+### Next operation
+
+Fix the acquisition/sampler manifest path contract, add validated tile-ID subset selection and tests, ignore local Copernicus build outputs, then query the three selected IDs against the pinned CDSE collection. Only after catalog results are recorded should authenticated tile acquisition and semantic validation proceed. Keep the historical route and political boundary gates unchanged.
